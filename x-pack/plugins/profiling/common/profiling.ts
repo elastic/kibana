@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { charCodeAt, safeBase64Encoder } from './base64';
+
 export type StackTraceID = string;
 export type StackFrameID = string;
 export type FileID = string;
@@ -14,6 +16,37 @@ export function createStackFrameID(fileID: FileID, addressOrLine: number): Stack
   Buffer.from(fileID, 'base64url').copy(buf);
   buf.writeBigUInt64BE(BigInt(addressOrLine), 16);
   return buf.toString('base64url');
+}
+
+/* eslint no-bitwise: ["error", { "allow": ["&"] }] */
+export function getFileIDFromStackFrameID(frameID: StackFrameID): FileID {
+  return frameID.slice(0, 21) + safeBase64Encoder[frameID.charCodeAt(21) & 0x30];
+}
+
+/* eslint no-bitwise: ["error", { "allow": ["<<=", "&"] }] */
+export function getAddressFromStackFrameID(frameID: StackFrameID): number {
+  let address = charCodeAt(frameID, 21) & 0xf;
+  address <<= 6;
+  address += charCodeAt(frameID, 22);
+  address <<= 6;
+  address += charCodeAt(frameID, 23);
+  address <<= 6;
+  address += charCodeAt(frameID, 24);
+  address <<= 6;
+  address += charCodeAt(frameID, 25);
+  address <<= 6;
+  address += charCodeAt(frameID, 26);
+  address <<= 6;
+  address += charCodeAt(frameID, 27);
+  address <<= 6;
+  address += charCodeAt(frameID, 28);
+  address <<= 6;
+  address += charCodeAt(frameID, 29);
+  address <<= 6;
+  address += charCodeAt(frameID, 30);
+  address <<= 6;
+  address += charCodeAt(frameID, 31);
+  return address;
 }
 
 export enum FrameType {
@@ -26,6 +59,7 @@ export enum FrameType {
   Ruby,
   Perl,
   JavaScript,
+  PHPJIT,
 }
 
 const frameTypeDescriptions = {
@@ -38,6 +72,7 @@ const frameTypeDescriptions = {
   [FrameType.Ruby]: 'Ruby',
   [FrameType.Perl]: 'Perl',
   [FrameType.JavaScript]: 'JavaScript',
+  [FrameType.PHPJIT]: 'PHP JIT',
 };
 
 export function describeFrameType(ft: FrameType): string {
@@ -68,7 +103,6 @@ export interface StackFrame {
   FunctionName: string;
   FunctionOffset: number;
   LineNumber: number;
-  SourceType: number;
 }
 
 export const emptyStackFrame: StackFrame = {
@@ -76,7 +110,6 @@ export const emptyStackFrame: StackFrame = {
   FunctionName: '',
   FunctionOffset: 0,
   LineNumber: 0,
-  SourceType: 0,
 };
 
 export interface Executable {
@@ -122,7 +155,6 @@ export interface StackFrameMetadata {
   // unused atm due to lack of symbolization metadata
   SourcePackageURL: string;
   // unused atm due to lack of symbolization metadata
-  SourceType: number;
 }
 
 export function createStackFrameMetadata(
@@ -144,7 +176,6 @@ export function createStackFrameMetadata(
   metadata.SourceFilename = options.SourceFilename ?? '';
   metadata.SourcePackageHash = options.SourcePackageHash ?? '';
   metadata.SourcePackageURL = options.SourcePackageURL ?? '';
-  metadata.SourceType = options.SourceType ?? 0;
 
   // Unknown/invalid offsets are currently set to 0.
   //

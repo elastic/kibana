@@ -443,7 +443,13 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/event_annotation/common/event_annotation_group/index.ts",
@@ -506,6 +512,17 @@
             "path": "src/plugins/event_annotation/common/event_annotation_group/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.EventAnnotationGroupArgs.ignoreGlobalFilters",
+            "type": "boolean",
+            "tags": [],
+            "label": "ignoreGlobalFilters",
+            "description": [],
+            "path": "src/plugins/event_annotation/common/event_annotation_group/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -549,6 +566,20 @@
             "tags": [],
             "label": "indexPatternId",
             "description": [],
+            "path": "src/plugins/event_annotation/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "eventAnnotation",
+            "id": "def-common.EventAnnotationGroupConfig.ignoreGlobalFilters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreGlobalFilters",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/event_annotation/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -607,7 +638,7 @@
         "label": "AvailableAnnotationIcon",
         "description": [],
         "signature": [
-          "\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\""
+          "\"alert\" | \"circle\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\""
         ],
         "path": "src/plugins/event_annotation/common/types.ts",
         "deprecated": false,
@@ -696,15 +727,15 @@
         "label": "EventAnnotationOutput",
         "description": [],
         "signature": [
-          "ManualEventAnnotationOutput",
-          " | ",
           {
             "pluginId": "eventAnnotation",
             "scope": "common",
             "docId": "kibEventAnnotationPluginApi",
             "section": "def-common.QueryPointEventAnnotationOutput",
             "text": "QueryPointEventAnnotationOutput"
-          }
+          },
+          " | ",
+          "ManualEventAnnotationOutput"
         ],
         "path": "src/plugins/event_annotation/common/types.ts",
         "deprecated": false,
@@ -872,7 +903,7 @@
             "section": "def-common.KibanaQueryOutput",
             "text": "KibanaQueryOutput"
           },
-          "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; ignoreGlobalFilters?: boolean | undefined; } & StyleSharedProps & { icon?: ",
+          "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; } & StyleSharedProps & { icon?: ",
           {
             "pluginId": "eventAnnotation",
             "scope": "common",
@@ -905,7 +936,7 @@
             "section": "def-common.KibanaQueryOutput",
             "text": "KibanaQueryOutput"
           },
-          "; timeField?: string | undefined; textField?: string | undefined; extraFields?: string[] | undefined; ignoreGlobalFilters?: boolean | undefined; key: { type: \"point_in_time\"; }; } & StyleSharedProps & { icon?: ",
+          "; timeField?: string | undefined; textField?: string | undefined; extraFields?: string[] | undefined; key: { type: \"point_in_time\"; }; } & StyleSharedProps & { icon?: ",
           {
             "pluginId": "eventAnnotation",
             "scope": "common",
@@ -938,7 +969,7 @@
             "section": "def-common.KibanaQueryOutput",
             "text": "KibanaQueryOutput"
           },
-          "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; ignoreGlobalFilters?: boolean | undefined; } & StyleSharedProps & { icon?: ",
+          "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; } & StyleSharedProps & { icon?: ",
           {
             "pluginId": "eventAnnotation",
             "scope": "common",
@@ -1028,10 +1059,13 @@
           {
             "parentPluginId": "eventAnnotation",
             "id": "def-common.manualPointEventAnnotation.help",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "help",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1103,10 +1137,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.manualPointEventAnnotation.args.id.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1141,10 +1178,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.manualPointEventAnnotation.args.time.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1179,10 +1219,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.manualPointEventAnnotation.args.label.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1217,10 +1260,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.manualPointEventAnnotation.args.color.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1269,10 +1315,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.manualPointEventAnnotation.args.lineStyle.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1307,10 +1356,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.manualPointEventAnnotation.args.lineWidth.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1345,10 +1397,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.manualPointEventAnnotation.args.icon.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1361,7 +1416,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\")[]"
+                      "(\"alert\" | \"circle\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
@@ -1411,10 +1466,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.manualPointEventAnnotation.args.textVisibility.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1449,10 +1507,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.manualPointEventAnnotation.args.isHidden.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1593,10 +1654,13 @@
           {
             "parentPluginId": "eventAnnotation",
             "id": "def-common.manualRangeEventAnnotation.help",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "help",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1668,10 +1732,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.manualRangeEventAnnotation.args.id.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1706,10 +1773,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.manualRangeEventAnnotation.args.time.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1744,10 +1814,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.manualRangeEventAnnotation.args.endTime.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1848,10 +1921,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.manualRangeEventAnnotation.args.label.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1886,10 +1962,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.manualRangeEventAnnotation.args.color.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1924,10 +2003,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.manualRangeEventAnnotation.args.isHidden.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/manual_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2048,10 +2130,13 @@
           {
             "parentPluginId": "eventAnnotation",
             "id": "def-common.queryPointEventAnnotation.help",
-            "type": "string",
+            "type": "Any",
             "tags": [],
             "label": "help",
             "description": [],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2123,10 +2208,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.queryPointEventAnnotation.args.id.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2161,10 +2249,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.queryPointEventAnnotation.args.filter.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2213,10 +2304,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.queryPointEventAnnotation.args.extraFields.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2251,10 +2345,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.queryPointEventAnnotation.args.timeField.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2289,10 +2386,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.queryPointEventAnnotation.args.label.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2327,10 +2427,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.queryPointEventAnnotation.args.color.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2379,10 +2482,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.queryPointEventAnnotation.args.lineStyle.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2417,10 +2523,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.queryPointEventAnnotation.args.lineWidth.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2455,10 +2564,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.queryPointEventAnnotation.args.icon.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2471,7 +2583,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"circle\" | \"asterisk\" | \"alert\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\")[]"
+                      "(\"alert\" | \"circle\" | \"asterisk\" | \"bell\" | \"bolt\" | \"bug\" | \"editorComment\" | \"flag\" | \"heart\" | \"mapMarker\" | \"pinFilled\" | \"starEmpty\" | \"starFilled\" | \"tag\" | \"triangle\")[]"
                     ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,
@@ -2521,10 +2633,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.queryPointEventAnnotation.args.textVisibility.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2559,10 +2674,13 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.queryPointEventAnnotation.args.textField.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "signature": [
+                      "any"
+                    ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -2597,61 +2715,12 @@
                   {
                     "parentPluginId": "eventAnnotation",
                     "id": "def-common.queryPointEventAnnotation.args.isHidden.help",
-                    "type": "string",
+                    "type": "Any",
                     "tags": [],
                     "label": "help",
                     "description": [],
-                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "eventAnnotation",
-                "id": "def-common.queryPointEventAnnotation.args.ignoreGlobalFilters",
-                "type": "Object",
-                "tags": [],
-                "label": "ignoreGlobalFilters",
-                "description": [],
-                "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "eventAnnotation",
-                    "id": "def-common.queryPointEventAnnotation.args.ignoreGlobalFilters.types",
-                    "type": "Array",
-                    "tags": [],
-                    "label": "types",
-                    "description": [],
                     "signature": [
-                      "\"boolean\"[]"
-                    ],
-                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "eventAnnotation",
-                    "id": "def-common.queryPointEventAnnotation.args.ignoreGlobalFilters.help",
-                    "type": "string",
-                    "tags": [],
-                    "label": "help",
-                    "description": [],
-                    "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "eventAnnotation",
-                    "id": "def-common.queryPointEventAnnotation.args.ignoreGlobalFilters.default",
-                    "type": "boolean",
-                    "tags": [],
-                    "label": "default",
-                    "description": [],
-                    "signature": [
-                      "true"
+                      "any"
                     ],
                     "path": "src/plugins/event_annotation/common/query_point_event_annotation/index.ts",
                     "deprecated": false,
@@ -2685,7 +2754,7 @@
                 "section": "def-common.KibanaQueryOutput",
                 "text": "KibanaQueryOutput"
               },
-              "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; ignoreGlobalFilters?: boolean | undefined; label: string; color?: string | undefined; isHidden?: boolean | undefined; icon?: ",
+              "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; label: string; color?: string | undefined; isHidden?: boolean | undefined; icon?: ",
               {
                 "pluginId": "eventAnnotation",
                 "scope": "common",
@@ -2732,7 +2801,7 @@
                     "section": "def-common.KibanaQueryOutput",
                     "text": "KibanaQueryOutput"
                   },
-                  "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; ignoreGlobalFilters?: boolean | undefined; } & StyleSharedProps & { icon?: ",
+                  "; timeField?: string | undefined; extraFields?: string[] | undefined; textField?: string | undefined; } & StyleSharedProps & { icon?: ",
                   {
                     "pluginId": "eventAnnotation",
                     "scope": "common",

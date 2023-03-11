@@ -6,7 +6,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Router, Switch, Route, Redirect } from 'react-router-dom';
+import { Router, Switch, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiEmptyPrompt,
@@ -27,19 +29,12 @@ import {
 } from '../shared_imports';
 import { AppDependencies } from '../types';
 import { AppContextProvider, useAppContext } from './app_context';
-import {
-  EsDeprecations,
-  EsDeprecationLogs,
-  ComingSoonPrompt,
-  KibanaDeprecations,
-  Overview,
-} from './components';
+import { EsDeprecations, EsDeprecationLogs, KibanaDeprecations, Overview } from './components';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
 const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
   const {
-    isReadOnlyMode,
     services: { api, core },
   } = useAppContext();
 
@@ -78,11 +73,6 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
         />
       </EuiPageContent>
     );
-  }
-
-  // Read-only mode will be enabled up until the last minor before the next major release
-  if (isReadOnlyMode) {
-    return <ComingSoonPrompt />;
   }
 
   if (clusterUpgradeState === 'isUpgrading') {
@@ -201,8 +191,10 @@ export const App = ({ history }: { history: ScopedHistory }) => {
 export const RootComponent = (dependencies: AppDependencies) => {
   const {
     history,
-    core: { i18n, application, http },
+    core: { i18n, application, http, executionContext },
   } = dependencies.services;
+
+  executionContext.set({ type: 'application', page: 'upgradeAssistant' });
 
   return (
     <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>

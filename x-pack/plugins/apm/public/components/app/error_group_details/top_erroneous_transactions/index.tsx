@@ -25,7 +25,11 @@ import { isTimeComparison } from '../../../shared/time_comparison/get_comparison
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import {
+  useFetcher,
+  FETCH_STATUS,
+  isPending,
+} from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { asInteger } from '../../../../../common/utils/formatters';
 
@@ -90,8 +94,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
     ]
   );
 
-  const loading =
-    status === FETCH_STATUS.LOADING || status === FETCH_STATUS.NOT_INITIATED;
+  const loading = isPending(status);
 
   const columns: Array<
     EuiBasicTableColumn<
@@ -141,11 +144,12 @@ export function TopErroneousTransactions({ serviceName }: Props) {
         { occurrences, currentPeriodTimeseries, previousPeriodTimeseries }
       ) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.FAILED_TRANSACTION_RATE
+          ChartType.ERROR_OCCURRENCES
         );
 
         return (
           <SparkPlot
+            type="bar"
             isLoading={loading}
             valueLabel={i18n.translate(
               'xpack.apm.errorGroupTopTransactions.column.occurrences.valueLabel',

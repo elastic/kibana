@@ -24,6 +24,7 @@ jest.mock('./collect_multi_namespace_references', () => ({
 export const mockInternalBulkResolve = jest.fn() as jest.MockedFunction<typeof internalBulkResolve>;
 
 jest.mock('./internal_bulk_resolve', () => ({
+  ...jest.requireActual('./internal_bulk_resolve'),
   internalBulkResolve: mockInternalBulkResolve,
 }));
 

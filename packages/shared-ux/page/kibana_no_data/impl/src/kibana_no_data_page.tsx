@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useState } from 'react';
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { NoDataConfigPage } from '@kbn/shared-ux-page-no-data-config';
 import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
 import { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
@@ -16,7 +16,12 @@ import { useServices } from './services';
 /**
  * A page to display when Kibana has no data, prompting a person to add integrations or create a new data view.
  */
-export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: KibanaNoDataPageProps) => {
+export const KibanaNoDataPage = ({
+  onDataViewCreated,
+  noDataConfig,
+  allowAdHocDataView,
+  showPlainSpinner,
+}: KibanaNoDataPageProps) => {
   // These hooks are temporary, until this component is moved to a package.
   const services = useServices();
   const { hasESData, hasUserDataView } = services;
@@ -39,11 +44,20 @@ export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: KibanaNoDa
   }, [hasESData, hasUserDataView]);
 
   if (isLoading) {
-    return <EuiLoadingElastic css={{ margin: 'auto' }} size="xxl" />;
+    return showPlainSpinner ? (
+      <EuiLoadingSpinner css={{ margin: 'auto' }} size="xxl" />
+    ) : (
+      <EuiLoadingElastic css={{ margin: 'auto' }} size="xxl" />
+    );
   }
 
   if (!hasUserDataViews && dataExists) {
-    return <NoDataViewsPrompt onDataViewCreated={onDataViewCreated} />;
+    return (
+      <NoDataViewsPrompt
+        onDataViewCreated={onDataViewCreated}
+        allowAdHocDataView={allowAdHocDataView}
+      />
+    );
   }
 
   if (!dataExists) {

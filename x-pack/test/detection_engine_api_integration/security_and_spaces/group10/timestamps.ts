@@ -9,15 +9,15 @@ import expect from '@kbn/expect';
 import { orderBy } from 'lodash';
 import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import {
-  EqlCreateSchema,
-  QueryCreateSchema,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+  EqlRuleCreateProps,
+  QueryRuleCreateProps,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   createRule,
   waitForRuleSuccessOrStatus,
@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_in_seconds'
         );
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should still use the @timestamp field even with an override field. It should never use the override field', async () => {
-          const rule: QueryCreateSchema = {
+          const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['myfakeindex-5']),
             timestamp_override: 'event.ingested',
           };
@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should still use the @timestamp field even with an override field. It should never use the override field', async () => {
-          const rule: EqlCreateSchema = {
+          const rule: EqlRuleCreateProps = {
             ...getEqlRuleForSignalTesting(['myfakeindex-5']),
             timestamp_override: 'event.ingested',
           };
@@ -148,7 +148,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_override_1'
         );
@@ -165,7 +165,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('KQL', () => {
         it('should generate signals with event.ingested, @timestamp and (event.ingested + timestamp)', async () => {
-          const rule: QueryCreateSchema = {
+          const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['myfa*']),
             timestamp_override: 'event.ingested',
           };
@@ -187,7 +187,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should generate 2 signals with event.ingested when timestamp fallback is disabled', async () => {
-          const rule: QueryCreateSchema = {
+          const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['myfa*']),
             rule_id: 'rule-without-timestamp-fallback',
             timestamp_override: 'event.ingested',
@@ -211,7 +211,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should generate 2 signals with @timestamp', async () => {
-          const rule: QueryCreateSchema = getRuleForSignalTesting(['myfa*']);
+          const rule: QueryRuleCreateProps = getRuleForSignalTesting(['myfa*']);
 
           const { id } = await createRule(supertest, log, rule);
 
@@ -230,7 +230,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should generate 2 signals when timestamp override does not exist', async () => {
-          const rule: QueryCreateSchema = {
+          const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['myfa*']),
             timestamp_override: 'event.fakeingestfield',
           };
@@ -251,7 +251,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should not generate any signals when timestamp override does not exist and timestamp fallback is disabled', async () => {
-          const rule: QueryCreateSchema = {
+          const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['myfa*']),
             rule_id: 'rule-without-timestamp-fallback',
             timestamp_override: 'event.fakeingestfield',
@@ -276,7 +276,7 @@ export default ({ getService }: FtrProviderContext) => {
          * and we add a new timestamp to the signal.
          */
         it('should NOT use the timestamp override as the "original_time"', async () => {
-          const rule: QueryCreateSchema = {
+          const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['myfakeindex-2']),
             timestamp_override: 'event.ingested',
           };
@@ -294,7 +294,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('EQL', () => {
         it('should generate 2 signals with @timestamp', async () => {
-          const rule: EqlCreateSchema = getEqlRuleForSignalTesting(['myfa*']);
+          const rule: EqlRuleCreateProps = getEqlRuleForSignalTesting(['myfa*']);
 
           const { id } = await createRule(supertest, log, rule);
 
@@ -313,7 +313,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should generate 2 signals when timestamp override does not exist', async () => {
-          const rule: EqlCreateSchema = {
+          const rule: EqlRuleCreateProps = {
             ...getEqlRuleForSignalTesting(['myfa*']),
             timestamp_override: 'event.fakeingestfield',
           };
@@ -334,7 +334,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should not generate any signals when timestamp override does not exist and timestamp fallback is disabled', async () => {
-          const rule: EqlCreateSchema = {
+          const rule: EqlRuleCreateProps = {
             ...getEqlRuleForSignalTesting(['myfa*']),
             timestamp_override: 'event.fakeingestfield',
             timestamp_override_fallback_disabled: true,
@@ -367,7 +367,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       describe('KQL', () => {
@@ -383,7 +383,7 @@ export default ({ getService }: FtrProviderContext) => {
          * ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
          */
         it('should generate 200 signals when timestamp override does not exist', async () => {
-          const rule: QueryCreateSchema = {
+          const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['auditbeat-*']),
             timestamp_override: 'event.fakeingested',
             max_signals: 200,

@@ -18,6 +18,14 @@ import {
   EuiKeyPadMenuItemProps,
 } from '@elastic/eui';
 
+export type MonitorTypeRadioGroupProps = EuiKeyPadMenuItemProps & {
+  options: MonitorTypeRadioOption[];
+  onChange: React.ChangeEvent<HTMLInputElement>;
+  name: string;
+  value: string;
+  ariaLegend: string;
+};
+
 export type MonitorTypeRadioOption = EuiKeyPadMenuItemProps & {
   icon: string;
   description: string;
@@ -63,13 +71,7 @@ export const MonitorTypeRadioGroup = ({
   onChange,
   ariaLegend,
   ...props
-}: EuiKeyPadMenuItemProps & {
-  options: MonitorTypeRadioOption[];
-  onChange: React.ChangeEvent<HTMLInputElement>;
-  name: string;
-  value: string;
-  ariaLegend: string;
-}) => {
+}: MonitorTypeRadioGroupProps) => {
   const selectedOption = options.find((radio) => radio.value === value);
   return (
     <>
@@ -83,6 +85,7 @@ export const MonitorTypeRadioGroup = ({
               onChange={onChange}
               isSelected={radio.value === value}
               data-test-subj={radio['data-test-subj']}
+              key={radio.value}
             />
           );
         })}

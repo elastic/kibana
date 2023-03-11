@@ -12,7 +12,7 @@ import { MockRouter, MockKibanaProvider } from '../../../lib/helper/rtl_helpers'
 import { SyntaxType, useQueryBar, DEBOUNCE_INTERVAL } from './use_query_bar';
 import { MountWithReduxProvider } from '../../../lib';
 import * as URL from '../../../hooks/use_url_params';
-import * as ES_FILTERS from '../../../hooks/update_kuery_string';
+import * as ES_FILTERS from '../../../hooks/use_update_kuery_string';
 import { UptimeUrlParams } from '../../../lib/helper/url_params';
 
 const SAMPLE_ES_FILTERS = `{"bool":{"should":[{"match_phrase":{"monitor.id":"NodeServer"}}],"minimum_should_match":1}}`;
@@ -49,7 +49,7 @@ describe.skip('useQueryBar', () => {
     );
     useUrlParamsSpy = jest.spyOn(URL, 'useUrlParams');
     useGetUrlParamsSpy = jest.spyOn(URL, 'useGetUrlParams');
-    useUpdateKueryStringSpy = jest.spyOn(ES_FILTERS, 'generateUpdatedKueryString');
+    useUpdateKueryStringSpy = jest.spyOn(ES_FILTERS, 'useGenerateUpdatedKueryString');
     updateUrlParamsMock = jest.fn();
 
     useUrlParamsSpy.mockImplementation(() => [jest.fn(), updateUrlParamsMock]);

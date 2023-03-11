@@ -11,6 +11,7 @@ import { SecurityPageName } from '../../app/types';
 import type { NavLinkItem } from '../../common/components/navigation/types';
 import { TestProviders } from '../../common/mock';
 import { LandingLinksIcons } from './landing_links_icons';
+import * as telemetry from '../../common/lib/telemetry';
 
 const DEFAULT_NAV_ITEM: NavLinkItem = {
   id: SecurityPageName.overview,
@@ -18,6 +19,7 @@ const DEFAULT_NAV_ITEM: NavLinkItem = {
   description: 'TEST DESCRIPTION',
   icon: 'myTestIcon',
 };
+const spyTrack = jest.spyOn(telemetry, 'track');
 
 const mockNavigateTo = jest.fn();
 jest.mock('../../common/lib/kibana', () => {
@@ -65,5 +67,23 @@ describe('LandingLinksIcons', () => {
     getByText(title).click();
 
     expect(mockNavigateTo).toHaveBeenCalledWith({ url: '/administration' });
+  });
+
+  it('sends telemetry', () => {
+    const id = SecurityPageName.administration;
+    const title = 'myTestLable';
+
+    const { getByText } = render(
+      <TestProviders>
+        <LandingLinksIcons items={[{ ...DEFAULT_NAV_ITEM, id, title }]} />
+      </TestProviders>
+    );
+
+    getByText(title).click();
+
+    expect(spyTrack).toHaveBeenCalledWith(
+      telemetry.METRIC_TYPE.CLICK,
+      `${telemetry.TELEMETRY_EVENT.LANDING_CARD}${id}`
+    );
   });
 });

@@ -78,7 +78,7 @@ describe('transaction_details/distribution', () => {
   describe('TransactionDistribution', () => {
     it('shows loading indicator when the service is running and returned no results yet', async () => {
       jest.spyOn(useFetcherModule, 'useFetcher').mockImplementation(() => ({
-        data: {},
+        data: undefined,
         refetch: () => {},
         status: useFetcherModule.FETCH_STATUS.LOADING,
       }));
@@ -104,11 +104,21 @@ describe('transaction_details/distribution', () => {
     });
 
     it("doesn't show loading indicator when the service isn't running", async () => {
-      jest.spyOn(useFetcherModule, 'useFetcher').mockImplementation(() => ({
-        data: { percentileThresholdValue: 1234, overallHistogram: [] },
-        refetch: () => {},
-        status: useFetcherModule.FETCH_STATUS.SUCCESS,
-      }));
+      jest
+        .spyOn(useFetcherModule, 'useFetcher')
+        .mockImplementationOnce(() => ({
+          data: {
+            traceItems: {},
+            entryTransaction: {},
+          },
+          refetch: () => {},
+          status: useFetcherModule.FETCH_STATUS.SUCCESS,
+        }))
+        .mockImplementationOnce(() => ({
+          data: { percentileThresholdValue: 1234, overallHistogram: [] },
+          refetch: () => {},
+          status: useFetcherModule.FETCH_STATUS.SUCCESS,
+        }));
 
       render(
         <Wrapper>

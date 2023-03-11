@@ -23,5 +23,6 @@ declare namespace Cypress {
     }): void;
     updateAdvancedSettings(settings: Record<string, unknown>): void;
     getByTestSubj(selector: string): Chainable<JQuery<Element>>;
+    dismissServiceGroupsTour(): void;
   }
 }

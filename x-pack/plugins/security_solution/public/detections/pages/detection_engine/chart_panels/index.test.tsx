@@ -9,16 +9,26 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { useAlertsLocalStorage } from './alerts_local_storage';
+import type { Status } from '../../../../../common/detection_engine/schemas/common';
 import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
 import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from '../../../../common/components/chart_settings_popover/translations';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { TestProviders } from '../../../../common/mock';
 import { ChartPanels } from '.';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 jest.mock('./alerts_local_storage');
-
 jest.mock('../../../../common/containers/sourcerer');
+
+jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
+jest.mock('../../../../common/components/page/use_refetch_by_session', () => ({
+  useRefetchByRestartingSession: jest.fn().mockReturnValue({
+    searchSessionId: 'mockSearchSessionId',
+    refetchByRestartingSession: jest.fn(),
+  }),
+}));
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -51,16 +61,25 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+jest.mock('../../../../common/hooks/use_experimental_features');
+
+const mockSetToggle = jest.fn();
+const mockUseQueryToggle = useQueryToggle as jest.Mock;
+jest.mock('../../../../common/containers/query_toggle');
+
 const defaultAlertSettings = {
   alertViewSelection: 'trend',
   countTableStackBy0: 'kibana.alert.rule.name',
   countTableStackBy1: 'host.name',
   isTreemapPanelExpanded: true,
+  groupBySelection: 'host.name',
   riskChartStackBy0: 'kibana.alert.rule.name',
   riskChartStackBy1: 'host.name',
   setAlertViewSelection: jest.fn(),
   setCountTableStackBy0: jest.fn(),
   setCountTableStackBy1: jest.fn(),
+  setGroupBySelection: jest.fn(),
   setIsTreemapPanelExpanded: jest.fn(),
   setRiskChartStackBy0: jest.fn(),
   setRiskChartStackBy1: jest.fn(),
@@ -70,7 +89,7 @@ const defaultAlertSettings = {
 
 const defaultProps = {
   addFilter: jest.fn(),
-  alertsHistogramDefaultFilters: [
+  alertsDefaultFilters: [
     {
       meta: {
         alias: null,
@@ -104,6 +123,7 @@ const defaultProps = {
       },
     },
   ],
+  filterGroup: 'open' as Status,
   isLoadingIndexPattern: false,
   query: {
     query: '',
@@ -111,6 +131,8 @@ const defaultProps = {
   },
   runtimeMappings: {},
   signalIndexName: '.alerts-security.alerts-default',
+  showBuildingBlockAlerts: false,
+  showOnlyThreatIndicatorAlerts: false,
   updateDateRangeCallback: jest.fn(),
 };
 
@@ -125,6 +147,8 @@ const resetGroupByFields = () => {
 describe('ChartPanels', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
 
     (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: true,
@@ -137,7 +161,7 @@ describe('ChartPanels', () => {
     });
   });
 
-  test('it renders the chart selector', async () => {
+  test('it renders the chart selector when alertsPageChartsEnabled is false', async () => {
     render(
       <TestProviders>
         <ChartPanels {...defaultProps} />
@@ -146,6 +170,34 @@ describe('ChartPanels', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('chartSelect')).toBeInTheDocument();
+    });
+  });
+
+  test('it renders the chart selector tabs when alertsPageChartsEnabled is true and toggle is true', async () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
+    render(
+      <TestProviders>
+        <ChartPanels {...defaultProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('chart-select-tabs')).toBeInTheDocument();
+    });
+  });
+
+  test('it renders the chart collapse when alertsPageChartsEnabled is true and toggle is false', async () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
+    render(
+      <TestProviders>
+        <ChartPanels {...defaultProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('chart-collapse')).toBeInTheDocument();
     });
   });
 
@@ -304,7 +356,7 @@ describe('ChartPanels', () => {
     });
   });
 
-  test('it renders the alerts count panel when `alertViewSelection` is treemap', async () => {
+  test('it renders the treemap panel when `alertViewSelection` is treemap', async () => {
     (useAlertsLocalStorage as jest.Mock).mockReturnValue({
       ...defaultAlertSettings,
       alertViewSelection: 'treemap',
@@ -318,6 +370,40 @@ describe('ChartPanels', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('treemapPanel')).toBeInTheDocument();
+    });
+  });
+
+  test('it renders the charts loading spinner when data is loading and `alertViewSelection` is charts', async () => {
+    (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+      ...defaultAlertSettings,
+      alertViewSelection: 'charts',
+    });
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    render(
+      <TestProviders>
+        <ChartPanels {...defaultProps} isLoadingIndexPattern={true} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('chartsLoadingSpinner')).toBeInTheDocument();
+    });
+  });
+
+  test('it renders the charts panel when `alertViewSelection` is charts', async () => {
+    (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+      ...defaultAlertSettings,
+      alertViewSelection: 'charts',
+    });
+
+    render(
+      <TestProviders>
+        <ChartPanels {...defaultProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('chartPanels')).toBeInTheDocument();
     });
   });
 });

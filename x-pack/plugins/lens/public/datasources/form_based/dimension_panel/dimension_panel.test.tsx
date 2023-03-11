@@ -32,6 +32,7 @@ import {
   CoreStart,
 } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
 import { generateId } from '../../../id_generator';
 import { FormBasedPrivateState } from '../types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -78,6 +79,16 @@ jest.mock('../operations/definitions/formula/editor/formula_editor', () => {
   };
 });
 
+jest.mock('@kbn/unified-field-list-plugin/public/hooks/use_existing_fields', () => ({
+  useExistingFieldsReader: jest.fn(() => {
+    return {
+      hasFieldData: (dataViewId: string, fieldName: string) => {
+        return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
+      },
+    };
+  }),
+}));
+
 const fields = [
   {
     name: 'timestamp',
@@ -111,6 +122,15 @@ const fields = [
     searchable: true,
     exists: true,
   },
+  // Added to test issue#148062 about the use of Object method names as fields name
+  ...Object.getOwnPropertyNames(Object.getPrototypeOf({})).map((name) => ({
+    name,
+    displayName: name,
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  })),
   documentField,
 ];
 
@@ -197,14 +217,6 @@ describe('FormBasedDimensionEditor', () => {
 
     defaultProps = {
       indexPatterns: expectedIndexPatterns,
-      existingFields: {
-        'my-fake-index-pattern': {
-          timestamp: true,
-          bytes: true,
-          memory: true,
-          source: true,
-        },
-      },
       state,
       setState,
       dateRange: { fromDate: 'now-1d', toDate: 'now' },
@@ -327,7 +339,7 @@ describe('FormBasedDimensionEditor', () => {
       .filter('[data-test-subj="indexPattern-dimension-field"]')
       .prop('options');
 
-    expect(options).toHaveLength(2);
+    expect(options).toHaveLength(3);
 
     expect(options![0].label).toEqual('Records');
     expect(options![1].options!.map(({ label }) => label)).toEqual([
@@ -336,19 +348,23 @@ describe('FormBasedDimensionEditor', () => {
       'memory',
       'source',
     ]);
+
+    // these fields are generated to test the issue #148062 about fields that are using JS Object method names
+    expect(options![2].options!.map(({ label }) => label)).toEqual(
+      Object.getOwnPropertyNames(Object.getPrototypeOf({})).sort()
+    );
   });
 
   it('should hide fields that have no data', () => {
-    const props = {
-      ...defaultProps,
-      existingFields: {
-        'my-fake-index-pattern': {
-          timestamp: true,
-          source: true,
+    (useExistingFieldsReader as jest.Mock).mockImplementationOnce(() => {
+      return {
+        hasFieldData: (dataViewId: string, fieldName: string) => {
+          return ['timestamp', 'source'].includes(fieldName);
         },
-      },
-    };
-    wrapper = mount(<FormBasedDimensionEditorComponent {...props} />);
+      };
+    });
+
+    wrapper = mount(<FormBasedDimensionEditorComponent {...defaultProps} />);
 
     const options = wrapper
       .find(EuiComboBox)
@@ -1556,6 +1572,23 @@ describe('FormBasedDimensionEditor', () => {
     it('should report a generic error for invalid shift string', () => {
       const props = getProps({
         timeShift: '5 months',
+      });
+      wrapper = mount(<FormBasedDimensionEditorComponent {...props} />);
+
+      expect(wrapper.find(TimeShift).find(EuiComboBox).prop('isInvalid')).toBeTruthy();
+
+      expect(
+        wrapper
+          .find(TimeShift)
+          .find('[data-test-subj="indexPattern-dimension-time-shift-row"]')
+          .first()
+          .prop('error')
+      ).toBe('Time shift value is not valid.');
+    });
+
+    it('should mark absolute time shift as invalid', () => {
+      const props = getProps({
+        timeShift: 'startAt(2022-11-02T00:00:00.000Z)',
       });
       wrapper = mount(<FormBasedDimensionEditorComponent {...props} />);
 

@@ -7,6 +7,8 @@
  */
 
 /**
+ * Options for the open point-in-time for type operation
+ *
  * @public
  */
 export interface SavedObjectsOpenPointInTimeOptions {
@@ -30,11 +32,11 @@ export interface SavedObjectsOpenPointInTimeOptions {
 }
 
 /**
+ * Return type of the Saved Objects `openPointInTimeForType()` method.
+ *
  * @public
  */
 export interface SavedObjectsOpenPointInTimeResponse {
-  /**
-   * PIT ID returned from ES.
-   */
+  /** PIT ID returned from ES */
   id: string;
 }

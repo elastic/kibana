@@ -10,6 +10,13 @@ import type { Query } from '@kbn/data-plugin/common/query';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 import type { SearchQueryLanguage } from './combined_query';
 
+import type { DATA_VISUALIZER_INDEX_VIEWER } from '../constants/index_data_visualizer_viewer';
+
+export interface DataVisualizerIndexBasedPageUrlState {
+  pageKey: typeof DATA_VISUALIZER_INDEX_VIEWER;
+  pageUrlState: Required<DataVisualizerIndexBasedAppState>;
+}
+
 export interface ListingPageUrlState {
   pageSize: number;
   pageIndex: number;
@@ -17,6 +24,7 @@ export interface ListingPageUrlState {
   sortDirection: string;
   queryText?: string;
 }
+
 export interface DataVisualizerIndexBasedAppState extends Omit<ListingPageUrlState, 'queryText'> {
   searchString?: Query['query'];
   searchQuery?: Query['query'];

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { AnomalyDetails } from './anomaly_details';
 
 const props = {
@@ -52,23 +52,25 @@ const props = {
   influencersLimit: 5,
   isAggregatedData: true,
   tabIndex: 0,
+  job: {
+    id: 'it-ops-count-by-mlcategory-one',
+    selected: false,
+    bucketSpanSeconds: 900,
+    isSingleMetricViewerJob: false,
+    sourceIndices: [''],
+    modelPlotEnabled: false,
+  },
 };
 
 describe('AnomalyDetails', () => {
-  test('Renders with anomaly details tab selected by default', () => {
-    const wrapper = shallowWithIntl(<AnomalyDetails {...props} />);
-
-    expect(wrapper.prop('tabs').length).toBe(2);
-    expect(wrapper.prop('initialSelectedTab').id).toBe('Details');
-  });
-
-  test('Renders with category tab selected when index set to 1', () => {
+  test('Renders two tabs', () => {
     const categoryTabProps = {
       ...props,
       tabIndex: 1,
     };
-    const wrapper = shallowWithIntl(<AnomalyDetails {...categoryTabProps} />);
-    expect(wrapper.prop('initialSelectedTab').id).toBe('category-examples');
+    const wrapper = mountWithIntl(<AnomalyDetails {...categoryTabProps} />);
+    expect(wrapper.containsMatchingElement(<span>Details</span>)).toBe(true);
+    expect(wrapper.containsMatchingElement(<span>Category examples</span>)).toBe(true);
   });
 
   test('Renders with terms and regex when definition prop is not undefined', () => {

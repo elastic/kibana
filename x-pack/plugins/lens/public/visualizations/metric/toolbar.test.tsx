@@ -13,7 +13,6 @@ import { MetricVisualizationState } from './visualization';
 import { createMockFramePublicAPI } from '../../mocks';
 import { HTMLAttributes, ReactWrapper } from 'enzyme';
 import { EuiFieldText } from '@elastic/eui';
-import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import { act } from 'react-dom/test-utils';
 
 jest.mock('lodash', () => {
@@ -71,7 +70,7 @@ describe('metric toolbar', () => {
     }
 
     public get textOptionsButton() {
-      const toolbarButtons = this._wrapper.find(ToolbarButton);
+      const toolbarButtons = this._wrapper.find('button[data-test-subj="lnsLabelsButton"]');
       return toolbarButtons.at(0);
     }
 

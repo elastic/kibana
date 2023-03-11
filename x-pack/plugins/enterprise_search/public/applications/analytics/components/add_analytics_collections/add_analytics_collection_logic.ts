@@ -9,12 +9,15 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { Status } from '../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../common/types/api';
 
-import { isAlphaNumericOrUnderscore } from '../../../../../common/utils/is_alphanumeric_underscore';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
+import {
+  flashAPIErrors,
+  FlashMessagesLogic,
+  flashSuccessToast,
+} from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 import {
   AddAnalyticsCollectionsAPILogic,
@@ -22,6 +25,8 @@ import {
   AddAnalyticsCollectionApiLogicResponse,
 } from '../../api/add_analytics_collection/add_analytics_collection_api_logic';
 import { COLLECTION_VIEW_PATH } from '../../routes';
+
+const SERVER_ERROR_CODE = 500;
 
 export interface AddAnalyticsCollectionsActions {
   apiError: Actions<
@@ -37,15 +42,17 @@ export interface AddAnalyticsCollectionsActions {
     AddAnalyticsCollectionApiLogicArgs,
     AddAnalyticsCollectionApiLogicResponse
   >['makeRequest'];
-  setInputError(error: string | null): { inputError: string | null };
+  setInputError: (inputError: string | null) => { inputError: string | null };
   setNameValue(name: string): { name: string };
 }
 
 interface AddAnalyticsCollectionValues {
   canSubmit: boolean;
-  hasInputError: boolean;
+  error: HttpError | undefined;
   inputError: string | null;
   isLoading: boolean;
+  isSuccess: boolean;
+  isSystemError: boolean;
   name: string;
   status: Status;
 }
@@ -55,17 +62,37 @@ export const AddAnalyticsCollectionLogic = kea<
 >({
   actions: {
     createAnalyticsCollection: () => {},
-    setInputError: (inputError: string | boolean) => ({ inputError }),
+    setInputError: (inputError) => ({ inputError }),
     setNameValue: (name: string) => ({ name }),
   },
   connect: {
     actions: [AddAnalyticsCollectionsAPILogic, ['apiError', 'apiSuccess', 'makeRequest']],
-    values: [AddAnalyticsCollectionsAPILogic, ['status']],
+    values: [AddAnalyticsCollectionsAPILogic, ['status', 'error']],
   },
   listeners: ({ values, actions }) => ({
-    apiError: (error) => flashAPIErrors(error),
-    apiSuccess: async ({ name }, breakpoint) => {
-      // Wait for propagation of the new collection
+    apiError: async (error) => {
+      if (values.isSystemError) {
+        if (error?.body?.message) {
+          FlashMessagesLogic.actions.setFlashMessages([
+            {
+              description: error.body.message,
+              message: i18n.translate(
+                'xpack.enterpriseSearch.analytics.collectionsCreate.action.systemErrorMessage',
+                {
+                  defaultMessage: 'Sorry, there was an error creating your collection.',
+                }
+              ),
+              type: 'error',
+            },
+          ]);
+        } else {
+          flashAPIErrors(error);
+        }
+      } else {
+        actions.setInputError(error?.body?.message || null);
+      }
+    },
+    apiSuccess: async ({ name, id }) => {
       flashSuccessToast(
         i18n.translate('xpack.enterpriseSearch.analytics.collectionsCreate.action.successMessage', {
           defaultMessage: "Successfully added collection '{name}'",
@@ -74,10 +101,9 @@ export const AddAnalyticsCollectionLogic = kea<
           },
         })
       );
-      await breakpoint(1000);
       KibanaLogic.values.navigateToUrl(
         generateEncodedPath(COLLECTION_VIEW_PATH, {
-          name,
+          id,
           section: 'events',
         })
       );
@@ -86,18 +112,6 @@ export const AddAnalyticsCollectionLogic = kea<
       const { name } = values;
       actions.makeRequest({ name });
     },
-    setNameValue: ({ name }) => {
-      if (!isAlphaNumericOrUnderscore(name)) {
-        const message = i18n.translate(
-          'xpack.enterpriseSearch.analytics.collectionsCreate.action.invalidCollectionName',
-          {
-            defaultMessage: 'Name must only contain alphanumeric characters and underscores',
-          }
-        );
-        return actions.setInputError(message);
-      }
-      return actions.setInputError(null);
-    },
   }),
   path: ['enterprise_search', 'analytics', 'add_analytics_collection'],
   reducers: {
@@ -105,6 +119,7 @@ export const AddAnalyticsCollectionLogic = kea<
       null,
       {
         setInputError: (_, { inputError }) => inputError,
+        setNameValue: () => null,
       },
     ],
     name: [
@@ -116,14 +131,15 @@ export const AddAnalyticsCollectionLogic = kea<
   },
   selectors: ({ selectors }) => ({
     canSubmit: [
-      () => [selectors.hasInputError, selectors.isLoading, selectors.name],
-      (hasInputError, isLoading, name) => !hasInputError && !isLoading && name.length > 0,
+      () => [selectors.isLoading, selectors.name],
+      (isLoading, name) => !isLoading && name.length > 0,
     ],
-    hasInputError: [() => [selectors.inputError], (inputError) => inputError !== null],
-    isLoading: [
-      () => [selectors.status],
-      // includes success to include the redirect wait time
-      (status: Status) => [Status.LOADING, Status.SUCCESS].includes(status),
+    isLoading: [() => [selectors.status], (status: Status) => status === Status.LOADING],
+    isSuccess: [() => [selectors.status], (status: Status) => status === Status.SUCCESS],
+    isSystemError: [
+      () => [selectors.status, selectors.error],
+      (status: Status, error?: HttpError) =>
+        Boolean(status === Status.ERROR && (error?.body?.statusCode || 0) >= SERVER_ERROR_CODE),
     ],
   }),
 });

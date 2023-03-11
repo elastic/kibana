@@ -444,7 +444,7 @@ export const getEcommerceSavedObjects = () => {
       id: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
       type: 'map',
       updated_at: '2019-01-15T21:12:56.253Z',
-      version: 5,
+      version: '5',
       references: [
         {
           name: 'layer_1_join_0_index_pattern',

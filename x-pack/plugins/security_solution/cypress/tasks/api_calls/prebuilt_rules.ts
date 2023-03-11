@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PrePackagedRulesStatusResponse } from '../../../public/detections/containers/detection_engine/rules/types';
+import type { PrePackagedRulesStatusResponse } from '../../../public/detection_engine/rule_management/logic/types';
 
 export const getPrebuiltRulesStatus = () => {
   return cy.request<PrePackagedRulesStatusResponse>({
@@ -31,6 +31,6 @@ export const waitTillPrebuiltRulesReadyToInstall = () => {
         return availablePrebuiltRulesCount > 0;
       });
     },
-    { interval: 100, timeout: 60000 }
+    { interval: 2000, timeout: 60000 }
   );
 };

@@ -72,6 +72,10 @@ export default ({ getService }: FtrProviderContext) => {
           'Create Rule button is visible',
           async () => await testSubjects.exists('createRuleButton')
         );
+        await retry.waitFor(
+          'Create Rule button is enabled',
+          async () => await testSubjects.isEnabled('createRuleButton')
+        );
         await observability.alerts.rulesPage.clickCreateRuleButton();
         await retry.waitFor(
           'Create Rule flyout is visible',
@@ -104,6 +108,10 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const logThresholdRule = {
           params: {
+            logView: {
+              logViewId: 'Default',
+              type: 'log-view-reference',
+            },
             timeSize: 5,
             timeUnit: 'm',
             count: { value: 75, comparator: 'more than' },

@@ -15,6 +15,7 @@ import { LogQueryFields } from '../../metrics/types';
 import { InfraSource } from '../../sources';
 import { calculateFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
 import { getData } from './lib/get_data';
+import { AdditionalContext } from '../common/utils';
 
 export type ConditionResult = InventoryMetricConditions & {
   shouldFire: boolean;
@@ -22,7 +23,7 @@ export type ConditionResult = InventoryMetricConditions & {
   currentValue: number;
   isNoData: boolean;
   isError: boolean;
-  context: [x: string];
+  context: AdditionalContext;
 };
 
 export const evaluateCondition = async ({

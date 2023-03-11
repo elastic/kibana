@@ -141,7 +141,7 @@ describe('ExecutionContract', () => {
       const executor = createUnitTestExecutor();
       executor.registerFunction(observable);
 
-      const execution = executor.createExecution('observable');
+      const execution = executor.createExecution('observable', { partial: true });
       execution.start(null);
       await execution.result.pipe(first()).toPromise();
 

@@ -9,7 +9,7 @@ import React from 'react';
 import { type CustomAssetsAccordionProps, CustomAssetsAccordion } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { cloudPosturePages } from '../../common/navigation/constants';
+import { benchmarksNavigation, cloudPosturePages } from '../../common/navigation/constants';
 
 const SECURITY_APP_NAME = 'securitySolutionUI';
 
@@ -34,7 +34,7 @@ export const CspCustomAssetsExtension = () => {
       ),
     },
     {
-      name: cloudPosturePages.rules.name,
+      name: benchmarksNavigation.rules.name,
       url: application.getUrlForApp(SECURITY_APP_NAME, { path: cloudPosturePages.benchmarks.path }),
       description: i18n.translate('xpack.csp.createPackagePolicy.customAssetsTab.rulesViewLabel', {
         defaultMessage: 'View CSP Rules ',

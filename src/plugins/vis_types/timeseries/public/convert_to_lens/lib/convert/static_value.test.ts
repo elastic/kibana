@@ -48,6 +48,11 @@ describe('convertToStaticValueColumn', () => {
       null,
     ],
     [
+      'null if value is not specified',
+      [{ series, metrics: [metric], dataView }, { visibleSeriesCount: 2 }],
+      null,
+    ],
+    [
       'static value column',
       [{ series, metrics: [{ ...metric, value: 'some value' }], dataView }],
       {

@@ -16,14 +16,16 @@ import { i18n } from '@kbn/i18n';
 import { MlInferenceError } from '../../../../../../common/types/pipelines';
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 
+import { FetchMlInferenceErrorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_errors';
+
 import { InferenceErrorsLogic } from './inference_errors_logic';
 
 export const InferenceErrors: React.FC = () => {
   const { indexName, isLoading, inferenceErrors } = useValues(InferenceErrorsLogic);
-  const { fetchIndexInferenceErrorLogs } = useActions(InferenceErrorsLogic);
+  const { makeRequest } = useActions(FetchMlInferenceErrorsApiLogic);
 
   useEffect(() => {
-    fetchIndexInferenceErrorLogs({ indexName });
+    makeRequest({ indexName });
   }, [indexName]);
 
   const errorsColumns: Array<EuiBasicTableColumn<MlInferenceError>> = [
@@ -31,7 +33,7 @@ export const InferenceErrors: React.FC = () => {
       dataType: 'date',
       field: 'timestamp',
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineLogs.tableColumn.timestamp',
+        'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineInferenceLogs.tableColumn.timestamp',
         { defaultMessage: 'Timestamp' }
       ),
     },
@@ -39,8 +41,8 @@ export const InferenceErrors: React.FC = () => {
       dataType: 'string',
       field: 'message',
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineLogs.tableColumn.message',
-        { defaultMessage: 'Inference error' }
+        'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineInferenceLogs.tableColumn.message',
+        { defaultMessage: 'Error message' }
       ),
       textOnly: true,
     },
@@ -48,7 +50,7 @@ export const InferenceErrors: React.FC = () => {
       dataType: 'number',
       field: 'doc_count',
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineLogs.tableColumn.docCount',
+        'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineInferenceLogs.tableColumn.docCount',
         { defaultMessage: 'Approx. document count' }
       ),
     },
@@ -63,15 +65,11 @@ export const InferenceErrors: React.FC = () => {
         title={
           <h2>
             {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineLogs.title',
-              { defaultMessage: 'Ingestion logs' }
+              'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineInferenceLogs.title',
+              { defaultMessage: 'Inference errors' }
             )}
           </h2>
         }
-        subtitle={i18n.translate(
-          'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineLogs.subtitle',
-          { defaultMessage: 'Errors and dropped data failures' }
-        )}
       >
         {isLoading ? (
           <EuiLoadingSpinner />
@@ -82,7 +80,7 @@ export const InferenceErrors: React.FC = () => {
             items={inferenceErrors}
             rowHeader="message"
             noItemsMessage={i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineLogs.emptyMessage',
+              'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineInferenceLogs.emptyMessage',
               { defaultMessage: 'This index has no inference errors' }
             )}
           />

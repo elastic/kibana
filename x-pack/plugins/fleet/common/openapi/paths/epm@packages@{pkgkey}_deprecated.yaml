@@ -1,6 +1,7 @@
 get:
-  summary: Packages - Info
-  tags: []
+  summary: Get package
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -25,7 +26,9 @@ get:
                 required:
                   - status
                   - savedObject
-  operationId: get-package
+    '400':
+      $ref: ../components/responses/error.yaml
+  operationId: get-package-deprecated
   security:
     - basicAuth: []
   parameters:
@@ -34,10 +37,18 @@ get:
       name: pkgkey
       in: path
       required: true
+    - in: query
+      name: prerelease
+      schema:
+        type: boolean
+        default: false
+      description: >-
+        Whether to return prerelease versions of packages (e.g. beta, rc, preview)
   deprecated: true
 post:
-  summary: Packages - Install
-  tags: []
+  summary: Install package
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -62,10 +73,17 @@ post:
                     - type
             required:
               - response
-  operationId: install-package
+    '400':
+      $ref: ../components/responses/error.yaml
+  operationId: install-package-deprecated
   description: ''
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+    - schema:
+        type: string
+      name: pkgkey
+      in: path
+      required: true
   requestBody:
     content:
       application/json:
@@ -76,8 +94,9 @@ post:
               type: boolean
   deprecated: true
 delete:
-  summary: Packages - Delete
-  tags: []
+  summary: Delete ackage
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -102,9 +121,16 @@ delete:
                     - type
             required:
               - response
-  operationId: delete-package
+    '400':
+      $ref: ../components/responses/error.yaml
+  operationId: delete-package-deprecated
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+    - schema:
+        type: string
+      name: pkgkey
+      in: path
+      required: true
   requestBody:
     content:
       application/json:

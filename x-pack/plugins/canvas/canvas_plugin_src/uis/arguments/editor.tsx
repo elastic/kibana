@@ -52,7 +52,7 @@ const EditorArg: FC<EditorArgProps> = ({ argValue, typeInstance, onValueChange, 
   const { language } = typeInstance?.options ?? {};
 
   return (
-    <EuiFormRow display="rowCompressed">
+    <EuiFormRow display="rowCompressed" data-test-subj="canvasCodeEditorField">
       <CodeEditorField
         languageId={language ?? ''}
         value={value}

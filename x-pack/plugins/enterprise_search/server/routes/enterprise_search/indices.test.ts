@@ -14,12 +14,15 @@ import { SharedServices } from '@kbn/ml-plugin/server/shared_services';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
-jest.mock('../../lib/indices/fetch_ml_inference_pipeline_history', () => ({
+jest.mock('../../lib/indices/pipelines/ml_inference/get_ml_inference_pipeline_history', () => ({
   fetchMlInferencePipelineHistory: jest.fn(),
 }));
-jest.mock('../../lib/indices/fetch_ml_inference_pipeline_processors', () => ({
-  fetchMlInferencePipelineProcessors: jest.fn(),
-}));
+jest.mock(
+  '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors',
+  () => ({
+    fetchMlInferencePipelineProcessors: jest.fn(),
+  })
+);
 jest.mock(
   '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline',
   () => ({
@@ -33,13 +36,13 @@ jest.mock(
   })
 );
 jest.mock(
-  '../../lib/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline',
+  '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline',
   () => ({
     deleteMlInferencePipeline: jest.fn(),
   })
 );
 jest.mock(
-  '../../lib/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline',
+  '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline',
   () => ({
     detachMlInferencePipeline: jest.fn(),
   })
@@ -47,22 +50,22 @@ jest.mock(
 jest.mock('../../lib/indices/exists_index', () => ({
   indexOrAliasExists: jest.fn(),
 }));
-jest.mock('../../lib/ml_inference_pipeline/get_inference_errors', () => ({
+jest.mock('../../lib/indices/pipelines/ml_inference/get_ml_inference_errors', () => ({
   getMlInferenceErrors: jest.fn(),
 }));
-jest.mock('../../lib/ml_inference_pipeline/get_inference_pipelines', () => ({
+jest.mock('../../lib/pipelines/ml_inference/get_ml_inference_pipelines', () => ({
   getMlInferencePipelines: jest.fn(),
 }));
 
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
-import { fetchMlInferencePipelineHistory } from '../../lib/indices/fetch_ml_inference_pipeline_history';
-import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
+import { getMlInferenceErrors } from '../../lib/indices/pipelines/ml_inference/get_ml_inference_errors';
+import { fetchMlInferencePipelineHistory } from '../../lib/indices/pipelines/ml_inference/get_ml_inference_pipeline_history';
 import { attachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/attach_ml_pipeline';
 import { createAndReferenceMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline';
-import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
-import { getMlInferencePipelines } from '../../lib/ml_inference_pipeline/get_inference_pipelines';
-import { deleteMlInferencePipeline } from '../../lib/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
-import { detachMlInferencePipeline } from '../../lib/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
+import { deleteMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
+import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
+import { fetchMlInferencePipelineProcessors } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
+import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
 import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { registerIndexRoutes } from './indices';
@@ -72,6 +75,7 @@ describe('Enterprise Search Managed Indices', () => {
   const mockClient = {
     asCurrentUser: {
       ingest: {
+        getPipeline: jest.fn(),
         putPipeline: jest.fn(),
         simulate: jest.fn(),
       },
@@ -82,6 +86,9 @@ describe('Enterprise Search Managed Indices', () => {
     elasticsearch: { client: mockClient },
     savedObjects: { client: {} },
   };
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
 
   describe('GET /internal/enterprise_search/indices/{indexName}/ml_inference/errors', () => {
     beforeEach(() => {
@@ -282,6 +289,7 @@ describe('Enterprise Search Managed Indices', () => {
         mockRequestBody.model_id,
         mockRequestBody.source_field,
         mockRequestBody.destination_field,
+        undefined,
         mockClient.asCurrentUser
       );
 
@@ -446,6 +454,26 @@ describe('Enterprise Search Managed Indices', () => {
       );
       expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
     });
+
+    it('raises error if the pipeline is in use', async () => {
+      (deleteMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+        return Promise.reject({
+          message: ErrorCode.PIPELINE_IS_IN_USE,
+          pipelineName: 'my-other-index@ml-inference',
+        });
+      });
+
+      await mockRouter.callRoute({
+        params: { indexName, pipelineName },
+      });
+
+      expect(deleteMlInferencePipeline).toHaveBeenCalledWith(
+        indexName,
+        pipelineName,
+        mockClient.asCurrentUser
+      );
+      expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('POST /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate', () => {
@@ -544,6 +572,132 @@ describe('Enterprise Search Managed Indices', () => {
       };
 
       (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(true));
+      mockClient.asCurrentUser.ingest.simulate.mockImplementationOnce(() =>
+        Promise.resolve(simulateResponse)
+      );
+
+      await mockRouter.callRoute(request);
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: simulateResponse,
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+  });
+
+  describe('POST /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate/{pipelineName}', () => {
+    const pipelineBody = {
+      description: 'Some pipeline',
+      processors: [
+        {
+          set: {
+            field: 'some_field',
+            value: 'some value',
+          },
+        },
+      ],
+    };
+
+    const docs = [
+      {
+        _index: 'some-index',
+        _id: '1',
+        _source: {
+          my_field: 'my value',
+        },
+      },
+    ];
+    const indexName = 'my-index';
+    const pipelineName = 'my-pipeline';
+
+    beforeEach(() => {
+      const context = {
+        core: Promise.resolve(mockCore),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'post',
+        path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate/{pipelineName}',
+      });
+
+      registerIndexRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('fails validation without index_name', () => {
+      const request = {
+        docs,
+        params: { pipelineName },
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without pipelineName', () => {
+      const request = {
+        docs,
+        params: { indexName },
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fails validation without docs', () => {
+      const request = {
+        docs: [],
+        params: { indexName, pipelineName },
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('returns error if index does not exist', async () => {
+      const request = {
+        docs,
+        params: { indexName, pipelineName },
+      };
+
+      (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(false));
+
+      await mockRouter.callRoute(request);
+
+      expect(indexOrAliasExists).toHaveBeenCalledWith(mockClient, indexName);
+      expect(mockRouter.response.ok).toHaveBeenCalledTimes(0);
+      expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns error if pipeline does not exist', async () => {
+      const request = {
+        docs,
+        params: { indexName, pipelineName },
+      };
+      (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(true));
+      mockClient.asCurrentUser.ingest.getPipeline.mockResolvedValue({});
+
+      await mockRouter.callRoute(request);
+
+      expect(mockClient.asCurrentUser.ingest.getPipeline).toHaveBeenCalledTimes(1);
+      expect(mockClient.asCurrentUser.ingest.getPipeline).toHaveBeenCalledWith({
+        id: pipelineName,
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledTimes(0);
+      expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
+    });
+
+    it('simulates pipeline', async () => {
+      const request = {
+        docs,
+        params: { indexName, pipelineName },
+      };
+
+      const simulateResponse = {
+        simulateKey: 'simulate value',
+      };
+
+      (indexOrAliasExists as jest.Mock).mockImplementationOnce(() => Promise.resolve(true));
+      mockClient.asCurrentUser.ingest.getPipeline.mockResolvedValue({
+        [pipelineName]: pipelineBody,
+      });
       mockClient.asCurrentUser.ingest.simulate.mockImplementationOnce(() =>
         Promise.resolve(simulateResponse)
       );

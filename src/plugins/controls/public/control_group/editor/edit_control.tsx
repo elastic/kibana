@@ -13,19 +13,18 @@ import React, { useEffect, useRef } from 'react';
 import { OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { EmbeddableFactoryNotFoundError } from '@kbn/embeddable-plugin/public';
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
-import { ControlGroupReduxState } from '../types';
-import { ControlEditor } from './control_editor';
-import { pluginServices } from '../../services';
-import { ControlGroupStrings } from '../control_group_strings';
+
 import {
-  IEditableControlFactory,
   ControlInput,
   DataControlInput,
   ControlEmbeddable,
+  IEditableControlFactory,
 } from '../../types';
-import { controlGroupReducers } from '../state/control_group_reducers';
-import { ControlGroupContainer, setFlyoutRef } from '../embeddable/control_group_container';
+import { pluginServices } from '../../services';
+import { ControlEditor } from './control_editor';
+import { ControlGroupStrings } from '../control_group_strings';
+import { setFlyoutRef } from '../embeddable/control_group_container';
+import { useControlGroupContainerContext } from '../control_group_renderer';
 
 interface EditControlResult {
   type: string;
@@ -40,16 +39,13 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     theme: { theme$ },
   } = pluginServices.getServices();
   // Redux embeddable container Context
-  const reduxContainerContext = useReduxContainerContext<
-    ControlGroupReduxState,
-    typeof controlGroupReducers
-  >();
+  const reduxContext = useControlGroupContainerContext();
   const {
-    containerActions: { untilEmbeddableLoaded, removeEmbeddable, replaceEmbeddable },
+    embeddableInstance: controlGroup,
     actions: { setControlWidth, setControlGrow },
     useEmbeddableSelector,
     useEmbeddableDispatch,
-  } = reduxContainerContext;
+  } = reduxContext;
   const dispatch = useEmbeddableDispatch();
 
   // current state
@@ -63,7 +59,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
 
   const editControl = async () => {
     const ControlsServicesProvider = pluginServices.getContextProvider();
-    const embeddable = (await untilEmbeddableLoaded(
+    const embeddable = (await controlGroup.untilEmbeddableLoaded(
       embeddableId
     )) as ControlEmbeddable<DataControlInput>;
 
@@ -71,8 +67,6 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
       const panel = panels[embeddableId];
       let factory = getControlFactory(panel.type);
       if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
-
-      const controlGroup = embeddable.getRoot() as ControlGroupContainer;
 
       let inputToReturn: Partial<DataControlInput> = {};
 
@@ -84,7 +78,8 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
             ...panel.explicitInput,
             ...inputToReturn,
           }) &&
-            isEqual(latestPanelState.current.width, panel.width))
+            isEqual(latestPanelState.current.width, panel.width) &&
+            isEqual(latestPanelState.current.grow, panel.grow))
         ) {
           reject();
           ref.close();
@@ -98,6 +93,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
         }).then((confirmed) => {
           if (confirmed) {
             dispatch(setControlWidth({ width: panel.width, embeddableId }));
+            dispatch(setControlGrow({ grow: panel.grow, embeddableId }));
             reject();
             ref.close();
           }
@@ -125,41 +121,45 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
         ref.close();
       };
 
+      const ReduxWrapper = controlGroup.getReduxEmbeddableTools().Wrapper;
+
       const flyoutInstance = openFlyout(
         toMountPoint(
           <ControlsServicesProvider>
-            <ControlEditor
-              isCreate={false}
-              width={panel.width}
-              grow={panel.grow}
-              embeddable={embeddable}
-              title={embeddable.getTitle()}
-              onCancel={() => onCancel(flyoutInstance)}
-              updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
-              setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
-              updateWidth={(newWidth) =>
-                dispatch(setControlWidth({ width: newWidth, embeddableId }))
-              }
-              updateGrow={(grow) => dispatch(setControlGrow({ grow, embeddableId }))}
-              onTypeEditorChange={(partialInput) => {
-                inputToReturn = { ...inputToReturn, ...partialInput };
-              }}
-              onSave={(type) => onSave(flyoutInstance, type)}
-              removeControl={() => {
-                openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
-                  confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
-                  cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
-                  title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
-                  buttonColor: 'danger',
-                }).then((confirmed) => {
-                  if (confirmed) {
-                    removeEmbeddable(embeddableId);
-                    removed = true;
-                    flyoutInstance.close();
-                  }
-                });
-              }}
-            />
+            <ReduxWrapper>
+              <ControlEditor
+                isCreate={false}
+                width={panel.width}
+                grow={panel.grow}
+                embeddable={embeddable}
+                title={embeddable.getTitle()}
+                onCancel={() => onCancel(flyoutInstance)}
+                updateTitle={(newTitle) => (inputToReturn.title = newTitle)}
+                setLastUsedDataViewId={(lastUsed) => controlGroup.setLastUsedDataViewId(lastUsed)}
+                updateWidth={(newWidth) =>
+                  dispatch(setControlWidth({ width: newWidth, embeddableId }))
+                }
+                updateGrow={(grow) => dispatch(setControlGrow({ grow, embeddableId }))}
+                onTypeEditorChange={(partialInput) => {
+                  inputToReturn = { ...inputToReturn, ...partialInput };
+                }}
+                onSave={(type) => onSave(flyoutInstance, type)}
+                removeControl={() => {
+                  openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
+                    confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
+                    cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
+                    title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
+                    buttonColor: 'danger',
+                  }).then((confirmed) => {
+                    if (confirmed) {
+                      controlGroup.removeEmbeddable(embeddableId);
+                      removed = true;
+                      flyoutInstance.close();
+                    }
+                  });
+                }}
+              />
+            </ReduxWrapper>
           </ControlsServicesProvider>,
           { theme$ }
         ),
@@ -177,7 +177,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
 
     initialInputPromise.then(
       async (promise) => {
-        await replaceEmbeddable(embeddable.id, promise.controlInput, promise.type);
+        await controlGroup.replaceEmbeddable(embeddable.id, promise.controlInput, promise.type);
       },
       () => {} // swallow promise rejection because it can be part of normal flow
     );

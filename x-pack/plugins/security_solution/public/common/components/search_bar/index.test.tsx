@@ -21,7 +21,6 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { createStore } from '../../store';
 import { inputsActions } from '../../store/inputs';
 import { InputsModelId } from '../../store/inputs/constants';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 const mockSetAppFilters = jest.fn();
 const mockFilterManager = new FilterManager(coreMock.createStart().uiSettings);
@@ -138,13 +137,7 @@ describe('SearchBarComponent', () => {
     };
 
     const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
-      kibanaObservable,
-      storage
-    );
+    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
     render(
       <TestProviders store={store}>
@@ -180,13 +173,7 @@ describe('SearchBarComponent', () => {
     };
 
     const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
-      kibanaObservable,
-      storage
-    );
+    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
     render(
       <TestProviders store={store}>
@@ -201,13 +188,7 @@ describe('SearchBarComponent', () => {
 
   it('calls useUpdateUrlParam when query query changes', async () => {
     const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(
-      mockGlobalState,
-      SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
-      kibanaObservable,
-      storage
-    );
+    const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
     render(
       <TestProviders store={store}>
@@ -232,13 +213,7 @@ describe('SearchBarComponent', () => {
 
   it('calls useUpdateUrlParam when filters change', async () => {
     const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(
-      mockGlobalState,
-      SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
-      kibanaObservable,
-      storage
-    );
+    const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
     render(
       <TestProviders store={store}>
@@ -274,13 +249,7 @@ describe('SearchBarComponent', () => {
 
   it('calls useUpdateUrlParam when savedQuery changes', async () => {
     const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(
-      mockGlobalState,
-      SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
-      kibanaObservable,
-      storage
-    );
+    const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
     render(
       <TestProviders store={store}>
@@ -313,13 +282,7 @@ describe('SearchBarComponent', () => {
   describe('Timerange', () => {
     it('calls useUpdateUrlParam when global timerange changes', async () => {
       const { storage } = createSecuritySolutionStorageMock();
-      const store = createStore(
-        mockGlobalState,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
       render(
         <TestProviders store={store}>
@@ -355,13 +318,7 @@ describe('SearchBarComponent', () => {
 
     it('calls useUpdateUrlParam when timeline timerange changes', async () => {
       const { storage } = createSecuritySolutionStorageMock();
-      const store = createStore(
-        mockGlobalState,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
       render(
         <TestProviders store={store}>
@@ -400,13 +357,7 @@ describe('SearchBarComponent', () => {
 
     it('initializes timerange URL param with redux date on mount', async () => {
       const { storage } = createSecuritySolutionStorageMock();
-      const store = createStore(
-        mockGlobalState,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       jest.clearAllMocks();
       render(
         <TestProviders store={store}>

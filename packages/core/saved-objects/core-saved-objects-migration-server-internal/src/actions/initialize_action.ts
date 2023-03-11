@@ -12,10 +12,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
-  RetryableEsClientError,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 
-import { FetchIndexResponse, fetchIndices } from './fetch_indices';
+import { type FetchIndexResponse, fetchIndices } from './fetch_indices';
 
 const routingAllocationEnable = 'cluster.routing.allocation.enable';
 export interface ClusterRoutingAllocationEnabled {

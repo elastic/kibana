@@ -45,6 +45,7 @@ export const renderApp = (
 
   const noProductAccess: ProductAccess = {
     hasAppSearchAccess: false,
+    hasSearchEnginesAccess: false,
     hasWorkplaceSearchAccess: false,
   };
   const productAccess = data.access || noProductAccess;
@@ -56,12 +57,14 @@ export const renderApp = (
   const store = getContext().store;
 
   const unmountKibanaLogic = mountKibanaLogic({
+    application: core.application,
     capabilities: core.application.capabilities,
     config,
     productAccess,
     charts: plugins.charts,
     cloud: plugins.cloud,
     uiSettings: core.uiSettings,
+    guidedOnboarding: plugins.guidedOnboarding,
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,
     security: plugins.security,

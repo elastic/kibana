@@ -9,10 +9,10 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { THRESHOLD_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import type { ThresholdRuleParams } from '../../schemas/rule_schemas';
-import { thresholdRuleParams } from '../../schemas/rule_schemas';
-import { thresholdExecutor } from '../../signals/executors/threshold';
-import type { ThresholdAlertState } from '../../signals/types';
+import type { ThresholdRuleParams } from '../../rule_schema';
+import { thresholdRuleParams } from '../../rule_schema';
+import { thresholdExecutor } from './threshold';
+import type { ThresholdAlertState } from './types';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
 

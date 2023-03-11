@@ -14,6 +14,7 @@ import type { UsersRequestOptions } from '../../../../../../common/search_strate
 import * as buildRiskQuery from '../../risk_score/all/query.risk_score.dsl';
 
 import { get } from 'lodash/fp';
+import { RiskScoreEntity } from '../../../../../../common/search_strategy';
 
 class IndexNotFoundException extends Error {
   meta: { body: { error: { type: string } } };
@@ -115,6 +116,7 @@ describe('allHosts search strategy', () => {
       expect(buildHostsRiskQuery).toHaveBeenCalledWith({
         defaultIndex: ['ml_user_risk_score_latest_test-space'],
         filterQuery: { terms: { 'user.name': userName } },
+        riskScoreEntity: RiskScoreEntity.user,
       });
     });
 

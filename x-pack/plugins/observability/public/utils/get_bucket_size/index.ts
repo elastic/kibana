@@ -14,13 +14,15 @@ export function getBucketSize({
   start,
   end,
   minInterval,
+  buckets = 100,
 }: {
   start: number;
   end: number;
   minInterval: string;
+  buckets?: number;
 }) {
   const duration = moment.duration(end - start, 'ms');
-  const bucketSize = Math.max(calculateAuto.near(100, duration).asSeconds(), 1);
+  const bucketSize = Math.max(calculateAuto.near(buckets, duration)?.asSeconds() ?? 0, 1);
   const intervalString = `${bucketSize}s`;
   const matches = minInterval && minInterval.match(/^([\d]+)([shmdwMy]|ms)$/);
   const minBucketSize = matches ? Number(matches[1]) * unitToSeconds(matches[2]) : 0;

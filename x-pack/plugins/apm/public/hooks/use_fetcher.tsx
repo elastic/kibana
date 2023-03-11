@@ -26,6 +26,10 @@ export enum FETCH_STATUS {
   NOT_INITIATED = 'not_initiated',
 }
 
+export const isPending = (fetchStatus: FETCH_STATUS) =>
+  fetchStatus === FETCH_STATUS.LOADING ||
+  fetchStatus === FETCH_STATUS.NOT_INITIATED;
+
 export interface FetcherResult<Data> {
   data?: Data;
   status: FETCH_STATUS;
@@ -50,13 +54,28 @@ function getDetailsFromErrorResponse(
 }
 
 const createAutoAbortedAPMClient = (
-  signal: AbortSignal
+  signal: AbortSignal,
+  addInspectorRequest: <Data>(result: FetcherResult<Data>) => void
 ): AutoAbortedAPMClient => {
   return ((endpoint, options) => {
     return callApmApi(endpoint, {
       ...options,
       signal,
-    } as any);
+    } as any)
+      .catch((err) => {
+        addInspectorRequest({
+          status: FETCH_STATUS.FAILURE,
+          data: err.body?.attributes,
+        });
+        throw err;
+      })
+      .then((response) => {
+        addInspectorRequest({
+          data: response,
+          status: FETCH_STATUS.SUCCESS,
+        });
+        return response;
+      });
   }) as AutoAbortedAPMClient;
 };
 
@@ -98,7 +117,9 @@ export function useFetcher<TReturn>(
 
       const signal = controller.signal;
 
-      const promise = fn(createAutoAbortedAPMClient(signal));
+      const promise = fn(
+        createAutoAbortedAPMClient(signal, addInspectorRequest)
+      );
       // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
       // This can happen if the data fetching is conditional (based on certain inputs).
       // In these cases it is not desirable to invoke the global loading spinner, or change the status to success
@@ -174,14 +195,6 @@ export function useFetcher<TReturn>(
     ...fnDeps,
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
-
-  useEffect(() => {
-    if (result.error) {
-      addInspectorRequest({ ...result, data: result.error.body?.attributes });
-    } else {
-      addInspectorRequest(result);
-    }
-  }, [addInspectorRequest, result]);
 
   return useMemo(() => {
     return {

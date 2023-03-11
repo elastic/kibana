@@ -28,6 +28,7 @@ export function TransactionCharts({
   environment,
   start,
   end,
+  serviceName,
   transactionName,
   isServerlessContext,
   comparisonEnabled,
@@ -37,6 +38,7 @@ export function TransactionCharts({
   environment: string;
   start: string;
   end: string;
+  serviceName: string;
   transactionName?: string;
   isServerlessContext?: boolean;
   comparisonEnabled?: boolean;
@@ -88,6 +90,7 @@ export function TransactionCharts({
   return (
     <>
       <AnnotationsContextProvider
+        serviceName={serviceName}
         environment={environment}
         start={start}
         end={end}

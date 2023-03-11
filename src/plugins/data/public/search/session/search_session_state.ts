@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import deepEqual from 'fast-deep-equal';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs/operators';
@@ -188,7 +188,7 @@ export const sessionPureTransitions: SessionPureTransitions = {
     (state) =>
     ({ appName }) => ({
       ...createSessionDefaultState(),
-      sessionId: uuid.v4(),
+      sessionId: uuidv4(),
       startTime: new Date(),
       appName,
     }),

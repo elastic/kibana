@@ -7,6 +7,7 @@
  */
 
 import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { LoggerFactory } from '@kbn/logging';
 import type { PackageInfo, EnvironmentMode } from '@kbn/config';
 import type { Plugin } from './plugin';
 
@@ -37,6 +38,7 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
     mode: Readonly<EnvironmentMode>;
     packageInfo: Readonly<PackageInfo>;
   };
+  readonly logger: LoggerFactory;
   readonly config: {
     get: <T extends object = ConfigSchema>() => T;
   };

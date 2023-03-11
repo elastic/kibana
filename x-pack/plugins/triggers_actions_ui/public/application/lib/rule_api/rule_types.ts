@@ -24,6 +24,7 @@ const rewriteBodyReq: RewriteRequestCase<RuleType> = ({
   rule_task_timeout: ruleTaskTimeout,
   does_set_recovery_context: doesSetRecoveryContext,
   default_schedule_interval: defaultScheduleInterval,
+  has_get_summarized_alerts: hasGetSummarizedAlerts,
   ...rest
 }: AsApiContract<RuleType>) => ({
   enabledInLicense,
@@ -36,6 +37,7 @@ const rewriteBodyReq: RewriteRequestCase<RuleType> = ({
   ruleTaskTimeout,
   doesSetRecoveryContext,
   defaultScheduleInterval,
+  hasGetSummarizedAlerts,
   ...rest,
 });
 

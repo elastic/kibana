@@ -5,37 +5,37 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useMemo } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
+import { i18n } from '@kbn/i18n';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useDataView } from '../../hooks/use_data_view';
-import { withQueryParams } from '../../utils/with_query_params';
-import { useMainRouteBreadcrumb } from '../../hooks/use_navigation_props';
 import { Doc } from './components/doc';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-
-export interface SingleDocRouteProps {
-  /**
-   * Document id
-   */
-  id: string;
-}
+import { getScopedHistory } from '../../kibana_services';
+import { DiscoverError } from '../../components/common/error_alert';
+import { useDataView } from '../../hooks/use_data_view';
+import { DocHistoryLocationState } from './locator';
 
 export interface DocUrlParams {
   dataViewId: string;
   index: string;
 }
 
-const SingleDoc = ({ id }: SingleDocRouteProps) => {
-  const services = useDiscoverServices();
-  const { chrome, timefilter, core } = services;
-
+export const SingleDocRoute = () => {
+  const { timefilter, core } = useDiscoverServices();
+  const { search } = useLocation();
   const { dataViewId, index } = useParams<DocUrlParams>();
-  const breadcrumb = useMainRouteBreadcrumb();
+
+  const query = useMemo(() => new URLSearchParams(search), [search]);
+  const id = query.get('id');
+
+  const locationState = useMemo(
+    () => getScopedHistory().location.state as DocHistoryLocationState | undefined,
+    []
+  );
 
   useExecutionContext(core.executionContext, {
     type: 'application',
@@ -44,20 +44,13 @@ const SingleDoc = ({ id }: SingleDocRouteProps) => {
   });
 
   useEffect(() => {
-    chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(breadcrumb),
-      {
-        text: `${index}#${id}`,
-      },
-    ]);
-  }, [chrome, index, id, breadcrumb]);
-
-  useEffect(() => {
     timefilter.disableAutoRefreshSelector();
     timefilter.disableTimeRangeSelector();
-  });
+  }, [timefilter]);
 
-  const { dataView, error } = useDataView(services.dataViews, dataViewId);
+  const { dataView, error } = useDataView({
+    index: locationState?.dataViewSpec || decodeURIComponent(dataViewId),
+  });
 
   if (error) {
     return (
@@ -85,11 +78,24 @@ const SingleDoc = ({ id }: SingleDocRouteProps) => {
     return <LoadingIndicator />;
   }
 
+  if (!id) {
+    return (
+      <DiscoverError
+        error={
+          new Error(
+            i18n.translate('discover.discoverError.missingIdParamError', {
+              defaultMessage:
+                'No document ID provided. Return to Discover to select another document.',
+            })
+          )
+        }
+      />
+    );
+  }
+
   return (
     <div className="app-container">
-      <Doc id={id} index={index} dataView={dataView} />
+      <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />
     </div>
   );
 };
-
-export const SingleDocRoute = withQueryParams(SingleDoc, ['id']);

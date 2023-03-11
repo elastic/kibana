@@ -42,6 +42,7 @@ interface Props {
   formatFactory: FormatFactory;
   chartHasMoreThanOneBarSeries?: boolean;
   yAxesConfiguration: GroupsConfiguration;
+  xAxisConfiguration?: GroupsConfiguration[number];
   fittingFunction?: FittingFunction;
   endValue?: EndValue | undefined;
   paletteService: PaletteRegistry;
@@ -71,6 +72,7 @@ export const DataLayers: FC<Props> = ({
   fittingFunction,
   emphasizeFitting,
   yAxesConfiguration,
+  xAxisConfiguration,
   shouldShowValueLabels,
   formattedDatatables,
   chartHasMoreThanOneBarSeries,
@@ -157,6 +159,7 @@ export const DataLayers: FC<Props> = ({
             formattedDatatableInfo,
             syncColors,
             yAxis,
+            xAxis: xAxisConfiguration,
             timeZone,
             emphasizeFitting,
             fillOpacity,

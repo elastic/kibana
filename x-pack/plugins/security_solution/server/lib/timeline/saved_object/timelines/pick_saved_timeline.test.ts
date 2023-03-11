@@ -120,6 +120,30 @@ describe('pickSavedTimeline', () => {
       expect(result.updatedBy).toEqual(userInfo.username);
     });
 
+    test('Creating a timeline with user email', () => {
+      const savedTimeline = getMockSavedTimeline();
+      const timelineId = null;
+      const userInfo = { username: 'elastic', email: 'some@email.com' } as AuthenticatedUser;
+      const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
+
+      expect(result.createdBy).toEqual(userInfo.email);
+      expect(result.updatedBy).toEqual(userInfo.email);
+    });
+
+    test('Creating a timeline with user full name', () => {
+      const savedTimeline = getMockSavedTimeline();
+      const timelineId = null;
+      const userInfo = {
+        username: 'elastic',
+        email: 'some@email.com',
+        full_name: 'Some Full Name',
+      } as AuthenticatedUser;
+      const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
+
+      expect(result.createdBy).toEqual(userInfo.full_name);
+      expect(result.updatedBy).toEqual(userInfo.full_name);
+    });
+
     test('Updating a timeline', () => {
       const savedTimeline = getMockSavedTimeline();
       const timelineId = savedTimeline.savedObjectId ?? null;
@@ -128,6 +152,30 @@ describe('pickSavedTimeline', () => {
 
       expect(result.createdBy).toEqual(savedTimeline.createdBy);
       expect(result.updatedBy).toEqual(userInfo.username);
+    });
+
+    test('Updating a timeline with user email', () => {
+      const savedTimeline = getMockSavedTimeline();
+      const timelineId = savedTimeline.savedObjectId ?? null;
+      const userInfo = { username: 'elastic', email: 'some@email.com' } as AuthenticatedUser;
+      const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
+
+      expect(result.createdBy).toEqual(savedTimeline.createdBy);
+      expect(result.updatedBy).toEqual(userInfo.email);
+    });
+
+    test('Updating a timeline with user full name', () => {
+      const savedTimeline = getMockSavedTimeline();
+      const timelineId = savedTimeline.savedObjectId ?? null;
+      const userInfo = {
+        username: 'elastic',
+        email: 'some@email.com',
+        full_name: 'Some Full Name',
+      } as AuthenticatedUser;
+      const result = pickSavedTimeline(timelineId, savedTimeline, userInfo);
+
+      expect(result.createdBy).toEqual(savedTimeline.createdBy);
+      expect(result.updatedBy).toEqual(userInfo.full_name);
     });
   });
 

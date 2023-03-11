@@ -18,7 +18,7 @@ import {
   EuiDragDropContext,
   EuiDroppable,
   EuiDraggable,
-  EuiButtonIconColor,
+  EuiButtonIconProps,
   EuiEmptyPrompt,
 } from '@elastic/eui';
 
@@ -98,7 +98,7 @@ export const Library: React.FC = () => {
       title: 'Fill this action button',
       onClick: () => setIsActionButtonFilled(!isActionButtonFilled),
       iconType: isActionButtonFilled ? 'starFilled' : 'starEmpty',
-      iconColor: 'primary' as EuiButtonIconColor,
+      iconColor: 'primary' as EuiButtonIconProps['color'],
     },
   ];
 

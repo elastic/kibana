@@ -7,26 +7,41 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiLink, EuiIcon } from '@elastic/eui';
 import { InPortal } from 'react-reverse-portal';
+import { useSelectedLocation } from '../monitor_details/hooks/use_selected_location';
 import { MonitorDetailsLinkPortalNode } from './portals';
 
-export const MonitorDetailsLinkPortal = ({ name, id }: { name: string; id: string }) => {
+interface Props {
+  name: string;
+  configId: string;
+  locationId?: string;
+}
+
+export const MonitorDetailsLinkPortal = ({ name, configId, locationId }: Props) => {
   return (
     <InPortal node={MonitorDetailsLinkPortalNode}>
-      <MonitorDetailsLink name={name} id={id} />
+      <MonitorDetailsLink name={name} configId={configId} locationId={locationId} />
     </InPortal>
   );
 };
 
-export const MonitorDetailsLink = ({ name, id }: { name: string; id: string }) => {
+export const MonitorDetailsLink = ({ name, configId, locationId }: Props) => {
+  const selectedLocation = useSelectedLocation();
+
+  let locId = locationId;
+
+  if (selectedLocation?.id && !locationId) {
+    locId = selectedLocation.id;
+  }
+
   const history = useHistory();
   const href = history.createHref({
-    pathname: `monitor/${id}`,
+    pathname: locId ? `monitor/${configId}?locationId=${locId}` : `monitor/${configId}`,
   });
   return (
-    <EuiButtonEmpty href={href} iconType="arrowLeft" flush="left">
-      {name}
-    </EuiButtonEmpty>
+    <EuiLink href={href}>
+      <EuiIcon type="arrowLeft" /> {name}
+    </EuiLink>
   );
 };

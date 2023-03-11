@@ -103,7 +103,7 @@
         "tags": [],
         "label": "getWindowParameters",
         "description": [
-          "\nGiven a point in time (e.g. where a user clicks), use simple heuristics to compute:\n\n1. The time window around the click to evaluate for changes\n2. The historical time window prior to the click to use as a baseline.\n\nThe philosophy here is that charts are displayed with different granularities according to their\noverall time window. We select the change point and historical time windows inline with the\noverall time window.\n\nThe algorithm for doing this is based on the typical granularities that exist in machine data.\n"
+          "\nGiven a point in time (e.g. where a user clicks), use simple heuristics to compute:\n\n1. The time window around the click to evaluate for changes\n2. The historical time window prior to the click to use as a baseline.\n\nThe philosophy here is that charts are displayed with different granularities according to their\noverall time window. We select the log spike and historical time windows inline with the\noverall time window.\n\nThe algorithm for doing this is based on the typical granularities that exist in machine data.\n"
         ],
         "signature": [
           "(clickTime: number, minTime: number, maxTime: number) => ",
@@ -187,9 +187,21 @@
         ],
         "signature": [
           "(headers: ",
-          "Headers",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.Headers",
+            "text": "Headers"
+          },
           ", logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
           ", compressOverride: boolean | undefined, flushFix: boolean | undefined) => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
@@ -206,7 +218,13 @@
               "- Request headers."
             ],
             "signature": [
-              "Headers"
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.Headers",
+                "text": "Headers"
+              }
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
             "deprecated": false,
@@ -223,7 +241,13 @@
               "- Kibana logger."
             ],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
             "deprecated": false,
@@ -281,9 +305,21 @@
         ],
         "signature": [
           "(headers: ",
-          "Headers",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.Headers",
+            "text": "Headers"
+          },
           ", logger: ",
-          "Logger",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
           ", compressOverride: boolean, flushFix: boolean) => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
@@ -300,7 +336,13 @@
               "- Request headers."
             ],
             "signature": [
-              "Headers"
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.Headers",
+                "text": "Headers"
+              }
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
             "deprecated": false,
@@ -317,7 +359,13 @@
               "- Kibana logger."
             ],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
             "deprecated": false,

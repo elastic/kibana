@@ -5,9 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-// @ts-expect-error
 import { bombIcon } from '../../components/svg/bomb_icon';
-// @ts-expect-error
 import { fireIcon } from '../../components/svg/fire_icon';
 
 export const ICON_NAMES = {

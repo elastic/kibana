@@ -2,7 +2,6 @@
   "name": "@kbn/core-usage-data-base-server-internal",
   "private": true,
   "version": "1.0.0",
-  "main": "./target_node/index.js",
   "author": "Kibana Core",
   "license": "SSPL-1.0 OR Elastic License 2.0"
 }

@@ -23,6 +23,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_no_data'));
     loadTestFile(require.resolve('./_discover'));
     loadTestFile(require.resolve('./_discover_accessibility'));
+    loadTestFile(require.resolve('./_discover_histogram_breakdown'));
     loadTestFile(require.resolve('./_discover_histogram'));
     loadTestFile(require.resolve('./_doc_accessibility'));
     loadTestFile(require.resolve('./_filter_editor'));
@@ -33,6 +34,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_sidebar'));
     loadTestFile(require.resolve('./_source_filters'));
     loadTestFile(require.resolve('./_large_string'));
+    loadTestFile(require.resolve('./_greeting_screen'));
     loadTestFile(require.resolve('./_inspector'));
     loadTestFile(require.resolve('./_date_nanos'));
     loadTestFile(require.resolve('./_date_nanos_mixed'));

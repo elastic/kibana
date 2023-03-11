@@ -1,16 +1,15 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "stripInternal": false,
+    "outDir": "target/types",
     "types": [
       "@types/react",
     ]
   },
   "include": [
     "*.d.ts"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

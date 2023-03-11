@@ -6,6 +6,7 @@ exports[`create_description_list renders correctly against snapshot 1`] = `
     Object {
       "align": "left",
       "compressed": false,
+      "gutterSize": "m",
       "textStyle": "normal",
       "type": "row",
     }

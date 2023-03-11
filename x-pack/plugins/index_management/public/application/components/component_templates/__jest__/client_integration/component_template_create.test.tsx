@@ -134,10 +134,10 @@ describe('<ComponentTemplateCreate />', () => {
         );
 
         // Verify 2 tabs exist
-        expect(find('stepReview.content').find('.euiTab').length).toBe(2);
+        expect(find('stepReview.content').find('button.euiTab').length).toBe(2);
         expect(
           find('stepReview.content')
-            .find('.euiTab')
+            .find('button.euiTab')
             .map((t) => t.text())
         ).toEqual(['Summary', 'Request']);
 

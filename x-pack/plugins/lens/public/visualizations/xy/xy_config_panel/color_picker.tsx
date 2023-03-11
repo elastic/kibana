@@ -27,7 +27,7 @@ const tooltipContent = {
   }),
   disabled: i18n.translate('xpack.lens.configPanel.color.tooltip.disabled', {
     defaultMessage:
-      'Individual series cannot be custom colored when the layer includes a “Break down by.“',
+      'You are unable to apply custom colors to individual series when the layer includes a "Break down by" field.',
   }),
 };
 

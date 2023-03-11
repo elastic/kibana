@@ -9,7 +9,6 @@ import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { InnerFieldItem, FieldItemProps } from './field_item';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -25,8 +24,8 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '@kbn/unified-field-list-plugin/public/services/field_stats';
+import { FieldIcon } from '@kbn/unified-field-list-plugin/public';
 import { DOCUMENT_FIELD_NAME } from '../../../common';
-import { LensFieldIcon } from '../../shared_components';
 import { FieldStats, FieldVisualizeButton } from '@kbn/unified-field-list-plugin/public';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
@@ -49,11 +48,15 @@ const mockedServices = {
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   charts: chartPluginMock.createSetupContract(),
   uiSettings: coreMock.createStart().uiSettings,
-  discover: {
-    locator: {
-      getRedirectUrl: jest.fn(() => 'discover_url'),
+  share: {
+    url: {
+      locators: {
+        get: jest.fn().mockReturnValue({
+          getRedirectUrl: jest.fn(() => 'discover_url'),
+        }),
+      },
     },
-  } as unknown as DiscoverStart,
+  },
   application: {
     capabilities: {
       discover: { save: true, saveQuery: true, show: true },
@@ -201,12 +204,12 @@ describe('IndexPattern Field Item', () => {
   it('should show gauge icon for gauge fields', async () => {
     const wrapper = await getComponent({
       ...defaultProps,
-      field: { ...defaultProps.field, timeSeriesMetricType: 'gauge' },
+      field: { ...defaultProps.field, timeSeriesMetric: 'gauge' },
     });
 
     // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>
     // which can't be seen, but shows in the text content
-    expect(wrapper.find(LensFieldIcon).first().prop('type')).toEqual('gauge');
+    expect(wrapper.find(FieldIcon).first().prop('type')).toEqual('gauge');
   });
 
   it('should render edit field button if callback is set', async () => {
@@ -460,7 +463,7 @@ describe('IndexPattern Field Item', () => {
     expect(wrapper.find(FieldVisualizeButton).exists()).toBeFalsy();
   });
 
-  it('should not request field stats for geo fields but render Visualize button', async () => {
+  it('should request examples for geo fields and render Visualize button', async () => {
     const wrapper = await getComponent({
       ...defaultProps,
       field: {
@@ -479,7 +482,9 @@ describe('IndexPattern Field Item', () => {
     expect(loadFieldStats).toHaveBeenCalled();
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(FieldStats).text()).toBe('Analysis is not available for this field.');
+    expect(wrapper.find(FieldStats).text()).toBe(
+      'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.'
+    );
     expect(wrapper.find(FieldVisualizeButton).exists()).toBeTruthy();
   });
 

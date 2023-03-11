@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiTab, EuiListGroupItem, EuiButton, EuiAccordion, EuiFieldText } from '@elastic/eui';
+import { EuiListGroupItem, EuiAccordion, EuiFieldText } from '@elastic/eui';
 import * as Rx from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Settings, SettingsWorkspaceProps } from './settings';
@@ -158,12 +158,9 @@ describe('settings', () => {
     );
   });
 
-  function toTab(tab: string) {
+  function toTab(testSubj: string) {
     act(() => {
-      instance
-        .find(EuiTab)
-        .findWhere((node) => node.key() === tab)
-        .prop('onClick')!({});
+      instance.find(`EuiTab[data-test-subj="${testSubj}"]`).prop('onClick')!({} as any);
     });
     instance.update();
   }
@@ -217,7 +214,7 @@ describe('settings', () => {
 
   describe('blocklist', () => {
     beforeEach(() => {
-      toTab('Block list');
+      toTab('blocklist');
     });
 
     it('should switch tab to blocklist', () => {
@@ -267,7 +264,7 @@ describe('settings', () => {
     });
 
     it('should delete all nodes', () => {
-      instance.find('[data-test-subj="graphUnblocklistAll"]').find(EuiButton).simulate('click');
+      instance.find('button[data-test-subj="graphUnblocklistAll"]').simulate('click');
 
       expect(workspaceProps.unblockAll).toHaveBeenCalled();
     });
@@ -288,7 +285,7 @@ describe('settings', () => {
     }
 
     beforeEach(() => {
-      toTab('Drilldowns');
+      toTab('drillDowns');
     });
 
     it('should switch tab to url templates', () => {
@@ -314,7 +311,7 @@ describe('settings', () => {
 
     it('should add url template', async () => {
       act(() => {
-        instance.find('EuiButton[data-test-subj="graphAddNewTemplate"]').simulate('click');
+        instance.find('button[data-test-subj="graphAddNewTemplate"]').simulate('click');
       });
       instance.update();
 

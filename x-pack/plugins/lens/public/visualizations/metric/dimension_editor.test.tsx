@@ -12,7 +12,11 @@ import { OperationDescriptor, VisualizationDimensionEditorProps } from '../../ty
 import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
 import { MetricVisualizationState } from './visualization';
-import { DimensionEditor, SupportingVisType } from './dimension_editor';
+import {
+  DimensionEditor,
+  DimensionEditorAdditionalSection,
+  SupportingVisType,
+} from './dimension_editor';
 import { HTMLAttributes, mount, ReactWrapper, shallow } from 'enzyme';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { EuiButtonGroup, EuiColorPicker, PropsOf } from '@elastic/eui';
@@ -154,42 +158,6 @@ describe('dimension editor', () => {
           this.colorPicker.props().onChange!(color, {} as EuiColorPickerOutput);
         });
       }
-
-      private get supportingVisButtonGroup() {
-        return this._wrapper.find(
-          'EuiButtonGroup[data-test-subj="lnsMetric_supporting_visualization_buttons"]'
-        ) as unknown as ReactWrapper<PropsOf<typeof EuiButtonGroup>>;
-      }
-
-      public get currentSupportingVis() {
-        return this.supportingVisButtonGroup
-          .props()
-          .idSelected?.split('--')[1] as SupportingVisType;
-      }
-
-      public isDisabled(type: SupportingVisType) {
-        return this.supportingVisButtonGroup.props().options.find(({ id }) => id.includes(type))
-          ?.isDisabled;
-      }
-
-      public setSupportingVis(type: SupportingVisType) {
-        this.supportingVisButtonGroup.props().onChange(`some-id--${type}`);
-      }
-
-      private get progressDirectionControl() {
-        return this._wrapper.find(
-          'EuiButtonGroup[data-test-subj="lnsMetric_progress_direction_buttons"]'
-        ) as unknown as ReactWrapper<PropsOf<typeof EuiButtonGroup>>;
-      }
-
-      public get progressDirectionShowing() {
-        return this.progressDirectionControl.exists();
-      }
-
-      public setProgressDirection(direction: LayoutDirection) {
-        this.progressDirectionControl.props().onChange(direction);
-        this._wrapper.update();
-      }
     }
 
     const mockSetState = jest.fn();
@@ -264,144 +232,6 @@ describe('dimension editor', () => {
             undefined,
           ]
         `);
-      });
-    });
-
-    describe('supporting visualizations', () => {
-      const stateWOTrend = {
-        ...metricAccessorState,
-        trendlineLayerId: undefined,
-      };
-
-      describe('reflecting visualization state', () => {
-        it('should select the correct button', () => {
-          expect(
-            getHarnessWithState({ ...stateWOTrend, showBar: false, maxAccessor: undefined })
-              .currentSupportingVis
-          ).toBe<SupportingVisType>('none');
-          expect(
-            getHarnessWithState({ ...stateWOTrend, showBar: true }).currentSupportingVis
-          ).toBe<SupportingVisType>('bar');
-          expect(
-            getHarnessWithState(metricAccessorState).currentSupportingVis
-          ).toBe<SupportingVisType>('trendline');
-        });
-
-        it('should disable bar when no max dimension', () => {
-          expect(
-            getHarnessWithState({
-              ...stateWOTrend,
-              showBar: false,
-              maxAccessor: 'something',
-            }).isDisabled('bar')
-          ).toBeFalsy();
-          expect(
-            getHarnessWithState({
-              ...stateWOTrend,
-              showBar: false,
-              maxAccessor: undefined,
-            }).isDisabled('bar')
-          ).toBeTruthy();
-        });
-
-        it('should disable trendline when no default time field', () => {
-          expect(
-            getHarnessWithState(stateWOTrend, {
-              hasDefaultTimeField: () => false,
-              getOperationForColumnId: (id) => ({} as OperationDescriptor),
-            } as DatasourcePublicAPI).isDisabled('trendline')
-          ).toBeTruthy();
-          expect(
-            getHarnessWithState(stateWOTrend, {
-              hasDefaultTimeField: () => true,
-              getOperationForColumnId: (id) => ({} as OperationDescriptor),
-            } as DatasourcePublicAPI).isDisabled('trendline')
-          ).toBeFalsy();
-        });
-      });
-
-      it('should disable trendline when a metric dimension has a reduced time range', () => {
-        expect(
-          getHarnessWithState(stateWOTrend, {
-            hasDefaultTimeField: () => true,
-            getOperationForColumnId: (id) =>
-              ({ hasReducedTimeRange: id === stateWOTrend.metricAccessor } as OperationDescriptor),
-          } as DatasourcePublicAPI).isDisabled('trendline')
-        ).toBeTruthy();
-        expect(
-          getHarnessWithState(stateWOTrend, {
-            hasDefaultTimeField: () => true,
-            getOperationForColumnId: (id) =>
-              ({
-                hasReducedTimeRange: id === stateWOTrend.secondaryMetricAccessor,
-              } as OperationDescriptor),
-          } as DatasourcePublicAPI).isDisabled('trendline')
-        ).toBeTruthy();
-      });
-
-      describe('responding to buttons', () => {
-        it('enables trendline', () => {
-          getHarnessWithState(stateWOTrend).setSupportingVis('trendline');
-
-          expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
-          expect(props.addLayer).toHaveBeenCalledWith('metricTrendline');
-
-          expectCalledBefore(mockSetState, props.addLayer as jest.Mock);
-        });
-
-        it('enables bar', () => {
-          getHarnessWithState(metricAccessorState).setSupportingVis('bar');
-
-          expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: true });
-          expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
-
-          expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
-        });
-
-        it('selects none from bar', () => {
-          getHarnessWithState(stateWOTrend).setSupportingVis('none');
-
-          expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
-          expect(props.removeLayer).not.toHaveBeenCalled();
-        });
-
-        it('selects none from trendline', () => {
-          getHarnessWithState(metricAccessorState).setSupportingVis('none');
-
-          expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: false });
-          expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
-
-          expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
-        });
-      });
-
-      describe('progress bar direction controls', () => {
-        it('hides direction controls if bar not showing', () => {
-          expect(
-            getHarnessWithState({ ...stateWOTrend, showBar: false }).progressDirectionShowing
-          ).toBeFalsy();
-        });
-
-        it('toggles progress direction', () => {
-          const harness = getHarnessWithState(metricAccessorState);
-
-          expect(harness.progressDirectionShowing).toBeTruthy();
-          expect(harness.currentState.progressDirection).toBe('vertical');
-
-          harness.setProgressDirection('horizontal');
-          harness.setProgressDirection('vertical');
-          harness.setProgressDirection('horizontal');
-
-          expect(mockSetState).toHaveBeenCalledTimes(3);
-          expect(mockSetState.mock.calls.map((args) => args[0].progressDirection))
-            .toMatchInlineSnapshot(`
-              Array [
-                "horizontal",
-                "vertical",
-                "horizontal",
-              ]
-            `);
-        });
       });
     });
   });
@@ -626,6 +456,237 @@ describe('dimension editor', () => {
             3,
           ]
         `);
+    });
+  });
+
+  describe('additional section', () => {
+    const accessor = 'primary-metric-col-id';
+    const metricAccessorState = { ...fullState, metricAccessor: accessor };
+
+    class Harness {
+      public _wrapper;
+
+      constructor(
+        wrapper: ReactWrapper<HTMLAttributes, unknown, React.Component<{}, {}, unknown>>
+      ) {
+        this._wrapper = wrapper;
+      }
+
+      private get rootComponent() {
+        return this._wrapper.find(DimensionEditorAdditionalSection);
+      }
+
+      public get currentState() {
+        return this.rootComponent.props().state;
+      }
+
+      private get supportingVisButtonGroup() {
+        return this._wrapper.find(
+          'EuiButtonGroup[data-test-subj="lnsMetric_supporting_visualization_buttons"]'
+        ) as unknown as ReactWrapper<PropsOf<typeof EuiButtonGroup>>;
+      }
+
+      public get currentSupportingVis() {
+        return this.supportingVisButtonGroup
+          .props()
+          .idSelected?.split('--')[1] as SupportingVisType;
+      }
+
+      public isDisabled(type: SupportingVisType) {
+        return this.supportingVisButtonGroup.props().options.find(({ id }) => id.includes(type))
+          ?.isDisabled;
+      }
+
+      public setSupportingVis(type: SupportingVisType) {
+        this.supportingVisButtonGroup.props().onChange(`some-id--${type}`);
+      }
+
+      private get progressDirectionControl() {
+        return this._wrapper.find(
+          'EuiButtonGroup[data-test-subj="lnsMetric_progress_direction_buttons"]'
+        ) as unknown as ReactWrapper<PropsOf<typeof EuiButtonGroup>>;
+      }
+
+      public get progressDirectionShowing() {
+        return this.progressDirectionControl.exists();
+      }
+
+      public setProgressDirection(direction: LayoutDirection) {
+        this.progressDirectionControl.props().onChange(direction);
+        this._wrapper.update();
+      }
+    }
+
+    const mockSetState = jest.fn();
+
+    const getHarnessWithState = (state: MetricVisualizationState, datasource = props.datasource) =>
+      new Harness(
+        mountWithIntl(
+          <DimensionEditorAdditionalSection
+            {...props}
+            datasource={datasource}
+            state={state}
+            setState={mockSetState}
+            accessor={accessor}
+          />
+        )
+      );
+
+    it.each([
+      { name: 'secondary metric', accessor: metricAccessorState.secondaryMetricAccessor },
+      { name: 'max', accessor: metricAccessorState.maxAccessor },
+      { name: 'break down by', accessor: metricAccessorState.breakdownByAccessor },
+    ])('doesnt show for the following dimension: %s', ({ accessor: testAccessor }) => {
+      expect(
+        shallow(
+          <DimensionEditorAdditionalSection
+            {...props}
+            state={metricAccessorState}
+            setState={mockSetState}
+            accessor={testAccessor}
+          />
+        ).isEmptyRender()
+      ).toBeTruthy();
+    });
+
+    describe('supporting visualizations', () => {
+      const stateWOTrend = {
+        ...metricAccessorState,
+        trendlineLayerId: undefined,
+      };
+
+      describe('reflecting visualization state', () => {
+        it('should select the correct button', () => {
+          expect(
+            getHarnessWithState({ ...stateWOTrend, showBar: false, maxAccessor: undefined })
+              .currentSupportingVis
+          ).toBe<SupportingVisType>('none');
+          expect(
+            getHarnessWithState({ ...stateWOTrend, showBar: true }).currentSupportingVis
+          ).toBe<SupportingVisType>('bar');
+          expect(
+            getHarnessWithState(metricAccessorState).currentSupportingVis
+          ).toBe<SupportingVisType>('trendline');
+        });
+
+        it('should disable bar when no max dimension', () => {
+          expect(
+            getHarnessWithState({
+              ...stateWOTrend,
+              showBar: false,
+              maxAccessor: 'something',
+            }).isDisabled('bar')
+          ).toBeFalsy();
+          expect(
+            getHarnessWithState({
+              ...stateWOTrend,
+              showBar: false,
+              maxAccessor: undefined,
+            }).isDisabled('bar')
+          ).toBeTruthy();
+        });
+
+        it('should disable trendline when no default time field', () => {
+          expect(
+            getHarnessWithState(stateWOTrend, {
+              hasDefaultTimeField: () => false,
+              getOperationForColumnId: (id) => ({} as OperationDescriptor),
+            } as DatasourcePublicAPI).isDisabled('trendline')
+          ).toBeTruthy();
+          expect(
+            getHarnessWithState(stateWOTrend, {
+              hasDefaultTimeField: () => true,
+              getOperationForColumnId: (id) => ({} as OperationDescriptor),
+            } as DatasourcePublicAPI).isDisabled('trendline')
+          ).toBeFalsy();
+        });
+      });
+
+      it('should disable trendline when a metric dimension has a reduced time range', () => {
+        expect(
+          getHarnessWithState(stateWOTrend, {
+            hasDefaultTimeField: () => true,
+            getOperationForColumnId: (id) =>
+              ({
+                hasReducedTimeRange: id === stateWOTrend.metricAccessor,
+              } as OperationDescriptor),
+          } as DatasourcePublicAPI).isDisabled('trendline')
+        ).toBeTruthy();
+        expect(
+          getHarnessWithState(stateWOTrend, {
+            hasDefaultTimeField: () => true,
+            getOperationForColumnId: (id) =>
+              ({
+                hasReducedTimeRange: id === stateWOTrend.secondaryMetricAccessor,
+              } as OperationDescriptor),
+          } as DatasourcePublicAPI).isDisabled('trendline')
+        ).toBeTruthy();
+      });
+
+      describe('responding to buttons', () => {
+        it('enables trendline', () => {
+          getHarnessWithState(stateWOTrend).setSupportingVis('trendline');
+
+          expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
+          expect(props.addLayer).toHaveBeenCalledWith('metricTrendline');
+
+          expectCalledBefore(mockSetState, props.addLayer as jest.Mock);
+        });
+
+        it('enables bar', () => {
+          getHarnessWithState(metricAccessorState).setSupportingVis('bar');
+
+          expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: true });
+          expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
+
+          expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
+        });
+
+        it('selects none from bar', () => {
+          getHarnessWithState(stateWOTrend).setSupportingVis('none');
+
+          expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
+          expect(props.removeLayer).not.toHaveBeenCalled();
+        });
+
+        it('selects none from trendline', () => {
+          getHarnessWithState(metricAccessorState).setSupportingVis('none');
+
+          expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: false });
+          expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
+
+          expectCalledBefore(mockSetState, props.removeLayer as jest.Mock);
+        });
+      });
+
+      describe('progress bar direction controls', () => {
+        it('hides direction controls if bar not showing', () => {
+          expect(
+            getHarnessWithState({ ...stateWOTrend, showBar: false }).progressDirectionShowing
+          ).toBeFalsy();
+        });
+
+        it('toggles progress direction', () => {
+          const harness = getHarnessWithState(metricAccessorState);
+
+          expect(harness.progressDirectionShowing).toBeTruthy();
+          expect(harness.currentState.progressDirection).toBe('vertical');
+
+          harness.setProgressDirection('horizontal');
+          harness.setProgressDirection('vertical');
+          harness.setProgressDirection('horizontal');
+
+          expect(mockSetState).toHaveBeenCalledTimes(3);
+          expect(mockSetState.mock.calls.map((args) => args[0].progressDirection))
+            .toMatchInlineSnapshot(`
+              Array [
+                "horizontal",
+                "vertical",
+                "horizontal",
+              ]
+            `);
+        });
+      });
     });
   });
 });

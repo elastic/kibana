@@ -14,7 +14,6 @@ import { appendSearch } from '../../common/components/link_to/helpers';
 import type { ArtifactListPageUrlParams } from '../components/artifact_list_page';
 import { paginationFromUrlParams } from '../hooks/use_url_pagination';
 import type { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
-import type { EventFiltersPageLocation } from '../pages/event_filters/types';
 import type { PolicyDetailsArtifactsPageLocation } from '../pages/policy/types';
 import { AdministrationSubTab } from '../types';
 import {
@@ -168,29 +167,6 @@ const normalizePolicyDetailsArtifactsListPageLocation = (
   }
 };
 
-const normalizeEventFiltersPageLocation = (
-  location?: Partial<EventFiltersPageLocation>
-): Partial<EventFiltersPageLocation> => {
-  if (location) {
-    return {
-      ...(!isDefaultOrMissing(location.page_index, MANAGEMENT_DEFAULT_PAGE)
-        ? { page_index: location.page_index }
-        : {}),
-      ...(!isDefaultOrMissing(location.page_size, MANAGEMENT_DEFAULT_PAGE_SIZE)
-        ? { page_size: location.page_size }
-        : {}),
-      ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
-      ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
-      ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
-      ...(!isDefaultOrMissing(location.included_policies, '')
-        ? { included_policies: location.included_policies }
-        : ''),
-    };
-  } else {
-    return {};
-  }
-};
-
 /**
  * Given an object with url params, and a given key, return back only the first param value (case multiples were defined)
  * @param query
@@ -265,14 +241,12 @@ export const getPolicyDetailsArtifactsListPath = (
   )}`;
 };
 
-export const getEventFiltersListPath = (location?: Partial<EventFiltersPageLocation>): string => {
+export const getEventFiltersListPath = (location?: Partial<ArtifactListPageUrlParams>): string => {
   const path = generatePath(MANAGEMENT_ROUTING_EVENT_FILTERS_PATH, {
     tabName: AdministrationSubTab.eventFilters,
   });
 
-  return `${path}${appendSearch(
-    querystring.stringify(normalizeEventFiltersPageLocation(location))
-  )}`;
+  return getArtifactListPageUrlPath(path, location);
 };
 
 export const getHostIsolationExceptionsListPath = (

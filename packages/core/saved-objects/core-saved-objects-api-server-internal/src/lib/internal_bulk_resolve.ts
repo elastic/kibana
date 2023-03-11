@@ -9,7 +9,6 @@
 import type { MgetResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBaseOptions,
   SavedObjectsBulkResolveObject,
@@ -17,14 +16,15 @@ import type {
   SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
 } from '@kbn/core-saved-objects-api-server';
-import type {
-  ISavedObjectTypeRegistry,
-  SavedObjectsRawDocSource,
-} from '@kbn/core-saved-objects-server';
 import {
+  type ISavedObjectsEncryptionExtension,
+  type ISavedObjectsSecurityExtension,
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsRawDocSource,
+  type SavedObject,
+  type BulkResolveError,
   SavedObjectsErrorHelpers,
-  type DecoratedError,
-} from '@kbn/core-saved-objects-utils-server';
+} from '@kbn/core-saved-objects-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
   type LegacyUrlAlias,
@@ -35,17 +35,20 @@ import {
   CORE_USAGE_STATS_TYPE,
   REPOSITORY_RESOLVE_OUTCOME_STATS,
 } from '@kbn/core-usage-data-base-server-internal';
+import pMap from 'p-map';
 import {
   getCurrentTime,
   getSavedObjectFromSource,
   normalizeNamespace,
   rawDocExistsInNamespace,
-  Either,
-  Right,
+  type Either,
+  type Right,
   isLeft,
   isRight,
 } from './internal_utils';
 import type { RepositoryEsClient } from './repository_es_client';
+
+const MAX_CONCURRENT_RESOLVE = 10;
 
 /**
  * Parameters for the internal bulkResolve function.
@@ -64,6 +67,8 @@ export interface InternalBulkResolveParams {
     counterFields: Array<string | SavedObjectsIncrementCounterField>,
     options?: SavedObjectsIncrementCounterOptions<T>
   ) => Promise<SavedObject<T>>;
+  encryptionExtension: ISavedObjectsEncryptionExtension | undefined;
+  securityExtension: ISavedObjectsSecurityExtension | undefined;
   objects: SavedObjectsBulkResolveObject[];
   options?: SavedObjectsBaseOptions;
 }
@@ -74,18 +79,14 @@ export interface InternalBulkResolveParams {
  * @public
  */
 export interface InternalSavedObjectsBulkResolveResponse<T = unknown> {
-  resolved_objects: Array<SavedObjectsResolveResponse<T> | InternalBulkResolveError>;
+  resolved_objects: Array<SavedObjectsResolveResponse<T> | BulkResolveError>;
 }
 
-/**
- * Error result for the internal bulkResolve function.
- *
- * @internal
- */
-export interface InternalBulkResolveError {
-  type: string;
-  id: string;
-  error: DecoratedError;
+/** Type guard used in the repository. */
+export function isBulkResolveError<T>(
+  result: SavedObjectsResolveResponse<T> | BulkResolveError
+): result is BulkResolveError {
+  return !!(result as BulkResolveError).error;
 }
 
 type AliasInfo = Pick<LegacyUrlAlias, 'targetId' | 'purpose'>;
@@ -100,6 +101,8 @@ export async function internalBulkResolve<T>(
     serializer,
     getIndexForType,
     incrementCounterInternal,
+    encryptionExtension,
+    securityExtension,
     objects,
     options = {},
   } = params;
@@ -166,70 +169,83 @@ export async function internalBulkResolve<T>(
 
   let getResponseIndex = 0;
   let aliasInfoIndex = 0;
-  const resolveCounter = new ResolveCounter();
-  const resolvedObjects = allObjects.map<SavedObjectsResolveResponse<T> | InternalBulkResolveError>(
-    (either) => {
-      if (isLeft(either)) {
-        return either.value;
-      }
-      const exactMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
-      let aliasMatchDoc: MgetResponseItem<SavedObjectsRawDocSource> | undefined;
-      const aliasInfo = aliasInfoArray[aliasInfoIndex++];
-      if (aliasInfo !== undefined) {
-        aliasMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
-      }
-      const foundExactMatch =
-        // @ts-expect-error MultiGetHit._source is optional
-        exactMatchDoc.found && rawDocExistsInNamespace(registry, exactMatchDoc, namespace);
-      const foundAliasMatch =
-        // @ts-expect-error MultiGetHit._source is optional
-        aliasMatchDoc?.found && rawDocExistsInNamespace(registry, aliasMatchDoc, namespace);
 
-      const { type, id } = either.value;
-      let result: SavedObjectsResolveResponse<T> | null = null;
-      if (foundExactMatch && foundAliasMatch) {
-        result = {
-          // @ts-expect-error MultiGetHit._source is optional
-          saved_object: getSavedObjectFromSource(registry, type, id, exactMatchDoc),
-          outcome: 'conflict',
-          alias_target_id: aliasInfo!.targetId,
-          alias_purpose: aliasInfo!.purpose,
-        };
-        resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT);
-      } else if (foundExactMatch) {
-        result = {
-          // @ts-expect-error MultiGetHit._source is optional
-          saved_object: getSavedObjectFromSource(registry, type, id, exactMatchDoc),
-          outcome: 'exactMatch',
-        };
-        resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
-      } else if (foundAliasMatch) {
-        result = {
-          saved_object: getSavedObjectFromSource(
-            registry,
-            type,
-            aliasInfo!.targetId,
-            // @ts-expect-error MultiGetHit._source is optional
-            aliasMatchDoc!
-          ),
-          outcome: 'aliasMatch',
-          alias_target_id: aliasInfo!.targetId,
-          alias_purpose: aliasInfo!.purpose,
-        };
-        resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
-      }
-
-      if (result !== null) {
-        return result;
-      }
-      resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND);
-      return {
-        type,
-        id,
-        error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id),
-      };
+  // Helper function for the map block below
+  async function getSavedObject(
+    objectType: string,
+    objectId: string,
+    doc: MgetResponseItem<SavedObjectsRawDocSource>
+  ) {
+    // Encryption
+    // @ts-expect-error MultiGetHit._source is optional
+    const object = getSavedObjectFromSource<T>(registry, objectType, objectId, doc);
+    if (!encryptionExtension?.isEncryptableType(object.type)) {
+      return object;
     }
-  );
+    return encryptionExtension.decryptOrStripResponseAttributes(object);
+  }
+
+  // map function for pMap below
+  const mapper = async (either: Either<BulkResolveError, SavedObjectsBulkResolveObject>) => {
+    if (isLeft(either)) {
+      return either.value;
+    }
+    const exactMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
+    let aliasMatchDoc: MgetResponseItem<SavedObjectsRawDocSource> | undefined;
+    const aliasInfo = aliasInfoArray[aliasInfoIndex++];
+    if (aliasInfo !== undefined) {
+      aliasMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
+    }
+    const foundExactMatch =
+      // @ts-expect-error MultiGetHit._source is optional
+      exactMatchDoc.found && rawDocExistsInNamespace(registry, exactMatchDoc, namespace);
+    const foundAliasMatch =
+      // @ts-expect-error MultiGetHit._source is optional
+      aliasMatchDoc?.found && rawDocExistsInNamespace(registry, aliasMatchDoc, namespace);
+
+    const { type, id } = either.value;
+    let result: SavedObjectsResolveResponse<T> | null = null;
+
+    if (foundExactMatch && foundAliasMatch) {
+      result = {
+        saved_object: await getSavedObject(type, id, exactMatchDoc!),
+        outcome: 'conflict',
+        alias_target_id: aliasInfo!.targetId,
+        alias_purpose: aliasInfo!.purpose,
+      };
+      resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.CONFLICT);
+    } else if (foundExactMatch) {
+      result = {
+        saved_object: await getSavedObject(type, id, exactMatchDoc!),
+        outcome: 'exactMatch',
+      };
+      resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.EXACT_MATCH);
+    } else if (foundAliasMatch) {
+      result = {
+        saved_object: await getSavedObject(type, aliasInfo!.targetId, aliasMatchDoc!),
+        outcome: 'aliasMatch',
+        alias_target_id: aliasInfo!.targetId,
+        alias_purpose: aliasInfo!.purpose,
+      };
+      resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
+    }
+
+    if (result !== null) {
+      return result;
+    }
+    resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.NOT_FOUND);
+    return {
+      type,
+      id,
+      error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id),
+    };
+  };
+
+  const resolveCounter = new ResolveCounter();
+
+  const resolvedObjects = await pMap(allObjects, mapper, {
+    concurrency: MAX_CONCURRENT_RESOLVE,
+  });
 
   incrementCounterInternal(
     CORE_USAGE_STATS_TYPE,
@@ -238,12 +254,18 @@ export async function internalBulkResolve<T>(
     { refresh: false }
   ).catch(() => {}); // if the call fails for some reason, intentionally swallow the error
 
-  return { resolved_objects: resolvedObjects };
+  if (!securityExtension) return { resolved_objects: resolvedObjects };
+
+  const redactedObjects = await securityExtension?.authorizeAndRedactInternalBulkResolve({
+    namespace,
+    objects: resolvedObjects,
+  });
+  return { resolved_objects: redactedObjects };
 }
 
 /** Separates valid and invalid object types */
 function validateObjectTypes(objects: SavedObjectsBulkResolveObject[], allowedTypes: string[]) {
-  return objects.map<Either<InternalBulkResolveError, SavedObjectsBulkResolveObject>>((object) => {
+  return objects.map<Either<BulkResolveError, SavedObjectsBulkResolveObject>>((object) => {
     const { type, id } = object;
     if (!allowedTypes.includes(type)) {
       return {
@@ -317,7 +339,6 @@ async function fetchAndUpdateAliases(
     return item.update?.get;
   });
 }
-
 class ResolveCounter {
   private record = new Map<string, number>();
 

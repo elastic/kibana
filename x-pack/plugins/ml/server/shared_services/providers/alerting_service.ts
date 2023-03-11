@@ -16,9 +16,10 @@ export function getAlertingServiceProvider(getGuards: GetGuards) {
       savedObjectsClient: SavedObjectsClientContract,
       request: KibanaRequest
     ) {
+      const guards = getGuards(request, savedObjectsClient);
       return {
         preview: async (...args: Parameters<MlAlertingService['preview']>) => {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
             .ok(({ mlClient, scopedClient, getFieldsFormatRegistry, getDataViewsService }) =>
@@ -33,7 +34,7 @@ export function getAlertingServiceProvider(getGuards: GetGuards) {
         execute: async (
           ...args: Parameters<MlAlertingService['execute']>
         ): ReturnType<MlAlertingService['execute']> => {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
             .ok(({ mlClient, scopedClient, getFieldsFormatRegistry, getDataViewsService }) =>

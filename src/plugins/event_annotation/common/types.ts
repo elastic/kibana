@@ -72,7 +72,6 @@ export type QueryPointEventAnnotationConfig = {
   timeField?: string;
   textField?: string;
   extraFields?: string[];
-  ignoreGlobalFilters?: boolean;
   key: {
     type: 'point_in_time';
   };
@@ -86,6 +85,7 @@ export type EventAnnotationConfig =
 export interface EventAnnotationGroupConfig {
   annotations: EventAnnotationConfig[];
   indexPatternId: string;
+  ignoreGlobalFilters?: boolean;
 }
 
 export type EventAnnotationArgs =

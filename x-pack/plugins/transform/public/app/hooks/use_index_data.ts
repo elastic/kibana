@@ -10,6 +10,9 @@ import { useEffect, useMemo, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
+import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
+
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import {
   isEsSearchResponse,
   isFieldHistogramsResponseSchema,
@@ -19,22 +22,26 @@ import {
   isKeywordDuplicate,
   removeKeywordPostfix,
 } from '../../../common/utils/field_utils';
+import { getErrorMessage } from '../../../common/utils/errors';
+import { isRuntimeMappings } from '../../../common/shared_imports';
+
 import type { EsSorting, UseIndexDataReturnType } from '../../shared_imports';
 
-import { getErrorMessage } from '../../../common/utils/errors';
-import { isDefaultQuery, matchAllQuery, PivotQuery } from '../common';
+import { isDefaultQuery, matchAllQuery, TransformConfigQuery } from '../common';
+import { useAppDependencies, useToastNotifications } from '../app_dependencies';
+import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
+
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
 
-import { useAppDependencies, useToastNotifications } from '../app_dependencies';
-import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
-import { isRuntimeMappings } from '../../../common/shared_imports';
-
 export const useIndexData = (
   dataView: SearchItems['dataView'],
-  query: PivotQuery,
-  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings']
+  query: TransformConfigQuery,
+  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings'],
+  timeRangeMs?: TimeRangeMs
 ): UseIndexDataReturnType => {
+  const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
+
   const api = useApi();
   const toastNotifications = useToastNotifications();
   const {
@@ -53,6 +60,24 @@ export const useIndexData = (
 
   const [dataViewFields, setDataViewFields] = useState<string[]>();
 
+  const baseFilterCriteria = buildBaseFilterCriteria(
+    dataView.timeFieldName,
+    timeRangeMs?.from,
+    timeRangeMs?.to,
+    query
+  );
+
+  const defaultQuery = useMemo(
+    () => (timeRangeMs && dataView.timeFieldName ? baseFilterCriteria[0] : matchAllQuery),
+    [baseFilterCriteria, dataView, timeRangeMs]
+  );
+
+  const queryWithBaseFilterCriteria = {
+    bool: {
+      filter: baseFilterCriteria,
+    },
+  };
+
   // Fetch 500 random documents to determine populated fields.
   // This is a workaround to avoid passing potentially thousands of unpopulated fields
   // (for example, as part of filebeat/metricbeat/ECS based indices)
@@ -62,13 +87,13 @@ export const useIndexData = (
     setStatus(INDEX_STATUS.LOADING);
 
     const esSearchRequest = {
-      index: dataView.title,
+      index: indexPattern,
       body: {
         fields: ['*'],
         _source: false,
         query: {
           function_score: {
-            query: { match_all: {} },
+            query: defaultQuery,
             random_score: {},
           },
         },
@@ -84,7 +109,7 @@ export const useIndexData = (
       return;
     }
 
-    const isCrossClusterSearch = dataView.title.includes(':');
+    const isCrossClusterSearch = indexPattern.includes(':');
     const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
 
     const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
@@ -104,7 +129,7 @@ export const useIndexData = (
   useEffect(() => {
     fetchDataGridSampleDocuments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [timeRangeMs]);
 
   const columns: EuiDataGridColumn[] = useMemo(() => {
     if (typeof dataViewFields === 'undefined') {
@@ -152,8 +177,7 @@ export const useIndexData = (
     setColumnCharts,
     setCcsWarning,
     setErrorMessage,
-    setRowCount,
-    setRowCountRelation,
+    setRowCountInfo,
     setStatus,
     setTableItems,
     sortingColumns,
@@ -164,7 +188,7 @@ export const useIndexData = (
     resetPagination();
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(query)]);
+  }, [JSON.stringify([query, timeRangeMs])]);
 
   const fetchDataGridData = async function () {
     setErrorMessage('');
@@ -176,12 +200,11 @@ export const useIndexData = (
     }, {} as EsSorting);
 
     const esSearchRequest = {
-      index: dataView.title,
+      index: indexPattern,
       body: {
         fields: ['*'],
         _source: false,
-        // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
-        query: isDefaultQuery(query) ? matchAllQuery : query,
+        query: isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
@@ -198,18 +221,19 @@ export const useIndexData = (
       return;
     }
 
-    const isCrossClusterSearch = dataView.title.includes(':');
+    const isCrossClusterSearch = indexPattern.includes(':');
     const isMissingFields = resp.hits.hits.every((d) => typeof d.fields === 'undefined');
 
     const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
     setCcsWarning(isCrossClusterSearch && isMissingFields);
-    setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value);
-    setRowCountRelation(
-      typeof resp.hits.total === 'number'
-        ? ('eq' as estypes.SearchTotalHitsRelation)
-        : resp.hits.total!.relation
-    );
+    setRowCountInfo({
+      rowCount: typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value,
+      rowCountRelation:
+        typeof resp.hits.total === 'number'
+          ? ('eq' as estypes.SearchTotalHitsRelation)
+          : resp.hits.total!.relation,
+    });
     setTableItems(docs);
     setStatus(INDEX_STATUS.LOADED);
   };
@@ -217,7 +241,7 @@ export const useIndexData = (
   const fetchColumnChartsData = async function () {
     const allDataViewFieldNames = new Set(dataView.fields.map((f) => f.name));
     const columnChartsData = await api.getHistogramsForFields(
-      dataView.title,
+      indexPattern,
       columns
         .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
         .map((cT) => {
@@ -234,7 +258,7 @@ export const useIndexData = (
                 type: getFieldType(cT.schema),
               };
         }),
-      isDefaultQuery(query) ? matchAllQuery : query,
+      isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
       combinedRuntimeMappings
     );
 
@@ -259,9 +283,16 @@ export const useIndexData = (
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    dataView.title,
+    indexPattern,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify([query, pagination, sortingColumns, dataViewFields, combinedRuntimeMappings]),
+    JSON.stringify([
+      query,
+      pagination,
+      sortingColumns,
+      dataViewFields,
+      combinedRuntimeMappings,
+      timeRangeMs,
+    ]),
   ]);
 
   useEffect(() => {
@@ -272,9 +303,9 @@ export const useIndexData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     chartsVisible,
-    dataView.title,
+    indexPattern,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify([query, dataGrid.visibleColumns, combinedRuntimeMappings]),
+    JSON.stringify([query, dataGrid.visibleColumns, combinedRuntimeMappings, timeRangeMs]),
   ]);
 
   const renderCellValue = useRenderCellValue(dataView, pagination, tableItems);

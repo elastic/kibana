@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -63,20 +63,20 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
 });
 
 const getMapsLink = async (context: VisualizeFieldContext) => {
-  const indexPattern = await getIndexPatternService().get(context.dataViewSpec.id!);
+  const dataView = await getIndexPatternService().get(context.dataViewSpec.id!);
   // create initial layer descriptor
   const hasTooltips =
     context?.contextualFields?.length && context?.contextualFields[0] !== '_source';
   const initialLayers = [
     {
-      id: uuid(),
+      id: uuidv4(),
       visible: true,
       type: LAYER_TYPE.MVT_VECTOR,
       sourceDescriptor: {
-        id: uuid(),
+        id: uuidv4(),
         type: SOURCE_TYPES.ES_SEARCH,
         tooltipProperties: hasTooltips ? context.contextualFields : [],
-        label: indexPattern.title,
+        label: dataView.getIndexPattern(),
         indexPatternId: context.dataViewSpec.id,
         geoField: context.fieldName,
         scalingType: SCALING_TYPES.MVT,

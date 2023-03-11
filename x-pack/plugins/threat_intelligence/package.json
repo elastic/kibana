@@ -1,6 +1,8 @@
 {
   "author": "Elastic",
-  "name": "threat_intelligence",
+  "name": "@kbn/threat-intelligence-plugin",
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
   "scripts": {
     "cypress": "../../../node_modules/.bin/cypress",
     "cypress:open": "yarn cypress open --config-file ./cypress/cypress.config.ts",

@@ -28,9 +28,9 @@ import { useQueryToggle } from '../../../containers/query_toggle';
 import { JobIdFilter } from './job_id_filter';
 import { SelectInterval } from './select_interval';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { usersActions, usersSelectors } from '../../../../users/store';
+import { usersActions, usersSelectors } from '../../../../explore/users/store';
 import type { State } from '../../../store/types';
-import { useInstalledSecurityJobsIds } from '../hooks/use_installed_security_jobs';
+import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
 
 const sorting = {
   sort: {
@@ -63,7 +63,8 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     [setQuerySkip, setToggleStatus]
   );
 
-  const { jobIds, loading: loadingJobs } = useInstalledSecurityJobsIds();
+  const { jobNameById, loading: loadingJobs } = useInstalledSecurityJobNameById();
+  const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
 
   const getAnomaliesUserTableFilterQuerySelector = useMemo(
     () => usersSelectors.usersAnomaliesJobIdFilterSelector(),
@@ -119,8 +120,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     aggregationInterval: selectedInterval,
   });
 
-  const users = convertAnomaliesToUsers(tableData, userName);
-
+  const users = convertAnomaliesToUsers(tableData, jobNameById, userName);
   const columns = getAnomaliesUserTableColumnsCurated(type, startDate, endDate);
   const pagination = {
     initialPageIndex: 0,
@@ -156,6 +156,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
                   onSelect={onSelectJobId}
                   selectedJobIds={selectedJobIds}
                   jobIds={jobIds}
+                  jobNameById={jobNameById}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

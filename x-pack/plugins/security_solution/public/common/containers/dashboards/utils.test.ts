@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/public';
-import { getSecurityTagId, SECURITY_TAG_NAME } from './utils';
+import { SECURITY_TAG_NAME } from '../../../../common/constants';
+import { getSecurityTagId } from './utils';
 
 const TAG_ID = 'securityTagId';
 const DEFAULT_TAGS_RESPONSE = [

@@ -13,6 +13,7 @@ import { ListWithKuerySchema, BulkRequestBodySchema } from './common';
 
 export const GetAgentPoliciesRequestSchema = {
   query: ListWithKuerySchema.extends({
+    noAgentCount: schema.maybe(schema.boolean()),
     full: schema.maybe(schema.boolean()),
   }),
 };

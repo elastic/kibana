@@ -17,16 +17,16 @@ Array [
 
 exports[`policy table changes pages when a pagination link is clicked on 2`] = `
 Array [
-  "testy16",
-  "testy17",
-  "testy19",
-  "testy2",
-  "testy20",
-  "testy22",
-  "testy23",
-  "testy25",
-  "testy26",
-  "testy28",
+  "testy0",
+  "testy1",
+  "testy10",
+  "testy100",
+  "testy101",
+  "testy103",
+  "testy104",
+  "testy11",
+  "testy13",
+  "testy14",
 ]
 `;
 
@@ -80,23 +80,18 @@ exports[`policy table shows empty state when there are no policies 1`] = `
             class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
           />
           <button
-            class="euiButton euiButton--primary euiButton--fill"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="createPolicyButton"
             type="button"
           >
             <span
-              class="euiButtonContent euiButton__content"
+              class="emotion-euiButtonDisplayContent"
             >
               <span
-                class="euiButtonContent__icon"
                 color="inherit"
                 data-euiicon-type="plusInCircle"
               />
-              <span
-                class="euiButton__text"
-              >
-                Create policy
-              </span>
+              Create policy
             </span>
           </button>
         </div>

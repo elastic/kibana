@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
 import moment from 'moment';
@@ -92,36 +92,36 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const { firstTransaction } = config;
 
-      const documents = timerange(start, end)
-        .ratePerMinute(firstTransaction.successRate)
-        .generator((timestamp) =>
-          serviceGoProdInstance
-            .transaction({ transactionName: firstTransaction.name })
-            .timestamp(timestamp)
-            .duration(1000)
-            .success()
-        )
-        .merge(
-          timerange(start, end)
-            .ratePerMinute(firstTransaction.failureRate)
-            .generator((timestamp) =>
-              serviceGoProdInstance
-                .transaction({ transactionName: firstTransaction.name })
-                .errors(
-                  serviceGoProdInstance
-                    .error({
-                      message: 'Error 1',
-                      type: firstTransaction.name,
-                      groupingName: 'Error test',
-                    })
-                    .timestamp(timestamp)
-                )
-                .duration(1000)
-                .timestamp(timestamp)
-                .failure()
-            )
-        );
+      const documents = [
+        timerange(start, end)
+          .ratePerMinute(firstTransaction.successRate)
+          .generator((timestamp) =>
+            serviceGoProdInstance
+              .transaction({ transactionName: firstTransaction.name })
+              .timestamp(timestamp)
+              .duration(1000)
+              .success()
+          ),
 
+        timerange(start, end)
+          .ratePerMinute(firstTransaction.failureRate)
+          .generator((timestamp) =>
+            serviceGoProdInstance
+              .transaction({ transactionName: firstTransaction.name })
+              .errors(
+                serviceGoProdInstance
+                  .error({
+                    message: 'Error 1',
+                    type: firstTransaction.name,
+                    groupingName: 'Error test',
+                  })
+                  .timestamp(timestamp)
+              )
+              .duration(1000)
+              .timestamp(timestamp)
+              .failure()
+          ),
+      ];
       await synthtraceEsClient.index(documents);
     });
 

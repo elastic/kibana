@@ -7,11 +7,11 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
+import { useUrlState } from '@kbn/ml-url-state';
 import { useMlLocator, useNavigateToPath } from '../../../../../contexts/kibana';
 import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { getViewLinkStatus } from '../action_view/get_view_link_status';
-import { useUrlState } from '../../../../../util/url_state';
 
 import { mapActionButtonText, MapButton } from './map_button';
 

@@ -32,7 +32,6 @@ describe('createRule', () => {
       tags: [],
       name: 'test',
       rule_type_id: '.index-threshold',
-      notify_when: 'onActionGroupChange',
       actions: [
         {
           group: 'threshold met',
@@ -42,6 +41,11 @@ describe('createRule', () => {
             message: 'alert ',
           },
           connector_type_id: '.server-log',
+          frequency: {
+            notify_when: 'onActionGroupChange',
+            throttle: null,
+            summary: false,
+          },
         },
       ],
       scheduled_task_id: '1',
@@ -71,7 +75,6 @@ describe('createRule', () => {
       enabled: true,
       throttle: null,
       ruleTypeId: '.index-threshold',
-      notifyWhen: 'onActionGroupChange',
       actions: [
         {
           group: 'threshold met',
@@ -82,11 +85,17 @@ describe('createRule', () => {
               "alert '{{alertName}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
           },
           actionTypeId: '.server-log',
+          frequency: {
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+            summary: false,
+          },
         },
       ],
       createdAt: new Date('2021-04-01T21:33:13.247Z'),
       updatedAt: new Date('2021-04-01T21:33:13.247Z'),
       apiKeyOwner: '',
+      revision: 0,
     };
     http.post.mockResolvedValueOnce(resolvedValue);
 
@@ -100,6 +109,11 @@ describe('createRule', () => {
           params: {
             level: 'info',
             message: 'alert ',
+          },
+          frequency: {
+            notifyWhen: 'onActionGroupChange',
+            throttle: null,
+            summary: false,
           },
         },
       ],
@@ -116,7 +130,6 @@ describe('createRule', () => {
       muteAll: undefined,
       mutedInstanceIds: undefined,
       name: 'test',
-      notifyWhen: 'onActionGroupChange',
       params: {
         aggType: 'count',
         groupBy: 'all',

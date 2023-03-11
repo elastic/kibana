@@ -7,11 +7,11 @@
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { isEmpty } from 'lodash';
-import type { ElasticUser } from '../../containers/types';
-import type { UserInfoWithAvatar } from './types';
+import type { CaseUser } from '../../containers/types';
+import type { CaseUserWithProfileInfo, UserInfoWithAvatar } from './types';
 
 export const convertToUserInfo = (
-  user: ElasticUser,
+  user: CaseUser,
   userProfiles?: Map<string, UserProfileWithAvatar>
 ): { key: string; userInfo: UserInfoWithAvatar } | undefined => {
   const username = user.username;
@@ -35,7 +35,7 @@ export const convertToUserInfo = (
 
 const isValidString = (value?: string | null): value is string => !isEmpty(value);
 
-const createWithUsername = (username: string, user: ElasticUser) => {
+const createWithUsername = (username: string, user: CaseUser) => {
   return {
     key: username,
     userInfo: {
@@ -43,3 +43,8 @@ const createWithUsername = (username: string, user: ElasticUser) => {
     },
   };
 };
+
+export const convertToCaseUserWithProfileInfo = (user: CaseUser): CaseUserWithProfileInfo => ({
+  uid: user.profileUid,
+  user: { email: user.email, full_name: user.fullName, username: user.username },
+});

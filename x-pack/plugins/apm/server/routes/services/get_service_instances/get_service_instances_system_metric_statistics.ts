@@ -15,12 +15,12 @@ import {
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { Coordinate } from '../../../../typings/timeseries';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { getBucketSize } from '../../../../common/utils/get_bucket_size';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,
@@ -48,7 +48,7 @@ export async function getServiceInstancesSystemMetricStatistics<
 >({
   environment,
   kuery,
-  setup,
+  apmEventClient,
   serviceName,
   size,
   start,
@@ -58,7 +58,7 @@ export async function getServiceInstancesSystemMetricStatistics<
   isComparisonSearch,
   offset,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   serviceName: string;
   start: number;
   end: number;
@@ -70,8 +70,6 @@ export async function getServiceInstancesSystemMetricStatistics<
   isComparisonSearch: T;
   offset?: string;
 }): Promise<Array<ServiceInstanceSystemMetricStatistics<T>>> {
-  const { apmEventClient } = setup;
-
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,

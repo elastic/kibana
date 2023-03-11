@@ -19,6 +19,11 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
   const filterBar = getService('filterBar');
   const browser = getService('browser');
 
+  type RandomSamplerOption =
+    | 'dvRandomSamplerOptionOnAutomatic'
+    | 'dvRandomSamplerOptionOnManual'
+    | 'dvRandomSamplerOptionOff';
+
   return {
     async assertTimeRangeSelectorSectionExists() {
       await testSubjects.existOrFail('dataVisualizerTimeRangeSelectorSection');
@@ -34,11 +39,15 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       });
     },
 
-    async clickUseFullDataButton(expectedFormattedTotalDocCount: string) {
+    async clickUseFullDataButton(
+      expectedFormattedTotalDocCount: string,
+      randomSamplerOption: RandomSamplerOption = 'dvRandomSamplerOptionOff'
+    ) {
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerButtonUseFullData');
+        await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
         await testSubjects.clickWhenNotDisabledWithoutRetry('superDatePickerApplyTimeButton');
-        await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
+        await this.setRandomSamplingOption(randomSamplerOption);
+        await await this.assertTotalDocumentCount(expectedFormattedTotalDocCount);
       });
     },
 
@@ -238,10 +247,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     },
 
     async assertRandomSamplingOption(
-      expectedOption:
-        | 'dvRandomSamplerOptionOnAutomatic'
-        | 'dvRandomSamplerOptionOnManual'
-        | 'dvRandomSamplerOptionOff',
+      expectedOption: RandomSamplerOption,
       expectedProbability?: number
     ) {
       await retry.tryForTime(20000, async () => {
@@ -252,7 +258,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
         if (expectedOption === 'dvRandomSamplerOptionOff') {
           await testSubjects.existOrFail('dvRandomSamplerOptionOff', { timeout: 1000 });
           await testSubjects.missingOrFail('dvRandomSamplerProbabilityRange', { timeout: 1000 });
-          await testSubjects.missingOrFail('dvRandomSamplerAutomaticProbabilityMsg', {
+          await testSubjects.missingOrFail('dvRandomSamplerProbabilityUsedMsg', {
             timeout: 1000,
           });
         }
@@ -274,13 +280,13 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
         if (expectedOption === 'dvRandomSamplerOptionOnAutomatic') {
           await testSubjects.existOrFail('dvRandomSamplerOptionOnAutomatic', { timeout: 1000 });
-          await testSubjects.existOrFail('dvRandomSamplerAutomaticProbabilityMsg', {
+          await testSubjects.existOrFail('dvRandomSamplerProbabilityUsedMsg', {
             timeout: 1000,
           });
 
           if (expectedProbability !== undefined) {
             const probabilityText = await testSubjects.getVisibleText(
-              'dvRandomSamplerAutomaticProbabilityMsg'
+              'dvRandomSamplerProbabilityUsedMsg'
             );
             expect(probabilityText).to.contain(
               `${expectedProbability}`,
@@ -291,12 +297,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       });
     },
 
-    async setRandomSamplingOption(
-      option:
-        | 'dvRandomSamplerOptionOnAutomatic'
-        | 'dvRandomSamplerOptionOnManual'
-        | 'dvRandomSamplerOptionOff'
-    ) {
+    async setRandomSamplingOption(option: RandomSamplerOption) {
       await retry.tryForTime(20000, async () => {
         // escape popover
         await browser.pressKeys(browser.keys.ESCAPE);

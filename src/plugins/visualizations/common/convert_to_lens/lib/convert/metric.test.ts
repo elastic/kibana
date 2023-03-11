@@ -16,6 +16,7 @@ const mockGetFieldByName = jest.fn();
 
 describe('convertToLastValueColumn', () => {
   const dataView = stubLogstashDataView;
+  const visType = 'heatmap';
 
   const agg: SchemaConfig<METRIC_TYPES.AVG> = {
     accessor: 0,
@@ -42,6 +43,7 @@ describe('convertToLastValueColumn', () => {
       convertMetricAggregationColumnWithoutSpecialParams(SUPPORTED_METRICS[METRIC_TYPES.TOP_HITS], {
         agg,
         dataView,
+        visType,
       })
     ).toBeNull();
   });
@@ -54,6 +56,7 @@ describe('convertToLastValueColumn', () => {
       convertMetricAggregationColumnWithoutSpecialParams(SUPPORTED_METRICS[METRIC_TYPES.AVG], {
         agg,
         dataView,
+        visType,
       })
     ).toBeNull();
     expect(dataView.getFieldByName).toBeCalledTimes(1);
@@ -67,6 +70,7 @@ describe('convertToLastValueColumn', () => {
       convertMetricAggregationColumnWithoutSpecialParams(SUPPORTED_METRICS[METRIC_TYPES.COUNT], {
         agg,
         dataView,
+        visType,
       })
     ).toEqual(expect.objectContaining({ operationType: 'count' }));
     expect(dataView.getFieldByName).toBeCalledTimes(1);
@@ -80,6 +84,7 @@ describe('convertToLastValueColumn', () => {
       convertMetricAggregationColumnWithoutSpecialParams(SUPPORTED_METRICS[METRIC_TYPES.AVG], {
         agg,
         dataView,
+        visType,
       })
     ).toEqual(
       expect.objectContaining({

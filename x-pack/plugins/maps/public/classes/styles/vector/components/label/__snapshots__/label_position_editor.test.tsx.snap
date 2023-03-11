@@ -1,0 +1,122 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render 1`] = `
+<EuiFormRow
+  describedByIds={Array []}
+  display="row"
+  hasChildLabel={true}
+  hasEmptyLabelSpace={false}
+  label="Label position"
+  labelType="label"
+>
+  <EuiSelect
+    aria-label="Select label position"
+    compressed={true}
+    disabled={false}
+    onChange={[Function]}
+    options={
+      Array [
+        Object {
+          "text": "Top",
+          "value": "TOP",
+        },
+        Object {
+          "text": "Center",
+          "value": "CENTER",
+        },
+        Object {
+          "text": "Bottom",
+          "value": "BOTTOM",
+        },
+      ]
+    }
+    value="TOP"
+  />
+</EuiFormRow>
+`;
+
+exports[`should render as disabled when label is not set 1`] = `
+<EuiToolTip
+  anchorClassName="mapStyleFormDisabledTooltip"
+  content="Set 'Label' to enable"
+  delay="regular"
+  display="inlineBlock"
+  position="top"
+>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Label position"
+    labelType="label"
+  >
+    <EuiSelect
+      aria-label="Select label position"
+      compressed={true}
+      disabled={true}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Top",
+            "value": "TOP",
+          },
+          Object {
+            "text": "Center",
+            "value": "CENTER",
+          },
+          Object {
+            "text": "Bottom",
+            "value": "BOTTOM",
+          },
+        ]
+      }
+      value="CENTER"
+    />
+  </EuiFormRow>
+</EuiToolTip>
+`;
+
+exports[`should render as disabled when label position is disabled 1`] = `
+<EuiToolTip
+  anchorClassName="mapStyleFormDisabledTooltip"
+  content="simulated disabled error"
+  delay="regular"
+  display="inlineBlock"
+  position="top"
+>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label="Label position"
+    labelType="label"
+  >
+    <EuiSelect
+      aria-label="Select label position"
+      compressed={true}
+      disabled={true}
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Top",
+            "value": "TOP",
+          },
+          Object {
+            "text": "Center",
+            "value": "CENTER",
+          },
+          Object {
+            "text": "Bottom",
+            "value": "BOTTOM",
+          },
+        ]
+      }
+      value="CENTER"
+    />
+  </EuiFormRow>
+</EuiToolTip>
+`;

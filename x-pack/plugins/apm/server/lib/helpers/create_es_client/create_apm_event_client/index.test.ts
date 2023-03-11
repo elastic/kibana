@@ -54,6 +54,7 @@ describe('APMEventClient', () => {
           indices: {} as any,
           options: {
             includeFrozen: false,
+            forceSyntheticSource: false,
           },
         });
 

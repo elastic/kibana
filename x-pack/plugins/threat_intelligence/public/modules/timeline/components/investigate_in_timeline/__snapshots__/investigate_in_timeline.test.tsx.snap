@@ -6,15 +6,15 @@ Object {
   "baseElement": <body>
     <div>
       <button
-        class="euiButton euiButton--primary euiButton--fill"
+        class="euiContextMenuItem"
         data-test-subj="mockId"
         type="button"
       >
         <span
-          class="euiButtonContent euiButton__content"
+          class="euiContextMenu__itemLayout"
         >
           <span
-            class="euiButton__text"
+            class="euiContextMenuItem__text"
           >
             Investigate in Timeline
           </span>
@@ -24,15 +24,15 @@ Object {
   </body>,
   "container": <div>
     <button
-      class="euiButton euiButton--primary euiButton--fill"
+      class="euiContextMenuItem"
       data-test-subj="mockId"
       type="button"
     >
       <span
-        class="euiButtonContent euiButton__content"
+        class="euiContextMenu__itemLayout"
       >
         <span
-          class="euiButton__text"
+          class="euiContextMenuItem__text"
         >
           Investigate in Timeline
         </span>
@@ -160,11 +160,11 @@ Object {
   "baseElement": <body>
     <div>
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <button
           aria-label="Investigate in Timeline"
-          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+          class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
           data-test-subj="mockId"
           type="button"
         >
@@ -180,11 +180,11 @@ Object {
   </body>,
   "container": <div>
     <span
-      class="euiToolTipAnchor"
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <button
         aria-label="Investigate in Timeline"
-        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+        class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
         data-test-subj="mockId"
         type="button"
       >

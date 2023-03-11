@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { Setup } from '../../../lib/helpers/setup_request';
-import { getServiceDetailedStatsPeriods } from './get_service_transaction_detailed_statistics';
-import { getServiceAggregatedDetailedStatsPeriods } from './get_service_aggregated_transaction_detailed_statistics';
+import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { getServiceDetailedStatsPeriods } from './get_service_transaction_detailed_statistics';
 
 export async function getServicesDetailedStatistics({
   serviceNames,
   environment,
   kuery,
-  setup,
-  searchAggregatedTransactions,
-  searchAggregatedServiceMetrics,
+  apmEventClient,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
   offset,
   start,
   end,
@@ -25,31 +27,26 @@ export async function getServicesDetailedStatistics({
   serviceNames: string[];
   environment: string;
   kuery: string;
-  setup: Setup;
-  searchAggregatedTransactions: boolean;
-  searchAggregatedServiceMetrics: boolean;
+  apmEventClient: APMEventClient;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
   offset?: string;
   start: number;
   end: number;
   randomSampler: RandomSampler;
 }) {
-  const commonProps = {
+  return getServiceDetailedStatsPeriods({
     serviceNames,
     environment,
     kuery,
-    setup,
+    apmEventClient,
     start,
     end,
     randomSampler,
     offset,
-  };
-  return searchAggregatedServiceMetrics
-    ? getServiceAggregatedDetailedStatsPeriods({
-        ...commonProps,
-        searchAggregatedServiceMetrics,
-      })
-    : getServiceDetailedStatsPeriods({
-        ...commonProps,
-        searchAggregatedTransactions,
-      });
+    documentType,
+    rollupInterval,
+    bucketSizeInSeconds,
+  });
 }

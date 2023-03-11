@@ -8,8 +8,5 @@
 
 import * as t from 'io-ts';
 
-export const severity = t.keyof({ low: null, medium: null, high: null, critical: null });
-export type Severity = t.TypeOf<typeof severity>;
-
-export const severityOrUndefined = t.union([severity, t.undefined]);
-export type SeverityOrUndefined = t.TypeOf<typeof severityOrUndefined>;
+export type Severity = t.TypeOf<typeof Severity>;
+export const Severity = t.keyof({ low: null, medium: null, high: null, critical: null });

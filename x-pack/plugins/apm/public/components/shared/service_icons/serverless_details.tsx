@@ -72,5 +72,17 @@ export function ServerlessDetails({ serverless }: Props) {
     });
   }
 
+  if (serverless.hostArchitecture) {
+    listItems.push({
+      title: i18n.translate(
+        'xpack.apm.serviceIcons.serviceDetails.cloud.architecture',
+        { defaultMessage: 'Architecture' }
+      ),
+      description: (
+        <EuiBadge color="hollow">{serverless.hostArchitecture}</EuiBadge>
+      ),
+    });
+  }
+
   return <EuiDescriptionList textStyle="reverse" listItems={listItems} />;
 }

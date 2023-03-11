@@ -39,6 +39,7 @@ export const GuideButtonPopover = ({
       data-test-subj="manualCompletionPopover"
       button={button}
       isOpen={isPopoverShown}
+      repositionOnScroll
       closePopover={() => {
         /* do nothing, the popover is closed once the panel is opened */
       }}
@@ -49,7 +50,9 @@ export const GuideButtonPopover = ({
         </EuiTitle>
       )}
       <EuiSpacer />
-      <EuiText style={{ width: 300 }}>{description && <p>{description}</p>}</EuiText>
+      <EuiText size="s" style={{ width: 300 }}>
+        {description && <p>{description}</p>}
+      </EuiText>
     </EuiPopover>
   );
 };

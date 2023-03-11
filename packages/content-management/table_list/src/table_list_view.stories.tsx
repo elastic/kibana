@@ -52,21 +52,28 @@ const itemTypes = ['foo', 'bar', 'baz', 'elastic'];
 const mockItems: UserContentCommonSchema[] = createMockItems(500);
 
 export const ConnectedComponent = (params: Params) => {
+  const findItems = (searchQuery: string) => {
+    const hits = mockItems
+      .filter((_, i) => i < params.numberOfItemsToRender)
+      .filter((item) => {
+        return (
+          item.attributes.title.includes(searchQuery) ||
+          item.attributes.description?.includes(searchQuery)
+        );
+      });
+
+    return Promise.resolve({
+      total: hits.length,
+      hits,
+    });
+  };
+
   return (
     <TableListViewProvider {...getStoryServices(params, action)}>
       <Component
         // Added key to force a refresh of the component state
         key={`${params.initialFilter}-${params.initialPageSize}`}
-        findItems={(searchQuery) => {
-          const hits = mockItems
-            .filter((_, i) => i < params.numberOfItemsToRender)
-            .filter((item) => item.attributes.title.includes(searchQuery));
-
-          return Promise.resolve({
-            total: hits.length,
-            hits,
-          });
-        }}
+        findItems={findItems}
         getDetailViewLink={() => 'http://elastic.co'}
         createItem={
           params.canCreateItem

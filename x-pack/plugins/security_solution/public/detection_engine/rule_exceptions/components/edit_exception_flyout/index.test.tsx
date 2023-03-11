@@ -19,13 +19,14 @@ import { useFetchIndex } from '../../../../common/containers/source';
 import { createStubIndexPattern, stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
+import type { Rule } from '../../../rule_management/logic/types';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
-} from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+} from '../../../../../common/detection_engine/rule_schema/mocks';
+
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
@@ -44,14 +45,13 @@ const mockTheme = getMockTheme({
 });
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../../logic/use_create_update_exception');
 jest.mock('../../logic/use_exception_flyout_data');
 jest.mock('../../../../common/containers/source');
 jest.mock('../../logic/use_find_references');
 jest.mock('../../logic/use_fetch_or_create_rule_exception_list');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
+jest.mock('../../../rule_management/logic/use_rule');
 jest.mock('@kbn/lists-plugin/public');
 
 const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as jest.Mock<

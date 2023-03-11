@@ -28,8 +28,8 @@ jest.mock('../../../../common/lib/kibana', () => ({
 }));
 
 const mockAPIs = {
-  enableRule: jest.fn(),
-  disableRule: jest.fn(),
+  bulkEnableRules: jest.fn(),
+  bulkDisableRules: jest.fn(),
   snoozeRule: jest.fn(),
   unsnoozeRule: jest.fn(),
   loadExecutionLogAggregations: jest.fn(),
@@ -57,9 +57,10 @@ describe('rule status panel', () => {
     );
     expect(ruleExecutionsDescription.first().text()).toBe('400 executions in the last 24 hr');
   });
+
   it('should disable the rule when picking disable in the dropdown', async () => {
     const rule = mockRule({ enabled: true });
-    const disableRule = jest.fn();
+    const bulkDisableRules = jest.fn();
     const wrapper = mountWithIntl(
       <RuleStatusPanel
         {...mockAPIs}
@@ -68,7 +69,7 @@ describe('rule status panel', () => {
         healthColor="primary"
         statusMessage="Ok"
         requestRefresh={requestRefresh}
-        disableRule={disableRule}
+        bulkDisableRules={bulkDisableRules}
       />
     );
     const actionsElem = wrapper
@@ -88,12 +89,12 @@ describe('rule status panel', () => {
       await nextTick();
     });
 
-    expect(disableRule).toHaveBeenCalledTimes(1);
+    expect(bulkDisableRules).toHaveBeenCalledTimes(1);
   });
 
   it('if rule is already disabled should do nothing when picking disable in the dropdown', async () => {
     const rule = mockRule({ enabled: false });
-    const disableRule = jest.fn();
+    const bulkDisableRules = jest.fn();
     const wrapper = mountWithIntl(
       <RuleStatusPanel
         {...mockAPIs}
@@ -102,7 +103,7 @@ describe('rule status panel', () => {
         healthColor="primary"
         statusMessage="Ok"
         requestRefresh={requestRefresh}
-        disableRule={disableRule}
+        bulkDisableRules={bulkDisableRules}
       />
     );
     const actionsElem = wrapper
@@ -122,12 +123,12 @@ describe('rule status panel', () => {
       await nextTick();
     });
 
-    expect(disableRule).toHaveBeenCalledTimes(0);
+    expect(bulkDisableRules).toHaveBeenCalledTimes(0);
   });
 
   it('should enable the rule when picking enable in the dropdown', async () => {
     const rule = mockRule({ enabled: false });
-    const enableRule = jest.fn();
+    const bulkEnableRules = jest.fn();
     const wrapper = mountWithIntl(
       <RuleStatusPanel
         {...mockAPIs}
@@ -136,7 +137,7 @@ describe('rule status panel', () => {
         healthColor="primary"
         statusMessage="Ok"
         requestRefresh={requestRefresh}
-        enableRule={enableRule}
+        bulkEnableRules={bulkEnableRules}
       />
     );
     const actionsElem = wrapper
@@ -156,12 +157,12 @@ describe('rule status panel', () => {
       await nextTick();
     });
 
-    expect(enableRule).toHaveBeenCalledTimes(1);
+    expect(bulkEnableRules).toHaveBeenCalledTimes(1);
   });
 
   it('if rule is already enabled should do nothing when picking enable in the dropdown', async () => {
     const rule = mockRule({ enabled: true });
-    const enableRule = jest.fn();
+    const bulkEnableRules = jest.fn();
     const wrapper = mountWithIntl(
       <RuleStatusPanel
         {...mockAPIs}
@@ -170,7 +171,7 @@ describe('rule status panel', () => {
         healthColor="primary"
         statusMessage="Ok"
         requestRefresh={requestRefresh}
-        enableRule={enableRule}
+        bulkEnableRules={bulkEnableRules}
       />
     );
     const actionsElem = wrapper
@@ -190,7 +191,7 @@ describe('rule status panel', () => {
       await nextTick();
     });
 
-    expect(enableRule).toHaveBeenCalledTimes(0);
+    expect(bulkEnableRules).toHaveBeenCalledTimes(0);
   });
 
   it('should show the loading spinner when the rule enabled switch was clicked and the server responded with some delay', async () => {
@@ -198,10 +199,10 @@ describe('rule status panel', () => {
       enabled: true,
     });
 
-    const disableRule = jest.fn(async () => {
+    const bulkDisableRules = jest.fn(async () => {
       await new Promise((resolve) => setTimeout(resolve, 6000));
-    });
-    const enableRule = jest.fn();
+    }) as any;
+
     const wrapper = mountWithIntl(
       <RuleStatusPanel
         {...mockAPIs}
@@ -210,8 +211,7 @@ describe('rule status panel', () => {
         healthColor="primary"
         statusMessage="Ok"
         requestRefresh={requestRefresh}
-        enableRule={enableRule}
-        disableRule={disableRule}
+        bulkDisableRules={bulkDisableRules}
       />
     );
 
@@ -237,7 +237,7 @@ describe('rule status panel', () => {
     });
 
     await act(async () => {
-      expect(disableRule).toHaveBeenCalled();
+      expect(bulkDisableRules).toHaveBeenCalled();
       expect(
         wrapper.find('[data-test-subj="statusDropdown"] .euiBadge__childButton .euiLoadingSpinner')
           .length

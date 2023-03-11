@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getQueryStringFilter } from './search/get_query_string_filter';
 import { getFilterClause } from '../helper';
 import { GetPingHistogramParams, HistogramResult } from '../../../../common/runtime_types';
 import { QUERY } from '../../../../common/constants';
@@ -24,6 +25,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   monitorId,
   bucketSize,
   query,
+  timeZone,
 }) => {
   const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
@@ -36,6 +38,10 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   const filter = getFilterClause(from, to, additionalFilters);
 
   const minInterval = getHistogramInterval(from, to, QUERY.DEFAULT_BUCKET_COUNT);
+
+  if (query) {
+    filter.push(getQueryStringFilter(query));
+  }
 
   const params = createEsQuery({
     body: {
@@ -50,20 +56,6 @@ export const getPingHistogram: UMElasticsearchQueryFn<
             },
             EXCLUDE_RUN_ONCE_FILTER,
           ],
-          ...(query
-            ? {
-                minimum_should_match: 1,
-                should: [
-                  {
-                    multi_match: {
-                      query: escape(query),
-                      type: 'phrase_prefix' as const,
-                      fields: ['monitor.id.text', 'monitor.name.text', 'url.full.text'],
-                    },
-                  },
-                ],
-              }
-            : {}),
         },
       },
       size: 0,
@@ -73,6 +65,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
             field: '@timestamp',
             fixed_interval: bucketSize || minInterval + 'ms',
             missing: '0',
+            time_zone: timeZone,
           },
           aggs: {
             down: {

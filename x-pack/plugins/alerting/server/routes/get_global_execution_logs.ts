@@ -9,7 +9,7 @@ import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { GetGlobalExecutionLogParams } from '../rules_client';
-import { RewriteRequestCase, verifyAccessAndContext } from './lib';
+import { RewriteRequestCase, verifyAccessAndContext, rewriteNamespaces } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
 const sortOrderSchema = schema.oneOf([schema.literal('asc'), schema.literal('desc')]);
@@ -38,15 +38,18 @@ const querySchema = schema.object({
   per_page: schema.number({ defaultValue: 10, min: 1 }),
   page: schema.number({ defaultValue: 1, min: 1 }),
   sort: sortFieldsSchema,
+  namespaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 const rewriteReq: RewriteRequestCase<GetGlobalExecutionLogParams> = ({
   date_start: dateStart,
   date_end: dateEnd,
   per_page: perPage,
+  namespaces,
   ...rest
 }) => ({
   ...rest,
+  namespaces: rewriteNamespaces(namespaces),
   dateStart,
   dateEnd,
   perPage,

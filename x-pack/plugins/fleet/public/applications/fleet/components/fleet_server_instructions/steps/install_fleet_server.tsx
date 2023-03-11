@@ -111,6 +111,7 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
         linuxRpmCommand={installCommands.rpm}
         k8sCommand={installCommands.kubernetes}
         hasK8sIntegration={false}
+        hasK8sIntegrationMultiPage={false}
         hasFleetServer={true}
       />
     </>

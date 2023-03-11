@@ -10,6 +10,7 @@ import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { CredentialStore } from './lib/reindexing/credential_store';
 import { handleEsError } from './shared_imports';
+import type { FeatureSet } from '../common/types';
 
 export interface RouteDependencies {
   router: IRouter;
@@ -22,6 +23,7 @@ export interface RouteDependencies {
     handleEsError: typeof handleEsError;
   };
   config: {
+    featureSet: FeatureSet;
     isSecurityEnabled: () => boolean;
   };
 }

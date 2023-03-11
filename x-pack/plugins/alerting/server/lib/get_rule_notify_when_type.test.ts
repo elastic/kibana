@@ -19,6 +19,6 @@ test(`should return 'onThrottleInterval' value if 'notifyWhen' is null and throt
   expect(getRuleNotifyWhenType(null, '10m')).toEqual('onThrottleInterval');
 });
 
-test(`should return 'onActiveAlert' value if 'notifyWhen' is null and throttle is null`, () => {
-  expect(getRuleNotifyWhenType(null, null)).toEqual('onActiveAlert');
+test(`should return null value if 'notifyWhen' is null and throttle is null`, () => {
+  expect(getRuleNotifyWhenType(null, null)).toEqual(null);
 });

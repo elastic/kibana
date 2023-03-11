@@ -228,7 +228,7 @@ describe('Footer Timeline Component', () => {
         </TestProviders>
       );
 
-      wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="pagination-button-next"]').first().simulate('click');
       expect(loadMore).toBeCalled();
     });
 

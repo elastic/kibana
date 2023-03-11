@@ -9,16 +9,17 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonTo } from '../../../shared/react_router_helpers';
-import { COLLECTION_CREATION_PATH } from '../../routes';
+import { AddAnalyticsCollection } from '../add_analytics_collections/add_analytics_collection';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
 
 import { AnalyticsCollectionTable } from './analytics_collection_table';
 import { AnalyticsCollectionsLogic } from './analytics_collections_logic';
+import { AnalyticsOverviewEmptyPage } from './analytics_overview_empty_page';
 
 export const AnalyticsOverview: React.FC = () => {
   const { fetchAnalyticsCollections } = useActions(AnalyticsCollectionsLogic);
@@ -44,8 +45,9 @@ export const AnalyticsOverview: React.FC = () => {
           }
         ),
         pageTitle: i18n.translate('xpack.enterpriseSearch.analytics.collections.pageTitle', {
-          defaultMessage: 'Behaviorial Analytics',
+          defaultMessage: 'Behavioral Analytics',
         }),
+        rightSideItems: [<AddAnalyticsCollection />],
       }}
     >
       {!hasNoAnalyticsCollections && (
@@ -60,48 +62,14 @@ export const AnalyticsOverview: React.FC = () => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonTo fill iconType="plusInCircle" to={COLLECTION_CREATION_PATH}>
-              {i18n.translate('xpack.enterpriseSearch.analytics.collections.create.buttonTitle', {
-                defaultMessage: 'Create new collection',
-              })}
-            </EuiButtonTo>
+            <AddAnalyticsCollection />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
 
       <EuiSpacer size="l" />
       {hasNoAnalyticsCollections ? (
-        <EuiEmptyPrompt
-          iconType="search"
-          title={
-            <h2>
-              {i18n.translate(
-                'xpack.enterpriseSearch.analytics.collections.emptyState.headingTitle',
-                {
-                  defaultMessage: 'You dont have any collections yet',
-                }
-              )}
-            </h2>
-          }
-          body={
-            <p>
-              {i18n.translate(
-                'xpack.enterpriseSearch.analytics.collections.emptyState.subHeading',
-                {
-                  defaultMessage:
-                    'An analytics collection provides a place to store the analytics events for any given search application you are building. Create a new collection to get started.',
-                }
-              )}
-            </p>
-          }
-          actions={[
-            <EuiButtonTo fill iconType="plusInCircle" to={COLLECTION_CREATION_PATH}>
-              {i18n.translate('xpack.enterpriseSearch.analytics.collections.create.buttonTitle', {
-                defaultMessage: 'Create new collection',
-              })}
-            </EuiButtonTo>,
-          ]}
-        />
+        <AnalyticsOverviewEmptyPage />
       ) : (
         <AnalyticsCollectionTable collections={analyticsCollections} isLoading={isLoading} />
       )}

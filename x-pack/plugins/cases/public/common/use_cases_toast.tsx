@@ -32,6 +32,7 @@ const Title = styled.span`
   -webkit-line-clamp: ${LINE_CLAMP};
   -webkit-box-orient: vertical;
   overflow: hidden;
+  word-break: break-word;
 `;
 const EuiTextStyled = styled(EuiText)`
   ${({ theme }) => `
@@ -166,7 +167,7 @@ export const useCasesToast = () => {
       }
     },
     showSuccessToast: (title: string) => {
-      toasts.addSuccess(title);
+      toasts.addSuccess({ title, className: 'eui-textBreakWord' });
     },
   };
 };

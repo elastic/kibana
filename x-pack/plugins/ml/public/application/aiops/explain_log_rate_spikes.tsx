@@ -25,7 +25,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
 
   const context = useMlContext();
   const dataView = context.currentDataView;
-  const savedSearch = context.currentSavedSearch;
+  const savedSearch = context.selectedSavedSearch;
 
   return (
     <>
@@ -58,6 +58,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
             'uiSettings',
             'unifiedSearch',
             'theme',
+            'lens',
           ])}
         />
       )}

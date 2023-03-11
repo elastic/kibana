@@ -12,6 +12,7 @@ import PropTypes from 'prop-types';
 import { Home } from './home';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
+// eslint-disable-next-line no-restricted-imports
 import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
@@ -79,6 +80,7 @@ export function HomeApp({ directories, solutions }) {
               localStorage={localStorage}
               urlBasePath={getBasePath()}
               hasUserDataView={() => dataViewsService.hasUserDataView()}
+              isCloudEnabled={isCloudEnabled}
             />
           </Route>
           <Redirect to="/" />

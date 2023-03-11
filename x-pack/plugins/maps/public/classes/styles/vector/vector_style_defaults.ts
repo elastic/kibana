@@ -8,6 +8,7 @@
 import {
   DEFAULT_ICON,
   LABEL_BORDER_SIZES,
+  LABEL_POSITIONS,
   MAX_ZOOM,
   MIN_ZOOM,
   SYMBOLIZE_AS_TYPES,
@@ -141,6 +142,11 @@ export function getDefaultStaticProperties(
         size: LABEL_BORDER_SIZES.SMALL,
       },
     },
+    [VECTOR_STYLES.LABEL_POSITION]: {
+      options: {
+        position: LABEL_POSITIONS.CENTER,
+      },
+    },
   };
 }
 
@@ -271,6 +277,11 @@ export function getDefaultDynamicProperties(): VectorStylePropertiesDescriptor {
     [VECTOR_STYLES.LABEL_BORDER_SIZE]: {
       options: {
         size: LABEL_BORDER_SIZES.SMALL,
+      },
+    },
+    [VECTOR_STYLES.LABEL_POSITION]: {
+      options: {
+        position: LABEL_POSITIONS.CENTER,
       },
     },
   };

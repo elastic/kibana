@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiFilterGroup } from '@elastic/eui';
 import { FilterStatusButton } from './filter_status_button';
 import { useGetUrlParams } from '../../../hooks';
-import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../common/translations';
+import {
+  STATUS_DOWN_LABEL,
+  STATUS_UP_LABEL,
+} from '../../../../../common/translations/translations';
 
 export const StatusFilter: React.FC = () => {
   const { statusFilter } = useGetUrlParams();

@@ -54,13 +54,6 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
 
   const resultValue = value ?? ANOMALY_THRESHOLD.LOW;
 
-  const onChangeCallback = (
-    e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
-  ) => {
-    // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
-    onChange(Number(e.target.value));
-  };
-
   const ticks = new Array(5).fill(null).map((x, i) => {
     const v = i * 25;
     return { value: v, label: v };
@@ -76,7 +69,7 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
             compressed
             prepend={label}
             value={resultValue}
-            onChange={onChangeCallback}
+            onChange={(e) => onChange(Number(e.target.value))}
             min={ANOMALY_THRESHOLD.LOW}
             max={MAX_ANOMALY_SCORE}
           />
@@ -88,7 +81,7 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
             min={ANOMALY_THRESHOLD.LOW}
             max={MAX_ANOMALY_SCORE}
             value={resultValue}
-            onChange={onChangeCallback}
+            onChange={(e) => onChange(Number(e.currentTarget.value))}
             aria-label={i18n.translate('xpack.ml.severitySelector.formControlAriaLabel', {
               defaultMessage: 'Select severity threshold',
             })}

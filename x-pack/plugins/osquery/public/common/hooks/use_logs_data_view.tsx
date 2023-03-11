@@ -16,6 +16,11 @@ export interface LogsDataView extends DataView {
 
 interface UseLogsDataView {
   skip?: boolean;
+  /*
+    this flag is used to retrieve the persistent logs data view
+    and should be used only for external links, eg. discover, lens
+  */
+  checkOnly?: boolean;
 }
 
 export const useLogsDataView = (payload?: UseLogsDataView) => {
@@ -24,34 +29,35 @@ export const useLogsDataView = (payload?: UseLogsDataView) => {
   return useQuery<LogsDataView | undefined>(
     ['logsDataView'],
     async () => {
-      try {
-        await dataViews.getFieldsForWildcard({
-          pattern: 'logs-osquery_manager.result*',
-        });
-      } catch (e) {
-        return undefined;
-      }
-
       let dataView;
       try {
         const data = await dataViews.find('logs-osquery_manager.result*', 1);
         if (data.length) {
           dataView = data[0];
+        } else {
+          throw new Error('No data view found');
         }
-      } catch (e) {
-        if (dataViews.getCanSaveSync()) {
+        // eslint-disable-next-line no-empty
+      } catch (e) {}
+
+      if (!dataView && dataViews.getCanSaveSync()) {
+        try {
           dataView = await dataViews.createAndSave({
             title: 'logs-osquery_manager.result*',
             timeFieldName: '@timestamp',
           });
-        }
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
       }
 
-      if (!dataView) {
-        dataView = await dataViews.create({
-          title: 'logs-osquery_manager.result*',
-          timeFieldName: '@timestamp',
-        });
+      if (!dataView && !payload?.checkOnly) {
+        try {
+          dataView = await dataViews.create({
+            title: 'logs-osquery_manager.result*',
+            timeFieldName: '@timestamp',
+          });
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
       }
 
       return dataView as LogsDataView;

@@ -14,6 +14,7 @@ import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import axios, { AxiosResponse } from 'axios';
 import times from 'lodash/times';
 import { LocationStatus, HeartbeatConfig } from '../../common/runtime_types';
+import { mockEncryptedSO } from './utils/mocks';
 
 const taskManagerSetup = taskManagerMock.createSetup();
 
@@ -37,6 +38,7 @@ describe('SyntheticsService', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
       },
     },
+    encryptedSavedObjects: mockEncryptedSO,
   } as unknown as UptimeServerSetup;
 
   const getMockedService = (locationsNum: number = 1) => {
@@ -59,7 +61,6 @@ describe('SyntheticsService', () => {
 
     service.apiClient.locations = locations;
 
-    jest.spyOn(service, 'getApiKey').mockResolvedValue({ name: 'example', id: 'i', apiKey: 'k' });
     jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
 
     return { service, locations };

@@ -16,19 +16,17 @@ import { fetchAll } from '../fetch_all';
 
 import { setupAnalyticsCollectionIndex } from './setup_indices';
 
-export const fetchAnalyticsCollectionByName = async (
+export const fetchAnalyticsCollectionById = async (
   client: IScopedClusterClient,
-  name: string
+  id: string
 ): Promise<AnalyticsCollection | undefined> => {
   try {
-    const searchResults = await client.asCurrentUser.search<AnalyticsCollection>({
+    const hit = await client.asCurrentUser.get<AnalyticsCollection>({
+      id,
       index: ANALYTICS_COLLECTIONS_INDEX,
-      query: { term: { name } },
     });
 
-    const result = searchResults.hits.hits[0]?._source
-      ? { ...searchResults.hits.hits[0]._source, id: searchResults.hits.hits[0]._id }
-      : undefined;
+    const result = hit._source ? { ...hit._source, id: hit._id } : undefined;
 
     return result;
   } catch (error) {

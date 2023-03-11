@@ -60,6 +60,7 @@ export const timelineDefaults: SubsetTimelineModel &
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
   savedObjectId: null,
+  selectAll: false,
   sessionViewConfig: null,
   show: false,
   sort: [

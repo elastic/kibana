@@ -29,14 +29,11 @@ import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
 import { createReindexWorker } from './routes/reindex_indices';
 import { registerRoutes } from './routes/register_routes';
-import {
-  telemetrySavedObjectType,
-  reindexOperationSavedObjectType,
-  mlSavedObjectType,
-} from './saved_object_types';
+import { reindexOperationSavedObjectType, mlSavedObjectType } from './saved_object_types';
 import { handleEsError } from './shared_imports';
-
 import { RouteDependencies } from './types';
+import type { UpgradeAssistantConfig } from './config';
+import type { FeatureSet } from '../common/types';
 
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
@@ -54,6 +51,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly credentialStore: CredentialStore;
   private readonly kibanaVersion: string;
+  private readonly initialFeatureSet: FeatureSet;
 
   // Properties set at setup
   private licensing?: LicensingPluginSetup;
@@ -63,10 +61,13 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private securityPluginStart?: SecurityPluginStart;
   private worker?: ReindexWorker;
 
-  constructor({ logger, env }: PluginInitializerContext) {
+  constructor({ logger, env, config }: PluginInitializerContext<UpgradeAssistantConfig>) {
     this.logger = logger.get();
     this.credentialStore = credentialStoreFactory(this.logger);
     this.kibanaVersion = env.packageInfo.version;
+
+    const { featureSet } = config.get();
+    this.initialFeatureSet = featureSet;
   }
 
   private getWorker() {
@@ -83,7 +84,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     this.licensing = licensing;
 
     savedObjects.registerType(reindexOperationSavedObjectType);
-    savedObjects.registerType(telemetrySavedObjectType);
     savedObjects.registerType(mlSavedObjectType);
 
     features.registerElasticsearchFeature({
@@ -101,7 +101,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
     // We need to initialize the deprecation logs plugin so that we can
     // navigate from this app to the observability app using a source_id.
-    infra?.defineInternalSourceConfiguration(DEPRECATION_LOGS_SOURCE_ID, {
+    infra?.logViews.defineInternalLogView(DEPRECATION_LOGS_SOURCE_ID, {
       name: 'deprecationLogs',
       description: 'deprecation logs',
       logIndices: {
@@ -132,6 +132,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
         handleEsError,
       },
       config: {
+        featureSet: this.initialFeatureSet,
         isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
       },
     };

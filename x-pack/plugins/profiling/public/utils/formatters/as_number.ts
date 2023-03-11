@@ -5,24 +5,30 @@
  * 2.0.
  */
 
+import { NOT_AVAILABLE_LABEL } from '../../../common';
+
 export function asNumber(value: number): string {
+  if (isNaN(value)) {
+    return NOT_AVAILABLE_LABEL;
+  }
+
   if (value === 0) {
     return '0';
   }
 
   value = Math.round(value * 100) / 100;
-  if (value < 0.01) {
+  if (Math.abs(value) < 0.01) {
     return '~0.00';
   }
-  if (value < 1e3) {
+  if (Math.abs(value) < 1e3) {
     return value.toString();
   }
 
-  if (value < 1e6) {
+  if (Math.abs(value) < 1e6) {
     return `${asNumber(value / 1e3)}k`;
   }
 
-  if (value < 1e9) {
+  if (Math.abs(value) < 1e9) {
     return `${asNumber(value / 1e6)}m`;
   }
 

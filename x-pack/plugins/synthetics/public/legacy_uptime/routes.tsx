@@ -7,7 +7,9 @@
 
 import React, { FC, useEffect } from 'react';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -240,7 +242,7 @@ const getRoutes = (): RouteProps[] => {
         defaultMessage: 'Monitor Management | {baseTitle}',
         values: { baseTitle },
       }),
-      path: MONITOR_MANAGEMENT_ROUTE + '/:type',
+      path: MONITOR_MANAGEMENT_ROUTE + '/:type?',
       component: () => (
         <ServiceAllowedWrapper>
           <MonitorManagementPage />

@@ -411,6 +411,7 @@ describe('monitor availability', () => {
             "monitorInfo": Object {
               "docId": "myDocId",
               "monitor": Object {
+                "check_group": "myCheckGroup",
                 "duration": Object {
                   "us": 100000,
                 },
@@ -432,6 +433,7 @@ describe('monitor availability', () => {
             "monitorInfo": Object {
               "docId": "myDocId",
               "monitor": Object {
+                "check_group": "myCheckGroup",
                 "duration": Object {
                   "us": 100000,
                 },
@@ -453,6 +455,7 @@ describe('monitor availability', () => {
             "monitorInfo": Object {
               "docId": "myDocId",
               "monitor": Object {
+                "check_group": "myCheckGroup",
                 "duration": Object {
                   "us": 100000,
                 },
@@ -542,6 +545,7 @@ describe('monitor availability', () => {
             "monitorInfo": Object {
               "docId": "myDocId",
               "monitor": Object {
+                "check_group": "myCheckGroup",
                 "duration": Object {
                   "us": 100000,
                 },
@@ -563,6 +567,7 @@ describe('monitor availability', () => {
             "monitorInfo": Object {
               "docId": "myDocId",
               "monitor": Object {
+                "check_group": "myCheckGroup",
                 "duration": Object {
                   "us": 100000,
                 },
@@ -584,6 +589,7 @@ describe('monitor availability', () => {
             "monitorInfo": Object {
               "docId": "myDocId",
               "monitor": Object {
+                "check_group": "myCheckGroup",
                 "duration": Object {
                   "us": 100000,
                 },
@@ -605,6 +611,7 @@ describe('monitor availability', () => {
             "monitorInfo": Object {
               "docId": "myDocId",
               "monitor": Object {
+                "check_group": "myCheckGroup",
                 "duration": Object {
                   "us": 100000,
                 },

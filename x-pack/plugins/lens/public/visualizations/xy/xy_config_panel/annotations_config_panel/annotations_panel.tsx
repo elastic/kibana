@@ -23,6 +23,7 @@ import {
   QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-plugin/common';
 import moment from 'moment';
+import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
 import {
   FieldOption,
   FieldOptionValue,
@@ -31,7 +32,6 @@ import {
 import { FormatFactory } from '../../../../../common';
 import {
   DimensionEditorSection,
-  fieldExists,
   NameInput,
   useDebouncedValue,
 } from '../../../../shared_components';
@@ -58,6 +58,7 @@ export const AnnotationsPanel = (
 ) => {
   const { state, setState, layerId, accessor, frame } = props;
   const isHorizontal = isHorizontalChart(state.layers);
+  const { hasFieldData } = useExistingFieldsReader();
 
   const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
     value: state,
@@ -248,10 +249,7 @@ export const AnnotationsPanel = (
                           field: field.name,
                           dataType: field.type,
                         },
-                        exists: fieldExists(
-                          frame.dataViews.existingFields[currentIndexPattern.title],
-                          field.name
-                        ),
+                        exists: hasFieldData(currentIndexPattern.id, field.name),
                         compatible: true,
                         'data-test-subj': `lnsXY-annotation-fieldOption-${field.name}`,
                       } as FieldOption<FieldOptionValue>)
@@ -379,7 +377,6 @@ export const AnnotationsPanel = (
               currentConfig={currentAnnotation}
               setConfig={setAnnotations}
               indexPattern={frame.dataViews.indexPatterns[localLayer.indexPatternId]}
-              existingFields={frame.dataViews.existingFields}
             />
           </EuiFormRow>
         </DimensionEditorSection>

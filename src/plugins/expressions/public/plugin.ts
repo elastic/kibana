@@ -42,6 +42,7 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
     get() {
       return this;
     },
+    isLevelEnabled: () => true,
   };
 
   private readonly expressions: ExpressionsService = new ExpressionsService({

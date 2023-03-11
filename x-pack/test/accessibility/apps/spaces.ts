@@ -20,8 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/137136
-  describe.skip('Kibana Spaces Accessibility', () => {
+  describe('Kibana Spaces Accessibility', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
@@ -86,29 +85,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // creating space b and making it the current space so space selector page gets displayed when space b gets deleted
-    // FLAKY: https://github.com/elastic/kibana/issues/135341
-    it.skip('a11y test for delete space button', async () => {
-      await PageObjects.spaceSelector.clickCreateSpace();
-      await PageObjects.spaceSelector.clickEnterSpaceName();
-      await PageObjects.spaceSelector.addSpaceName('space_b');
-      await PageObjects.spaceSelector.clickSaveSpaceCreation();
-      await PageObjects.common.navigateToApp('home');
-      await PageObjects.spaceSelector.openSpacesNav();
-      await PageObjects.spaceSelector.clickSpaceAvatar('space_b');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.spaceSelector.openSpacesNav();
-      await PageObjects.spaceSelector.clickManageSpaces();
-      await PageObjects.spaceSelector.clickOnDeleteSpaceButton('space_b');
-      await a11y.testAppSnapshot();
-    });
-
-    // test starts with deleting space b so we can get the space selection page instead of logging out in the test
-    it('a11y test for space selection page', async () => {
-      await PageObjects.spaceSelector.confirmDeletingSpace();
-      await retry.try(async () => {
+    // Skipped due to an a11y violation
+    // https://github.com/elastic/kibana/issues/144155
+    describe.skip('Create Space B and Verify', async () => {
+      it('a11y test for delete space button', async () => {
+        await PageObjects.spaceSelector.clickCreateSpace();
+        await PageObjects.spaceSelector.clickEnterSpaceName();
+        await PageObjects.spaceSelector.addSpaceName('space_b');
+        await PageObjects.spaceSelector.clickSaveSpaceCreation();
+        await PageObjects.common.navigateToApp('home');
+        await PageObjects.spaceSelector.openSpacesNav();
+        await PageObjects.spaceSelector.clickSpaceAvatar('space_b');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.spaceSelector.openSpacesNav();
+        await PageObjects.spaceSelector.clickManageSpaces();
+        await PageObjects.spaceSelector.clickOnDeleteSpaceButton('space_b');
         await a11y.testAppSnapshot();
       });
-      await PageObjects.spaceSelector.clickSpaceCard('default');
+
+      // test starts with deleting space b so we can get the space selection page instead of logging out in the test
+      it('a11y test for space selection page', async () => {
+        await PageObjects.spaceSelector.confirmDeletingSpace();
+        await retry.try(async () => {
+          await a11y.testAppSnapshot();
+        });
+        await PageObjects.spaceSelector.clickSpaceCard('default');
+      });
     });
   });
 }

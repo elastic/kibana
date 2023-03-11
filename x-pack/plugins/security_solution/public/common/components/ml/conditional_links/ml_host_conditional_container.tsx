@@ -9,13 +9,13 @@ import { parse, stringify } from 'query-string';
 import React from 'react';
 
 import { Redirect, Switch, useRouteMatch } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
 
 import { url as urlUtils } from '@kbn/kibana-utils-plugin/public';
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, multipleEntities, getMultipleEntities } from './entity_helpers';
-import { HostsTableType } from '../../../../hosts/store/model';
+import { HostsTableType } from '../../../../explore/hosts/store/model';
 import { HOSTS_PATH } from '../../../../../common/constants';
 interface QueryStringType {
   '?_g': string;

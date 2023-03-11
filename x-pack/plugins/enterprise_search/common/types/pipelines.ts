@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import { IngestInferenceConfig, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 export interface InferencePipeline {
   modelId: string | undefined;
   modelState: TrainedModelState;
   modelStateReason?: string;
   pipelineName: string;
+  pipelineReferences: string[];
   types: string[];
 }
 
@@ -63,3 +64,17 @@ export interface DeleteMlInferencePipelineResponse {
   deleted?: string;
   updated?: string;
 }
+
+export interface CreateMlInferencePipelineParameters {
+  destination_field?: string;
+  inference_config?: InferencePipelineInferenceConfig;
+  model_id: string;
+  pipeline_name: string;
+  source_field: string;
+}
+
+export type InferencePipelineInferenceConfig = IngestInferenceConfig & {
+  zero_shot_classification?: {
+    labels: string[];
+  };
+};

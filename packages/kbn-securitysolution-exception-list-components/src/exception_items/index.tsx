@@ -92,7 +92,7 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
         viewerStatus={viewerStatus}
         buttonText={emptyViewerButtonText}
         body={emptyViewerBody}
-        onCreateExceptionListItem={onCreateExceptionListItem}
+        onEmptyButtonStateClick={onCreateExceptionListItem}
       />
     );
   return (
@@ -104,7 +104,7 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
             css={exceptionItemCss}
             data-test-subj={`${dataTestSubj || ''}exceptionsContainer`}
             direction="column"
-            gutterSize="m"
+            gutterSize="s"
           >
             {exceptions.map((exception) => (
               <EuiFlexItem

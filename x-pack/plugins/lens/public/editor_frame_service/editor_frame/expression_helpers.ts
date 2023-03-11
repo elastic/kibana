@@ -5,13 +5,16 @@
  * 2.0.
  */
 import { Ast, fromExpression } from '@kbn/interpreter';
+import type { DateRange } from '../../../common/types';
 import { DatasourceStates } from '../../state_management';
 import { Visualization, DatasourceMap, DatasourceLayers, IndexPatternMap } from '../../types';
 
 export function getDatasourceExpressionsByLayers(
   datasourceMap: DatasourceMap,
   datasourceStates: DatasourceStates,
-  indexPatterns: IndexPatternMap
+  indexPatterns: IndexPatternMap,
+  dateRange: DateRange,
+  searchSessionId?: string
 ): null | Record<string, Ast> {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
 
@@ -24,7 +27,13 @@ export function getDatasourceExpressionsByLayers(
     const layers = datasource.getLayers(state);
 
     layers.forEach((layerId) => {
-      const result = datasource.toExpression(state, layerId, indexPatterns);
+      const result = datasource.toExpression(
+        state,
+        layerId,
+        indexPatterns,
+        dateRange,
+        searchSessionId
+      );
       if (result) {
         datasourceExpressions.push([layerId, result]);
       }
@@ -53,6 +62,8 @@ export function buildExpression({
   title,
   description,
   indexPatterns,
+  dateRange,
+  searchSessionId,
 }: {
   title?: string;
   description?: string;
@@ -62,6 +73,8 @@ export function buildExpression({
   datasourceStates: DatasourceStates;
   datasourceLayers: DatasourceLayers;
   indexPatterns: IndexPatternMap;
+  searchSessionId?: string;
+  dateRange: DateRange;
 }): Ast | null {
   if (visualization === null) {
     return null;
@@ -70,7 +83,9 @@ export function buildExpression({
   const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
     datasourceMap,
     datasourceStates,
-    indexPatterns
+    indexPatterns,
+    dateRange,
+    searchSessionId
   );
 
   const visualizationExpression = visualization.toExpression(

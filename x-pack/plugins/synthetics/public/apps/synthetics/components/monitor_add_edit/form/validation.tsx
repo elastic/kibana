@@ -162,6 +162,8 @@ const validateBrowser: ValidationLibrary = {
   [ConfigKey.LATENCY]: ({ [ConfigKey.LATENCY]: latency }) => validateThrottleValue(latency, true),
   [ConfigKey.PLAYWRIGHT_OPTIONS]: ({ [ConfigKey.PLAYWRIGHT_OPTIONS]: playwrightOptions }) =>
     playwrightOptions ? !validJSONFormat(playwrightOptions) : false,
+  [ConfigKey.PARAMS]: ({ [ConfigKey.PARAMS]: params }) =>
+    params ? !validJSONFormat(params) : false,
 };
 
 export type ValidateDictionary = Record<DataStream, Validation>;

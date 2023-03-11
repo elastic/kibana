@@ -13,7 +13,7 @@ import type {
   ResponseErrorBody,
 } from '@kbn/core-http-browser';
 
-import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
+import { EVENT_OUTCOME } from '../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../common/event_outcome';
 import {
   DEBOUNCE_INTERVAL,
@@ -73,7 +73,6 @@ export function useFailedTransactionsCorrelations() {
       overallHistogram: undefined,
       totalDocCount: undefined,
       errorHistogram: undefined,
-      fieldStats: undefined,
     });
     setResponse.flush();
 
@@ -249,22 +248,6 @@ export function useFailedTransactionsCorrelations() {
         }
       }
 
-      setResponse.flush();
-
-      const { stats } = await callApmApi(
-        'POST /internal/apm/correlations/field_stats/transactions',
-        {
-          signal: abortCtrl.current.signal,
-          params: {
-            body: {
-              ...fetchParams,
-              fieldsToSample: [...fieldsToSample],
-            },
-          },
-        }
-      );
-
-      responseUpdate.fieldStats = stats;
       setResponse({
         ...responseUpdate,
         fallbackResult,

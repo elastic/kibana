@@ -11,6 +11,7 @@ import type {
   ExceptionListSchema,
   UseExceptionListsProps,
   Pagination,
+  Sort,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { fetchExceptionLists } from '@kbn/securitysolution-list-api';
 
@@ -22,13 +23,20 @@ export type ReturnExceptionLists = [
   exceptionLists: ExceptionListSchema[],
   pagination: Pagination,
   setPagination: React.Dispatch<React.SetStateAction<Pagination>>,
-  fetchLists: Func | null
+  fetchLists: Func | null,
+  sort: Sort,
+  setSort: React.Dispatch<React.SetStateAction<Sort>>
 ];
 
 const DEFAULT_PAGINATION = {
   page: 1,
   perPage: 20,
   total: 0,
+};
+
+const DEFAULT_SORT = {
+  field: 'created_at',
+  order: 'desc',
 };
 
 /**
@@ -51,9 +59,11 @@ export const useExceptionLists = ({
   namespaceTypes,
   notifications,
   hideLists = [],
+  initialSort = DEFAULT_SORT,
 }: UseExceptionListsProps): ReturnExceptionLists => {
   const [exceptionLists, setExceptionLists] = useState<ExceptionListSchema[]>([]);
   const [pagination, setPagination] = useState<Pagination>(initialPagination);
+  const [sort, setSort] = useState<Sort>(initialSort);
   const [loading, setLoading] = useState(true);
   const abortCtrlRef = useRef<AbortController>();
 
@@ -87,6 +97,7 @@ export const useExceptionLists = ({
           page: pagination.page,
           perPage: pagination.perPage,
         },
+        sort,
         signal: abortCtrlRef.current.signal,
       });
 
@@ -115,6 +126,7 @@ export const useExceptionLists = ({
     notifications.toasts,
     pagination.page,
     pagination.perPage,
+    sort,
   ]);
 
   useEffect(() => {
@@ -125,5 +137,5 @@ export const useExceptionLists = ({
     };
   }, [fetchData]);
 
-  return [loading, exceptionLists, pagination, setPagination, fetchData];
+  return [loading, exceptionLists, pagination, setPagination, fetchData, sort, setSort];
 };

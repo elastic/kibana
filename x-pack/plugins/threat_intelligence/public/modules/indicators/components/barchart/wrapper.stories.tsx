@@ -14,10 +14,11 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
+import { BARCHART_AGGREGATION_NAME } from '../../../../../common/constants';
 import { StoryProvidersComponent } from '../../../../common/mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
 import { IndicatorsBarChartWrapper } from '.';
-import { Aggregation, AGGREGATION_NAME, ChartSeries } from '../../services';
+import { Aggregation, ChartSeries } from '../../services';
 
 export default {
   component: IndicatorsBarChartWrapper,
@@ -84,7 +85,7 @@ const dataServiceMock = {
       of({
         rawResponse: {
           aggregations: {
-            [AGGREGATION_NAME]: {
+            [BARCHART_AGGREGATION_NAME]: {
               buckets: [aggregation1, aggregation2],
             },
           },

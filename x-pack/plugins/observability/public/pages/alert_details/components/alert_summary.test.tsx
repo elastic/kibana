@@ -10,11 +10,8 @@ import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/u
 import { render } from '../../../utils/test_helper';
 import { AlertSummary } from './alert_summary';
 import { asDuration } from '../../../../common/utils/formatters';
-import { kibanaStartMock } from '../../../utils/kibana_react.mock';
-import { useKibana } from '../../../utils/kibana_react';
-import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { waitFor } from '@testing-library/react';
 import { alertWithTags, alertWithNoData, tags } from '../mock/alert';
+import { alertSummaryFieldsMock } from '../mock/alert_summary_fields';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -23,17 +20,6 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('../../../utils/kibana_react');
 
-const useKibanaMock = useKibana as jest.Mock;
-
-const mockKibana = () => {
-  useKibanaMock.mockReturnValue({
-    services: {
-      ...kibanaStartMock.startContract(),
-      triggersActionsUi: triggersActionsUiMock.createStart(),
-    },
-  });
-};
-
 describe('Alert summary', () => {
   jest
     .spyOn(useUiSettingHook, 'useUiSetting')
@@ -41,11 +27,12 @@ describe('Alert summary', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockKibana();
   });
 
   it('should show alert data', async () => {
-    const alertSummary = render(<AlertSummary alert={alertWithTags} />);
+    const alertSummary = render(
+      <AlertSummary alert={alertWithTags} alertSummaryFields={alertSummaryFieldsMock} />
+    );
 
     expect(alertSummary.queryByText('1957')).toBeInTheDocument();
     expect(alertSummary.queryByText(asDuration(882076000))).toBeInTheDocument();
@@ -54,7 +41,6 @@ describe('Alert summary', () => {
     expect(
       alertSummary.getByText('Sep 2, 2021 @ 09:08:51.750', { exact: false })
     ).toBeInTheDocument();
-    await waitFor(() => expect(alertSummary.queryByTestId('tagsOutPopover')).toBeInTheDocument());
     expect(alertSummary.queryByText(tags[0])).toBeInTheDocument();
   });
 
@@ -63,8 +49,5 @@ describe('Alert summary', () => {
 
     expect(alertSummary.queryByTestId('noAlertStatus')).toBeInTheDocument();
     expect(alertSummary.queryByTestId('noAlertStatus')).toHaveTextContent('-');
-    await waitFor(() =>
-      expect(alertSummary.queryByTestId('tagsOutPopover')).not.toBeInTheDocument()
-    );
   });
 });

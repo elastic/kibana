@@ -26,6 +26,7 @@ import { disableEventDefaults, focusNextElement } from './helpers';
 import { useTreeViewContext } from '../contexts';
 import { TreeViewIcon } from '../tree_view_icon';
 import type { DynamicTreeViewProps, DynamicTreeViewItemProps } from './types';
+import { BREADCRUMBS_CLUSTER_TREE_VIEW_LEVELS } from '../translations';
 
 const BUTTON_TEST_ID = 'kubernetesSecurity:dynamicTreeViewButton';
 
@@ -309,6 +310,8 @@ const DynamicTreeViewItem = ({
     );
   }, [aggData.key, aggData.key_as_string, depth, selected, selectionDepth, tree]);
 
+  const clusterLevel = BREADCRUMBS_CLUSTER_TREE_VIEW_LEVELS[tree[depth].type];
+
   return (
     <li
       className={`euiTreeView__node
@@ -332,7 +335,7 @@ const DynamicTreeViewItem = ({
           />
         )}
         <TreeViewIcon {...tree[depth].iconProps} css={styles.labelIcon} />
-        <EuiToolTip content={aggData.key}>
+        <EuiToolTip content={`${clusterLevel}: ${aggData.key}`}>
           <span className="euiTreeView__nodeLabel">{aggData.key_as_string || aggData.key}</span>
         </EuiToolTip>
       </button>

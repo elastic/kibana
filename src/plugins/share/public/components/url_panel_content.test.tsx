@@ -61,6 +61,22 @@ describe('share url panel content', () => {
     expect(component).toMatchSnapshot();
   });
 
+  test('should use custom savedObjectUrl if provided for saved object export', () => {
+    const component = shallow(
+      <UrlPanelContent
+        {...defaultProps}
+        objectId="id1"
+        allowShortUrl={false}
+        shareableUrlForSavedObject="socustomurl:id1#"
+      />
+    );
+
+    act(() => {
+      component.find(EuiRadioGroup).prop('onChange')!(ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT);
+    });
+    expect(component.find(EuiCopy).prop('textToCopy')).toEqual('socustomurl:id1#?_g=');
+  });
+
   test('should hide short url section when allowShortUrl is false', () => {
     const component = shallow(
       <UrlPanelContent {...defaultProps} allowShortUrl={false} objectId="id1" />

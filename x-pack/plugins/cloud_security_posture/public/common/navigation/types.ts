@@ -8,14 +8,14 @@ export interface CspNavigationItem {
   readonly name: string;
   readonly path: string;
   readonly disabled?: boolean;
-  readonly exact?: boolean;
 }
 
 export interface CspPageNavigationItem extends CspNavigationItem {
   id: CloudSecurityPosturePageId;
 }
 
-export type CspPage = 'dashboard' | 'findings' | 'benchmarks' | 'rules';
+export type CspPage = 'dashboard' | 'findings' | 'benchmarks';
+export type CspBenchmarksPage = 'rules';
 
 /**
  * All the IDs for the cloud security posture pages.
@@ -25,10 +25,9 @@ export type CloudSecurityPosturePageId =
   | 'cloud_security_posture-dashboard'
   | 'cloud_security_posture-findings'
   | 'cloud_security_posture-benchmarks'
-  | 'cloud_security_posture-rules';
+  | 'cloud_security_posture-benchmarks-rules';
 
-/** An entry for the cloud security posture breadcrumbs implementation. */
-export interface BreadcrumbEntry {
-  readonly name: string;
-  readonly path: string;
+export interface CspIntegrationDocNavigationItem {
+  overviewPath: string;
+  getStartedPath: string;
 }

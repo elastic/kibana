@@ -13,7 +13,7 @@ type MockInstances<T extends Record<string, any>> = {
     : never;
 };
 
-type RuleDataClientMock = jest.Mocked<Omit<IRuleDataClient, 'getWriter' | 'getReader'>> & {
+export type RuleDataClientMock = jest.Mocked<Omit<IRuleDataClient, 'getWriter' | 'getReader'>> & {
   getReader: (...args: Parameters<IRuleDataClient['getReader']>) => MockInstances<IRuleDataReader>;
   getWriter: (
     ...args: Parameters<IRuleDataClient['getWriter']>

@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { AnalyticsServiceSetup, AnalyticsServiceStart } from './src/types';
+export type {
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+  KbnAnalyticsWindowApi,
+} from './src/types';

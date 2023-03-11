@@ -14,4 +14,5 @@ import type { IUiSettingsClient } from './ui_settings_client';
  */
 export interface UiSettingsRequestHandlerContext {
   client: IUiSettingsClient;
+  globalClient: IUiSettingsClient;
 }

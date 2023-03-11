@@ -70,6 +70,7 @@ export function esdocs(): ExpressionFunctionDefinition<
       },
       index: {
         types: ['string'],
+        aliases: ['dataView'],
         default: '_all',
         help: argHelp.index,
       },

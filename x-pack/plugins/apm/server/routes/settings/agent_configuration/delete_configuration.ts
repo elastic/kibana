@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { Setup } from '../../../lib/helpers/setup_request';
+import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/get_apm_indices';
 
 export async function deleteConfiguration({
   configurationId,
-  setup,
+  internalESClient,
 }: {
   configurationId: string;
-  setup: Setup;
+  internalESClient: APMInternalESClient;
 }) {
-  const { internalClient, indices } = setup;
-
   const params = {
     refresh: 'wait_for' as const,
-    index: indices.apmAgentConfigurationIndex,
+    index: APM_AGENT_CONFIGURATION_INDEX,
     id: configurationId,
   };
 
-  return internalClient.delete('delete_agent_configuration', params);
+  return internalESClient.delete('delete_agent_configuration', params);
 }

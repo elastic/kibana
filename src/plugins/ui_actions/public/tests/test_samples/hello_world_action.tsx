@@ -9,10 +9,10 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiFlyoutBody } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
-import { toMountPoint, reactToUiComponent } from '@kbn/kibana-react-plugin/public';
-import { createAction, Action } from '../../actions';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { ActionDefinition } from '../../actions';
 
-const ReactMenuItem: React.FC = () => {
+const MenuItem: React.FC = () => {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>Hello world!</EuiFlexItem>
@@ -23,16 +23,14 @@ const ReactMenuItem: React.FC = () => {
   );
 };
 
-const UiMenuItem = reactToUiComponent(ReactMenuItem);
-
 export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
 
-export function createHelloWorldAction(overlays: CoreStart['overlays']): Action {
-  return createAction({
+export function createHelloWorldAction(overlays: CoreStart['overlays']): ActionDefinition {
+  return {
     id: ACTION_HELLO_WORLD,
     type: ACTION_HELLO_WORLD,
     getIconType: () => 'lock',
-    MenuItem: UiMenuItem,
+    MenuItem,
     execute: async () => {
       overlays.openFlyout(
         toMountPoint(<EuiFlyoutBody>Hello World, I am a hello world action!</EuiFlyoutBody>),
@@ -42,5 +40,5 @@ export function createHelloWorldAction(overlays: CoreStart['overlays']): Action 
         }
       );
     },
-  });
+  };
 }

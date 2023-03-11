@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
   createExecutionEnqueuerFunction,
@@ -79,6 +79,7 @@ describe('execute()', () => {
         actionId: '123',
         params: { baz: false },
         executionId: '123abc',
+        source: 'HTTP_REQUEST',
         apiKey: Buffer.from('123:abc').toString('base64'),
       },
       {
@@ -151,6 +152,7 @@ describe('execute()', () => {
         params: { baz: false },
         executionId: '123abc',
         consumer: 'test-consumer',
+        source: 'HTTP_REQUEST',
         apiKey: Buffer.from('123:abc').toString('base64'),
       },
       {
@@ -213,6 +215,7 @@ describe('execute()', () => {
         params: { baz: false },
         apiKey: Buffer.from('123:abc').toString('base64'),
         executionId: '123abc',
+        source: 'HTTP_REQUEST',
         relatedSavedObjects: [
           {
             id: 'related_some-type_0',
@@ -256,7 +259,7 @@ describe('execute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuidv4() };
 
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -303,6 +306,7 @@ describe('execute()', () => {
         actionId: '123',
         params: { baz: false },
         executionId: '123abc',
+        source: 'SAVED_OBJECT',
         apiKey: Buffer.from('123:abc').toString('base64'),
       },
       {
@@ -334,7 +338,7 @@ describe('execute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuidv4() };
 
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -390,6 +394,7 @@ describe('execute()', () => {
         params: { baz: false },
         apiKey: Buffer.from('123:abc').toString('base64'),
         executionId: '123abc',
+        source: 'SAVED_OBJECT',
         relatedSavedObjects: [
           {
             id: 'related_some-type_0',
@@ -430,6 +435,7 @@ describe('execute()', () => {
         spaceId: 'default',
         executionId: '123abc',
         apiKey: null,
+        source: asHttpRequestExecutionSource(request),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
@@ -460,6 +466,7 @@ describe('execute()', () => {
         spaceId: 'default',
         executionId: '123abc',
         apiKey: null,
+        source: asHttpRequestExecutionSource(request),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Unable to execute action because no secrets are defined for the \\"mock-action\\" connector."`
@@ -493,6 +500,7 @@ describe('execute()', () => {
         spaceId: 'default',
         executionId: '123abc',
         apiKey: null,
+        source: asHttpRequestExecutionSource(request),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });
@@ -537,6 +545,7 @@ describe('execute()', () => {
       spaceId: 'default',
       executionId: '123abc',
       apiKey: null,
+      source: asHttpRequestExecutionSource(request),
     });
 
     expect(mockedActionTypeRegistry.ensureActionTypeEnabled).not.toHaveBeenCalled();
@@ -605,24 +614,28 @@ describe('bulkExecute()', () => {
       ]
     `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([{ id: '123', type: 'action' }]);
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: false },
-          executionId: '123abc',
-          apiKey: Buffer.from('123:abc').toString('base64'),
-        },
-        references: [
-          {
-            id: '123',
-            name: 'actionRef',
-            type: 'action',
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+            params: { baz: false },
+            executionId: '123abc',
+            source: 'HTTP_REQUEST',
+            apiKey: Buffer.from('123:abc').toString('base64'),
           },
-        ],
-      },
-    ]);
+          references: [
+            {
+              id: '123',
+              name: 'actionRef',
+              type: 'action',
+            },
+          ],
+        },
+      ],
+      { refresh: false }
+    );
     expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('123', 'mock-action', {
       notifyUsage: true,
     });
@@ -691,25 +704,29 @@ describe('bulkExecute()', () => {
       ]
     `);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([{ id: '123', type: 'action' }]);
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: false },
-          executionId: '123abc',
-          consumer: 'test-consumer',
-          apiKey: Buffer.from('123:abc').toString('base64'),
-        },
-        references: [
-          {
-            id: '123',
-            name: 'actionRef',
-            type: 'action',
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+            params: { baz: false },
+            executionId: '123abc',
+            consumer: 'test-consumer',
+            source: 'HTTP_REQUEST',
+            apiKey: Buffer.from('123:abc').toString('base64'),
           },
-        ],
-      },
-    ]);
+          references: [
+            {
+              id: '123',
+              name: 'actionRef',
+              type: 'action',
+            },
+          ],
+        },
+      ],
+      { refresh: false }
+    );
     expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('123', 'mock-action', {
       notifyUsage: true,
     });
@@ -763,37 +780,41 @@ describe('bulkExecute()', () => {
         ],
       },
     ]);
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: false },
-          apiKey: Buffer.from('123:abc').toString('base64'),
-          executionId: '123abc',
-          relatedSavedObjects: [
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+            params: { baz: false },
+            apiKey: Buffer.from('123:abc').toString('base64'),
+            executionId: '123abc',
+            source: 'HTTP_REQUEST',
+            relatedSavedObjects: [
+              {
+                id: 'related_some-type_0',
+                namespace: 'some-namespace',
+                type: 'some-type',
+                typeId: 'some-typeId',
+              },
+            ],
+          },
+          references: [
             {
-              id: 'related_some-type_0',
-              namespace: 'some-namespace',
+              id: '123',
+              name: 'actionRef',
+              type: 'action',
+            },
+            {
+              id: 'some-id',
+              name: 'related_some-type_0',
               type: 'some-type',
-              typeId: 'some-typeId',
             },
           ],
         },
-        references: [
-          {
-            id: '123',
-            name: 'actionRef',
-            type: 'action',
-          },
-          {
-            id: 'some-id',
-            name: 'related_some-type_0',
-            type: 'some-type',
-          },
-        ],
-      },
-    ]);
+      ],
+      { refresh: false }
+    );
   });
 
   test('schedules the action with all given parameters with a preconfigured action', async () => {
@@ -813,7 +834,7 @@ describe('bulkExecute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuidv4() };
 
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -868,24 +889,28 @@ describe('bulkExecute()', () => {
       ]
   `);
     expect(savedObjectsClient.get).not.toHaveBeenCalled();
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: false },
-          executionId: '123abc',
-          apiKey: Buffer.from('123:abc').toString('base64'),
-        },
-        references: [
-          {
-            id: source.id,
-            name: 'source',
-            type: source.type,
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+            params: { baz: false },
+            executionId: '123abc',
+            source: 'SAVED_OBJECT',
+            apiKey: Buffer.from('123:abc').toString('base64'),
           },
-        ],
-      },
-    ]);
+          references: [
+            {
+              id: source.id,
+              name: 'source',
+              type: source.type,
+            },
+          ],
+        },
+      ],
+      { refresh: false }
+    );
   });
 
   test('schedules the action with all given parameters with a preconfigured action and relatedSavedObjects', async () => {
@@ -905,7 +930,7 @@ describe('bulkExecute()', () => {
         },
       ],
     });
-    const source = { type: 'alert', id: uuid.v4() };
+    const source = { type: 'alert', id: uuidv4() };
 
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -968,37 +993,41 @@ describe('bulkExecute()', () => {
       ]
   `);
     expect(savedObjectsClient.get).not.toHaveBeenCalled();
-    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith([
-      {
-        type: 'action_task_params',
-        attributes: {
-          actionId: '123',
-          params: { baz: false },
-          apiKey: Buffer.from('123:abc').toString('base64'),
-          executionId: '123abc',
-          relatedSavedObjects: [
+    expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+            params: { baz: false },
+            apiKey: Buffer.from('123:abc').toString('base64'),
+            executionId: '123abc',
+            source: 'SAVED_OBJECT',
+            relatedSavedObjects: [
+              {
+                id: 'related_some-type_0',
+                namespace: 'some-namespace',
+                type: 'some-type',
+                typeId: 'some-typeId',
+              },
+            ],
+          },
+          references: [
             {
-              id: 'related_some-type_0',
-              namespace: 'some-namespace',
+              id: source.id,
+              name: 'source',
+              type: source.type,
+            },
+            {
+              id: 'some-id',
+              name: 'related_some-type_0',
               type: 'some-type',
-              typeId: 'some-typeId',
             },
           ],
         },
-        references: [
-          {
-            id: source.id,
-            name: 'source',
-            type: source.type,
-          },
-          {
-            id: 'some-id',
-            name: 'related_some-type_0',
-            type: 'some-type',
-          },
-        ],
-      },
-    ]);
+      ],
+      { refresh: false }
+    );
   });
 
   test('throws when passing isESOCanEncrypt with false as a value', async () => {
@@ -1016,6 +1045,7 @@ describe('bulkExecute()', () => {
           spaceId: 'default',
           executionId: '123abc',
           apiKey: null,
+          source: asHttpRequestExecutionSource(request),
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1052,6 +1082,7 @@ describe('bulkExecute()', () => {
           spaceId: 'default',
           executionId: '123abc',
           apiKey: null,
+          source: asHttpRequestExecutionSource(request),
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1091,6 +1122,7 @@ describe('bulkExecute()', () => {
           spaceId: 'default',
           executionId: '123abc',
           apiKey: null,
+          source: asHttpRequestExecutionSource(request),
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
@@ -1147,6 +1179,7 @@ describe('bulkExecute()', () => {
         spaceId: 'default',
         executionId: '123abc',
         apiKey: null,
+        source: asHttpRequestExecutionSource(request),
       },
     ]);
 

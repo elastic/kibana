@@ -14,7 +14,6 @@ import { getErrorsForDateReference } from './utils';
 import type { OperationDefinition } from '..';
 import { combineErrorMessages, getFormatFromPreviousColumn } from '../helpers';
 import { FormBasedLayer } from '../../../types';
-import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
 
 type OverallMetricIndexPatternColumn<T extends string> = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
@@ -110,7 +109,6 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
             defaultMessage: 'Normalize by unit',
           })
         ),
-        getDisallowedPreviousShiftMessage(layer, columnId),
         !(layer.columns[columnId] as TimeScaleIndexPatternColumn).params.unit
           ? [
               i18n.translate('xpack.lens.indexPattern.timeScale.missingUnit', {
@@ -123,7 +121,7 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
         ) === -1
           ? [
               i18n.translate('xpack.lens.indexPattern.timeScale.wrongUnit', {
-                defaultMessage: 'Unknown unit specified, use s,m,h or d.',
+                defaultMessage: 'Unknown unit specified: use s, m, h or d.',
               }),
             ]
           : [],

@@ -57,12 +57,13 @@ export class IndexPatternsFetcher {
   async getFieldsForWildcard(options: {
     pattern: string | string[];
     metaFields?: string[];
-    fieldCapsOptions?: { allow_no_indices: boolean };
+    fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean };
     type?: string;
     rollupIndex?: string;
-    filter?: QueryDslQueryContainer;
+    indexFilter?: QueryDslQueryContainer;
+    fields?: string[];
   }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
-    const { pattern, metaFields = [], fieldCapsOptions, type, rollupIndex, filter } = options;
+    const { pattern, metaFields = [], fieldCapsOptions, type, rollupIndex, indexFilter } = options;
     const patternList = Array.isArray(pattern) ? pattern : pattern.split(',');
     const allowNoIndices = fieldCapsOptions
       ? fieldCapsOptions.allow_no_indices
@@ -78,8 +79,10 @@ export class IndexPatternsFetcher {
       metaFields,
       fieldCapsOptions: {
         allow_no_indices: allowNoIndices,
+        include_unmapped: fieldCapsOptions?.includeUnmapped,
       },
-      filter,
+      indexFilter,
+      fields: options.fields || ['*'],
     });
     if (type === 'rollup' && rollupIndex) {
       const rollupFields: FieldDescriptor[] = [];
@@ -123,7 +126,7 @@ export class IndexPatternsFetcher {
       patternList
         .map(async (index) => {
           // perserve negated patterns
-          if (index.startsWith('-')) {
+          if (index.startsWith('-') || index.includes(':-')) {
             return true;
           }
           const searchResponse = await this.elasticsearchClient.fieldCaps({

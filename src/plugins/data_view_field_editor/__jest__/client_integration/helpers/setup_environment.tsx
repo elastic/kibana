@@ -17,6 +17,8 @@ import { notificationServiceMock, uiSettingsServiceMock } from '@kbn/core/public
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsMock as fieldFormats } from '@kbn/field-formats-plugin/common/mocks';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+import { PreviewController } from '../../../public/components/preview/preview_controller';
 import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
 import { FieldPreviewProvider } from '../../../public/components/preview';
 import { initApi, ApiService } from '../../../public/lib';
@@ -115,14 +117,16 @@ export const WithFieldEditorDependencies =
       return new MockDefaultFieldFormat();
     });
 
-    const dependencies: Context = {
-      dataView: {
+    const dataView = createStubDataView({
+      spec: {
         title: indexPatternNameForTest,
-        getIndexPattern: () => indexPatternNameForTest,
-        name: indexPatternNameForTest,
-        getName: () => indexPatternNameForTest,
-        fields: { getAll: spyIndexPatternGetAllFields },
-      } as any,
+      },
+    });
+
+    jest.spyOn(dataView.fields, 'getAll').mockImplementation(spyIndexPatternGetAllFields);
+
+    const dependencies: Context = {
+      dataView,
       uiSettings: uiSettingsServiceMock.createStartContract(),
       fieldTypeToProcess: 'runtime',
       existingConcreteFields: [],
@@ -145,10 +149,11 @@ export const WithFieldEditorDependencies =
     };
 
     const mergedDependencies = merge({}, dependencies, overridingDependencies);
+    const previewController = new PreviewController({ dataView, search });
 
     return (
       <FieldEditorProvider {...mergedDependencies}>
-        <FieldPreviewProvider>
+        <FieldPreviewProvider controller={previewController}>
           <Comp {...props} />
         </FieldPreviewProvider>
       </FieldEditorProvider>

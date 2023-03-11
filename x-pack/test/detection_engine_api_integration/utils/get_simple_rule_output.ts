@@ -6,15 +6,15 @@
  */
 
 import type {
-  FullResponseSchema,
-  SharedResponseSchema,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+  RuleResponse,
+  SharedResponseProps,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { removeServerGeneratedProperties } from './remove_server_generated_properties';
 
 export const getMockSharedResponseSchema = (
   ruleId = 'rule-1',
   enabled = false
-): SharedResponseSchema => ({
+): SharedResponseProps => ({
   actions: [],
   author: [],
   created_by: 'elastic',
@@ -43,6 +43,7 @@ export const getMockSharedResponseSchema = (
   throttle: 'no_actions',
   exceptions_list: [],
   version: 1,
+  revision: 0,
   id: 'id',
   updated_at: '2020-07-08T16:36:32.377Z',
   created_at: '2020-07-08T16:36:32.377Z',
@@ -61,7 +62,7 @@ export const getMockSharedResponseSchema = (
   namespace: undefined,
 });
 
-const getQueryRuleOutput = (ruleId = 'rule-1', enabled = false): FullResponseSchema => ({
+const getQueryRuleOutput = (ruleId = 'rule-1', enabled = false): RuleResponse => ({
   ...getMockSharedResponseSchema(ruleId, enabled),
   index: ['auditbeat-*'],
   language: 'kuery',
@@ -71,6 +72,7 @@ const getQueryRuleOutput = (ruleId = 'rule-1', enabled = false): FullResponseSch
   filters: undefined,
   saved_id: undefined,
   response_actions: undefined,
+  alert_suppression: undefined,
 });
 
 /**

@@ -394,10 +394,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:visualize:legacyPieChartsLibrary': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'visualization:visualize:legacyHeatmapChartsLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -422,10 +418,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:enableNewSyntheticsView': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:maxSuggestions': {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
@@ -439,6 +431,26 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmEnableServiceMetrics': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmEnableContinuousRollups': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmAgentExplorerView': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmAWSLambdaPriceFactor': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmAWSLambdaRequestCostPerMillion': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingElasticsearchPlugin': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -506,10 +518,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'lens:useFieldExistenceSampling': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'metrics:allowCheckingForFailedShards': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -517,10 +525,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'observability:apmDefaultServiceEnvironment': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
-  },
-  'observability:apmOperationsTab': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmLabsButton': {
     type: 'boolean',
@@ -546,6 +550,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmEnableCriticalPath': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:enableInfrastructureHostsView': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -559,10 +567,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'visualization:visualize:legacyGaugeChartsLibrary': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'enterpriseSearch:enableBehavioralAnalyticsSection': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

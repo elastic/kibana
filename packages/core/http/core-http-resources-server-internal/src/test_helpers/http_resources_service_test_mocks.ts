@@ -14,7 +14,10 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 export function createCoreRequestHandlerContextMock() {
   return {
     core: {
-      uiSettings: { client: uiSettingsServiceMock.createClient() },
+      uiSettings: {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      },
     },
   };
 }

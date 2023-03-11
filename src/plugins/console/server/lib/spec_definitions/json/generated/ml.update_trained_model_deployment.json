@@ -1,0 +1,11 @@
+{
+  "ml.update_trained_model_deployment": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_ml/trained_models/{model_id}/deployment/_update"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-update-trained-model-deployment.html"
+  }
+}

@@ -2,7 +2,5 @@
   "type": "shared-common",
   "id": "@kbn/ci-stats-core",
   "devOnly": true,
-  "owner": "@elastic/kibana-operations",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/kibana-operations"
 }

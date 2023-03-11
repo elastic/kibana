@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from '../cli_plugin/lib/logger';
+import { Logger } from '../cli/logger';
 
 export function list(keystore, command, options = {}) {
   const logger = new Logger(options);

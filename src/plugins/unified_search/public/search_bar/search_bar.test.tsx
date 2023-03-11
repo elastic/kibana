@@ -138,6 +138,7 @@ describe('SearchBar', () => {
   const FILTER_BAR = '[data-test-subj="unifiedFilterBar"]';
   const QUERY_BAR = '.kbnQueryBar';
   const QUERY_INPUT = '[data-test-subj="unifiedQueryInput"]';
+  const QUERY_MENU_BUTTON = '[data-test-subj="showQueryBarMenu"]';
   const EDITOR = '[data-test-subj="unifiedTextLangEditor"]';
 
   beforeEach(() => {
@@ -220,6 +221,20 @@ describe('SearchBar', () => {
     expect(component.find(QUERY_INPUT).length).toBeFalsy();
   });
 
+  it('Should NOT render the query menu button, if disabled', () => {
+    const component = mount(
+      wrapSearchBarInContext({
+        indexPatterns: [mockIndexPattern],
+        screenTitle: 'test screen',
+        onQuerySubmit: noop,
+        query: kqlQuery,
+        showQueryMenu: false,
+      })
+    );
+
+    expect(component.find(QUERY_MENU_BUTTON).length).toBeFalsy();
+  });
+
   it('Should render query bar and filter bar', () => {
     const component = mount(
       wrapSearchBarInContext({
@@ -269,7 +284,7 @@ describe('SearchBar', () => {
         },
       })
     );
-    const queryInput = component.find(QUERY_INPUT).at(0).getDOMNode();
+    const queryInput = component.find(QUERY_INPUT).last().getDOMNode();
     expect(queryInput.querySelector('textarea')).toBeDisabled();
     expect(queryInput.querySelector('[title="Clear input"]')).toBeNull();
 
@@ -277,8 +292,10 @@ describe('SearchBar', () => {
     expect(component.find(EuiSuperUpdateButton).prop('isDisabled')).toBe(true);
     expect(component.find(FilterItems).prop('readOnly')).toBe(true);
 
-    expect(component.find('[data-test-subj="showQueryBarMenu"]').at(0).getDOMNode()).toBeDisabled();
-    expect(component.find('[data-test-subj="addFilter"]').at(0).getDOMNode()).toBeDisabled();
+    expect(
+      component.find('button[data-test-subj="showQueryBarMenu"]').at(0).getDOMNode()
+    ).toBeDisabled();
+    expect(component.find('button[data-test-subj="addFilter"]').at(0).getDOMNode()).toBeDisabled();
 
     expect(component.find(DataViewPicker).prop('isDisabled')).toBe(true);
 

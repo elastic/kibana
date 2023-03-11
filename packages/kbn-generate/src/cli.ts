@@ -13,7 +13,6 @@ import { ContextExtensions } from './generate_command';
 
 import { PackageCommand } from './commands/package_command';
 import { CodeownersCommand } from './commands/codeowners_command';
-import { PackagesBuildManifestCommand } from './commands/packages_build_manifest_command';
 
 /**
  * Runs the generate CLI. Called by `node scripts/generate` and not intended for use outside of that script
@@ -28,6 +27,6 @@ export function runGenerateCli() {
         };
       },
     },
-    [PackageCommand, PackagesBuildManifestCommand, CodeownersCommand]
+    [PackageCommand, CodeownersCommand]
   ).execute();
 }

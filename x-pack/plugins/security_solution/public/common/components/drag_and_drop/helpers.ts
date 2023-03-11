@@ -4,11 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isString, keyBy } from 'lodash/fp';
 import type { DropResult } from 'react-beautiful-dnd';
 import type { Dispatch } from 'redux';
 import type { ActionCreator } from 'typescript-fsa';
-import { getProviderIdFromDraggable } from '@kbn/securitysolution-t-grid';
 
+import { getFieldIdFromDraggable, getProviderIdFromDraggable } from '@kbn/securitysolution-t-grid';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
+import { getScopedActions } from '../../../helpers';
+import type { ColumnHeaderOptions } from '../../../../common/types';
+import { TableId } from '../../../../common/types';
+import type { BrowserField, BrowserFields } from '../../../../common/search_strategy';
 import { dragAndDropActions } from '../../store/actions';
 import type { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { addContentToTimeline } from '../../../timelines/components/timeline/data_providers/helpers';
@@ -177,3 +183,84 @@ export const allowTopN = ({
 
   return isAllowlistedNonBrowserField || (isAggregatable && isAllowedType);
 };
+
+const getAllBrowserFields = (browserFields: BrowserFields): Array<Partial<BrowserField>> =>
+  Object.values(browserFields).reduce<Array<Partial<BrowserField>>>(
+    (acc, namespace) => [
+      ...acc,
+      ...Object.values(namespace.fields != null ? namespace.fields : {}),
+    ],
+    []
+  );
+
+const getAllFieldsByName = (
+  browserFields: BrowserFields
+): { [fieldName: string]: Partial<BrowserField> } =>
+  keyBy('name', getAllBrowserFields(browserFields));
+
+const linkFields: Record<string, string> = {
+  'kibana.alert.rule.name': 'kibana.alert.rule.uuid',
+  'event.module': 'rule.reference',
+};
+
+interface AddFieldToTimelineColumnsParams {
+  defaultsHeader: ColumnHeaderOptions[];
+  browserFields: BrowserFields;
+  dispatch: Dispatch;
+  result: DropResult;
+  scopeId: string;
+}
+
+export const addFieldToColumns = ({
+  browserFields,
+  dispatch,
+  result,
+  scopeId,
+  defaultsHeader,
+}: AddFieldToTimelineColumnsParams): void => {
+  const fieldId = getFieldIdFromDraggable(result);
+  const allColumns = getAllFieldsByName(browserFields);
+  const column = allColumns[fieldId];
+  const initColumnHeader =
+    scopeId === TableId.alertsOnAlertsPage || scopeId === TableId.alertsOnRuleDetailsPage
+      ? defaultsHeader.find((c) => c.id === fieldId) ?? {}
+      : {};
+
+  const scopedActions = getScopedActions(scopeId);
+  if (column != null && scopedActions) {
+    dispatch(
+      scopedActions.upsertColumn({
+        column: {
+          category: column.category,
+          columnHeaderType: 'not-filtered',
+          description: isString(column.description) ? column.description : undefined,
+          example: isString(column.example) ? column.example : undefined,
+          id: fieldId,
+          linkField: linkFields[fieldId] ?? undefined,
+          type: column.type,
+          aggregatable: column.aggregatable,
+          initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+          ...initColumnHeader,
+        },
+        id: scopeId,
+        index: result.destination != null ? result.destination.index : 0,
+      })
+    );
+  } else if (scopedActions) {
+    // create a column definition, because it doesn't exist in the browserFields:
+    dispatch(
+      scopedActions.upsertColumn({
+        column: {
+          columnHeaderType: 'not-filtered',
+          id: fieldId,
+          initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+        },
+        id: scopeId,
+        index: result.destination != null ? result.destination.index : 0,
+      })
+    );
+  }
+};
+
+export const getIdFromColumnDroppableId = (droppableId: string) =>
+  droppableId.slice(droppableId.lastIndexOf('.') + 1);

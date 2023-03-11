@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-url-state",
+  "owner": "@elastic/ml-ui"
+}

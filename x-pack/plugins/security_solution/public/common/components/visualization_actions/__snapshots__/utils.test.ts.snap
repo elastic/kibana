@@ -1,0 +1,246 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getRequestsAndResponses should parse requests and responses 1`] = `
+Object {
+  "requests": Array [
+    "{
+  \\"body\\": {
+    \\"aggs\\": {
+      \\"0\\": {
+        \\"date_histogram\\": {
+          \\"field\\": \\"@timestamp\\",
+          \\"fixed_interval\\": \\"30m\\",
+          \\"time_zone\\": \\"Europe/London\\",
+          \\"min_doc_count\\": 1
+        },
+        \\"aggs\\": {
+          \\"1-bucket\\": {
+            \\"filter\\": {
+              \\"bool\\": {
+                \\"must\\": [],
+                \\"filter\\": [
+                  {
+                    \\"bool\\": {
+                      \\"should\\": [
+                        {
+                          \\"term\\": {
+                            \\"event.outcome\\": \\"success\\"
+                          }
+                        }
+                      ],
+                      \\"minimum_should_match\\": 1
+                    }
+                  }
+                ],
+                \\"should\\": [],
+                \\"must_not\\": []
+              }
+            }
+          }
+        }
+      }
+    },
+    \\"size\\": 0,
+    \\"script_fields\\": {},
+    \\"stored_fields\\": [
+      \\"*\\"
+    ],
+    \\"runtime_mappings\\": {},
+    \\"_source\\": {
+      \\"excludes\\": []
+    },
+    \\"query\\": {
+      \\"bool\\": {
+        \\"must\\": [],
+        \\"filter\\": [
+          {
+            \\"bool\\": {
+              \\"filter\\": [
+                {
+                  \\"term\\": {
+                    \\"event.category\\": \\"authentication\\"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            \\"bool\\": {
+              \\"should\\": [
+                {
+                  \\"match_phrase\\": {
+                    \\"_index\\": \\"auditbeat-*\\"
+                  }
+                },
+                {
+                  \\"match_phrase\\": {
+                    \\"_index\\": \\"packetbeat-*\\"
+                  }
+                }
+              ],
+              \\"minimum_should_match\\": 1
+            }
+          },
+          {
+            \\"range\\": {
+              \\"@timestamp\\": {
+                \\"format\\": \\"strict_date_optional_time\\",
+                \\"gte\\": \\"2023-01-09T00:00:00.000Z\\",
+                \\"lte\\": \\"2023-01-09T23:59:59.999Z\\"
+              }
+            }
+          }
+        ],
+        \\"should\\": [],
+        \\"must_not\\": []
+      }
+    }
+  },
+  \\"index\\": [
+    \\"auditbeat-*\\",
+    \\" packetbeat-*\\"
+  ]
+}",
+    "{
+  \\"body\\": {
+    \\"aggs\\": {
+      \\"0\\": {
+        \\"date_histogram\\": {
+          \\"field\\": \\"@timestamp\\",
+          \\"fixed_interval\\": \\"30m\\",
+          \\"time_zone\\": \\"Europe/London\\",
+          \\"min_doc_count\\": 1
+        },
+        \\"aggs\\": {
+          \\"1-bucket\\": {
+            \\"filter\\": {
+              \\"bool\\": {
+                \\"must\\": [],
+                \\"filter\\": [
+                  {
+                    \\"bool\\": {
+                      \\"should\\": [
+                        {
+                          \\"term\\": {
+                            \\"event.outcome\\": \\"failure\\"
+                          }
+                        }
+                      ],
+                      \\"minimum_should_match\\": 1
+                    }
+                  }
+                ],
+                \\"should\\": [],
+                \\"must_not\\": []
+              }
+            }
+          }
+        }
+      }
+    },
+    \\"size\\": 0,
+    \\"script_fields\\": {},
+    \\"stored_fields\\": [
+      \\"*\\"
+    ],
+    \\"runtime_mappings\\": {},
+    \\"_source\\": {
+      \\"excludes\\": []
+    },
+    \\"query\\": {
+      \\"bool\\": {
+        \\"must\\": [],
+        \\"filter\\": [
+          {
+            \\"bool\\": {
+              \\"filter\\": [
+                {
+                  \\"term\\": {
+                    \\"event.category\\": \\"authentication\\"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            \\"bool\\": {
+              \\"should\\": [
+                {
+                  \\"match_phrase\\": {
+                    \\"_index\\": \\"auditbeat-*\\"
+                  }
+                },
+                {
+                  \\"match_phrase\\": {
+                    \\"_index\\": \\"packetbeat-*\\"
+                  }
+                }
+              ],
+              \\"minimum_should_match\\": 1
+            }
+          },
+          {
+            \\"range\\": {
+              \\"@timestamp\\": {
+                \\"format\\": \\"strict_date_optional_time\\",
+                \\"gte\\": \\"2023-01-09T00:00:00.000Z\\",
+                \\"lte\\": \\"2023-01-09T23:59:59.999Z\\"
+              }
+            }
+          }
+        ],
+        \\"should\\": [],
+        \\"must_not\\": []
+      }
+    }
+  },
+  \\"index\\": [
+    \\"auditbeat-*\\",
+    \\" packetbeat-*\\"
+  ]
+}",
+  ],
+  "responses": Array [
+    "{
+  \\"took\\": 7,
+  \\"timed_out\\": false,
+  \\"_shards\\": {
+    \\"total\\": 3,
+    \\"successful\\": 3,
+    \\"skipped\\": 1,
+    \\"failed\\": 0
+  },
+  \\"hits\\": {
+    \\"total\\": 0,
+    \\"max_score\\": null,
+    \\"hits\\": []
+  },
+  \\"aggregations\\": {
+    \\"0\\": {
+      \\"buckets\\": []
+    }
+  }
+}",
+    "{
+  \\"took\\": 7,
+  \\"timed_out\\": false,
+  \\"_shards\\": {
+    \\"total\\": 3,
+    \\"successful\\": 3,
+    \\"skipped\\": 1,
+    \\"failed\\": 0
+  },
+  \\"hits\\": {
+    \\"total\\": 0,
+    \\"max_score\\": null,
+    \\"hits\\": []
+  },
+  \\"aggregations\\": {
+    \\"0\\": {
+      \\"buckets\\": []
+    }
+  }
+}",
+  ],
+}
+`;

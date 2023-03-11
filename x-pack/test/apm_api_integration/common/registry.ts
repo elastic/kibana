@@ -132,6 +132,7 @@ export function RegistryProvider({ getService }: FtrProviderContext) {
 
       Object.keys(byConfig).forEach((config) => {
         const groupsForConfig = byConfig[config];
+
         // register suites for other configs, but skip them so tests are marked as such
         // and their snapshots are not marked as obsolete
         (config === apmFtrConfig.name ? describe : describe.skip)(config, () => {

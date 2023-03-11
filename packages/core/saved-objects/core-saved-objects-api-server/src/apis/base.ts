@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '../..';
 
 /**
  * Base options used by most of the savedObject APIs.
@@ -24,9 +24,11 @@ export interface SavedObjectsBaseOptions {
 export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 
 /**
+ * Base return for saved object bulk operations
  *
  * @public
  */
 export interface SavedObjectsBulkResponse<T = unknown> {
+  /** array of saved objects */
   saved_objects: Array<SavedObject<T>>;
 }

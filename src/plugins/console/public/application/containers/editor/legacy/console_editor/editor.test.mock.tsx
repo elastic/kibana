@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+// TODO(jbudz): should be removed when upgrading to TS@4.8
+// this is a skip for the errors created when typechecking with isolatedModules
+export {};
+
 jest.mock('../../../../contexts/editor_context/editor_registry', () => ({
   instance: {
     setInputEditor: () => {},

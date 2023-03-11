@@ -52,6 +52,7 @@ describe('interpreter/functions#mosaicVis', () => {
       percentDecimals: 2,
       truncate: 100,
       last_level: false,
+      colorOverrides: {},
     },
     metric: {
       type: 'vis_dimension',

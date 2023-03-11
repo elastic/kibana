@@ -63,7 +63,7 @@ export const getJourneySteps: UMElasticsearchQueryFn<
     },
     size: 500,
   };
-  const { body: result } = await uptimeEsClient.search({ body: params });
+  const { body: result } = await uptimeEsClient.search({ body: params }, 'getJourneySteps');
 
   const steps = result.hits.hits.map(
     ({ _id, _source }) => Object.assign({ _id }, _source) as ResultType

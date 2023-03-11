@@ -10,7 +10,7 @@ import React, { PureComponent } from 'react';
 import _ from 'lodash';
 
 import { injectI18n, InjectedIntlProps } from '@kbn/i18n-react';
-import { EuiFieldText, EuiComboBox } from '@elastic/eui';
+import { EuiFieldText, EuiComboBox, EuiThemeProvider } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormRow } from './form_row';
 
@@ -31,6 +31,7 @@ export type ListControlUiProps = InjectedIntlProps & {
   controlIndex: number;
   stageFilter: (controlIndex: number, value: any) => void;
   fetchOptions?: (searchValue: string) => void;
+  isDarkMode?: boolean;
 };
 
 class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState> {
@@ -164,15 +165,17 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
     );
 
     return (
-      <FormRow
-        id={this.props.id}
-        label={this.props.label}
-        warningMsg={this.props.partialResults ? partialResultsWarningMessage : undefined}
-        controlIndex={this.props.controlIndex}
-        disableMsg={this.props.disableMsg}
-      >
-        {this.renderControl()}
-      </FormRow>
+      <EuiThemeProvider colorMode={this.props.isDarkMode ? 'dark' : 'light'}>
+        <FormRow
+          id={this.props.id}
+          label={this.props.label}
+          warningMsg={this.props.partialResults ? partialResultsWarningMessage : undefined}
+          controlIndex={this.props.controlIndex}
+          disableMsg={this.props.disableMsg}
+        >
+          {this.renderControl()}
+        </FormRow>
+      </EuiThemeProvider>
     );
   }
 }

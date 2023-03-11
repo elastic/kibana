@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsersType } from '../../../../users/store/model';
+import { UsersType } from '../../../../explore/users/store/model';
 import { getCriteriaFromUsersType } from './get_criteria_from_users_type';
 
 describe('get_criteria_from_user_type', () => {

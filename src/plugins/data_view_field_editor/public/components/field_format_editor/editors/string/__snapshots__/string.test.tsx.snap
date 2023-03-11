@@ -5,7 +5,6 @@ exports[`StringFormatEditor should render normally 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={false}

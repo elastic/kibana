@@ -8,7 +8,7 @@
 import '../../../mock/match_media';
 import * as i18n from './translations';
 import type { AnomaliesBy, Anomaly } from '../types';
-import type { Columns } from '../../paginated_table';
+import type { Columns } from '../../../../explore/components/paginated_table';
 import React from 'react';
 import { TestProviders } from '../../../mock';
 import { useMountAppended } from '../../../utils/use_mount_appended';
@@ -32,6 +32,7 @@ describe('getAnomaliesDefaultTableColumns', () => {
       AnomaliesBy
     >;
     const anomaly: AnomaliesBy = {
+      jobName: undefined,
       anomaly: {
         detectorIndex: 0,
         entityName: 'entity-name-1',

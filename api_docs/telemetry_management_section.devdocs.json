@@ -1,25 +1,84 @@
 {
   "id": "telemetryManagementSection",
   "client": {
-    "classes": [
+    "classes": [],
+    "functions": [
       {
         "parentPluginId": "telemetryManagementSection",
-        "id": "def-public.OptInExampleFlyout",
-        "type": "Class",
+        "id": "def-public.LazyOptInExampleFlyout",
+        "type": "Function",
         "tags": [],
-        "label": "OptInExampleFlyout",
+        "label": "LazyOptInExampleFlyout",
         "description": [
-          "\nReact component for displaying the example data associated with the Telemetry opt-in banner."
+          "\nLazy-loaded {@link OptInExampleFlyout}"
         ],
         "signature": [
+          "React.ExoticComponent<(",
           {
             "pluginId": "telemetryManagementSection",
             "scope": "public",
             "docId": "kibTelemetryManagementSectionPluginApi",
-            "section": "def-public.OptInExampleFlyout",
-            "text": "OptInExampleFlyout"
+            "section": "def-public.Props",
+            "text": "Props"
           },
-          " extends React.PureComponent<Props, State, any>"
+          " & React.RefAttributes<React.Component<",
+          {
+            "pluginId": "telemetryManagementSection",
+            "scope": "public",
+            "docId": "kibTelemetryManagementSectionPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          ", any, any>>) | (",
+          {
+            "pluginId": "telemetryManagementSection",
+            "scope": "public",
+            "docId": "kibTelemetryManagementSectionPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          " & { children?: React.ReactNode; })> & { readonly _result: React.ComponentType<",
+          {
+            "pluginId": "telemetryManagementSection",
+            "scope": "public",
+            "docId": "kibTelemetryManagementSectionPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          ">; }"
+        ],
+        "path": "src/plugins/telemetry_management_section/public/components/lazy_opt_in_example_flyout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "telemetryManagementSection",
+            "id": "def-public.LazyOptInExampleFlyout.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "telemetryManagementSection",
+        "id": "def-public.Props",
+        "type": "Interface",
+        "tags": [],
+        "label": "Props",
+        "description": [
+          "\nOptInExampleFlyout props"
         ],
         "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
         "deprecated": false,
@@ -27,79 +86,15 @@
         "children": [
           {
             "parentPluginId": "telemetryManagementSection",
-            "id": "def-public.OptInExampleFlyout._isMounted",
-            "type": "boolean",
-            "tags": [],
-            "label": "_isMounted",
-            "description": [],
-            "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "telemetryManagementSection",
-            "id": "def-public.OptInExampleFlyout.state",
-            "type": "Object",
-            "tags": [],
-            "label": "state",
-            "description": [],
-            "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "telemetryManagementSection",
-                "id": "def-public.OptInExampleFlyout.state.data",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "data",
-                "description": [],
-                "signature": [
-                  "null"
-                ],
-                "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "telemetryManagementSection",
-                "id": "def-public.OptInExampleFlyout.state.isLoading",
-                "type": "boolean",
-                "tags": [],
-                "label": "isLoading",
-                "description": [],
-                "signature": [
-                  "true"
-                ],
-                "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "telemetryManagementSection",
-                "id": "def-public.OptInExampleFlyout.state.hasPrivilegeToRead",
-                "type": "boolean",
-                "tags": [],
-                "label": "hasPrivilegeToRead",
-                "description": [],
-                "signature": [
-                  "false"
-                ],
-                "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "telemetryManagementSection",
-            "id": "def-public.OptInExampleFlyout.componentDidMount",
+            "id": "def-public.Props.fetchExample",
             "type": "Function",
             "tags": [],
-            "label": "componentDidMount",
-            "description": [],
+            "label": "fetchExample",
+            "description": [
+              "\nMethod that provides the sample payload to show in the flyout"
+            ],
             "signature": [
-              "() => Promise<void>"
+              "() => Promise<unknown[]>"
             ],
             "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
             "deprecated": false,
@@ -109,61 +104,15 @@
           },
           {
             "parentPluginId": "telemetryManagementSection",
-            "id": "def-public.OptInExampleFlyout.componentWillUnmount",
+            "id": "def-public.Props.onClose",
             "type": "Function",
             "tags": [],
-            "label": "componentWillUnmount",
-            "description": [],
+            "label": "onClose",
+            "description": [
+              "\nHook called when the flyout is closed"
+            ],
             "signature": [
               "() => void"
-            ],
-            "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "telemetryManagementSection",
-            "id": "def-public.OptInExampleFlyout.renderBody",
-            "type": "Function",
-            "tags": [],
-            "label": "renderBody",
-            "description": [],
-            "signature": [
-              "({ data, isLoading, hasPrivilegeToRead }: State) => JSX.Element"
-            ],
-            "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "telemetryManagementSection",
-                "id": "def-public.OptInExampleFlyout.renderBody.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{ data, isLoading, hasPrivilegeToRead }",
-                "description": [],
-                "signature": [
-                  "State"
-                ],
-                "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "telemetryManagementSection",
-            "id": "def-public.OptInExampleFlyout.render",
-            "type": "Function",
-            "tags": [],
-            "label": "render",
-            "description": [],
-            "signature": [
-              "() => JSX.Element"
             ],
             "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
             "deprecated": false,
@@ -175,8 +124,6 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
-    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

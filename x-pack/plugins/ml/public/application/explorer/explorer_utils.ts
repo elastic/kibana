@@ -11,7 +11,7 @@
 
 import { get, union, uniq } from 'lodash';
 import moment from 'moment-timezone';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { asyncForEach } from '@kbn/std';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -57,6 +57,7 @@ export interface ExplorerJob {
   bucketSpanSeconds: number;
   isSingleMetricViewerJob?: boolean;
   sourceIndices?: string[];
+  modelPlotEnabled: boolean;
 }
 
 export function isExplorerJob(arg: unknown): arg is ExplorerJob {
@@ -143,6 +144,7 @@ export function createJobs(jobs: CombinedJob[]): ExplorerJob[] {
       bucketSpanSeconds: bucketSpan!.asSeconds(),
       isSingleMetricViewerJob: isTimeSeriesViewJob(job),
       sourceIndices: job.datafeed_config.indices,
+      modelPlotEnabled: job.model_plot_config?.enabled === true,
     };
   });
 }

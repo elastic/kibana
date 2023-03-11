@@ -23,14 +23,13 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { LayerAction, Visualization } from '../../../../types';
+import type { LayerAction } from '../../../../types';
 import { LOCAL_STORAGE_LENS_KEY } from '../../../../settings_storage';
 import type { LayerType } from '../../../../../common/types';
 
 interface RemoveLayerAction {
   execute: () => void;
   layerIndex: number;
-  activeVisualization: Visualization;
   layerType?: LayerType;
   isOnlyLayer: boolean;
   core: Pick<CoreStart, 'overlays' | 'theme'>;
@@ -38,74 +37,65 @@ interface RemoveLayerAction {
 
 const SKIP_DELETE_MODAL_KEY = 'skipDeleteModal';
 
-const modalDescClear = i18n.translate('xpack.lens.layer.confirmModal.clearVis', {
-  defaultMessage: `Clearing this layer removes the visualization and its configurations. `,
-});
-const modalDescVis = i18n.translate('xpack.lens.layer.confirmModal.deleteVis', {
-  defaultMessage: `Deleting this layer removes the visualization and its configurations. `,
-});
-const modalDescRefLine = i18n.translate('xpack.lens.layer.confirmModal.deleteRefLine', {
-  defaultMessage: `Deleting this layer removes the reference lines and their configurations. `,
-});
-const modalDescAnnotation = i18n.translate('xpack.lens.layer.confirmModal.deleteAnnotation', {
-  defaultMessage: `Deleting this layer removes the annotations and their configurations. `,
-});
+const getCopy = (
+  layerType: LayerType,
+  isOnlyLayer?: boolean
+): { buttonLabel: string; modalTitle: string; modalBody: string } => {
+  if (isOnlyLayer && layerType === 'data') {
+    return {
+      buttonLabel: i18n.translate('xpack.lens.resetLayerAriaLabel', {
+        defaultMessage: 'Clear layer',
+      }),
+      modalTitle: i18n.translate('xpack.lens.modalTitle.title.clearVis', {
+        defaultMessage: 'Clear visualization layer?',
+      }),
+      modalBody: i18n.translate('xpack.lens.layer.confirmModal.clearVis', {
+        defaultMessage: `Clearing this layer removes the visualization and its configurations. `,
+      }),
+    };
+  }
 
-const getButtonCopy = (layerType: LayerType, canBeRemoved?: boolean, isOnlyLayer?: boolean) => {
-  let ariaLabel;
-
-  const layerTypeCopy =
-    layerType === LayerTypes.DATA
-      ? i18n.translate('xpack.lens.modalTitle.layerType.data', {
-          defaultMessage: 'visualization',
-        })
-      : layerType === LayerTypes.ANNOTATIONS
-      ? i18n.translate('xpack.lens.modalTitle.layerType.annotation', {
-          defaultMessage: 'annotations',
-        })
-      : i18n.translate('xpack.lens.modalTitle.layerType.refLines', {
-          defaultMessage: 'reference lines',
-        });
-
-  let modalTitle = i18n.translate('xpack.lens.modalTitle.title.delete', {
-    defaultMessage: 'Delete {layerType} layer?',
-    values: { layerType: layerTypeCopy },
+  const buttonLabel = i18n.translate('xpack.lens.deleteLayerAriaLabel', {
+    defaultMessage: `Delete layer`,
   });
-  let modalDesc = modalDescVis;
 
-  if (!canBeRemoved || isOnlyLayer) {
-    modalTitle = i18n.translate('xpack.lens.modalTitle.title.clear', {
-      defaultMessage: 'Clear {layerType} layer?',
-      values: { layerType: layerTypeCopy },
-    });
-    modalDesc = modalDescClear;
+  switch (layerType) {
+    case 'data':
+      return {
+        buttonLabel,
+        modalTitle: i18n.translate('xpack.lens.modalTitle.title.deleteVis', {
+          defaultMessage: 'Delete visualization layer?',
+        }),
+        modalBody: i18n.translate('xpack.lens.layer.confirmModal.deleteVis', {
+          defaultMessage: `Deleting this layer removes the visualization and its configurations. `,
+        }),
+      };
+
+    case 'annotations':
+      return {
+        buttonLabel,
+        modalTitle: i18n.translate('xpack.lens.modalTitle.title.deleteAnnotations', {
+          defaultMessage: 'Delete annotations layer?',
+        }),
+        modalBody: i18n.translate('xpack.lens.layer.confirmModal.deleteAnnotation', {
+          defaultMessage: `Deleting this layer removes the annotations and their configurations. `,
+        }),
+      };
+
+    case 'referenceLine':
+      return {
+        buttonLabel,
+        modalTitle: i18n.translate('xpack.lens.modalTitle.title.deleteReferenceLines', {
+          defaultMessage: 'Delete reference lines layer?',
+        }),
+        modalBody: i18n.translate('xpack.lens.layer.confirmModal.deleteRefLine', {
+          defaultMessage: `Deleting this layer removes the reference lines and their configurations. `,
+        }),
+      };
+
+    default:
+      throw new Error('Unknown layer type');
   }
-
-  if (layerType === LayerTypes.ANNOTATIONS) {
-    modalDesc = modalDescAnnotation;
-  } else if (layerType === LayerTypes.REFERENCELINE) {
-    modalDesc = modalDescRefLine;
-  }
-
-  if (!canBeRemoved) {
-    ariaLabel = i18n.translate('xpack.lens.resetVisualizationAriaLabel', {
-      defaultMessage: 'Reset visualization',
-    });
-  } else if (isOnlyLayer) {
-    ariaLabel = i18n.translate('xpack.lens.resetLayerAriaLabel', {
-      defaultMessage: 'Clear layer',
-    });
-  } else {
-    ariaLabel = i18n.translate('xpack.lens.deleteLayerAriaLabel', {
-      defaultMessage: `Delete layer`,
-    });
-  }
-
-  return {
-    ariaLabel,
-    modalTitle,
-    modalDesc,
-  };
 };
 
 const RemoveConfirmModal = ({
@@ -200,13 +190,13 @@ const RemoveConfirmModal = ({
 };
 
 export const getRemoveLayerAction = (props: RemoveLayerAction): LayerAction => {
-  const { ariaLabel, modalTitle, modalDesc } = getButtonCopy(
+  const { buttonLabel, modalTitle, modalBody } = getCopy(
     props.layerType || LayerTypes.DATA,
-    !!props.activeVisualization.removeLayer,
     props.isOnlyLayer
   );
 
   return {
+    id: 'removeLayerAction',
     execute: async () => {
       const storage = new Storage(localStorage);
       const lensLocalStorage = storage.get(LOCAL_STORAGE_LENS_KEY) ?? {};
@@ -223,8 +213,8 @@ export const getRemoveLayerAction = (props: RemoveLayerAction): LayerAction => {
           toMountPoint(
             <RemoveConfirmModal
               modalTitle={modalTitle}
-              isDeletable={!!props.activeVisualization.removeLayer && !props.isOnlyLayer}
-              modalDesc={modalDesc}
+              isDeletable={!props.isOnlyLayer}
+              modalDesc={modalBody}
               skipDeleteModal={lensLocalStorage[LOCAL_STORAGE_LENS_KEY] ?? false}
               execute={props.execute}
               closeModal={() => modal.close()}
@@ -241,7 +231,7 @@ export const getRemoveLayerAction = (props: RemoveLayerAction): LayerAction => {
         props.execute();
       }
     },
-    displayName: ariaLabel,
+    displayName: buttonLabel,
     isCompatible: true,
     icon: props.isOnlyLayer ? 'eraser' : 'trash',
     color: 'danger',

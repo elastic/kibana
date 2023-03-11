@@ -7,6 +7,8 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { LoadWhenInViewProps } from './load_when_in_view/load_when_in_view';
+import { ObservabilityAlertSearchBarProps } from './alert_search_bar/types';
 import type { CoreVitalProps, HeaderMenuPortalProps } from './types';
 import type {
   FieldValueSuggestionsProps,
@@ -99,6 +101,26 @@ export function DatePicker(props: DatePickerProps) {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <DatePickerLazy {...props} />
+    </Suspense>
+  );
+}
+
+const LoadWhenInViewLazy = lazy(() => import('./load_when_in_view/load_when_in_view'));
+
+export function LoadWhenInView(props: LoadWhenInViewProps) {
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <LoadWhenInViewLazy {...props} />
+    </Suspense>
+  );
+}
+
+const ObservabilityAlertSearchBarLazy = lazy(() => import('./alert_search_bar/alert_search_bar'));
+
+export function ObservabilityAlertSearchBar(props: ObservabilityAlertSearchBarProps) {
+  return (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <ObservabilityAlertSearchBarLazy {...props} />
     </Suspense>
   );
 }

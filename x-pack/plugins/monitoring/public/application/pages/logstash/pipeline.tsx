@@ -10,17 +10,13 @@ import { find } from 'lodash';
 import moment from 'moment';
 import { useRouteMatch } from 'react-router-dom';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { EuiSpacer } from '@elastic/eui';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
-// @ts-ignore
 import { List } from '../../../components/logstash/pipeline_viewer/models/list';
-// @ts-ignore
 import { PipelineViewer } from '../../../components/logstash/pipeline_viewer';
-// @ts-ignore
 import { Pipeline } from '../../../components/logstash/pipeline_viewer/models/pipeline';
-// @ts-ignore
 import { PipelineState } from '../../../components/logstash/pipeline_viewer/models/pipeline_state';
-// @ts-ignore
 import { vertexFactory } from '../../../components/logstash/pipeline_viewer/models/graph/vertex_factory';
 import { LogstashTemplate } from './logstash_template';
 import { useTable } from '../../hooks/use_table';
@@ -61,6 +57,7 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
   });
 
   const getPageData = useCallback(async () => {
+    const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = pipelineHash
       ? `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}/${pipelineHash}`
       : `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}`;
@@ -70,6 +67,10 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
       body: JSON.stringify({
         ccs,
         detailVertexId: detailVertexId || undefined,
+        timeRange: {
+          min: bounds.min.toISOString(),
+          max: bounds.max.toISOString(),
+        },
       }),
     });
     const myData = response;
@@ -117,6 +118,7 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
     minIntervalSeconds,
     pipelineHash,
     pipelineId,
+    services.data?.query.timefilter.timefilter,
   ]);
 
   useEffect(() => {
@@ -173,16 +175,17 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
           pipelineHash={pipelineHash}
         />
       </div>
-      <div>
-        {pipelineState && (
+      {pipelineState && (
+        <div>
+          <EuiSpacer size="s" />
           <PipelineViewer
             pipeline={List.fromPipeline(Pipeline.fromPipelineGraph(pipelineState.config.graph))}
             timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
             setDetailVertexId={onVertexChange}
             detailVertex={data.vertex ? vertexFactory(null, data.vertex) : null}
           />
-        )}
-      </div>
+        </div>
+      )}
     </LogstashTemplate>
   );
 };

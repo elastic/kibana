@@ -8,9 +8,10 @@
 import React, { VFC } from 'react';
 import { useFieldTypes } from '../../../../hooks';
 import { EMPTY_VALUE } from '../../../../common/constants';
-import { Indicator, RawIndicatorFieldId } from '../../types';
+import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { DateFormatter } from '../../../../components/date_formatter';
 import { unwrapValue } from '../../utils';
+import { TLPBadge } from '../tlp_badge';
 
 export interface IndicatorFieldValueProps {
   /**
@@ -29,8 +30,12 @@ export interface IndicatorFieldValueProps {
  */
 export const IndicatorFieldValue: VFC<IndicatorFieldValueProps> = ({ indicator, field }) => {
   const fieldType = useFieldTypes()[field];
-
   const value = unwrapValue(indicator, field as RawIndicatorFieldId);
+
+  if (field === RawIndicatorFieldId.MarkingTLP) {
+    return <TLPBadge value={value} />;
+  }
+
   return fieldType === 'date' ? (
     <DateFormatter date={value as string} />
   ) : value ? (

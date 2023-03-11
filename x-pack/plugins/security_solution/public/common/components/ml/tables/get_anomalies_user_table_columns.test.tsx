@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UsersType } from '../../../../users/store/model';
+import { UsersType } from '../../../../explore/users/store/model';
 import '../../../mock/match_media';
 import { getAnomaliesUserTableColumnsCurated } from './get_anomalies_user_table_columns';
 

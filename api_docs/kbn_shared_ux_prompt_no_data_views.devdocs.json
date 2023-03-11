@@ -29,7 +29,7 @@
           "\nA service-enabled component that provides Kibana-specific functionality to the `NoDataViewsPrompt`\ncomponent.\n\nUse of this component requires both the `EuiTheme` context as well as a `NoDataViewsPrompt` provider."
         ],
         "signature": [
-          "({ onDataViewCreated }: ",
+          "({ onDataViewCreated, allowAdHocDataView, }: ",
           "NoDataViewsPromptProps",
           ") => JSX.Element"
         ],
@@ -42,7 +42,7 @@
             "id": "def-common.NoDataViewsPrompt.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ onDataViewCreated }",
+            "label": "{\n  onDataViewCreated,\n  allowAdHocDataView = false,\n}",
             "description": [],
             "signature": [
               "NoDataViewsPromptProps"
@@ -180,7 +180,7 @@
         "tags": [],
         "label": "NoDataViewsPromptComponentProps",
         "description": [],
-        "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+        "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -193,7 +193,7 @@
             "description": [
               "True if the user has permission to create a data view, false otherwise."
             ],
-            "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -209,7 +209,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -227,7 +227,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -241,9 +241,9 @@
               "The background color of the prompt; defaults to `plain`."
             ],
             "signature": [
-              "\"warning\" | \"subdued\" | \"primary\" | \"accent\" | \"success\" | \"danger\" | \"transparent\" | \"plain\" | undefined"
+              "\"warning\" | \"success\" | \"plain\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"transparent\" | undefined"
             ],
-            "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -259,7 +259,7 @@
         "description": [
           "\nKibana-specific service types."
         ],
-        "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+        "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -273,7 +273,7 @@
             "signature": [
               "{ docLinks: { links: { indexPatterns: { introduction: string; }; }; }; }"
             ],
-            "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -289,7 +289,7 @@
               "DataViewEditorOptions",
               ") => () => void; }"
             ],
-            "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -303,7 +303,7 @@
         "tags": [],
         "label": "NoDataViewsPromptProps",
         "description": [],
-        "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+        "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -319,7 +319,7 @@
             "signature": [
               "(dataView: unknown) => void"
             ],
-            "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -333,13 +333,29 @@
                 "signature": [
                   "unknown"
                 ],
-                "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+                "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+            "id": "def-common.NoDataViewsPromptProps.allowAdHocDataView",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowAdHocDataView",
+            "description": [
+              "if set to true allows creation of an ad-hoc data view from data view editor"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -353,7 +369,7 @@
         "description": [
           "\nAbstract external services for this component."
         ],
-        "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+        "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -366,7 +382,7 @@
             "description": [
               "True if the user has permission to create a new Data View, false otherwise."
             ],
-            "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -384,7 +400,7 @@
               "DataViewEditorOptions",
               ") => () => void"
             ],
-            "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -398,7 +414,7 @@
                 "signature": [
                   "DataViewEditorOptions"
                 ],
-                "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+                "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -415,7 +431,7 @@
             "description": [
               "A link to information about Data Views in Kibana"
             ],
-            "path": "node_modules/@kbn/shared-ux-prompt-no-data-views-types/index.d.ts",
+            "path": "packages/shared-ux/prompt/no_data_views/types/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }

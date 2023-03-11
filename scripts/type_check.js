@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('../src/dev/typescript').runTypeCheckCli();
+require('@kbn/ts-type-check-cli');

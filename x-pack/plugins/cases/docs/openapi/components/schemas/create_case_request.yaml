@@ -10,6 +10,8 @@ required:
       - tags
       - title
 properties:
+  assignees:
+    $ref: 'assignees.yaml'
   connector:
     oneOf:
       - $ref: 'connector_properties_none.yaml'

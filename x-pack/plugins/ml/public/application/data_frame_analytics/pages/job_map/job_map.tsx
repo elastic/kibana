@@ -34,7 +34,7 @@ linear-gradient(
 center,
 ${theme.euiColorLightShade}`,
   backgroundSize: `${theme.euiSizeL} ${theme.euiSizeL}`,
-  margin: `-${theme.gutterTypes.gutterLarge}`,
+  margin: `-${theme.euiSizeL}`,
   marginTop: 0,
 });
 
@@ -171,10 +171,7 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div
-        style={{ height: height - parseInt(euiTheme.gutterTypes.gutterLarge, 10) - 20 }}
-        ref={ref}
-      >
+      <div style={{ height: height - parseInt(euiTheme.euiSizeL, 10) - 20 }} ref={ref}>
         <Cytoscape
           theme={euiTheme}
           height={height - 20}

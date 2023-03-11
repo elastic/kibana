@@ -10,11 +10,15 @@ import {
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
 } from '../../../common/endpoint/models/policy_config';
 import type { LicenseService } from '../../../common/license/license';
-import { isAtLeast } from '../../../common/license/license';
-import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
 import type { AnyPolicyCreateConfig, PolicyCreateEndpointConfig } from '../types';
-import { ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL, ENDPOINT_CONFIG_PRESET_NGAV } from '../constants';
+import {
+  ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
+  ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL,
+  ENDPOINT_CONFIG_PRESET_NGAV,
+  ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
+} from '../constants';
+import { disableProtections } from '../../../common/endpoint/models/policy_config_helpers';
 
 /**
  * Create the default endpoint policy based on the current license and configuration type
@@ -23,24 +27,36 @@ export const createDefaultPolicy = (
   licenseService: LicenseService,
   config: AnyPolicyCreateConfig | undefined
 ): PolicyConfig => {
-  const policy = isAtLeast(licenseService.getLicenseInformation(), 'platinum')
-    ? policyConfigFactory()
-    : policyConfigFactoryWithoutPaidFeatures();
+  const factoryPolicy = policyConfigFactory();
 
-  if (config?.type === 'cloud') {
-    return getCloudPolicyConfig(policy);
-  }
+  const defaultPolicyPerType =
+    config?.type === 'cloud'
+      ? getCloudPolicyConfig(factoryPolicy)
+      : getEndpointPolicyWithIntegrationConfig(factoryPolicy, config);
 
-  return getEndpointPolicyWithIntegrationConfig(policy, config);
+  // Apply license limitations in the final step, so it's not overriden (see malware popup)
+  return licenseService.isPlatinumPlus()
+    ? defaultPolicyPerType
+    : policyConfigFactoryWithoutPaidFeatures(defaultPolicyPerType);
 };
 
 /**
- * Set all keys of the given object to false
+ * Create a copy of an object with all keys set to false
  */
 const falsyObjectKeys = <T extends Record<string, boolean>>(obj: T): T => {
   return Object.keys(obj).reduce((accumulator, key) => {
     return { ...accumulator, [key]: false };
   }, {} as T);
+};
+
+const getEndpointPolicyConfigPreset = (config: PolicyCreateEndpointConfig | undefined) => {
+  const isNGAV = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_NGAV;
+  const isEDREssential = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL;
+  const isEDRComplete = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_EDR_COMPLETE;
+  const isDataCollection =
+    config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_DATA_COLLECTION;
+
+  return { isNGAV, isEDREssential, isEDRComplete, isDataCollection };
 };
 
 /**
@@ -50,9 +66,12 @@ const getEndpointPolicyWithIntegrationConfig = (
   policy: PolicyConfig,
   config: PolicyCreateEndpointConfig | undefined
 ): PolicyConfig => {
-  const isEDREssential = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL;
+  const { isNGAV, isEDREssential, isEDRComplete, isDataCollection } =
+    getEndpointPolicyConfigPreset(config);
 
-  if (config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_NGAV || isEDREssential) {
+  if (isEDRComplete) {
+    return policy;
+  } else if (isNGAV || isEDREssential) {
     const events = {
       process: true,
       file: isEDREssential,
@@ -83,9 +102,12 @@ const getEndpointPolicyWithIntegrationConfig = (
         },
       },
     };
+  } else if (isDataCollection) {
+    return disableProtections(policy);
   }
 
-  return policy;
+  // data collection by default
+  return disableProtections(policy);
 };
 
 /**
@@ -93,43 +115,16 @@ const getEndpointPolicyWithIntegrationConfig = (
  */
 const getCloudPolicyConfig = (policy: PolicyConfig): PolicyConfig => {
   // Disabling all protections, since it's not yet supported on Cloud integrations
-  const protections = {
-    memory_protection: {
-      supported: false,
-      mode: ProtectionModes.off,
-    },
-    malware: {
-      ...policy.linux.malware,
-      mode: ProtectionModes.off,
-    },
-    behavior_protection: {
-      ...policy.linux.behavior_protection,
-      mode: ProtectionModes.off,
-    },
-  };
+  const policyWithDisabledProtections = disableProtections(policy);
 
   return {
-    ...policy,
+    ...policyWithDisabledProtections,
     linux: {
-      ...policy.linux,
-      ...protections,
+      ...policyWithDisabledProtections.linux,
       events: {
-        ...policy.linux.events,
+        ...policyWithDisabledProtections.linux.events,
         session_data: true,
       },
-    },
-    windows: {
-      ...policy.windows,
-      ...protections,
-      // Disabling ransomware protection, since it's not supported on Cloud integrations
-      ransomware: {
-        supported: false,
-        mode: ProtectionModes.off,
-      },
-    },
-    mac: {
-      ...policy.mac,
-      ...protections,
     },
   };
 };

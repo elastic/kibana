@@ -15,13 +15,16 @@ import { EuiBasicTable } from '@elastic/eui';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
-import { EuiLinkTo } from '../../../shared/react_router_helpers';
-
 import { AnalyticsCollectionTable } from './analytics_collection_table';
 
 describe('AnalyticsCollectionTable', () => {
   const analyticsCollections: AnalyticsCollection[] = [
-    { event_retention_day_length: 180, id: '1', name: 'example' },
+    {
+      event_retention_day_length: 180,
+      events_datastream: 'analytics-events-example',
+      id: 'example',
+      name: 'example',
+    },
   ];
 
   beforeEach(() => {
@@ -39,6 +42,6 @@ describe('AnalyticsCollectionTable', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject(analyticsCollections[0]);
 
-    expect(wrapper.dive().find(EuiLinkTo).first().prop('to')).toBe('/collections/example/events');
+    expect(wrapper.render().find('a').attr('href')).toContain('/collections/example/events');
   });
 });

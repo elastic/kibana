@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { FieldFormatter, MIN_ZOOM, MAX_ZOOM } from '@kbn/maps-plugin/common';
 import type {
@@ -42,7 +42,13 @@ export class CustomRasterSource implements IRasterSource {
   constructor(sourceDescriptor: CustomRasterSourceDescriptor) {
     this._descriptor = sourceDescriptor;
   }
+  async hasLegendDetails(): Promise<boolean> {
+    return true;
+  }
 
+  renderLegendDetails(): ReactElement<any> | null {
+    return <img alt="Radar legend" src="https://nowcoast.noaa.gov/images/legends/radar.png" />;
+  }
   async canSkipSourceUpdate(
     dataRequest: DataRequest,
     nextRequestMeta: DataRequestMeta

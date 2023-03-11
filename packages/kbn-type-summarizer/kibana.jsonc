@@ -1,8 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/type-summarizer",
-  "devOnly": true,
-  "owner": "@elastic/kibana-operations",
-  "runtimeDeps": [],
-  "typeDeps": []
-}

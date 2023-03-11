@@ -119,31 +119,31 @@ const TabComponent = (props: TabProps) => {
     buildCustomMetric('system.cpu.cores', 'cores', 'max'),
   ];
 
-  const { nodes, reload } = useSnapshot(
-    filter,
-    [...defaultMetrics, ...customMetrics],
-    [],
+  const { nodes, reload } = useSnapshot({
+    filterQuery: filter,
+    metrics: [...defaultMetrics, ...customMetrics],
+    groupBy: [],
     nodeType,
     sourceId,
     currentTime,
     accountId,
     region,
-    false,
-    timeRange
-  );
+    sendRequestImmediately: false,
+    timerange: timeRange,
+  });
 
-  const { nodes: logRateNodes, reload: reloadLogRate } = useSnapshot(
-    filter,
-    [{ type: 'logRate' }],
-    [],
+  const { nodes: logRateNodes, reload: reloadLogRate } = useSnapshot({
+    filterQuery: filter,
+    metrics: [{ type: 'logRate' }],
+    groupBy: [],
     nodeType,
     sourceId,
     currentTime,
     accountId,
     region,
-    false,
-    timeRange
-  );
+    sendRequestImmediately: false,
+    timerange: timeRange,
+  });
 
   const getDomain = useCallback(
     (timeseries: MetricsExplorerSeries, ms: MetricsExplorerOptionsMetric[]) => {

@@ -16,10 +16,11 @@ import { getEndpointListPath, getPoliciesPath } from '../../../../common/routing
 import { APP_UI_ID } from '../../../../../../common/constants';
 
 /**
+ * Returns a link component that navigates to the endpoint list page filtered by a specific policy
+ *
  * @param policyId
  * @param nonLinkCondition: boolean where the returned component is just text and not a link
  *
- * Returns a link component that navigates to the endpoint list page filtered by a specific policy
  */
 export const PolicyEndpointCount = memo<
   Omit<EuiLinkAnchorProps, 'href'> & {

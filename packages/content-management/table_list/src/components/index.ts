@@ -12,5 +12,6 @@ export { ConfirmDeleteModal } from './confirm_delete_modal';
 export { ListingLimitWarning } from './listing_limit_warning';
 export { ItemDetails } from './item_details';
 export { TableSortSelect } from './table_sort_select';
+export { TagFilterPanel } from './tag_filter_panel';
 
 export type { SortColumnField } from './table_sort_select';

@@ -13,7 +13,7 @@ import { useCreateAndNavigateToMlLink } from '../contexts/kibana/use_create_url'
 import { useNotifications } from '../contexts/kibana';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
-import { useResolver } from './use_resolver';
+import { type GetSavedSearchPageDeps, useResolver } from './use_resolver';
 
 jest.mock('../contexts/kibana/use_create_url', () => {
   return {
@@ -38,7 +38,7 @@ const redirectToJobsManagementPage = jest.fn(() => Promise.resolve());
 
 describe('useResolver', () => {
   afterEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
   afterEach(() => {
     jest.advanceTimersByTime(0);
@@ -47,7 +47,14 @@ describe('useResolver', () => {
 
   it('should accept undefined as dataViewId and savedSearchId.', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useResolver(undefined, undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
+      useResolver(
+        undefined,
+        undefined,
+        {} as IUiSettingsClient,
+        {} as DataViewsContract,
+        {} as GetSavedSearchPageDeps,
+        {}
+      )
     );
 
     await act(async () => {
@@ -66,9 +73,10 @@ describe('useResolver', () => {
           },
         },
         currentDataView: null,
-        currentSavedSearch: null,
+        deprecatedSavedSearchObj: null,
         dataViewsContract: {},
         kibanaConfig: {},
+        selectedSavedSearch: null,
       },
       results: {},
     });
@@ -78,7 +86,14 @@ describe('useResolver', () => {
 
   it('should add an error toast and redirect if dataViewId is an empty string.', async () => {
     const { result } = renderHook(() =>
-      useResolver('', undefined, {} as IUiSettingsClient, {} as DataViewsContract, {})
+      useResolver(
+        '',
+        undefined,
+        {} as IUiSettingsClient,
+        {} as DataViewsContract,
+        {} as GetSavedSearchPageDeps,
+        {}
+      )
     );
 
     await act(async () => {});

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { euiPaletteColorBlind, EuiPanel } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import {
   AreaSeries,
   Axis,
@@ -83,56 +83,54 @@ export function StorageChart() {
   const isEmpty = isTimeseriesEmpty(storageTimeSeries);
 
   return (
-    <EuiPanel hasShadow={false} hasBorder={true}>
-      <ChartContainer
-        hasData={!isEmpty}
-        height={400}
-        status={status}
-        id="storageExplorerTimeseriesChart"
-      >
-        <Chart id="storageExplorerTimeseriesChart">
-          <Settings
-            theme={[
-              {
-                areaSeriesStyle: {
-                  line: { visible: false },
-                  area: { opacity: 1 },
-                },
+    <ChartContainer
+      hasData={!isEmpty}
+      height={400}
+      status={status}
+      id="storageExplorerTimeseriesChart"
+    >
+      <Chart id="storageExplorerTimeseriesChart">
+        <Settings
+          theme={[
+            {
+              areaSeriesStyle: {
+                line: { visible: false },
+                area: { opacity: 1 },
               },
-              ...chartTheme,
-            ]}
-            showLegend
-            legendPosition={Position.Right}
+            },
+            ...chartTheme,
+          ]}
+          showLegend
+          legendPosition={Position.Right}
+        />
+        <Axis
+          id="x-axis"
+          position={Position.Bottom}
+          showOverlappingTicks
+          tickFormat={xFormatter}
+          gridLine={{ visible: false }}
+        />
+        <Axis
+          id="y-axis"
+          position={Position.Left}
+          showGridLines
+          tickFormat={asDynamicBytes}
+        />
+        {storageTimeSeries.map((serie) => (
+          <AreaSeries
+            timeZone={timeZone}
+            key={serie.title}
+            id={serie.title}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={['y']}
+            data={isEmpty ? [] : serie.data}
+            color={serie.color}
+            stackAccessors={['x']}
           />
-          <Axis
-            id="x-axis"
-            position={Position.Bottom}
-            showOverlappingTicks
-            tickFormat={xFormatter}
-            gridLine={{ visible: false }}
-          />
-          <Axis
-            id="y-axis"
-            position={Position.Left}
-            showGridLines
-            tickFormat={asDynamicBytes}
-          />
-          {storageTimeSeries.map((serie) => (
-            <AreaSeries
-              timeZone={timeZone}
-              key={serie.title}
-              id={serie.title}
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor="x"
-              yAccessors={['y']}
-              data={isEmpty ? [] : serie.data}
-              color={serie.color}
-              stackAccessors={['x']}
-            />
-          ))}
-        </Chart>
-      </ChartContainer>
-    </EuiPanel>
+        ))}
+      </Chart>
+    </ChartContainer>
   );
 }

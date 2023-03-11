@@ -91,6 +91,7 @@ exports[`Should render cancel button when drawing 1`] = `
   </EuiFlexItem>
   <EuiFlexItem>
     <EuiButton
+      color="primary"
       fill={true}
       onClick={[Function]}
       size="s"

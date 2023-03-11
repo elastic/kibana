@@ -9,7 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import type { SavedObject, SavedObjectsResolveResponse } from '@kbn/core/server';
+import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type {
   CaseResponse,
   CaseResolveResponse,
@@ -19,6 +19,7 @@ import type {
   CasesByAlertIDRequest,
   CasesByAlertId,
   CaseAttributes,
+  AttachmentTotals,
 } from '../../../common/api';
 import {
   CaseResponseRt,
@@ -36,6 +37,7 @@ import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
+import type { CaseSavedObject } from '../../common/types';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -62,7 +64,7 @@ export const getCasesByAlertID = async (
   clientArgs: CasesClientArgs
 ): Promise<CasesByAlertId> => {
   const {
-    services: { caseService },
+    services: { caseService, attachmentService },
     logger,
     authorization,
   } = clientArgs;
@@ -104,6 +106,10 @@ export const getCasesByAlertID = async (
       return [];
     }
 
+    const commentStats = await attachmentService.getter.getCaseCommentStats({
+      caseIds,
+    });
+
     const casesInfo = await caseService.getCases({
       caseIds,
     });
@@ -125,6 +131,10 @@ export const getCasesByAlertID = async (
       validCasesInfo.map((caseInfo) => ({
         id: caseInfo.id,
         title: caseInfo.attributes.title,
+        description: caseInfo.attributes.description,
+        status: caseInfo.attributes.status,
+        createdAt: caseInfo.attributes.created_at,
+        totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
       }))
     );
   } catch (error) {
@@ -137,6 +147,9 @@ export const getCasesByAlertID = async (
     });
   }
 };
+
+const getAttachmentTotalsForCaseId = (id: string, stats: Map<string, AttachmentTotals>) =>
+  stats.get(id) ?? { alerts: 0, userComments: 0 };
 
 /**
  * The parameters for retrieving a case
@@ -168,7 +181,7 @@ export const get = async (
   } = clientArgs;
 
   try {
-    const theCase: SavedObject<CaseAttributes> = await caseService.getCase({
+    const theCase: CaseSavedObject = await caseService.getCase({
       id,
     });
 

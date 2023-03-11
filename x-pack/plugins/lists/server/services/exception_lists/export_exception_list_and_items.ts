@@ -15,6 +15,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 import { getExceptionList } from './get_exception_list';
@@ -24,6 +25,7 @@ interface ExportExceptionListAndItemsOptions {
   listId: ListIdOrUndefined;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
+  includeExpiredExceptions: boolean;
 }
 
 export interface ExportExceptionListAndItemsReturn {
@@ -35,6 +37,7 @@ export const exportExceptionListAndItems = async ({
   id,
   listId,
   namespaceType,
+  includeExpiredExceptions,
   savedObjectsClient,
 }: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
   const exceptionList = await getExceptionList({
@@ -52,10 +55,14 @@ export const exportExceptionListAndItems = async ({
     const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
       exceptionItems = [...exceptionItems, ...response.data];
     };
+    const savedObjectPrefix = getSavedObjectType({ namespaceType });
+    const filter = includeExpiredExceptions
+      ? undefined
+      : `(${savedObjectPrefix}.attributes.expire_time > "${new Date().toISOString()}" OR NOT ${savedObjectPrefix}.attributes.expire_time: *)`;
 
     await findExceptionListItemPointInTimeFinder({
       executeFunctionOnStream,
-      filter: undefined,
+      filter,
       listId: exceptionList.list_id,
       maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
       namespaceType: exceptionList.namespace_type,

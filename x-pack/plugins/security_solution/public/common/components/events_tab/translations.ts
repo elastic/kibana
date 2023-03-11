@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ALERTS_UNIT = (totalCount: number) =>
-  i18n.translate('xpack.securitySolution.eventsTab.unit', {
+export const EXTERNAL_ALERTS_UNIT = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.eventsTab.externalAlertsUnit', {
     values: { totalCount },
     defaultMessage: `external {totalCount, plural, =1 {alert} other {alerts}}`,
   });

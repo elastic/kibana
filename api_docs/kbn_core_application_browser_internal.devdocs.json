@@ -76,9 +76,21 @@
         "description": [],
         "signature": [
           "(app: ",
-          "App",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.App",
+            "text": "App"
+          },
           "<unknown>) => ",
-          "PublicAppInfo"
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.PublicAppInfo",
+            "text": "PublicAppInfo"
+          }
         ],
         "path": "packages/core/application/core-application-browser-internal/src/utils/get_app_info.ts",
         "deprecated": false,
@@ -92,7 +104,13 @@
             "label": "app",
             "description": [],
             "signature": [
-              "App",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.App",
+                "text": "App"
+              },
               "<unknown>"
             ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/get_app_info.ts",
@@ -115,9 +133,21 @@
         ],
         "signature": [
           "(url: string, basePath: ",
-          "IBasePath",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.IBasePath",
+            "text": "IBasePath"
+          },
           ", apps: Map<string, ",
-          "App",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.App",
+            "text": "App"
+          },
           "<unknown>>, currentUrl?: string) => ",
           "ParsedAppUrl",
           " | undefined"
@@ -149,7 +179,13 @@
             "label": "basePath",
             "description": [],
             "signature": [
-              "IBasePath"
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-common.IBasePath",
+                "text": "IBasePath"
+              }
             ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",
             "deprecated": false,
@@ -165,7 +201,13 @@
             "description": [],
             "signature": [
               "Map<string, ",
-              "App",
+              {
+                "pluginId": "@kbn/core-application-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationBrowserPluginApi",
+                "section": "def-common.App",
+                "text": "App"
+              },
               "<unknown>>"
             ],
             "path": "packages/core/application/core-application-browser-internal/src/utils/parse_app_url.ts",

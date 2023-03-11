@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const { username, password } = getService('config').get('servers.kibana');
 
   describe('Audit Log', function () {
-    const logFilePath = Path.resolve(__dirname, '../../fixtures/audit/audit.log');
+    const logFilePath = Path.resolve(__dirname, '../../plugins/audit_log/audit.log');
     const logFile = new FileWrapper(logFilePath, retry);
 
     beforeEach(async () => {
@@ -55,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
+        .set('X-Forwarded-For', '1.1.1.1, 2.2.2.2')
         .send({
           providerType: 'basic',
           providerName: 'basic',
@@ -71,12 +72,15 @@ export default function ({ getService }: FtrProviderContext) {
       expect(loginEvent.event.outcome).to.be('success');
       expect(loginEvent.trace.id).to.be.ok();
       expect(loginEvent.user.name).to.be(username);
+      expect(loginEvent.client.ip).to.be.ok();
+      expect(loginEvent.http.request.headers['x-forwarded-for']).to.be('1.1.1.1, 2.2.2.2');
     });
 
     it('logs audit events when failing to log in', async () => {
       await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
+        .set('X-Forwarded-For', '1.1.1.1, 2.2.2.2')
         .send({
           providerType: 'basic',
           providerName: 'basic',
@@ -93,6 +97,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(loginEvent.event.outcome).to.be('failure');
       expect(loginEvent.trace.id).to.be.ok();
       expect(loginEvent.user).not.to.be.ok();
+      expect(loginEvent.client.ip).to.be.ok();
+      expect(loginEvent.http.request.headers['x-forwarded-for']).to.be('1.1.1.1, 2.2.2.2');
     });
   });
 }

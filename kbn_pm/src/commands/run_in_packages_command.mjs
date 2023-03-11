@@ -10,6 +10,7 @@ import Path from 'path';
 
 import { REPO_ROOT } from '../lib/paths.mjs';
 import { run, spawnStreaming } from '../lib/spawn.mjs';
+import External from '../lib/external_packages.js';
 
 /** @type {import('../lib/command').Command} */
 export const command = {
@@ -39,8 +40,8 @@ export const command = {
     const exclude = args.getStringValues('exclude') ?? [];
     const include = args.getStringValues('include') ?? [];
 
-    const { discoverBazelPackages } = await import('@kbn/bazel-packages');
-    const packages = await discoverBazelPackages(REPO_ROOT);
+    const { getPackages } = External['@kbn/repo-packages']();
+    const packages = getPackages(REPO_ROOT);
     for (const { manifest, pkg, normalizedRepoRelativeDir } of packages) {
       if (
         exclude.includes(manifest.id) ||

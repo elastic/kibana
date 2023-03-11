@@ -9,6 +9,8 @@
 import { cloneDeep, isEqual } from 'lodash';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getChartHidden } from '@kbn/unified-histogram-plugin/public';
+import { AppState } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { getDefaultSort, getSortArray } from '../../../utils/sorting';
 import {
@@ -17,9 +19,6 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
-
-import { AppState } from '../services/discover_state';
-import { CHART_HIDDEN_KEY } from '../components/layout/use_discover_histogram';
 
 function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
@@ -48,7 +47,7 @@ export function getStateDefaults({
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
   const sort = getSortArray(savedSearch.sort ?? [], dataView!);
   const columns = getDefaultColumns(savedSearch, uiSettings);
-  const chartHidden = storage.get(CHART_HIDDEN_KEY);
+  const chartHidden = getChartHidden(storage, 'discover');
 
   const defaultState: AppState = {
     query,
@@ -70,6 +69,7 @@ export function getStateDefaults({
     rowHeight: undefined,
     rowsPerPage: undefined,
     grid: undefined,
+    breakdownField: undefined,
   };
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
@@ -88,6 +88,10 @@ export function getStateDefaults({
   }
   if (savedSearch.rowsPerPage) {
     defaultState.rowsPerPage = savedSearch.rowsPerPage;
+  }
+
+  if (savedSearch.breakdownField) {
+    defaultState.breakdownField = savedSearch.breakdownField;
   }
 
   return defaultState;

@@ -27,6 +27,10 @@ import type {
  * mergeSavedObjectMigrationMaps({ '1.2.3': f }, { '1.2.3': g }) -> { '1.2.3': (doc, context) => f(g(doc, context), context) }
  *
  * @public
+ *
+ * @param map1 - The first map to merge
+ * @param map2 - The second map to merge
+ * @returns The merged map {@link SavedObjectMigrationMap}
  */
 export const mergeSavedObjectMigrationMaps = (
   map1: SavedObjectMigrationMap,

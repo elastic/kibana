@@ -29,6 +29,13 @@ export function LayerPanel({
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
     defaultMessage: 'Data view not found',
   });
+  const indexPatternRefs = dataViews.indexPatternRefs.map((ref) => {
+    const isPersisted = dataViews.indexPatterns[ref.id]?.isPersisted ?? true;
+    return {
+      ...ref,
+      isAdhoc: !isPersisted,
+    };
+  });
   return (
     <I18nProvider>
       <ChangeIndexPattern
@@ -41,7 +48,7 @@ export function LayerPanel({
           fontWeight: 'normal',
         }}
         indexPatternId={layer.indexPatternId}
-        indexPatternRefs={dataViews.indexPatternRefs}
+        indexPatternRefs={indexPatternRefs}
         isMissingCurrent={!indexPattern}
         onChangeIndexPattern={onChangeIndexPattern}
       />

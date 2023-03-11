@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { findIndex } from 'lodash/fp';
 import type { FC } from 'react';
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
@@ -143,19 +143,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [getFields, onSubmit]
   );
 
-  const saveClickRef = useRef<{ onSaveClick: () => Promise<boolean> | null }>({
-    onSaveClick: () => null,
-  });
-
   const getData = useCallback(async () => {
-    const isResponseActionsInvalid = await saveClickRef.current.onSaveClick();
-    if (isResponseActionsInvalid) {
-      return {
-        isValid: false,
-        data: getFormData(),
-      };
-    }
-
     const result = await submit();
     return result?.isValid
       ? result
@@ -218,7 +206,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     if (isQueryRule(ruleType)) {
       return (
         <UseArray path="responseActions" initialNumberOfItems={0}>
-          {(params) => <ResponseActionsForm {...params} saveClickRef={saveClickRef} />}
+          {ResponseActionsForm}
         </UseArray>
       );
     }
@@ -292,6 +280,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 isDisabled={isLoading}
                 isLoading={isLoading}
                 onClick={() => handleSubmit(false)}
+                data-test-subj="create-enabled-false"
               >
                 {I18n.COMPLETE_WITHOUT_ENABLING}
               </EuiButton>

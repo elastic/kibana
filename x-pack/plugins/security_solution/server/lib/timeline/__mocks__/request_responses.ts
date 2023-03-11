@@ -41,7 +41,9 @@ export const getExportTimelinesRequest = () =>
   });
 
 export const getImportTimelinesRequest = async (fileName?: string) => {
-  const dir = resolve(join(__dirname, '../../detection_engine/rules/prepackaged_timelines'));
+  const dir = resolve(
+    join(__dirname, '../../detection_engine/prebuilt_rules/content/prepackaged_timelines')
+  );
   const file = fileName ?? 'index.ndjson';
   const dataPath = path.join(dir, file);
   const readable = await getReadables(dataPath);

@@ -81,7 +81,7 @@ export const SampleClientReadme = () => {
               <h1>
                 <FormattedMessage
                   id="customIntegrations.languageClients.sample.readme.title"
-                  defaultMessage="ElasticSearch Sample Client"
+                  defaultMessage="Elasticsearch Sample Client"
                 />
               </h1>
             </EuiTitle>

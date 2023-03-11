@@ -48,18 +48,21 @@ export const EmptyLocations = ({
       }
       footer={
         <EuiText size="s">
-          {LEARN_MORE}{' '}
-          <EuiLink
-            href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
-            target="_blank"
-          >
-            {READ_DOCS}
-          </EuiLink>
+          {LEARN_MORE} <PrivateLocationDocsLink />
         </EuiText>
       }
     />
   );
 };
+
+export const PrivateLocationDocsLink = ({ label }: { label?: string }) => (
+  <EuiLink
+    href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
+    target="_blank"
+  >
+    {label ?? READ_DOCS}
+  </EuiLink>
+);
 
 const FIRST_MONITOR = i18n.translate('xpack.synthetics.monitorManagement.firstLocationMonitor', {
   defaultMessage: 'In order to create a monitor, you will need to add a location first.',

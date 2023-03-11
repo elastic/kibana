@@ -13,6 +13,7 @@ import { PopulationJobCreator } from './population_job_creator';
 import { AdvancedJobCreator } from './advanced_job_creator';
 import { CategorizationJobCreator } from './categorization_job_creator';
 import { RareJobCreator } from './rare_job_creator';
+import { GeoJobCreator } from './geo_job_creator';
 
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
@@ -38,6 +39,9 @@ export const jobCreatorFactory =
         break;
       case JOB_TYPE.RARE:
         jc = RareJobCreator;
+        break;
+      case JOB_TYPE.GEO:
+        jc = GeoJobCreator;
         break;
       default:
         jc = SingleMetricJobCreator;

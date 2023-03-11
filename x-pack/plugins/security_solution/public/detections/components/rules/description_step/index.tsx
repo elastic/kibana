@@ -18,13 +18,14 @@ import { buildRelatedIntegrationsDescription } from '../related_integrations/int
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-} from '../../../../../common/detection_engine/schemas/common';
+} from '../../../../../common/detection_engine/rule_schema';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
 import type {
   AboutStepRiskScore,
   AboutStepSeverity,
+  Duration,
 } from '../../../pages/detection_engine/rules/types';
 import type { FieldValueTimeline } from '../pick_timeline';
 import type { FormSchema } from '../../../../shared_imports';
@@ -43,12 +44,16 @@ import {
   buildThreatMappingDescription,
   buildEqlOptionsDescription,
   buildRequiredFieldsDescription,
+  buildAlertSuppressionDescription,
+  buildAlertSuppressionWindowDescription,
 } from './helpers';
-import { buildMlJobsDescription } from './ml_job_description';
+import { buildMlJobsDescription } from './build_ml_jobs_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
 import { THREAT_QUERY_LABEL } from './translations';
-import { filterEmptyThreats } from '../../../pages/detection_engine/rules/create/helpers';
+import { filterEmptyThreats } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
+import { useLicense } from '../../../../common/hooks/use_license';
+import type { LicenseService } from '../../../../../common/license';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   &.euiDescriptionList--column .euiDescriptionList__title {
@@ -74,6 +79,7 @@ export const StepRuleDescriptionComponent = <T,>({
   schema,
 }: StepRuleDescriptionProps<T>) => {
   const kibana = useKibana();
+  const license = useLicense();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
 
   const keys = Object.keys(schema);
@@ -96,7 +102,10 @@ export const StepRuleDescriptionComponent = <T,>({
       return [...acc, buildActionsDescription(get(key, data), get([key, 'label'], schema))];
     }
 
-    return [...acc, ...buildListItems(data, pick(key, schema), filterManager, indexPatterns)];
+    return [
+      ...acc,
+      ...buildListItems(data, pick(key, schema), filterManager, license, indexPatterns),
+    ];
   }, []);
 
   if (columns === 'multi') {
@@ -137,6 +146,7 @@ export const buildListItems = <T,>(
   data: unknown,
   schema: FormSchema<T>,
   filterManager: FilterManager,
+  license: LicenseService,
   indexPatterns?: DataViewBase
 ): ListItems[] =>
   Object.keys(schema).reduce<ListItems[]>(
@@ -147,6 +157,7 @@ export const buildListItems = <T,>(
         get([field, 'label'], schema),
         data,
         filterManager,
+        license,
         indexPatterns
       ),
     ],
@@ -170,6 +181,7 @@ export const getDescriptionItem = (
   label: string,
   data: unknown,
   filterManager: FilterManager,
+  license: LicenseService,
   indexPatterns?: DataViewBase
 ): ListItems[] => {
   if (field === 'queryBar') {
@@ -186,6 +198,23 @@ export const getDescriptionItem = (
       savedQueryName,
       indexPatterns,
     });
+  } else if (field === 'groupByFields') {
+    const values: string[] = get(field, data);
+    return buildAlertSuppressionDescription(label, values, license);
+  } else if (field === 'groupByRadioSelection') {
+    return [];
+  } else if (field === 'groupByDuration') {
+    if (get('groupByFields', data).length > 0) {
+      const value: Duration = get(field, data);
+      return buildAlertSuppressionWindowDescription(
+        label,
+        value,
+        license,
+        get('groupByRadioSelection', data)
+      );
+    } else {
+      return [];
+    }
   } else if (field === 'eqlOptions') {
     const eqlOptions: EqlOptionsSelected = get(field, data);
     return buildEqlOptionsDescription(eqlOptions);

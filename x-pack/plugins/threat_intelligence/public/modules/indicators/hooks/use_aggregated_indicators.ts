@@ -10,7 +10,7 @@ import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useMemo, useState } from 'react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { useInspector, useKibana } from '../../../hooks';
-import { RawIndicatorFieldId } from '../types';
+import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { useSourcererDataView } from '.';
 import {
   ChartSeries,
@@ -56,9 +56,13 @@ export interface UseAggregatedIndicatorsValue {
 
   /** Is data update in progress? */
   isFetching?: boolean;
+
+  query: { refetch: VoidFunction; id: string; loading: boolean };
 }
 
 const DEFAULT_FIELD = RawIndicatorFieldId.Feed;
+
+const QUERY_ID = 'indicatorsBarchart';
 
 export const useAggregatedIndicators = ({
   timeRange,
@@ -87,9 +91,9 @@ export const useAggregatedIndicators = ({
     [inspectorAdapters, queryService, searchService]
   );
 
-  const { data, isLoading, isFetching } = useQuery(
+  const { data, isLoading, isFetching, refetch } = useQuery(
     [
-      'indicatorsBarchart',
+      QUERY_ID,
       {
         filters,
         field,
@@ -113,6 +117,11 @@ export const useAggregatedIndicators = ({
     [queryService.timefilter.timefilter, timeRange]
   );
 
+  const query = useMemo(
+    () => ({ refetch, id: QUERY_ID, loading: isLoading }),
+    [isLoading, refetch]
+  );
+
   return {
     dateRange,
     series: data || [],
@@ -120,5 +129,6 @@ export const useAggregatedIndicators = ({
     selectedField: field,
     isLoading,
     isFetching,
+    query,
   };
 };

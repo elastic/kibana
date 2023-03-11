@@ -11,9 +11,9 @@ set -e
 ./check_env_variables.sh
 
 # Uses a defaults if no argument is specified
-TIMELINES=${1:-../../rules/prepackaged_timelines/index.ndjson}
+TIMELINES=${1:-../../prebuilt_rules/content/prepackaged_timelines/index.ndjson}
 
-# Example to import and overwrite everything from ../rules/prepackaged_timelines/index.ndjson
+# Example to import and overwrite everything from ../prebuilt_rules/content/prepackaged_timelines/index.ndjson
 # ./timelines/add_prepackaged_timelines.sh
 curl -s -k \
   -H 'kbn-xsrf: 123' \

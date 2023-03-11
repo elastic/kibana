@@ -59,7 +59,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "DeeplyMockedKeys",
+              {
+                "pluginId": "@kbn/utility-types-jest",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesJestPluginApi",
+                "section": "def-common.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
+              },
               "<",
               "InternalChromeStart",
               ">"

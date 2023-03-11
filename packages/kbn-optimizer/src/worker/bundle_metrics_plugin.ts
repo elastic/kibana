@@ -25,6 +25,10 @@ export class BundleMetricsPlugin {
   constructor(private readonly bundle: Bundle) {}
 
   public apply(compiler: webpack.Compiler) {
+    if (this.bundle.ignoreMetrics) {
+      return;
+    }
+
     const { bundle } = this;
 
     compiler.hooks.emit.tap('BundleMetricsPlugin', (compilation) => {
@@ -79,7 +83,7 @@ export class BundleMetricsPlugin {
           id: bundle.id,
           value: entry.size,
           limit: bundle.pageLoadAssetSizeLimit,
-          limitConfigPath: `node_modules/@kbn/optimizer/limits.yml`,
+          limitConfigPath: `packages/kbn-optimizer/limits.yml`,
         },
         {
           group: `async chunks size`,

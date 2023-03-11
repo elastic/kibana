@@ -16,7 +16,7 @@ import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import { ObservabilityAppServices } from '../../../application/types';
-import { TopAlert } from '../../alerts';
+import type { TopAlert } from '../../../typings/alerts';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
@@ -94,7 +94,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
           </EuiButton>
         }
       >
-        <EuiFlexGroup direction="column" alignItems="flexStart">
+        <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
           <EuiButtonEmpty
             size="s"
             color="text"

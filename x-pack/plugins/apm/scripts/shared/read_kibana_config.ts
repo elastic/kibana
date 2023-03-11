@@ -43,7 +43,6 @@ export const readKibanaConfig = () => {
     'xpack.apm.indices.error': 'logs-apm*,apm-*',
     'xpack.apm.indices.span': 'traces-apm*,apm-*',
     'xpack.apm.indices.onboarding': 'apm-*',
-    'xpack.apm.indices.sourcemap': 'apm-*',
     'elasticsearch.hosts': 'http://localhost:9200',
     ...loadedKibanaConfig,
     ...cliEsCredentials,

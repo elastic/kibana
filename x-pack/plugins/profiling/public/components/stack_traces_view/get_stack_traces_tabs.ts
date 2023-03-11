@@ -21,22 +21,16 @@ export function getStackTracesTabs({
 }): Required<EuiPageHeaderContentProps>['tabs'] {
   return [
     {
-      label: i18n.translate('xpack.profiling.stackTracesView.containersTabLabel', {
-        defaultMessage: 'Containers',
-      }),
-      topNType: TopNType.Containers,
-    },
-    {
-      label: i18n.translate('xpack.profiling.stackTracesView.deploymentsTabLabel', {
-        defaultMessage: 'Deployments',
-      }),
-      topNType: TopNType.Deployments,
-    },
-    {
       label: i18n.translate('xpack.profiling.stackTracesView.threadsTabLabel', {
         defaultMessage: 'Threads',
       }),
       topNType: TopNType.Threads,
+    },
+    {
+      label: i18n.translate('xpack.profiling.stackTracesView.tracesTabLabel', {
+        defaultMessage: 'Traces',
+      }),
+      topNType: TopNType.Traces,
     },
     {
       label: i18n.translate('xpack.profiling.stackTracesView.hostsTabLabel', {
@@ -45,10 +39,16 @@ export function getStackTracesTabs({
       topNType: TopNType.Hosts,
     },
     {
-      label: i18n.translate('xpack.profiling.stackTracesView.tracesTabLabel', {
-        defaultMessage: 'Traces',
+      label: i18n.translate('xpack.profiling.stackTracesView.deploymentsTabLabel', {
+        defaultMessage: 'Deployments',
       }),
-      topNType: TopNType.Traces,
+      topNType: TopNType.Deployments,
+    },
+    {
+      label: i18n.translate('xpack.profiling.stackTracesView.containersTabLabel', {
+        defaultMessage: 'Containers',
+      }),
+      topNType: TopNType.Containers,
     },
   ].map((tab) => ({
     label: tab.label,

@@ -2,9 +2,8 @@
 
 This folder contains ML API routes in Kibana.
 
-Each route handler requires [apiDoc](https://github.com/apidoc/apidoc) annotations in order 
+Each route handler requires [apidoc-markdown](https://github.com/apidoc/apidoc-markdown) annotations in order
 to generate documentation.
-The [apidoc-markdown](https://github.com/rigwild/apidoc-markdown) package is also required in order to generate the markdown.
 
 There are custom parser and worker (`x-pack/plugins/ml/server/routes/apidoc_scripts`) to process api schemas for each documentation entry. It's written with typescript so make sure all the scripts in the folder are compiled before executing `apidoc` command.
 

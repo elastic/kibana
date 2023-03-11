@@ -33,6 +33,7 @@ export enum Aggregators {
   CARDINALITY = 'cardinality',
   P95 = 'p95',
   P99 = 'p99',
+  CUSTOM = 'custom',
 }
 
 export enum AlertStates {
@@ -100,14 +101,43 @@ interface BaseMetricExpressionParams {
 export interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Exclude<Aggregators, Aggregators.COUNT>;
   metric: string;
+  customMetrics: never;
+  equation: never;
+  label: never;
 }
 
 export interface CountMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Aggregators.COUNT;
   metric: never;
+  customMetrics: never;
+  equation: never;
+  label: never;
 }
 
-export type MetricExpressionParams = NonCountMetricExpressionParams | CountMetricExpressionParams;
+export type CustomMetricAggTypes = Exclude<
+  Aggregators,
+  Aggregators.CUSTOM | Aggregators.RATE | Aggregators.P95 | Aggregators.P99
+>;
+
+export interface MetricExpressionCustomMetric {
+  name: string;
+  aggType: CustomMetricAggTypes;
+  field?: string;
+  filter?: string;
+}
+
+export interface CustomMetricExpressionParams extends BaseMetricExpressionParams {
+  aggType: Aggregators.CUSTOM;
+  metric: never;
+  customMetrics: MetricExpressionCustomMetric[];
+  equation?: string;
+  label?: string;
+}
+
+export type MetricExpressionParams =
+  | NonCountMetricExpressionParams
+  | CountMetricExpressionParams
+  | CustomMetricExpressionParams;
 
 export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
 

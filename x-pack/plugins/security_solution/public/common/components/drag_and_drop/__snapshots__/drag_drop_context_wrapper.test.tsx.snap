@@ -625,6 +625,26 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
             },
             "type": "string",
           },
+          "nestedField.thirdAttributes": Object {
+            "aggregatable": false,
+            "category": "nestedField",
+            "description": "",
+            "example": "",
+            "format": "",
+            "indexes": Array [
+              "auditbeat",
+              "filebeat",
+              "packetbeat",
+            ],
+            "name": "nestedField.thirdAttributes",
+            "searchable": true,
+            "subType": Object {
+              "nested": Object {
+                "path": "nestedField",
+              },
+            },
+            "type": "date",
+          },
         },
       },
       "source": Object {

@@ -30,7 +30,7 @@ export interface DateRangePickerValues {
 }
 
 const DatePickerWrapper = euiStyled.div`
-  padding-bottom: ${(props) => `${props.theme.eui.euiCodeBlockPaddingModifiers.paddingLarge}`};
+  padding-bottom: ${(props) => `${props.theme.eui.euiSizeL}`};
 `;
 
 export const ActionLogDateRangePicker = memo(
@@ -41,6 +41,7 @@ export const ActionLogDateRangePicker = memo(
     onRefresh,
     onRefreshChange,
     onTimeChange,
+    'data-test-subj': dataTestSubj,
   }: {
     dateRangePickerState: DateRangePickerValues;
     isDataLoading: boolean;
@@ -48,9 +49,10 @@ export const ActionLogDateRangePicker = memo(
     onRefresh: () => void;
     onRefreshChange: (evt: OnRefreshChangeProps) => void;
     onTimeChange: ({ start, end }: DurationRange) => void;
+    'data-test-subj'?: string;
   }) => {
     const { startDate: startDateFromUrl, endDate: endDateFromUrl } = useActionHistoryUrlParams();
-    const getTestId = useTestIdGenerator('response-actions-list');
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const kibana = useKibana<IUnifiedSearchPluginServices>();
     const { uiSettings } = kibana.services;
     const [commonlyUsedRanges] = useState(() => {

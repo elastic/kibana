@@ -6,60 +6,16 @@
  * Side Public License, v 1.
  */
 import apmAgent from 'elastic-apm-node';
-import { Appender, LogLevel, LogRecord, LoggerFactory, LogMeta, Logger } from '@kbn/logging';
+import { LogLevel, LogRecord, LogMeta } from '@kbn/logging';
+import { AbstractLogger } from '@kbn/core-logging-common-internal';
 
 function isError(x: any): x is Error {
   return x instanceof Error;
 }
 
 /** @internal */
-export class BaseLogger implements Logger {
-  constructor(
-    private readonly context: string,
-    private readonly level: LogLevel,
-    private readonly appenders: Appender[],
-    private readonly factory: LoggerFactory
-  ) {}
-
-  public trace<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta): void {
-    this.log(this.createLogRecord<Meta>(LogLevel.Trace, message, meta));
-  }
-
-  public debug<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta): void {
-    this.log(this.createLogRecord<Meta>(LogLevel.Debug, message, meta));
-  }
-
-  public info<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta): void {
-    this.log(this.createLogRecord<Meta>(LogLevel.Info, message, meta));
-  }
-
-  public warn<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void {
-    this.log(this.createLogRecord<Meta>(LogLevel.Warn, errorOrMessage, meta));
-  }
-
-  public error<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void {
-    this.log(this.createLogRecord<Meta>(LogLevel.Error, errorOrMessage, meta));
-  }
-
-  public fatal<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void {
-    this.log(this.createLogRecord<Meta>(LogLevel.Fatal, errorOrMessage, meta));
-  }
-
-  public log(record: LogRecord) {
-    if (!this.level.supports(record.level)) {
-      return;
-    }
-
-    for (const appender of this.appenders) {
-      appender.append(record);
-    }
-  }
-
-  public get(...childContextPaths: string[]): Logger {
-    return this.factory.get(...[this.context, ...childContextPaths]);
-  }
-
-  private createLogRecord<Meta extends LogMeta>(
+export class BaseLogger extends AbstractLogger {
+  protected createLogRecord<Meta extends LogMeta>(
     level: LogLevel,
     errorOrMessage: string | Error,
     meta?: Meta

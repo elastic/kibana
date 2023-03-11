@@ -13,24 +13,40 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/core-capabilities-server-mocks",
-        "id": "def-server.CapabilitiesServiceContract",
+        "id": "def-common.CapabilitiesServiceContract",
         "type": "Type",
         "tags": [],
         "label": "CapabilitiesServiceContract",
         "description": [],
         "signature": [
-          "{ setup: (setupDeps: ",
-          "SetupDeps",
-          ") => ",
-          "CapabilitiesSetup",
-          "; start: () => ",
-          "CapabilitiesStart",
-          "; preboot: (prebootDeps: ",
-          "PrebootSetupDeps",
-          ") => void; }"
+          "{ start: () => ",
+          {
+            "pluginId": "@kbn/core-capabilities-server",
+            "scope": "common",
+            "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+            "section": "def-common.CapabilitiesStart",
+            "text": "CapabilitiesStart"
+          },
+          "; setup: (setupDeps: SetupDeps) => ",
+          {
+            "pluginId": "@kbn/core-capabilities-server",
+            "scope": "common",
+            "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+            "section": "def-common.CapabilitiesSetup",
+            "text": "CapabilitiesSetup"
+          },
+          "; preboot: (prebootDeps: PrebootSetupDeps) => void; }"
         ],
         "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
         "deprecated": false,
@@ -41,7 +57,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-capabilities-server-mocks",
-        "id": "def-server.capabilitiesServiceMock",
+        "id": "def-common.capabilitiesServiceMock",
         "type": "Object",
         "tags": [],
         "label": "capabilitiesServiceMock",
@@ -52,7 +68,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-capabilities-server-mocks",
-            "id": "def-server.capabilitiesServiceMock.create",
+            "id": "def-common.capabilitiesServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -61,9 +77,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-capabilities-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreCapabilitiesServerMocksPluginApi",
-                "section": "def-server.CapabilitiesServiceContract",
+                "section": "def-common.CapabilitiesServiceContract",
                 "text": "CapabilitiesServiceContract"
               },
               ">"
@@ -76,14 +92,20 @@
           },
           {
             "parentPluginId": "@kbn/core-capabilities-server-mocks",
-            "id": "def-server.capabilitiesServiceMock.createSetupContract",
+            "id": "def-common.capabilitiesServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "CapabilitiesSetup",
+              {
+                "pluginId": "@kbn/core-capabilities-server",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                "section": "def-common.CapabilitiesSetup",
+                "text": "CapabilitiesSetup"
+              },
               ">"
             ],
             "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
@@ -94,14 +116,20 @@
           },
           {
             "parentPluginId": "@kbn/core-capabilities-server-mocks",
-            "id": "def-server.capabilitiesServiceMock.createStartContract",
+            "id": "def-common.capabilitiesServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "CapabilitiesStart",
+              {
+                "pluginId": "@kbn/core-capabilities-server",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                "section": "def-common.CapabilitiesStart",
+                "text": "CapabilitiesStart"
+              },
               ">"
             ],
             "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
@@ -112,14 +140,20 @@
           },
           {
             "parentPluginId": "@kbn/core-capabilities-server-mocks",
-            "id": "def-server.capabilitiesServiceMock.createCapabilities",
+            "id": "def-common.capabilitiesServiceMock.createCapabilities",
             "type": "Function",
             "tags": [],
             "label": "createCapabilities",
             "description": [],
             "signature": [
               "() => ",
-              "Capabilities"
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              }
             ],
             "path": "packages/core/capabilities/core-capabilities-server-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
@@ -131,13 +165,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

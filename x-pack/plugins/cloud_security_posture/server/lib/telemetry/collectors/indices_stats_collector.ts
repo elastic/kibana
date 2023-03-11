@@ -4,29 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { CspmIndicesStats, IndexStats } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '../../../../common/constants';
-import type { CspmIndicesStats, IndexStats } from './types';
 
-export const getIndicesStats = async (
+const getIndexDocCount = (esClient: ElasticsearchClient, index: string) =>
+  esClient.indices.stats({ index });
+
+const getLatestDocTimestamp = async (
   esClient: ElasticsearchClient,
-  logger: Logger
-): Promise<CspmIndicesStats> => {
-  const [findings, latestFindings, score] = await Promise.all([
-    getIndexStats(esClient, FINDINGS_INDEX_DEFAULT_NS, logger),
-    getIndexStats(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
-    getIndexStats(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger),
-  ]);
-  return {
-    findings,
-    latest_findings: latestFindings,
-    score,
-  };
+  index: string
+): Promise<string | null> => {
+  const latestTimestamp = await esClient.search({
+    index,
+    query: {
+      match_all: {},
+    },
+    sort: '@timestamp:desc',
+    size: 1,
+    fields: ['@timestamp'],
+    _source: false,
+  });
+
+  const latestEventTimestamp = latestTimestamp.hits?.hits[0]?.fields;
+
+  return latestEventTimestamp ? latestEventTimestamp['@timestamp'][0] : null;
 };
 
 const getIndexStats = async (
@@ -60,25 +67,18 @@ const getIndexStats = async (
   }
 };
 
-const getIndexDocCount = (esClient: ElasticsearchClient, index: string) =>
-  esClient.indices.stats({ index });
-
-const getLatestDocTimestamp = async (
+export const getIndicesStats = async (
   esClient: ElasticsearchClient,
-  index: string
-): Promise<string | null> => {
-  const latestTimestamp = await esClient.search({
-    index,
-    query: {
-      match_all: {},
-    },
-    sort: '@timestamp:desc',
-    size: 1,
-    fields: ['@timestamp'],
-    _source: false,
-  });
-
-  const latestEventTimestamp = latestTimestamp.hits?.hits[0]?.fields;
-
-  return latestEventTimestamp ? latestEventTimestamp['@timestamp'][0] : null;
+  logger: Logger
+): Promise<CspmIndicesStats> => {
+  const [findings, latestFindings, score] = await Promise.all([
+    getIndexStats(esClient, FINDINGS_INDEX_DEFAULT_NS, logger),
+    getIndexStats(esClient, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
+    getIndexStats(esClient, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger),
+  ]);
+  return {
+    findings,
+    latest_findings: latestFindings,
+    score,
+  };
 };

@@ -76,13 +76,11 @@ jest.mock('./services', () => {
 
   const execute = service.execute;
 
-  jest.spyOn(service, 'execute').mockImplementation((...args) => {
+  // @ts-expect-error
+  service.execute = (...args: Parameters<ExpressionsService['execute']>) => {
     execution = execute(...args);
-    jest.spyOn(execution, 'getData');
-    jest.spyOn(execution, 'cancel');
-
     return execution;
-  });
+  };
 
   return moduleMock;
 });

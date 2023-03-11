@@ -17,15 +17,6 @@ echo " -- installing node.js dependencies"
 yarn kbn bootstrap --verbose
 
 ###
-### upload ts-refs-cache artifacts as quickly as possible so they are available for download
-###
-if [[ "$BUILD_TS_REFS_CACHE_CAPTURE" == "true" ]]; then
-  cd "$KIBANA_DIR/target/ts_refs_cache"
-  gsutil cp "*.zip" 'gs://kibana-ci-ts-refs-cache/'
-  cd "$KIBANA_DIR"
-fi
-
-###
 ### Download es snapshots
 ###
 echo " -- downloading es snapshot"

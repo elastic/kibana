@@ -72,6 +72,20 @@ export class TestSubjects extends FtrService {
     }
   }
 
+  /**
+   * Get a promise that resolves when an element no longer exists, if the element does exist
+   * it will wait until the element does not exist. If we wait until the timeout and the element
+   * still exists the promise will reject.
+   *
+   * This method is intended to quickly assert that an element does not exist. Its
+   * 2.5 second timeout responds quickly.
+   *
+   * When `options.timeout` is not passed the `timeouts.waitForExists` config is used as
+   * the timeout. The default value for that config is currently 2.5 seconds.
+   *
+   * If the element is hidden but still in the DOM it is treated as "existing", unless `options.allowHidden`
+   * is set to `true`.
+   */
   public async missingOrFail(selector: string, options: ExistsOptions = {}): Promise<void | never> {
     const { timeout = this.WAIT_FOR_EXISTS_TIME, allowHidden = false } = options;
 

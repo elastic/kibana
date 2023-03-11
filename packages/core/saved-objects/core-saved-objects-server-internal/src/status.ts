@@ -17,43 +17,7 @@ export const calculateStatus$ = (
   elasticsearchStatus$: Observable<ServiceStatus>
 ): Observable<ServiceStatus<SavedObjectStatusMeta>> => {
   const migratorStatus$: Observable<ServiceStatus<SavedObjectStatusMeta>> = rawMigratorStatus$.pipe(
-    map((migrationStatus) => {
-      if (migrationStatus.status === 'waiting_to_start') {
-        return {
-          level: ServiceStatusLevels.unavailable,
-          summary: `SavedObjects service is waiting to start migrations`,
-        };
-      } else if (migrationStatus.status === 'waiting_for_other_nodes') {
-        return {
-          level: ServiceStatusLevels.unavailable,
-          summary: `SavedObjects service is waiting for other nodes to complete the migration`,
-          detail:
-            `If no other Kibana instance is attempting ` +
-            `migrations, you can get past this message by deleting index ${migrationStatus.waitingIndex} and ` +
-            `restarting Kibana.`,
-        };
-      } else if (migrationStatus.status === 'running') {
-        return {
-          level: ServiceStatusLevels.unavailable,
-          summary: `SavedObjects service is running migrations`,
-        };
-      }
-
-      const statusCounts: SavedObjectStatusMeta['migratedIndices'] = { migrated: 0, skipped: 0 };
-      if (migrationStatus.result) {
-        migrationStatus.result.forEach(({ status }) => {
-          statusCounts[status] = (statusCounts[status] ?? 0) + 1;
-        });
-      }
-
-      return {
-        level: ServiceStatusLevels.available,
-        summary: `SavedObjects service has completed migrations and is available`,
-        meta: {
-          migratedIndices: statusCounts,
-        },
-      };
-    }),
+    map(migratorStatusToServiceStatus),
     startWith({
       level: ServiceStatusLevels.unavailable,
       summary: `SavedObjects service is waiting to start migrations`,
@@ -79,4 +43,44 @@ export const calculateStatus$ = (
       }
     })
   );
+};
+
+const migratorStatusToServiceStatus = (
+  migrationStatus: KibanaMigratorStatus
+): ServiceStatus<SavedObjectStatusMeta> => {
+  if (migrationStatus.status === 'waiting_to_start') {
+    return {
+      level: ServiceStatusLevels.unavailable,
+      summary: `SavedObjects service is waiting to start migrations`,
+    };
+  } else if (migrationStatus.status === 'waiting_for_other_nodes') {
+    return {
+      level: ServiceStatusLevels.unavailable,
+      summary: `SavedObjects service is waiting for other nodes to complete the migration`,
+      detail:
+        `If no other Kibana instance is attempting ` +
+        `migrations, you can get past this message by deleting index ${migrationStatus.waitingIndex} and ` +
+        `restarting Kibana.`,
+    };
+  } else if (migrationStatus.status === 'running') {
+    return {
+      level: ServiceStatusLevels.unavailable,
+      summary: `SavedObjects service is running migrations`,
+    };
+  }
+
+  const statusCounts: SavedObjectStatusMeta['migratedIndices'] = { migrated: 0, skipped: 0 };
+  if (migrationStatus.result) {
+    migrationStatus.result.forEach(({ status }) => {
+      statusCounts[status] = (statusCounts[status] ?? 0) + 1;
+    });
+  }
+
+  return {
+    level: ServiceStatusLevels.available,
+    summary: `SavedObjects service has completed migrations and is available`,
+    meta: {
+      migratedIndices: statusCounts,
+    },
+  };
 };

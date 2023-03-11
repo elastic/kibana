@@ -8,6 +8,7 @@
 import { Logger } from '@kbn/logging';
 import type { IBasePath } from '@kbn/core/server';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
+import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import { RulesServiceSetup } from '../services/rules';
 import { InfraConfig, InfraPluginStartServicesAccessor } from '../types';
 import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
@@ -24,14 +25,15 @@ export interface InfraDomainLibs {
 }
 
 export interface InfraBackendLibs extends InfraDomainLibs {
+  basePath: IBasePath;
   configuration: InfraConfig;
   framework: KibanaFramework;
-  sources: InfraSources;
-  sourceStatus: InfraSourceStatus;
-  handleEsError: typeof handleEsError;
   logsRules: RulesServiceSetup;
   metricsRules: RulesServiceSetup;
+  sources: InfraSources;
+  sourceStatus: InfraSourceStatus;
+  getAlertDetailsConfig: () => ObservabilityConfig['unsafe']['alertDetails'];
   getStartServices: InfraPluginStartServicesAccessor;
+  handleEsError: typeof handleEsError;
   logger: Logger;
-  basePath: IBasePath;
 }

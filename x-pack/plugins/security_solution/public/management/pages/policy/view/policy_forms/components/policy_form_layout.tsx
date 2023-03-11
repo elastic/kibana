@@ -14,6 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiBottomBar,
   EuiSpacer,
+  EuiThemeProvider,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -21,7 +22,8 @@ import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
+import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   policyDetails,
   agentStatusSummary,
@@ -31,7 +33,7 @@ import {
 
 import { useToasts, useKibana } from '../../../../../../common/lib/kibana';
 import type { AppAction } from '../../../../../../common/store/actions';
-import { getEndpointListPath } from '../../../../../common/routing';
+import { getEndpointListPath, getPoliciesPath } from '../../../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import type { PolicyDetailsRouteState } from '../../../../../../../common/endpoint/types';
@@ -49,6 +51,7 @@ export const PolicyFormLayout = React.memo(() => {
   } = useKibana();
   const toasts = useToasts();
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
+  const showEditableFormFields = useShowEditableFormFields();
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -60,12 +63,23 @@ export const PolicyFormLayout = React.memo(() => {
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
   const policyName = policyItem?.name ?? '';
-  const hostListRouterPath = getEndpointListPath({ name: 'endpointList' });
+  const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
 
   const routingOnCancelNavigateTo = routeState?.onCancelNavigateTo;
   const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
-    return routingOnCancelNavigateTo ?? [APP_UI_ID, { path: hostListRouterPath }];
-  }, [hostListRouterPath, routingOnCancelNavigateTo]);
+    if (routingOnCancelNavigateTo) {
+      return routingOnCancelNavigateTo;
+    }
+
+    return [
+      APP_UI_ID,
+      {
+        path: isPolicyListEnabled
+          ? getPoliciesPath()
+          : getEndpointListPath({ name: 'endpointList' }),
+      },
+    ];
+  }, [isPolicyListEnabled, routingOnCancelNavigateTo]);
 
   // Handle showing update statuses
   useEffect(() => {
@@ -153,31 +167,35 @@ export const PolicyFormLayout = React.memo(() => {
       <EuiBottomBar paddingSize="s">
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="ghost"
-              onClick={handleCancelOnClick}
-              data-test-subj="policyDetailsCancelButton"
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.details.cancel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
+            <EuiThemeProvider colorMode="dark">
+              <EuiButtonEmpty
+                color="text"
+                onClick={handleCancelOnClick}
+                data-test-subj="policyDetailsCancelButton"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policy.details.cancel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiThemeProvider>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill={true}
-              iconType="save"
-              data-test-subj="policyDetailsSaveButton"
-              onClick={handleSaveOnClick}
-              isLoading={isPolicyLoading}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.policy.details.save"
-                defaultMessage="Save"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+          {showEditableFormFields && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill={true}
+                iconType="save"
+                data-test-subj="policyDetailsSaveButton"
+                onClick={handleSaveOnClick}
+                isLoading={isPolicyLoading}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policy.details.save"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiBottomBar>
     </>

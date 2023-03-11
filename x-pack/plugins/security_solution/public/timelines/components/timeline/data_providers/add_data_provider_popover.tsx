@@ -17,14 +17,14 @@ import {
   EuiPopover,
   EuiIcon,
 } from '@elastic/eui';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { useDispatch } from 'react-redux';
 
 import type { BrowserFields } from '../../../../common/containers/source';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
-import { addContentToTimeline } from './helpers';
+import { addContentToTimeline, getDisplayValue } from './helpers';
 import { DataProviderType } from './data_provider';
 import { timelineSelectors } from '../../../store/timeline';
 import { ADD_FIELD_LABEL, ADD_TEMPLATE_FIELD_LABEL } from './translations';
@@ -71,14 +71,14 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         onAddedToTimeline: handleClosePopover,
         providerToAdd: {
           id: providerId,
-          name: value,
+          name: field,
           enabled: true,
           excluded,
           kqlQuery: '',
           type,
           queryMatch: {
             displayField: undefined,
-            displayValue: undefined,
+            displayValue: getDisplayValue(value),
             field,
             value,
             operator,
@@ -126,7 +126,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
             timelineId={timelineId}
             value=""
             type={DataProviderType.default}
-            providerId={`${timelineId}-${uuid.v4()}`}
+            providerId={`${timelineId}-${uuidv4()}`}
           />
         ),
       },
@@ -144,7 +144,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
             timelineId={timelineId}
             value=""
             type={DataProviderType.template}
-            providerId={`${timelineId}-${uuid.v4()}`}
+            providerId={`${timelineId}-${uuidv4()}`}
           />
         ),
       },
@@ -195,7 +195,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         timelineId={timelineId}
         value=""
         type={DataProviderType.default}
-        providerId={`${timelineId}-${uuid.v4()}`}
+        providerId={`${timelineId}-${uuidv4()}`}
       />
     );
   }, [browserFields, handleDataProviderEdited, panels, timelineId, timelineType]);

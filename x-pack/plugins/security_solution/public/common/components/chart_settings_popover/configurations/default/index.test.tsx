@@ -19,7 +19,6 @@ import type { State } from '../../../../store';
 import { createStore } from '../../../../store';
 import * as i18n from './translations';
 import { useChartSettingsPopoverConfiguration } from '.';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 const mockHandleClick = jest.fn();
 
@@ -33,13 +32,7 @@ describe('useChartSettingsPopoverConfiguration', () => {
 
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <TestProviders store={store}>{children}</TestProviders>
   );

@@ -17,24 +17,23 @@ import {
   ElementClickListener,
   ScaleType,
 } from '@elastic/charts';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import moment from 'moment';
-import { useSelector } from 'react-redux';
-import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
 import { getChartDateLabel } from '../../../lib/helper';
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeThemeContext } from '../../../contexts';
 import { HistogramResult } from '../../../../../common/runtime_types';
-import { useMonitorId, useUrlParams } from '../../../hooks';
+import { useUrlParams } from '../../../hooks';
 import { ChartEmptyState } from './chart_empty_state';
 import { getDateRangeFromChartElement } from './utils';
-import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../translations';
-import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
-import { monitorStatusSelector } from '../../../state/selectors';
+import {
+  STATUS_DOWN_LABEL,
+  STATUS_UP_LABEL,
+} from '../../../../../common/translations/translations';
 
 export interface PingHistogramComponentProps {
   /**
@@ -54,6 +53,8 @@ export interface PingHistogramComponentProps {
   data: HistogramResult | null;
 
   loading?: boolean;
+
+  timeZone: string;
 }
 
 interface BarPoint {
@@ -68,24 +69,17 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
   data,
   loading = false,
   height,
+  timeZone,
 }) => {
   const {
     colors: { danger, gray },
     chartTheme,
   } = useContext(UptimeThemeContext);
 
-  const monitorId = useMonitorId();
-
-  const selectedMonitor = useSelector(monitorStatusSelector);
-
-  const { basePath } = useUptimeSettingsContext();
-
-  const [getUrlParams, updateUrlParams] = useUrlParams();
-
-  const { dateRangeStart, dateRangeEnd } = getUrlParams();
+  const [_getUrlParams, updateUrlParams] = useUrlParams();
 
   let content: JSX.Element | undefined;
-  if (!data?.histogram?.length) {
+  if (!data?.histogram?.length && !loading) {
     content = (
       <ChartEmptyState
         title={i18n.translate('xpack.synthetics.snapshot.noDataTitle', {
@@ -97,7 +91,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
       />
     );
   } else {
-    const { histogram, minInterval } = data;
+    const { histogram, minInterval } = data ?? {};
 
     const onBrushEnd: BrushEndListener = ({ x }) => {
       if (!x) {
@@ -112,13 +106,13 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
 
     const onBarClicked: ElementClickListener = ([elementData]) => {
       updateUrlParams(
-        getDateRangeFromChartElement(elementData as XYChartElementEvent, minInterval)
+        getDateRangeFromChartElement(elementData as XYChartElementEvent, minInterval!)
       );
     };
 
     const barData: BarPoint[] = [];
 
-    histogram.forEach(({ x, upCount, downCount }) => {
+    histogram?.forEach(({ x, upCount, downCount }) => {
       barData.push(
         { x, y: downCount ?? 0, type: STATUS_DOWN_LABEL },
         { x, y: upCount ?? 0, type: STATUS_UP_LABEL }
@@ -181,7 +175,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             })}
             stackAccessors={['x']}
             splitSeriesAccessors={['type']}
-            timeZone="local"
+            timeZone={timeZone}
             xAccessor="x"
             xScaleType={ScaleType.Time}
             yAccessors={['y']}
@@ -191,29 +185,6 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
       </ChartWrapper>
     );
   }
-
-  const pingHistogramExploratoryViewLink = createExploratoryViewUrl(
-    {
-      reportType: 'kpi-over-time',
-      allSeries: [
-        {
-          name: `${monitorId}-pings`,
-          dataType: 'synthetics',
-          selectedMetricField: 'summary.up',
-          time: { from: dateRangeStart, to: dateRangeEnd },
-          reportDefinitions: {
-            'monitor.name':
-              monitorId && selectedMonitor?.monitor?.name
-                ? [selectedMonitor.monitor.name]
-                : ['ALL_VALUES'],
-          },
-        },
-      ],
-    },
-    basePath
-  );
-
-  const showAnalyzeButton = false;
 
   return (
     <>
@@ -228,16 +199,6 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
             </h2>
           </EuiTitle>
         </EuiFlexItem>
-        {showAnalyzeButton && (
-          <EuiFlexItem grow={false}>
-            <EuiButton size="s" href={pingHistogramExploratoryViewLink}>
-              <FormattedMessage
-                id="xpack.synthetics.pingHistogram.analyze"
-                defaultMessage="Analyze"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
       {content}
     </>

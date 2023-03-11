@@ -5,12 +5,27 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { defineConfig } from 'cypress';
+import { defineCypressConfig } from '@kbn/cypress-config';
 
-// eslint-disable-next-line import/no-default-export
-export default defineConfig({
-  defaultCommandTimeout: 120000,
+const CI = process.env.BUILDKITE === 'true';
+
+/**
+ * Converts seconds to milliseconds
+ * @param s Seconds
+ * @returns milliseconds
+ */
+const sToMs = (s: number) => s * 1000;
+
+const LOCAL_CONFIG: Cypress.ConfigOptions<any> = {
+  defaultCommandTimeout: sToMs(10),
+};
+
+const CI_CONFIG: Cypress.ConfigOptions<any> = {
+  defaultCommandTimeout: sToMs(120),
+};
+
+export default defineCypressConfig({
+  ...(CI ? CI_CONFIG : LOCAL_CONFIG),
   execTimeout: 120000,
   pageLoadTimeout: 120000,
   retries: {
@@ -29,9 +44,5 @@ export default defineConfig({
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
-    setupNodeEvents(on, config) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      return require('./plugins')(on, config);
-    },
   },
 });

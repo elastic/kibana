@@ -22,7 +22,6 @@ import {
   addNameAndDescriptionToTimeline,
   populateTimeline,
   waitForTimelineChanges,
-  closeTimeline,
   createNewTimeline,
   updateDataProviderByFieldHoverAction,
 } from '../../tasks/timeline';
@@ -34,19 +33,15 @@ describe('timeline data providers', () => {
   before(() => {
     cleanKibana();
     login();
-    visit(HOSTS_URL);
-    waitForAllHostsToBeLoaded();
-    scrollToBottom();
   });
 
   beforeEach(() => {
+    visit(HOSTS_URL);
+    waitForAllHostsToBeLoaded();
+    scrollToBottom();
     createNewTimeline();
     addNameAndDescriptionToTimeline(getTimeline());
     populateTimeline();
-  });
-
-  afterEach(() => {
-    closeTimeline();
   });
 
   it('displays the data provider action menu when Enter is pressed', (done) => {

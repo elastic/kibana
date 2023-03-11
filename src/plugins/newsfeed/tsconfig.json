@@ -1,15 +1,19 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": ["public/**/*", "server/**/*", "common/*", "../../../typings/**/*"],
-  "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json"},
-    { "path": "../screenshot_mode/tsconfig.json" }
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/screenshot-mode-plugin",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

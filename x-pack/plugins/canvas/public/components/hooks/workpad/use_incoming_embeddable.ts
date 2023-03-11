@@ -53,11 +53,20 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
           originalAst.chain[functionIndex].arguments.config[0] as string
         );
 
+        const originalType = originalAst.chain[functionIndex].arguments.type[0];
+
         // clear out resolved arg for old embeddable
         const argumentPath = [embeddableId, 'expressionRenderable'];
         dispatch(clearValue({ path: argumentPath }));
 
-        const updatedInput = { ...originalInput, ...incomingInput };
+        let updatedInput;
+
+        // if type was changed, we should not provide originalInput
+        if (originalType !== type) {
+          updatedInput = incomingInput;
+        } else {
+          updatedInput = { ...originalInput, ...incomingInput };
+        }
 
         const expression = `embeddable config="${encode(updatedInput)}"
   type="${type}"

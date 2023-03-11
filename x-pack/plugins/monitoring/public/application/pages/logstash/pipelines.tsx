@@ -11,9 +11,7 @@ import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 import { useCharts } from '../../hooks/use_charts';
-// @ts-ignore
 import { isPipelineMonitoringSupportedInVersion } from '../../../lib/logstash/pipelines';
-// @ts-ignore
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { LogstashTemplate } from './logstash_template';
 import { useTable } from '../../hooks/use_table';

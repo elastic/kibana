@@ -1,9 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 /* @notice
  * Portions of this code are licensed under the following license:
  * Gainsight PX Agent Wrapper Agent Version: 0.46.0 Installed: 2022-08-25 08:07

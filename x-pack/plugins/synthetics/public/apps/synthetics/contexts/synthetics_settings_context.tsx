@@ -13,6 +13,7 @@ import {
   I18nStart,
 } from '@kbn/core/public';
 import React, { createContext, useContext, useMemo } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ClientPluginsSetup, ClientPluginsStart } from '../../../plugin';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { useGetUrlParams } from '../hooks';
@@ -43,6 +44,7 @@ export interface SyntheticsAppProps {
 }
 
 export interface SyntheticsSettingsContextValues {
+  canSave: boolean;
   basePath: string;
   dateRangeStart: string;
   dateRangeEnd: string;
@@ -69,6 +71,7 @@ const defaultContext: SyntheticsSettingsContextValues = {
   isInfraAvailable: true,
   isLogsAvailable: true,
   isDev: false,
+  canSave: false,
 };
 export const SyntheticsSettingsContext = createContext(defaultContext);
 
@@ -81,8 +84,13 @@ export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = (
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
+  const { application } = useKibana().services;
+
+  const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
+
   const value = useMemo(() => {
     return {
+      canSave,
       isDev,
       basePath,
       isApmAvailable,
@@ -93,6 +101,7 @@ export const SyntheticsSettingsContextProvider: React.FC<SyntheticsAppProps> = (
       dateRangeEnd: dateRangeEnd ?? DATE_RANGE_END,
     };
   }, [
+    canSave,
     isDev,
     basePath,
     isApmAvailable,

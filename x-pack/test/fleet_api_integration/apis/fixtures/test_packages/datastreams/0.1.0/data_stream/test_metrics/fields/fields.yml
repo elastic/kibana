@@ -10,6 +10,10 @@
   type: constant_keyword
   description: >
     Data stream namespace.
+- name: numeric_field
+  type: integer
+  description: >
+    Numeric field
 - name: '@timestamp'
   type: date
   description: >

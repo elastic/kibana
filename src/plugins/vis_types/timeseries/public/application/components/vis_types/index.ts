@@ -23,17 +23,11 @@ import './_vis_types.scss';
  * Disable typescript errors since the components are not typed yet.
  */
 
-// @ts-expect-error
 const timeseries = lazy(() => import('./timeseries/vis'));
-// @ts-expect-error
 const metric = lazy(() => import('./metric/vis'));
-// @ts-expect-error
 const topN = lazy(() => import('./top_n/vis'));
-// @ts-expect-error
 const table = lazy(() => import('./table/vis'));
-// @ts-expect-error
 const gauge = lazy(() => import('./gauge/vis'));
-// @ts-expect-error
 const markdown = lazy(() => import('./markdown/vis'));
 
 export const TimeseriesVisTypes: Record<string, React.ComponentType<TimeseriesVisProps>> = {

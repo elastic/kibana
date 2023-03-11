@@ -8,11 +8,8 @@
 
 import expect from '@kbn/expect';
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import {
-  functionWrapper,
-  getElasticLogo,
-  getElasticOutline,
-} from '@kbn/presentation-util-plugin/common/lib';
+import { getElasticLogo, getElasticOutline } from '@kbn/presentation-util-plugin/common';
+import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { imageFunction as image } from './image_function';
 
 describe('image', () => {

@@ -7,7 +7,12 @@
 
 import Path from 'path';
 
-import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
+import {
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+  createRootWithCorePlugins,
+  createTestServers,
+} from '@kbn/core-test-helpers-kbn-server';
 
 import { AGENT_POLICY_INDEX } from '../../common';
 import type { PackagePolicySOAttributes, OutputSOAttributes } from '../../common/types';
@@ -24,13 +29,13 @@ const logFilePath = Path.join(__dirname, 'logs.log');
 
 // FLAKY: https://github.com/elastic/kibana/issues/133470
 describe.skip('Fleet preconfiguration reset', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
-  let kbnServer: kbnTestServer.TestKibanaUtils;
+  let esServer: TestElasticsearchUtils;
+  let kbnServer: TestKibanaUtils;
 
   const registryUrl = useDockerRegistry();
 
   const startServers = async (defaultKbnConfig: any = CLOUD_KIBANA_CONFIG) => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t) => jest.setTimeout(t),
       settings: {
         es: {
@@ -46,7 +51,7 @@ describe.skip('Fleet preconfiguration reset', () => {
         await kbnServer.stop();
       }
 
-      const root = kbnTestServer.createRootWithCorePlugins(
+      const root = createRootWithCorePlugins(
         {
           xpack: {
             ...kbnConfig.xpack,

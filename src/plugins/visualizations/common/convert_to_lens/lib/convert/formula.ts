@@ -21,6 +21,7 @@ export const createFormulaColumn = (formula: string, agg: SchemaConfig): Formula
     operationType: 'formula',
     ...createColumn(agg),
     references: [],
+    dataType: 'number',
     params: { ...params, ...getFormat() },
     timeShift: agg.aggParams?.timeShift,
     meta: { aggId: createAggregationId(agg) },

@@ -91,7 +91,13 @@
             "description": [],
             "signature": [
               "(element: HTMLDivElement) => ",
-              "UnmountCallback"
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.UnmountCallback",
+                "text": "UnmountCallback"
+              }
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
             "deprecated": false,
@@ -108,7 +114,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
+                "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -183,6 +189,50 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.ChromeGlobalHelpExtensionMenuLink",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChromeGlobalHelpExtensionMenuLink",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeGlobalHelpExtensionMenuLink",
+            "text": "ChromeGlobalHelpExtensionMenuLink"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeHelpExtensionMenuCustomLink",
+            "text": "ChromeHelpExtensionMenuCustomLink"
+          }
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeGlobalHelpExtensionMenuLink.priority",
+            "type": "number",
+            "tags": [],
+            "label": "priority",
+            "description": [
+              "\nHighest priority items are listed at the top of the list of links."
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -368,6 +418,22 @@
             ],
             "signature": [
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeHelpExtensionMenuCustomLink.external",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "external",
+            "description": [
+              "\nOpens link in new tab"
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
             "deprecated": false,
@@ -639,7 +705,13 @@
             "description": [],
             "signature": [
               "(element: HTMLElement) => ",
-              "UnmountCallback"
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.UnmountCallback",
+                "text": "UnmountCallback"
+              }
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_controls.ts",
             "deprecated": false,
@@ -656,7 +728,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
+                "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -920,7 +992,13 @@
               "\nThe category the app lives in"
             ],
             "signature": [
-              "AppCategory",
+              {
+                "pluginId": "@kbn/core-application-common",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationCommonPluginApi",
+                "section": "def-common.AppCategory",
+                "text": "AppCategory"
+              },
               " | undefined"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/nav_links.ts",
@@ -1884,12 +1962,88 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeStart.getGlobalHelpExtensionMenuLinks$",
+            "type": "Function",
+            "tags": [],
+            "label": "getGlobalHelpExtensionMenuLinks$",
+            "description": [
+              "\nGet the list of the registered global help extension menu links"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeGlobalHelpExtensionMenuLink",
+                "text": "ChromeGlobalHelpExtensionMenuLink"
+              },
+              "[]>"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeStart.registerGlobalHelpExtensionMenuLink",
+            "type": "Function",
+            "tags": [],
+            "label": "registerGlobalHelpExtensionMenuLink",
+            "description": [
+              "\nAppend a global help extension menu link"
+            ],
+            "signature": [
+              "(globalHelpExtensionMenuLink: ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeGlobalHelpExtensionMenuLink",
+                "text": "ChromeGlobalHelpExtensionMenuLink"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-common.ChromeStart.registerGlobalHelpExtensionMenuLink.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "globalHelpExtensionMenuLink",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-chrome-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreChromeBrowserPluginApi",
+                    "section": "def-common.ChromeGlobalHelpExtensionMenuLink",
+                    "text": "ChromeGlobalHelpExtensionMenuLink"
+                  }
+                ],
+                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-common.ChromeStart.getHelpExtension$",
             "type": "Function",
             "tags": [],
             "label": "getHelpExtension$",
             "description": [
-              "\nGet an observable of the current custom help conttent"
+              "\nGet an observable of the current custom help content"
             ],
             "signature": [
               "() => ",
@@ -2107,7 +2261,13 @@
             "description": [],
             "signature": [
               "(element: HTMLDivElement) => ",
-              "UnmountCallback"
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.UnmountCallback",
+                "text": "UnmountCallback"
+              }
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/types.ts",
             "deprecated": false,
@@ -2124,7 +2284,7 @@
                 "signature": [
                   "T"
                 ],
-                "path": "node_modules/@types/kbn__core-mount-utils-browser/index.d.ts",
+                "path": "packages/core/mount-utils/core-mount-utils-browser/src/mount_point.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2146,7 +2306,7 @@
         "signature": [
           "Omit<React.HTMLAttributes<HTMLElement>, \"color\" | \"aria-current\"> & ",
           "CommonProps",
-          " & { href?: string | undefined; rel?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"warning\" | \"subdued\" | \"primary\" | \"accent\" | \"success\" | \"danger\" | \"text\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"date\" | \"location\" | \"time\" | \"page\" | \"false\" | \"true\" | \"step\" | undefined; }"
+          " & { href?: string | undefined; rel?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"text\" | \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"page\" | \"date\" | \"time\" | \"true\" | \"false\" | \"step\" | \"location\" | undefined; }"
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
         "deprecated": false,
@@ -2161,9 +2321,9 @@
         "label": "ChromeHelpExtensionLinkBase",
         "description": [],
         "signature": [
-          "{ iconType?: ",
+          "{ 'data-test-subj'?: string | undefined; iconType?: ",
           "IconType",
-          " | undefined; 'data-test-subj'?: string | undefined; rel?: string | undefined; target?: string | (string & {}) | undefined; }"
+          " | undefined; rel?: string | undefined; target?: string | (string & {}) | undefined; }"
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
         "deprecated": false,

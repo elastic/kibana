@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 // TODO: Follow up https://github.com/elastic/kibana/pull/137628 and add an explicit type to this object
 // without using Partial
@@ -13,7 +13,7 @@ import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/de
  * This will return a complex rule with all the outputs possible
  * @param ruleId The ruleId to set which is optional and defaults to rule-1
  */
-export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<FullResponseSchema> => ({
+export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<RuleResponse> => ({
   actions: [],
   author: [],
   created_by: 'elastic',
@@ -51,6 +51,7 @@ export const getComplexRuleOutput = (ruleId = 'rule-1'): Partial<FullResponseSch
   tags: ['tag 1', 'tag 2', 'any tag you want'],
   to: 'now',
   from: 'now-6m',
+  revision: 0,
   severity: 'high',
   severity_mapping: [],
   language: 'kuery',

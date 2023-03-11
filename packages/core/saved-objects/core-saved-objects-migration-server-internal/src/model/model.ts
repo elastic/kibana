@@ -9,10 +9,10 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
-import { type AliasAction, isTypeof } from '../actions';
+import { isTypeof } from '../actions';
+import type { AliasAction } from '../actions';
 import type { AllActionStates, State } from '../state';
 import type { ResponseType } from '../next';
-import { disableUnknownTypeMappingFields } from '../core';
 import {
   createInitialProgress,
   incrementProcessedProgress,
@@ -38,12 +38,15 @@ import {
   mergeMigrationMappingPropertyHashes,
   throwBadControlState,
   throwBadResponse,
+  versionMigrationCompleted,
+  buildRemoveAliasActions,
 } from './helpers';
 import { createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
+import { diffMappings } from '../core/build_active_mappings';
+import { CLUSTER_SHARD_LIMIT_EXCEEDED_REASON } from '../common/constants';
 
 export const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
-const CLUSTER_SHARD_LIMIT_EXCEEDED_REASON = `[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources.`;
 
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action
@@ -71,7 +74,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
   if (stateP.controlState === 'INIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-
     if (Either.isLeft(res)) {
       const left = res.left;
       if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {
@@ -97,13 +99,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
       const aliases = aliasesRes.right;
 
+      // The source index .kibana is pointing to. E.g: ".kibana_8.7.0_001"
+      const source = aliases[stateP.currentAlias];
+
       if (
-        // `.kibana` and the version specific aliases both exists and
-        // are pointing to the same index. This version's migration has already
-        // been completed.
-        aliases[stateP.currentAlias] != null &&
-        aliases[stateP.versionAlias] != null &&
-        aliases[stateP.currentAlias] === aliases[stateP.versionAlias]
+        // This version's migration has already been completed.
+        versionMigrationCompleted(stateP.currentAlias, stateP.versionAlias, aliases)
       ) {
         return {
           ...stateP,
@@ -114,10 +115,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           // Source is a none because we didn't do any migration from a source
           // index
           sourceIndex: Option.none,
-          targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+          targetIndex: source!,
+          sourceIndexMappings: indices[source!].mappings,
+          // in this scenario, a .kibana_X.Y.Z_001 index exists that matches the current kibana version
+          // aka we are NOT upgrading to a newer version
+          // we inject the target index's current mappings in the state, to check them later
+          targetIndexRawMappings: indices[source!].mappings,
           targetIndexMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetIndexMappings,
-            indices[aliases[stateP.currentAlias]].mappings
+            indices[source!].mappings
           ),
           versionIndexReadyActions: Option.none,
         };
@@ -125,7 +131,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // `.kibana` is pointing to an index that belongs to a later
         // version of Kibana .e.g. a 7.11.0 instance found the `.kibana` alias
         // pointing to `.kibana_7.12.0_001`
-        indexBelongsToLaterVersion(aliases[stateP.currentAlias], stateP.kibanaVersion)
+        indexBelongsToLaterVersion(aliases[stateP.currentAlias]!, stateP.kibanaVersion)
       ) {
         return {
           ...stateP,
@@ -137,16 +143,33 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           )}`,
         };
       } else if (
-        // If the `.kibana` alias exists
-        aliases[stateP.currentAlias] != null
+        // Don't actively participate in this migration but wait for another instance to complete it
+        stateP.waitForMigrationCompletion === true
       ) {
-        // The source index is the index the `.kibana` alias points to
-        const source = aliases[stateP.currentAlias];
         return {
           ...stateP,
+          controlState: 'WAIT_FOR_MIGRATION_COMPLETION',
+          // Wait for 2s before checking again if the migration has completed
+          retryDelay: 2000,
+          logs: [
+            ...stateP.logs,
+            {
+              level: 'info',
+              message: `Migration required. Waiting until another Kibana instance completes the migration.`,
+            },
+          ],
+        };
+      } else if (
+        // If the `.kibana` alias exists
+        source != null
+      ) {
+        // CHECKPOINT here we decide to go for yellow source
+        return {
+          ...stateP,
+          aliases,
           controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: Option.some(source) as Option.Some<string>,
-          sourceIndexMappings: indices[source].mappings,
+          sourceIndex: Option.some(source!) as Option.Some<string>,
+          sourceIndexMappings: indices[source!].mappings,
         };
       } else if (indices[stateP.legacyIndex] != null) {
         // Migrate from a legacy index
@@ -174,10 +197,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           controlState: 'LEGACY_SET_WRITE_BLOCK',
           sourceIndex: Option.some(legacyReindexTarget) as Option.Some<string>,
           targetIndex: target,
-          targetIndexMappings: disableUnknownTypeMappingFields(
-            stateP.targetIndexMappings,
-            indices[stateP.legacyIndex].mappings
-          ),
           legacyReindexTargetMappings: indices[stateP.legacyIndex].mappings,
           legacyPreMigrationDoneActions: [
             { remove_index: { index: stateP.legacyIndex } },
@@ -218,6 +237,47 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       }
     } else {
       return throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'WAIT_FOR_MIGRATION_COMPLETION') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    const indices = res.right;
+    const aliasesRes = getAliases(indices);
+    if (
+      // If this version's migration has already been completed we can proceed
+      Either.isRight(aliasesRes) &&
+      versionMigrationCompleted(stateP.currentAlias, stateP.versionAlias, aliasesRes.right)
+    ) {
+      return {
+        ...stateP,
+        // Proceed to 'DONE' and start serving traffic.
+        // Because WAIT_FOR_MIGRATION_COMPLETION can only be used by
+        // background-task nodes on Cloud, we can be confident that this node
+        // has exactly the same plugins enabled as the node that finished the
+        // migration. So we won't need to transform any old documents or update
+        // the mappings.
+        controlState: 'DONE',
+        // Source is a none because we didn't do any migration from a source
+        // index
+        sourceIndex: Option.none,
+        targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+        versionIndexReadyActions: Option.none,
+      };
+    } else {
+      // When getAliases returns a left 'multiple_indices_per_alias' error or
+      // the migration is not yet up to date just continue waiting
+      return {
+        ...stateP,
+        controlState: 'WAIT_FOR_MIGRATION_COMPLETION',
+        // Wait for 2s before checking again if the migration has completed
+        retryDelay: 2000,
+        logs: [
+          ...stateP.logs,
+          {
+            level: 'info',
+            message: `Migration required. Waiting until another Kibana instance completes the migration.`,
+          },
+        ],
+      };
     }
   } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -364,10 +424,30 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-      };
+      if (
+        // source exists
+        Boolean(stateP.sourceIndexMappings._meta?.migrationMappingPropertyHashes) &&
+        // ...and mappings are unchanged
+        !diffMappings(
+          /* actual */
+          stateP.sourceIndexMappings,
+          /* expected */
+          stateP.targetIndexMappings
+        )
+      ) {
+        // the existing mappings match, we can avoid reindexing
+        return {
+          ...stateP,
+          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+          targetIndex: stateP.sourceIndex.value!, // We preserve the same index, source == target (E.g: ".xx8.7.0_001")
+          versionIndexReadyActions: Option.none,
+        };
+      } else {
+        return {
+          ...stateP,
+          controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+        };
+      }
     } else if (Either.isLeft(res)) {
       const left = res.left;
       if (isTypeof(left, 'index_not_yellow_timeout')) {
@@ -383,6 +463,165 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       }
     } else {
       return throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'UPDATE_SOURCE_MAPPINGS_PROPERTIES') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+        targetIndex: stateP.sourceIndex.value!, // We preserve the same index, source == target (E.g: ".xx8.7.0_001")
+        versionIndexReadyActions: Option.none,
+      };
+    } else if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isTypeof(left, 'incompatible_mapping_exception')) {
+        return {
+          ...stateP,
+          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+        };
+      } else {
+        return throwBadResponse(stateP, left as never);
+      }
+    } else {
+      return throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      if (res.right.unknownDocs.length) {
+        logs = [
+          ...stateP.logs,
+          { level: 'warning', message: extractDiscardedUnknownDocs(res.right.unknownDocs) },
+        ];
+      }
+
+      logs = [
+        ...logs,
+        ...Object.entries(res.right.errorsByType).map(([soType, error]) => ({
+          level: 'warning' as const,
+          message: `Ignored excludeOnUpgrade hook on type [${soType}] that failed with error: "${error.toString()}"`,
+        })),
+      ];
+
+      return {
+        ...stateP,
+        logs,
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK',
+        deleteByQueryTaskId: res.right.taskId,
+      };
+    } else {
+      return {
+        ...stateP,
+        controlState: 'FATAL',
+        reason: extractUnknownDocFailureReason(
+          stateP.migrationDocLinks.resolveMigrationFailures,
+          res.left.unknownDocs
+        ),
+      };
+    }
+  } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      const source = stateP.sourceIndex.value;
+      return {
+        ...stateP,
+        logs,
+        controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+        mustRefresh:
+          stateP.mustRefresh || typeof res.right.deleted === 'undefined' || res.right.deleted > 0,
+        targetIndexRawMappings: stateP.sourceIndexMappings,
+        targetIndexMappings: mergeMigrationMappingPropertyHashes(
+          stateP.targetIndexMappings,
+          stateP.sourceIndexMappings
+        ),
+        preTransformDocsActions: [
+          // Point the version alias to the source index. This let's other Kibana
+          // instances know that a migration for the current version is "done"
+          // even though we may be waiting for document transformations to finish.
+          { add: { index: source!, alias: stateP.versionAlias } },
+          ...buildRemoveAliasActions(source!, Object.keys(stateP.aliases), [
+            stateP.currentAlias,
+            stateP.versionAlias,
+          ]),
+        ],
+      };
+    } else {
+      if (isTypeof(res.left, 'wait_for_task_completion_timeout')) {
+        // After waiting for the specified timeout, the task has not yet
+        // completed. Retry this step to see if the task has completed after an
+        // exponential delay.  We will basically keep polling forever until the
+        // Elasticsearch task succeeds or fails.
+        return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
+      } else {
+        if (stateP.retryCount < stateP.retryAttempts) {
+          const retryCount = stateP.retryCount + 1;
+          const retryDelay = 1500 + 1000 * Math.random();
+          return {
+            ...stateP,
+            controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+            mustRefresh: true,
+            retryCount,
+            retryDelay,
+            logs: [
+              ...stateP.logs,
+              {
+                level: 'warning',
+                message: `Errors occurred whilst deleting unwanted documents. Another instance is probably updating or deleting documents in the same index. Retrying attempt ${retryCount}.`,
+              },
+            ],
+          };
+        } else {
+          const failures = res.left.failures.length;
+          const versionConflicts = res.left.versionConflicts ?? 0;
+
+          let reason = `Migration failed because it was unable to delete unwanted documents from the ${stateP.sourceIndex.value} system index (${failures} failures and ${versionConflicts} conflicts)`;
+          if (failures) {
+            reason += `:\n` + res.left.failures.map((failure: string) => `- ${failure}\n`).join('');
+          }
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason,
+          };
+        }
+      }
+    }
+  } else if (stateP.controlState === 'PREPARE_COMPATIBLE_MIGRATION') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: stateP.mustRefresh ? 'REFRESH_SOURCE' : 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+      };
+    } else if (Either.isLeft(res)) {
+      // Note: if multiple newer Kibana versions are competing with each other to perform a migration,
+      // it might happen that another Kibana instance has deleted this instance's version index.
+      // NIT to handle this in properly, we'd have to add a PREPARE_COMPATIBLE_MIGRATION_CONFLICT step,
+      // similar to MARK_VERSION_INDEX_READY_CONFLICT.
+      if (isTypeof(res.left, 'alias_not_found_exception')) {
+        // We assume that the alias was already deleted by another Kibana instance
+        return {
+          ...stateP,
+          controlState: stateP.mustRefresh
+            ? 'REFRESH_SOURCE'
+            : 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+        };
+      } else {
+        throwBadResponse(stateP, res.left as never);
+      }
+    } else {
+      throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'REFRESH_SOURCE') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+      };
+    } else {
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'CHECK_UNKNOWN_DOCUMENTS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -428,10 +667,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       excludeOnUpgradeQuery,
       sourceIndex: source,
       targetIndex: target,
-      targetIndexMappings: disableUnknownTypeMappingFields(
-        stateP.targetIndexMappings,
-        stateP.sourceIndexMappings
-      ),
       versionIndexReadyActions: Option.some<AliasAction[]>([
         { remove: { index: source.value, alias: stateP.currentAlias, must_exist: true } },
         { add: { index: target, alias: stateP.currentAlias } },
@@ -460,7 +695,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
     if (Either.isRight(res)) {
       excludeOnUpgradeQuery = addMustNotClausesToBoolQuery(
-        res.right.mustNotClauses,
+        res.right.filterClauses,
         stateP.excludeOnUpgradeQuery?.bool
       );
 
@@ -614,10 +849,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) ||
         stateP.discardCorruptObjects
       ) {
-        const processedDocs = Either.isRight(res)
-          ? res.right.processedDocs
-          : res.left.processedDocs;
-        const batches = createBatches(processedDocs, stateP.tempIndex, stateP.maxBatchSizeBytes);
+        const documents = Either.isRight(res) ? res.right.processedDocs : res.left.processedDocs;
+        const batches = createBatches({ documents, maxBatchSizeBytes: stateP.maxBatchSizeBytes });
         if (Either.isRight(batches)) {
           let corruptDocumentIds = stateP.corruptDocumentIds;
           let transformErrors = stateP.transformErrors;
@@ -632,7 +865,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             corruptDocumentIds,
             transformErrors,
             controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK', // handles the actual bulk indexing into temp index
-            transformedDocBatches: batches.right,
+            bulkOperationBatches: batches.right,
             currentBatch: 0,
             progress,
           };
@@ -641,7 +874,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ...stateP,
             controlState: 'FATAL',
             reason: fatalReasonDocumentExceedsMaxBatchSizeBytes({
-              _id: batches.left.document._id,
+              _id: batches.left.documentId,
               docSizeBytes: batches.left.docSizeBytes,
               maxBatchSizeBytes: batches.left.maxBatchSizeBytes,
             }),
@@ -677,7 +910,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (stateP.currentBatch + 1 < stateP.transformedDocBatches.length) {
+      if (stateP.currentBatch + 1 < stateP.bulkOperationBatches.length) {
         return {
           ...stateP,
           controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK',
@@ -747,7 +980,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // index_not_found_exception means another instance already completed
         // the MARK_VERSION_INDEX_READY step and removed the temp index
         // We still perform the REFRESH_TARGET, OUTDATED_DOCUMENTS_* and
-        // UPDATE_TARGET_MAPPINGS steps since we might have plugins enabled
+        // UPDATE_TARGET_MAPPINGS_PROPERTIES steps since we might have plugins enabled
         // which the other instances don't.
         return {
           ...stateP,
@@ -819,25 +1052,40 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
         if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
-          const transformFailureReason = extractTransformFailuresReason(
-            stateP.migrationDocLinks.resolveMigrationFailures,
-            stateP.corruptDocumentIds,
-            stateP.transformErrors
-          );
-          return {
-            ...stateP,
-            controlState: 'FATAL',
-            reason: transformFailureReason,
-          };
-        } else {
-          // If there are no more results we have transformed all outdated
-          // documents and we didn't encounter any corrupt documents or transformation errors
-          // and can proceed to the next step
-          return {
-            ...stateP,
-            controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
-          };
+          if (!stateP.discardCorruptObjects) {
+            const transformFailureReason = extractTransformFailuresReason(
+              stateP.migrationDocLinks.resolveMigrationFailures,
+              stateP.corruptDocumentIds,
+              stateP.transformErrors
+            );
+            return {
+              ...stateP,
+              controlState: 'FATAL',
+              reason: transformFailureReason,
+            };
+          }
+
+          // at this point, users have configured kibana to discard corrupt objects
+          // thus, we can ignore corrupt documents and transform errors and proceed with the migration
+          logs = [
+            ...stateP.logs,
+            {
+              level: 'warning',
+              message: extractDiscardedCorruptDocs(
+                stateP.corruptDocumentIds,
+                stateP.transformErrors
+              ),
+            },
+          ];
         }
+
+        // If there are no more results we have transformed all outdated
+        // documents and we didn't encounter any corrupt documents or transformation errors
+        // and can proceed to the next step
+        return {
+          ...stateP,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
+        };
       }
     } else {
       throwBadResponse(stateP, res);
@@ -849,20 +1097,36 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     // Otherwise the progress might look off when there are errors.
     const progress = incrementProcessedProgress(stateP.progress, stateP.outdatedDocuments.length);
 
-    if (Either.isRight(res)) {
-      // we haven't seen corrupt documents or any transformation errors thus far in the migration
-      // index the migrated docs
-      if (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) {
-        const batches = createBatches(
-          res.right.processedDocs,
-          stateP.targetIndex,
-          stateP.maxBatchSizeBytes
-        );
+    if (
+      Either.isRight(res) ||
+      (isTypeof(res.left, 'documents_transform_failed') && stateP.discardCorruptObjects)
+    ) {
+      // we might have some transformation errors, but user has chosen to discard them
+      if (
+        (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) ||
+        stateP.discardCorruptObjects
+      ) {
+        const documents = Either.isRight(res) ? res.right.processedDocs : res.left.processedDocs;
+
+        let corruptDocumentIds = stateP.corruptDocumentIds;
+        let transformErrors = stateP.transformErrors;
+
+        if (Either.isLeft(res)) {
+          corruptDocumentIds = [...stateP.corruptDocumentIds, ...res.left.corruptDocumentIds];
+          transformErrors = [...stateP.transformErrors, ...res.left.transformErrors];
+        }
+
+        const batches = createBatches({
+          documents,
+          corruptDocumentIds,
+          transformErrors,
+          maxBatchSizeBytes: stateP.maxBatchSizeBytes,
+        });
         if (Either.isRight(batches)) {
           return {
             ...stateP,
             controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
-            transformedDocBatches: batches.right,
+            bulkOperationBatches: batches.right,
             currentBatch: 0,
             hasTransformedDocs: true,
             progress,
@@ -872,7 +1136,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ...stateP,
             controlState: 'FATAL',
             reason: fatalReasonDocumentExceedsMaxBatchSizeBytes({
-              _id: batches.left.document._id,
+              _id: batches.left.documentId,
               docSizeBytes: batches.left.docSizeBytes,
               maxBatchSizeBytes: batches.left.maxBatchSizeBytes,
             }),
@@ -905,7 +1169,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'TRANSFORMED_DOCUMENTS_BULK_INDEX') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (stateP.currentBatch + 1 < stateP.transformedDocBatches.length) {
+      if (stateP.currentBatch + 1 < stateP.bulkOperationBatches.length) {
         return {
           ...stateP,
           controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
@@ -938,27 +1202,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         throwBadResponse(stateP, res.left);
       }
     }
-  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
-        updateTargetMappingsTaskId: res.right.taskId,
-      };
-    } else {
-      throwBadResponse(stateP, res as never);
-    }
-  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_REFRESH') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'UPDATE_TARGET_MAPPINGS',
-      };
-    } else {
-      throwBadResponse(stateP, res);
-    }
   } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
@@ -971,33 +1214,57 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       }
       return {
         ...state,
-        controlState: 'UPDATE_TARGET_MAPPINGS',
+        controlState: 'CHECK_TARGET_MAPPINGS',
       };
     } else {
       throwBadResponse(stateP, res);
     }
-  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
+  } else if (stateP.controlState === 'OUTDATED_DOCUMENTS_REFRESH') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (Option.isSome(stateP.versionIndexReadyActions)) {
-        // If there are some versionIndexReadyActions we performed a full
-        // migration and need to point the aliases to our newly migrated
-        // index.
+      return {
+        ...stateP,
+        controlState: 'CHECK_TARGET_MAPPINGS',
+      };
+    } else {
+      throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'CHECK_TARGET_MAPPINGS') {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res)) {
+      if (!res.right.match) {
         return {
           ...stateP,
-          controlState: 'MARK_VERSION_INDEX_READY',
-          versionIndexReadyActions: stateP.versionIndexReadyActions,
-        };
-      } else {
-        // If there are none versionIndexReadyActions another instance
-        // already completed this migration and we only transformed outdated
-        // documents and updated the mappings for in case a new plugin was
-        // enabled.
-        return {
-          ...stateP,
-          controlState: 'DONE',
+          controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
         };
       }
+
+      // The md5 of the mappings match, so there's no need to update target mappings
+      return {
+        ...stateP,
+        controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
+      };
+    } else {
+      throwBadResponse(stateP, res as never);
+    }
+  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_PROPERTIES') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK',
+        updateTargetMappingsTaskId: res.right.taskId,
+      };
+    } else {
+      throwBadResponse(stateP, res as never);
+    }
+  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'UPDATE_TARGET_MAPPINGS_META',
+      };
     } else {
       const left = res.left;
       if (isTypeof(left, 'wait_for_task_completion_timeout')) {
@@ -1009,6 +1276,36 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         throwBadResponse(stateP, left);
       }
+    }
+  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_META') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
+      };
+    } else {
+      throwBadResponse(stateP, res as never);
+    }
+  } else if (stateP.controlState === 'CHECK_VERSION_INDEX_READY_ACTIONS') {
+    if (Option.isSome(stateP.versionIndexReadyActions)) {
+      // If there are some versionIndexReadyActions we performed a full
+      // migration and need to point the aliases to our newly migrated
+      // index.
+      return {
+        ...stateP,
+        controlState: 'MARK_VERSION_INDEX_READY',
+        versionIndexReadyActions: stateP.versionIndexReadyActions,
+      };
+    } else {
+      // If there are none versionIndexReadyActions another instance
+      // already completed this migration and we only transformed outdated
+      // documents and updated the mappings for in case a new plugin was
+      // enabled.
+      return {
+        ...stateP,
+        controlState: 'DONE',
+      };
     }
   } else if (stateP.controlState === 'CREATE_NEW_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

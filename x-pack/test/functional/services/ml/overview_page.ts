@@ -13,20 +13,6 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
   const testSubjects = getService('testSubjects');
 
   return {
-    async assertGettingStartedCalloutVisible(expectVisible: boolean = true) {
-      if (expectVisible) {
-        await testSubjects.existOrFail('mlGettingStartedCallout');
-      } else {
-        await testSubjects.missingOrFail('mlGettingStartedCallout');
-      }
-    },
-
-    async dismissGettingStartedCallout() {
-      await this.assertGettingStartedCalloutVisible(true);
-      await testSubjects.click('mlDismissGettingStartedCallout');
-      await this.assertGettingStartedCalloutVisible(false);
-    },
-
     async assertADEmptyStateExists() {
       await testSubjects.existOrFail('mlAnomalyDetectionEmptyState');
     },
@@ -87,7 +73,7 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
       await this.assertPageNotFoundBannerExists();
       const text = await testSubjects.getVisibleText('mlPageNotFoundBannerText');
       expect(text).to.eql(
-        `The Machine Learning application doesn't recognize this route: /ml/${pathname}. You've been redirected to the Overview page.`
+        `The Machine Learning application doesn't recognize this route: /${pathname}. You've been redirected to the Overview page.`
       );
     },
   };

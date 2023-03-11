@@ -6,11 +6,11 @@
  */
 
 import { getOr } from 'lodash/fp';
+import type { GeoEcs } from '@kbn/securitysolution-ecs';
 import {
   unflattenObject,
   transformLocationFields,
 } from '../../../../helpers/format_response_object_values';
-import type { GeoEcs } from '../../../../../../common/ecs/geo';
 import type {
   AutonomousSystem,
   NetworkHit,

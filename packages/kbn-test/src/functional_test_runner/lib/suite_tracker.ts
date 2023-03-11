@@ -9,7 +9,7 @@
 import fs from 'fs';
 import { dirname, relative, resolve } from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { Lifecycle } from './lifecycle';
 

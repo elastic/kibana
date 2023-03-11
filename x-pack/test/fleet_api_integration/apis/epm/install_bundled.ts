@@ -100,6 +100,17 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(updateResponse.body._meta.install_source).to.be('bundled');
       });
+
+      it('should load package archive from bundled package', async () => {
+        await bundlePackage('nginx-1.2.1');
+
+        const response = await supertest
+          .get(`/api/fleet/epm/packages/nginx/1.2.1?full=true`)
+          .expect(200);
+
+        expect(response.body.item.name).to.eql('nginx');
+        expect(response.body.item.version).to.eql('1.2.1');
+      });
     });
 
     describe('with registry', () => {

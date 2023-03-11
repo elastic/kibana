@@ -11,6 +11,7 @@ import {
   ENROLLMENT_TOKENS_TAB,
   ADD_AGENT_BUTTON_TOP,
   PACKAGE_POLICY_TABLE_LINK,
+  API_KEYS,
 } from '../screens/fleet';
 import { LOADING_SPINNER } from '../screens/navigation';
 import { getIntegrationCard } from '../screens/integrations';
@@ -41,7 +42,7 @@ export function navigateToAgentPolicy(name: string) {
 export function navigateToEnrollmentTokens() {
   cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
   cy.get('.euiBasicTable-loading').should('not.exist');
-  cy.get('.euiButtonIcon--danger'); // wait for trash icon
+  cy.getBySel(API_KEYS.REVOKE_KEY_BUTTON); // wait for trash icon
 }
 
 export function verifyPolicy(name: string, integrations: string[]) {

@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import type { GenericBuckets } from '../../../../../common/search_strategy';
@@ -248,7 +249,7 @@ function parseHostsData(
 
   return buckets.reduce<HostAlertsItem[]>((accumalatedAlertsByHost, currentHost) => {
     accumalatedAlertsByHost.push({
-      hostName: currentHost.key || '—',
+      hostName: firstNonNullValue(currentHost.key) ?? '-',
       totalAlerts: currentHost.doc_count,
       low: currentHost.low.doc_count,
       medium: currentHost.medium.doc_count,

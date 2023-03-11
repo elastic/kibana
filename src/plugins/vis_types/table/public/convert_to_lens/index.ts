@@ -13,7 +13,7 @@ import {
   getVisSchemas,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { getDataViewsStart } from '../services';
 import { getConfiguration } from './configurations';
 import { ConvertTableToLensVisualization } from './types';
@@ -73,6 +73,7 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
       return null;
     }
     const percentageColumn = getPercentageColumnFormulaColumn({
+      visType: vis.type.name,
       agg: metricAgg as SchemaConfig<METRIC_TYPES>,
       dataView,
       aggs: visSchemas.metric as Array<SchemaConfig<METRIC_TYPES>>,
@@ -88,7 +89,7 @@ export const convertToLens: ConvertTableToLensVisualization = async (vis, timefi
     layerConfig.columnsWithoutReferenced.push(percentageColumn);
   }
 
-  const layerId = uuid();
+  const layerId = uuidv4();
   const indexPatternId = dataView.id!;
   return {
     type: 'lnsDatatable',

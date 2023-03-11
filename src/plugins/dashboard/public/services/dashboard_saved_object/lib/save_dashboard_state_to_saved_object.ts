@@ -7,42 +7,71 @@
  */
 
 import { pick } from 'lodash';
+import moment, { Moment } from 'moment';
 
+import {
+  getDefaultControlGroupInput,
+  persistableControlGroupInputIsEqual,
+  controlGroupInputToRawControlGroupAttributes,
+} from '@kbn/controls-plugin/common';
 import { isFilterPinned } from '@kbn/es-query';
 import { SavedObjectsClientContract } from '@kbn/core/public';
 import { SavedObjectAttributes } from '@kbn/core-saved-objects-common';
-
-import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
+import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
 
-import type { DashboardAttributes } from '../../../application';
+import {
+  extractReferences,
+  DashboardAttributes,
+  convertPanelMapToSavedPanels,
+  DashboardContainerByValueInput,
+} from '../../../../common';
 import { DashboardSavedObjectRequiredServices } from '../types';
-import { DashboardConstants } from '../../../dashboard_constants';
-import { convertTimeToUTCString } from '../../../application/lib';
-import { DashboardRedirect, DashboardState } from '../../../types';
-import { dashboardSaveToastStrings } from '../../../dashboard_strings';
-import { convertPanelMapToSavedPanels, extractReferences } from '../../../../common';
-import { serializeControlGroupInput } from '../../../application/lib/dashboard_control_group';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../dashboard_constants';
+import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
 
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolean };
 
 export type SaveDashboardProps = DashboardSavedObjectRequiredServices & {
-  currentState: DashboardState;
-  redirectTo: DashboardRedirect;
-  saveOptions: SavedDashboardSaveOpts;
   savedObjectsClient: SavedObjectsClientContract;
+  currentState: DashboardContainerByValueInput;
+  saveOptions: SavedDashboardSaveOpts;
+  lastSavedId?: string;
+};
+
+export const serializeControlGroupInput = (
+  controlGroupInput: DashboardContainerByValueInput['controlGroupInput']
+) => {
+  // only save to saved object if control group is not default
+  if (
+    !controlGroupInput ||
+    persistableControlGroupInputIsEqual(controlGroupInput, getDefaultControlGroupInput())
+  ) {
+    return undefined;
+  }
+  return controlGroupInputToRawControlGroupAttributes(controlGroupInput);
+};
+
+export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
+  if (moment(time).isValid()) {
+    return moment(time).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+  } else {
+    // If it's not a valid moment date, then it should be a string representing a relative time
+    // like 'now' or 'now-15m'.
+    return time as string;
+  }
 };
 
 export interface SaveDashboardReturn {
   id?: string;
   error?: string;
-  redirected?: boolean;
+  redirectRequired?: boolean;
 }
 
 export const saveDashboardStateToSavedObject = async ({
   data,
-  redirectTo,
   embeddable,
+  lastSavedId,
   saveOptions,
   currentState,
   savedObjectsClient,
@@ -64,11 +93,16 @@ export const saveDashboardStateToSavedObject = async ({
     title,
     panels,
     filters,
-    options,
     timeRestore,
     description,
-    savedObjectId,
     controlGroupInput,
+
+    // Dashboard options
+    useMargins,
+    syncColors,
+    syncCursor,
+    syncTooltips,
+    hidePanelTitles,
   } = currentState;
 
   /**
@@ -90,7 +124,13 @@ export const saveDashboardStateToSavedObject = async ({
   /**
    * Stringify options and panels
    */
-  const optionsJSON = JSON.stringify(options);
+  const optionsJSON = JSON.stringify({
+    useMargins,
+    syncColors,
+    syncCursor,
+    syncTooltips,
+    hidePanelTitles,
+  });
   const panelsJSON = JSON.stringify(convertPanelMapToSavedPanels(panels, kibanaVersion));
 
   /**
@@ -111,10 +151,10 @@ export const saveDashboardStateToSavedObject = async ({
   const rawDashboardAttributes: DashboardAttributes = {
     controlGroupInput: serializeControlGroupInput(controlGroupInput),
     kibanaSavedObjectMeta: { searchSourceJSON },
+    description: description ?? '',
     refreshInterval,
     timeRestore,
     optionsJSON,
-    description,
     panelsJSON,
     timeFrom,
     title,
@@ -139,17 +179,13 @@ export const saveDashboardStateToSavedObject = async ({
   /**
    * Save the saved object using the saved objects client
    */
-  const idToSaveTo = saveOptions.saveAsCopy ? undefined : savedObjectId;
+  const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
   try {
-    const { id: newId } = await savedObjectsClient.create(
-      DashboardConstants.DASHBOARD_SAVED_OBJECT_TYPE,
-      attributes,
-      {
-        id: idToSaveTo,
-        overwrite: true,
-        references,
-      }
-    );
+    const { id: newId } = await savedObjectsClient.create(DASHBOARD_SAVED_OBJECT_TYPE, attributes, {
+      id: idToSaveTo,
+      overwrite: true,
+      references,
+    });
 
     if (newId) {
       toasts.addSuccess({
@@ -160,15 +196,9 @@ export const saveDashboardStateToSavedObject = async ({
       /**
        * If the dashboard id has been changed, redirect to the new ID to keep the url param in sync.
        */
-      if (newId !== savedObjectId) {
-        dashboardSessionStorage.clearState(savedObjectId);
-        redirectTo({
-          id: newId,
-          editMode: true,
-          useReplace: true,
-          destination: 'dashboard',
-        });
-        return { redirected: true, id: newId };
+      if (newId !== lastSavedId) {
+        dashboardSessionStorage.clearState(lastSavedId);
+        return { redirectRequired: true, id: newId };
       }
     }
     return { id: newId };

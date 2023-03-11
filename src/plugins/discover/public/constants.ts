@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
+export const ADHOC_DATA_VIEW_RENDER_EVENT = 'ad_hoc_data_view';
+
 export const SEARCH_SESSION_ID_QUERY_PARAM = 'searchSessionId';

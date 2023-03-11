@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import type { GetBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import * as i18n from './translations';
-import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { MarkdownRenderer } from '../markdown_editor';
 import { LineClamp } from '../line_clamp';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';

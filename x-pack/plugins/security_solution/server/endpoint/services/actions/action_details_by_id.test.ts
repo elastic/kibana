@@ -68,7 +68,7 @@ describe('When using `getActionDetailsById()', () => {
     ).resolves.toEqual({
       agents: ['agent-a'],
       hosts: { 'agent-a': { name: 'Host-agent-a' } },
-      command: 'unisolate',
+      command: 'kill-process',
       completedAt: '2022-04-30T16:08:47.449Z',
       wasSuccessful: true,
       errors: undefined,

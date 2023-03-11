@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { CopyToClipboardButtonEmpty, CopyToClipboardContextMenu } from '.';
+import {
+  CopyToClipboardButtonEmpty,
+  CopyToClipboardButtonIcon,
+  CopyToClipboardContextMenu,
+} from '.';
 
 const mockValue: string = 'Text copied';
 
@@ -26,6 +30,14 @@ describe('<CopyToClipboardButtonEmpty /> <CopyToClipboardContextMenu />', () => 
   it('should render one EuiContextMenuItem (for EuiContextMenu use)', () => {
     const component = render(
       <CopyToClipboardContextMenu value={mockValue} data-test-subj={mockTestId} />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render one EuibuttonIcon', () => {
+    const component = render(
+      <CopyToClipboardButtonIcon value={mockValue} data-test-subj={mockTestId} />
     );
 
     expect(component).toMatchSnapshot();

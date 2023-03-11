@@ -20,7 +20,7 @@ describe('Build a column button to copy to clipboard', () => {
   it('should copy a column name to clipboard on click', () => {
     const { label, iconType, onClick } = buildCopyColumnNameButton({
       columnDisplayName: 'test-field-name',
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
     });
     execCommandMock.mockImplementationOnce(() => true);
 
@@ -30,7 +30,7 @@ describe('Build a column button to copy to clipboard', () => {
       </EuiButton>
     );
 
-    wrapper.find(EuiButton).simulate('click');
+    wrapper.find('button').simulate('click');
 
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(warn).not.toHaveBeenCalled();
@@ -49,7 +49,7 @@ describe('Build a column button to copy to clipboard', () => {
     const { label, iconType, onClick } = buildCopyColumnValuesButton({
       columnId: 'extension',
       columnDisplayName: 'custom_extension',
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
       rowsCount: 3,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
     });
@@ -60,7 +60,7 @@ describe('Build a column button to copy to clipboard', () => {
       </EuiButton>
     );
 
-    await wrapper.find(EuiButton).simulate('click');
+    await wrapper.find('button').simulate('click');
 
     // first row out of 3 rows does not have a value
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('"custom_extension"\n\njpg\ngif');
@@ -72,7 +72,7 @@ describe('Build a column button to copy to clipboard', () => {
     } = buildCopyColumnValuesButton({
       columnId: '_source',
       columnDisplayName: 'Document',
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 3,
     });
@@ -83,7 +83,7 @@ describe('Build a column button to copy to clipboard', () => {
       </EuiButton>
     );
 
-    await wrapperSource.find(EuiButton).simulate('click');
+    await wrapperSource.find('button').simulate('click');
 
     // first row out of 3 rows does not have a value
     expect(navigator.clipboard.writeText).toHaveBeenNthCalledWith(
@@ -101,7 +101,7 @@ describe('Build a column button to copy to clipboard', () => {
   it('should not copy to clipboard on click', () => {
     const { label, iconType, onClick } = buildCopyColumnNameButton({
       columnDisplayName: 'test-field-name',
-      services: discoverServiceMock,
+      toastNotifications: discoverServiceMock.toastNotifications,
     });
     execCommandMock.mockImplementationOnce(() => false);
 
@@ -111,7 +111,7 @@ describe('Build a column button to copy to clipboard', () => {
       </EuiButton>
     );
 
-    wrapper.find(EuiButton).simulate('click');
+    wrapper.find('button').simulate('click');
 
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(warn).toHaveBeenCalledWith('Unable to copy to clipboard.');

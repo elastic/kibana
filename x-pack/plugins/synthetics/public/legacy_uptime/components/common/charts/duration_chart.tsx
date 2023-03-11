@@ -32,7 +32,7 @@ import { UptimeThemeContext } from '../../../contexts';
 import { MONITOR_CHART_HEIGHT } from '../../monitor';
 import { monitorStatusSelector } from '../../../state/selectors';
 import { microToMilli, microToSec } from '../../../lib/formatting';
-import { MS_LABEL, SECONDS_LABEL } from '../translations';
+import { MS_LABEL, SECONDS_LABEL } from '../../../../../common/translations/translations';
 
 interface DurationChartProps {
   /**

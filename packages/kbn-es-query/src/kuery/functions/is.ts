@@ -100,6 +100,7 @@ export function toElasticsearchQuery(
   }
 
   const queries = fields!.reduce((accumulator: any, field: DataViewFieldBase) => {
+    const isKeywordField = field.esTypes?.length === 1 && field.esTypes.includes('keyword');
     const wrapWithNestedQuery = (query: any) => {
       // Wildcards can easily include nested and non-nested fields. There isn't a good way to let
       // users handle this themselves so we automatically add nested queries in this scenario.
@@ -142,10 +143,15 @@ export function toElasticsearchQuery(
         }),
       ];
     } else if (wildcard.isNode(valueArg)) {
-      const query = field.esTypes?.includes('keyword')
+      const query = isKeywordField
         ? {
             wildcard: {
-              [field.name]: value,
+              [field.name]: {
+                value,
+                ...(typeof config.caseInsensitive === 'boolean' && {
+                  case_insensitive: config.caseInsensitive,
+                }),
+              },
             },
           }
         : {
@@ -172,6 +178,20 @@ export function toElasticsearchQuery(
               gte: value,
               lte: value,
               ...timeZoneParam,
+            },
+          },
+        }),
+      ];
+    } else if (isKeywordField) {
+      return [
+        ...accumulator,
+        wrapWithNestedQuery({
+          term: {
+            [field.name]: {
+              value,
+              ...(typeof config.caseInsensitive === 'boolean' && {
+                case_insensitive: config.caseInsensitive,
+              }),
             },
           },
         }),

@@ -206,8 +206,7 @@ describe('<IndexManagementHome />', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/132780
-  describe.skip('index actions', () => {
+  describe('index actions', () => {
     const indexNameA = 'testIndexA';
     const indexNameB = 'testIndexB';
     const indexMockA = createNonDataStreamIndex(indexNameA);
@@ -311,7 +310,6 @@ describe('<IndexManagementHome />', () => {
 
     test("should be able to clear an index's cache", async () => {
       const { actions } = testBed;
-      await actions.clickManageContextMenuButton();
 
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('clearCacheIndexMenuButton');

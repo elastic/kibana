@@ -34,11 +34,11 @@ export async function findLegacyUrlAliases(
   }
 
   const filter = createAliasKueryFilter(objects);
-  const finder = createPointInTimeFinder<LegacyUrlAlias>({
-    type: LEGACY_URL_ALIAS_TYPE,
-    perPage,
-    filter,
-  });
+  const finder = createPointInTimeFinder<LegacyUrlAlias>(
+    { type: LEGACY_URL_ALIAS_TYPE, perPage, filter },
+    undefined,
+    { disableExtensions: true }
+  );
   const aliasesMap = new Map<string, Set<string>>();
   let error: Error | undefined;
   try {

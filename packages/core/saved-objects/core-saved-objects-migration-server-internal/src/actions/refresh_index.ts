@@ -11,13 +11,13 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import {
   catchRetryableEsClientErrors,
-  RetryableEsClientError,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 
 /** @internal */
 export interface RefreshIndexParams {
   client: ElasticsearchClient;
-  targetIndex: string;
+  index: string;
 }
 /**
  * Wait for Elasticsearch to reindex all the changes.
@@ -25,13 +25,11 @@ export interface RefreshIndexParams {
 export const refreshIndex =
   ({
     client,
-    targetIndex,
+    index,
   }: RefreshIndexParams): TaskEither.TaskEither<RetryableEsClientError, { refreshed: boolean }> =>
   () => {
     return client.indices
-      .refresh({
-        index: targetIndex,
-      })
+      .refresh({ index })
       .then(() => {
         return Either.right({ refreshed: true });
       })

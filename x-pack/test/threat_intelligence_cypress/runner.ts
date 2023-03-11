@@ -26,7 +26,7 @@ const retrieveIntegrations = (chunksTotal: number, chunkIndex: number) => {
   const integrationsPaths = globby.sync(pattern);
   const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
 
-  return chunk(integrationsPaths, chunkSize)[chunkIndex - 1];
+  return chunk(integrationsPaths, chunkSize)[chunkIndex - 1] || [];
 };
 
 export async function ThreatIntelligenceConfigurableCypressTestRunner(

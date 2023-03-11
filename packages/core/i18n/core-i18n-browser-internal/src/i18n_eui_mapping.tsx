@@ -125,18 +125,31 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Unavailable',
       description: 'Displayed button text when a card option is unavailable.',
     }),
-    'euiCodeBlock.copyButton': i18n.translate('core.euiCodeBlock.copyButton', {
+    'euiCodeBlockAnnotations.ariaLabel': ({ lineNumber }: EuiValues) =>
+      i18n.translate('core.euiCodeBlockAnnotations.ariaLabel', {
+        defaultMessage: 'Click to view a code annotation for line {lineNumber}',
+        values: { lineNumber },
+        description:
+          'ARIA label for a button icon that toggles a popover annotation for a specific code line',
+      }),
+    'euiCodeBlockCopy.copy': i18n.translate('core.euiCodeBlockCopy.copy', {
       defaultMessage: 'Copy',
       description: 'ARIA label for a button that copies source code text to the clipboard',
     }),
-    'euiCodeBlock.fullscreenCollapse': i18n.translate('core.euiCodeBlock.fullscreenCollapse', {
-      defaultMessage: 'Collapse',
-      description: 'ARIA label for a button that exits fullscreen view',
-    }),
-    'euiCodeBlock.fullscreenExpand': i18n.translate('core.euiCodeBlock.fullscreenExpand', {
-      defaultMessage: 'Expand',
-      description: 'ARIA label for a button that enters fullscreen view',
-    }),
+    'euiCodeBlockFullScreen.fullscreenCollapse': i18n.translate(
+      'core.euiCodeBlockFullScreen.fullscreenCollapse',
+      {
+        defaultMessage: 'Collapse',
+        description: 'ARIA label for a button that exits fullscreen view',
+      }
+    ),
+    'euiCodeBlockFullScreen.fullscreenExpand': i18n.translate(
+      'core.euiCodeBlockFullScreen.fullscreenExpand',
+      {
+        defaultMessage: 'Expand',
+        description: 'ARIA label for a button that enters fullscreen view',
+      }
+    ),
     'euiCollapsedItemActions.allActions': i18n.translate(
       'core.euiCollapsedItemActions.allActions',
       {
@@ -228,6 +241,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnActions.moveRight': i18n.translate('core.euiColumnActions.moveRight', {
       defaultMessage: 'Move right',
     }),
+    'euiColumnSelector.dragHandleAriaLabel': i18n.translate(
+      'core.euiColumnSelector.dragHandleAriaLabel',
+      {
+        defaultMessage: 'Drag handle',
+      }
+    ),
     'euiColumnSelector.hideAll': i18n.translate('core.euiColumnSelector.hideAll', {
       defaultMessage: 'Hide all',
     }),
@@ -385,6 +404,126 @@ export const getEuiContextMapping = (): EuiTokensObject => {
           'There is a new region landmark called {landmarkHeading} with page level controls at the end of the document.',
         values: { landmarkHeading },
       }),
+    'euiKeyboardShortcuts.title': i18n.translate('core.euiKeyboardShortcuts.title', {
+      defaultMessage: 'Keyboard shortcuts',
+    }),
+    'euiKeyboardShortcuts.upArrowTitle': i18n.translate('core.euiKeyboardShortcuts.upArrowTitle', {
+      defaultMessage: 'Up arrow',
+    }),
+    'euiKeyboardShortcuts.upArrowDescription': i18n.translate(
+      'core.euiKeyboardShortcuts.upArrowDescription',
+      {
+        defaultMessage: 'Move one cell up',
+      }
+    ),
+    'euiKeyboardShortcuts.downArrowTitle': i18n.translate(
+      'core.euiKeyboardShortcuts.downArrowTitle',
+      {
+        defaultMessage: 'Down arrow',
+      }
+    ),
+    'euiKeyboardShortcuts.downArrowDescription': i18n.translate(
+      'core.euiKeyboardShortcuts.downArrowDescription',
+      {
+        defaultMessage: 'Move one cell down',
+      }
+    ),
+    'euiKeyboardShortcuts.rightArrowTitle': i18n.translate(
+      'core.euiKeyboardShortcuts.rightArrowTitle',
+      {
+        defaultMessage: 'Right arrow',
+      }
+    ),
+    'euiKeyboardShortcuts.rightArrowDescription': i18n.translate(
+      'core.euiKeyboardShortcuts.rightArrowDescription',
+      {
+        defaultMessage: 'Move one cell right',
+      }
+    ),
+    'euiKeyboardShortcuts.leftArrowTitle': i18n.translate(
+      'core.euiKeyboardShortcuts.leftArrowTitle',
+      {
+        defaultMessage: 'Left arrow',
+      }
+    ),
+    'euiKeyboardShortcuts.leftArrowDescription': i18n.translate(
+      'core.euiKeyboardShortcuts.leftArrowDescription',
+      {
+        defaultMessage: 'Move one cell left',
+      }
+    ),
+    'euiKeyboardShortcuts.homeTitle': i18n.translate('core.euiKeyboardShortcuts.homeTitle', {
+      defaultMessage: 'Home',
+    }),
+    'euiKeyboardShortcuts.homeDescription': i18n.translate(
+      'core.euiKeyboardShortcuts.homeDescription',
+      {
+        defaultMessage: 'Move to the first cell of the current row',
+      }
+    ),
+    'euiKeyboardShortcuts.endTitle': i18n.translate('core.euiKeyboardShortcuts.endTitle', {
+      defaultMessage: 'End',
+    }),
+    'euiKeyboardShortcuts.endDescription': i18n.translate(
+      'core.euiKeyboardShortcuts.endDescription',
+      {
+        defaultMessage: 'Move to the last cell of the current row',
+      }
+    ),
+    'euiKeyboardShortcuts.ctrl': i18n.translate('core.euiKeyboardShortcuts.ctrl', {
+      defaultMessage: 'Ctrl',
+    }),
+    'euiKeyboardShortcuts.ctrlHomeDescription': i18n.translate(
+      'core.euiKeyboardShortcuts.ctrlHomeDescription',
+      {
+        defaultMessage: 'Move to the first cell of the current page',
+      }
+    ),
+    'euiKeyboardShortcuts.ctrlEndDescription': i18n.translate(
+      'core.euiKeyboardShortcuts.ctrlEndDescription',
+      {
+        defaultMessage: 'Move to the last cell of the current page',
+      }
+    ),
+    'euiKeyboardShortcuts.pageUpTitle': i18n.translate('core.euiKeyboardShortcuts.pageUpTitle', {
+      defaultMessage: 'Page Up',
+    }),
+    'euiKeyboardShortcuts.pageUpDescription': i18n.translate(
+      'core.euiKeyboardShortcuts.pageUpDescription',
+      {
+        defaultMessage: 'Go to the last row of the previous page',
+      }
+    ),
+    'euiKeyboardShortcuts.pageDownTitle': i18n.translate(
+      'core.euiKeyboardShortcuts.pageDownTitle',
+      {
+        defaultMessage: 'Page Down',
+      }
+    ),
+    'euiKeyboardShortcuts.pageDownDescription': i18n.translate(
+      'core.euiKeyboardShortcuts.pageDownDescription',
+      {
+        defaultMessage: 'Go to the first row of the next page',
+      }
+    ),
+    'euiKeyboardShortcuts.enterTitle': i18n.translate('core.euiKeyboardShortcuts.enterTitle', {
+      defaultMessage: 'Enter',
+    }),
+    'euiKeyboardShortcuts.enterDescription': i18n.translate(
+      'core.euiKeyboardShortcuts.enterDescription',
+      {
+        defaultMessage: 'Open cell details and actions',
+      }
+    ),
+    'euiKeyboardShortcuts.escapeTitle': i18n.translate('core.euiKeyboardShortcuts.escapeTitle', {
+      defaultMessage: 'Escape',
+    }),
+    'euiKeyboardShortcuts.escapeDescription': i18n.translate(
+      'core.euiKeyboardShortcuts.escapeDescription',
+      {
+        defaultMessage: 'Close cell details and actions',
+      }
+    ),
     'euiDataGrid.screenReaderNotice': i18n.translate('core.euiDataGrid.screenReaderNotice', {
       defaultMessage: 'Cell contains interactive content.',
     }),
@@ -611,6 +750,23 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFlyout.closeAriaLabel': i18n.translate('core.euiFlyout.closeAriaLabel', {
       defaultMessage: 'Close this dialog',
     }),
+    'euiFlyout.screenReaderModalDialog': i18n.translate('core.euiFlyout.screenReaderModalDialog', {
+      defaultMessage:
+        'You are in a modal dialog. Press Escape or tap/click outside the dialog on the shadowed overlay to close.',
+    }),
+    'euiFlyout.screenReaderNonModalDialog': i18n.translate(
+      'core.euiFlyout.screenReaderNonModalDialog',
+      {
+        defaultMessage: 'You are in a non-modal dialog. To close the dialog, press Escape.',
+      }
+    ),
+    'euiFlyout.screenReaderFixedHeaders': i18n.translate(
+      'core.euiFlyout.screenReaderFixedHeaders',
+      {
+        defaultMessage:
+          'You can still continue tabbing through the page headers in addition to the dialog.',
+      }
+    ),
     'euiForm.addressFormErrors': i18n.translate('core.euiForm.addressFormErrors', {
       defaultMessage: 'Please address the highlighted errors.',
     }),
@@ -887,7 +1043,8 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiPopover.screenReaderAnnouncement': i18n.translate(
       'core.euiPopover.screenReaderAnnouncement',
       {
-        defaultMessage: 'You are in a dialog. To close this dialog, hit escape.',
+        defaultMessage:
+          'You are in a dialog. Press Escape, or tap/click outside the dialog to close.',
       }
     ),
     'euiProgress.valueText': ({ value }: EuiValues) =>
@@ -1197,6 +1354,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiQuickSelect.valueLabel': i18n.translate('core.euiQuickSelect.valueLabel', {
       defaultMessage: 'Time value',
     }),
+    'euiQuickSelectPopover.buttonLabel': i18n.translate('core.euiQuickSelectPopover.buttonLabel', {
+      defaultMessage: 'Date quick select',
+    }),
     'euiRecentlyUsed.legend': i18n.translate('core.euiRecentlyUsed.legend', {
       defaultMessage: 'Recently used date ranges',
     }),
@@ -1501,7 +1661,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiSuperSelect.screenReaderAnnouncement',
       {
         defaultMessage:
-          'You are in a form selector and must select a single option. Use the up and down keys to navigate or escape to close.',
+          'You are in a form selector and must select a single option. Use the Up and Down arrow keys to navigate or Escape to close.',
       }
     ),
     'euiSuperSelectControl.selectAnOption': ({ selectedValue }: EuiValues) =>
@@ -1641,6 +1801,16 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       i18n.translate('core.euiNotificationEventReadIcon.unreadAria', {
         defaultMessage: '{eventName} is unread',
         values: { eventName },
+      }),
+    'euiSkeletonLoading.loadingAriaText': ({ contentAriaLabel }: EuiValues) =>
+      i18n.translate('core.euiSkeletonLoading.loadingAriaText', {
+        defaultMessage: 'Loading {contentAriaLabel}',
+        values: { contentAriaLabel },
+      }),
+    'euiSkeletonLoading.loadedAriaText': ({ contentAriaLabel }: EuiValues) =>
+      i18n.translate('core.euiSkeletonLoading.loadedAriaText', {
+        defaultMessage: 'Loaded {contentAriaLabel}',
+        values: { contentAriaLabel },
       }),
   };
 };

@@ -36,7 +36,10 @@ import type {
 export const transformOutput = (
   exceptionItem: UpdateExceptionListItemSchema | ExceptionListItemSchema
 ): UpdateExceptionListItemSchema | ExceptionListItemSchema =>
-  flow(removeIdFromExceptionItemsEntries)(exceptionItem);
+  flow(
+    removeCreatedAtCreatedByFromCommentsOnUpdate,
+    removeIdFromExceptionItemsEntries
+  )(exceptionItem);
 
 export const transformNewItemOutput = (
   exceptionItem: CreateExceptionListItemSchema
@@ -111,4 +114,24 @@ export const removeIdFromExceptionItemsEntries = <T extends { entries: EntriesAr
     }
   });
   return { ...exceptionItem, entries: entriesNoId };
+};
+
+/**
+ * This removes createdAt, createdBy from the exceptionItem if  a comment was added to
+ * the Exception item, and return the comment message with id to prevent creating the commet
+ * twice
+ * @param exceptionItem The exceptionItem to remove createdAt, createdBy from the comments array.
+ * @returns exceptionItem The exceptionItem with comments do  not have createdAt, createdBy.
+ */
+export const removeCreatedAtCreatedByFromCommentsOnUpdate = (
+  exceptionItem: UpdateExceptionListItemSchema | ExceptionListItemSchema
+) => {
+  const { comments } = exceptionItem;
+  if (!comments || !comments.length) return exceptionItem;
+
+  const entriesNoCreatedAtAndBy = comments.map(({ comment, id }) => ({
+    comment,
+    id,
+  }));
+  return { ...exceptionItem, comments: entriesNoCreatedAtAndBy };
 };

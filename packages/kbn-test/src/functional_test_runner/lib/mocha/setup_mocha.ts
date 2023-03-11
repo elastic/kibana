@@ -8,8 +8,10 @@
 
 import { relative } from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
+// @ts-expect-error we don't use @types/mocha so it doesn't conflict with @types/jest
+import Mocha from 'mocha';
 
 import { Suite } from '../../fake_mocha_types';
 import { loadTests } from './load_tests';
@@ -19,9 +21,7 @@ import { Config } from '../config';
 import { ProviderCollection } from '../providers';
 import { EsVersion } from '../es_version';
 
-// @ts-expect-error not ts yet
 import { MochaReporterProvider } from './reporter';
-// @ts-expect-error not ts yet
 import { validateCiGroupTags } from './validate_ci_group_tags';
 
 interface Options {
@@ -33,9 +33,6 @@ interface Options {
   reporter?: any;
   reporterOptions?: any;
 }
-
-// we use require so that @types/mocha isn't loaded
-const Mocha = require('mocha'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 /**
  *  Instantiate mocha and load testfiles into it

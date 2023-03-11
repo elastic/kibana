@@ -6,37 +6,51 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { ERRORS_LABEL } from './monitor_errors_count';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
-export const MonitorErrorSparklines = () => {
+interface Props {
+  from: string;
+  to: string;
+  monitorId: string[];
+  id: string;
+}
+export const MonitorErrorSparklines = ({ from, to, monitorId, id }: Props) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
 
-  const { monitorId } = useParams<{ monitorId: string }>();
-
   const { euiTheme } = useEuiTheme();
+
+  const selectedLocation = useSelectedLocation();
+
+  const time = useMemo(() => ({ from, to }), [from, to]);
+
+  if (!selectedLocation) {
+    return null;
+  }
 
   return (
     <ExploratoryViewEmbeddable
+      id={id}
       reportType="kpi-over-time"
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
       hideTicks={true}
       attributes={[
         {
+          time,
           seriesType: 'area',
-          time: {
-            from: 'now-30d/d',
-            to: 'now',
+          reportDefinitions: {
+            'monitor.id': monitorId,
+            'observer.geo.name': [selectedLocation?.label],
           },
-          reportDefinitions: { 'monitor.id': [monitorId] },
           dataType: 'synthetics',
-          selectedMetricField: 'state.id',
-          name: 'Monitor errors',
+          selectedMetricField: 'monitor_errors',
+          name: ERRORS_LABEL,
           color: euiTheme.colors.danger,
           operationType: 'unique_count',
         },

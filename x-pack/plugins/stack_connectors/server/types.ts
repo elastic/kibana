@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export type { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './connector_types/cases/jira/types';
+export type { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './connector_types/jira/types';
 export type { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './connector_types/lib/servicenow/types';
-export type { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './connector_types/cases/resilient/types';
-export type { SwimlanePublicConfigurationType } from './connector_types/cases/swimlane/types';
+export type { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './connector_types/resilient/types';
+export type { SwimlanePublicConfigurationType } from './connector_types/swimlane/types';
 
 export type {
   CasesWebhookConnectorTypeId,

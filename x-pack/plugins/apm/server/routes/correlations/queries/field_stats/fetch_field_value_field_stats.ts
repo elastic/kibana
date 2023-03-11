@@ -7,6 +7,11 @@
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
+  AggregationsAggregationContainer,
+  AggregationsSamplerAggregate,
+  AggregationsSingleBucketAggregateBase,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
   CommonCorrelationsQueryParams,
   FieldValuePair,
 } from '../../../../../common/correlations/types';
@@ -14,11 +19,11 @@ import {
   FieldValueFieldStats,
   TopValueBucket,
 } from '../../../../../common/correlations/field_stats_types';
-import { Setup } from '../../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from '../get_common_correlations_query';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const fetchFieldValueFieldStats = async ({
-  setup,
+  apmEventClient,
   eventType,
   start,
   end,
@@ -26,13 +31,43 @@ export const fetchFieldValueFieldStats = async ({
   kuery,
   query,
   field,
+  samplerShardSize,
 }: CommonCorrelationsQueryParams & {
   eventType: ProcessorEvent;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   field: FieldValuePair;
+  samplerShardSize?: number;
 }): Promise<FieldValueFieldStats> => {
-  const { apmEventClient } = setup;
+  const shouldSample = samplerShardSize !== undefined && samplerShardSize > 0;
 
+  let aggs: Record<string, AggregationsAggregationContainer> = {
+    filtered_count: {
+      filter: {
+        term: {
+          [`${field?.fieldName}`]: field?.fieldValue,
+        },
+      },
+    },
+  };
+
+  if (shouldSample) {
+    aggs = {
+      sample: {
+        sampler: {
+          shard_size: samplerShardSize,
+        },
+        aggs: {
+          filtered_count: {
+            filter: {
+              term: {
+                [`${field?.fieldName}`]: field?.fieldValue,
+              },
+            },
+          },
+        },
+      },
+    };
+  }
   const { aggregations } = await apmEventClient.search(
     'get_field_value_field_stats',
     {
@@ -49,30 +84,29 @@ export const fetchFieldValueFieldStats = async ({
           kuery,
           query,
         }),
-        aggs: {
-          filtered_count: {
-            filter: {
-              term: {
-                [`${field?.fieldName}`]: field?.fieldValue,
-              },
-            },
-          },
-        },
+        aggs,
       },
     }
   );
 
+  const results = (
+    shouldSample
+      ? (aggregations?.sample as AggregationsSamplerAggregate)?.filtered_count
+      : aggregations?.filtered_count
+  ) as AggregationsSingleBucketAggregateBase;
+
   const topValues: TopValueBucket[] = [
     {
       key: field.fieldValue,
-      doc_count: aggregations?.filtered_count.doc_count ?? 0,
+      doc_count: (results.doc_count as number) ?? 0,
     },
   ];
 
   const stats = {
     fieldName: field.fieldName,
     topValues,
-    topValuesSampleSize: aggregations?.filtered_count.doc_count ?? 0,
+    topValuesSampleSize:
+      (aggregations?.sample as AggregationsSamplerAggregate)?.doc_count ?? 0,
   };
 
   return stats;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { config, HttpConfig } from './http_config';
 import { cspConfig } from './csp';
 import { ExternalUrlConfig } from './external_url';
@@ -245,7 +245,7 @@ describe('publicBaseUrl', () => {
 
 test('accepts only valid uuids for server.uuid', () => {
   const httpSchema = config.schema;
-  expect(() => httpSchema.validate({ uuid: uuid.v4() })).not.toThrow();
+  expect(() => httpSchema.validate({ uuid: uuidv4() })).not.toThrow();
   expect(() => httpSchema.validate({ uuid: 'not an uuid' })).toThrowErrorMatchingInlineSnapshot(
     `"[uuid]: must be a valid uuid"`
   );
@@ -387,6 +387,33 @@ describe('with compression', () => {
       },
     };
     expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  });
+});
+
+describe('compression.brotli', () => {
+  describe('enabled', () => {
+    it('defaults to `false`', () => {
+      expect(config.schema.validate({}).compression.brotli.enabled).toEqual(false);
+    });
+  });
+  describe('quality', () => {
+    it('defaults to `3`', () => {
+      expect(config.schema.validate({}).compression.brotli.quality).toEqual(3);
+    });
+    it('does not accepts value superior to `11`', () => {
+      expect(() =>
+        config.schema.validate({ compression: { brotli: { quality: 12 } } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[compression.brotli.quality]: Value must be equal to or lower than [11]."`
+      );
+    });
+    it('does not accepts value inferior to `0`', () => {
+      expect(() =>
+        config.schema.validate({ compression: { brotli: { quality: -1 } } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[compression.brotli.quality]: Value must be equal to or greater than [0]."`
+      );
+    });
   });
 });
 

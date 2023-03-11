@@ -6,11 +6,11 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
         data-test-subj="MetaInfoDetailsmetaInfoDetails"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
             class="euiText emotion-EuiText"
@@ -19,19 +19,19 @@ Object {
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
           data-test-subj="MetaInfoDetailslastUpdate"
         >
           <span
-            class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
+            class="euiBadge emotion-EuiInnerText"
             style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
             title="Last update value"
           >
             <span
-              class="euiBadge__content"
+              class="euiBadge__content emotion-euiBadge__content"
             >
               <span
-                class="euiBadge__text"
+                class="euiBadge__text emotion-euiBadge__text"
               >
                 <p>
                   Last update value
@@ -41,7 +41,7 @@ Object {
           </span>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
             class="euiText emotion-EuiText"
@@ -50,24 +50,24 @@ Object {
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
           data-test-subj="MetaInfoDetailslastUpdateValue"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <span
-                class="euiBadge euiBadge--hollow euiBadge--iconLeft emotion-EuiInnerText"
+                class="euiBadge emotion-EuiInnerText"
                 title="value"
               >
                 <span
-                  class="euiBadge__content"
+                  class="euiBadge__content emotion-euiBadge__content"
                 >
                   <span
-                    class="euiBadge__text"
+                    class="euiBadge__text emotion-euiBadge__text"
                   >
                     value
                   </span>
@@ -81,11 +81,11 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
       data-test-subj="MetaInfoDetailsmetaInfoDetails"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
           class="euiText emotion-EuiText"
@@ -94,19 +94,19 @@ Object {
         </div>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
         data-test-subj="MetaInfoDetailslastUpdate"
       >
         <span
-          class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
+          class="euiBadge emotion-EuiInnerText"
           style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
           title="Last update value"
         >
           <span
-            class="euiBadge__content"
+            class="euiBadge__content emotion-euiBadge__content"
           >
             <span
-              class="euiBadge__text"
+              class="euiBadge__text emotion-euiBadge__text"
             >
               <p>
                 Last update value
@@ -116,7 +116,7 @@ Object {
         </span>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
           class="euiText emotion-EuiText"
@@ -125,24 +125,24 @@ Object {
         </div>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
         data-test-subj="MetaInfoDetailslastUpdateValue"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <span
-              class="euiBadge euiBadge--hollow euiBadge--iconLeft emotion-EuiInnerText"
+              class="euiBadge emotion-EuiInnerText"
               title="value"
             >
               <span
-                class="euiBadge__content"
+                class="euiBadge__content emotion-euiBadge__content"
               >
                 <span
-                  class="euiBadge__text"
+                  class="euiBadge__text emotion-euiBadge__text"
                 >
                   value
                 </span>
@@ -213,11 +213,11 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
         data-test-subj="MetaInfoDetailsmetaInfoDetails"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
             class="euiText emotion-EuiText"
@@ -226,19 +226,19 @@ Object {
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
           data-test-subj="MetaInfoDetailslastUpdate"
         >
           <span
-            class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
+            class="euiBadge emotion-EuiInnerText"
             style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
             title="last update"
           >
             <span
-              class="euiBadge__content"
+              class="euiBadge__content emotion-euiBadge__content"
             >
               <span
-                class="euiBadge__text"
+                class="euiBadge__text emotion-euiBadge__text"
               >
                 last update
               </span>
@@ -246,7 +246,7 @@ Object {
           </span>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
             class="euiText emotion-EuiText"
@@ -255,24 +255,24 @@ Object {
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
           data-test-subj="MetaInfoDetailslastUpdateValue"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <span
-                class="euiBadge euiBadge--hollow euiBadge--iconLeft emotion-EuiInnerText"
+                class="euiBadge emotion-EuiInnerText"
                 title="value"
               >
                 <span
-                  class="euiBadge__content"
+                  class="euiBadge__content emotion-euiBadge__content"
                 >
                   <span
-                    class="euiBadge__text"
+                    class="euiBadge__text emotion-euiBadge__text"
                   >
                     value
                   </span>
@@ -286,11 +286,11 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
       data-test-subj="MetaInfoDetailsmetaInfoDetails"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
           class="euiText emotion-EuiText"
@@ -299,19 +299,19 @@ Object {
         </div>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
         data-test-subj="MetaInfoDetailslastUpdate"
       >
         <span
-          class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
+          class="euiBadge emotion-EuiInnerText"
           style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
           title="last update"
         >
           <span
-            class="euiBadge__content"
+            class="euiBadge__content emotion-euiBadge__content"
           >
             <span
-              class="euiBadge__text"
+              class="euiBadge__text emotion-euiBadge__text"
             >
               last update
             </span>
@@ -319,7 +319,7 @@ Object {
         </span>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
           class="euiText emotion-EuiText"
@@ -328,24 +328,24 @@ Object {
         </div>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
         data-test-subj="MetaInfoDetailslastUpdateValue"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <span
-              class="euiBadge euiBadge--hollow euiBadge--iconLeft emotion-EuiInnerText"
+              class="euiBadge emotion-EuiInnerText"
               title="value"
             >
               <span
-                class="euiBadge__content"
+                class="euiBadge__content emotion-euiBadge__content"
               >
                 <span
-                  class="euiBadge__text"
+                  class="euiBadge__text emotion-euiBadge__text"
                 >
                   value
                 </span>

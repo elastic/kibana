@@ -21,8 +21,10 @@ describe('ShardFailureOpenModalButton', () => {
   it('triggers the openModal function when "Show details" button is clicked', () => {
     const component = mountWithIntl(
       <ShardFailureOpenModalButton
-        request={shardFailureRequest}
-        response={shardFailureResponse}
+        getRequestMeta={() => ({
+          request: shardFailureRequest,
+          response: shardFailureResponse,
+        })}
         theme={theme}
         title="test"
       />

@@ -7,17 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { DATA_DECORATION_CONFIG } from '../constants';
-import { DataDecorationConfig, DataDecorationConfigResult } from '../types';
+import { DataDecorationConfigFn } from '../types';
 import { commonDecorationConfigArgs } from './common_y_config_args';
 
-export const dataDecorationConfigFunction: ExpressionFunctionDefinition<
-  typeof DATA_DECORATION_CONFIG,
-  null,
-  DataDecorationConfig,
-  DataDecorationConfigResult
-> = {
+export const dataDecorationConfigFunction: DataDecorationConfigFn = {
   name: DATA_DECORATION_CONFIG,
   aliases: [],
   type: DATA_DECORATION_CONFIG,

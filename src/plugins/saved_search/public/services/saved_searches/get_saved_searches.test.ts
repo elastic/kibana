@@ -100,6 +100,7 @@ describe('getSavedSearch', () => {
     expect(savedObjectsClient.resolve).toHaveBeenCalled();
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
+        "breakdownField": undefined,
         "columns": Array [
           "_source",
         ],
@@ -154,6 +155,7 @@ describe('getSavedSearch', () => {
         "timeRange": undefined,
         "timeRestore": undefined,
         "title": "test1",
+        "usesAdHocDataView": undefined,
         "viewMode": undefined,
       }
     `);
@@ -197,6 +199,7 @@ describe('getSavedSearch', () => {
     expect(savedObjectsClient.resolve).toHaveBeenCalled();
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
+        "breakdownField": undefined,
         "columns": Array [
           "_source",
         ],
@@ -251,6 +254,7 @@ describe('getSavedSearch', () => {
         "timeRange": undefined,
         "timeRestore": undefined,
         "title": "test2",
+        "usesAdHocDataView": undefined,
         "viewMode": undefined,
       }
     `);

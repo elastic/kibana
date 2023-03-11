@@ -14,7 +14,7 @@ import {
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
-import { useController } from 'react-hook-form';
+import { useController, useFormState } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { i18n } from '@kbn/i18n';
@@ -57,18 +57,20 @@ interface ResultsTypeFieldProps {
 
 const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldProps = {} }) => {
   const [selectedOption, setSelectedOption] = useState(SNAPSHOT_OPTION.value);
+  const { defaultValues } = useFormState();
+
   const {
     field: { onChange: onSnapshotChange, value: snapshotValue },
   } = useController({
     name: 'snapshot',
-    defaultValue: true,
+    defaultValue: defaultValues?.snapshot,
   });
 
   const {
     field: { onChange: onRemovedChange, value: removedValue },
   } = useController({
     name: 'removed',
-    defaultValue: false,
+    defaultValue: defaultValues?.removed,
   });
 
   const handleChange = useCallback(
@@ -142,6 +144,7 @@ const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldPr
       fullWidth
     >
       <EuiSuperSelect
+        data-test-subj={'resultsTypeField'}
         options={FIELD_OPTIONS}
         fullWidth
         valueOfSelected={selectedOption}

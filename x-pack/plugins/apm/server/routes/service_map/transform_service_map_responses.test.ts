@@ -14,7 +14,7 @@ import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_SUBTYPE,
   SPAN_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import {
   transformServiceMapResponses,
   ServiceMapResponse,

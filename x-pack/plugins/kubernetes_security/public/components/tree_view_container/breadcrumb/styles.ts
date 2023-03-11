@@ -42,11 +42,19 @@ export const useStyles = () => {
       marginRight: size.xs,
     };
 
+    const breadcrumbsWrapper: CSSObject = { flexDirection: 'row', alignItems: 'center' };
+
+    const breadcrumbIconColor = (color: string): CSSObject => ({
+      color,
+    });
+
     return {
       breadcrumb,
       breadcrumbButton,
       breadcrumbButtonBold,
       breadcrumbRightIcon,
+      breadcrumbsWrapper,
+      breadcrumbIconColor,
     };
   }, [euiTheme]);
 

@@ -10,8 +10,10 @@ import { assertNever } from '@kbn/std';
 import type {
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
+  GetInfoResponse,
   EsAssetReference,
   KibanaAssetReference,
+  AssetsGroupedByServiceByType,
 } from '@kbn/fleet-plugin/common';
 import { agentPolicyStatuses } from '@kbn/fleet-plugin/common';
 import { EndpointMetadataGenerator } from './data_generators/endpoint_metadata_generator';
@@ -1589,6 +1591,90 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       type: 'integration',
       download: '/epr/endpoint/endpoint-0.5.0.tar.gz',
       path: '/package/endpoint/0.5.0',
+      icons: [
+        {
+          path: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',
+          src: '/img/logo-endpoint-64-color.svg',
+          size: '16x16',
+          type: 'image/svg+xml',
+        },
+      ],
+      status: 'installed',
+      release: 'ga',
+      savedObject: {
+        type: 'epm-packages',
+        id: 'endpoint',
+        attributes: {
+          installed_kibana: [
+            { id: '826759f0-7074-11ea-9bc8-6b38f4d29a16', type: 'dashboard' },
+            { id: '1cfceda0-728b-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: '1e525190-7074-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: '55387750-729c-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: '92b1edc0-706a-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: 'a3a3bd10-706b-11ea-9bc8-6b38f4d29a16', type: 'map' },
+          ] as KibanaAssetReference[],
+          installed_es: [
+            { id: 'logs-endpoint.alerts', type: 'index_template' },
+            { id: 'events-endpoint', type: 'index_template' },
+            { id: 'logs-endpoint.events.file', type: 'index_template' },
+            { id: 'logs-endpoint.events.library', type: 'index_template' },
+            { id: 'metrics-endpoint.metadata', type: 'index_template' },
+            { id: 'metrics-endpoint.metadata_mirror', type: 'index_template' },
+            { id: 'logs-endpoint.events.network', type: 'index_template' },
+            { id: 'metrics-endpoint.policy', type: 'index_template' },
+            { id: 'logs-endpoint.events.process', type: 'index_template' },
+            { id: 'logs-endpoint.events.registry', type: 'index_template' },
+            { id: 'logs-endpoint.events.security', type: 'index_template' },
+            { id: 'metrics-endpoint.telemetry', type: 'index_template' },
+          ] as EsAssetReference[],
+          package_assets: [],
+          es_index_patterns: {
+            alerts: 'logs-endpoint.alerts-*',
+            events: 'events-endpoint-*',
+            file: 'logs-endpoint.events.file-*',
+            library: 'logs-endpoint.events.library-*',
+            metadata: 'metrics-endpoint.metadata-*',
+            metadata_mirror: 'metrics-endpoint.metadata_mirror-*',
+            network: 'logs-endpoint.events.network-*',
+            policy: 'metrics-endpoint.policy-*',
+            process: 'logs-endpoint.events.process-*',
+            registry: 'logs-endpoint.events.registry-*',
+            security: 'logs-endpoint.events.security-*',
+            telemetry: 'metrics-endpoint.telemetry-*',
+          },
+          name: 'endpoint',
+          version: '0.5.0',
+          internal: false,
+          install_version: '0.5.0',
+          install_status: 'installed',
+          install_started_at: '2020-06-24T14:41:23.098Z',
+          install_source: 'registry',
+          keep_policies_up_to_date: false,
+          verification_status: 'unknown',
+        },
+        references: [],
+        updated_at: '2020-06-24T14:41:23.098Z',
+        version: 'Wzc0LDFd',
+      },
+    };
+  }
+
+  /**
+   * Generate a Fleet EPM Package for Endpoint
+   */
+  public generateEpmPackageInfo(): GetInfoResponse['item'] {
+    return {
+      name: 'endpoint',
+      title: 'Elastic Endpoint',
+      version: '0.5.0',
+      description: 'This is the Elastic Endpoint package.',
+      type: 'integration',
+      download: '/epr/endpoint/endpoint-0.5.0.tar.gz',
+      path: '/package/endpoint/0.5.0',
+      format_version: '',
+      owner: { github: '' },
+      latestVersion: '',
+      assets: {} as AssetsGroupedByServiceByType,
       icons: [
         {
           path: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',

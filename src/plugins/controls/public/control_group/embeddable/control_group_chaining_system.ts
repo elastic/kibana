@@ -35,7 +35,7 @@ interface OnChildChangedProps {
 interface ChainingSystem {
   getContainerSettings: (
     initialInput: ControlGroupInput
-  ) => EmbeddableContainerSettings | undefined;
+  ) => EmbeddableContainerSettings<ControlGroupInput> | undefined;
   getPrecedingFilters: (
     props: GetPrecedingFiltersProps
   ) => { filters: Filter[]; timeslice?: [number, number] } | undefined;

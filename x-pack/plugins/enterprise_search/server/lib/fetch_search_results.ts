@@ -21,7 +21,7 @@ export const fetchSearchResults = async (
     from,
     index: indexName,
     size,
-    ...(!!query ? { q: JSON.stringify(query) } : {}),
+    ...(!!query ? { q: query.replace(/"/g, '\\"') } : {}),
   });
   return results;
 };

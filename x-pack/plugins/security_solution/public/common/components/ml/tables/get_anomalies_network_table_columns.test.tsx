@@ -7,7 +7,7 @@
 
 import '../../../mock/match_media';
 import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
-import { NetworkType } from '../../../../network/store/model';
+import { NetworkType } from '../../../../explore/network/store/model';
 import * as i18n from './translations';
 
 jest.mock('../../../lib/kibana');

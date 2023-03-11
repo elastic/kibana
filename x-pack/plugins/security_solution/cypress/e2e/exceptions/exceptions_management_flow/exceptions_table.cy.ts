@@ -9,7 +9,7 @@ import { ROLES } from '../../../../common/test';
 import { getExceptionList, expectedExportedExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
-import { createCustomRule } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../../tasks/login';
 
 import { EXCEPTIONS_URL } from '../../../urls/navigation';
@@ -22,7 +22,7 @@ import {
   clearSearchSelection,
 } from '../../../tasks/exceptions_table';
 import {
-  EXCEPTIONS_TABLE_DELETE_BTN,
+  EXCEPTIONS_OVERFLOW_ACTIONS_BTN,
   EXCEPTIONS_TABLE_LIST_NAME,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../../screens/exceptions';
@@ -48,9 +48,9 @@ describe('Exceptions Table', () => {
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
-      createCustomRule({
+      createRule({
         ...getNewRule(),
-        exceptionLists: [
+        exceptions_list: [
           {
             id: response.body.id,
             list_id: getExceptionList2().list_id,
@@ -65,18 +65,15 @@ describe('Exceptions Table', () => {
     createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
       'exceptionListResponse'
     );
+  });
 
+  beforeEach(() => {
     visitWithoutDateRange(EXCEPTIONS_URL);
-
-    // Using cy.contains because we do not care about the exact text,
-    // just checking number of lists shown
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
   });
 
   it('Exports exception list', function () {
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
-    visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
     exportExceptionList();
 
@@ -86,12 +83,14 @@ describe('Exceptions Table', () => {
         expectedExportedExceptionList(this.exceptionListResponse)
       );
 
-      cy.get(TOASTER).should('have.text', 'Exception list export success');
+      cy.get(TOASTER).should(
+        'have.text',
+        `Exception list "${getExceptionList1().name}" exported successfully`
+      );
     });
   });
 
   it('Filters exception lists on search', () => {
-    visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
     // Using cy.contains because we do not care about the exact text,
@@ -142,7 +141,6 @@ describe('Exceptions Table', () => {
   });
 
   it('Deletes exception list without rule reference', () => {
-    visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
     // Using cy.contains because we do not care about the exact text,
@@ -188,7 +186,7 @@ describe('Exceptions Table - read only', () => {
     cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 1 list`);
   });
 
-  it('Delete icon is not shown', () => {
-    cy.get(EXCEPTIONS_TABLE_DELETE_BTN).should('not.exist');
+  it('Card menu actions should be disabled', () => {
+    cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().should('be.disabled');
   });
 });

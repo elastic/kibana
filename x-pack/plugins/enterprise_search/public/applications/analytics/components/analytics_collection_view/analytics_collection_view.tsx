@@ -14,21 +14,27 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
+  EuiLink,
   EuiSpacer,
   EuiTitle,
-  EuiIcon,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
-import { EuiButtonTo } from '../../../shared/react_router_helpers';
-import { COLLECTION_CREATION_PATH, COLLECTION_VIEW_PATH } from '../../routes';
+import { COLLECTION_VIEW_PATH } from '../../routes';
+import { AddAnalyticsCollection } from '../add_analytics_collections/add_analytics_collection';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
 
+import { AnalyticsCollectionDataViewIdLogic } from './analytics_collection_data_view_id_logic';
+
 import { AnalyticsCollectionEvents } from './analytics_collection_events';
-import { AnalyticsCollectionIntegrate } from './analytics_collection_integrate';
+import { AnalyticsCollectionIntegrate } from './analytics_collection_integrate/analytics_collection_integrate';
 import { AnalyticsCollectionSettings } from './analytics_collection_settings';
 
 import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
@@ -41,9 +47,11 @@ export const collectionViewBreadcrumbs = [
 
 export const AnalyticsCollectionView: React.FC = () => {
   const { fetchAnalyticsCollection } = useActions(FetchAnalyticsCollectionLogic);
+  const { fetchAnalyticsCollectionDataViewId } = useActions(AnalyticsCollectionDataViewIdLogic);
   const { analyticsCollection, isLoading } = useValues(FetchAnalyticsCollectionLogic);
-  const { name, section } = useParams<{ name: string; section: string }>();
-  const { navigateToUrl } = useValues(KibanaLogic);
+  const { dataViewId } = useValues(AnalyticsCollectionDataViewIdLogic);
+  const { id, section } = useParams<{ id: string; section: string }>();
+  const { navigateToUrl, application } = useValues(KibanaLogic);
   const collectionViewTabs = [
     {
       id: 'events',
@@ -53,7 +61,7 @@ export const AnalyticsCollectionView: React.FC = () => {
       onClick: () =>
         navigateToUrl(
           generateEncodedPath(COLLECTION_VIEW_PATH, {
-            name: analyticsCollection?.name,
+            id: analyticsCollection?.id,
             section: 'events',
           })
         ),
@@ -64,11 +72,10 @@ export const AnalyticsCollectionView: React.FC = () => {
       label: i18n.translate('xpack.enterpriseSearch.analytics.collectionsView.tabs.integrateName', {
         defaultMessage: 'Integrate',
       }),
-      prepend: <EuiIcon type="editorCodeBlock" size="l" />,
       onClick: () =>
         navigateToUrl(
           generateEncodedPath(COLLECTION_VIEW_PATH, {
-            name: analyticsCollection?.name,
+            id: analyticsCollection?.id,
             section: 'integrate',
           })
         ),
@@ -82,7 +89,7 @@ export const AnalyticsCollectionView: React.FC = () => {
       onClick: () =>
         navigateToUrl(
           generateEncodedPath(COLLECTION_VIEW_PATH, {
-            name: analyticsCollection?.name,
+            id: analyticsCollection?.id,
             section: 'settings',
           })
         ),
@@ -91,7 +98,8 @@ export const AnalyticsCollectionView: React.FC = () => {
   ];
 
   useEffect(() => {
-    fetchAnalyticsCollection(name);
+    fetchAnalyticsCollection(id);
+    fetchAnalyticsCollectionDataViewId(id);
   }, []);
 
   return (
@@ -99,7 +107,7 @@ export const AnalyticsCollectionView: React.FC = () => {
       restrictWidth
       isLoading={isLoading}
       pageChrome={[...collectionViewBreadcrumbs]}
-      pageViewTelemetry="View Analytics Collection"
+      pageViewTelemetry={`View Analytics Collection - ${section}`}
       pageHeader={{
         description: i18n.translate(
           'xpack.enterpriseSearch.analytics.collectionsView.pageDescription',
@@ -109,6 +117,28 @@ export const AnalyticsCollectionView: React.FC = () => {
           }
         ),
         pageTitle: analyticsCollection?.name,
+        rightSideItems: dataViewId
+          ? [
+              <RedirectAppLinks application={application}>
+                <EuiLink
+                  href={application.getUrlForApp('discover', {
+                    path: `#/?_a=(index:'${dataViewId}')`,
+                  })}
+                >
+                  <EuiIconTip
+                    position="bottom"
+                    content={
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.analytics.collectionsView.exploreTooltip"
+                        defaultMessage="For a deeper analysis, explore event logs on Discover."
+                      />
+                    }
+                    type="inspect"
+                  />
+                </EuiLink>
+              </RedirectAppLinks>,
+            ]
+          : undefined,
         tabs: [...collectionViewTabs],
       }}
     >
@@ -127,14 +157,7 @@ export const AnalyticsCollectionView: React.FC = () => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonTo fill iconType="plusInCircle" to={COLLECTION_CREATION_PATH}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.analytics.collections.collectionsView.create.buttonTitle',
-                {
-                  defaultMessage: 'Create new collection',
-                }
-              )}
-            </EuiButtonTo>
+            <AddAnalyticsCollection />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
@@ -174,16 +197,7 @@ export const AnalyticsCollectionView: React.FC = () => {
               )}
             </p>
           }
-          actions={[
-            <EuiButtonTo fill iconType="plusInCircle" to={COLLECTION_CREATION_PATH}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.analytics.collections.collectionsView.create.buttonTitle',
-                {
-                  defaultMessage: 'Create new collection',
-                }
-              )}
-            </EuiButtonTo>,
-          ]}
+          actions={[<AddAnalyticsCollection />]}
         />
       )}
     </EnterpriseSearchAnalyticsPageTemplate>

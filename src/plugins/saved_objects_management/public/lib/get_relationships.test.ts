@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectGetRelationshipsResponse } from '../types';
+import { v1 } from '../../common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getRelationships } from './get_relationships';
 
@@ -23,7 +23,7 @@ describe('getRelationships', () => {
   });
 
   it('should handle successful responses', async () => {
-    const serverResponse: SavedObjectGetRelationshipsResponse = {
+    const serverResponse: v1.RelationshipsResponseHTTP = {
       relations: [],
       invalidRelations: [],
     };

@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ExistingFieldsMap, IndexPattern } from '../../../../../types';
+import { IndexPattern } from '../../../../../types';
 import {
   DragDropBuckets,
   FieldsBucketContainer,
@@ -27,7 +27,6 @@ export const MAX_MULTI_FIELDS_SIZE = 3;
 export interface FieldInputsProps {
   column: TermsIndexPatternColumn;
   indexPattern: IndexPattern;
-  existingFields: ExistingFieldsMap;
   invalidFields?: string[];
   operationSupportMatrix: Pick<OperationSupportMatrix, 'operationByField'>;
   onChange: (newValues: string[]) => void;
@@ -49,7 +48,6 @@ export function FieldInputs({
   column,
   onChange,
   indexPattern,
-  existingFields,
   operationSupportMatrix,
   invalidFields,
 }: FieldInputsProps) {
@@ -104,7 +102,7 @@ export function FieldInputs({
           // * a field of unsupported type should be removed
           // * a field that has been used
           // * a scripted field was used in a singular term, should be marked as invalid for multi-terms
-          const filteredOperationByField = Object.keys(operationSupportMatrix.operationByField)
+          const filteredOperationByField = [...operationSupportMatrix.operationByField.keys()]
             .filter((key) => {
               if (key === value) {
                 return true;
@@ -122,9 +120,12 @@ export function FieldInputs({
               }
             })
             .reduce<OperationSupportMatrix['operationByField']>((memo, key) => {
-              memo[key] = operationSupportMatrix.operationByField[key];
+              const fieldOps = operationSupportMatrix.operationByField.get(key);
+              if (fieldOps) {
+                memo.set(key, fieldOps);
+              }
               return memo;
-            }, {});
+            }, new Map());
 
           const shouldShowError = Boolean(
             value &&
@@ -153,7 +154,6 @@ export function FieldInputs({
               <FieldSelect
                 fieldIsInvalid={shouldShowError}
                 currentIndexPattern={indexPattern}
-                existingFields={existingFields[indexPattern.title]}
                 operationByField={filteredOperationByField}
                 selectedOperationType={column.operationType}
                 selectedField={value}

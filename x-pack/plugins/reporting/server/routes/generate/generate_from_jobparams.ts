@@ -6,14 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import rison from 'rison-node';
 import type { Logger } from '@kbn/core/server';
+import rison from '@kbn/rison';
 import type { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
 import type { BaseParams } from '../../types';
-import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
-import { RequestHandler } from '../lib/request_handler';
-import { incrementApiUsageCounter } from '..';
+import { authorizedUserPreRouting, getCounters, RequestHandler } from '../lib';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
@@ -41,7 +39,7 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
         options: { tags: kibanaAccessControlTags },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        incrementApiUsageCounter(
+        const counters = getCounters(
           req.route.method,
           path.replace(/{exportType}/, req.params.exportType),
           reporting.getUsageCounter()
@@ -86,12 +84,11 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
         }
 
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
-
-        try {
-          return await requestHandler.handleGenerateRequest(req.params.exportType, jobParams);
-        } catch (err) {
-          return requestHandler.handleError(err);
-        }
+        return await requestHandler.handleGenerateRequest(
+          req.params.exportType,
+          jobParams,
+          counters
+        );
       })
     );
   };

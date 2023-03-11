@@ -344,7 +344,7 @@ export function MachineLearningCommonUIProvider({
     },
 
     async waitForRefreshButtonEnabled() {
-      await testSubjects.waitForEnabled('~mlRefreshPageButton');
+      await testSubjects.waitForEnabled('~mlDatePickerRefreshPageButton');
     },
 
     async assertOneOfExists(subjectsToCheck: string[], timeout: number = 0) {
@@ -402,17 +402,28 @@ export function MachineLearningCommonUIProvider({
       });
     },
 
-    async invokeTableRowAction(rowSelector: string, actionTestSubject: string) {
+    async invokeTableRowAction(
+      rowSelector: string,
+      actionTestSubject: string,
+      fromContextMenu: boolean = true
+    ) {
       await retry.tryForTime(30 * 1000, async () => {
-        await this.ensureAllMenuPopoversClosed();
-        await testSubjects.click(`${rowSelector} > euiCollapsedItemActionsButton`);
-        await find.existsByCssSelector('euiContextMenuPanel');
+        if (fromContextMenu) {
+          await this.ensureAllMenuPopoversClosed();
 
-        const isEnabled = await testSubjects.isEnabled(actionTestSubject);
+          await testSubjects.click(`${rowSelector} > euiCollapsedItemActionsButton`);
+          await find.existsByCssSelector('euiContextMenuPanel');
 
-        expect(isEnabled).to.eql(true, `Expected action "${actionTestSubject}" to be enabled.`);
+          const isEnabled = await testSubjects.isEnabled(actionTestSubject);
 
-        await testSubjects.click(actionTestSubject);
+          expect(isEnabled).to.eql(true, `Expected action "${actionTestSubject}" to be enabled.`);
+
+          await testSubjects.click(actionTestSubject);
+        } else {
+          const isEnabled = await testSubjects.isEnabled(`${rowSelector} > ${actionTestSubject}`);
+          expect(isEnabled).to.eql(true, `Expected action "${actionTestSubject}" to be enabled.`);
+          await testSubjects.click(`${rowSelector} > ${actionTestSubject}`);
+        }
       });
     },
   };

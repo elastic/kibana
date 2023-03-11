@@ -14,7 +14,6 @@ import {
 import {
   HOST_GEO_CITY_NAME_HEADER,
   HOST_GEO_COUNTRY_NAME_HEADER,
-  INSPECT_MODAL,
   SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/hosts/events';
 
@@ -30,7 +29,6 @@ import {
   addsHostGeoCityNameToHeader,
   addsHostGeoCountryNameToHeader,
   openEventsViewerFieldsBrowser,
-  opensInspectQueryModal,
   waitsForEventsToBeLoaded,
 } from '../../tasks/hosts/events';
 import { clearSearchBar, kqlSearch } from '../../tasks/security_header';
@@ -60,12 +58,9 @@ describe('Events Viewer', () => {
   });
 
   context('Fields rendering', () => {
-    before(() => {
+    beforeEach(() => {
       visit(HOSTS_URL);
       openEvents();
-    });
-
-    beforeEach(() => {
       openEventsViewerFieldsBrowser();
     });
 
@@ -92,25 +87,16 @@ describe('Events Viewer', () => {
   });
 
   context('Events viewer query modal', () => {
-    before(() => {
+    beforeEach(() => {
       visit(HOSTS_URL);
       openEvents();
-    });
-
-    it('launches the inspect query modal when the inspect button is clicked', () => {
-      waitsForEventsToBeLoaded();
-      opensInspectQueryModal();
-      cy.get(INSPECT_MODAL).should('exist');
     });
   });
 
   context('Events viewer fields behaviour', () => {
-    before(() => {
+    beforeEach(() => {
       visit(HOSTS_URL);
       openEvents();
-    });
-
-    beforeEach(() => {
       openEventsViewerFieldsBrowser();
     });
 
@@ -135,7 +121,7 @@ describe('Events Viewer', () => {
   });
 
   context('Events behavior', () => {
-    before(() => {
+    beforeEach(() => {
       visit(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();

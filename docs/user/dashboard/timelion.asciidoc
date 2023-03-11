@@ -271,9 +271,9 @@ To save the panel to the dashboard:
 
 .. In the panel header, click *No Title*.
 
-.. On the *Customize panel* window, select *Show panel title*.
+.. On the *Panel settings* window, select *Show title*.
 
-.. Enter the *Panel title*, then click *Save*.
+.. Enter the *Title*, then click *Save*.
 
 [float]
 [[timelion-tutorial-create-visualizations-with-mathematical-functions]]
@@ -406,9 +406,9 @@ To save the panel to the dashboard:
 
 .. In the panel header, click *No Title*.
 
-.. On the *Customize panel* window, select *Show panel title*.
+.. On the *Panel settings* window, select *Show title*.
 
-.. Enter the *Panel title*, then click *Save*.
+.. Enter the *Title*, then click *Save*.
 
 [float]
 [[timelion-tutorial-create-visualizations-withconditional-logic-and-tracking-trends]]
@@ -594,8 +594,8 @@ To save the panel to the dashboard:
 
 .. In the panel header, click *No Title*.
 
-.. On the *Customize panel* window, select *Show panel title*.
+.. On the *Panel settings* window, select *Show title*.
 
-.. Enter the *Panel title*, then click *Save*.
+.. Enter the *Title*, then click *Save*.
 
 For more information about *Timelion* conditions, refer to https://www.elastic.co/blog/timeseries-if-then-else-with-timelion[I have but one .condition()].

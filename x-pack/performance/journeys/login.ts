@@ -7,6 +7,7 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
+import { waitForChrome } from '../utils';
 
 export const journey = new Journey({
   skipAutoLogin: true,
@@ -40,5 +41,5 @@ export const journey = new Journey({
   await page.type(subj('loginPassword'), 'changeme', { delay: inputDelays.TYPING });
   await page.click(subj('loginSubmit'), { delay: inputDelays.MOUSE_CLICK });
 
-  await page.waitForSelector('#headerUserMenu');
+  await waitForChrome(page);
 });

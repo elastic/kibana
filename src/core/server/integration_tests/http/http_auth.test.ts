@@ -7,13 +7,13 @@
  */
 
 import type { IRouter, RouteConfigOptions, HttpAuth } from '@kbn/core-http-server';
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 
 describe('http auth', () => {
-  let root: ReturnType<typeof kbnTestServer.createRoot>;
+  let root: ReturnType<typeof createRoot>;
 
   beforeEach(async () => {
-    root = kbnTestServer.createRoot({
+    root = createRoot({
       plugins: { initialize: false },
       elasticsearch: { skipStartupConnectionCheck: true },
     });
@@ -53,7 +53,7 @@ describe('http auth', () => {
         registerRoute(router, auth, true);
 
         await root.start();
-        await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: true });
+        await request.get(root, '/route').expect(200, { authenticated: true });
       });
 
       it('blocks access when auth returns `notHandled`', async () => {
@@ -66,7 +66,7 @@ describe('http auth', () => {
         registerRoute(router, auth, true);
 
         await root.start();
-        await kbnTestServer.request.get(root, '/route').expect(401);
+        await request.get(root, '/route').expect(401);
       });
 
       it('blocks access when auth returns `unauthorized`', async () => {
@@ -79,7 +79,7 @@ describe('http auth', () => {
         registerRoute(router, auth, true);
 
         await root.start();
-        await kbnTestServer.request.get(root, '/route').expect(401);
+        await request.get(root, '/route').expect(401);
       });
     });
     describe('when authRequired is `false`', () => {
@@ -93,7 +93,7 @@ describe('http auth', () => {
         registerRoute(router, auth, false);
 
         await root.start();
-        await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: false });
+        await request.get(root, '/route').expect(200, { authenticated: false });
       });
 
       it('allows anonymous access when auth returns `notHandled`', async () => {
@@ -106,7 +106,7 @@ describe('http auth', () => {
         registerRoute(router, auth, false);
 
         await root.start();
-        await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: false });
+        await request.get(root, '/route').expect(200, { authenticated: false });
       });
 
       it('allows anonymous access when auth returns `unauthorized`', async () => {
@@ -119,7 +119,7 @@ describe('http auth', () => {
         registerRoute(router, auth, false);
 
         await root.start();
-        await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: false });
+        await request.get(root, '/route').expect(200, { authenticated: false });
       });
     });
     describe('when authRequired is `optional`', () => {
@@ -133,7 +133,7 @@ describe('http auth', () => {
         registerRoute(router, auth, 'optional');
 
         await root.start();
-        await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: true });
+        await request.get(root, '/route').expect(200, { authenticated: true });
       });
 
       it('allows anonymous access when auth returns `notHandled`', async () => {
@@ -146,7 +146,7 @@ describe('http auth', () => {
         registerRoute(router, auth, 'optional');
 
         await root.start();
-        await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: false });
+        await request.get(root, '/route').expect(200, { authenticated: false });
       });
 
       it('allows anonymous access when auth returns `unauthorized`', async () => {
@@ -159,7 +159,7 @@ describe('http auth', () => {
         registerRoute(router, auth, 'optional');
 
         await root.start();
-        await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: false });
+        await request.get(root, '/route').expect(200, { authenticated: false });
       });
     });
   });
@@ -173,7 +173,7 @@ describe('http auth', () => {
       registerRoute(router, auth, true);
 
       await root.start();
-      await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: false });
+      await request.get(root, '/route').expect(200, { authenticated: false });
     });
 
     it('allow anonymous access to resources when `authRequired` is `false`', async () => {
@@ -184,7 +184,7 @@ describe('http auth', () => {
       registerRoute(router, auth, false);
 
       await root.start();
-      await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: false });
+      await request.get(root, '/route').expect(200, { authenticated: false });
     });
 
     it('allow anonymous access to resources when `authRequired` is `optional`', async () => {
@@ -195,7 +195,7 @@ describe('http auth', () => {
       registerRoute(router, auth, 'optional');
 
       await root.start();
-      await kbnTestServer.request.get(root, '/route').expect(200, { authenticated: false });
+      await request.get(root, '/route').expect(200, { authenticated: false });
     });
   });
 });

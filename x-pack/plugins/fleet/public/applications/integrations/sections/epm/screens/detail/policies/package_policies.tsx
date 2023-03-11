@@ -27,7 +27,7 @@ import {
   useUrlPagination,
   useGetPackageInstallStatus,
   AgentPolicyRefreshContext,
-  usePackageInstallations,
+  useIsPackagePolicyUpgradable,
   useAuthz,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
@@ -99,6 +99,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
+
   const {
     data,
     isLoading,
@@ -108,7 +109,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     perPage: pagination.pageSize,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${name}`,
   });
-  const { updatableIntegrations } = usePackageInstallations();
+  const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
 
@@ -121,14 +122,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     }
 
     const newPolicies = data.items.map(({ agentPolicy, packagePolicy }) => {
-      const updatableIntegrationRecord = updatableIntegrations.get(
-        packagePolicy.package?.name ?? ''
-      );
-      const hasUpgrade =
-        !!updatableIntegrationRecord &&
-        updatableIntegrationRecord.policiesToUpgrade.some(
-          ({ pkgPolicyId }) => pkgPolicyId === packagePolicy.id
-        );
+      const hasUpgrade = isPackagePolicyUpgradable(packagePolicy);
 
       return {
         agentPolicy,
@@ -140,7 +134,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     });
 
     return newPolicies;
-  }, [data?.items, updatableIntegrations]);
+  }, [data?.items, isPackagePolicyUpgradable]);
 
   const showAddAgentHelpForPackagePolicyId = packageAndAgentPolicies.find(
     ({ agentPolicy }) => agentPolicy?.id === showAddAgentHelpForPolicyId

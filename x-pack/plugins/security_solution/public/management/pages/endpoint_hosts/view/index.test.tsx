@@ -52,9 +52,13 @@ import {
   METADATA_UNITED_TRANSFORM,
 } from '../../../../../common/endpoint/constants';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
+import {
+  initialUserPrivilegesState,
+  initialUserPrivilegesState as mockInitialUserPrivilegesState,
+} from '../../../../common/components/user_privileges/user_privileges_context';
 import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
 import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
@@ -236,63 +240,6 @@ describe('when on the endpoint list page', () => {
       });
       const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
       expect(onboardingPolicySelect).not.toBeNull();
-    });
-  });
-
-  describe('when determining when to show the enrolling message', () => {
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should display the enrolling message when there are less Endpoints than Agents', async () => {
-      reactTestingLibrary.act(() => {
-        const mockedEndpointListData = mockEndpointResultList({
-          total: 4,
-        });
-        setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.data,
-          totalAgentsUsingEndpoint: 5,
-        });
-      });
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
-      });
-      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).not.toBeNull();
-    });
-
-    it('should NOT display the enrolling message when there are equal Endpoints than Agents', async () => {
-      reactTestingLibrary.act(() => {
-        const mockedEndpointListData = mockEndpointResultList({
-          total: 5,
-        });
-        setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.data,
-          totalAgentsUsingEndpoint: 5,
-        });
-      });
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
-      });
-      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).toBeNull();
-    });
-
-    it('should NOT display the enrolling message when there are more Endpoints than Agents', async () => {
-      reactTestingLibrary.act(() => {
-        const mockedEndpointListData = mockEndpointResultList({
-          total: 6,
-        });
-        setEndpointListApiMockImplementation(coreStart.http, {
-          endpointsResults: mockedEndpointListData.data,
-          totalAgentsUsingEndpoint: 5,
-        });
-      });
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
-      });
-      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).toBeNull();
     });
   });
 
@@ -495,7 +442,7 @@ describe('when on the endpoint list page', () => {
           }
         });
 
-        it('should show the flyout', () => {
+        it('should show the flyout', async () => {
           return renderResult.findByTestId('endpointDetailsFlyout').then((flyout) => {
             expect(flyout).not.toBeNull();
           });
@@ -820,6 +767,8 @@ describe('when on the endpoint list page', () => {
             endpointPrivileges: {
               ...mockInitialUserPrivilegesState().endpointPrivileges,
               canReadActionsLogManagement: false,
+              canReadEndpointList: true,
+              canAccessFleet: true,
             },
           });
           const renderResult = await renderAndWaitForData();
@@ -839,6 +788,8 @@ describe('when on the endpoint list page', () => {
             endpointPrivileges: {
               ...mockInitialUserPrivilegesState().endpointPrivileges,
               canReadActionsLogManagement: false,
+              canReadEndpointList: true,
+              canAccessFleet: true,
             },
           });
           reactTestingLibrary.act(() => {
@@ -1231,6 +1182,14 @@ describe('when on the endpoint list page', () => {
   });
 
   describe('required transform failed banner', () => {
+    beforeEach(() => {
+      mockUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+      mockUserPrivileges.mockReset();
+    });
     it('is not displayed when transform state is not failed', () => {
       const transforms: TransformStats[] = [
         {
@@ -1313,6 +1272,264 @@ describe('when on the endpoint list page', () => {
       const banner = await screen.findByTestId('callout-endpoints-list-transform-failed');
       expect(banner).not.toHaveTextContent(transforms[0].id);
       expect(banner).toHaveTextContent(transforms[1].id);
+    });
+  });
+  describe('endpoint list onboarding screens with RBAC', () => {
+    beforeEach(() => {
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: [],
+        endpointPackagePolicies: mockPolicyResultList({ total: 3 }).items,
+      });
+    });
+    afterEach(() => {
+      mockUserPrivileges.mockReset();
+    });
+    it('user has endpoint list ALL and fleet All and can view entire onboarding screen', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canWriteEndpointList: true,
+          canAccessFleet: true,
+        }),
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
+      const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
+      expect(onboardingSteps).not.toBeNull();
+    });
+    it('user has endpoint list READ and fleet All and can view entire onboarding screen', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canReadEndpointList: true,
+          canAccessFleet: true,
+        }),
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
+      const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
+      expect(onboardingSteps).not.toBeNull();
+    });
+    it('user has endpoint list ALL/READ and fleet NONE and can view a modified onboarding screen with no actions link to fleet', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+          canReadEndpointList: true,
+          canAccessFleet: false,
+        }),
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
+      });
+      const onboardingSteps = await renderResult.findByTestId('policyOnboardingInstructions');
+      expect(onboardingSteps).not.toBeNull();
+      const noPrivilegesPage = await renderResult.findByTestId('noFleetAccess');
+      expect(noPrivilegesPage).not.toBeNull();
+      const startButton = renderResult.queryByTestId('onboardingStartButton');
+      expect(startButton).toBeNull();
+    });
+  });
+  describe('endpoint list take action with RBAC controls', () => {
+    let renderResult: ReturnType<AppContextTestRender['render']>;
+
+    const renderAndClickActionsButton = async (tableRow: number = 0) => {
+      reactTestingLibrary.act(() => {
+        history.push(`${MANAGEMENT_PATH}/endpoints`);
+      });
+
+      renderResult = render();
+      await middlewareSpy.waitForAction('serverReturnedEndpointList');
+      await middlewareSpy.waitForAction('serverReturnedEndpointAgentPolicies');
+
+      const endpointActionsButton: HTMLElement = (
+        await renderResult.findAllByTestId('endpointTableRowActions')
+      )[tableRow];
+
+      reactTestingLibrary.act(() => {
+        reactTestingLibrary.fireEvent.click(endpointActionsButton);
+      });
+    };
+
+    beforeEach(async () => {
+      const { data: hosts } = mockEndpointResultList({ total: 2 });
+      // second host is isolated, for unisolate testing
+      const hostInfo: HostInfo[] = [
+        {
+          host_status: hosts[0].host_status,
+          metadata: {
+            ...hosts[0].metadata,
+            Endpoint: {
+              ...hosts[0].metadata.Endpoint,
+              capabilities: [...ENDPOINT_CAPABILITIES],
+              state: {
+                ...hosts[0].metadata.Endpoint.state,
+                isolation: false,
+              },
+            },
+            host: {
+              ...hosts[0].metadata.host,
+              os: {
+                ...hosts[0].metadata.host.os,
+                name: 'Windows',
+              },
+            },
+            agent: {
+              ...hosts[0].metadata.agent,
+              version: '7.14.0',
+            },
+          },
+        },
+        {
+          host_status: hosts[1].host_status,
+          metadata: {
+            ...hosts[1].metadata,
+            Endpoint: {
+              ...hosts[1].metadata.Endpoint,
+              capabilities: ['isolation'],
+              state: {
+                ...hosts[1].metadata.Endpoint.state,
+                isolation: true,
+              },
+            },
+            host: {
+              ...hosts[1].metadata.host,
+              os: {
+                ...hosts[1].metadata.host.os,
+                name: 'Windows',
+              },
+            },
+            agent: {
+              ...hosts[1].metadata.agent,
+              version: '8.4.0',
+            },
+          },
+        },
+      ];
+      setEndpointListApiMockImplementation(coreStart.http, {
+        endpointsResults: hostInfo,
+        endpointPackagePolicies: mockPolicyResultList({ total: 2 }).items,
+      });
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+      mockUserPrivileges.mockReset();
+    });
+    it('shows Isolate host option if canHostIsolate is READ/ALL', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...mockInitialUserPrivilegesState(),
+        endpointPrivileges: {
+          ...mockInitialUserPrivilegesState().endpointPrivileges,
+          canIsolateHost: true,
+        },
+      });
+      await renderAndClickActionsButton();
+      const isolateLink = await renderResult.findByTestId('isolateLink');
+      expect(isolateLink).not.toBeNull();
+    });
+    it('hides Isolate host option if canIsolateHost is NONE', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...mockInitialUserPrivilegesState(),
+        endpointPrivileges: {
+          ...mockInitialUserPrivilegesState().endpointPrivileges,
+          canIsolateHost: false,
+        },
+      });
+      await renderAndClickActionsButton();
+      const isolateLink = screen.queryByTestId('isolateLink');
+      expect(isolateLink).toBeNull();
+    });
+    it('shows unisolate host option if canUnHostIsolate is READ/ALL', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...mockInitialUserPrivilegesState(),
+        endpointPrivileges: {
+          ...mockInitialUserPrivilegesState().endpointPrivileges,
+          canUnIsolateHost: true,
+        },
+      });
+      await renderAndClickActionsButton(1);
+      const unisolateLink = await renderResult.findByTestId('unIsolateLink');
+      expect(unisolateLink).not.toBeNull();
+    });
+    it('hides unisolate host option if canUnIsolateHost is NONE', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...mockInitialUserPrivilegesState(),
+        endpointPrivileges: {
+          ...mockInitialUserPrivilegesState().endpointPrivileges,
+          canUnIsolateHost: false,
+        },
+      });
+      await renderAndClickActionsButton(1);
+      const unisolateLink = renderResult.queryByTestId('unIsolateLink');
+      expect(unisolateLink).toBeNull();
+    });
+
+    it('shows the Responder option when at least one rbac privilege from host isolation, process operation and file operation, is set to TRUE', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...mockInitialUserPrivilegesState(),
+        endpointPrivileges: {
+          ...mockInitialUserPrivilegesState().endpointPrivileges,
+          canAccessResponseConsole: true,
+        },
+      });
+      await renderAndClickActionsButton();
+      const responderButton = await renderResult.findByTestId('console');
+      expect(responderButton).not.toBeNull();
+    });
+
+    it('hides the Responder option when host isolation, process operation and file operations are ALL set to NONE', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...mockInitialUserPrivilegesState(),
+        endpointPrivileges: {
+          ...mockInitialUserPrivilegesState().endpointPrivileges,
+          canAccessResponseConsole: false,
+        },
+      });
+      await renderAndClickActionsButton();
+      const responderButton = renderResult.queryByTestId('console');
+      expect(responderButton).toBeNull();
+    });
+    it('always shows the Host details link', async () => {
+      mockUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
+      await renderAndClickActionsButton();
+      const hostLink = await renderResult.findByTestId('hostLink');
+      expect(hostLink).not.toBeNull();
+    });
+    it('shows Agent Policy, View Agent Details and Reassign Policy Links when canAccessFleet RBAC control is enabled', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...mockInitialUserPrivilegesState(),
+        endpointPrivileges: {
+          ...mockInitialUserPrivilegesState().endpointPrivileges,
+          canAccessFleet: true,
+        },
+      });
+      await renderAndClickActionsButton();
+      const agentPolicyLink = await renderResult.findByTestId('agentPolicyLink');
+      const agentDetailsLink = await renderResult.findByTestId('agentDetailsLink');
+      const agentPolicyReassignLink = await renderResult.findByTestId('agentPolicyReassignLink');
+      expect(agentPolicyLink).not.toBeNull();
+      expect(agentDetailsLink).not.toBeNull();
+      expect(agentPolicyReassignLink).not.toBeNull();
+    });
+    it('hides Agent Policy, View Agent Details and Reassign Policy Links when canAccessFleet RBAC control is NOT enabled', async () => {
+      mockUserPrivileges.mockReturnValue({
+        ...mockInitialUserPrivilegesState(),
+        endpointPrivileges: {
+          ...mockInitialUserPrivilegesState().endpointPrivileges,
+          canAccessFleet: false,
+        },
+      });
+      await renderAndClickActionsButton();
+      const agentPolicyLink = renderResult.queryByTestId('agentPolicyLink');
+      const agentDetailsLink = renderResult.queryByTestId('agentDetailsLink');
+      const agentPolicyReassignLink = renderResult.queryByTestId('agentPolicyReassignLink');
+      expect(agentPolicyLink).toBeNull();
+      expect(agentDetailsLink).toBeNull();
+      expect(agentPolicyReassignLink).toBeNull();
     });
   });
 });

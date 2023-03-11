@@ -7,11 +7,11 @@
 
 import { CommonCorrelationsQueryParams } from '../../../common/correlations/types';
 import { LatencyDistributionChartType } from '../../../common/latency_distribution_chart_types';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchDurationPercentiles } from '../correlations/queries/fetch_duration_percentiles';
 
 export async function getPercentileThresholdValue({
-  setup,
+  apmEventClient,
   chartType,
   start,
   end,
@@ -21,13 +21,13 @@ export async function getPercentileThresholdValue({
   percentileThreshold,
   searchMetrics,
 }: CommonCorrelationsQueryParams & {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   chartType: LatencyDistributionChartType;
   percentileThreshold: number;
   searchMetrics: boolean;
 }) {
   const durationPercentiles = await fetchDurationPercentiles({
-    setup,
+    apmEventClient,
     chartType,
     start,
     end,

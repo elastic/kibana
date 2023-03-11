@@ -12,7 +12,7 @@ import { useAggregatedIndicators, useIndicators } from '../hooks';
 import { useFilters } from '../../query_bar/hooks/use_filters';
 import moment from 'moment';
 import { TestProvidersComponent } from '../../../common/mocks/test_providers';
-import { TABLE_TEST_ID } from '../components/table';
+import { TABLE_TEST_ID } from '../components/table/test_ids';
 import { mockTimeRange } from '../../../common/mocks/mock_indicators_filters_context';
 
 jest.mock('../../query_bar/hooks/use_filters');
@@ -30,6 +30,11 @@ describe('<IndicatorsPage />', () => {
       series: [],
       selectedField: '',
       onFieldChange: () => {},
+      query: {
+        id: 'chart',
+        loading: false,
+        refetch: stub,
+      },
     });
 
     (useIndicators as jest.MockedFunction<typeof useIndicators>).mockReturnValue({
@@ -40,8 +45,12 @@ describe('<IndicatorsPage />', () => {
       pagination: { pageIndex: 0, pageSize: 10, pageSizeOptions: [10] },
       onChangeItemsPerPage: stub,
       onChangePage: stub,
-      handleRefresh: stub,
       dataUpdatedAt: Date.now(),
+      query: {
+        id: 'list',
+        loading: false,
+        refetch: stub,
+      },
     });
 
     (useFilters as jest.MockedFunction<typeof useFilters>).mockReturnValue({

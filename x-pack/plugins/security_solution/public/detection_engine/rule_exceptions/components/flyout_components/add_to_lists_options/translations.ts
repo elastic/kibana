@@ -14,6 +14,13 @@ export const ADD_TO_LISTS_OPTION = i18n.translate(
   }
 );
 
+export const GO_TO_EXCEPTIONS = i18n.translate(
+  'xpack.securitySolution.rule_exceptions.flyoutComponents.addToListsOptions.gotToSharedExceptions',
+  {
+    defaultMessage: 'Manage shared exception lists',
+  }
+);
+
 export const ADD_TO_LISTS_OPTION_TOOLTIP = i18n.translate(
   'xpack.securitySolution.rule_exceptions.flyoutComponents.addToListsOptions.addToListsTooltip',
   {
@@ -28,6 +35,6 @@ export const ADD_TO_LISTS_OPTION_DISABLED_TOOLTIP = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage:
-        'Shared exception list is a group of exceptions. {rulesCount, plural, =1 {This rule currently has no shared} other {These rules currently have no commonly shared}} exception lists attached. To create one, visit the Exception lists management page.',
+        'Shared exception list is a group of exceptions shared across rules. {rulesCount, plural, =1 {This rule currently has no shared} other {These rules currently have no commonly shared}} exception lists attached. To create one, visit the Shared Exception Lists page.',
     }
   );

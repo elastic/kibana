@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import {
   FetchData,
   FetchDataParams,

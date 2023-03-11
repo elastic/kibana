@@ -48,6 +48,7 @@ export class AnomalyChartsEmbeddable extends Embeddable<
       initialInput,
       {
         defaultTitle: initialInput.title,
+        defaultDescription: initialInput.description,
       },
       parent
     );

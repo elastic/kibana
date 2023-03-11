@@ -30,7 +30,7 @@ function getMockContext(
 
 describe('POST /internal/security/analytics/_record_auth_type', () => {
   beforeAll(() => {
-    jest.useFakeTimers('modern').setSystemTime(FAKE_TIMESTAMP);
+    jest.useFakeTimers().setSystemTime(FAKE_TIMESTAMP);
   });
 
   let routeHandler: RequestHandler<any, any, any, any>;

@@ -9,7 +9,6 @@ import * as t from 'io-ts';
 import { ecsMapping, arrayQueries } from '@kbn/osquery-io-ts-types';
 
 export const OsqueryParams = t.type({
-  id: t.string,
   query: t.union([t.string, t.undefined]),
   ecs_mapping: t.union([ecsMapping, t.undefined]),
   queries: t.union([arrayQueries, t.undefined]),
@@ -18,7 +17,6 @@ export const OsqueryParams = t.type({
 });
 
 export const OsqueryParamsCamelCase = t.type({
-  id: t.string,
   query: t.union([t.string, t.undefined]),
   ecsMapping: t.union([ecsMapping, t.undefined]),
   queries: t.union([arrayQueries, t.undefined]),

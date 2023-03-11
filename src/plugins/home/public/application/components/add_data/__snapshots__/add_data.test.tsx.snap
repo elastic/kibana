@@ -28,7 +28,7 @@ exports[`AddData render 1`] = `
       <EuiText>
         <p>
           <FormattedMessage
-            defaultMessage="To start working with your data, use one of our many ingest options. Collect data from an app or service, or upload a file. If you're not ready to use your own data, add a sample data set."
+            defaultMessage="To start working with your data, use one of our many ingest options. Collect data from an app or service, or upload a file. If you're not ready to use your own data, play with a sample data set."
             id="home.addData.text"
             values={Object {}}
           />
@@ -37,8 +37,6 @@ exports[`AddData render 1`] = `
       <EuiSpacer />
       <EuiFlexGroup
         gutterSize="m"
-        responsive={false}
-        wrap={true}
       >
         <EuiFlexItem
           grow={false}
@@ -55,11 +53,14 @@ exports[`AddData render 1`] = `
             }
           >
             <EuiButton
+              color="primary"
               data-test-subj="homeAddData"
               fill={true}
+              fullWidth={true}
               href="/app/integrations/browse"
               iconType="plusInCircle"
               onClick={[Function]}
+              size="m"
             >
               <FormattedMessage
                 defaultMessage="Add integrations"
@@ -102,10 +103,36 @@ exports[`AddData render 1`] = `
       </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiImage
-        alt="Illustration of Elastic data integrations"
-        className="homDataAdd__illustration"
-        src="/plugins/kibanaReact/assets/illustration_integrations_lightmode.svg"
+      <MoveData
+        addBasePath={
+          [MockFunction] {
+            "calls": Array [
+              Array [
+                "/app/integrations/browse",
+              ],
+              Array [
+                "#/tutorial_directory/sampleData",
+              ],
+              Array [
+                "#/tutorial_directory/fileDataViz",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": "/app/integrations/browse",
+              },
+              Object {
+                "type": "return",
+                "value": "#/tutorial_directory/sampleData",
+              },
+              Object {
+                "type": "return",
+                "value": "#/tutorial_directory/fileDataViz",
+              },
+            ],
+          }
+        }
       />
     </EuiFlexItem>
   </EuiFlexGroup>

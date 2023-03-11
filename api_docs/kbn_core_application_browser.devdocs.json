@@ -84,7 +84,13 @@
               "\nThe category definition of the product\nSee {@link AppCategory}\nSee DEFAULT_APP_CATEGORIES for more reference"
             ],
             "signature": [
-              "AppCategory",
+              {
+                "pluginId": "@kbn/core-application-common",
+                "scope": "common",
+                "docId": "kibKbnCoreApplicationCommonPluginApi",
+                "section": "def-common.AppCategory",
+                "text": "AppCategory"
+              },
               " | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
@@ -205,7 +211,13 @@
             ],
             "signature": [
               "Partial<",
-              "Capabilities",
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
+              },
               "> | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/application.ts",
@@ -390,7 +402,7 @@
             ],
             "signature": [
               "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: ",
-              "ButtonColor",
+              "EuiButtonColor",
               " | undefined) => ",
               {
                 "pluginId": "@kbn/core-application-browser",
@@ -482,7 +494,7 @@
                   "(optional) color for the confirmation button\nso we can show to the user the right UX for him to saved his/her/their changes"
                 ],
                 "signature": [
-                  "ButtonColor",
+                  "EuiButtonColor",
                   " | undefined"
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
@@ -602,7 +614,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "ButtonColor",
+              "EuiButtonColor",
               " | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
@@ -1153,18 +1165,45 @@
             "deprecated": true,
             "removeBy": "8.8.0",
             "trackAdoption": false,
-            "references": []
+            "references": [
+              {
+                "plugin": "@kbn/core-application-browser-internal",
+                "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
+              },
+              {
+                "plugin": "@kbn/core-application-browser-mocks",
+                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
+              },
+              {
+                "plugin": "management",
+                "path": "src/plugins/management/public/application.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/integrations/index.tsx"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
+              },
+              {
+                "plugin": "kibanaOverview",
+                "path": "src/plugins/kibana_overview/public/application.tsx"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/public/mocks.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
             "id": "def-common.AppMountParameters.onAppLeave",
             "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "onAppLeave",
             "description": [
-              "\nA function that can be used to register a handler that will be called\nwhen the user is leaving the current application, allowing to\nprompt a confirmation message before actually changing the page.\n\nThis will be called either when the user goes to another application, or when\ntrying to close the tab or manually changing the url.\n"
+              "\nA function that can be used to register a handler that will be called\nwhen the user is leaving the current application, allowing to\nprompt a confirmation message before actually changing the page.\n\nThis will be called either when the user goes to another application, or when\ntrying to close the tab or manually changing the url.\n\n"
             ],
             "signature": [
               "(handler: ",
@@ -1178,10 +1217,8 @@
               ") => void"
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
+            "deprecated": false,
             "trackAdoption": false,
-            "references": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
@@ -1218,7 +1255,13 @@
             ],
             "signature": [
               "(menuMount: ",
-              "MountPoint",
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.MountPoint",
+                "text": "MountPoint"
+              },
               "<HTMLElement> | undefined) => void"
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
@@ -1233,7 +1276,13 @@
                 "label": "menuMount",
                 "description": [],
                 "signature": [
-                  "MountPoint",
+                  {
+                    "pluginId": "@kbn/core-mount-utils-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                    "section": "def-common.MountPoint",
+                    "text": "MountPoint"
+                  },
                   "<HTMLElement> | undefined"
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_mount.ts",
@@ -1256,7 +1305,13 @@
             "signature": [
               "Observable",
               "<",
-              "CoreTheme",
+              {
+                "pluginId": "@kbn/core-theme-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreThemeBrowserPluginApi",
+                "section": "def-common.CoreTheme",
+                "text": "CoreTheme"
+              },
               ">"
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
@@ -1788,9 +1843,7 @@
         "parentPluginId": "@kbn/core-application-browser",
         "id": "def-common.AppLeaveHandler",
         "type": "Type",
-        "tags": [
-          "deprecated"
-        ],
+        "tags": [],
         "label": "AppLeaveHandler",
         "description": [
           "\nA handler that will be executed before leaving the application, either when\ngoing to another application or when closing the browser tab or manually changing\nthe url.\nShould return `confirm` to prompt a message to the user before leaving the page, or `default`\nto keep the default behavior (doing nothing).\n\nSee {@link AppMountParameters} for detailed usage examples.\n"
@@ -1814,10 +1867,8 @@
           }
         ],
         "path": "packages/core/application/core-application-browser/src/app_leave.ts",
-        "deprecated": true,
-        "removeBy": "8.8.0",
+        "deprecated": false,
         "trackAdoption": false,
-        "references": [],
         "returnComment": [],
         "children": [
           {
@@ -1963,6 +2014,14 @@
             "section": "def-common.AppStatus",
             "text": "AppStatus"
           },
+          " | undefined; tooltip?: string | undefined; navLinkStatus?: ",
+          {
+            "pluginId": "@kbn/core-application-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreApplicationBrowserPluginApi",
+            "section": "def-common.AppNavLinkStatus",
+            "text": "AppNavLinkStatus"
+          },
           " | undefined; searchable?: boolean | undefined; deepLinks?: ",
           {
             "pluginId": "@kbn/core-application-browser",
@@ -1971,15 +2030,7 @@
             "section": "def-common.AppDeepLink",
             "text": "AppDeepLink"
           },
-          "[] | undefined; navLinkStatus?: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppNavLinkStatus",
-            "text": "AppNavLinkStatus"
-          },
-          " | undefined; defaultPath?: string | undefined; tooltip?: string | undefined; }"
+          "[] | undefined; defaultPath?: string | undefined; }"
         ],
         "path": "packages/core/application/core-application-browser/src/application.ts",
         "deprecated": false,
@@ -2061,7 +2112,7 @@
             "section": "def-common.AppDeepLink",
             "text": "AppDeepLink"
           },
-          ", \"searchable\" | \"keywords\" | \"deepLinks\" | \"navLinkStatus\"> & { deepLinks: ",
+          ", \"keywords\" | \"navLinkStatus\" | \"searchable\" | \"deepLinks\"> & { deepLinks: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -2102,7 +2153,7 @@
             "section": "def-common.App",
             "text": "App"
           },
-          "<unknown>, \"searchable\" | \"mount\" | \"updater$\" | \"keywords\" | \"deepLinks\"> & { status: ",
+          "<unknown>, \"keywords\" | \"searchable\" | \"deepLinks\" | \"mount\" | \"updater$\"> & { status: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",

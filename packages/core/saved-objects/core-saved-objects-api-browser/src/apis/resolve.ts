@@ -7,13 +7,14 @@
  */
 
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
-import { SimpleSavedObject } from '../simple_saved_object';
+import type { SimpleSavedObject } from '../simple_saved_object';
 
 /**
  * This interface is a very simple wrapper for SavedObjects resolved from the server
  * with the {@link SavedObjectsClientContract}.
  *
  * @public
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export interface ResolvedSimpleSavedObject<T = unknown> {
   /**

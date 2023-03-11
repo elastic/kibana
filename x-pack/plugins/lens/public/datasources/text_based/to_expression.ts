@@ -34,7 +34,8 @@ function getExpressionForLayer(layer: TextBasedLayer, refs: IndexPatternRef[]): 
       };
     }
   });
-  const timeFieldName = refs.find((r) => r.id === layer.index)?.timeField;
+  const timeFieldName = layer.timeField ?? undefined;
+
   const textBasedQueryToAst = textBasedQueryStateToExpressionAst({
     query: layer.query,
     timeFieldName,

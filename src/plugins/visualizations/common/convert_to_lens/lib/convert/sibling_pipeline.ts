@@ -22,11 +22,12 @@ export const convertToSiblingPipelineColumns = (
     return null;
   }
 
-  const customMetricColumn = convertMetricToColumns(
-    { ...convertToSchemaConfig(aggParams.customMetric), label, aggId },
-    columnConverterArgs.dataView,
-    columnConverterArgs.aggs
-  );
+  const customMetricColumn = convertMetricToColumns({
+    agg: { ...convertToSchemaConfig(aggParams.customMetric), label, aggId },
+    dataView: columnConverterArgs.dataView,
+    aggs: columnConverterArgs.aggs,
+    visType: columnConverterArgs.visType,
+  });
 
   if (!customMetricColumn) {
     return null;

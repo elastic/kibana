@@ -28,6 +28,7 @@ describe('Service inventory - header filters', () => {
         specialServiceName,
       })
     );
+    cy.dismissServiceGroupsTour();
   });
 
   after(() => {

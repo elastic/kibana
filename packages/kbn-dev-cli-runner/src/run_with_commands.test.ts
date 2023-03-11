@@ -8,6 +8,7 @@
 
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { ProcRunner } from '@kbn/dev-proc-runner';
+jest.mock('./metrics');
 
 import { FlagsReader } from './flags_reader';
 import { RunWithCommands } from './run_with_commands';
@@ -48,7 +49,7 @@ it('extends the context using extendContext()', async () => {
     flagsReader: expect.any(FlagsReader),
     addCleanupTask: expect.any(Function),
     procRunner: expect.any(ProcRunner),
-    statsMeta: expect.any(Map),
+    statsMeta: undefined,
     extraContext: true,
   });
 

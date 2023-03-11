@@ -19,17 +19,21 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
   const batchSet = jest.fn(() => ({
     settings: {},
   }));
+  const batchSetGlobal = jest.fn(() => ({
+    settings: {},
+  }));
   done$ = new Subject();
   const client = new UiSettingsClient({
     defaults,
     initialSettings,
     api: {
       batchSet,
+      batchSetGlobal,
     } as any,
     done$,
   });
 
-  return { client, batchSet };
+  return { client, batchSet, batchSetGlobal };
 }
 
 afterEach(() => {

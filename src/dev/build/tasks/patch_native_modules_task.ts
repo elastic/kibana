@@ -57,15 +57,15 @@ const packages: Package[] = [
       // ARM builds are currently done manually as Github Actions used in upstream project
       // do not natively support an ARM target.
 
-      // From a AWS Graviton instance running Ubuntu:
-      // * install build-essential package
+      // From an AWS Graviton instance running Ubuntu or a GCE T2A instance running Debian:
+      // * install build-essential package: `sudo apt-get update` + `sudo apt install build-essential`
       // * install nvm and the node version used by the Kibana repository
-      // * `npm install re2@1.17.4`
+      // * `npm install re2@1.17.7`
       // * re2 will build itself on install
-      // * `cp node_modules/re2/build/Release/re2.node > linux-arm64-$(node -e "console.log(process.versions.modules)")
+      // * `cp node_modules/re2/build/Release/re2.node linux-arm64-$(node -e "console.log(process.versions.modules)")`
       // * `gzip linux-arm64-*`
       // * capture the sha256 with: `shasum -a 256 linux-arm64-*`
-      // * upload the `linux-arm64-*.gz` artifact to the `yarn-prebuilt-assets` bucket in GCS using the correct version number
+      // * upload the `linux-arm64-*.gz` artifact to the `yarn-prebuilt-artifacts` bucket in GCS using the correct version number
       'linux-arm64': {
         url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/linux-arm64-93.gz',
         sha256: '25409584f76f3d6ed85463d84adf094eb6e256ed1cb0b754b95bcbda6691fc26',
@@ -73,10 +73,10 @@ const packages: Package[] = [
 
       // A similar process is necessary for building on ARM macs:
       // * bootstrap and re2 will build itself on install
-      // * `cp node_modules/re2/build/Release/re2.node > darwin-arm64-$(node -e "console.log(process.versions.modules)")
+      // * `cp node_modules/re2/build/Release/re2.node darwin-arm64-$(node -e "console.log(process.versions.modules)")`
       // * `gzip darwin-arm64-*`
       // * capture the sha256 with: `shasum -a 256 darwin-arm64-*`
-      // * upload the `darwin-arm64-*.gz` artifact to the `yarn-prebuilt-assets` bucket in GCS using the correct version number
+      // * upload the `darwin-arm64-*.gz` artifact to the `yarn-prebuilt-artifacts` bucket in GCS using the correct version number
       'darwin-arm64': {
         url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/darwin-arm64-93.gz',
         sha256: 'd4b708749ddef1c87019f6b80e051ed0c29ccd1de34f233c47d8dcaddf803872',

@@ -25,7 +25,7 @@ const rule = {
 
 describe('wrapScopedClusterClient', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

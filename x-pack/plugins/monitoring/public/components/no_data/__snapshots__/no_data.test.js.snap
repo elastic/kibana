@@ -46,24 +46,20 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
         class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <button
-            class="euiButton euiButton--primary euiButton--fill"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="enableCollectionInterval"
             type="button"
           >
             <span
-              class="euiButtonContent euiButton__content"
+              class="emotion-euiButtonDisplayContent"
             >
-              <span
-                class="euiButton__text"
-              >
-                Set up monitoring with Metricbeat
-              </span>
+              Set up monitoring with Metricbeat
             </span>
           </button>
         </div>
@@ -72,7 +68,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
         class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
       />
       <button
-        class="euiButtonEmpty euiButtonEmpty--primary"
+        class="euiButtonEmpty css-9t7nyf-empty-primary"
         data-test-subj="useInternalCollection"
         type="button"
       >
@@ -141,24 +137,20 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
         class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <button
-            class="euiButton euiButton--primary euiButton--fill"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
             data-test-subj="enableCollectionInterval"
             type="button"
           >
             <span
-              class="euiButtonContent euiButton__content"
+              class="emotion-euiButtonDisplayContent"
             >
-              <span
-                class="euiButton__text"
-              >
-                Set up monitoring with Metricbeat
-              </span>
+              Set up monitoring with Metricbeat
             </span>
           </button>
         </div>
@@ -167,7 +159,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
         class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
       />
       <button
-        class="euiButtonEmpty euiButtonEmpty--primary"
+        class="euiButtonEmpty css-9t7nyf-empty-primary"
         data-test-subj="useInternalCollection"
         type="button"
       >

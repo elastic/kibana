@@ -27,8 +27,7 @@ export const getIndexData = async (
     const {
       pagination,
       setErrorMessage,
-      setRowCount,
-      setRowCountRelation,
+      setRowCountInfo,
       setStatus,
       setTableItems,
       sortingColumns,
@@ -64,12 +63,13 @@ export const getIndexData = async (
       });
 
       if (!options.didCancel) {
-        setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value);
-        setRowCountRelation(
-          typeof resp.hits.total === 'number'
-            ? ('eq' as estypes.SearchTotalHitsRelation)
-            : resp.hits.total!.relation
-        );
+        setRowCountInfo({
+          rowCount: typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value,
+          rowCountRelation:
+            typeof resp.hits.total === 'number'
+              ? ('eq' as estypes.SearchTotalHitsRelation)
+              : resp.hits.total!.relation,
+        });
         setTableItems(
           resp.hits.hits.map((d) =>
             getProcessedFields(

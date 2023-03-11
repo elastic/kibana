@@ -63,6 +63,7 @@ export const getBucketCollapseFn = (
 };
 
 export const getBucketColumns = (
+  visType: string,
   visSchemas: Schemas,
   keys: Array<keyof Schemas>,
   dataView: DataView,
@@ -78,6 +79,7 @@ export const getBucketColumns = (
           {
             agg: m,
             dataView,
+            visType,
             metricColumns,
             aggs: visSchemas.metric as Array<SchemaConfig<METRIC_TYPES>>,
           },
@@ -154,6 +156,7 @@ export const sortColumns = (
 export const getColumnIds = (columns: AggBasedColumn[]) => columns.map(({ columnId }) => columnId);
 
 export const getCustomBucketColumns = (
+  visType: string,
   customBucketsWithMetricIds: Array<{
     customBucket: IAggConfig;
     metricIds: string[];
@@ -167,7 +170,7 @@ export const getCustomBucketColumns = (
   const customBucketsMap: Record<string, string> = {};
   customBucketsWithMetricIds.forEach((customBucketWithMetricIds) => {
     const customBucketColumn = convertBucketToColumns(
-      { agg: customBucketWithMetricIds.customBucket, dataView, metricColumns, aggs },
+      { agg: customBucketWithMetricIds.customBucket, dataView, metricColumns, aggs, visType },
       true,
       dropEmptyRowsInDateHistogram
     );

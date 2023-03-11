@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const addFilterAndRefresh = async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
-      await filterBar.addFilter('bytes', 'is', '12345678');
+      await filterBar.addFilter({ field: 'bytes', operation: 'is', value: '12345678' });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       // first round of requests sometimes times out, refresh all visualizations to fetch again

@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 
 describe('http resources service', () => {
   describe('register', () => {
@@ -18,12 +18,12 @@ describe('http resources service', () => {
 
 function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
   describe(`with disableUnsafeEval=${disableUnsafeEval}`, () => {
-    let root: ReturnType<typeof kbnTestServer.createRoot>;
+    let root: ReturnType<typeof createRoot>;
     const defaultCspRules = disableUnsafeEval
       ? `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
       : `script-src 'self' 'unsafe-eval'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`;
     beforeEach(async () => {
-      root = kbnTestServer.createRoot({
+      root = createRoot({
         csp: { disableUnsafeEval },
         plugins: { initialize: false },
         elasticsearch: { skipStartupConnectionCheck: true },
@@ -46,7 +46,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
         );
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
+        const response = await request.get(root, '/render-core').expect(200);
 
         expect(response.text.length).toBeGreaterThan(0);
       });
@@ -61,7 +61,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
         );
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
+        const response = await request.get(root, '/render-core').expect(200);
 
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
       });
@@ -81,7 +81,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
         );
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
+        const response = await request.get(root, '/render-core').expect(200);
 
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
         expect(response.header['x-kibana']).toBe('42');
@@ -107,7 +107,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
         );
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/render-html').expect(200);
+        const response = await request.get(root, '/render-html').expect(200);
 
         expect(response.text).toBe(htmlBody);
         expect(response.header['content-type']).toBe('text/html; charset=utf-8');
@@ -124,7 +124,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
         );
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/render-js').expect(200);
+        const response = await request.get(root, '/render-js').expect(200);
 
         expect(response.text).toBe(jsBody);
         expect(response.header['content-type']).toBe('text/javascript; charset=utf-8');
@@ -148,7 +148,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
         );
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/render-html').expect(200);
+        const response = await request.get(root, '/render-html').expect(200);
 
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
       });
@@ -170,7 +170,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
         );
 
         await root.start();
-        const response = await kbnTestServer.request.get(root, '/render-core').expect(200);
+        const response = await request.get(root, '/render-core').expect(200);
 
         expect(response.header['content-security-policy']).toBe(defaultCspRules);
         expect(response.header['x-kibana']).toBe('42');
@@ -192,9 +192,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
         );
 
         await root.start();
-        const response = await kbnTestServer.request
-          .get(root, '/render-js-with-param/42')
-          .expect(200);
+        const response = await request.get(root, '/render-js-with-param/42').expect(200);
 
         expect(response.text).toBe('window.alert(42);');
       });

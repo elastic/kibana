@@ -7,8 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
-import { getCommandNameFromTextInput } from '../../../service/parsed_command_input';
-import type { ConsoleDataAction, ConsoleStoreReducer } from '../types';
+import type { ParsedCommandInterface } from '../../../service/types';
+import { parseCommandInput } from '../../../service/parsed_command_input';
+import type {
+  ConsoleDataAction,
+  ConsoleDataState,
+  ConsoleStoreReducer,
+  EnteredCommand,
+} from '../types';
 
 export const INPUT_DEFAULT_PLACEHOLDER_TEXT = i18n.translate(
   'xpack.securitySolution.handleInputAreaState.inputPlaceholderText',
@@ -17,13 +23,30 @@ export const INPUT_DEFAULT_PLACEHOLDER_TEXT = i18n.translate(
   }
 );
 
+const setArgSelectorValueToParsedArgs = (
+  parsedInput: ParsedCommandInterface,
+  enteredCommand: EnteredCommand | undefined
+) => {
+  if (enteredCommand && enteredCommand.argsWithValueSelectors) {
+    for (const argName of Object.keys(enteredCommand.argsWithValueSelectors)) {
+      if (parsedInput.hasArg(argName)) {
+        const argumentValues = enteredCommand.argState[argName] ?? [];
+
+        parsedInput.args[argName] = argumentValues.map((itemState) => itemState.value);
+      }
+    }
+  }
+};
+
 type InputAreaStateAction = ConsoleDataAction & {
   type:
     | 'updateInputPopoverState'
     | 'updateInputHistoryState'
+    | 'clearInputHistoryState'
     | 'updateInputTextEnteredState'
     | 'updateInputPlaceholderState'
-    | 'setInputState';
+    | 'setInputState'
+    | 'updateInputCommandArgState';
 };
 
 export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
@@ -49,38 +72,91 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         input: {
           ...state.input,
           // Keeping the last 100 entries only for now
-          history: [{ id: uuidV4(), input: payload.command }, ...state.input.history.slice(0, 99)],
+          history: [
+            {
+              id: uuidV4(),
+              input: payload.command,
+              display: payload.display ?? payload.command,
+            },
+            ...state.input.history.slice(0, 99),
+          ],
+        },
+      };
+
+    case 'clearInputHistoryState':
+      return {
+        ...state,
+        input: {
+          ...state.input,
+          history: [],
         },
       };
 
     case 'updateInputTextEnteredState':
-      const { textEntered: newTextEntered, rightOfCursor: newRightOfCursor = { text: '' } } =
-        typeof payload === 'function'
-          ? payload({
-              textEntered: state.input.textEntered,
-              rightOfCursor: state.input.rightOfCursor,
-            })
-          : payload;
+      const {
+        leftOfCursorText: newTextEntered,
+        rightOfCursorText: newRightOfCursor = '',
+        argState: adjustedArgState,
+      } = typeof payload === 'function' ? payload(state.input) : payload;
 
       if (
-        state.input.textEntered !== newTextEntered ||
-        state.input.rightOfCursor !== newRightOfCursor
+        state.input.leftOfCursorText !== newTextEntered ||
+        state.input.rightOfCursorText !== newRightOfCursor
       ) {
-        const fullCommandText = newTextEntered + newRightOfCursor.text;
-        const commandEntered =
-          // If the user has typed a command (some text followed by at space),
-          // then parse it to get the command name.
-          fullCommandText.trimStart().indexOf(' ') !== -1
-            ? getCommandNameFromTextInput(fullCommandText)
-            : '';
+        const parsedInput = parseCommandInput(newTextEntered + newRightOfCursor);
+
+        let enteredCommand: ConsoleDataState['input']['enteredCommand'] =
+          state.input.enteredCommand;
+
+        if (enteredCommand && adjustedArgState && enteredCommand?.argState !== adjustedArgState) {
+          enteredCommand = {
+            ...enteredCommand,
+            argState: adjustedArgState,
+          };
+        }
+
+        // Determine if `enteredCommand` should be re-defined
+        if (
+          (parsedInput.name &&
+            (!enteredCommand || parsedInput.name !== enteredCommand.commandDefinition.name)) ||
+          (!parsedInput.name && enteredCommand)
+        ) {
+          enteredCommand = undefined;
+
+          const commandDefinition = state.commands.find((def) => def.name === parsedInput.name);
+
+          if (commandDefinition) {
+            let argsWithValueSelectors: EnteredCommand['argsWithValueSelectors'];
+
+            for (const [argName, argDef] of Object.entries(commandDefinition.args ?? {})) {
+              if (argDef.SelectorComponent) {
+                if (!argsWithValueSelectors) {
+                  argsWithValueSelectors = {};
+                }
+
+                argsWithValueSelectors[argName] = argDef;
+              }
+            }
+
+            enteredCommand = {
+              argState: {},
+              commandDefinition,
+              argsWithValueSelectors,
+            };
+          }
+        }
+
+        // Update parsed input with any values that were selected via argument selectors
+        setArgSelectorValueToParsedArgs(parsedInput, enteredCommand);
 
         return {
           ...state,
           input: {
             ...state.input,
-            textEntered: newTextEntered,
-            rightOfCursor: newRightOfCursor,
-            commandEntered,
+            leftOfCursorText: newTextEntered,
+            rightOfCursorText: newRightOfCursor,
+            parsedInput,
+            enteredCommand,
           },
         };
       }
@@ -105,6 +181,38 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
           input: {
             ...state.input,
             visibleState: payload.value,
+          },
+        };
+      }
+      break;
+
+    case 'updateInputCommandArgState':
+      if (state.input.enteredCommand) {
+        const { name: argName, instance: argInstance, state: newArgState } = payload;
+        const updatedArgState = [...(state.input.enteredCommand.argState[argName] ?? [])];
+
+        updatedArgState[argInstance] = newArgState;
+
+        const updatedEnteredCommand = {
+          ...state.input.enteredCommand,
+          argState: {
+            ...state.input.enteredCommand.argState,
+            [argName]: updatedArgState,
+          },
+        };
+
+        // store a new version of parsed input that contains the updated selector value
+        const updatedParsedInput = parseCommandInput(
+          state.input.leftOfCursorText + state.input.rightOfCursorText
+        );
+        setArgSelectorValueToParsedArgs(updatedParsedInput, updatedEnteredCommand);
+
+        return {
+          ...state,
+          input: {
+            ...state.input,
+            parsedInput: updatedParsedInput,
+            enteredCommand: updatedEnteredCommand,
           },
         };
       }

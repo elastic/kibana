@@ -6,10 +6,10 @@ exports[`<IndicatorsBarChartWrapper /> when not loading or refetching should ren
     style="position: relative;"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-stretch-row"
     >
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <h2
           class="euiTitle emotion-euiTitle-s"
@@ -18,7 +18,7 @@ exports[`<IndicatorsBarChartWrapper /> when not loading or refetching should ren
         </h2>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
           class="euiComboBox euiComboBox--prepended css-18y0wn9"

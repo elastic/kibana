@@ -19,7 +19,7 @@ import type { GlobalTimeArgs } from '../../../common/containers/use_global_time'
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import {
   hostNameExistsFilter,
-  filterNetworkExternalAlertData,
+  sourceOrDestinationIpExistsFilter,
 } from '../../../common/components/visualization_actions/utils';
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'setQuery'> {
@@ -57,7 +57,7 @@ const EventCountsComponent: React.FC<Props> = ({
         config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
-        filters: [...filters, ...filterNetworkExternalAlertData],
+        filters: [...filters, ...sourceOrDestinationIpExistsFilter],
       }),
     [filters, indexPattern, uiSettings, query]
   );

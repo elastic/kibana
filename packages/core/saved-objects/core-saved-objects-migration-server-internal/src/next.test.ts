@@ -8,7 +8,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { next } from './next';
-import { State } from './state';
+import type { State } from './state';
 
 describe('migrations v2 next', () => {
   it.todo('when state.retryDelay > 0 delays execution of the next action');

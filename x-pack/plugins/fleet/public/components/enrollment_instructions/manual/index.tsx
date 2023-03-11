@@ -5,18 +5,38 @@
  * 2.0.
  */
 
-function getfleetServerHostsEnrollArgs(apiKey: string, fleetServerHosts: string[]) {
-  return `--url=${fleetServerHosts[0]} --enrollment-token=${apiKey}`;
-}
+import type { FleetProxy } from '../../../types';
 
-export const ManualInstructions = (
+function getfleetServerHostsEnrollArgs(
   apiKey: string,
   fleetServerHosts: string[],
-  kibanaVersion: string
-) => {
-  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts);
+  fleetProxy?: FleetProxy
+) {
+  const proxyHeadersArgs = fleetProxy?.proxy_headers
+    ? Object.entries(fleetProxy.proxy_headers).reduce((acc, [proxyKey, proyVal]) => {
+        acc += ` --proxy-header ${proxyKey}=${proyVal}`;
 
-  const k8sCommand = 'kubectl apply -f elastic-agent-managed-kubernetes.yaml';
+        return acc;
+      }, '')
+    : '';
+  const proxyArgs = fleetProxy ? ` --proxy-url=${fleetProxy.url}${proxyHeadersArgs}` : '';
+  return `--url=${fleetServerHosts[0]} --enrollment-token=${apiKey}${proxyArgs}`;
+}
+
+export const ManualInstructions = ({
+  apiKey,
+  fleetServerHosts,
+  fleetProxy,
+  kibanaVersion,
+}: {
+  apiKey: string;
+  fleetServerHosts: string[];
+  fleetProxy?: FleetProxy;
+  kibanaVersion: string;
+}) => {
+  const enrollArgs = getfleetServerHostsEnrollArgs(apiKey, fleetServerHosts, fleetProxy);
+
+  const k8sCommand = 'kubectl apply -f elastic-agent-managed-kubernetes.yml';
 
   const linuxCommand = `curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz
 tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz

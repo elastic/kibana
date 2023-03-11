@@ -127,7 +127,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(type).to.be('Donut');
 
       const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
-      goBackBtn.click();
+      await goBackBtn.click();
 
       await visEditor.clickOptionsTab();
       const isDonutButton = await testSubjects.find('visTypePieIsDonut');

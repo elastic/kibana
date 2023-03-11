@@ -6,10 +6,8 @@
  */
 import Path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
+import { FtrConfigProviderContext, getKibanaCliLoggers, findTestPluginPaths } from '@kbn/test';
 import { logFilePath } from './test_utils';
-
-const alertTestPlugin = Path.resolve(__dirname, './fixtures/plugins/alerts');
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
@@ -38,7 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        `--plugin-path=${alertTestPlugin}`,
+        ...findTestPluginPaths(Path.resolve(__dirname, 'plugins')),
         `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
 

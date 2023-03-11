@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
-import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
 import {
   postBeatsOverviewRequestParamsRT,
   postBeatsOverviewRequestPayloadRT,
@@ -16,6 +14,7 @@ import { getLatestStats, getStats } from '../../../../lib/beats';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';
+import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { MonitoringCore } from '../../../../types';
 import { metricSet } from './metric_set_overview';
 
@@ -34,7 +33,11 @@ export function beatsOverviewRoute(server: MonitoringCore) {
       const config = server.config;
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const beatsIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_BEATS, ccs);
+      const beatsIndexPattern = getIndexPatterns({
+        ccs,
+        config,
+        moduleType: 'beats',
+      });
 
       try {
         const [latest, stats, metrics] = await Promise.all([

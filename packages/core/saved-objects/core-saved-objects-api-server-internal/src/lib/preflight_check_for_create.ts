@@ -8,15 +8,13 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type {
-  ISavedObjectTypeRegistry,
-  SavedObjectsRawDoc,
-  SavedObjectsRawDocSource,
-} from '@kbn/core-saved-objects-server';
 import {
+  type ISavedObjectTypeRegistry,
+  type SavedObjectsRawDoc,
+  type SavedObjectsRawDocSource,
   SavedObjectsErrorHelpers,
-  ALL_NAMESPACES_STRING,
-} from '@kbn/core-saved-objects-utils-server';
+} from '@kbn/core-saved-objects-server';
+import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
   getObjectKey,
@@ -24,7 +22,7 @@ import {
   type SavedObjectsSerializer,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { findLegacyUrlAliases } from './legacy_url_aliases';
-import { Either, rawDocExistsInNamespaces } from './internal_utils';
+import { type Either, rawDocExistsInNamespaces } from './internal_utils';
 import { isLeft, isRight } from './internal_utils';
 import type { CreatePointInTimeFinderFn } from './point_in_time_finder';
 import type { RepositoryEsClient } from './repository_es_client';

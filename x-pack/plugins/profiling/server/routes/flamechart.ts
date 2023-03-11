@@ -6,18 +6,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { createCalleeTree } from '../../common/callee';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { createBaseFlameGraph } from '../../common/flamegraph';
-import { createProfilingEsClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
-import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
+import { getStackTraces } from './get_stacktraces';
 import { createCommonFilter } from './query';
 
-export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterParameters) {
+export function registerFlameChartSearchRoute({
+  router,
+  logger,
+  services: { createProfilingEsClient },
+}: RouteRegisterParameters) {
   const paths = getRoutePaths();
   router.get(
     {
@@ -36,6 +40,7 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
 
       try {
         const esClient = await getClient(context);
+        const profilingElasticsearchClient = createProfilingEsClient({ request, esClient });
         const filter = createCommonFilter({
           timeFrom,
           timeTo,
@@ -43,16 +48,19 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
         });
         const totalSeconds = timeTo - timeFrom;
 
+        const t0 = Date.now();
         const { stackTraceEvents, stackTraces, executables, stackFrames, totalFrames } =
-          await getExecutablesAndStackTraces({
+          await getStackTraces({
+            context,
             logger,
-            client: createProfilingEsClient({ request, esClient }),
+            client: profilingElasticsearchClient,
             filter,
             sampleSize: targetSampleSize,
           });
+        logger.info(`querying stacktraces took ${Date.now() - t0} ms`);
 
         const flamegraph = await withProfilingSpan('create_flamegraph', async () => {
-          const t0 = Date.now();
+          const t1 = Date.now();
           const tree = createCalleeTree(
             stackTraceEvents,
             stackTraces,
@@ -60,11 +68,11 @@ export function registerFlameChartSearchRoute({ router, logger }: RouteRegisterP
             executables,
             totalFrames
           );
-          logger.info(`creating callee tree took ${Date.now() - t0} ms`);
+          logger.info(`creating callee tree took ${Date.now() - t1} ms`);
 
-          const t1 = Date.now();
+          const t2 = Date.now();
           const fg = createBaseFlameGraph(tree, totalSeconds);
-          logger.info(`creating flamegraph took ${Date.now() - t1} ms`);
+          logger.info(`creating flamegraph took ${Date.now() - t2} ms`);
 
           return fg;
         });

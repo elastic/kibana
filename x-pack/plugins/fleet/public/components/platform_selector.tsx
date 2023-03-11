@@ -32,6 +32,7 @@ interface Props {
   linuxRpmCommand: string;
   k8sCommand: string;
   hasK8sIntegration: boolean;
+  hasK8sIntegrationMultiPage: boolean;
   isManaged?: boolean;
   hasFleetServer?: boolean;
   enrollToken?: string | undefined;
@@ -52,6 +53,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   linuxRpmCommand,
   k8sCommand,
   hasK8sIntegration,
+  hasK8sIntegrationMultiPage,
   isManaged,
   enrollToken,
   hasFleetServer,
@@ -112,14 +114,16 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   return (
     <>
       <>
-        <EuiButtonGroup
-          options={useReduce ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS}
-          idSelected={platform}
-          onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
-          legend={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
-            defaultMessage: 'Platform',
-          })}
-        />
+        {!hasK8sIntegrationMultiPage && (
+          <EuiButtonGroup
+            options={useReduce ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS}
+            idSelected={platform}
+            onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
+            legend={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
+              defaultMessage: 'Platform',
+            })}
+          />
+        )}
         <EuiSpacer size="s" />
         {(platform === 'deb' || platform === 'rpm') && (
           <>
@@ -135,55 +139,63 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
         )}
         {platform === 'kubernetes' && isManaged && (
           <>
-            <KubernetesInstructions enrollmentAPIKey={enrollToken} />
+            <KubernetesInstructions
+              onCopy={onCopy}
+              onDownload={onCopy}
+              enrollmentAPIKey={enrollToken}
+            />
             <EuiSpacer size="s" />
           </>
         )}
-        {platform === 'kubernetes' && (
-          <EuiText>
-            <EuiSpacer size="s" />
-            <FormattedMessage
-              id="xpack.fleet.agentEnrollment.kubernetesCommandInstructions"
-              defaultMessage="From the directory where the manifest is downloaded, run the apply command."
-            />
-            <EuiSpacer size="m" />
-          </EuiText>
-        )}
-        <EuiCodeBlock
-          onClick={onTextAreaClick}
-          fontSize="m"
-          isCopyable={!fullCopyButton}
-          paddingSize="m"
-          css={`
-            max-width: 1100px;
-          `}
-        >
-          <CommandCode>{commandsByPlatform[platform]}</CommandCode>
-        </EuiCodeBlock>
-        <EuiSpacer size="s" />
-        {fullCopyButton && (
-          <EuiCopy textToCopy={commandsByPlatform[platform]}>
-            {(copy) => (
-              <EuiButton
-                color="primary"
-                iconType="copyClipboard"
-                size="m"
-                onClick={() => onCopyButtonClick(copy)}
-              >
-                {copyButtonClicked ? (
-                  <FormattedMessage
-                    id="xpack.fleet.enrollmentInstructions.copyButtonClicked"
-                    defaultMessage="Copied"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.fleet.enrollmentInstructions.copyButton"
-                    defaultMessage="Copy to clipboard"
-                  />
-                )}
-              </EuiButton>
+        {!hasK8sIntegrationMultiPage && (
+          <>
+            {platform === 'kubernetes' && (
+              <EuiText>
+                <EuiSpacer size="s" />
+                <FormattedMessage
+                  id="xpack.fleet.agentEnrollment.kubernetesCommandInstructions"
+                  defaultMessage="From the directory where the manifest is downloaded, run the apply command."
+                />
+                <EuiSpacer size="m" />
+              </EuiText>
             )}
-          </EuiCopy>
+            <EuiCodeBlock
+              onClick={onTextAreaClick}
+              fontSize="m"
+              isCopyable={!fullCopyButton}
+              paddingSize="m"
+              css={`
+                max-width: 1100px;
+              `}
+            >
+              <CommandCode>{commandsByPlatform[platform]}</CommandCode>
+            </EuiCodeBlock>
+            <EuiSpacer size="s" />
+            {fullCopyButton && (
+              <EuiCopy textToCopy={commandsByPlatform[platform]}>
+                {(copy) => (
+                  <EuiButton
+                    color="primary"
+                    iconType="copyClipboard"
+                    size="m"
+                    onClick={() => onCopyButtonClick(copy)}
+                  >
+                    {copyButtonClicked ? (
+                      <FormattedMessage
+                        id="xpack.fleet.enrollmentInstructions.copyButtonClicked"
+                        defaultMessage="Copied"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.fleet.enrollmentInstructions.copyButton"
+                        defaultMessage="Copy to clipboard"
+                      />
+                    )}
+                  </EuiButton>
+                )}
+              </EuiCopy>
+            )}
+          </>
         )}
       </>
     </>

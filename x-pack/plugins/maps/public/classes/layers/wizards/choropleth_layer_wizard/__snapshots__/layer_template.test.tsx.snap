@@ -20,7 +20,6 @@ exports[`should render EMS UI when left source is BOUNDARIES_SOURCE.EMS 1`] = `
     <EuiFormRow
       describedByIds={Array []}
       display="row"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       labelType="label"
@@ -73,7 +72,6 @@ exports[`should render elasticsearch UI when left source is BOUNDARIES_SOURCE.EL
     <EuiFormRow
       describedByIds={Array []}
       display="row"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       labelType="label"

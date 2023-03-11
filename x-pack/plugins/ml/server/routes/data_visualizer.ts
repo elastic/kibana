@@ -52,7 +52,7 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
         body: dataVisualizerFieldHistogramsSchema,
       },
       options: {
-        tags: ['access:ml:canAccessML'],
+        tags: ['access:ml:canGetFieldInfo'],
       },
     },
     routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {

@@ -50,7 +50,7 @@ export const CELL_EXPAND_VALUE = '[data-test-subj="euiDataGridCellExpandButton"]
 
 export const CELL_EXPANSION_POPOVER = '[data-test-subj="euiDataGridExpansionPopover"]';
 
-export const USER_DETAILS_LINK = '[data-test-subj="data-grid-user-details"]';
+export const USER_DETAILS_LINK = '[data-test-subj="users-link-anchor"]';
 
 export const TABLE_TAB = '[data-test-subj="tableTab"]';
 
@@ -81,3 +81,5 @@ export const INSIGHTS_RELATED_ALERTS_BY_ANCESTRY = `[data-test-subj='related-ale
 export const INSIGHTS_INVESTIGATE_ANCESTRY_ALERTS_IN_TIMELINE_BUTTON = `[data-test-subj='investigate-ancestry-in-timeline']`;
 
 export const ENRICHED_DATA_ROW = `[data-test-subj='EnrichedDataRow']`;
+
+export const OPEN_ALERT_DETAILS_PAGE = `[data-test-subj="open-alert-details-page"]`;

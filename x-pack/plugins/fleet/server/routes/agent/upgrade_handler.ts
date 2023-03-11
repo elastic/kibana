@@ -13,7 +13,7 @@ import semverGt from 'semver/functions/gt';
 import semverMajor from 'semver/functions/major';
 import semverMinor from 'semver/functions/minor';
 
-import type { PostAgentUpgradeResponse, GetCurrentUpgradesResponse } from '../../../common/types';
+import type { PostAgentUpgradeResponse } from '../../../common/types';
 import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
@@ -46,7 +46,7 @@ export const postAgentUpgradeHandler: RequestHandler<
     });
   }
   try {
-    const agent = await getAgentById(esClient, request.params.agentId);
+    const agent = await getAgentById(esClient, soClient, request.params.agentId);
 
     const fleetServerAgents = await getAllFleetServerAgents(soClient, esClient);
     const agentIsFleetServer = fleetServerAgents.some(
@@ -142,19 +142,6 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
     const results = await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
 
     return response.ok({ body: { actionId: results.actionId } });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
-};
-
-export const getCurrentUpgradesHandler: RequestHandler = async (context, request, response) => {
-  const coreContext = await context.core;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-
-  try {
-    const upgrades = await AgentService.getCurrentBulkUpgrades(esClient);
-    const body: GetCurrentUpgradesResponse = { items: upgrades };
-    return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

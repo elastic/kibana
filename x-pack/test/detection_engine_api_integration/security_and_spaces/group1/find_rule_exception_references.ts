@@ -9,20 +9,24 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   CreateExceptionListSchema,
   ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
+
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
-import { RuleReferencesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response';
+import {
+  DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
+  RuleReferencesSchema,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_exceptions';
+
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   getSimpleRule,
   createSignalsIndex,
   deleteSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   createExceptionList,
 } from '../../utils';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
@@ -39,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     afterEach(async () => {

@@ -1,0 +1,523 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getAlertsTableLensAttributes should render with extra options - breakdownField 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "adHocDataViews": Object {},
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b": Object {
+            "columnOrder": Array [
+              "2881fedd-54b7-42ba-8c97-5175dec86166",
+              "75ce269b-ee9c-4c7d-a14e-9226ba0fe059",
+              "f04a71a3-399f-4d32-9efc-8a005e989991",
+            ],
+            "columns": Object {
+              "2881fedd-54b7-42ba-8c97-5175dec86166": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of event.category",
+                "operationType": "terms",
+                "params": Object {
+                  "exclude": Array [],
+                  "excludeIsRegex": false,
+                  "include": Array [],
+                  "includeIsRegex": false,
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "size": 1000,
+                },
+                "scale": "ordinal",
+                "sourceField": "event.category",
+              },
+              "75ce269b-ee9c-4c7d-a14e-9226ba0fe059": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of agent.type",
+                "operationType": "terms",
+                "params": Object {
+                  "exclude": Array [],
+                  "excludeIsRegex": false,
+                  "include": Array [],
+                  "includeIsRegex": false,
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "size": 1000,
+                },
+                "scale": "ordinal",
+                "sourceField": "agent.type",
+              },
+              "f04a71a3-399f-4d32-9efc-8a005e989991": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of agent.type",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "agent.type",
+              },
+            },
+            "incompleteColumns": Object {},
+            "sampling": 1,
+          },
+        },
+      },
+      "textBased": Object {
+        "layers": Object {},
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "signal-index",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "signal-index",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+    ],
+    "internalReferences": Array [],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "columns": Array [
+        Object {
+          "columnId": "2881fedd-54b7-42ba-8c97-5175dec86166",
+          "isTransposed": false,
+          "width": 362,
+        },
+        Object {
+          "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
+          "isTransposed": false,
+        },
+        Object {
+          "columnId": "75ce269b-ee9c-4c7d-a14e-9226ba0fe059",
+          "isTransposed": false,
+        },
+      ],
+      "layerId": "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
+      "layerType": "data",
+    },
+  },
+  "title": "Alerts",
+  "visualizationType": "lnsDatatable",
+}
+`;
+
+exports[`getAlertsTableLensAttributes should render with extra options - filters 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "adHocDataViews": Object {},
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b": Object {
+            "columnOrder": Array [
+              "2881fedd-54b7-42ba-8c97-5175dec86166",
+              "75ce269b-ee9c-4c7d-a14e-9226ba0fe059",
+              "f04a71a3-399f-4d32-9efc-8a005e989991",
+            ],
+            "columns": Object {
+              "2881fedd-54b7-42ba-8c97-5175dec86166": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of event.category",
+                "operationType": "terms",
+                "params": Object {
+                  "exclude": Array [],
+                  "excludeIsRegex": false,
+                  "include": Array [],
+                  "includeIsRegex": false,
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "size": 1000,
+                },
+                "scale": "ordinal",
+                "sourceField": "event.category",
+              },
+              "75ce269b-ee9c-4c7d-a14e-9226ba0fe059": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of undefined",
+                "operationType": "terms",
+                "params": Object {
+                  "exclude": Array [],
+                  "excludeIsRegex": false,
+                  "include": Array [],
+                  "includeIsRegex": false,
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "size": 1000,
+                },
+                "scale": "ordinal",
+                "sourceField": undefined,
+              },
+              "f04a71a3-399f-4d32-9efc-8a005e989991": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of undefined",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": undefined,
+              },
+            },
+            "incompleteColumns": Object {},
+            "sampling": 1,
+          },
+        },
+      },
+      "textBased": Object {
+        "layers": Object {},
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            ".alerts-security.alerts-default",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": ".alerts-security.alerts-default",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "signal-index",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "signal-index",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+    ],
+    "internalReferences": Array [],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "columns": Array [
+        Object {
+          "columnId": "2881fedd-54b7-42ba-8c97-5175dec86166",
+          "isTransposed": false,
+          "width": 362,
+        },
+        Object {
+          "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
+          "isTransposed": false,
+        },
+        Object {
+          "columnId": "75ce269b-ee9c-4c7d-a14e-9226ba0fe059",
+          "isTransposed": false,
+        },
+      ],
+      "layerId": "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
+      "layerType": "data",
+    },
+  },
+  "title": "Alerts",
+  "visualizationType": "lnsDatatable",
+}
+`;
+
+exports[`getAlertsTableLensAttributes should render without extra options 1`] = `
+Object {
+  "description": "",
+  "references": Array [
+    Object {
+      "id": "security-solution-my-test",
+      "name": "indexpattern-datasource-layer-4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "adHocDataViews": Object {},
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b": Object {
+            "columnOrder": Array [
+              "2881fedd-54b7-42ba-8c97-5175dec86166",
+              "75ce269b-ee9c-4c7d-a14e-9226ba0fe059",
+              "f04a71a3-399f-4d32-9efc-8a005e989991",
+            ],
+            "columns": Object {
+              "2881fedd-54b7-42ba-8c97-5175dec86166": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of event.category",
+                "operationType": "terms",
+                "params": Object {
+                  "exclude": Array [],
+                  "excludeIsRegex": false,
+                  "include": Array [],
+                  "includeIsRegex": false,
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "size": 1000,
+                },
+                "scale": "ordinal",
+                "sourceField": "event.category",
+              },
+              "75ce269b-ee9c-4c7d-a14e-9226ba0fe059": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top values of undefined",
+                "operationType": "terms",
+                "params": Object {
+                  "exclude": Array [],
+                  "excludeIsRegex": false,
+                  "include": Array [],
+                  "includeIsRegex": false,
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "size": 1000,
+                },
+                "scale": "ordinal",
+                "sourceField": undefined,
+              },
+              "f04a71a3-399f-4d32-9efc-8a005e989991": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of undefined",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": undefined,
+              },
+            },
+            "incompleteColumns": Object {},
+            "sampling": 1,
+          },
+        },
+      },
+      "textBased": Object {
+        "layers": Object {},
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "_index",
+          "negate": false,
+          "params": Array [
+            "signal-index",
+          ],
+          "type": "phrases",
+        },
+        "query": Object {
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "_index": "signal-index",
+                },
+              },
+            ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+    ],
+    "internalReferences": Array [],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "columns": Array [
+        Object {
+          "columnId": "2881fedd-54b7-42ba-8c97-5175dec86166",
+          "isTransposed": false,
+          "width": 362,
+        },
+        Object {
+          "columnId": "f04a71a3-399f-4d32-9efc-8a005e989991",
+          "isTransposed": false,
+        },
+        Object {
+          "columnId": "75ce269b-ee9c-4c7d-a14e-9226ba0fe059",
+          "isTransposed": false,
+        },
+      ],
+      "layerId": "4aa7cf71-cf20-4e62-8ca6-ca6be6b0988b",
+      "layerType": "data",
+    },
+  },
+  "title": "Alerts",
+  "visualizationType": "lnsDatatable",
+}
+`;

@@ -16,6 +16,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   const observability = getService('observability');
   const supertest = getService('supertest');
   const find = getService('find');
@@ -65,6 +66,10 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const logThresholdRule = {
         params: {
+          logView: {
+            logViewId: 'Default',
+            type: 'log-view-reference',
+          },
           timeSize: 5,
           timeUnit: 'm',
           count: { value: 75, comparator: 'more than' },
@@ -138,6 +143,50 @@ export default ({ getService }: FtrProviderContext) => {
         );
         const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
         expect(ruleType).to.be('Log threshold');
+      });
+    });
+
+    describe('Alert summary widget component', () => {
+      before(async () => {
+        await observability.alerts.common.navigateToRuleDetailsByRuleId(uptimeRuleId);
+      });
+
+      it('shows component on the rule detils page', async () => {
+        await observability.components.alertSummaryWidget.getCompactComponentSelectorOrFail();
+
+        const timeRangeTitle =
+          await observability.components.alertSummaryWidget.getCompactTimeRangeTitle();
+        expect(timeRangeTitle).to.be('Last 30 days');
+      });
+
+      it('handles clicking on active correctly', async () => {
+        const activeAlerts =
+          await observability.components.alertSummaryWidget.getCompactActiveAlertSelector();
+        await activeAlerts.click();
+
+        const url = await browser.getCurrentUrl();
+        const from = 'rangeFrom:now-30d';
+        const to = 'rangeTo:now';
+
+        expect(url.includes('tabId=alerts')).to.be(true);
+        expect(url.includes('status%3Aactive')).to.be(true);
+        expect(url.includes(from.replaceAll(':', '%3A'))).to.be(true);
+        expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
+      });
+
+      it('handles clicking on widget correctly', async () => {
+        const compactWidget =
+          await observability.components.alertSummaryWidget.getCompactWidgetSelector();
+        await compactWidget.click();
+
+        const url = await browser.getCurrentUrl();
+        const from = 'rangeFrom:now-30d';
+        const to = 'rangeTo:now';
+
+        expect(url.includes('tabId=alerts')).to.be(true);
+        expect(url.includes('status%3Aall')).to.be(true);
+        expect(url.includes(from.replaceAll(':', '%3A'))).to.be(true);
+        expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
       });
     });
 

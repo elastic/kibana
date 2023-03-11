@@ -20,6 +20,11 @@ export const getMapping: GetMapping = () => {
       action_type: 'overwrite',
     },
     {
+      source: 'tags',
+      target: 'labels',
+      action_type: 'overwrite',
+    },
+    {
       source: 'comments',
       target: 'comments',
       action_type: 'append',

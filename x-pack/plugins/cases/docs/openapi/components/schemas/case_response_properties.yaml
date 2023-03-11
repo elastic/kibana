@@ -22,7 +22,9 @@ required:
   - updated_at
   - updated_by
   - version
-properties: 
+properties:
+  assignees:
+    $ref: 'assignees.yaml'
   closed_at:
     type: string
     format: date-time

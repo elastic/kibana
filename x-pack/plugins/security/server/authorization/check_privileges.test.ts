@@ -3109,14 +3109,25 @@ describe('#checkUserProfilesPrivileges.atSpace', () => {
         ],
         esHasPrivilegesResponse: Promise.resolve({
           has_privilege_uids: ['uid-1', 'uid-2'],
-          error_uids: ['uid-3'],
+          errors: {
+            count: 1,
+            details: {
+              'uid-3': { type: 'Not Found', reason: 'UID not found' },
+            },
+          },
         }),
       })
     ).resolves.toMatchInlineSnapshot(`
         Object {
-          "errorUids": Array [
-            "uid-3",
-          ],
+          "errors": Object {
+            "count": 1,
+            "details": Object {
+              "uid-3": Object {
+                "reason": "UID not found",
+                "type": "Not Found",
+              },
+            },
+          },
           "hasPrivilegeUids": Array [
             "uid-1",
             "uid-2",

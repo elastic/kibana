@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { getLinksFromSignature } from './suricata_links';
@@ -18,21 +18,41 @@ const LinkEuiFlexItem = styled(EuiFlexItem)`
 LinkEuiFlexItem.displayName = 'LinkEuiFlexItem';
 
 export const SuricataRefs = React.memo<{ signatureId: number }>(({ signatureId }) => {
-  let comp = <></>;
-  getLinksFromSignature(signatureId).then((links) => {
-    comp = (
-      <EuiFlexGroup gutterSize="none" justifyContent="center" wrap>
-        {links.map((link) => (
+  const [linksFromSignature, setLinksFromSignature] = useState<string[] | undefined>(undefined);
+  useEffect(() => {
+    let isSubscribed = true;
+    async function getLinks() {
+      if (signatureId != null) {
+        try {
+          const links = await getLinksFromSignature(signatureId);
+          if (isSubscribed && links != null) {
+            setLinksFromSignature(links);
+          }
+        } catch (exc) {
+          setLinksFromSignature(undefined);
+        }
+      } else if (isSubscribed) {
+        setLinksFromSignature(undefined);
+      }
+    }
+    getLinks();
+    return () => {
+      isSubscribed = false;
+    };
+  }, [signatureId]);
+
+  return (
+    <EuiFlexGroup data-test-subj="suricataRefs" gutterSize="none" justifyContent="center" wrap>
+      {linksFromSignature &&
+        linksFromSignature.map((link) => (
           <LinkEuiFlexItem key={link} grow={false}>
             <EuiLink href={link} color="subdued" target="_blank">
               {link}
             </EuiLink>
           </LinkEuiFlexItem>
         ))}
-      </EuiFlexGroup>
-    );
-  });
-  return comp;
+    </EuiFlexGroup>
+  );
 });
 
 SuricataRefs.displayName = 'SuricataRefs';

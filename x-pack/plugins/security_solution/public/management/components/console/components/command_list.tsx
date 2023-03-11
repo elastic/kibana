@@ -7,7 +7,6 @@
 
 import React, { memo, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
-import { groupBy, sortBy } from 'lodash';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -24,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { sortBy } from 'lodash';
 import type { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
@@ -32,6 +32,21 @@ import { COMMON_ARGS, HELP_GROUPS } from '../service/builtin_commands';
 import { getCommandNameWithArgs } from '../service/utils';
 import { ConsoleCodeBlock } from './console_code_block';
 import { useKibana } from '../../../../common/lib/kibana';
+
+const otherCommandsGroupLabel = i18n.translate(
+  'xpack.securitySolution.console.commandList.otherCommandsGroup.label',
+  {
+    defaultMessage: 'Other commands',
+  }
+);
+
+/**
+ * Takes a string and removes all non-letters/number from it.
+ * @param value
+ */
+export const convertToTestId = (value: string): string => {
+  return value.replace(/[^A-Za-z0-9]/g, '');
+};
 
 // @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`
@@ -78,11 +93,9 @@ export interface CommandListProps {
 }
 
 export const CommandList = memo<CommandListProps>(({ commands, display = 'default' }) => {
-  const getTestId = useTestIdGenerator(useDataTestSubj());
+  const getTestId = useTestIdGenerator(useDataTestSubj('commandList'));
   const dispatch = useConsoleStateDispatch();
   const { docLinks } = useKibana().services;
-
-  const allowedCommands = commands.filter((command) => command.helpHidden !== true);
 
   const footerMessage = useMemo(() => {
     return (
@@ -111,20 +124,14 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
     );
   }, []);
 
-  const otherCommandsGroupLabel = i18n.translate(
-    'xpack.securitySolution.console.commandList.otherCommandsGroup.label',
-    {
-      defaultMessage: 'Other commands',
-    }
-  );
-
   const updateInputText = useCallback(
     (text) => () => {
       dispatch({
         type: 'updateInputTextEnteredState',
         payload: () => {
           return {
-            textEntered: text,
+            leftOfCursorText: text,
+            rightOfCursorText: '',
           };
         },
       });
@@ -135,23 +142,62 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
   );
 
   const commandsByGroups = useMemo(() => {
-    return Object.values(groupBy(allowedCommands, 'helpGroupLabel')).reduce<CommandDefinition[][]>(
-      (acc, current) => {
-        if (current[0].helpGroupPosition !== undefined) {
-          // If it already exists just move it to the end
-          if (acc[current[0].helpGroupPosition]) {
-            acc[acc.length] = acc[current[0].helpGroupPosition];
-          }
+    const helpGroups = new Map<
+      string,
+      { label: string; position: number; list: CommandDefinition[] }
+    >();
 
-          acc[current[0].helpGroupPosition] = sortBy(current, 'helpCommandPosition');
-        } else if (current.length) {
-          acc.push(sortBy(current, 'helpCommandPosition'));
+    // We only show commands that are no hidden
+    const allowedCommands = commands.filter((command) => command.helpHidden !== true);
+
+    for (const allowedCommand of allowedCommands) {
+      const { helpGroupLabel = otherCommandsGroupLabel, helpGroupPosition = Infinity } =
+        allowedCommand;
+
+      const groupEntry = helpGroups.get(helpGroupLabel);
+
+      if (groupEntry) {
+        groupEntry.list.push(allowedCommand);
+
+        // Its possible (but probably not intentionally) that the same Group Label might
+        // have different positions defined (ex. one has a position, and another does not,
+        // which defaults to `Infinity`. If we detect that here, then update the group
+        // position. In the end, the group label will have the last explicitly defined
+        // position found.
+        if (
+          groupEntry.position === Infinity &&
+          helpGroupPosition !== undefined &&
+          helpGroupPosition !== groupEntry.position
+        ) {
+          groupEntry.position = helpGroupPosition;
         }
-        return acc;
-      },
-      []
-    );
-  }, [allowedCommands]);
+      } else {
+        helpGroups.set(allowedCommand.helpGroupLabel as string, {
+          label: helpGroupLabel,
+          position: helpGroupPosition,
+          list: [allowedCommand],
+        });
+      }
+    }
+
+    // Sort by Group position and return an array of arrays with the list of commands per group
+    return sortBy(Array.from(helpGroups.values()), 'position').map((group) => {
+      // ensure all commands in this group have a `helpCommandPosition`. Those missing one, will
+      // be set to `Infinity` so that they are moved to the end.
+      const groupCommandList = group.list.map((command) => {
+        if (command.helpCommandPosition === undefined) {
+          return {
+            ...command,
+            helpCommandPosition: Infinity,
+          };
+        }
+
+        return command;
+      });
+
+      return sortBy(groupCommandList, 'helpCommandPosition');
+    });
+  }, [commands]);
 
   const getTableItems = useCallback(
     (
@@ -168,24 +214,35 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         [commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel]: command,
       }));
     },
-    [otherCommandsGroupLabel]
+    []
   );
 
   const getTableColumns = useCallback(
     (commandsByGroup) => {
+      const groupLabel = commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel;
+      const groupTestIdSuffix = convertToTestId(groupLabel);
+
       return [
         {
-          field: commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel,
-          name: commandsByGroup[0]?.helpGroupLabel ?? otherCommandsGroupLabel,
+          field: groupLabel,
+          name: <div data-test-subj={getTestId('group')}>{groupLabel}</div>,
           render: (command: CommandDefinition) => {
             const commandNameWithArgs = getCommandNameWithArgs(command);
             return (
-              <StyledEuiFlexGroup alignItems="center">
+              <StyledEuiFlexGroup
+                alignItems="center"
+                data-test-subj={getTestId(`${groupTestIdSuffix}-${command.name}`)}
+              >
                 <EuiFlexItem grow={1}>
                   <EuiDescriptionList
+                    data-test-subj={getTestId('command')}
                     listItems={[
                       {
-                        title: <EuiBadge>{commandNameWithArgs}</EuiBadge>,
+                        title: (
+                          <EuiBadge data-test-subj={getTestId('commandName')}>
+                            {commandNameWithArgs}
+                          </EuiBadge>
+                        ),
                         description: (
                           <>
                             <EuiSpacer size="xs" />
@@ -196,7 +253,6 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                         ),
                       },
                     ]}
-                    data-test-subj={getTestId('commandList-command')}
                   />
                 </EuiFlexItem>
                 {command.helpGroupLabel !== HELP_GROUPS.supporting.label &&
@@ -221,6 +277,9 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                           aria-label={`updateTextInputCommand-${command.name}`}
                           onClick={updateInputText(`${commandNameWithArgs} `)}
                           isDisabled={command.helpDisabled === true}
+                          data-test-subj={getTestId(
+                            `${groupTestIdSuffix}-${command.name}-addToInput`
+                          )}
                         />
                       </EuiToolTip>
                     </EuiFlexItem>
@@ -231,7 +290,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         },
       ];
     },
-    [getTestId, otherCommandsGroupLabel, updateInputText]
+    [getTestId, updateInputText]
   );
 
   const getFilteredCommands = useCallback(
@@ -257,7 +316,11 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         defaultMessage="{learnMore} about response actions and using the console."
         values={{
           learnMore: (
-            <EuiLink href={docLinks.links.securitySolution.responseActions} target="_blank">
+            <EuiLink
+              href={docLinks.links.securitySolution.responseActions}
+              target="_blank"
+              data-test-subj={getTestId('helpfulHintDocLink')}
+            >
               <FormattedMessage
                 id="xpack.securitySolution.console.commandList.callout.readMoreLink"
                 defaultMessage="Learn more"
@@ -276,6 +339,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
             defaultMessage="Helpful tips:"
           />
         }
+        data-test-subj={getTestId('helpfulTips')}
       >
         <ul>
           {calloutItems.map((item, index) => (
@@ -288,20 +352,24 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
     );
 
     return (
-      <>
-        {commandsByGroups.map((commandsByGroup) => (
+      <div data-test-subj={getTestId()}>
+        {commandsByGroups.map((commandsByGroup, i) => (
           <StyledEuiBasicTable
+            data-test-subj={getTestId(
+              convertToTestId(commandsByGroup[0].helpGroupLabel ?? otherCommandsGroupLabel)
+            )}
+            key={`styledEuiBasicTable-${i}`}
             items={getTableItems(commandsByGroup)}
             columns={getTableColumns(commandsByGroup)}
           />
         ))}
         {callout}
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div data-test-subj={getTestId()}>
       <EuiSpacer size="s" />
       {commandsByGroups.map((commandsByGroup) => {
         const groupLabel = commandsByGroup[0].helpGroupLabel;
@@ -343,7 +411,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                         ),
                       },
                     ]}
-                    data-test-subj={getTestId('commandList-command')}
+                    data-test-subj={getTestId('command')}
                   />
                 </EuiFlexItem>
               );
@@ -353,7 +421,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
       })}
       <EuiSpacer size="xl" />
       {footerMessage}
-    </>
+    </div>
   );
 });
 CommandList.displayName = 'CommandList';

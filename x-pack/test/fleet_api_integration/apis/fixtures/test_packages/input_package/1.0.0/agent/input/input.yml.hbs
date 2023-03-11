@@ -1,0 +1,18 @@
+paths:
+{{#each paths}}
+  - {{this}}
+{{/each}}
+
+{{#if tags}}
+tags:
+{{#each tags as |tag i|}}
+  - {{tag}}
+{{/each}}
+{{/if}}
+
+{{#if pipeline}}
+pipeline: {{pipeline}}
+{{/if}}
+
+data_stream:
+  dataset: {{data_stream.dataset}}

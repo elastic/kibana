@@ -6,6 +6,7 @@
  */
 
 import { useRouter } from '@kbn/typed-react-router-config';
+import { useMemo } from 'react';
 import type { ApmRouter } from '../components/routing/apm_route_config';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
@@ -13,12 +14,13 @@ export function useApmRouter() {
   const router = useRouter();
   const { core } = useApmPluginContext();
 
-  const link = (...args: [any]) => {
-    return core.http.basePath.prepend('/app/apm' + router.link(...args));
-  };
-
-  return {
-    ...router,
-    link,
-  } as unknown as ApmRouter;
+  return useMemo(
+    () =>
+      ({
+        ...router,
+        link: (...args: [any]) =>
+          core.http.basePath.prepend('/app/apm' + router.link(...args)),
+      } as unknown as ApmRouter),
+    [core.http.basePath, router]
+  );
 }

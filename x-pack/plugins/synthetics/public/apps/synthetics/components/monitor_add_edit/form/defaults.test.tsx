@@ -72,10 +72,13 @@ describe('defaults', () => {
     type: 'browser',
     'url.port': null,
     urls: '',
+    id: '',
+    config_id: '',
   } as SyntheticsMonitor;
 
   it('correctly formats monitor type to form type', () => {
     expect(formatDefaultFormValues(monitorValues)).toEqual({
+      ...monitorValues,
       __ui: {
         script_source: {
           file_name: '',
@@ -146,20 +149,23 @@ describe('defaults', () => {
   });
 
   it.each([
-    [DataStream.HTTP, 'testCA'],
-    [DataStream.HTTP, ''],
-    [DataStream.TCP, 'testCA'],
-    [DataStream.TCP, ''],
-  ])('correctly formats isTLSEnabled', (formType, testCA) => {
+    [DataStream.HTTP, true],
+    [DataStream.HTTP, false],
+    [DataStream.TCP, true],
+    [DataStream.TCP, false],
+  ])('correctly formats isTLSEnabled', (formType, isTLSEnabled) => {
     const monitor = {
       ...DEFAULT_FIELDS[formType as DataStream],
       [ConfigKey.FORM_MONITOR_TYPE]: formType as unknown as FormMonitorType,
-      [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: testCA,
+      [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: 'mockCA',
+      [ConfigKey.METADATA]: {
+        is_tls_enabled: isTLSEnabled,
+      },
     };
     expect(formatDefaultFormValues(monitor)).toEqual({
       ...monitor,
-      isTLSEnabled: Boolean(testCA),
-      [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: testCA,
+      [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: 'mockCA',
+      isTLSEnabled,
     });
   });
 

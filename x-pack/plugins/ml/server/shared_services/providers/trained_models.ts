@@ -26,9 +26,10 @@ export interface TrainedModelsProvider {
 export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsProvider {
   return {
     trainedModelsProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
+      const guards = getGuards(request, savedObjectsClient);
       return {
         async getTrainedModels(params: estypes.MlGetTrainedModelsRequest) {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetTrainedModels'])
             .ok(async ({ mlClient }) => {
@@ -36,7 +37,7 @@ export function getTrainedModelsProvider(getGuards: GetGuards): TrainedModelsPro
             });
         },
         async getTrainedModelsStats(params: estypes.MlGetTrainedModelsStatsRequest) {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetTrainedModels'])
             .ok(async ({ mlClient }) => {

@@ -15,6 +15,8 @@ steps:
 
   - label: '💪 Performance Tests with Playwright config'
     command: .buildkite/scripts/steps/functional/performance_playwright.sh
+    env:
+      PERFORMANCE_ENABLE_TELEMETRY: true
     agents:
       queue: kb-static-ubuntu
     depends_on: build
@@ -26,12 +28,6 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
-
-  - label: '🚢 Performance Tests dataset extraction for scalability benchmarking'
-    command: .buildkite/scripts/steps/functional/scalability_dataset_extraction.sh
-    agents:
-      queue: n2-2
-    depends_on: tests
 
   - label: '📈 Report performance metrics to ci-stats'
     command: .buildkite/scripts/steps/functional/report_performance_metrics.sh

@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-usage-data-server-internal",
-        "id": "def-server.CoreUsageDataService",
+        "id": "def-common.CoreUsageDataService",
         "type": "Class",
         "tags": [],
         "label": "CoreUsageDataService",
@@ -20,9 +28,9 @@
         "signature": [
           {
             "pluginId": "@kbn/core-usage-data-server-internal",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreUsageDataServerInternalPluginApi",
-            "section": "def-server.CoreUsageDataService",
+            "section": "def-common.CoreUsageDataService",
             "text": "CoreUsageDataService"
           },
           " implements ",
@@ -30,7 +38,13 @@
           "<",
           "InternalCoreUsageDataSetup",
           ", ",
-          "CoreUsageDataStart",
+          {
+            "pluginId": "@kbn/core-usage-data-server",
+            "scope": "common",
+            "docId": "kibKbnCoreUsageDataServerPluginApi",
+            "section": "def-common.CoreUsageDataStart",
+            "text": "CoreUsageDataStart"
+          },
           ">"
         ],
         "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
@@ -39,7 +53,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server-internal",
-            "id": "def-server.CoreUsageDataService.Unnamed",
+            "id": "def-common.CoreUsageDataService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -53,7 +67,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-usage-data-server-internal",
-                "id": "def-server.CoreUsageDataService.Unnamed.$1",
+                "id": "def-common.CoreUsageDataService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "core",
@@ -71,7 +85,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server-internal",
-            "id": "def-server.CoreUsageDataService.setup",
+            "id": "def-common.CoreUsageDataService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -88,7 +102,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-usage-data-server-internal",
-                "id": "def-server.CoreUsageDataService.setup.$1",
+                "id": "def-common.CoreUsageDataService.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ http, metrics, savedObjectsStartPromise, changedDeprecatedConfigPath$ }",
@@ -106,7 +120,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server-internal",
-            "id": "def-server.CoreUsageDataService.start",
+            "id": "def-common.CoreUsageDataService.start",
             "type": "Function",
             "tags": [],
             "label": "start",
@@ -115,9 +129,21 @@
               "({ savedObjects, elasticsearch, exposedConfigsToUsage }: ",
               "StartDeps",
               ") => { getCoreUsageData: () => Promise<",
-              "CoreUsageData",
+              {
+                "pluginId": "@kbn/core-usage-data-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUsageDataServerPluginApi",
+                "section": "def-common.CoreUsageData",
+                "text": "CoreUsageData"
+              },
               ">; getConfigsUsageData: () => Promise<",
-              "ConfigUsageData",
+              {
+                "pluginId": "@kbn/core-usage-data-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUsageDataServerPluginApi",
+                "section": "def-common.ConfigUsageData",
+                "text": "ConfigUsageData"
+              },
               ">; }"
             ],
             "path": "packages/core/usage-data/core-usage-data-server-internal/src/core_usage_data_service.ts",
@@ -126,7 +152,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-usage-data-server-internal",
-                "id": "def-server.CoreUsageDataService.start.$1",
+                "id": "def-common.CoreUsageDataService.start.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ savedObjects, elasticsearch, exposedConfigsToUsage }",
@@ -144,7 +170,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server-internal",
-            "id": "def-server.CoreUsageDataService.stop",
+            "id": "def-common.CoreUsageDataService.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -162,14 +188,6 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],

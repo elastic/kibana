@@ -33,7 +33,8 @@ describe('create_description_list', () => {
           startDate,
           endDate,
           'hours',
-          narrowDateRange
+          narrowDateRange,
+          'job-1'
         )}
       />
     );
@@ -48,7 +49,8 @@ describe('create_description_list', () => {
           startDate,
           endDate,
           'hours',
-          narrowDateRange
+          narrowDateRange,
+          'job-1'
         )}
       />
     );
@@ -69,7 +71,8 @@ describe('create_description_list', () => {
           startDate,
           endDate,
           'hours',
-          narrowDateRange
+          narrowDateRange,
+          'job-1'
         )}
       />
     );
@@ -129,7 +132,8 @@ describe('create_description_list', () => {
           startDate,
           endDate,
           'hours',
-          narrowDateRange
+          narrowDateRange,
+          'job-1'
         )}
       />
     );

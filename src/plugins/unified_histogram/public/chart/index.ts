@@ -7,5 +7,3 @@
  */
 
 export { Chart } from './chart';
-export { getChartAggConfigs } from './get_chart_agg_configs';
-export { buildChartData } from './build_chart_data';

@@ -48,7 +48,7 @@ Object {
                     Object {
                       "input": Object {
                         "language": "kuery",
-                        "query": "",
+                        "query": "source.ip: *",
                       },
                       "label": "Src.",
                     },
@@ -84,7 +84,7 @@ Object {
                     Object {
                       "input": Object {
                         "language": "kuery",
-                        "query": "",
+                        "query": "destination.ip: *",
                       },
                       "label": "Dest.",
                     },
@@ -99,23 +99,6 @@ Object {
       },
     },
     "filters": Array [
-      Object {
-        "meta": Object {
-          "alias": null,
-          "disabled": false,
-          "key": "host.id",
-          "negate": false,
-          "params": Object {
-            "query": "123",
-          },
-          "type": "phrase",
-        },
-        "query": Object {
-          "match_phrase": Object {
-            "host.id": "123",
-          },
-        },
-      },
       Object {
         "meta": Object {
           "alias": null,
@@ -144,17 +127,11 @@ Object {
         },
         "query": Object {
           "bool": Object {
-            "filter": Array [
+            "minimum_should_match": 1,
+            "should": Array [
               Object {
-                "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "host.name",
-                      },
-                    },
-                  ],
+                "exists": Object {
+                  "field": "host.name",
                 },
               },
             ],
@@ -182,6 +159,23 @@ Object {
                 },
               },
             ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
           },
         },
       },
@@ -259,7 +253,7 @@ Object {
       },
     },
   },
-  "title": "[Host] Unique IPs - bar",
+  "title": "[Host] Unique IPs - bar chart",
   "visualizationType": "lnsXY",
 }
 `;

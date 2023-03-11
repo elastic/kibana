@@ -6,6 +6,7 @@
  */
 
 import type { AlertEvent, ResolverNode, SafeResolverEvent } from '../../../common/endpoint/types';
+import type { AllowlistFields } from './filterlists/types';
 
 type BaseSearchTypes = string | number | boolean | object;
 export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
@@ -51,6 +52,7 @@ export interface TelemetryEvent {
   };
   cluster_name?: string;
   cluster_uuid?: string;
+  package_version?: string;
   file?: {
     [key: string]: SearchTypes;
     Ext?: {
@@ -380,7 +382,7 @@ export interface ValueListMetaData {
 
 export interface ValueListResponseAggregation {
   aggregations: {
-    total_value_list_count: number;
+    total_value_list_count: { value: number };
     type_breakdown: {
       buckets: Array<{
         key: string;
@@ -428,4 +430,17 @@ export interface TelemetryConfiguration {
   max_endpoint_telemetry_batch: number;
   max_detection_rule_telemetry_batch: number;
   max_detection_alerts_batch: number;
+}
+
+export interface TelemetryFilterListArtifact {
+  endpoint_alerts: AllowlistFields;
+  exception_lists: AllowlistFields;
+  prebuilt_rules_alerts: AllowlistFields;
+}
+
+export interface ValueListResponse {
+  listMetricsResponse: ValueListResponseAggregation;
+  itemMetricsResponse: ValueListItemsResponseAggregation;
+  exceptionListMetricsResponse: ValueListExceptionListResponseAggregation;
+  indicatorMatchMetricsResponse: ValueListIndicatorMatchResponseAggregation;
 }

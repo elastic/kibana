@@ -211,8 +211,4 @@ export const getVisualization = ({
       );
     }
   },
-
-  getErrorMessages(state) {
-    return undefined;
-  },
 });

@@ -16,7 +16,11 @@ import { RouteDependencies } from '../types';
 /**
  * Note that this route is primarily intended for consumption by Cloud.
  */
-export function registerUpgradeStatusRoute({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerUpgradeStatusRoute({
+  config: { featureSet },
+  router,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.get(
     {
       path: `${API_BASE_PATH}/status`,
@@ -30,11 +34,30 @@ export function registerUpgradeStatusRoute({ router, lib: { handleEsError } }: R
         } = await core;
         // Fetch ES upgrade status
         const { totalCriticalDeprecations: esTotalCriticalDeps } = await getESUpgradeStatus(
-          esClient
+          esClient,
+          featureSet
         );
-        // Fetch system indices migration status
+
+        const getSystemIndicesMigrationStatus = async () => {
+          /**
+           * Skip system indices migration status check if `featureSet.migrateSystemIndices`
+           * is set to `false`. This flag is enabled from configs for major version stack ugprades.
+           * returns `migration_status: 'NO_MIGRATION_NEEDED'` to indicate no migation needed.
+           */
+          if (!featureSet.migrateSystemIndices) {
+            return {
+              migration_status: 'NO_MIGRATION_NEEDED',
+              features: [],
+            };
+          }
+
+          // Fetch system indices migration status from ES
+          return await getESSystemIndicesMigrationStatus(esClient.asCurrentUser);
+        };
+
         const { migration_status: systemIndicesMigrationStatus, features } =
-          await getESSystemIndicesMigrationStatus(esClient.asCurrentUser);
+          await getSystemIndicesMigrationStatus();
+
         const notMigratedSystemIndices = features.filter(
           (feature) => feature.migration_status !== 'NO_MIGRATION_NEEDED'
         ).length;

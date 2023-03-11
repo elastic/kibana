@@ -24,7 +24,8 @@ const mockActions = {
 
 const analyticsCollection: AnalyticsCollection = {
   event_retention_day_length: 180,
-  id: '1',
+  events_datastream: 'analytics-events-foo',
+  id: 'example',
   name: 'example',
 };
 

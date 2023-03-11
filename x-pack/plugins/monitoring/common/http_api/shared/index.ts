@@ -7,9 +7,9 @@
 
 export * from './ccs';
 export * from './cluster';
-export * from './literal_value';
 export * from './pagination';
 export * from './query_string_boolean';
 export * from './query_string_number';
 export * from './sorting';
 export * from './time_range';
+export { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';

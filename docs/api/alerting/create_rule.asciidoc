@@ -6,6 +6,12 @@
 
 Create {kib} rules.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification]. For a preview, check out <<rule-apis>>.
+====
+
 [[create-rule-api-request]]
 === {api-request-title}
 
@@ -21,7 +27,7 @@ the `consumer` and `rule_type_id` of the rules you're creating. For example, the
 *Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
 features, *{observability}*, and *Security* features. If the rule has `actions`,
 you must also have `read` privileges for the *Management* >
-*Actions and Connectors* feature. For more details, refer to
+*{connectors-feature}* feature. For more details, refer to
 <<kibana-feature-privileges>>.
 
 === {api-description-title}

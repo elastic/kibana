@@ -77,6 +77,7 @@ interface UseBulkEditSelectProps {
   actionTypesFilter?: string[];
   tagsFilter?: string[];
   ruleExecutionStatusesFilter?: string[];
+  ruleLastRunOutcomesFilter?: string[];
   ruleStatusesFilter?: RuleStatus[];
   searchText?: string;
 }
@@ -89,11 +90,15 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
     actionTypesFilter,
     tagsFilter,
     ruleExecutionStatusesFilter,
+    ruleLastRunOutcomesFilter,
     ruleStatusesFilter,
     searchText,
   } = props;
 
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    selectedIds: new Set<string>(),
+  });
 
   const itemIds = useMemo(() => {
     return items.map((item) => item.id);
@@ -187,6 +192,7 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
         actionTypesFilter,
         tagsFilter,
         ruleExecutionStatusesFilter,
+        ruleLastRunOutcomesFilter,
         ruleStatusesFilter,
         searchText,
       });
@@ -208,6 +214,7 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
       actionTypesFilter,
       tagsFilter,
       ruleExecutionStatusesFilter,
+      ruleLastRunOutcomesFilter,
       ruleStatusesFilter,
       searchText,
     ]
@@ -231,7 +238,7 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
 
   return useMemo(() => {
     return {
-      selectedIds: state.selectedIds,
+      selectedIds: [...state.selectedIds],
       isAllSelected: state.isAllSelected,
       isPageSelected,
       numberOfSelectedItems,

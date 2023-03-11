@@ -17,7 +17,7 @@ import {
 } from '../../../../../common/utils/formatters';
 import { Maybe } from '../../../../../typings/common';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { TimeseriesChart } from '../timeseries_chart';
+import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
@@ -76,7 +76,7 @@ export function MetricsChart({ chart, fetchStatus }: Props) {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <TimeseriesChart
+      <TimeseriesChartWithContext
         fetchStatus={fetchStatus}
         id={chart.key}
         timeseries={chart.series}

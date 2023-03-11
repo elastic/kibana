@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { sortBy } from 'lodash';
-
 import type { State, UserContentCommonSchema } from './table_list_view';
 import type { Action } from './actions';
 
 export function getReducer<T extends UserContentCommonSchema>() {
+  let sortColumnChanged = false;
+
   return (state: State<T>, action: Action<T>): State<T> => {
     switch (action.type) {
       case 'onFetchItems': {
@@ -28,7 +28,10 @@ export function getReducer<T extends UserContentCommonSchema>() {
           // We only get the state on the initial fetch of items
           // After that we don't want to reset the columns or change the sort after fetching
           hasUpdatedAtMetadata = Boolean(items.find((item) => Boolean(item.updatedAt)));
-          if (hasUpdatedAtMetadata) {
+
+          // Only change the table sort if it hasn't been changed already.
+          // For example if its state comes from the URL, we don't want to override it here.
+          if (hasUpdatedAtMetadata && !sortColumnChanged) {
             tableSort = {
               field: 'updatedAt' as const,
               direction: 'desc' as const,
@@ -40,7 +43,7 @@ export function getReducer<T extends UserContentCommonSchema>() {
           ...state,
           hasInitialFetchReturned: true,
           isFetchingItems: false,
-          items: !state.searchQuery ? sortBy<T>(items, 'title') : items,
+          items,
           totalItems: action.data.response.total,
           hasUpdatedAtMetadata,
           tableSort: tableSort ?? state.tableSort,
@@ -60,6 +63,10 @@ export function getReducer<T extends UserContentCommonSchema>() {
         };
       }
       case 'onSearchQueryChange': {
+        if (action.data.text === state.searchQuery.text) {
+          return state;
+        }
+
         return {
           ...state,
           searchQuery: action.data,
@@ -67,21 +74,22 @@ export function getReducer<T extends UserContentCommonSchema>() {
         };
       }
       case 'onTableChange': {
-        const tableSort = (action.data.sort as State['tableSort']) ?? state.tableSort;
+        if (action.data.sort) {
+          sortColumnChanged = true;
+        }
+
+        const tableSort = action.data.sort ?? state.tableSort;
+        const pageIndex = action.data.page?.pageIndex ?? state.pagination.pageIndex;
+        const pageSize = action.data.page?.pageSize ?? state.pagination.pageSize;
+
         return {
           ...state,
           pagination: {
             ...state.pagination,
-            pageIndex: action.data.page.index,
-            pageSize: action.data.page.size,
+            pageIndex,
+            pageSize,
           },
           tableSort,
-        };
-      }
-      case 'onTableSortChange': {
-        return {
-          ...state,
-          tableSort: action.data,
         };
       }
       case 'showConfirmDeleteItemsModal': {

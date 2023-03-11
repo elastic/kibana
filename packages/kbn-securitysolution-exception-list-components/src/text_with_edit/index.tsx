@@ -7,10 +7,9 @@
  */
 
 import React, { FC } from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Interpolation, Theme } from '@emotion/react';
-import { textWithEditContainerCss } from '../list_header/list_header.styles';
-
+import { textWithEditContainerCss, editIconCss } from './text_with_edit.styles';
 interface TextWithEditProps {
   isReadonly: boolean;
   dataTestSubj?: string;
@@ -27,19 +26,23 @@ const TextWithEditComponent: FC<TextWithEditProps> = ({
   textCss,
 }) => {
   return (
-    <div css={textWithEditContainerCss}>
-      <span css={textCss} data-test-subj={`${dataTestSubj || ''}Text`}>
-        {text}
-      </span>
-      {isReadonly ? null : (
-        <EuiButtonIcon
-          data-test-subj={`${dataTestSubj || ''}EditIcon`}
-          aria-label="Edit Text List Header"
-          iconType="pencil"
-          onClick={() => (typeof onEdit === 'function' ? onEdit() : null)}
-        />
-      )}
-    </div>
+    <EuiFlexGroup css={textWithEditContainerCss}>
+      <EuiFlexItem grow={10}>
+        <span css={textCss} data-test-subj={`${dataTestSubj || ''}Text`}>
+          {text}
+        </span>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={editIconCss}>
+        {isReadonly ? null : (
+          <EuiButtonIcon
+            data-test-subj={`${dataTestSubj || ''}EditIcon`}
+            aria-label="Edit Text List Header"
+            iconType="pencil"
+            onClick={() => (typeof onEdit === 'function' ? onEdit() : null)}
+          />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 TextWithEditComponent.displayName = 'TextWithEditComponent';

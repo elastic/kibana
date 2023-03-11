@@ -8,11 +8,15 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const superTestWithoutAuth = getService('supertestWithoutAuth');
   const dockerServers = getService('dockerServers');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   const server = dockerServers.get('registry');
   // use function () {} and not () => {} here
@@ -23,23 +27,19 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
-      await getService('kibanaServer').savedObjects.cleanStandardList();
-
-      await getService('esArchiver').load(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
-      );
+      await kibanaServer.savedObjects.cleanStandardList();
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
     after(async () => {
-      await getService('esArchiver').unload(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
-      );
-      await getService('kibanaServer').savedObjects.cleanStandardList();
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('get by id', async function () {
       let agentPolicyId: string;
       let packagePolicyId: string;
+      let endpointPackagePolicyId: string;
 
       before(async function () {
         if (!server.enabled) {
@@ -72,6 +72,25 @@ export default function (providerContext: FtrProviderContext) {
             },
           });
         packagePolicyId = packagePolicyResponse.item.id;
+
+        const { body: endpointPackagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'endpoint-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [],
+            force: true,
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Defend',
+              version: '8.6.1',
+            },
+          });
+        endpointPackagePolicyId = endpointPackagePolicyResponse.item.id;
       });
 
       after(async function () {
@@ -88,12 +107,45 @@ export default function (providerContext: FtrProviderContext) {
         await supertest
           .post(`/api/fleet/package_policies/delete`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ packagePolicyIds: [packagePolicyId] })
+          .send({ packagePolicyIds: [packagePolicyId, endpointPackagePolicyId] })
+          .expect(200);
+
+        // uninstall endpoint package
+        await supertest
+          .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
           .expect(200);
       });
 
       it('should succeed with a valid id', async function () {
         await supertest.get(`/api/fleet/package_policies/${packagePolicyId}`).expect(200);
+      });
+
+      it('should succeed when requesting with policy ids that match package names allowed by package privileges', async function () {
+        await superTestWithoutAuth
+          .get(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .auth(
+            testUsers.endpoint_integr_read_policy.username,
+            testUsers.endpoint_integr_read_policy.password
+          )
+          .expect(200);
+      });
+
+      it('should return 403 for requests with authenticated role but not allowed packages', async function () {
+        await superTestWithoutAuth
+          .get(`/api/fleet/package_policies/${packagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .auth(
+            testUsers.endpoint_integr_read_policy.username,
+            testUsers.endpoint_integr_read_policy.password
+          )
+          .expect(403, {
+            statusCode: 403,
+            error: 'Forbidden',
+            message: 'Authorization denied to package: filetest. Allowed package(s): endpoint',
+          });
       });
 
       it('should return a 404 with an invalid id', async function () {
@@ -104,6 +156,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('POST /api/fleet/package_policies/_bulk_get', async function () {
       let agentPolicyId: string;
       let packagePolicyId: string;
+      let endpointPackagePolicyId: string;
 
       before(async function () {
         if (!server.enabled) {
@@ -136,6 +189,25 @@ export default function (providerContext: FtrProviderContext) {
             },
           });
         packagePolicyId = packagePolicyResponse.item.id;
+
+        const { body: endpointPackagePolicyResponse } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'endpoint-1',
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [],
+            force: true,
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Defend',
+              version: '8.6.1',
+            },
+          });
+        endpointPackagePolicyId = endpointPackagePolicyResponse.item.id;
       });
 
       after(async function () {
@@ -152,7 +224,14 @@ export default function (providerContext: FtrProviderContext) {
         await supertest
           .post(`/api/fleet/package_policies/delete`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ packagePolicyIds: [packagePolicyId] })
+          .send({ packagePolicyIds: [packagePolicyId, endpointPackagePolicyId] })
+          .expect(200);
+
+        // uninstall endpoint package
+        await supertest
+          .delete(`/api/fleet/epm/packages/endpoint-8.6.1`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
           .expect(200);
       });
 
@@ -174,6 +253,34 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .send({ ids: ['invalid-id-i-do-not-exists'] })
           .expect(404);
+      });
+
+      it('should return 403 without allowed package names', async function () {
+        await superTestWithoutAuth
+          .post(`/api/fleet/package_policies/_bulk_get`)
+          .set('kbn-xsrf', 'xxxx')
+          .auth(
+            testUsers.endpoint_integr_read_policy.username,
+            testUsers.endpoint_integr_read_policy.password
+          )
+          .send({ ids: [packagePolicyId] })
+          .expect(403, {
+            error: 'Forbidden',
+            message: 'Authorization denied to package: filetest. Allowed package(s): endpoint',
+            statusCode: 403,
+          });
+      });
+
+      it('should succeed when bulk requesting with policy ids that match package names allowed by package privileges', async function () {
+        await superTestWithoutAuth
+          .post(`/api/fleet/package_policies/_bulk_get`)
+          .set('kbn-xsrf', 'xxxx')
+          .auth(
+            testUsers.endpoint_integr_read_policy.username,
+            testUsers.endpoint_integr_read_policy.password
+          )
+          .send({ ids: [endpointPackagePolicyId] })
+          .expect(200);
       });
 
       it('should succeed with mixed valid ids and invalid ids and ignoreMissing flag ', async function () {

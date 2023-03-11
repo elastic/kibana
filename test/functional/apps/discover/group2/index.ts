@@ -11,7 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover app', function () {
+  describe('discover/group2', function () {
     before(async function () {
       await browser.setWindowSize(1300, 800);
     });
@@ -40,5 +40,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_chart_hidden'));
     loadTestFile(require.resolve('./_context_encoded_url_params'));
     loadTestFile(require.resolve('./_hide_announcements'));
+    loadTestFile(require.resolve('./_data_view_edit'));
   });
 }

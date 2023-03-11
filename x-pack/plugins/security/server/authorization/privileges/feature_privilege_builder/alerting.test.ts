@@ -91,6 +91,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/runSoon",
           ]
         `);
       });
@@ -130,6 +131,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAlertSummary",
           ]
         `);
       });
@@ -176,9 +178,11 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/runSoon",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAlertSummary",
           ]
         `);
       });
@@ -221,6 +225,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/runSoon",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
@@ -233,6 +238,9 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkEdit",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkDelete",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkEnable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkDisable",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
           ]
         `);
@@ -273,6 +281,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAlertSummary",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
           ]
         `);
@@ -320,6 +329,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/runSoon",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
@@ -332,10 +342,14 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkEdit",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkDelete",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkEnable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkDisable",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAlertSummary",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
           ]
         `);
@@ -379,6 +393,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/runSoon",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
@@ -391,6 +406,9 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkEdit",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkDelete",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkEnable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkDisable",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/get",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleState",
@@ -398,6 +416,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/find",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/runSoon",
           ]
         `);
       });
@@ -437,10 +456,12 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/alert/getAlertSummary",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/getAlertSummary",
           ]
         `);
       });
@@ -487,6 +508,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/runSoon",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/create",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/delete",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/update",
@@ -499,6 +521,9 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkEdit",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkDelete",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkEnable",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/bulkDisable",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/get",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleState",
@@ -506,13 +531,16 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getExecutionLog",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/find",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/runSoon",
             "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/getAlertSummary",
             "alerting:1.0.0-zeta1:another-alert-type/my-feature/alert/update",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/getAuthorizedAlertsIndices",
+            "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/alert/getAlertSummary",
           ]
         `);
       });

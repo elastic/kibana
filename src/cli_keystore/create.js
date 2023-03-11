@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from '../cli_plugin/lib/logger';
+import { Logger } from '../cli/logger';
 import { confirm } from './utils';
 
 export async function create(keystore, command, options) {

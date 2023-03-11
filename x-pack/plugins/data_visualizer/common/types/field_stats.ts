@@ -11,6 +11,25 @@ import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { TimeBucketsInterval } from '../services/time_buckets';
 
+export interface RandomSamplingOption {
+  mode: 'random_sampling';
+  seed: string;
+  probability: number;
+}
+
+export interface NormalSamplingOption {
+  mode: 'normal_sampling';
+  seed: string;
+  shardSize: number;
+}
+
+export interface NoSamplingOption {
+  mode: 'no_sampling';
+  seed: string;
+}
+
+export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
+
 export interface FieldData {
   fieldName: string;
   existsInDocs: boolean;
@@ -54,7 +73,7 @@ export const isIKibanaSearchResponse = (arg: unknown): arg is IKibanaSearchRespo
 
 export interface NumericFieldStats {
   fieldName: string;
-  count: number;
+  count?: number;
   min: number;
   max: number;
   avg: number;
@@ -86,7 +105,8 @@ export interface BooleanFieldStats {
   count: number;
   trueCount: number;
   falseCount: number;
-  [key: string]: number | string;
+  topValues: Bucket[];
+  topValuesSampleSize: number;
 }
 
 export interface DocumentCountStats {
@@ -186,6 +206,9 @@ export interface FieldStatsCommonRequestParams {
   intervalMs?: number;
   query: estypes.QueryDslQueryContainer;
   maxExamples?: number;
+  samplingProbability: number | null;
+  browserSessionSeed: number;
+  samplingOption: SamplingOption;
 }
 
 export interface OverallStatsSearchStrategyParams {
@@ -202,6 +225,8 @@ export interface OverallStatsSearchStrategyParams {
   aggregatableFields: string[];
   nonAggregatableFields: string[];
   fieldsToFetch?: string[];
+  browserSessionSeed: number;
+  samplingOption: SamplingOption;
 }
 
 export interface FieldStatsSearchStrategyReturnBase {
@@ -237,4 +262,21 @@ export interface Field {
 
 export interface Aggs {
   [key: string]: estypes.AggregationsAggregationContainer;
+}
+
+export const EMBEDDABLE_SAMPLER_OPTION = {
+  RANDOM: 'random_sampling',
+  NORMAL: 'normal_sampling',
+};
+export type FieldStatsEmbeddableSamplerOption =
+  typeof EMBEDDABLE_SAMPLER_OPTION[keyof typeof EMBEDDABLE_SAMPLER_OPTION];
+
+export function isRandomSamplingOption(arg: SamplingOption): arg is RandomSamplingOption {
+  return arg.mode === 'random_sampling';
+}
+export function isNormalSamplingOption(arg: SamplingOption): arg is NormalSamplingOption {
+  return arg.mode === 'normal_sampling';
+}
+export function isNoSamplingOption(arg: SamplingOption): arg is NoSamplingOption {
+  return arg.mode === 'no_sampling' || (arg.mode === 'random_sampling' && arg.probability === 1);
 }

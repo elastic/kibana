@@ -17,6 +17,7 @@ export const analyticsClientMock: jest.Mocked<AnalyticsClient> = {
   removeContextProvider: jest.fn(),
   registerShipper: jest.fn(),
   telemetryCounter$: new Subject(),
+  flush: jest.fn(),
   shutdown: jest.fn(),
 };
 

@@ -12,9 +12,10 @@ import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
   ISavedObjectsImporter,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportFailure,
   Logger,
 } from '@kbn/core/server';
-import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from '@kbn/core/server/types';
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
 
@@ -141,6 +142,7 @@ export async function installKibanaAssetsAndReferences({
   pkgTitle,
   paths,
   installedPkg,
+  spaceId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -151,6 +153,7 @@ export async function installKibanaAssetsAndReferences({
   pkgTitle: string;
   paths: string[];
   installedPkg?: SavedObject<Installation>;
+  spaceId: string;
 }) {
   const kibanaAssets = await getKibanaAssets(paths);
   if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
@@ -161,13 +164,12 @@ export async function installKibanaAssetsAndReferences({
     kibanaAssets
   );
 
-  await installKibanaAssets({
+  const importedAssets = await installKibanaAssets({
     logger,
     savedObjectsImporter,
     pkgName,
     kibanaAssets,
   });
-
   await withPackageSpan('Create and assign package tags', () =>
     tagKibanaAssets({
       savedObjectTagAssignmentService,
@@ -175,6 +177,8 @@ export async function installKibanaAssetsAndReferences({
       kibanaAssets,
       pkgTitle,
       pkgName,
+      spaceId,
+      importedAssets,
     })
   );
 

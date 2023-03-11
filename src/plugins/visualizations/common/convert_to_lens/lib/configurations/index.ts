@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { getPalette } from './palette';
+export { getPalette, getPaletteFromStopsWithColors } from './palette';
 export { getPercentageModeConfig } from './percentage_mode';

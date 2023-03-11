@@ -22,5 +22,6 @@ export function createEMSClient(emsSettings: EMSSettings, kbnVersion: string): E
       return fetch(url);
     },
     proxyPath: '',
+    emsVersion: kbnVersion,
   });
 }

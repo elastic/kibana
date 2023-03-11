@@ -5,108 +5,64 @@
  * 2.0.
  */
 
-import { isEmpty, get } from 'lodash/fp';
-import memoizeOne from 'memoize-one';
+import { isEmpty } from 'lodash/fp';
 
 import {
-  handleSkipFocus,
   elementOrChildrenHasFocus,
   getFocusedAriaColindexCell,
   getTableSkipFocus,
+  handleSkipFocus,
   stopPropagationAndPreventDefault,
 } from '@kbn/timelines-plugin/public';
-import { escapeQueryValue } from '../../../common/lib/kuery';
 
-import type { DataProvider, DataProvidersAnd } from './data_providers/data_provider';
-import { DataProviderType, EXISTS_OPERATOR } from './data_providers/data_provider';
+import { assertUnreachable } from '../../../../common/utility_types';
 import type { BrowserFields } from '../../../common/containers/source';
-
+import {
+  escapeQueryValue,
+  isNumber,
+  convertDateFieldToQuery,
+  checkIfFieldTypeIsDate,
+  convertNestedFieldToQuery,
+  convertNestedFieldToExistQuery,
+  checkIfFieldTypeIsNested,
+  type PrimitiveOrArrayOfPrimitives,
+} from '../../../common/lib/kuery';
+import type { DataProvider, DataProvidersAnd } from './data_providers/data_provider';
+import {
+  DataProviderType,
+  EXISTS_OPERATOR,
+  IS_ONE_OF_OPERATOR,
+  IS_OPERATOR,
+} from './data_providers/data_provider';
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
-
-const isNumber = (value: string | number) => !isNaN(Number(value));
-
-const convertDateFieldToQuery = (field: string, value: string | number) =>
-  `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;
-
-const getBaseFields = memoizeOne((browserFields: BrowserFields): string[] => {
-  const baseFields = get('base', browserFields);
-  if (baseFields != null && baseFields.fields != null) {
-    return Object.keys(baseFields.fields);
-  }
-  return [];
-});
-
-const getBrowserFieldPath = (field: string, browserFields: BrowserFields) => {
-  const splitFields = field.split('.');
-  const baseFields = getBaseFields(browserFields);
-  if (baseFields.includes(field)) {
-    return ['base', 'fields', field];
-  }
-  return [splitFields[0], 'fields', field];
-};
-
-const checkIfFieldTypeIsDate = (field: string, browserFields: BrowserFields) => {
-  const pathBrowserField = getBrowserFieldPath(field, browserFields);
-  const browserField = get(pathBrowserField, browserFields);
-  if (browserField != null && browserField.type === 'date') {
-    return true;
-  }
-  return false;
-};
-
-const convertNestedFieldToQuery = (
-  field: string,
-  value: string | number,
-  browserFields: BrowserFields
-) => {
-  const pathBrowserField = getBrowserFieldPath(field, browserFields);
-  const browserField = get(pathBrowserField, browserFields);
-  const nestedPath = browserField.subType.nested.path;
-  const key = field.replace(`${nestedPath}.`, '');
-  return `${nestedPath}: { ${key}: ${browserField.type === 'date' ? `"${value}"` : value} }`;
-};
-
-const convertNestedFieldToExistQuery = (field: string, browserFields: BrowserFields) => {
-  const pathBrowserField = getBrowserFieldPath(field, browserFields);
-  const browserField = get(pathBrowserField, browserFields);
-  const nestedPath = browserField.subType.nested.path;
-  const key = field.replace(`${nestedPath}.`, '');
-  return `${nestedPath}: { ${key}: * }`;
-};
-
-const checkIfFieldTypeIsNested = (field: string, browserFields: BrowserFields) => {
-  const pathBrowserField = getBrowserFieldPath(field, browserFields);
-  const browserField = get(pathBrowserField, browserFields);
-  if (browserField != null && browserField.subType && browserField.subType.nested) {
-    return true;
-  }
-  return false;
-};
 
 const buildQueryMatch = (
   dataProvider: DataProvider | DataProvidersAnd,
   browserFields: BrowserFields
-) =>
-  `${dataProvider.excluded ? 'NOT ' : ''}${
-    dataProvider.queryMatch.operator !== EXISTS_OPERATOR &&
-    dataProvider.type !== DataProviderType.template
-      ? checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
-        ? convertNestedFieldToQuery(
-            dataProvider.queryMatch.field,
-            dataProvider.queryMatch.value,
-            browserFields
-          )
-        : checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
-        ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
-        : `${dataProvider.queryMatch.field} : ${
-            isNumber(dataProvider.queryMatch.value)
-              ? dataProvider.queryMatch.value
-              : escapeQueryValue(dataProvider.queryMatch.value)
-          }`
-      : checkIfFieldTypeIsNested(dataProvider.queryMatch.field, browserFields)
-      ? convertNestedFieldToExistQuery(dataProvider.queryMatch.field, browserFields)
-      : `${dataProvider.queryMatch.field} ${EXISTS_OPERATOR}`
-  }`.trim();
+) => {
+  const {
+    excluded,
+    type,
+    queryMatch: { field, operator, value },
+  } = dataProvider;
+
+  const isFieldTypeNested = checkIfFieldTypeIsNested(field, browserFields);
+  const isExcluded = excluded ? 'NOT ' : '';
+
+  switch (operator) {
+    case IS_OPERATOR:
+      return handleIsOperator({ browserFields, field, isExcluded, isFieldTypeNested, type, value });
+
+    case EXISTS_OPERATOR:
+      return `${isExcluded}${buildExistsQueryMatch({ browserFields, field, isFieldTypeNested })}`;
+
+    case IS_ONE_OF_OPERATOR:
+      return handleIsOneOfOperator({ field, isExcluded, value });
+
+    default:
+      assertUnreachable(operator);
+  }
+};
 
 export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
   dataProviders
@@ -253,3 +209,94 @@ export const focusUtilityBarAction = (containerElement: HTMLElement | null) => {
 export const resetKeyboardFocus = () => {
   document.querySelector<HTMLAnchorElement>('header.headerGlobalNav a.euiHeaderLogo')?.focus();
 };
+
+interface OperatorHandler {
+  field: string;
+  isExcluded: string;
+  value: PrimitiveOrArrayOfPrimitives;
+}
+
+export const handleIsOperator = ({
+  browserFields,
+  field,
+  isExcluded,
+  isFieldTypeNested,
+  type,
+  value,
+}: OperatorHandler & {
+  browserFields: BrowserFields;
+  isFieldTypeNested: boolean;
+  type?: DataProviderType;
+}) => {
+  if (!isPrimitiveArray(value)) {
+    return `${isExcluded}${
+      type !== DataProviderType.template
+        ? buildIsQueryMatch({ browserFields, field, isFieldTypeNested, value })
+        : buildExistsQueryMatch({ browserFields, field, isFieldTypeNested })
+    }`;
+  } else {
+    return `${isExcluded}${field} : ${JSON.stringify(value)}`;
+  }
+};
+
+const handleIsOneOfOperator = ({ field, isExcluded, value }: OperatorHandler) => {
+  if (isPrimitiveArray(value)) {
+    return `${isExcluded}${buildIsOneOfQueryMatch({ field, value })}`;
+  } else {
+    return `${isExcluded}${field} : ${JSON.stringify(value)}`;
+  }
+};
+
+export const buildIsQueryMatch = ({
+  browserFields,
+  field,
+  isFieldTypeNested,
+  value,
+}: {
+  browserFields: BrowserFields;
+  field: string;
+  isFieldTypeNested: boolean;
+  value: string | number | boolean;
+}): string => {
+  if (isFieldTypeNested) {
+    return convertNestedFieldToQuery(field, value, browserFields);
+  } else if (checkIfFieldTypeIsDate(field, browserFields)) {
+    return convertDateFieldToQuery(field, value);
+  } else {
+    return `${field} : ${isNumber(value) ? value : escapeQueryValue(value)}`;
+  }
+};
+
+export const buildExistsQueryMatch = ({
+  browserFields,
+  field,
+  isFieldTypeNested,
+}: {
+  browserFields: BrowserFields;
+  field: string;
+  isFieldTypeNested: boolean;
+}): string => {
+  return isFieldTypeNested
+    ? convertNestedFieldToExistQuery(field, browserFields).trim()
+    : `${field} ${EXISTS_OPERATOR}`.trim();
+};
+
+export const buildIsOneOfQueryMatch = ({
+  field,
+  value,
+}: {
+  field: string;
+  value: Array<string | number | boolean>;
+}): string => {
+  const trimmedField = field.trim();
+  if (value.length) {
+    return `${trimmedField} : (${value
+      .map((item) => (isNumber(item) ? Number(item) : `${escapeQueryValue(String(item).trim())}`))
+      .join(' OR ')})`;
+  }
+  return `${trimmedField} : ''`;
+};
+
+export const isPrimitiveArray = (value: unknown): value is Array<string | number | boolean> =>
+  Array.isArray(value) &&
+  (value.every((x) => typeof x === 'string') || value.every((x) => typeof x === 'number'));

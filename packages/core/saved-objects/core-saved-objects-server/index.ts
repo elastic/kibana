@@ -9,10 +9,12 @@
 export type {
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
-  SavedObjectsClientWrapperFactory,
   SavedObjectsRepositoryFactory,
   SavedObjectsClientProviderOptions,
-  SavedObjectsClientWrapperOptions,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
+  SavedObjectsExtensionFactory,
 } from './src/client_factory';
 export type { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './src/contracts';
 export type {
@@ -64,3 +66,67 @@ export type {
 } from './src/serialization';
 export type { ISavedObjectTypeRegistry } from './src/type_registry';
 export type { SavedObjectsValidationMap, SavedObjectsValidationSpec } from './src/validation';
+export type {
+  ISavedObjectsEncryptionExtension,
+  EncryptedObjectDescriptor,
+} from './src/extensions/encryption';
+export type {
+  AuthorizationTypeEntry,
+  AuthorizationTypeMap,
+  CheckAuthorizationResult,
+  RedactNamespacesParams,
+  ISavedObjectsSecurityExtension,
+  AuthorizeCreateObject,
+  AuthorizeUpdateObject,
+  AuthorizeBulkGetObject,
+  AuthorizeCreateParams,
+  AuthorizeUpdateParams,
+  AuthorizeAndRedactMultiNamespaceReferencesParams,
+  AuthorizeAndRedactInternalBulkResolveParams,
+  AuthorizeGetParams,
+  AuthorizeBulkGetParams,
+  AuthorizeObjectWithExistingSpaces,
+  AuthorizeBulkCreateParams,
+  AuthorizeBulkDeleteParams,
+  AuthorizeBulkUpdateParams,
+  AuthorizeCheckConflictsParams,
+  AuthorizeDeleteParams,
+  GetFindRedactTypeMapParams,
+  AuthorizeOpenPointInTimeParams,
+  AuthorizeUpdateSpacesParams,
+  AuthorizeFindParams,
+} from './src/extensions/security';
+export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
+export type { SavedObjectsExtensions } from './src/extensions/extensions';
+export {
+  ENCRYPTION_EXTENSION_ID,
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
+} from './src/extensions/extensions';
+export {
+  SavedObjectsErrorHelpers,
+  type DecoratedError,
+  type BulkResolveError,
+} from './src/saved_objects_error_helpers';
+
+export type {
+  SavedObjectsModelVersion,
+  SavedObjectsModelVersionMap,
+  SavedObjectsModelVersionMapProvider,
+  SavedObjectsModelChange,
+  SavedObjectsModelExpansionChange,
+  SavedObjectModelTransformationDoc,
+  SavedObjectModelTransformationContext,
+  SavedObjectModelTransformationFn,
+  SavedObjectModelBidirectionalTransformation,
+  SavedObjectModelTransformationResult,
+} from './src/model_version';
+
+// We re-export the SavedObject types here for convenience.
+export type {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectAttributeSingle,
+  SavedObjectReference,
+} from '@kbn/core-saved-objects-api-server';

@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/alerts",
-  "owner": "@elastic/security-solution",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/security-solution"
 }

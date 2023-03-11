@@ -15,6 +15,7 @@ import type { ChartSeriesConfigs } from '../../../../common/components/charts/co
 import type { FieldValueQueryBar } from '../query_bar';
 import type { TimeframePreviewOptions } from '../../../pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../pages/detection_engine/rules/types';
+import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 
 /**
  * Determines whether or not to display noise warning.
@@ -108,6 +109,10 @@ export const getHistogramConfig = (
   };
 };
 
+const isNewTermsPreviewDisabled = (newTermsFields: string[]): boolean => {
+  return newTermsFields.length === 0 || newTermsFields.length > MAX_NUMBER_OF_NEW_TERMS_FIELDS;
+};
+
 export const getIsRulePreviewDisabled = ({
   ruleType,
   isQueryBarValid,
@@ -157,7 +162,7 @@ export const getIsRulePreviewDisabled = ({
     return isEmpty(queryBar.query.query) && isEmpty(queryBar.filters);
   }
   if (ruleType === 'new_terms') {
-    return newTermsFields.length === 0;
+    return isNewTermsPreviewDisabled(newTermsFields);
   }
   return false;
 };

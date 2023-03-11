@@ -42,6 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
       await esArchiver.unload('test/functional/fixtures/es_archiver/huge_fields');
       await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
   });
 }

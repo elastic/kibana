@@ -12,6 +12,7 @@ import { useAppUrl } from '../../lib/kibana/hooks';
 import type { SecurityPageName } from '../../../app/types';
 import { needsUrlState } from '../../links';
 
+export { getAlertDetailsUrl, getAlertDetailsTabUrl } from './redirect_to_alerts';
 export { getDetectionEngineUrl, getRuleDetailsUrl } from './redirect_to_detection_engine';
 export { getHostDetailsUrl, getTabsOnHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
 export { getKubernetesUrl, getKubernetesDetailsUrl } from './redirect_to_kubernetes';

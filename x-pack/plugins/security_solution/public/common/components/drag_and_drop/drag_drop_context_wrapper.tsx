@@ -14,10 +14,6 @@ import type { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
-import {
-  addFieldToTimelineColumns,
-  getTimelineIdFromColumnDroppableId,
-} from '@kbn/timelines-plugin/public';
 import type { BeforeCapture } from './drag_drop_context';
 import type { BrowserFields } from '../../containers/source';
 import { dragAndDropSelectors } from '../../store';
@@ -38,6 +34,8 @@ import {
   providerWasDroppedOnTimeline,
   draggableIsField,
   userIsReArrangingProviders,
+  getIdFromColumnDroppableId,
+  addFieldToColumns,
 } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
@@ -87,12 +85,12 @@ const onDragEndHandler = ({
       timelineId: TimelineId.active,
     });
   } else if (fieldWasDroppedOnTimelineColumns(result)) {
-    addFieldToTimelineColumns({
+    addFieldToColumns({
       browserFields,
       defaultsHeader: defaultAlertsHeaders,
       dispatch,
       result,
-      timelineId: getTimelineIdFromColumnDroppableId(result.destination?.droppableId ?? ''),
+      scopeId: getIdFromColumnDroppableId(result.destination?.droppableId ?? ''),
     });
   }
 };

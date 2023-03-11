@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/import-locator",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}

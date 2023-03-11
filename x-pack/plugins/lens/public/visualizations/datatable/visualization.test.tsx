@@ -550,22 +550,16 @@ describe('Datatable Visualization', () => {
       expect(columnArgs[0].arguments).toEqual(
         expect.objectContaining({
           columnId: ['c'],
-          hidden: [],
-          width: [],
-          isTransposed: [],
+          palette: [expect.any(Object)],
           transposable: [true],
-          alignment: [],
           colorMode: ['none'],
         })
       );
       expect(columnArgs[1].arguments).toEqual(
         expect.objectContaining({
           columnId: ['b'],
-          hidden: [],
-          width: [],
-          isTransposed: [],
+          palette: [expect.objectContaining({})],
           transposable: [true],
-          alignment: [],
           colorMode: ['none'],
         })
       );
@@ -592,14 +586,16 @@ describe('Datatable Visualization', () => {
     });
 
     it('sets pagination based on state', () => {
-      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).pageSize).toEqual([]);
+      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).pageSize).toEqual(
+        undefined
+      );
 
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
           paging: { size: 20, enabled: false },
         }).pageSize
-      ).toEqual([]);
+      ).toEqual(undefined);
 
       expect(
         getDatatableExpressionArgs({
@@ -696,60 +692,6 @@ describe('Datatable Visualization', () => {
           headerRowHeight: 'custom',
         }).headerRowHeightLines
       ).toEqual([2]);
-    });
-  });
-
-  describe('#getErrorMessages', () => {
-    it('returns undefined if the datasource is missing a metric dimension', () => {
-      const datasource = createMockDatasource('test');
-      const frame = mockFrame();
-      frame.datasourceLayers = { a: datasource.publicAPIMock };
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'c', fields: [] },
-        { columnId: 'b', fields: [] },
-      ]);
-      datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
-        dataType: 'string',
-        isBucketed: true, // move it from the metric to the break down by side
-        label: 'label',
-        isStaticValue: false,
-        hasTimeShift: false,
-        hasReducedTimeRange: false,
-      });
-
-      const error = datatableVisualization.getErrorMessages({
-        layerId: 'a',
-        layerType: LayerTypes.DATA,
-        columns: [{ columnId: 'b' }, { columnId: 'c' }],
-      });
-
-      expect(error).toBeUndefined();
-    });
-
-    it('returns undefined if the metric dimension is defined', () => {
-      const datasource = createMockDatasource('test');
-      const frame = mockFrame();
-      frame.datasourceLayers = { a: datasource.publicAPIMock };
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'c', fields: [] },
-        { columnId: 'b', fields: [] },
-      ]);
-      datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
-        dataType: 'string',
-        isBucketed: false, // keep it a metric
-        label: 'label',
-        isStaticValue: false,
-        hasTimeShift: false,
-        hasReducedTimeRange: false,
-      });
-
-      const error = datatableVisualization.getErrorMessages({
-        layerId: 'a',
-        layerType: LayerTypes.DATA,
-        columns: [{ columnId: 'b' }, { columnId: 'c' }],
-      });
-
-      expect(error).toBeUndefined();
     });
   });
 

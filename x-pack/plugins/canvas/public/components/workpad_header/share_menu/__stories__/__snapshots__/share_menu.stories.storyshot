@@ -10,7 +10,7 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu minimal 1`] = `
     >
       <button
         aria-label="Share this workpad"
-        className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+        className="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
         data-test-subj="shareTopNavButton"
         disabled={false}
         onClick={[Function]}
@@ -41,7 +41,7 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu with Reporting 1`] = `
     >
       <button
         aria-label="Share this workpad"
-        className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+        className="euiButtonEmpty euiButtonEmpty--small css-9t7nyf-empty-primary"
         data-test-subj="shareTopNavButton"
         disabled={false}
         onClick={[Function]}

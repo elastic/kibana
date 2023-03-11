@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const SESSIONS_TITLE = i18n.translate('xpack.securitySolution.sessionsView.sessionsTitle', {
+  defaultMessage: 'Sessions',
+});
+
 export const TOTAL_COUNT_OF_SESSIONS = i18n.translate(
   'xpack.securitySolution.sessionsView.totalCountOfSessions',
   {

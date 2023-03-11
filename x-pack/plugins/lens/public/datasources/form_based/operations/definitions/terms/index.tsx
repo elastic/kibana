@@ -29,11 +29,7 @@ import { DOCUMENT_FIELD_NAME } from '../../../../../../common';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { DataType, OperationMetadata } from '../../../../../types';
 import { OperationDefinition } from '..';
-import {
-  FieldBasedIndexPatternColumn,
-  GenericIndexPatternColumn,
-  IncompleteColumn,
-} from '../column_types';
+import { GenericIndexPatternColumn, IncompleteColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage, isColumn } from '../helpers';
 import { FieldInputs, getInputFieldErrorMessage, MAX_MULTI_FIELDS_SIZE } from './field_inputs';
@@ -187,10 +183,7 @@ export const termsOperation: OperationDefinition<
   },
   getErrorMessage: (layer, columnId, indexPattern) => {
     const messages = [
-      ...(getInvalidFieldMessage(
-        layer.columns[columnId] as FieldBasedIndexPatternColumn,
-        indexPattern
-      ) || []),
+      ...(getInvalidFieldMessage(layer, columnId, indexPattern) || []),
       getDisallowedTermsMessage(layer, columnId, indexPattern) || '',
       getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern) || '',
     ].filter(Boolean);
@@ -271,7 +264,7 @@ export const termsOperation: OperationDefinition<
       const orderColumn = layer.columns[column.params.orderBy.columnId];
       orderBy = String(orderedColumnIds.indexOf(column.params.orderBy.columnId));
       // percentile rank with non integer value should default to alphabetical order
-      if (!isPercentileRankSortable(orderColumn)) {
+      if (!orderColumn || !isPercentileRankSortable(orderColumn)) {
         orderBy = '_key';
       }
     }
@@ -426,7 +419,6 @@ export const termsOperation: OperationDefinition<
       selectedColumn,
       columnId,
       indexPattern,
-      existingFields,
       operationSupportMatrix,
       updateLayer,
       dimensionGroups,
@@ -452,7 +444,7 @@ export const termsOperation: OperationDefinition<
         // in single field mode, allow the automatic switch of the function to
         // the most appropriate one
         if (fields.length === 1) {
-          const possibleOperations = operationSupportMatrix.operationByField[sourcefield];
+          const possibleOperations = operationSupportMatrix.operationByField.get(sourcefield);
           const termsSupported = possibleOperations?.has('terms');
           if (!termsSupported) {
             const newFieldOp = possibleOperations?.values().next().value;
@@ -549,7 +541,6 @@ export const termsOperation: OperationDefinition<
         <FieldInputs
           column={selectedColumn}
           indexPattern={indexPattern}
-          existingFields={existingFields}
           operationSupportMatrix={operationSupportMatrix}
           onChange={onFieldSelectChange}
           invalidFields={invalidFields}
@@ -562,17 +553,18 @@ export const termsOperation: OperationDefinition<
 The top values of a specified field ranked by the chosen metric.
       `,
   }),
+  handleDataSectionExtra: true,
   paramEditor: function ParamEditor({
     layer,
     paramEditorUpdater,
     currentColumn,
     columnId,
     indexPattern,
-    existingFields,
     operationDefinitionMap,
     ReferenceEditor,
     paramEditorCustomProps,
     activeData,
+    dataSectionExtra,
     ...rest
   }) {
     const [incompleteColumn, setIncompleteColumn] = useState<IncompleteColumn | undefined>(
@@ -808,7 +800,6 @@ The top values of a specified field ranked by the chosen metric.
               }}
               column={currentColumn.params.orderAgg}
               incompleteColumn={incompleteColumn}
-              existingFields={existingFields}
               onDeleteColumn={() => {
                 throw new Error('Should not be called');
               }}
@@ -933,6 +924,12 @@ The top values of a specified field ranked by the chosen metric.
             }}
           />
         </EuiFormRow>
+        {dataSectionExtra && (
+          <>
+            <EuiSpacer size="m" />
+            {dataSectionExtra}
+          </>
+        )}
         {!hasRestrictions && (
           <>
             <EuiSpacer size="m" />

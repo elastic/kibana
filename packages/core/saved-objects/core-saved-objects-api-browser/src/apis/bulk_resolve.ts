@@ -8,7 +8,13 @@
 
 import type { ResolvedSimpleSavedObject } from './resolve';
 
-/** @public */
+/**
+ * Return type of the Saved Objects `bulkResolve()` method.
+ *
+ * @public
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
+ */
 export interface SavedObjectsBulkResolveResponse<T = unknown> {
+  /** Array of {@link ResolvedSimpleSavedObject} that were resolved */
   resolved_objects: Array<ResolvedSimpleSavedObject<T>>;
 }

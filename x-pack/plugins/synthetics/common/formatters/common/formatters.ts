@@ -16,6 +16,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.LOCATIONS]: null,
   [ConfigKey.MONITOR_TYPE]: null,
   [ConfigKey.ENABLED]: null,
+  [ConfigKey.ALERT_CONFIG]: null,
   [ConfigKey.CONFIG_ID]: null,
   [ConfigKey.SCHEDULE]: (fields) =>
     JSON.stringify(
@@ -33,9 +34,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.CUSTOM_HEARTBEAT_ID]: null,
   [ConfigKey.ORIGINAL_SPACE]: null,
   [ConfigKey.CONFIG_HASH]: null,
-
-  // Deprecated, slated to be removed in a later release
-  [ConfigKey.ID]: null,
+  [ConfigKey.MONITOR_QUERY_ID]: null,
 };
 
 export const arrayToJsonFormatter = (value: string[] = []) =>

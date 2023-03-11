@@ -60,8 +60,8 @@ interface WaitForSelectorOpts {
   timeout: number;
 }
 
-interface EvaluateOpts {
-  fn: EvaluateFunc<any>;
+interface EvaluateOpts<A extends unknown[]> {
+  fn: EvaluateFunc<A>;
   args: unknown[];
 }
 
@@ -127,7 +127,7 @@ export class HeadlessChromiumDriver {
     this.interceptedCount = 0;
 
     /**
-     * Integrate with the screenshot mode plugin contract by calling this function before any other
+     * Integrate with the screenshot mode plugin contract by calling this function before whatever other
      * scripts have run on the browser page.
      */
     await this.page.evaluateOnNewDocument(this.screenshotMode.setScreenshotModeEnabled);
@@ -293,10 +293,14 @@ export class HeadlessChromiumDriver {
     return undefined;
   }
 
-  evaluate({ fn, args = [] }: EvaluateOpts, meta: EvaluateMetaOpts, logger: Logger): Promise<any> {
+  evaluate<A extends unknown[], T = void>(
+    { fn, args = [] }: EvaluateOpts<A>,
+    meta: EvaluateMetaOpts,
+    logger: Logger
+  ): Promise<T> {
     logger.debug(`evaluate ${meta.context}`);
 
-    return this.page.evaluate(fn, ...args);
+    return this.page.evaluate(fn as EvaluateFunc<unknown[]>, ...args) as Promise<T>;
   }
 
   public async waitForSelector(
@@ -317,16 +321,20 @@ export class HeadlessChromiumDriver {
     return response;
   }
 
-  public async waitFor({
+  public async waitFor<T extends unknown[] = unknown[]>({
     fn,
     args,
     timeout,
   }: {
-    fn: EvaluateFunc<any>;
+    fn: EvaluateFunc<T>;
     args: unknown[];
     timeout: number;
   }): Promise<void> {
-    await this.page.waitForFunction(fn, { timeout, polling: WAIT_FOR_DELAY_MS }, ...args);
+    await this.page.waitForFunction(
+      fn as EvaluateFunc<unknown[]>,
+      { timeout, polling: WAIT_FOR_DELAY_MS },
+      ...args
+    );
   }
 
   /**

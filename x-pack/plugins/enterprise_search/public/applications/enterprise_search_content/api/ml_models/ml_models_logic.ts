@@ -6,7 +6,7 @@
  */
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export type GetMlModelsArgs = number | undefined;
@@ -19,4 +19,9 @@ export const getMLModels = async (size: GetMlModelsArgs = 1000) => {
   });
 };
 
-export const MLModelsApiLogic = createApiLogic(['ml_models_api_logic'], getMLModels);
+export const MLModelsApiLogic = createApiLogic(['ml_models_api_logic'], getMLModels, {
+  clearFlashMessagesOnMakeRequest: false,
+  showErrorFlash: false,
+});
+
+export type MLModelsApiLogicActions = Actions<GetMlModelsArgs, GetMlModelsResponse>;

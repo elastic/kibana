@@ -16,4 +16,6 @@ export const NO_FINDINGS_STATUS_TEST_SUBJ = {
   NO_AGENTS_DEPLOYED: 'status-api-no-agent-deployed',
   INDEXING: 'status-api-indexing',
   INDEX_TIMEOUT: 'status-api-index-timeout',
+  UNPRIVILEGED: 'status-api-unprivileged',
+  NO_FINDINGS: 'no-findings-found',
 };

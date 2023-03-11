@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SERVICE_ENVIRONMENT } from './elasticsearch_fieldnames';
+import { escapeKuery } from '@kbn/es-query';
+import { SERVICE_ENVIRONMENT } from './es_fields/apm';
 import { Environment } from './environment_rt';
 
 const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL' as const;
@@ -43,16 +44,28 @@ export const ENVIRONMENT_NOT_DEFINED = {
   label: getEnvironmentLabel(ENVIRONMENT_NOT_DEFINED_VALUE),
 };
 
+function isEnvironmentDefined(environment: string) {
+  return (
+    environment &&
+    environment !== ENVIRONMENT_NOT_DEFINED_VALUE &&
+    environment !== ENVIRONMENT_ALL_VALUE
+  );
+}
+
 export function getEnvironmentEsField(environment: string) {
-  if (
-    !environment ||
-    environment === ENVIRONMENT_NOT_DEFINED_VALUE ||
-    environment === ENVIRONMENT_ALL_VALUE
-  ) {
+  if (!isEnvironmentDefined(environment)) {
     return {};
   }
 
   return { [SERVICE_ENVIRONMENT]: environment };
+}
+
+export function getEnvironmentKuery(environment: string) {
+  if (!isEnvironmentDefined(environment)) {
+    return null;
+  }
+
+  return `${[SERVICE_ENVIRONMENT]}: ${escapeKuery(environment)} `;
 }
 
 // returns the environment url param that should be used

@@ -95,7 +95,7 @@ describe('utils', () => {
 
   describe('getPushedDate', () => {
     beforeAll(() => {
-      jest.useFakeTimers('modern');
+      jest.useFakeTimers();
       jest.setSystemTime(new Date('2021-10-04 11:15:06 GMT'));
     });
 

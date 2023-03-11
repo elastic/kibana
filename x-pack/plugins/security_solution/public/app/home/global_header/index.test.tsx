@@ -26,23 +26,13 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { createStore } from '../../../common/store';
 import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
 import { sourcererPaths } from '../../../common/containers/sourcerer';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock('../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../common/lib/kibana');
-  return {
-    ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: { theme: { theme$: {} }, http: { basePath: { prepend: jest.fn((href) => href) } } },
-    }),
-    useUiSetting$: jest.fn().mockReturnValue([]),
-  };
-});
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../../common/containers/source', () => ({
   useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
@@ -73,13 +63,7 @@ describe('global header', () => {
     },
   };
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
     useVariationMock.mockReset();
@@ -176,13 +160,7 @@ describe('global header', () => {
         },
       },
     };
-    const mockStore = createStore(
-      mockstate,
-      SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
-      kibanaObservable,
-      storage
-    );
+    const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
     (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[2] });
 

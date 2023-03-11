@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { GeoJsonProperties } from 'geojson';
 import type { Query } from '@kbn/data-plugin/common';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
@@ -38,7 +38,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
       __rows: descriptor.__rows || [],
       __columns: descriptor.__columns || [],
       term: descriptor.term || '',
-      id: descriptor.id || uuid(),
+      id: descriptor.id || uuidv4(),
     };
   }
 
@@ -52,7 +52,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
   async getDisplayName(): Promise<string> {
     // no need to localize. this is never rendered.
-    return `table source ${uuid()}`;
+    return `table source ${uuidv4()}`;
   }
 
   getSyncMeta(): null {

@@ -33,6 +33,7 @@ export const SearchResult = React.memo(
 
     return result.length === 0 ? (
       <EuiEmptyPrompt
+        data-test-subj="mappingsEditorSearchResultEmptyPrompt"
         iconType="search"
         title={
           <h3>
@@ -53,6 +54,7 @@ export const SearchResult = React.memo(
       />
     ) : (
       <VirtualList
+        data-test-subj="mappingsEditorSearchResult"
         style={{ overflowX: 'hidden', ...virtualListStyle }}
         width="100%"
         height={listHeight}
@@ -77,3 +79,5 @@ export const SearchResult = React.memo(
     );
   }
 );
+
+SearchResult.displayName = 'SearchResult'; // display name required for tests to work with React.memo

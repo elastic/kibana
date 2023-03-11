@@ -18,5 +18,6 @@ export const documentationLinksServiceFactory: DocumentationLinksServiceFactory 
   return {
     indexPatternsDocLink: corePluginMock.docLinks.links.indexPatterns.introduction,
     kibanaGuideDocLink: corePluginMock.docLinks.links.kibana.guide,
+    dashboardDocLink: corePluginMock.docLinks.links.dashboard.guide,
   };
 };

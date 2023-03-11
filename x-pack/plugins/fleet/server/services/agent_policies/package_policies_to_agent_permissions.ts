@@ -37,7 +37,7 @@ export async function storedPackagePoliciesToAgentPermissions(
   const permissionEntries = (packagePolicies as PackagePolicy[]).map<Promise<[string, any]>>(
     async (packagePolicy) => {
       if (!packagePolicy.package) {
-        throw new Error(`No package for package policy ${packagePolicy.name}`);
+        throw new Error(`No package for package policy ${packagePolicy.name ?? packagePolicy.id}`);
       }
 
       const pkg = packageInfoCache.get(pkgToPkgKey(packagePolicy.package))!;

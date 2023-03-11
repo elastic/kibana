@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 import type { Payload } from '@hapi/boom';
-import {
+import type {
   BulkOperationBase,
   BulkResponseItem,
   ErrorCause,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
-import { Either } from './internal_utils';
-import { DeleteLegacyUrlAliasesParams } from './legacy_url_aliases';
+import type { Either } from './internal_utils';
+import type { DeleteLegacyUrlAliasesParams } from './legacy_url_aliases';
 
 /**
  * @internal

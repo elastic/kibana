@@ -6,7 +6,7 @@
  */
 
 import type { RiskScoreEntity } from './common';
-import { getLegacyRiskScoreLevelScriptId } from './stored_scripts';
+import { getLegacyRiskScoreLevelScriptId, getRiskScoreLevelScriptId } from './stored_scripts';
 
 export const getIngestPipelineName = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
   `ml_${riskScoreEntity}riskscore_ingest_pipeline_${spaceId}`;
@@ -14,7 +14,10 @@ export const getIngestPipelineName = (riskScoreEntity: RiskScoreEntity, spaceId 
 export const getLegacyIngestPipelineName = (riskScoreEntity: RiskScoreEntity) =>
   `ml_${riskScoreEntity}riskscore_ingest_pipeline`;
 
-export const getLegacyRiskScoreIngestPipelineOptions = (riskScoreEntity: RiskScoreEntity) => {
+export const getLegacyRiskScoreIngestPipelineOptions = (
+  riskScoreEntity: RiskScoreEntity,
+  version = '8.4'
+) => {
   const processors = [
     {
       set: {
@@ -31,7 +34,10 @@ export const getLegacyRiskScoreIngestPipelineOptions = (riskScoreEntity: RiskSco
     },
     {
       script: {
-        id: getLegacyRiskScoreLevelScriptId(riskScoreEntity),
+        id:
+          version === '8.4'
+            ? getLegacyRiskScoreLevelScriptId(riskScoreEntity)
+            : getRiskScoreLevelScriptId(riskScoreEntity),
         params: {
           risk_score: 'risk_stats.risk_score',
         },
@@ -39,7 +45,10 @@ export const getLegacyRiskScoreIngestPipelineOptions = (riskScoreEntity: RiskSco
     },
   ];
   return {
-    name: getLegacyIngestPipelineName(riskScoreEntity),
+    name:
+      version === '8.4'
+        ? getLegacyIngestPipelineName(riskScoreEntity)
+        : getIngestPipelineName(riskScoreEntity),
     processors,
   };
 };

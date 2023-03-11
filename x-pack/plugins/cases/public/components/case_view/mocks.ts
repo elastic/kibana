@@ -99,13 +99,8 @@ export const defaultUpdateCaseState = {
   updateCaseProperty: jest.fn(),
 };
 
-export const defaultUseGetCaseUserActions = {
-  data: {
-    caseUserActions: [...caseUserActions, getAlertUserAction()],
-    caseServices: {},
-    hasDataToPush: false,
-    participants: [caseData.createdBy],
-  },
+export const defaultUseFindCaseUserActions = {
+  data: { userActions: [...caseUserActions, getAlertUserAction()] },
   refetch: jest.fn(),
   isLoading: false,
   isFetching: false,

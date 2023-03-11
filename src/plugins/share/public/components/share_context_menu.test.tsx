@@ -33,6 +33,11 @@ test('should only render permalink panel when there are no other panels', () => 
   expect(component).toMatchSnapshot();
 });
 
+test('should disable the share URL when set', () => {
+  const component = shallow(<ShareContextMenu {...defaultProps} disabledShareUrl />);
+  expect(component).toMatchSnapshot();
+});
+
 describe('shareContextMenuExtensions', () => {
   const shareContextMenuItems: ShareMenuItem[] = [
     {
@@ -64,6 +69,17 @@ describe('shareContextMenuExtensions', () => {
       <ShareContextMenu
         {...defaultProps}
         allowEmbed={false}
+        shareMenuItems={shareContextMenuItems}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should render a custom panel title when provided', () => {
+    const component = shallow(
+      <ShareContextMenu
+        {...defaultProps}
+        objectTypeTitle="Custom object"
         shareMenuItems={shareContextMenuItems}
       />
     );

@@ -120,7 +120,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(textContent).to.contain('Maximum:15000000000');
       expect(textContent).to.contain('Value:13104036080.615');
 
-      dimensions[0].click();
+      await dimensions[0].click();
 
       await lens.openPalettePanel('lnsGauge');
       const colorStops = await lens.getPaletteColorStops();

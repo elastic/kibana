@@ -870,6 +870,27 @@ describe('MetricVisComponent', function () {
               max-height: 100%;
               max-width: 100%;
               overflow-y: auto;
+              scrollbar-width: thin;
+
+          &::-webkit-scrollbar {
+            inline-size: 16px;
+            block-size: 16px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: rgba(105,112,125,0.5);
+            background-clip: content-box;
+            border-radius: 16px;
+            border: calc(8px * 0.75) solid transparent;
+          }
+
+          &::-webkit-scrollbar-corner,
+          &::-webkit-scrollbar-track {
+            background-color: transparent;
+          }
+
+          scrollbar-color: rgba(105,112,125,0.5) transparent;
+        
             "
     `);
 
@@ -880,6 +901,27 @@ describe('MetricVisComponent', function () {
               max-height: 100%;
               max-width: 100%;
               overflow-y: auto;
+              scrollbar-width: thin;
+
+          &::-webkit-scrollbar {
+            inline-size: 16px;
+            block-size: 16px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: rgba(105,112,125,0.5);
+            background-clip: content-box;
+            border-radius: 16px;
+            border: calc(8px * 0.75) solid transparent;
+          }
+
+          &::-webkit-scrollbar-corner,
+          &::-webkit-scrollbar-track {
+            background-color: transparent;
+          }
+
+          scrollbar-color: rgba(105,112,125,0.5) transparent;
+        
             "
     `);
 
@@ -890,6 +932,27 @@ describe('MetricVisComponent', function () {
               max-height: 100%;
               max-width: 100%;
               overflow-y: auto;
+              scrollbar-width: thin;
+
+          &::-webkit-scrollbar {
+            inline-size: 16px;
+            block-size: 16px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: rgba(105,112,125,0.5);
+            background-clip: content-box;
+            border-radius: 16px;
+            border: calc(8px * 0.75) solid transparent;
+          }
+
+          &::-webkit-scrollbar-corner,
+          &::-webkit-scrollbar-track {
+            background-color: transparent;
+          }
+
+          scrollbar-color: rgba(105,112,125,0.5) transparent;
+        
             "
     `);
   });
@@ -1005,6 +1068,7 @@ describe('MetricVisComponent', function () {
               table,
               column: 1,
               row: 0,
+              value: 28.984375,
             },
           ],
         },
@@ -1029,6 +1093,7 @@ describe('MetricVisComponent', function () {
               table,
               column: 0,
               row: 5,
+              value: '__other__',
             },
           ],
         },

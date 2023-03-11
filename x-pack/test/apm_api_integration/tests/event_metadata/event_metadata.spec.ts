@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { PROCESSOR_EVENT } from '@kbn/apm-plugin/common/elasticsearch_fieldnames';
+import { PROCESSOR_EVENT } from '@kbn/apm-plugin/common/es_fields/apm';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {

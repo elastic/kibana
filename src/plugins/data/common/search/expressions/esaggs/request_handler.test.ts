@@ -143,6 +143,26 @@ describe('esaggs expression function - public', () => {
     });
   });
 
+  test('calls searchSource.fetch with custom inspector params', async () => {
+    await handleRequest({
+      ...mockParams,
+      title: 'MyTitle',
+      description: 'MyDescription',
+    }).toPromise();
+    const searchSource = await mockParams.searchSourceService.create();
+
+    expect(searchSource.fetch$).toHaveBeenCalledWith({
+      abortSignal: mockParams.abortSignal,
+      sessionId: mockParams.searchSessionId,
+      inspector: {
+        title: 'MyTitle',
+        description: 'MyDescription',
+        adapter: undefined,
+      },
+      disableShardFailureWarning: false,
+    });
+  });
+
   test('tabifies response data', async () => {
     await handleRequest(mockParams).toPromise();
     expect(tabifyAggResponse).toHaveBeenCalledWith(

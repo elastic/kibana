@@ -16,7 +16,6 @@ import Semver from 'semver';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectsRawDoc,
@@ -31,11 +30,16 @@ import {
   type KibanaMigratorStatus,
   type MigrationResult,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { buildActiveMappings } from './core';
-import { DocumentMigrator, VersionedTransformer } from './core/document_migrator';
+import { buildActiveMappings, buildTypesMappings } from './core';
+import { DocumentMigrator, type VersionedTransformer } from './document_migrator';
 import { createIndexMap } from './core/build_index_map';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
+import { runZeroDowntimeMigration } from './zdt';
+
+// ensure plugins don't try to convert SO namespaceTypes after 8.0.0
+// see https://github.com/elastic/kibana/issues/147344
+const ALLOWED_CONVERT_VERSION = '8.0.0';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
@@ -45,6 +49,7 @@ export interface KibanaMigratorOptions {
   kibanaVersion: string;
   logger: Logger;
   docLinks: DocLinksServiceStart;
+  waitForMigrationCompletion: boolean;
 }
 
 /**
@@ -65,7 +70,7 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly activeMappings: IndexMapping;
   private readonly soMigrationsConfig: SavedObjectsMigrationConfigType;
   private readonly docLinks: DocLinksServiceStart;
-
+  private readonly waitForMigrationCompletion: boolean;
   public readonly kibanaVersion: string;
 
   /**
@@ -79,20 +84,23 @@ export class KibanaMigrator implements IKibanaMigrator {
     kibanaVersion,
     logger,
     docLinks,
+    waitForMigrationCompletion,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaIndex = kibanaIndex;
     this.soMigrationsConfig = soMigrationsConfig;
     this.typeRegistry = typeRegistry;
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
-    this.mappingProperties = mergeTypes(this.typeRegistry.getAllTypes());
+    this.mappingProperties = buildTypesMappings(this.typeRegistry.getAllTypes());
     this.log = logger;
     this.kibanaVersion = kibanaVersion;
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion: this.kibanaVersion,
+      convertVersion: ALLOWED_CONVERT_VERSION,
       typeRegistry,
       log: this.log,
     });
+    this.waitForMigrationCompletion = waitForMigrationCompletion;
     // Building the active mappings (and associated md5sums) is an expensive
     // operation so we cache the result
     this.activeMappings = buildActiveMappings(this.mappingProperties);
@@ -127,6 +135,29 @@ export class KibanaMigrator implements IKibanaMigrator {
   }
 
   private runMigrationsInternal(): Promise<MigrationResult[]> {
+    const migrationAlgorithm = this.soMigrationsConfig.algorithm;
+    if (migrationAlgorithm === 'zdt') {
+      return this.runMigrationZdt();
+    } else {
+      return this.runMigrationV2();
+    }
+  }
+
+  private runMigrationZdt(): Promise<MigrationResult[]> {
+    return runZeroDowntimeMigration({
+      kibanaVersion: this.kibanaVersion,
+      kibanaIndexPrefix: this.kibanaIndex,
+      typeRegistry: this.typeRegistry,
+      logger: this.log,
+      documentMigrator: this.documentMigrator,
+      migrationConfig: this.soMigrationsConfig,
+      docLinks: this.docLinks,
+      serializer: this.serializer,
+      elasticsearchClient: this.client,
+    });
+  }
+
+  private runMigrationV2(): Promise<MigrationResult[]> {
     const indexMap = createIndexMap({
       kibanaIndexName: this.kibanaIndex,
       indexMap: this.mappingProperties,
@@ -148,6 +179,7 @@ export class KibanaMigrator implements IKibanaMigrator {
           return runResilientMigrator({
             client: this.client,
             kibanaVersion: this.kibanaVersion,
+            waitForMigrationCompletion: this.waitForMigrationCompletion,
             targetMappings: buildActiveMappings(indexMap[index].typeMappings),
             logger: this.log,
             preMigrationScript: indexMap[index].script,
@@ -177,21 +209,4 @@ export class KibanaMigrator implements IKibanaMigrator {
   public migrateDocument(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
     return this.documentMigrator.migrate(doc);
   }
-}
-
-/**
- * Merges savedObjectMappings properties into a single object, verifying that
- * no mappings are redefined.
- */
-export function mergeTypes(types: SavedObjectsType[]): SavedObjectsTypeMappingDefinitions {
-  return types.reduce((acc, { name: type, mappings }) => {
-    const duplicate = acc.hasOwnProperty(type);
-    if (duplicate) {
-      throw new Error(`Type ${type} is already defined.`);
-    }
-    return {
-      ...acc,
-      [type]: mappings,
-    };
-  }, {});
 }

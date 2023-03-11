@@ -8,7 +8,7 @@
 import { resolve } from 'path';
 import consumeState from './consume_state';
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import chalk from 'chalk';
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
 import { TriggersActionsPageProvider } from '../../functional_with_es_ssl/page_objects/triggers_actions_ui_page';
@@ -28,12 +28,15 @@ const prepend = (testFile) => require.resolve(`${testsFolder}/${testFile}`);
 
 export default async ({ readConfigFile }) => {
   const apiConfig = await readConfigFile(require.resolve('../../api_integration/config'));
-  const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../../functional/config.base.js')
-  );
   const externalConf = consumeState(resolve(__dirname, stateFilePath)) ?? {
     TESTS_LIST: 'alerts',
   };
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../../functional/config.ccs.ts')
+  );
+  const fleetFunctionalConfig = await readConfigFile(
+    require.resolve('../../fleet_functional/config.ts')
+  );
   process.env.stack_functional_integration = true;
   logAll(log);
 
@@ -42,6 +45,7 @@ export default async ({ readConfigFile }) => {
     pageObjects: {
       triggersActionsUI: TriggersActionsPageProvider,
       ...xpackFunctionalConfig.get('pageObjects'),
+      ...fleetFunctionalConfig.get('pageObjects'),
     },
     apps: {
       ...xpackFunctionalConfig.get('apps'),

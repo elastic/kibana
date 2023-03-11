@@ -67,15 +67,3 @@ export function filterDownBy(...filter: estypes.QueryDslQueryContainer[]) {
     },
   };
 }
-
-export function asPinnedQuery(
-  ids: estypes.QueryDslPinnedQuery['ids'],
-  organic: estypes.QueryDslPinnedQuery['organic']
-): Pick<estypes.QueryDslQueryContainer, 'pinned'> {
-  return {
-    pinned: {
-      ids,
-      organic,
-    },
-  };
-}

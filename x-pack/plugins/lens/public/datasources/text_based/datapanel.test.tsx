@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
 import type { Query } from '@kbn/es-query';
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -17,7 +18,7 @@ import {
   Start as DataViewPublicStart,
 } from '@kbn/data-views-plugin/public/mocks';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { FieldButton } from '@kbn/react-field';
+import { EuiHighlight } from '@elastic/eui';
 
 import { type TextBasedDataPanelProps, TextBasedDataPanel } from './datapanel';
 
@@ -30,7 +31,6 @@ import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mo
 import { createMockFramePublicAPI } from '../../mocks';
 import { createMockedDragDropContext } from './mocks';
 import { DataViewsState } from '../../state_management';
-import { ExistingFieldsMap, IndexPattern } from '../../types';
 
 const fieldsFromQuery = [
   {
@@ -101,18 +101,6 @@ const fieldsOne = [
   },
 ];
 
-function getExistingFields(indexPatterns: Record<string, IndexPattern>) {
-  const existingFields: ExistingFieldsMap = {};
-  for (const { title, fields } of Object.values(indexPatterns)) {
-    const fieldsMap: Record<string, boolean> = {};
-    for (const { displayName, name } of fields) {
-      fieldsMap[displayName ?? name] = true;
-    }
-    existingFields[title] = fieldsMap;
-  }
-  return existingFields;
-}
-
 const initialState: TextBasedPrivateState = {
   layers: {
     first: {
@@ -130,8 +118,41 @@ const initialState: TextBasedPrivateState = {
   fieldList: fieldsFromQuery,
 };
 
-function getFrameAPIMock({ indexPatterns, existingFields, ...rest }: Partial<DataViewsState> = {}) {
+function getFrameAPIMock({
+  indexPatterns,
+  ...rest
+}: Partial<DataViewsState> & { indexPatterns: DataViewsState['indexPatterns'] }) {
   const frameAPI = createMockFramePublicAPI();
+  return {
+    ...frameAPI,
+    dataViews: {
+      ...frameAPI.dataViews,
+      indexPatterns,
+      ...rest,
+    },
+  };
+}
+
+// @ts-expect-error Portal mocks are notoriously difficult to type
+ReactDOM.createPortal = jest.fn((element) => element);
+
+async function mountAndWaitForLazyModules(component: React.ReactElement): Promise<ReactWrapper> {
+  let inst: ReactWrapper;
+  await act(async () => {
+    inst = await mountWithIntl(component);
+    // wait for lazy modules
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    inst.update();
+  });
+
+  await inst!.update();
+
+  return inst!;
+}
+
+describe('TextBased Query Languages Data Panel', () => {
+  let core: ReturnType<typeof coreMock['createStart']>;
+  let dataViews: DataViewPublicStart;
   const defaultIndexPatterns = {
     '1': {
       id: '1',
@@ -144,27 +165,10 @@ function getFrameAPIMock({ indexPatterns, existingFields, ...rest }: Partial<Dat
       spec: {},
     },
   };
-  return {
-    ...frameAPI,
-    dataViews: {
-      ...frameAPI.dataViews,
-      indexPatterns: indexPatterns ?? defaultIndexPatterns,
-      existingFields: existingFields ?? getExistingFields(indexPatterns ?? defaultIndexPatterns),
-      isFirstExistenceFetch: false,
-      ...rest,
-    },
-  };
-}
-
-// @ts-expect-error Portal mocks are notoriously difficult to type
-ReactDOM.createPortal = jest.fn((element) => element);
-
-describe('TextBased Query Languages Data Panel', () => {
-  let core: ReturnType<typeof coreMock['createStart']>;
-  let dataViews: DataViewPublicStart;
 
   let defaultProps: TextBasedDataPanelProps;
   const dataViewsMock = dataViewPluginMocks.createStartContract();
+
   beforeEach(() => {
     core = coreMock.createStart();
     dataViews = dataViewPluginMocks.createStartContract();
@@ -194,7 +198,7 @@ describe('TextBased Query Languages Data Panel', () => {
       hasSuggestionForField: jest.fn(() => false),
       uiActions: uiActionsPluginMock.createStartContract(),
       indexPatternService: createIndexPatternServiceMock({ core, dataViews }),
-      frame: getFrameAPIMock(),
+      frame: getFrameAPIMock({ indexPatterns: defaultIndexPatterns }),
       state: initialState,
       setState: jest.fn(),
       onChangeIndexPattern: jest.fn(),
@@ -202,23 +206,35 @@ describe('TextBased Query Languages Data Panel', () => {
   });
 
   it('should render a search box', async () => {
-    const wrapper = mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
-    expect(wrapper.find('[data-test-subj="lnsTextBasedLangugesFieldSearch"]').length).toEqual(1);
+    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
+
+    expect(
+      wrapper.find('[data-test-subj="lnsTextBasedLanguagesFieldSearch"] input').length
+    ).toEqual(1);
   });
 
   it('should list all supported fields in the pattern', async () => {
-    const wrapper = mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
+    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
+
     expect(
       wrapper
-        .find('[data-test-subj="lnsTextBasedLanguagesPanelFields"]')
-        .find(FieldButton)
-        .map((fieldItem) => fieldItem.prop('fieldName'))
-    ).toEqual(['timestamp', 'bytes', 'memory']);
+        .find('[data-test-subj="lnsTextBasedLanguagesAvailableFields"]')
+        .find(EuiHighlight)
+        .map((item) => item.prop('children'))
+    ).toEqual(['bytes', 'memory', 'timestamp']);
+
+    expect(wrapper.find('[data-test-subj="lnsTextBasedLanguagesEmptyFields"]').exists()).toBe(
+      false
+    );
+    expect(wrapper.find('[data-test-subj="lnsTextBasedLanguagesMetaFields"]').exists()).toBe(false);
   });
 
   it('should not display the selected fields accordion if there are no fields displayed', async () => {
-    const wrapper = mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
-    expect(wrapper.find('[data-test-subj="lnsSelectedFieldsTextBased"]').length).toEqual(0);
+    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
+
+    expect(wrapper.find('[data-test-subj="lnsTextBasedLanguagesSelectedFields"]').length).toEqual(
+      0
+    );
   });
 
   it('should display the selected fields accordion if there are fields displayed', async () => {
@@ -226,26 +242,36 @@ describe('TextBased Query Languages Data Panel', () => {
       ...defaultProps,
       layerFields: ['memory'],
     };
-    const wrapper = mountWithIntl(<TextBasedDataPanel {...props} />);
-    expect(wrapper.find('[data-test-subj="lnsSelectedFieldsTextBased"]').length).not.toEqual(0);
+    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...props} />);
+
+    expect(
+      wrapper.find('[data-test-subj="lnsTextBasedLanguagesSelectedFields"]').length
+    ).not.toEqual(0);
   });
 
   it('should list all supported fields in the pattern that match the search input', async () => {
-    const wrapper = mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
-    const searchBox = wrapper.find('[data-test-subj="lnsTextBasedLangugesFieldSearch"]');
+    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
 
-    act(() => {
-      searchBox.prop('onChange')!({
-        target: { value: 'mem' },
-      } as React.ChangeEvent<HTMLInputElement>);
-    });
-
-    wrapper.update();
     expect(
       wrapper
-        .find('[data-test-subj="lnsTextBasedLanguagesPanelFields"]')
-        .find(FieldButton)
-        .map((fieldItem) => fieldItem.prop('fieldName'))
+        .find('[data-test-subj="lnsTextBasedLanguagesAvailableFields"]')
+        .find(EuiHighlight)
+        .map((item) => item.prop('children'))
+    ).toEqual(['bytes', 'memory', 'timestamp']);
+
+    act(() => {
+      wrapper.find('[data-test-subj="lnsTextBasedLanguagesFieldSearch"] input').simulate('change', {
+        target: { value: 'mem' },
+      });
+    });
+
+    await wrapper.update();
+
+    expect(
+      wrapper
+        .find('[data-test-subj="lnsTextBasedLanguagesAvailableFields"]')
+        .find(EuiHighlight)
+        .map((item) => item.prop('children'))
     ).toEqual(['memory']);
   });
 });

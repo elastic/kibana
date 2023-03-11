@@ -1,25 +1,16 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/root_types"
+    "outDir": "target/types"
   },
   "include": [
     "kibana.d.ts",
-    "typings/**/*",
-
-    "src/cli/**/*",
-    "src/cli_setup/**/*",
-    "src/cli_plugin/**/*",
-    "src/dev/**/*",
-    "src/fixtures/**/*",
-
-    "x-pack/tasks/**/*",
+    "package.json",
   ],
-  "exclude": [],
-  "references": [
-    { "path": "./src/core/tsconfig.json" },
-    { "path": "./src/plugins/usage_collection/tsconfig.json" },
-    { "path": "./src/plugins/interactive_setup/tsconfig.json" },
-    { "path": "./x-pack/plugins/reporting/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

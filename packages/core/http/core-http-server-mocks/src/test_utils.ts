@@ -8,7 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import moment from 'moment';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Env } from '@kbn/config';
 import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
@@ -26,6 +26,7 @@ const createConfigService = () => {
   configService.atPath.mockImplementation((path) => {
     if (path === 'server') {
       return new BehaviorSubject({
+        name: 'kibana',
         hosts: ['localhost'],
         maxPayload: new ByteSizeValue(1024),
         autoListen: true,
@@ -35,7 +36,7 @@ const createConfigService = () => {
         cors: {
           enabled: false,
         },
-        compression: { enabled: true },
+        compression: { enabled: true, brotli: { enabled: false } },
         xsrf: {
           disableProtection: true,
           allowlist: [],

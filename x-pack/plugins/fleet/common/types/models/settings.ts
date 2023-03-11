@@ -9,7 +9,8 @@ import type { SavedObjectAttributes } from '@kbn/core/public';
 
 export interface BaseSettings {
   has_seen_add_data_notice?: boolean;
-  fleet_server_hosts: string[];
+  fleet_server_hosts?: string[];
+  prerelease_integrations_enabled: boolean;
 }
 
 export interface Settings extends BaseSettings {

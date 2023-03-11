@@ -11,6 +11,7 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { DataProviders } from '.';
+import { TimelineId } from '../../../../../common/types';
 
 describe('DataProviders', () => {
   const mount = useMountAppended();
@@ -54,7 +55,7 @@ describe('DataProviders', () => {
       test('it may be resized vertically via a resize handle', () => {
         const wrapper = mount(
           <TestProviders>
-            <DataProviders timelineId="test" />
+            <DataProviders timelineId={TimelineId.test} />
           </TestProviders>
         );
 
@@ -67,7 +68,7 @@ describe('DataProviders', () => {
       test('it never grows taller than one third (33%) of the view height', () => {
         const wrapper = mount(
           <TestProviders>
-            <DataProviders timelineId="test" />
+            <DataProviders timelineId={TimelineId.test} />
           </TestProviders>
         );
 
@@ -80,7 +81,7 @@ describe('DataProviders', () => {
       test('it automatically displays scroll bars when the width or height of the data providers exceeds the drop target', () => {
         const wrapper = mount(
           <TestProviders>
-            <DataProviders timelineId="test" />
+            <DataProviders timelineId={TimelineId.test} />
           </TestProviders>
         );
 

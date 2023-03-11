@@ -6,6 +6,12 @@
 
 Disable a rule.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification]. For a preview, check out <<rule-apis>>.
+====
+
 [[disable-rule-api-request]]
 === {api-request-title}
 
@@ -17,7 +23,7 @@ Disable a rule.
 === {api-prereq-title}
 
 You must have `all` privileges for the appropriate {kib} features, depending on
-the `consumer` and `rule_type_id` of the rules you're disabling. For example,
+the `consumer` and `rule_type_id` of the rule. For example,
 the *Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
 features, *{observability}*, and *Security* features. For more details, refer to
 <<kibana-feature-privileges>>.
@@ -35,7 +41,7 @@ the URL, the default space is used.
 [[disable-rule-api-response-codes]]
 === {api-response-codes-title}
 
-`200`::
+`204`::
 Indicates a successful call.
 
 === {api-examples-title}

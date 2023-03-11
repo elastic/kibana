@@ -12,7 +12,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import {
   ENVIRONMENT_ALL,
   getEnvironmentLabel,
@@ -38,7 +38,9 @@ export function ServiceField({
       })}
     >
       <SuggestionsSelect
-        customOptions={allowAll ? [ENVIRONMENT_ALL] : undefined}
+        customOptions={
+          allowAll ? [{ label: allOptionText, value: '' }] : undefined
+        }
         customOptionText={i18n.translate(
           'xpack.apm.serviceNamesSelectCustomOptionText',
           {
@@ -61,9 +63,11 @@ export function ServiceField({
 export function EnvironmentField({
   currentValue,
   onChange,
+  serviceName,
 }: {
   currentValue: string;
   onChange: (value?: string) => void;
+  serviceName?: string;
 }) {
   return (
     <PopoverExpression
@@ -88,6 +92,7 @@ export function EnvironmentField({
         })}
         start={moment().subtract(24, 'h').toISOString()}
         end={moment().toISOString()}
+        serviceName={serviceName}
       />
     </PopoverExpression>
   );
@@ -96,9 +101,11 @@ export function EnvironmentField({
 export function TransactionTypeField({
   currentValue,
   onChange,
+  serviceName,
 }: {
   currentValue?: string;
   onChange: (value?: string) => void;
+  serviceName?: string;
 }) {
   const label = i18n.translate('xpack.apm.alerting.fields.type', {
     defaultMessage: 'Type',
@@ -106,7 +113,7 @@ export function TransactionTypeField({
   return (
     <PopoverExpression value={currentValue || allOptionText} title={label}>
       <SuggestionsSelect
-        customOptions={[ENVIRONMENT_ALL]}
+        customOptions={[{ label: allOptionText, value: '' }]}
         customOptionText={i18n.translate(
           'xpack.apm.transactionTypesSelectCustomOptionText',
           {
@@ -124,6 +131,7 @@ export function TransactionTypeField({
         )}
         start={moment().subtract(24, 'h').toISOString()}
         end={moment().toISOString()}
+        serviceName={serviceName}
       />
     </PopoverExpression>
   );

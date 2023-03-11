@@ -14,12 +14,9 @@ import { LogViewProvider } from '../../hooks/use_log_view';
 export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
   const [sourceId] = useSourceId();
   const { services } = useKibanaContextForPlugin();
+
   return (
-    <LogViewProvider
-      fetch={services.http.fetch}
-      logViewId={sourceId}
-      logViews={services.logViews.client}
-    >
+    <LogViewProvider logViewId={sourceId} logViews={services.logViews.client}>
       <LogAnalysisCapabilitiesProvider>{children}</LogAnalysisCapabilitiesProvider>
     </LogViewProvider>
   );

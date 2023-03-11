@@ -20,10 +20,9 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import type { SnoozeSchedule } from '../../../../types';
 import { SnoozePanel } from './rule_snooze';
 import { isRuleSnoozed } from '../../../lib';
-import { Rule } from '../../../../types';
+import { Rule, SnoozeSchedule } from '../../../../types';
 
 export type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const SNOOZE_END_TIME_FORMAT = 'LL @ LT';

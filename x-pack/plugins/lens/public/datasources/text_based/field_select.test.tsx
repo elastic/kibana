@@ -6,11 +6,9 @@
  */
 
 import React from 'react';
-import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-
 import { FieldPicker, FieldOptionValue } from '../../shared_components/field_picker';
 
-import { FieldSelect, FieldSelectProps } from './field_select';
+import { type FieldOptionCompatible, FieldSelect, FieldSelectProps } from './field_select';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 
 const fields = [
@@ -20,6 +18,7 @@ const fields = [
     meta: {
       type: 'date',
     },
+    compatible: true,
   },
   {
     name: 'bytes',
@@ -27,6 +26,7 @@ const fields = [
     meta: {
       type: 'number',
     },
+    compatible: true,
   },
   {
     name: 'memory',
@@ -34,8 +34,9 @@ const fields = [
     meta: {
       type: 'number',
     },
+    compatible: true,
   },
-] as DatatableColumn[];
+] as FieldOptionCompatible[];
 
 describe('Layer Data Panel', () => {
   let defaultProps: FieldSelectProps;
@@ -75,7 +76,7 @@ describe('Layer Data Panel', () => {
         label: 'Available fields',
         options: [
           {
-            compatible: true,
+            compatible: 1,
             exists: true,
             label: 'timestamp',
             value: {
@@ -85,7 +86,7 @@ describe('Layer Data Panel', () => {
             },
           },
           {
-            compatible: true,
+            compatible: 1,
             exists: true,
             label: 'bytes',
             value: {
@@ -95,7 +96,7 @@ describe('Layer Data Panel', () => {
             },
           },
           {
-            compatible: true,
+            compatible: 1,
             exists: true,
             label: 'memory',
             value: {

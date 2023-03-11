@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { TSVB_METRIC_TYPES } from '../../../common/enums';
-import { Metric } from '../../../common/types';
+import { Panel, Metric } from '../../../common/types';
 import { convertToLens } from '.';
 import { createPanel, createSeries } from '../lib/__mocks__';
 import { AvgColumn } from '../lib/convert';
@@ -21,7 +22,7 @@ const mockIsValidMetrics = jest.fn();
 const mockGetDatasourceValue = jest
   .fn()
   .mockImplementation(() => Promise.resolve(stubLogstashDataView));
-const mockGetDataSourceInfo = jest.fn();
+const mockExtractOrGenerateDatasourceInfo = jest.fn();
 const mockGetSeriesAgg = jest.fn();
 
 jest.mock('../../services', () => ({
@@ -49,7 +50,7 @@ jest.mock('../lib/metrics', () => {
 });
 
 jest.mock('../lib/datasource', () => ({
-  getDataSourceInfo: jest.fn(() => mockGetDataSourceInfo()),
+  extractOrGenerateDatasourceInfo: jest.fn(() => mockExtractOrGenerateDatasourceInfo()),
 }));
 
 describe('convertToLens', () => {
@@ -57,6 +58,10 @@ describe('convertToLens', () => {
   const model = createPanel({
     series: [createSeries({ metrics: [metric] })],
   });
+
+  const vis = {
+    params: model,
+  } as Vis<Panel>;
 
   const metricColumn: AvgColumn = {
     columnId: 'col-id',
@@ -72,7 +77,7 @@ describe('convertToLens', () => {
 
   beforeEach(() => {
     mockIsValidMetrics.mockReturnValue(true);
-    mockGetDataSourceInfo.mockReturnValue({
+    mockExtractOrGenerateDatasourceInfo.mockReturnValue({
       indexPatternId: 'test-index-pattern',
       timeField: 'timeField',
       indexPattern: { id: 'test-index-pattern' },
@@ -89,51 +94,55 @@ describe('convertToLens', () => {
 
   test('should return null for invalid metrics', async () => {
     mockIsValidMetrics.mockReturnValue(null);
-    const result = await convertToLens(model);
+    const result = await convertToLens(vis);
     expect(result).toBeNull();
     expect(mockIsValidMetrics).toBeCalledTimes(1);
   });
 
   test('should return null for invalid or unsupported metrics', async () => {
     mockGetMetricsColumns.mockReturnValue(null);
-    const result = await convertToLens(model);
+    const result = await convertToLens(vis);
     expect(result).toBeNull();
     expect(mockGetMetricsColumns).toBeCalledTimes(1);
   });
 
   test('should return null for invalid or unsupported buckets', async () => {
     mockGetBucketsColumns.mockReturnValue(null);
-    const result = await convertToLens(model);
+    const result = await convertToLens(vis);
     expect(result).toBeNull();
     expect(mockGetBucketsColumns).toBeCalledTimes(1);
   });
 
   test('should return null if metric is staticValue', async () => {
     const result = await convertToLens({
-      ...model,
-      series: [
-        {
-          ...model.series[0],
-          metrics: [...model.series[0].metrics, { type: TSVB_METRIC_TYPES.STATIC } as Metric],
-        },
-      ],
-    });
+      params: {
+        ...model,
+        series: [
+          {
+            ...model.series[0],
+            metrics: [...model.series[0].metrics, { type: TSVB_METRIC_TYPES.STATIC } as Metric],
+          },
+        ],
+      },
+    } as Vis<Panel>);
     expect(result).toBeNull();
-    expect(mockGetDataSourceInfo).toBeCalledTimes(0);
+    expect(mockExtractOrGenerateDatasourceInfo).toBeCalledTimes(0);
   });
 
   test('should return null if only series agg is specified', async () => {
     const result = await convertToLens({
-      ...model,
-      series: [
-        {
-          ...model.series[0],
-          metrics: [
-            { type: TSVB_METRIC_TYPES.SERIES_AGG, function: 'min', id: 'some-id' } as Metric,
-          ],
-        },
-      ],
-    });
+      params: {
+        ...model,
+        series: [
+          {
+            ...model.series[0],
+            metrics: [
+              { type: TSVB_METRIC_TYPES.SERIES_AGG, function: 'min', id: 'some-id' } as Metric,
+            ],
+          },
+        ],
+      },
+    } as Vis<Panel>);
     expect(result).toBeNull();
   });
 
@@ -142,7 +151,7 @@ describe('convertToLens', () => {
     mockGetSeriesAgg.mockReturnValue({ metrics: [metric] });
     mockGetConfigurationForGauge.mockReturnValue(null);
 
-    const result = await convertToLens(model);
+    const result = await convertToLens(vis);
     expect(result).toBeNull();
   });
 
@@ -151,8 +160,8 @@ describe('convertToLens', () => {
     mockGetSeriesAgg.mockReturnValue({ metrics: [metric] });
     mockGetConfigurationForGauge.mockReturnValue({});
 
-    const result = await convertToLens(
-      createPanel({
+    const result = await convertToLens({
+      params: createPanel({
         series: [
           createSeries({
             metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
@@ -163,7 +172,34 @@ describe('convertToLens', () => {
             hidden: false,
           }),
         ],
-      })
+      }),
+    } as Vis<Panel>);
+    expect(result).toBeDefined();
+    expect(result?.type).toBe('lnsMetric');
+  });
+
+  test('should drop adhoc dataviews if action is required', async () => {
+    mockGetMetricsColumns.mockReturnValue([metricColumn]);
+    mockGetSeriesAgg.mockReturnValue({ metrics: [metric] });
+    mockGetConfigurationForGauge.mockReturnValue({});
+
+    const result = await convertToLens(
+      {
+        params: createPanel({
+          series: [
+            createSeries({
+              metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+              hidden: false,
+            }),
+            createSeries({
+              metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+              hidden: false,
+            }),
+          ],
+        }),
+      } as Vis<Panel>,
+      undefined,
+      true
     );
     expect(result).toBeDefined();
     expect(result?.type).toBe('lnsMetric');

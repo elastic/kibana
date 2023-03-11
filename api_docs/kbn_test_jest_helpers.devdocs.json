@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.StubBrowserStorage",
+        "id": "def-common.StubBrowserStorage",
         "type": "Class",
         "tags": [],
         "label": "StubBrowserStorage",
@@ -20,9 +28,9 @@
         "signature": [
           {
             "pluginId": "@kbn/test-jest-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestJestHelpersPluginApi",
-            "section": "def-server.StubBrowserStorage",
+            "section": "def-common.StubBrowserStorage",
             "text": "StubBrowserStorage"
           },
           " implements Storage"
@@ -33,7 +41,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.StubBrowserStorage.length",
+            "id": "def-common.StubBrowserStorage.length",
             "type": "number",
             "tags": [],
             "label": "length",
@@ -44,7 +52,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.StubBrowserStorage.key",
+            "id": "def-common.StubBrowserStorage.key",
             "type": "Function",
             "tags": [],
             "label": "key",
@@ -58,7 +66,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.StubBrowserStorage.key.$1",
+                "id": "def-common.StubBrowserStorage.key.$1",
                 "type": "number",
                 "tags": [],
                 "label": "i",
@@ -76,7 +84,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.StubBrowserStorage.getItem",
+            "id": "def-common.StubBrowserStorage.getItem",
             "type": "Function",
             "tags": [],
             "label": "getItem",
@@ -90,7 +98,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.StubBrowserStorage.getItem.$1",
+                "id": "def-common.StubBrowserStorage.getItem.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -108,7 +116,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.StubBrowserStorage.setItem",
+            "id": "def-common.StubBrowserStorage.setItem",
             "type": "Function",
             "tags": [],
             "label": "setItem",
@@ -122,7 +130,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.StubBrowserStorage.setItem.$1",
+                "id": "def-common.StubBrowserStorage.setItem.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -137,7 +145,7 @@
               },
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.StubBrowserStorage.setItem.$2",
+                "id": "def-common.StubBrowserStorage.setItem.$2",
                 "type": "string",
                 "tags": [],
                 "label": "value",
@@ -155,7 +163,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.StubBrowserStorage.removeItem",
+            "id": "def-common.StubBrowserStorage.removeItem",
             "type": "Function",
             "tags": [],
             "label": "removeItem",
@@ -169,7 +177,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.StubBrowserStorage.removeItem.$1",
+                "id": "def-common.StubBrowserStorage.removeItem.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -187,7 +195,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.StubBrowserStorage.clear",
+            "id": "def-common.StubBrowserStorage.clear",
             "type": "Function",
             "tags": [],
             "label": "clear",
@@ -203,7 +211,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.StubBrowserStorage.setStubbedSizeLimit",
+            "id": "def-common.StubBrowserStorage.setStubbedSizeLimit",
             "type": "Function",
             "tags": [],
             "label": "setStubbedSizeLimit",
@@ -217,7 +225,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.StubBrowserStorage.setStubbedSizeLimit.$1",
+                "id": "def-common.StubBrowserStorage.setStubbedSizeLimit.$1",
                 "type": "number",
                 "tags": [],
                 "label": "sizeLimit",
@@ -235,7 +243,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.StubBrowserStorage.getStubbedSizeLimit",
+            "id": "def-common.StubBrowserStorage.getStubbedSizeLimit",
             "type": "Function",
             "tags": [],
             "label": "getStubbedSizeLimit",
@@ -251,7 +259,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.StubBrowserStorage.getStubbedSize",
+            "id": "def-common.StubBrowserStorage.getStubbedSize",
             "type": "Function",
             "tags": [],
             "label": "getStubbedSize",
@@ -272,7 +280,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.clearBroadcastChannelInstances",
+        "id": "def-common.clearBroadcastChannelInstances",
         "type": "Function",
         "tags": [],
         "label": "clearBroadcastChannelInstances",
@@ -291,7 +299,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.delay",
+        "id": "def-common.delay",
         "type": "Function",
         "tags": [],
         "label": "delay",
@@ -305,7 +313,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.delay.$1",
+            "id": "def-common.delay.$1",
             "type": "number",
             "tags": [],
             "label": "time",
@@ -324,7 +332,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.expectToBeAccessible",
+        "id": "def-common.expectToBeAccessible",
         "type": "Function",
         "tags": [],
         "label": "expectToBeAccessible",
@@ -342,7 +350,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.expectToBeAccessible.$1",
+            "id": "def-common.expectToBeAccessible.$1",
             "type": "Object",
             "tags": [],
             "label": "component",
@@ -361,7 +369,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.findTestSubject",
+        "id": "def-common.findTestSubject",
         "type": "Function",
         "tags": [],
         "label": "findTestSubject",
@@ -383,7 +391,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.findTestSubject.$1",
+            "id": "def-common.findTestSubject.$1",
             "type": "Object",
             "tags": [],
             "label": "reactWrapper",
@@ -401,7 +409,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.findTestSubject.$2",
+            "id": "def-common.findTestSubject.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "testSubjectSelector",
@@ -418,7 +426,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.findTestSubject.$3",
+            "id": "def-common.findTestSubject.$3",
             "type": "CompoundType",
             "tags": [],
             "label": "matcher",
@@ -439,7 +447,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.getA11yViolations",
+        "id": "def-common.getA11yViolations",
         "type": "Function",
         "tags": [],
         "label": "getA11yViolations",
@@ -459,7 +467,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.getA11yViolations.$1",
+            "id": "def-common.getA11yViolations.$1",
             "type": "Object",
             "tags": [],
             "label": "component",
@@ -478,7 +486,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.getBroadcastChannelInstances",
+        "id": "def-common.getBroadcastChannelInstances",
         "type": "Function",
         "tags": [],
         "label": "getBroadcastChannelInstances",
@@ -499,7 +507,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.getRandomNumber",
+        "id": "def-common.getRandomNumber",
         "type": "Function",
         "tags": [],
         "label": "getRandomNumber",
@@ -513,7 +521,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.getRandomNumber.$1",
+            "id": "def-common.getRandomNumber.$1",
             "type": "Object",
             "tags": [],
             "label": "range",
@@ -524,7 +532,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.getRandomNumber.$1.min",
+                "id": "def-common.getRandomNumber.$1.min",
                 "type": "number",
                 "tags": [],
                 "label": "min",
@@ -535,7 +543,7 @@
               },
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.getRandomNumber.$1.max",
+                "id": "def-common.getRandomNumber.$1.max",
                 "type": "number",
                 "tags": [],
                 "label": "max",
@@ -552,7 +560,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.getRandomString",
+        "id": "def-common.getRandomString",
         "type": "Function",
         "tags": [],
         "label": "getRandomString",
@@ -566,7 +574,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.getRandomString.$1",
+            "id": "def-common.getRandomString.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -585,7 +593,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.mountHook",
+        "id": "def-common.mountHook",
         "type": "Function",
         "tags": [
           "return"
@@ -603,7 +611,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.mountHook.$1",
+            "id": "def-common.mountHook.$1",
             "type": "Function",
             "tags": [],
             "label": "body",
@@ -620,7 +628,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.mountHook.$2",
+            "id": "def-common.mountHook.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "WrapperComponent",
@@ -637,7 +645,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.mountHook.$3",
+            "id": "def-common.mountHook.$3",
             "type": "Uncategorized",
             "tags": [],
             "label": "initialArgs",
@@ -658,7 +666,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.mountWithI18nProvider",
+        "id": "def-common.mountWithI18nProvider",
         "type": "Function",
         "tags": [],
         "label": "mountWithI18nProvider",
@@ -676,7 +684,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.mountWithI18nProvider.$1",
+            "id": "def-common.mountWithI18nProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "child",
@@ -695,7 +703,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.mountWithIntl",
+        "id": "def-common.mountWithIntl",
         "type": "Function",
         "tags": [
           "return"
@@ -717,7 +725,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.mountWithIntl.$1",
+            "id": "def-common.mountWithIntl.$1",
             "type": "Object",
             "tags": [],
             "label": "node",
@@ -734,7 +742,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.mountWithIntl.$2",
+            "id": "def-common.mountWithIntl.$2",
             "type": "Object",
             "tags": [],
             "label": "{\n    context,\n    childContextTypes,\n    ...props\n  }",
@@ -745,7 +753,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.mountWithIntl.$2.attachTo",
+                "id": "def-common.mountWithIntl.$2.attachTo",
                 "type": "Object",
                 "tags": [],
                 "label": "attachTo",
@@ -759,7 +767,7 @@
               },
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.mountWithIntl.$2.context",
+                "id": "def-common.mountWithIntl.$2.context",
                 "type": "Any",
                 "tags": [],
                 "label": "context",
@@ -773,7 +781,7 @@
               },
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.mountWithIntl.$2.childContextTypes",
+                "id": "def-common.mountWithIntl.$2.childContextTypes",
                 "type": "Object",
                 "tags": [],
                 "label": "childContextTypes",
@@ -796,7 +804,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.nextTick",
+        "id": "def-common.nextTick",
         "type": "Function",
         "tags": [],
         "label": "nextTick",
@@ -813,7 +821,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.nodeWithIntlProp",
+        "id": "def-common.nodeWithIntlProp",
         "type": "Function",
         "tags": [],
         "label": "nodeWithIntlProp",
@@ -829,7 +837,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.nodeWithIntlProp.$1",
+            "id": "def-common.nodeWithIntlProp.$1",
             "type": "Object",
             "tags": [],
             "label": "node",
@@ -848,7 +856,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.registerTestBed",
+        "id": "def-common.registerTestBed",
         "type": "Function",
         "tags": [],
         "label": "registerTestBed",
@@ -858,20 +866,20 @@
         "signature": [
           "(Component: ",
           "ComponentType",
-          "<any>, config: ",
+          "<P>, config: ",
           {
             "pluginId": "@kbn/test-jest-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestJestHelpersPluginApi",
-            "section": "def-server.AsyncTestBedConfig",
+            "section": "def-common.AsyncTestBedConfig",
             "text": "AsyncTestBedConfig"
           },
-          ") => ",
+          "<P>) => ",
           {
             "pluginId": "@kbn/test-jest-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestJestHelpersPluginApi",
-            "section": "def-server.AsyncSetupFunc",
+            "section": "def-common.AsyncSetupFunc",
             "text": "AsyncSetupFunc"
           },
           "<T, Partial<P>>"
@@ -882,7 +890,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.registerTestBed.$1",
+            "id": "def-common.registerTestBed.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "Component",
@@ -891,7 +899,7 @@
             ],
             "signature": [
               "ComponentType",
-              "<any>"
+              "<P>"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
@@ -900,7 +908,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.registerTestBed.$2",
+            "id": "def-common.registerTestBed.$2",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -910,11 +918,12 @@
             "signature": [
               {
                 "pluginId": "@kbn/test-jest-helpers",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestJestHelpersPluginApi",
-                "section": "def-server.AsyncTestBedConfig",
+                "section": "def-common.AsyncTestBedConfig",
                 "text": "AsyncTestBedConfig"
-              }
+              },
+              "<P>"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
@@ -927,7 +936,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.registerTestBed",
+        "id": "def-common.registerTestBed",
         "type": "Function",
         "tags": [],
         "label": "registerTestBed",
@@ -935,20 +944,20 @@
         "signature": [
           "(Component: ",
           "ComponentType",
-          "<any>, config: ",
+          "<P>, config: ",
           {
             "pluginId": "@kbn/test-jest-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestJestHelpersPluginApi",
-            "section": "def-server.TestBedConfig",
+            "section": "def-common.TestBedConfig",
             "text": "TestBedConfig"
           },
-          " | undefined) => ",
+          "<P> | undefined) => ",
           {
             "pluginId": "@kbn/test-jest-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestJestHelpersPluginApi",
-            "section": "def-server.SyncSetupFunc",
+            "section": "def-common.SyncSetupFunc",
             "text": "SyncSetupFunc"
           },
           "<T, Partial<P>>"
@@ -959,14 +968,14 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.registerTestBed.$1",
+            "id": "def-common.registerTestBed.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "Component",
             "description": [],
             "signature": [
               "ComponentType",
-              "<any>"
+              "<P>"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
@@ -975,7 +984,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.registerTestBed.$2",
+            "id": "def-common.registerTestBed.$2",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -983,12 +992,12 @@
             "signature": [
               {
                 "pluginId": "@kbn/test-jest-helpers",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestJestHelpersPluginApi",
-                "section": "def-server.TestBedConfig",
+                "section": "def-common.TestBedConfig",
                 "text": "TestBedConfig"
               },
-              " | undefined"
+              "<P> | undefined"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
@@ -1001,7 +1010,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.registerTestBed",
+        "id": "def-common.registerTestBed",
         "type": "Function",
         "tags": [],
         "label": "registerTestBed",
@@ -1009,28 +1018,28 @@
         "signature": [
           "(Component: ",
           "ComponentType",
-          "<any>, config: ",
+          "<P>, config: ",
           {
             "pluginId": "@kbn/test-jest-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestJestHelpersPluginApi",
-            "section": "def-server.AsyncTestBedConfig",
+            "section": "def-common.AsyncTestBedConfig",
             "text": "AsyncTestBedConfig"
           },
-          " | ",
+          "<P> | ",
           {
             "pluginId": "@kbn/test-jest-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestJestHelpersPluginApi",
-            "section": "def-server.TestBedConfig",
+            "section": "def-common.TestBedConfig",
             "text": "TestBedConfig"
           },
-          " | undefined) => ",
+          "<P> | undefined) => ",
           {
             "pluginId": "@kbn/test-jest-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestJestHelpersPluginApi",
-            "section": "def-server.SetupFunc",
+            "section": "def-common.SetupFunc",
             "text": "SetupFunc"
           },
           "<T, Partial<P>>"
@@ -1041,14 +1050,14 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.registerTestBed.$1",
+            "id": "def-common.registerTestBed.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "Component",
             "description": [],
             "signature": [
               "ComponentType",
-              "<any>"
+              "<P>"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
@@ -1057,7 +1066,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.registerTestBed.$2",
+            "id": "def-common.registerTestBed.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "config",
@@ -1065,20 +1074,20 @@
             "signature": [
               {
                 "pluginId": "@kbn/test-jest-helpers",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestJestHelpersPluginApi",
-                "section": "def-server.AsyncTestBedConfig",
+                "section": "def-common.AsyncTestBedConfig",
                 "text": "AsyncTestBedConfig"
               },
-              " | ",
+              "<P> | ",
               {
                 "pluginId": "@kbn/test-jest-helpers",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestJestHelpersPluginApi",
-                "section": "def-server.TestBedConfig",
+                "section": "def-common.TestBedConfig",
                 "text": "TestBedConfig"
               },
-              " | undefined"
+              "<P> | undefined"
             ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
@@ -1091,7 +1100,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.renderWithIntl",
+        "id": "def-common.renderWithIntl",
         "type": "Function",
         "tags": [
           "return"
@@ -1111,7 +1120,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.renderWithIntl.$1",
+            "id": "def-common.renderWithIntl.$1",
             "type": "Object",
             "tags": [],
             "label": "node",
@@ -1128,7 +1137,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.renderWithIntl.$2",
+            "id": "def-common.renderWithIntl.$2",
             "type": "Object",
             "tags": [],
             "label": "{\n    context,\n    childContextTypes,\n    ...props\n  }",
@@ -1139,7 +1148,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.renderWithIntl.$2.context",
+                "id": "def-common.renderWithIntl.$2.context",
                 "type": "Any",
                 "tags": [],
                 "label": "context",
@@ -1153,7 +1162,7 @@
               },
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.renderWithIntl.$2.childContextTypes",
+                "id": "def-common.renderWithIntl.$2.childContextTypes",
                 "type": "Object",
                 "tags": [],
                 "label": "childContextTypes",
@@ -1176,7 +1185,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.setHTMLElementClientSizes",
+        "id": "def-common.setHTMLElementClientSizes",
         "type": "Function",
         "tags": [],
         "label": "setHTMLElementClientSizes",
@@ -1190,7 +1199,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.setHTMLElementClientSizes.$1",
+            "id": "def-common.setHTMLElementClientSizes.$1",
             "type": "number",
             "tags": [],
             "label": "width",
@@ -1205,7 +1214,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.setHTMLElementClientSizes.$2",
+            "id": "def-common.setHTMLElementClientSizes.$2",
             "type": "number",
             "tags": [],
             "label": "height",
@@ -1224,7 +1233,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.setHTMLElementOffset",
+        "id": "def-common.setHTMLElementOffset",
         "type": "Function",
         "tags": [],
         "label": "setHTMLElementOffset",
@@ -1238,7 +1247,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.setHTMLElementOffset.$1",
+            "id": "def-common.setHTMLElementOffset.$1",
             "type": "number",
             "tags": [],
             "label": "width",
@@ -1253,7 +1262,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.setHTMLElementOffset.$2",
+            "id": "def-common.setHTMLElementOffset.$2",
             "type": "number",
             "tags": [],
             "label": "height",
@@ -1272,7 +1281,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.setSVGElementGetBBox",
+        "id": "def-common.setSVGElementGetBBox",
         "type": "Function",
         "tags": [],
         "label": "setSVGElementGetBBox",
@@ -1286,7 +1295,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.setSVGElementGetBBox.$1",
+            "id": "def-common.setSVGElementGetBBox.$1",
             "type": "number",
             "tags": [],
             "label": "width",
@@ -1301,7 +1310,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.setSVGElementGetBBox.$2",
+            "id": "def-common.setSVGElementGetBBox.$2",
             "type": "number",
             "tags": [],
             "label": "height",
@@ -1316,7 +1325,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.setSVGElementGetBBox.$3",
+            "id": "def-common.setSVGElementGetBBox.$3",
             "type": "number",
             "tags": [],
             "label": "x",
@@ -1331,7 +1340,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.setSVGElementGetBBox.$4",
+            "id": "def-common.setSVGElementGetBBox.$4",
             "type": "number",
             "tags": [],
             "label": "y",
@@ -1350,7 +1359,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.setSVGElementGetComputedTextLength",
+        "id": "def-common.setSVGElementGetComputedTextLength",
         "type": "Function",
         "tags": [],
         "label": "setSVGElementGetComputedTextLength",
@@ -1364,7 +1373,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.setSVGElementGetComputedTextLength.$1",
+            "id": "def-common.setSVGElementGetComputedTextLength.$1",
             "type": "number",
             "tags": [],
             "label": "width",
@@ -1383,7 +1392,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.shallowWithI18nProvider",
+        "id": "def-common.shallowWithI18nProvider",
         "type": "Function",
         "tags": [],
         "label": "shallowWithI18nProvider",
@@ -1399,7 +1408,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.shallowWithI18nProvider.$1",
+            "id": "def-common.shallowWithI18nProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "child",
@@ -1418,7 +1427,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.shallowWithIntl",
+        "id": "def-common.shallowWithIntl",
         "type": "Function",
         "tags": [
           "return"
@@ -1440,7 +1449,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.shallowWithIntl.$1",
+            "id": "def-common.shallowWithIntl.$1",
             "type": "Object",
             "tags": [],
             "label": "node",
@@ -1457,7 +1466,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.shallowWithIntl.$2",
+            "id": "def-common.shallowWithIntl.$2",
             "type": "Object",
             "tags": [],
             "label": "{\n    context,\n    childContextTypes,\n    ...props\n  }",
@@ -1468,7 +1477,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.shallowWithIntl.$2.context",
+                "id": "def-common.shallowWithIntl.$2.context",
                 "type": "Any",
                 "tags": [],
                 "label": "context",
@@ -1482,7 +1491,7 @@
               },
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.shallowWithIntl.$2.childContextTypes",
+                "id": "def-common.shallowWithIntl.$2.childContextTypes",
                 "type": "Object",
                 "tags": [],
                 "label": "childContextTypes",
@@ -1505,7 +1514,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.stubBroadcastChannel",
+        "id": "def-common.stubBroadcastChannel",
         "type": "Function",
         "tags": [],
         "label": "stubBroadcastChannel",
@@ -1524,7 +1533,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.stubWebWorker",
+        "id": "def-common.stubWebWorker",
         "type": "Function",
         "tags": [],
         "label": "stubWebWorker",
@@ -1541,7 +1550,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.WithMemoryRouter",
+        "id": "def-common.WithMemoryRouter",
         "type": "Function",
         "tags": [],
         "label": "WithMemoryRouter",
@@ -1557,7 +1566,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.WithMemoryRouter.$1",
+            "id": "def-common.WithMemoryRouter.$1",
             "type": "Array",
             "tags": [],
             "label": "initialEntries",
@@ -1573,7 +1582,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.WithMemoryRouter.$2",
+            "id": "def-common.WithMemoryRouter.$2",
             "type": "number",
             "tags": [],
             "label": "initialIndex",
@@ -1592,17 +1601,17 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.WithRoute",
+        "id": "def-common.WithRoute",
         "type": "Function",
         "tags": [],
         "label": "WithRoute",
         "description": [],
         "signature": [
-          "(componentRoutePath?: ",
+          "(componentRoutePath: ",
           "LocationDescriptor",
           "<unknown> | ",
           "LocationDescriptor",
-          "<unknown>[], onRouter?: (router: any) => void) => (WrappedComponent: React.ComponentType<{}>) => (props: any) => JSX.Element"
+          "<unknown>[], onRouter: (router: any) => void) => (WrappedComponent: React.ComponentType<T>) => (props: any) => JSX.Element"
         ],
         "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
         "deprecated": false,
@@ -1610,7 +1619,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.WithRoute.$1",
+            "id": "def-common.WithRoute.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "componentRoutePath",
@@ -1628,7 +1637,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.WithRoute.$2",
+            "id": "def-common.WithRoute.$2",
             "type": "Function",
             "tags": [],
             "label": "onRouter",
@@ -1647,13 +1656,13 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.WithStore",
+        "id": "def-common.WithStore",
         "type": "Function",
         "tags": [],
         "label": "WithStore",
         "description": [],
         "signature": [
-          "(store: any) => (WrappedComponent: React.ComponentType<{}>) => (props: any) => JSX.Element"
+          "(store: any) => (WrappedComponent: React.ComponentType<T>) => (props: any) => JSX.Element"
         ],
         "path": "packages/kbn-test-jest-helpers/src/redux_helpers.tsx",
         "deprecated": false,
@@ -1661,7 +1670,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.WithStore.$1",
+            "id": "def-common.WithStore.$1",
             "type": "Any",
             "tags": [],
             "label": "store",
@@ -1682,7 +1691,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.AsyncTestBedConfig",
+        "id": "def-common.AsyncTestBedConfig",
         "type": "Interface",
         "tags": [],
         "label": "AsyncTestBedConfig",
@@ -1690,13 +1699,14 @@
         "signature": [
           {
             "pluginId": "@kbn/test-jest-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestJestHelpersPluginApi",
-            "section": "def-server.AsyncTestBedConfig",
+            "section": "def-common.AsyncTestBedConfig",
             "text": "AsyncTestBedConfig"
           },
-          " extends ",
-          "BaseTestBedConfig"
+          "<T> extends ",
+          "BaseTestBedConfig",
+          "<T>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
@@ -1704,7 +1714,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.AsyncTestBedConfig.doMountAsync",
+            "id": "def-common.AsyncTestBedConfig.doMountAsync",
             "type": "boolean",
             "tags": [],
             "label": "doMountAsync",
@@ -1721,7 +1731,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.EuiTableMetaData",
+        "id": "def-common.EuiTableMetaData",
         "type": "Interface",
         "tags": [],
         "label": "EuiTableMetaData",
@@ -1732,7 +1742,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.EuiTableMetaData.rows",
+            "id": "def-common.EuiTableMetaData.rows",
             "type": "Array",
             "tags": [],
             "label": "rows",
@@ -1752,7 +1762,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.EuiTableMetaData.tableCellsValues",
+            "id": "def-common.EuiTableMetaData.tableCellsValues",
             "type": "Array",
             "tags": [],
             "label": "tableCellsValues",
@@ -1771,7 +1781,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.TestBed",
+        "id": "def-common.TestBed",
         "type": "Interface",
         "tags": [],
         "label": "TestBed",
@@ -1779,9 +1789,9 @@
         "signature": [
           {
             "pluginId": "@kbn/test-jest-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestJestHelpersPluginApi",
-            "section": "def-server.TestBed",
+            "section": "def-common.TestBed",
             "text": "TestBed"
           },
           "<T>"
@@ -1792,7 +1802,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.TestBed.component",
+            "id": "def-common.TestBed.component",
             "type": "Object",
             "tags": [],
             "label": "component",
@@ -1809,7 +1819,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.TestBed.exists",
+            "id": "def-common.TestBed.exists",
             "type": "Function",
             "tags": [],
             "label": "exists",
@@ -1825,7 +1835,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.TestBed.exists.$1",
+                "id": "def-common.TestBed.exists.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "testSubject",
@@ -1842,7 +1852,7 @@
               },
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.TestBed.exists.$2",
+                "id": "def-common.TestBed.exists.$2",
                 "type": "number",
                 "tags": [],
                 "label": "count",
@@ -1862,7 +1872,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.TestBed.find",
+            "id": "def-common.TestBed.find",
             "type": "Function",
             "tags": [],
             "label": "find",
@@ -1881,7 +1891,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.TestBed.find.$1",
+                "id": "def-common.TestBed.find.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "testSubject",
@@ -1898,7 +1908,7 @@
               },
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.TestBed.find.$2",
+                "id": "def-common.TestBed.find.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "reactWrapper",
@@ -1917,7 +1927,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.TestBed.setProps",
+            "id": "def-common.TestBed.setProps",
             "type": "Function",
             "tags": [],
             "label": "setProps",
@@ -1933,7 +1943,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.TestBed.setProps.$1",
+                "id": "def-common.TestBed.setProps.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "updatedProps",
@@ -1953,7 +1963,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.TestBed.form",
+            "id": "def-common.TestBed.form",
             "type": "Object",
             "tags": [],
             "label": "form",
@@ -1973,7 +1983,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.TestBed.table",
+            "id": "def-common.TestBed.table",
             "type": "Object",
             "tags": [],
             "label": "table",
@@ -1982,9 +1992,9 @@
               "{ getMetaData: (tableTestSubject: T) => ",
               {
                 "pluginId": "@kbn/test-jest-helpers",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestJestHelpersPluginApi",
-                "section": "def-server.EuiTableMetaData",
+                "section": "def-common.EuiTableMetaData",
                 "text": "EuiTableMetaData"
               },
               "; }"
@@ -1995,7 +2005,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.TestBed.router",
+            "id": "def-common.TestBed.router",
             "type": "Object",
             "tags": [],
             "label": "router",
@@ -2012,7 +2022,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.TestBedConfig",
+        "id": "def-common.TestBedConfig",
         "type": "Interface",
         "tags": [],
         "label": "TestBedConfig",
@@ -2020,13 +2030,14 @@
         "signature": [
           {
             "pluginId": "@kbn/test-jest-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestJestHelpersPluginApi",
-            "section": "def-server.TestBedConfig",
+            "section": "def-common.TestBedConfig",
             "text": "TestBedConfig"
           },
-          " extends ",
-          "BaseTestBedConfig"
+          "<T> extends ",
+          "BaseTestBedConfig",
+          "<T>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
         "deprecated": false,
@@ -2034,7 +2045,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.TestBedConfig.doMountAsync",
+            "id": "def-common.TestBedConfig.doMountAsync",
             "type": "boolean",
             "tags": [],
             "label": "doMountAsync",
@@ -2054,7 +2065,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.AsyncSetupFunc",
+        "id": "def-common.AsyncSetupFunc",
         "type": "Type",
         "tags": [],
         "label": "AsyncSetupFunc",
@@ -2063,9 +2074,9 @@
           "(props?: P | undefined) => Promise<",
           {
             "pluginId": "@kbn/test-jest-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestJestHelpersPluginApi",
-            "section": "def-server.TestBed",
+            "section": "def-common.TestBed",
             "text": "TestBed"
           },
           "<T>>"
@@ -2077,7 +2088,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.AsyncSetupFunc.$1",
+            "id": "def-common.AsyncSetupFunc.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -2094,7 +2105,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.SetupFunc",
+        "id": "def-common.SetupFunc",
         "type": "Type",
         "tags": [],
         "label": "SetupFunc",
@@ -2103,17 +2114,17 @@
           "(props?: P | undefined) => ",
           {
             "pluginId": "@kbn/test-jest-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestJestHelpersPluginApi",
-            "section": "def-server.TestBed",
+            "section": "def-common.TestBed",
             "text": "TestBed"
           },
           "<T> | Promise<",
           {
             "pluginId": "@kbn/test-jest-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestJestHelpersPluginApi",
-            "section": "def-server.TestBed",
+            "section": "def-common.TestBed",
             "text": "TestBed"
           },
           "<T>>"
@@ -2125,7 +2136,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.SetupFunc.$1",
+            "id": "def-common.SetupFunc.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -2142,7 +2153,7 @@
       },
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.SyncSetupFunc",
+        "id": "def-common.SyncSetupFunc",
         "type": "Type",
         "tags": [],
         "label": "SyncSetupFunc",
@@ -2151,9 +2162,9 @@
           "(props?: P | undefined) => ",
           {
             "pluginId": "@kbn/test-jest-helpers",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestJestHelpersPluginApi",
-            "section": "def-server.TestBed",
+            "section": "def-common.TestBed",
             "text": "TestBed"
           },
           "<T>"
@@ -2165,7 +2176,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.SyncSetupFunc.$1",
+            "id": "def-common.SyncSetupFunc.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -2184,7 +2195,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/test-jest-helpers",
-        "id": "def-server.reactRouterMock",
+        "id": "def-common.reactRouterMock",
         "type": "Object",
         "tags": [],
         "label": "reactRouterMock",
@@ -2195,7 +2206,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.reactRouterMock.history",
+            "id": "def-common.reactRouterMock.history",
             "type": "Object",
             "tags": [],
             "label": "history",
@@ -2206,7 +2217,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.reactRouterMock.history.push",
+                "id": "def-common.reactRouterMock.history.push",
                 "type": "Function",
                 "tags": [],
                 "label": "push",
@@ -2222,7 +2233,7 @@
               },
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.reactRouterMock.history.createHref",
+                "id": "def-common.reactRouterMock.history.createHref",
                 "type": "Function",
                 "tags": [],
                 "label": "createHref",
@@ -2238,7 +2249,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
-                    "id": "def-server.reactRouterMock.history.createHref.$1",
+                    "id": "def-common.reactRouterMock.history.createHref.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "location",
@@ -2257,7 +2268,7 @@
               },
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.reactRouterMock.history.location",
+                "id": "def-common.reactRouterMock.history.location",
                 "type": "Object",
                 "tags": [],
                 "label": "location",
@@ -2268,7 +2279,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
-                    "id": "def-server.reactRouterMock.history.location.pathname",
+                    "id": "def-common.reactRouterMock.history.location.pathname",
                     "type": "string",
                     "tags": [],
                     "label": "pathname",
@@ -2279,7 +2290,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
-                    "id": "def-server.reactRouterMock.history.location.search",
+                    "id": "def-common.reactRouterMock.history.location.search",
                     "type": "string",
                     "tags": [],
                     "label": "search",
@@ -2290,7 +2301,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
-                    "id": "def-server.reactRouterMock.history.location.state",
+                    "id": "def-common.reactRouterMock.history.location.state",
                     "type": "string",
                     "tags": [],
                     "label": "state",
@@ -2301,7 +2312,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
-                    "id": "def-server.reactRouterMock.history.location.hash",
+                    "id": "def-common.reactRouterMock.history.location.hash",
                     "type": "string",
                     "tags": [],
                     "label": "hash",
@@ -2316,7 +2327,7 @@
           },
           {
             "parentPluginId": "@kbn/test-jest-helpers",
-            "id": "def-server.reactRouterMock.route",
+            "id": "def-common.reactRouterMock.route",
             "type": "Object",
             "tags": [],
             "label": "route",
@@ -2327,7 +2338,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/test-jest-helpers",
-                "id": "def-server.reactRouterMock.route.location",
+                "id": "def-common.reactRouterMock.route.location",
                 "type": "Object",
                 "tags": [],
                 "label": "location",
@@ -2338,7 +2349,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
-                    "id": "def-server.reactRouterMock.route.location.pathname",
+                    "id": "def-common.reactRouterMock.route.location.pathname",
                     "type": "string",
                     "tags": [],
                     "label": "pathname",
@@ -2349,7 +2360,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
-                    "id": "def-server.reactRouterMock.route.location.search",
+                    "id": "def-common.reactRouterMock.route.location.search",
                     "type": "string",
                     "tags": [],
                     "label": "search",
@@ -2360,7 +2371,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
-                    "id": "def-server.reactRouterMock.route.location.state",
+                    "id": "def-common.reactRouterMock.route.location.state",
                     "type": "string",
                     "tags": [],
                     "label": "state",
@@ -2371,7 +2382,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/test-jest-helpers",
-                    "id": "def-server.reactRouterMock.route.location.hash",
+                    "id": "def-common.reactRouterMock.route.location.hash",
                     "type": "string",
                     "tags": [],
                     "label": "hash",
@@ -2388,13 +2399,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

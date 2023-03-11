@@ -50,7 +50,11 @@
             }
           }
         },
-        "my_str_array": { "type": "array", "items": { "type": "keyword" } }
+        "my_str_array": { "type": "array", "items": { "type": "keyword" } },
+        "my_pass_through": {
+          "type": "pass_through",
+          "_meta": { "description": "Don't know what goes here. Simply passing it through."}
+        }
       }
     }
   }

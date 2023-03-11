@@ -42,6 +42,9 @@ import { IndexPattern } from '../../../types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const dataMock = dataPluginMock.createStartContract();
+dataMock.query.timefilter.timefilter.getAbsoluteTime = jest
+  .fn()
+  .mockReturnValue({ from: '2022-11-01T00:00:00.000Z', to: '2022-11-03T00:00:00.000Z' });
 
 jest.mock('.');
 jest.mock('../../../id_generator');
@@ -1289,6 +1292,35 @@ describe('state_helpers', () => {
             indexPattern,
             columnId: 'col1',
             op: 'average',
+            field: indexPattern.fields[2], // bytes field
+            visualizationGroups: [],
+            shouldResetLabel: undefined,
+          }).columns.col1
+        ).toEqual(expect.objectContaining({ label: 'MY CUSTOM LABEL' }));
+      });
+
+      it('should keep the custom label when already in formula and a setting change', () => {
+        expect(
+          replaceColumn({
+            layer: {
+              indexPatternId: '1',
+              columnOrder: ['col1', 'col2'],
+              columns: {
+                col1: {
+                  label: 'MY CUSTOM LABEL',
+                  customLabel: true,
+                  dataType: 'number',
+                  operationType: 'formula',
+                  isBucketed: false,
+                  scale: 'ratio',
+                  params: { isFormulaBroken: false, formula: 'average(bytes)' },
+                  references: [],
+                } as FormulaIndexPatternColumn,
+              },
+            },
+            indexPattern,
+            columnId: 'col1',
+            op: 'formula',
             field: indexPattern.fields[2], // bytes field
             visualizationGroups: [],
             shouldResetLabel: undefined,
@@ -3202,6 +3234,10 @@ describe('state_helpers', () => {
         },
         'col1',
         indexPattern,
+        {
+          fromDate: '2022-11-01T00:00:00.000Z',
+          toDate: '2022-11-03T00:00:00.000Z',
+        },
         operationDefinitionMap
       );
     });

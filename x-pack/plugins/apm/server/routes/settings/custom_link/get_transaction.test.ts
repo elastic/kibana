@@ -10,29 +10,28 @@ import {
   SearchParamsMock,
 } from '../../../utils/test_helpers';
 import { getTransaction } from './get_transaction';
-import { Setup } from '../../../lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
   TRANSACTION_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 
 describe('custom link get transaction', () => {
   let mock: SearchParamsMock;
   it('fetches without filter', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getTransaction({
-        setup: setup as unknown as Setup,
+        apmEventClient: mockApmEventClient,
       })
     );
 
     expect(mock.params).toMatchSnapshot();
   });
   it('fetches with all filter', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getTransaction({
-        setup: setup as unknown as Setup,
+        apmEventClient: mockApmEventClient,
         filters: {
           [SERVICE_NAME]: 'foo',
           [SERVICE_ENVIRONMENT]: 'bar',

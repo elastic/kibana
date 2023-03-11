@@ -41,7 +41,13 @@ export class KibanaTilemapSource extends AbstractSource {
       },
     ];
   }
+  async hasLegendDetails() {
+    return false;
+  }
 
+  renderLegendDetails() {
+    return null;
+  }
   isSourceStale(mbSource, sourceData) {
     if (!sourceData.url) {
       return false;

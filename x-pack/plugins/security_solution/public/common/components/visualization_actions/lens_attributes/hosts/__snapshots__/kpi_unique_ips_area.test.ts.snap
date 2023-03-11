@@ -90,23 +90,6 @@ Object {
         "meta": Object {
           "alias": null,
           "disabled": false,
-          "key": "host.id",
-          "negate": false,
-          "params": Object {
-            "query": "123",
-          },
-          "type": "phrase",
-        },
-        "query": Object {
-          "match_phrase": Object {
-            "host.id": "123",
-          },
-        },
-      },
-      Object {
-        "meta": Object {
-          "alias": null,
-          "disabled": false,
           "key": "host.name",
           "negate": false,
           "params": Object {
@@ -131,17 +114,11 @@ Object {
         },
         "query": Object {
           "bool": Object {
-            "filter": Array [
+            "minimum_should_match": 1,
+            "should": Array [
               Object {
-                "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "host.name",
-                      },
-                    },
-                  ],
+                "exists": Object {
+                  "field": "host.name",
                 },
               },
             ],
@@ -169,6 +146,23 @@ Object {
                 },
               },
             ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
           },
         },
       },

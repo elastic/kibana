@@ -121,6 +121,23 @@ const BaseRangeEditor = ({
 
   return (
     <>
+      <EuiSpacer size="s" />
+      <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+        <EuiSwitch
+          label={
+            <EuiText size="xs">
+              {i18n.translate('xpack.lens.indexPattern.ranges.includeEmptyRows', {
+                defaultMessage: 'Include empty rows',
+              })}
+            </EuiText>
+          }
+          checked={Boolean(includeEmptyRows)}
+          onChange={() => {
+            onChangeIncludeEmptyRows(!includeEmptyRows);
+          }}
+          compressed
+        />
+      </EuiFormRow>
       <EuiFormRow
         label={granularityLabel}
         data-test-subj="indexPattern-ranges-section-label"
@@ -177,23 +194,6 @@ const BaseRangeEditor = ({
           defaultMessage: 'Create custom ranges',
         })}
       </EuiButtonEmpty>
-      <EuiSpacer size="s" />
-      <EuiFormRow display="rowCompressed" hasChildLabel={false}>
-        <EuiSwitch
-          label={
-            <EuiText size="xs">
-              {i18n.translate('xpack.lens.indexPattern.ranges.includeEmptyRows', {
-                defaultMessage: 'Include empty rows',
-              })}
-            </EuiText>
-          }
-          checked={Boolean(includeEmptyRows)}
-          onChange={() => {
-            onChangeIncludeEmptyRows(!includeEmptyRows);
-          }}
-          compressed
-        />
-      </EuiFormRow>
     </>
   );
 };

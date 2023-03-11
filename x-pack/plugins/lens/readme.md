@@ -31,7 +31,7 @@ When adding visualizations to a solution page, there are multiple ways to approa
    * Limited data processing options - if the Lens UI doesn't support it, it can't be used
    * Limited visualization options - if Lens can't do it, it's not possible
 * #### **Using custom data fetching and rendering**
-  In case the disadvantages of using the Lens embeddable heavily affect your use case, it sometimes makes sense to roll your own data fetching and rendering by using the underlying APIs of search service and `elastic-charts` directly. This allows a high degree of flexibility when it comes to data processing, efficiently querying data for multiple charts in a single query and adjusting small details in how charts are rendered. However, do not choose these option lightly as maintenance as well as initial development effort will most likely be much higher than by using the Lens embeddable directly. In this case, almost always an "Open in Lens" button can still be offered to the user to drill down and further explore the data by generating a Lens configuration which is similar to the displayed visualization given the possibilities of Lens. Keep in mind that for the "Open in Lens" flow, the most important property isn't perfect fidelity of the chart but retaining the mental context of the user when switching so they don't have to start over. It's also possible to mix this approach with Lens embeddables on a single page.  **Note**: In this situation, please let the VisEditors team know what features you are missing / why you chose not to use Lens.
+  In case the disadvantages of using the Lens embeddable heavily affect your use case, it sometimes makes sense to roll your own data fetching and rendering by using the underlying APIs of search service and `elastic-charts` directly. This allows a high degree of flexibility when it comes to data processing, efficiently querying data for multiple charts in a single query and adjusting small details in how charts are rendered. However, do not choose these option lightly as maintenance as well as initial development effort will most likely be much higher than by using the Lens embeddable directly. In this case, almost always an "Open in Lens" button can still be offered to the user to drill down and further explore the data by generating a Lens configuration which is similar to the displayed visualization given the possibilities of Lens. Keep in mind that for the "Open in Lens" flow, the most important property isn't perfect fidelity of the chart but retaining the mental context of the user when switching so they don't have to start over. It's also possible to mix this approach with Lens embeddables on a single page.  **Note**: In this situation, please let the Visualizations team know what features you are missing / why you chose not to use Lens.
 
   Pros:
    * Full flexibility in data fetching optimization and chart rendering
@@ -158,6 +158,14 @@ The Lens embeddable is handling data fetching internally, this means as soon as 
 * Pass the current session id to the Lens embeddable component via the `searchSessionId` property
 * When refreshing, simply call `session.start` again and update your state - Lens will discard the existing cache and re-fetch even if the query doesn't change at all
 * When unmounting your app, call `session.clear` to end the current session
+
+## Performance considerations
+
+As the Lens embeddable is doing data fetching and processing internally as soon as props are passed to it, it's beneficial to make sure it's not rendered with new props if that's avoidable. Lens is aborting in-flight search requests as soon as the chart configuration changes based on props, but there's still non-trivial work kicked off in multiple parts of the stack. To avoid this, make sure to keep these things in mind:
+* Changing the reference of the `attributes` prop will cause the Lens vis to re-initialize from scratch. Try to keep it stable as long as possible, e.g. by using `useMemo` instead of re-constructing it on the fly on every render
+* Pass time range and filters in via the dedicated props instead of part of the `attributes` to avoid re-initalization. Changing time range or filters might kick off another search request so it makes sense to keep this stable as well, but this can also be controlled somewhat by the session id (see section above)
+* The chart will adjust itself automatically to layout changes, no need to trigger another re-render in this situation
+
 
 ## Getting data tables and requests/responses
 

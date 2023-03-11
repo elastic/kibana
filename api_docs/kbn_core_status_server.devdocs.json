@@ -11,50 +11,67 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-status-server",
-        "id": "def-server.CoreStatus",
+        "id": "def-common.CoreStatus",
         "type": "Interface",
         "tags": [],
         "label": "CoreStatus",
         "description": [
           "\nStatus of core services.\n"
         ],
-        "signature": [
-          "CoreStatus"
-        ],
-        "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
+        "path": "packages/core/status/core-status-common/src/core_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.CoreStatus.elasticsearch",
+            "id": "def-common.CoreStatus.elasticsearch",
             "type": "Object",
             "tags": [],
             "label": "elasticsearch",
             "description": [],
             "signature": [
-              "ServiceStatus",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.ServiceStatus",
+                "text": "ServiceStatus"
+              },
               "<unknown>"
             ],
-            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
+            "path": "packages/core/status/core-status-common/src/core_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.CoreStatus.savedObjects",
+            "id": "def-common.CoreStatus.savedObjects",
             "type": "Object",
             "tags": [],
             "label": "savedObjects",
             "description": [],
             "signature": [
-              "ServiceStatus",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.ServiceStatus",
+                "text": "ServiceStatus"
+              },
               "<unknown>"
             ],
-            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
+            "path": "packages/core/status/core-status-common/src/core_status.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -63,7 +80,7 @@
       },
       {
         "parentPluginId": "@kbn/core-status-server",
-        "id": "def-server.ServiceStatus",
+        "id": "def-common.ServiceStatus",
         "type": "Interface",
         "tags": [],
         "label": "ServiceStatus",
@@ -71,16 +88,22 @@
           "\nThe current status of a service at a point in time.\n"
         ],
         "signature": [
-          "ServiceStatus",
+          {
+            "pluginId": "@kbn/core-status-common",
+            "scope": "common",
+            "docId": "kibKbnCoreStatusCommonPluginApi",
+            "section": "def-common.ServiceStatus",
+            "text": "ServiceStatus"
+          },
           "<Meta>"
         ],
-        "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
+        "path": "packages/core/status/core-status-common/src/service_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.ServiceStatus.level",
+            "id": "def-common.ServiceStatus.level",
             "type": "CompoundType",
             "tags": [],
             "label": "level",
@@ -90,26 +113,26 @@
             "signature": [
               "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
             ],
-            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
+            "path": "packages/core/status/core-status-common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.ServiceStatus.summary",
+            "id": "def-common.ServiceStatus.summary",
             "type": "string",
             "tags": [],
             "label": "summary",
             "description": [
               "\nA high-level summary of the service status."
             ],
-            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
+            "path": "packages/core/status/core-status-common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.ServiceStatus.detail",
+            "id": "def-common.ServiceStatus.detail",
             "type": "string",
             "tags": [],
             "label": "detail",
@@ -119,13 +142,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
+            "path": "packages/core/status/core-status-common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.ServiceStatus.documentationUrl",
+            "id": "def-common.ServiceStatus.documentationUrl",
             "type": "string",
             "tags": [],
             "label": "documentationUrl",
@@ -135,13 +158,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
+            "path": "packages/core/status/core-status-common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.ServiceStatus.meta",
+            "id": "def-common.ServiceStatus.meta",
             "type": "Uncategorized",
             "tags": [],
             "label": "meta",
@@ -151,7 +174,7 @@
             "signature": [
               "Meta | undefined"
             ],
-            "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
+            "path": "packages/core/status/core-status-common/src/service_status.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -160,7 +183,7 @@
       },
       {
         "parentPluginId": "@kbn/core-status-server",
-        "id": "def-server.StatusServiceSetup",
+        "id": "def-common.StatusServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "StatusServiceSetup",
@@ -173,7 +196,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.StatusServiceSetup.core$",
+            "id": "def-common.StatusServiceSetup.core$",
             "type": "Object",
             "tags": [],
             "label": "core$",
@@ -183,7 +206,13 @@
             "signature": [
               "Observable",
               "<",
-              "CoreStatus",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.CoreStatus",
+                "text": "CoreStatus"
+              },
               ">"
             ],
             "path": "packages/core/status/core-status-server/src/contracts.ts",
@@ -192,7 +221,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.StatusServiceSetup.overall$",
+            "id": "def-common.StatusServiceSetup.overall$",
             "type": "Object",
             "tags": [],
             "label": "overall$",
@@ -202,7 +231,13 @@
             "signature": [
               "Observable",
               "<",
-              "ServiceStatus",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.ServiceStatus",
+                "text": "ServiceStatus"
+              },
               "<unknown>>"
             ],
             "path": "packages/core/status/core-status-server/src/contracts.ts",
@@ -211,7 +246,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.StatusServiceSetup.set",
+            "id": "def-common.StatusServiceSetup.set",
             "type": "Function",
             "tags": [],
             "label": "set",
@@ -222,7 +257,13 @@
               "(status$: ",
               "Observable",
               "<",
-              "ServiceStatus",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.ServiceStatus",
+                "text": "ServiceStatus"
+              },
               "<unknown>>) => void"
             ],
             "path": "packages/core/status/core-status-server/src/contracts.ts",
@@ -231,7 +272,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-status-server",
-                "id": "def-server.StatusServiceSetup.set.$1",
+                "id": "def-common.StatusServiceSetup.set.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "status$",
@@ -239,7 +280,13 @@
                 "signature": [
                   "Observable",
                   "<",
-                  "ServiceStatus",
+                  {
+                    "pluginId": "@kbn/core-status-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreStatusCommonPluginApi",
+                    "section": "def-common.ServiceStatus",
+                    "text": "ServiceStatus"
+                  },
                   "<unknown>>"
                 ],
                 "path": "packages/core/status/core-status-server/src/contracts.ts",
@@ -252,7 +299,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.StatusServiceSetup.dependencies$",
+            "id": "def-common.StatusServiceSetup.dependencies$",
             "type": "Object",
             "tags": [],
             "label": "dependencies$",
@@ -262,7 +309,13 @@
             "signature": [
               "Observable",
               "<Record<string, ",
-              "ServiceStatus",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.ServiceStatus",
+                "text": "ServiceStatus"
+              },
               "<unknown>>>"
             ],
             "path": "packages/core/status/core-status-server/src/contracts.ts",
@@ -271,7 +324,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.StatusServiceSetup.derivedStatus$",
+            "id": "def-common.StatusServiceSetup.derivedStatus$",
             "type": "Object",
             "tags": [],
             "label": "derivedStatus$",
@@ -281,7 +334,13 @@
             "signature": [
               "Observable",
               "<",
-              "ServiceStatus",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.ServiceStatus",
+                "text": "ServiceStatus"
+              },
               "<unknown>>"
             ],
             "path": "packages/core/status/core-status-server/src/contracts.ts",
@@ -290,7 +349,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server",
-            "id": "def-server.StatusServiceSetup.isStatusPageAnonymous",
+            "id": "def-common.StatusServiceSetup.isStatusPageAnonymous",
             "type": "Function",
             "tags": [],
             "label": "isStatusPageAnonymous",
@@ -314,7 +373,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-status-server",
-        "id": "def-server.ServiceStatusLevel",
+        "id": "def-common.ServiceStatusLevel",
         "type": "Type",
         "tags": [],
         "label": "ServiceStatusLevel",
@@ -324,14 +383,14 @@
         "signature": [
           "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
         ],
-        "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
+        "path": "packages/core/status/core-status-common/src/service_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-status-server",
-        "id": "def-server.ServiceStatusLevelId",
+        "id": "def-common.ServiceStatusLevelId",
         "type": "Type",
         "tags": [],
         "label": "ServiceStatusLevelId",
@@ -339,9 +398,9 @@
           "\nPossible values for the ID of a {@link ServiceStatusLevel}\n"
         ],
         "signature": [
-          "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
+          "\"degraded\" | \"unavailable\" | \"critical\" | \"available\""
         ],
-        "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
+        "path": "packages/core/status/core-status-common/src/service_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -350,7 +409,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-status-server",
-        "id": "def-server.ServiceStatusLevels",
+        "id": "def-common.ServiceStatusLevels",
         "type": "Object",
         "tags": [],
         "label": "ServiceStatusLevels",
@@ -360,19 +419,11 @@
         "signature": [
           "{ readonly available: Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }>; readonly degraded: Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }>; readonly unavailable: Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }>; readonly critical: Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>; }"
         ],
-        "path": "node_modules/@types/kbn__core-status-common/index.d.ts",
+        "path": "packages/core/status/core-status-common/src/service_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

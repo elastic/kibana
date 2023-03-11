@@ -8,5 +8,12 @@
 export enum SYNTHETICS_API_URLS {
   SYNTHETICS_OVERVIEW = '/internal/synthetics/overview',
   PINGS = '/internal/synthetics/pings',
-  OVERVIEW_STATUS = `/internal/synthetics/overview/status`,
+  PING_STATUSES = '/internal/synthetics/ping_statuses',
+  OVERVIEW_STATUS = `/internal/synthetics/overview_status`,
+  INDEX_SIZE = `/internal/synthetics/index_size`,
+  PARAMS = `/synthetics/params`,
+  PRIVATE_LOCATIONS = `/synthetics/private_locations`,
+  SYNC_GLOBAL_PARAMS = `/synthetics/sync_global_params`,
+  ENABLE_DEFAULT_ALERTING = `/synthetics/enable_default_alerting`,
+  JOURNEY = `/internal/synthetics/journey/{checkGroup}`,
 }

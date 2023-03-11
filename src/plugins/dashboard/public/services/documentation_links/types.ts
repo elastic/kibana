@@ -11,4 +11,5 @@ import { CoreStart } from '@kbn/core/public';
 export interface DashboardDocumentationLinksService {
   indexPatternsDocLink: CoreStart['docLinks']['links']['indexPatterns']['introduction'];
   kibanaGuideDocLink: CoreStart['docLinks']['links']['kibana']['guide'];
+  dashboardDocLink: CoreStart['docLinks']['links']['dashboard']['guide'];
 }

@@ -92,6 +92,18 @@ export interface ChromeHelpExtensionMenuCustomLink extends ChromeHelpExtensionLi
    * Content of the button (in lieu of `children`)
    */
   content: React.ReactNode;
+  /**
+   * Opens link in new tab
+   */
+  external?: boolean;
+}
+
+/** @public */
+export interface ChromeGlobalHelpExtensionMenuLink extends ChromeHelpExtensionMenuCustomLink {
+  /**
+   * Highest priority items are listed at the top of the list of links.
+   */
+  priority: number;
 }
 
 /** @public */

@@ -7,9 +7,9 @@
 import { sum } from 'lodash/fp';
 import { useMemo } from 'react';
 import type { LegendItem } from '../../../../common/components/charts/legend_item';
-import type { SeverityCount } from '../../../../common/components/severity/types';
+import type { SeverityCount } from '../../../../explore/components/risk_score/severity/types';
 import type { DonutChartProps } from '../../../../common/components/charts/donutchart';
-import { RISK_SEVERITY_COLOUR } from '../../../../common/components/severity/common';
+import { RISK_SEVERITY_COLOUR } from '../../../../explore/components/risk_score/severity/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 
 const legendField = 'kibana.alert.severity';

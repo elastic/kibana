@@ -14,7 +14,10 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
+import type { PackageList } from '../../../common';
+
 import type {
+  CategoryId,
   EsAssetReference,
   InstallablePackage,
   Installation,
@@ -22,12 +25,13 @@ import type {
   ArchivePackage,
   BundledPackage,
 } from '../../types';
-import { checkSuperuser } from '../../routes/security';
+import { checkSuperuser } from '../security';
 import { FleetUnauthorizedError } from '../../errors';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
+import type { FetchFindLatestPackageOptions } from './registry';
 import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
-import { ensureInstalledPackage, getInstallation } from './packages';
+import { ensureInstalledPackage, getInstallation, getPackages } from './packages';
 
 export type InstalledAssetType = EsAssetReference;
 
@@ -45,12 +49,21 @@ export interface PackageClient {
     spaceId?: string;
   }): Promise<Installation | undefined>;
 
-  fetchFindLatestPackage(packageName: string): Promise<RegistryPackage | BundledPackage>;
+  fetchFindLatestPackage(
+    packageName: string,
+    options?: FetchFindLatestPackageOptions
+  ): Promise<RegistryPackage | BundledPackage>;
 
   getPackage(
     packageName: string,
     packageVersion: string
   ): Promise<{ packageInfo: ArchivePackage; paths: string[] }>;
+
+  getPackages(params?: {
+    excludeInstallStatus?: false;
+    category?: CategoryId;
+    prerelease?: false;
+  }): Promise<PackageList>;
 
   reinstallEsAssets(
     packageInfo: InstallablePackage,
@@ -116,9 +129,12 @@ class PackageClientImpl implements PackageClient {
     });
   }
 
-  public async fetchFindLatestPackage(packageName: string) {
+  public async fetchFindLatestPackage(
+    packageName: string,
+    options?: FetchFindLatestPackageOptions
+  ): Promise<RegistryPackage | BundledPackage> {
     await this.#runPreflight();
-    return fetchFindLatestPackageOrThrow(packageName);
+    return fetchFindLatestPackageOrThrow(packageName, options);
   }
 
   public async getPackage(
@@ -128,6 +144,21 @@ class PackageClientImpl implements PackageClient {
   ) {
     await this.#runPreflight();
     return getPackage(packageName, packageVersion, options);
+  }
+
+  public async getPackages(params?: {
+    excludeInstallStatus?: false;
+    category?: CategoryId;
+    prerelease?: false;
+  }) {
+    const { excludeInstallStatus, category, prerelease } = params || {};
+    await this.#runPreflight();
+    return getPackages({
+      savedObjectsClient: this.internalSoClient,
+      excludeInstallStatus,
+      category,
+      prerelease,
+    });
   }
 
   public async reinstallEsAssets(

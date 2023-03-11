@@ -98,6 +98,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async clickProcessorOutputTab() {
       await act(async () => {
         find('outputTab').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     },
@@ -112,6 +113,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async clickRunPipelineButton() {
       await act(async () => {
         find('runPipelineButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     },
@@ -119,6 +121,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async toggleVerboseSwitch() {
       await act(async () => {
         form.toggleEuiSwitch('verboseOutputToggle');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     },
@@ -127,6 +130,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       find('documentsEditor').simulate('change', {
         jsonString,
       });
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     },
 
     clickDocumentsDropdown() {
@@ -181,6 +185,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async clickAddDocumentButton() {
       await act(async () => {
         find('addDocumentButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     },

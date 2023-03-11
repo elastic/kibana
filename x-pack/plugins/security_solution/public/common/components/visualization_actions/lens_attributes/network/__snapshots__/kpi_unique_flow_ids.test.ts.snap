@@ -75,16 +75,28 @@ Object {
         "meta": Object {
           "alias": null,
           "disabled": false,
-          "key": "host.id",
+          "key": "source.ip",
           "negate": false,
           "params": Object {
-            "query": "123",
+            "query": "192.168.1.1",
           },
           "type": "phrase",
         },
         "query": Object {
-          "match_phrase": Object {
-            "host.id": "123",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "source.ip": "192.168.1.1",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "destination.ip": "192.168.1.1",
+                },
+              },
+            ],
           },
         },
       },
@@ -99,36 +111,16 @@ Object {
         },
         "query": Object {
           "bool": Object {
-            "filter": Array [
+            "minimum_should_match": 1,
+            "should": Array [
               Object {
-                "bool": Object {
-                  "minimum_should_match": 1,
-                  "should": Array [
-                    Object {
-                      "bool": Object {
-                        "minimum_should_match": 1,
-                        "should": Array [
-                          Object {
-                            "exists": Object {
-                              "field": "source.ip",
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    Object {
-                      "bool": Object {
-                        "minimum_should_match": 1,
-                        "should": Array [
-                          Object {
-                            "exists": Object {
-                              "field": "destination.ip",
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
+                "exists": Object {
+                  "field": "source.ip",
+                },
+              },
+              Object {
+                "exists": Object {
+                  "field": "destination.ip",
                 },
               },
             ],
@@ -159,6 +151,23 @@ Object {
           },
         },
       },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
     ],
     "query": Object {
       "language": "kql",
@@ -166,6 +175,7 @@ Object {
     },
     "visualization": Object {
       "accessor": "a27f3503-9c73-4fc1-86bb-12461dae4b70",
+      "autoScaleMetricAlignment": "left",
       "layerId": "5d46d48f-6ce8-46be-a797-17ad50642564",
       "layerType": "data",
     },

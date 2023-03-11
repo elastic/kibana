@@ -10,11 +10,11 @@ import { each, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
 
-import { buildBaseFilterCriteria } from './application/utils/query_utils';
-import { GroupTableItem } from './components/spike_analysis_table/spike_analysis_table_groups';
+import { buildExtendedBaseFilterCriteria } from './application/utils/build_extended_base_filter_criteria';
+import { GroupTableItem } from './components/spike_analysis_table/types';
 
 export interface DocumentCountStats {
   interval?: number;
@@ -33,8 +33,8 @@ export interface DocumentStatsSearchStrategyParams {
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   fieldsToFetch?: string[];
-  selectedChangePoint?: ChangePoint;
-  includeSelectedChangePoint?: boolean;
+  selectedSignificantTerm?: SignificantTerm;
+  includeSelectedSignificantTerm?: boolean;
   selectedGroup?: GroupTableItem | null;
 }
 
@@ -48,19 +48,19 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
     searchQuery,
     intervalMs,
     fieldsToFetch,
-    selectedChangePoint,
-    includeSelectedChangePoint,
+    selectedSignificantTerm,
+    includeSelectedSignificantTerm,
     selectedGroup,
   } = params;
 
   const size = 0;
-  const filterCriteria = buildBaseFilterCriteria(
+  const filterCriteria = buildExtendedBaseFilterCriteria(
     timeFieldName,
     earliestMs,
     latestMs,
     searchQuery,
-    selectedChangePoint,
-    includeSelectedChangePoint,
+    selectedSignificantTerm,
+    includeSelectedSignificantTerm,
     selectedGroup
   );
 
@@ -71,7 +71,11 @@ export const getDocumentCountStatsRequest = (params: DocumentStatsSearchStrategy
       date_histogram: {
         field: timeFieldName,
         fixed_interval: `${intervalMs}ms`,
-        min_doc_count: 1,
+        min_doc_count: 0,
+        extended_bounds: {
+          min: earliestMs,
+          max: latestMs,
+        },
       },
     },
   };

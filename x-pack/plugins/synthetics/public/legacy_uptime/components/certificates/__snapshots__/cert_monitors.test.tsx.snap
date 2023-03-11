@@ -4,7 +4,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
 <span>
   <span>
     <span
-      class="euiToolTipAnchor"
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <button
         class="euiLink emotion-euiLink-primary"
@@ -22,7 +22,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
   <span>
     , 
     <span
-      class="euiToolTipAnchor"
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <button
         class="euiLink emotion-euiLink-primary"
@@ -40,7 +40,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
   <span>
     , 
     <span
-      class="euiToolTipAnchor"
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
     >
       <button
         class="euiLink emotion-euiLink-primary"

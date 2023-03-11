@@ -6,12 +6,12 @@
  */
 
 import React, { lazy } from 'react';
-import { AppMockRenderer, createAppMockRenderer } from '../../components/test_utils';
 import { ConnectorForm } from './connector_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/dom';
 import { act } from '@testing-library/react';
+import { AppMockRenderer, createAppMockRenderer } from '../test_utils';
 
 describe('ConnectorForm', () => {
   let appMockRenderer: AppMockRenderer;
@@ -103,19 +103,20 @@ describe('ConnectorForm', () => {
     );
 
     expect(result.getByTestId('nameInput')).toBeInTheDocument();
+
     await act(async () => {
       const submit = onChange.mock.calls[0][0].submit;
       await submit();
     });
 
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith({
-        isSubmitted: true,
-        isSubmitting: true,
-        isValid: false,
-        preSubmitValidator: null,
-        submit: expect.anything(),
-      });
+    await waitFor(() => expect(onChange).toHaveBeenCalled());
+
+    expect(onChange).toHaveBeenCalledWith({
+      isSubmitted: false,
+      isSubmitting: false,
+      isValid: false,
+      preSubmitValidator: expect.anything(),
+      submit: expect.anything(),
     });
   });
 

@@ -7,15 +7,19 @@
  */
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsCollectMultiNamespaceReferencesObject,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectReferenceWithContext,
 } from '@kbn/core-saved-objects-api-server';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
+import {
+  type ISavedObjectsSecurityExtension,
+  type ISavedObjectTypeRegistry,
+  type SavedObject,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core-saved-objects-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   type SavedObjectsSerializer,
   getObjectKey,
@@ -54,6 +58,7 @@ export interface CollectMultiNamespaceReferencesParams {
   serializer: SavedObjectsSerializer;
   getIndexForType: (type: string) => string;
   createPointInTimeFinder: CreatePointInTimeFinderFn;
+  securityExtension: ISavedObjectsSecurityExtension | undefined;
   objects: SavedObjectsCollectMultiNamespaceReferencesObject[];
   options?: SavedObjectsCollectMultiNamespaceReferencesOptions;
 }
@@ -67,7 +72,7 @@ export interface CollectMultiNamespaceReferencesParams {
 export async function collectMultiNamespaceReferences(
   params: CollectMultiNamespaceReferencesParams
 ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
-  const { createPointInTimeFinder, objects } = params;
+  const { createPointInTimeFinder, objects, securityExtension, options } = params;
   if (!objects.length) {
     return { objects: [] };
   }
@@ -94,17 +99,17 @@ export async function collectMultiNamespaceReferences(
     };
   });
 
-  const objectsToFindAliasesFor = objectsWithContext
-    .filter(({ spaces }) => spaces.length !== 0)
-    .map(({ type, id }) => ({ type, id }));
+  const foundObjects = objectsWithContext.filter(({ spaces }) => spaces.length !== 0); // Any objects that have a non-empty `spaces` field are "found"
+  const objectsToFindAliasesFor = foundObjects.map(({ type, id }) => ({ type, id }));
   const aliasesMap = await findLegacyUrlAliases(
     createPointInTimeFinder,
     objectsToFindAliasesFor,
     ALIAS_OR_SHARED_ORIGIN_SEARCH_PER_PAGE
   );
-  const objectOriginsToSearchFor = objectsWithContext
-    .filter(({ spaces }) => spaces.length !== 0)
-    .map(({ type, id, originId }) => ({ type, origin: originId || id }));
+  const objectOriginsToSearchFor = foundObjects.map(({ type, id, originId }) => ({
+    type,
+    origin: originId || id,
+  }));
   const originsMap = await findSharedOriginObjects(
     createPointInTimeFinder,
     objectOriginsToSearchFor,
@@ -118,8 +123,18 @@ export async function collectMultiNamespaceReferences(
     return { ...obj, spacesWithMatchingAliases, spacesWithMatchingOrigins };
   });
 
+  if (!securityExtension) return { objects: results };
+
+  // Now that we have *all* information for the object graph, if the Security extension is enabled, we can: check/enforce authorization,
+  // write audit events, filter the object graph, and redact spaces from the objects.
+  const filteredAndRedactedResults =
+    await securityExtension.authorizeAndRedactMultiNamespaceReferences({
+      namespace: SavedObjectsUtils.namespaceIdToString(options?.namespace),
+      objects: results,
+      options: { purpose: options?.purpose },
+    });
   return {
-    objects: results,
+    objects: filteredAndRedactedResults,
   };
 }
 

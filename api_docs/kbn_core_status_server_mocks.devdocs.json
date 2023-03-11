@@ -14,10 +14,18 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-status-server-mocks",
-        "id": "def-server.statusServiceMock",
+        "id": "def-common.statusServiceMock",
         "type": "Object",
         "tags": [],
         "label": "statusServiceMock",
@@ -28,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-status-server-mocks",
-            "id": "def-server.statusServiceMock.create",
+            "id": "def-common.statusServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -44,14 +52,20 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-mocks",
-            "id": "def-server.statusServiceMock.createSetupContract",
+            "id": "def-common.statusServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "StatusServiceSetup",
+              {
+                "pluginId": "@kbn/core-status-server",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusServerPluginApi",
+                "section": "def-common.StatusServiceSetup",
+                "text": "StatusServiceSetup"
+              },
               ">"
             ],
             "path": "packages/core/status/core-status-server-mocks/src/status_service.mock.ts",
@@ -62,7 +76,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-mocks",
-            "id": "def-server.statusServiceMock.createInternalSetupContract",
+            "id": "def-common.statusServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
@@ -82,13 +96,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

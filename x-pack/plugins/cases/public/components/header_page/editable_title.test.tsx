@@ -190,9 +190,8 @@ describe('EditableTitle', () => {
     expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(true);
   });
 
-  it('does not submit the title when the length is longer than 64 characters', () => {
-    const longTitle =
-      'This is a title that should not be saved as it is longer than 64 characters.';
+  it('does not submit the title when the length is longer than 160 characters', () => {
+    const longTitle = 'a'.repeat(161);
 
     const wrapper = mount(
       <TestProviders>
@@ -210,7 +209,7 @@ describe('EditableTitle', () => {
     wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
     wrapper.update();
     expect(wrapper.find('.euiFormErrorText').text()).toBe(
-      'The length of the title is too long. The maximum length is 64.'
+      'The length of the title is too long. The maximum length is 160.'
     );
 
     expect(submitTitle).not.toHaveBeenCalled();
@@ -220,8 +219,7 @@ describe('EditableTitle', () => {
   });
 
   it('does not show an error after a previous edit error was displayed', () => {
-    const longTitle =
-      'This is a title that should not be saved as it is longer than 64 characters.';
+    const longTitle = 'a'.repeat(161);
 
     const shortTitle = 'My title';
     const wrapper = mount(
@@ -241,7 +239,7 @@ describe('EditableTitle', () => {
     wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
     wrapper.update();
     expect(wrapper.find('.euiFormErrorText').text()).toBe(
-      'The length of the title is too long. The maximum length is 64.'
+      'The length of the title is too long. The maximum length is 160.'
     );
 
     // write a shorter one

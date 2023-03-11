@@ -12,6 +12,7 @@ export const LOCAL_STORAGE_HIDE_WIDGETS_KEY = 'kubernetesSecurity:shouldHideWidg
 export const AGGREGATE_ROUTE = '/internal/kubernetes_security/aggregate';
 export const COUNT_ROUTE = '/internal/kubernetes_security/count';
 export const MULTI_TERMS_AGGREGATE_ROUTE = '/internal/kubernetes_security/multi_terms_aggregate';
+export const AGENT_ID_ROUTE = '/internal/kubernetes_security/agent_id';
 export const AGGREGATE_PAGE_SIZE = 10;
 
 // so, bucket sort can only page through what we request at the top level agg, which means there is a ceiling to how many aggs we can page through.
@@ -23,6 +24,7 @@ export const QUERY_KEY_PERCENT_WIDGET = 'kubernetesSecurityPercentWidget';
 export const QUERY_KEY_COUNT_WIDGET = 'kubernetesSecurityCountWidget';
 export const QUERY_KEY_CONTAINER_NAME_WIDGET = 'kubernetesSecurityContainerNameWidget';
 export const QUERY_KEY_PROCESS_EVENTS = 'kubernetesSecurityProcessEvents';
+export const QUERY_KEY_AGENT_ID = 'kubernetesSecurityAgentId';
 
 // ECS fields
 export const ENTRY_LEADER_INTERACTIVE = 'process.entry_leader.interactive';

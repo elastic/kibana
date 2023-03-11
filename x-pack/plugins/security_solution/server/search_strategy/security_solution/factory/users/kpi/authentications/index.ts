@@ -16,7 +16,7 @@ import type {
   UsersKpiAuthenticationsStrategyResponse,
   UsersQueries,
 } from '../../../../../../../common/search_strategy';
-import { formatGeneralHistogramData } from '../../../hosts/kpi';
+import { formatGeneralHistogramData } from '../../../common/format_general_histogram_data';
 
 export const usersKpiAuthentications: SecuritySolutionFactory<UsersQueries.kpiAuthentications> = {
   buildDsl: (options: UsersKpiAuthenticationsRequestOptions) =>

@@ -19,6 +19,9 @@ const analyticsCollectionMappingsProperties: Record<string, MappingProperty> = {
   event_retention_day_length: {
     type: 'long',
   },
+  eventsDatastream: {
+    type: 'keyword',
+  },
   name: {
     type: 'keyword',
   },

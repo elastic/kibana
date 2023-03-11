@@ -19,12 +19,11 @@ import {
 import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
 import { DetailsPanel } from '.';
-import type { TimelineExpandedDetail } from '../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { EventDetailsPanel } from './event_details';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import type { ExpandedDetailTimeline } from '../../../../common/types';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
@@ -43,13 +42,7 @@ describe('Details Panel Component', () => {
   };
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   const dataLessExpandedDetail = {
     [TimelineTabs.query]: {
@@ -58,7 +51,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const hostExpandedDetail: TimelineExpandedDetail = {
+  const hostExpandedDetail: ExpandedDetailTimeline = {
     [TimelineTabs.query]: {
       panelView: 'hostDetail',
       params: {
@@ -67,7 +60,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const networkExpandedDetail: TimelineExpandedDetail = {
+  const networkExpandedDetail: ExpandedDetailTimeline = {
     [TimelineTabs.query]: {
       panelView: 'networkDetail',
       params: {
@@ -77,7 +70,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const eventExpandedDetail: TimelineExpandedDetail = {
+  const eventExpandedDetail: ExpandedDetailTimeline = {
     [TimelineTabs.query]: {
       panelView: 'eventDetail',
       params: {
@@ -87,7 +80,7 @@ describe('Details Panel Component', () => {
     },
   };
 
-  const eventPinnedExpandedDetail: TimelineExpandedDetail = {
+  const eventPinnedExpandedDetail: ExpandedDetailTimeline = {
     [TimelineTabs.pinned]: {
       panelView: 'eventDetail',
       params: {
@@ -110,13 +103,7 @@ describe('Details Panel Component', () => {
 
   describe('DetailsPanel: rendering', () => {
     beforeEach(() => {
-      store = createStore(
-        state,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
     test('it should not render the DetailsPanel if no expanded detail has been set in the reducer', () => {
@@ -131,7 +118,7 @@ describe('Details Panel Component', () => {
 
     test('it should not render the DetailsPanel if an expanded detail with a panelView, but not params have been set', () => {
       state.timeline.timelineById[TimelineId.test].expandedDetail =
-        dataLessExpandedDetail as TimelineExpandedDetail; // Casting as the dataless doesn't meet the actual type requirements
+        dataLessExpandedDetail as ExpandedDetailTimeline; // Casting as the dataless doesn't meet the actual type requirements
       const wrapper = mount(
         <TestProviders store={store}>
           <DetailsPanel {...mockProps} />
@@ -165,13 +152,7 @@ describe('Details Panel Component', () => {
       };
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = eventExpandedDetail;
       mockState.timeline.timelineById[TimelineId.test].expandedDetail = eventExpandedDetail;
-      store = createStore(
-        mockState,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
       mockUseSearchStrategy.mockReturnValue({
         loading: true,
@@ -235,13 +216,7 @@ describe('Details Panel Component', () => {
       };
       newState.timeline.timelineById[TimelineId.active].activeTab = TimelineTabs.query;
       newState.timeline.timelineById[TimelineId.active].expandedDetail = eventExpandedDetail;
-      store = createStore(
-        newState,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      store = createStore(newState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       const wrapper = mount(
         <TestProviders store={store}>
           <DetailsPanel {...currentProps} />
@@ -267,13 +242,7 @@ describe('Details Panel Component', () => {
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = eventPinnedExpandedDetail;
       mockState.timeline.timelineById[TimelineId.test].expandedDetail = eventPinnedExpandedDetail;
       mockState.timeline.timelineById[TimelineId.test].activeTab = TimelineTabs.pinned;
-      store = createStore(
-        mockState,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
     test('it should have the attributes isDraggable to be false when timelineId !== "active" and activeTab === "pinned"', () => {
@@ -327,13 +296,7 @@ describe('Details Panel Component', () => {
       };
       mockState.timeline.timelineById[TimelineId.test].expandedDetail = hostExpandedDetail;
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = hostExpandedDetail;
-      store = createStore(
-        mockState,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
     afterEach(() => {
@@ -374,13 +337,7 @@ describe('Details Panel Component', () => {
       };
       mockState.timeline.timelineById[TimelineId.test].expandedDetail = networkExpandedDetail;
       mockState.timeline.timelineById[TimelineId.active].expandedDetail = networkExpandedDetail;
-      store = createStore(
-        mockState,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      store = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     });
 
     afterEach(() => {

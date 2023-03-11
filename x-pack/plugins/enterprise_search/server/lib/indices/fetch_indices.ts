@@ -13,7 +13,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { ElasticsearchIndexWithPrivileges } from '../../../common/types/indices';
+import { AlwaysShowPattern, ElasticsearchIndexWithPrivileges } from '../../../common/types/indices';
 
 import { fetchIndexCounts } from './fetch_index_counts';
 import { fetchIndexPrivileges } from './fetch_index_privileges';
@@ -34,12 +34,14 @@ export const fetchIndices = async (
   indexPattern: string,
   returnHiddenIndices: boolean,
   includeAliases: boolean,
-  alwaysShowSearchPattern?: 'search-'
+  alwaysShowPattern?: AlwaysShowPattern
 ): Promise<ElasticsearchIndexWithPrivileges[]> => {
   // This call retrieves alias and settings information about indices
-  // If we provide an override pattern with alwaysShowSearchPattern we get everything and filter out hiddens.
+  // If we provide an override pattern with alwaysShowPattern we get everything and filter out hiddens.
   const expandWildcards: ExpandWildcard[] =
-    returnHiddenIndices || alwaysShowSearchPattern ? ['hidden', 'all'] : ['open'];
+    returnHiddenIndices || alwaysShowPattern?.alias_pattern || alwaysShowPattern?.index_pattern
+      ? ['hidden', 'all']
+      : ['open'];
 
   const { allIndexMatches, indexAndAliasNames, indicesNames, alwaysShowMatchNames } =
     await getIndexData(
@@ -48,7 +50,7 @@ export const fetchIndices = async (
       expandWildcards,
       returnHiddenIndices,
       includeAliases,
-      alwaysShowSearchPattern
+      alwaysShowPattern
     );
 
   if (indicesNames.length === 0) {
@@ -80,19 +82,28 @@ export const fetchIndices = async (
         privileges: { manage: false, read: false, ...indexPrivileges[name] },
       };
       return includeAliases
-        ? [indexEntry, ...expandAliases(name, aliases, indexData, totalIndexData)]
+        ? [
+            indexEntry,
+            ...expandAliases(
+              name,
+              aliases,
+              indexData,
+              totalIndexData,
+              ...(name.startsWith('.ent-search-engine-documents') ? [alwaysShowPattern] : [])
+            ),
+          ]
         : [indexEntry];
     });
 
   let indicesData = regularIndexData;
 
-  if (alwaysShowSearchPattern && includeAliases) {
+  if (alwaysShowPattern?.alias_pattern && includeAliases) {
     const indexNamesAlreadyIncluded = regularIndexData.map(({ name }) => name);
 
     const itemsToInclude = getAlwaysShowAliases(indexNamesAlreadyIncluded, alwaysShowMatchNames)
       .map(getIndexDataMapper(totalIndexData))
       .flatMap(({ name, aliases, ...indexData }) => {
-        return expandAliases(name, aliases, indexData, totalIndexData, alwaysShowSearchPattern);
+        return expandAliases(name, aliases, indexData, totalIndexData, alwaysShowPattern);
       });
 
     indicesData = [...indicesData, ...itemsToInclude];

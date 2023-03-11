@@ -232,6 +232,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
         },
         syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
         syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
+        canNavigateToLens: Boolean(handlers?.variables?.canNavigateToLens),
       },
     };
   },

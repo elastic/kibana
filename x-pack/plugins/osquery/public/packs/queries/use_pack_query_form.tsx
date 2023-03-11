@@ -11,6 +11,7 @@ import type { Draft } from 'immer';
 import { produce } from 'immer';
 import { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import type { Shard } from '../../../common/schemas/common/utils';
 
 export interface UsePackQueryFormProps {
   uniqueQueryIds: string[];
@@ -26,6 +27,7 @@ export interface PackSOQueryFormData {
   platform?: string | undefined;
   version?: string | undefined;
   ecs_mapping?: ECSMapping;
+  shards: Shard;
 }
 
 export type PackQuerySOECSMapping = Array<{ field: string; value: string }>;

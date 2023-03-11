@@ -7,6 +7,7 @@
     - assert_encryption_keys_cli
     - assert_plugin_cli
     - assert_setup_cli
+    - assert_health_gateway_cli
     - assert_verification_code_cli
     - assert_kibana_yml
     - assert_kibana_listening

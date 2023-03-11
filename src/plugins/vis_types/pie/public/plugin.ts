@@ -12,7 +12,6 @@ import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { LEGACY_PIE_CHARTS_LIBRARY } from '../common';
 import { pieVisType } from './vis_type';
 import { setDataViewsStart } from './services';
 
@@ -49,14 +48,12 @@ export class VisTypePiePlugin {
     core: CoreSetup<VisTypePiePluginStartDependencies>,
     { visualizations, charts, usageCollection }: VisTypePieSetupDependencies
   ) {
-    if (!core.uiSettings.get(LEGACY_PIE_CHARTS_LIBRARY, false)) {
-      visualizations.createBaseVisualization(
-        pieVisType({
-          showElasticChartsOptions: true,
-          palettes: charts.palettes,
-        })
-      );
-    }
+    visualizations.createBaseVisualization(
+      pieVisType({
+        showElasticChartsOptions: true,
+        palettes: charts.palettes,
+      })
+    );
     return {};
   }
 

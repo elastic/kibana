@@ -45,7 +45,13 @@
             "signature": [
               "Observable",
               "<",
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               ">"
             ],
             "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
@@ -63,7 +69,13 @@
             ],
             "signature": [
               "(c$: ",
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               ") => void"
             ],
             "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
@@ -78,7 +90,13 @@
                 "label": "c$",
                 "description": [],
                 "signature": [
-                  "KibanaExecutionContext"
+                  {
+                    "pluginId": "@kbn/core-execution-context-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                    "section": "def-common.KibanaExecutionContext",
+                    "text": "KibanaExecutionContext"
+                  }
                 ],
                 "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
                 "deprecated": false,
@@ -99,7 +117,13 @@
             ],
             "signature": [
               "() => ",
-              "KibanaExecutionContext"
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              }
             ],
             "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
             "deprecated": false,
@@ -155,9 +179,21 @@
             ],
             "signature": [
               "(context?: ",
-              "KibanaExecutionContext",
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
               " | undefined) => ",
-              "KibanaExecutionContext"
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              }
             ],
             "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",
             "deprecated": false,
@@ -171,7 +207,13 @@
                 "label": "context",
                 "description": [],
                 "signature": [
-                  "KibanaExecutionContext",
+                  {
+                    "pluginId": "@kbn/core-execution-context-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                    "section": "def-common.KibanaExecutionContext",
+                    "text": "KibanaExecutionContext"
+                  },
                   " | undefined"
                 ],
                 "path": "packages/core/execution-context/core-execution-context-browser/src/types.ts",

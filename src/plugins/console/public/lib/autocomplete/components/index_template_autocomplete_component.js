@@ -6,12 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { getAutocompleteInfo } from '../../../services';
+import { getAutocompleteInfo, ENTITIES } from '../../../services';
 import { ListComponent } from './list_component';
 
 export class IndexTemplateAutocompleteComponent extends ListComponent {
   constructor(name, parent) {
-    super(name, getAutocompleteInfo().getEntityProvider('indexTemplates'), parent, true, true);
+    super(
+      name,
+      getAutocompleteInfo().getEntityProvider(ENTITIES.INDEX_TEMPLATES),
+      parent,
+      true,
+      true
+    );
   }
 
   getContextKey() {

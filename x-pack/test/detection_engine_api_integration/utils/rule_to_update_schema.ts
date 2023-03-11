@@ -6,9 +6,9 @@
  */
 
 import type {
-  FullResponseSchema,
-  UpdateRulesSchema,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+  RuleResponse,
+  RuleUpdateProps,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { omit, pickBy } from 'lodash';
 
 const propertiesToRemove = [
@@ -20,17 +20,18 @@ const propertiesToRemove = [
   'created_by',
   'related_integrations',
   'required_fields',
+  'revision',
   'setup',
   'execution_summary',
 ];
 
 /**
- * transforms FullResponseSchema rule to UpdateRulesSchema
+ * transforms RuleResponse rule to RuleUpdateProps
  * returned result can be used in rule update API calls
  */
-export const ruleToUpdateSchema = (rule: FullResponseSchema): UpdateRulesSchema => {
+export const ruleToUpdateSchema = (rule: RuleResponse): RuleUpdateProps => {
   const removedProperties = omit(rule, propertiesToRemove);
 
   //  We're only removing undefined values, so this cast correctly narrows the type
-  return pickBy(removedProperties, (value) => value !== undefined) as UpdateRulesSchema;
+  return pickBy(removedProperties, (value) => value !== undefined) as RuleUpdateProps;
 };

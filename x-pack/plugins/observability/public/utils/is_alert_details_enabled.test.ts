@@ -23,9 +23,11 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { TopAlert } from '../pages/alerts';
+
 import { ConfigSchema } from '../plugin';
 import { isAlertDetailsEnabledPerApp } from './is_alert_details_enabled';
+import type { TopAlert } from '../typings/alerts';
+
 const defaultConfig = {
   unsafe: {
     alertDetails: {
@@ -249,7 +251,7 @@ describe('isAlertDetailsEnabled', () => {
           },
         },
       } as ConfigSchema;
-      expect(isAlertDetailsEnabledPerApp(undefined, updatedConfig)).toBeFalsy();
+      expect(isAlertDetailsEnabledPerApp(null, updatedConfig)).toBeFalsy();
     });
     it('returns FALSE when a none-listed rule type is checked', () => {
       const updatedConfig = {

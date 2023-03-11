@@ -41,6 +41,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/graph'),
       require.resolve('./apps/security_solution'),
       require.resolve('./apps/ml_embeddables_in_dashboard'),
+      require.resolve('./apps/rules_connectors'),
       // Please make sure that the remote clusters, snapshot and restore and
       // CCR tests stay in that order. Their execution fails if rearranged.
       require.resolve('./apps/remote_clusters'),

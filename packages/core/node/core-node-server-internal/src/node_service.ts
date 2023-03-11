@@ -14,13 +14,15 @@ import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
 import {
-  NodeConfigType,
-  NODE_WILDCARD_CHAR,
-  NODE_ACCEPTED_ROLES,
+  type NodeConfigType,
+  type NodeRolesConfig,
+  NODE_ALL_ROLES,
   NODE_CONFIG_PATH,
+  NODE_WILDCARD_CHAR,
+  NODE_DEFAULT_ROLES,
 } from './node_config';
 
-const DEFAULT_ROLES = NODE_ACCEPTED_ROLES;
+const DEFAULT_ROLES = [...NODE_DEFAULT_ROLES];
 const containsWildcard = (roles: string[]) => roles.includes(NODE_WILDCARD_CHAR);
 
 /**
@@ -28,12 +30,25 @@ const containsWildcard = (roles: string[]) => roles.includes(NODE_WILDCARD_CHAR)
  */
 export interface InternalNodeServicePreboot {
   /**
-   * Retrieve the Kibana instance uuid.
+   * The Kibana process can take on specialised roles via the `node.roles` config.
+   *
+   * The roles can be used by plugins to adjust their behavior based
+   * on the way the Kibana process has been configured.
    */
   roles: NodeRoles;
 }
 
-interface PrebootDeps {
+export interface InternalNodeServiceStart {
+  /**
+   * The Kibana process can take on specialised roles via the `node.roles` config.
+   *
+   * The roles can be used by plugins to adjust their behavior based
+   * on the way the Kibana process has been configured.
+   */
+  roles: NodeRoles;
+}
+
+export interface PrebootDeps {
   loggingSystem: ILoggingSystem;
 }
 
@@ -41,6 +56,7 @@ interface PrebootDeps {
 export class NodeService {
   private readonly configService: IConfigService;
   private readonly log: Logger;
+  private roles?: NodeRoles;
 
   constructor(core: CoreContext) {
     this.configService = core.configService;
@@ -52,18 +68,28 @@ export class NodeService {
     loggingSystem.setGlobalContext({ service: { node: { roles } } });
     this.log.info(`Kibana process configured with roles: [${roles.join(', ')}]`);
 
+    // We assume the combination of node roles has been validated and avoid doing additional checks here.
+    this.roles = NODE_ALL_ROLES.reduce((acc, curr) => {
+      return { ...acc, [camelCase(curr)]: (roles as string[]).includes(curr) };
+    }, {} as NodeRoles);
+
     return {
-      roles: NODE_ACCEPTED_ROLES.reduce((acc, curr) => {
-        return { ...acc, [camelCase(curr)]: roles.includes(curr) };
-      }, {} as NodeRoles),
+      roles: this.roles,
     };
+  }
+
+  public start(): InternalNodeServiceStart {
+    if (this.roles == null) {
+      throw new Error('NodeService#start() can only be called after NodeService#preboot()');
+    }
+    return { roles: this.roles };
   }
 
   public stop() {
     // nothing to do here yet
   }
 
-  private async getNodeRoles(): Promise<string[]> {
+  private async getNodeRoles(): Promise<NodeRolesConfig> {
     const { roles } = await firstValueFrom(
       this.configService.atPath<NodeConfigType>(NODE_CONFIG_PATH)
     );

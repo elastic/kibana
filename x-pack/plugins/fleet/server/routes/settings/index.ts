@@ -7,15 +7,16 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
+import type { FleetAuthzRouter } from '../../services/security';
+
 import { SETTINGS_API_ROUTES } from '../../constants';
 import type { FleetRequestHandler } from '../../types';
 import { PutSettingsRequestSchema, GetSettingsRequestSchema } from '../../types';
 import { defaultFleetErrorHandler } from '../../errors';
 import { settingsService, agentPolicyService, appContextService } from '../../services';
-import type { FleetAuthzRouter } from '../security';
 
 export const getSettingsHandler: FleetRequestHandler = async (context, request, response) => {
-  const soClient = (await context.fleet).epm.internalSoClient;
+  const soClient = (await context.fleet).internalSoClient;
 
   try {
     const settings = await settingsService.getSettings(soClient);
@@ -39,7 +40,7 @@ export const putSettingsHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PutSettingsRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = (await context.fleet).epm.internalSoClient;
+  const soClient = (await context.fleet).internalSoClient;
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
 

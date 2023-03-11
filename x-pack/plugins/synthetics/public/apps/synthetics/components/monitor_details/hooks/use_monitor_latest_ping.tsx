@@ -8,7 +8,8 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ConfigKey } from '../../../../../../common/runtime_types';
-import { getMonitorRecentPingsAction, selectLatestPing, selectPingsLoading } from '../../../state';
+import { useSyntheticsRefreshContext } from '../../../contexts';
+import { getMonitorLastRunAction, selectLastRunMetadata } from '../../../state';
 import { useSelectedLocation } from './use_selected_location';
 import { useSelectedMonitor } from './use_selected_monitor';
 
@@ -19,6 +20,7 @@ interface UseMonitorLatestPingParams {
 
 export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   const dispatch = useDispatch();
+  const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { monitor } = useSelectedMonitor();
   const location = useSelectedLocation();
@@ -26,8 +28,7 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   const monitorId = params?.monitorId ?? monitor?.id;
   const locationLabel = params?.locationLabel ?? location?.label;
 
-  const latestPing = useSelector(selectLatestPing);
-  const pingsLoading = useSelector(selectPingsLoading);
+  const { data: latestPing, loading } = useSelector(selectLastRunMetadata);
 
   const latestPingId = latestPing?.monitor.id;
 
@@ -39,22 +40,22 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   const isUpToDate = isIdSame && isLocationSame;
 
   useEffect(() => {
-    if (monitorId && locationLabel && !isUpToDate) {
-      dispatch(getMonitorRecentPingsAction.get({ monitorId, locationId: locationLabel }));
+    if (monitorId && locationLabel) {
+      dispatch(getMonitorLastRunAction.get({ monitorId, locationId: locationLabel }));
     }
-  }, [dispatch, monitorId, locationLabel, isUpToDate]);
+  }, [dispatch, monitorId, locationLabel, isUpToDate, lastRefresh]);
 
   if (!monitorId || !locationLabel) {
-    return { loading: pingsLoading, latestPing: null };
+    return { loading, latestPing: undefined };
   }
 
   if (!latestPing) {
-    return { loading: pingsLoading, latestPing: null };
+    return { loading, latestPing: undefined };
   }
 
   if (!isIdSame || !isLocationSame) {
-    return { loading: pingsLoading, latestPing: null };
+    return { loading, latestPing: undefined };
   }
 
-  return { loading: pingsLoading, latestPing };
+  return { loading, latestPing };
 };

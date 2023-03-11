@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { CloudEcs } from '../../../../ecs/cloud';
-import type { HostEcs, OsEcs } from '../../../../ecs/host';
+import type { CloudEcs, HostEcs, OsEcs } from '@kbn/securitysolution-ecs';
 import type { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
 import type { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
 import type { CommonFields } from '../..';
@@ -32,6 +31,7 @@ export interface EndpointFields {
   /** A count of pending endpoint actions against the host */
   pendingActions?: Maybe<EndpointPendingActions['pending_actions']>;
   elasticAgentStatus?: Maybe<HostStatus>;
+  fleetAgentId?: Maybe<string>;
   id?: Maybe<string>;
 }
 

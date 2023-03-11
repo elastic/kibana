@@ -111,6 +111,7 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
               Object {
                 "docId": "foo",
                 "monitor": Object {
+                  "check_group": "myCheckGroup",
                   "duration": Object {
                     "us": 121,
                   },
@@ -125,6 +126,7 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
               Object {
                 "docId": "foo-0",
                 "monitor": Object {
+                  "check_group": "myCheckGroup",
                   "duration": Object {
                     "us": 100000,
                   },
@@ -139,6 +141,7 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
               Object {
                 "docId": "foo-1",
                 "monitor": Object {
+                  "check_group": "myCheckGroup",
                   "duration": Object {
                     "us": 1,
                   },
@@ -153,6 +156,7 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there are 
               Object {
                 "docId": "foo-2",
                 "monitor": Object {
+                  "check_group": "myCheckGroup",
                   "duration": Object {
                     "us": 2,
                   },
@@ -289,6 +293,7 @@ exports[`MonitorListDrawer component renders a MonitorListDrawer when there is o
               Object {
                 "docId": "foo",
                 "monitor": Object {
+                  "check_group": "myCheckGroup",
                   "duration": Object {
                     "us": 121,
                   },

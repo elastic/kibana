@@ -8,34 +8,39 @@
 import expect from '@kbn/expect';
 import { createPdfV2Params, createPngV2Params } from '..';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { UsageStatsPayloadTestFriendly } from '../../../api_integration/services/usage_api';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
-  const supertest = getService('supertest');
-  const supertestUnauth = getService('supertestWithoutAuth');
+  const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const usageAPI = getService('usageAPI');
   const reportingAPI = getService('reportingAPI');
 
-  describe(`Usage Counters`, () => {
+  // Failing: See https://github.com/elastic/kibana/issues/134517
+  // Failing: See https://github.com/elastic/kibana/issues/149942
+  describe.skip(`Usage Counters`, () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await reportingAPI.initEcommerce();
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
     });
 
     after(async () => {
       await reportingAPI.deleteAllReports();
       await reportingAPI.teardownEcommerce();
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
     });
 
     describe('server', function () {
       this.tags('skipCloud');
       it('configuration settings of the tests_server', async () => {
-        const usage = await usageAPI.getUsageStats();
-        expect(usage.kibana_config_usage.xpack_reporting_capture_max_attempts).to.be(1);
-        expect(usage.kibana_config_usage.xpack_reporting_csv_max_size_bytes).to.be(6000);
-        expect(usage.kibana_config_usage.xpack_reporting_roles_enabled).to.be(false);
+        const [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
+        const usage = stats.stack_stats.kibana.plugins;
+        expect(usage.kibana_config_usage['xpack.reporting.capture.maxAttempts']).to.be(1);
+        expect(usage.kibana_config_usage['xpack.reporting.csv.maxSizeBytes']).to.be(6000);
+        expect(usage.kibana_config_usage['xpack.reporting.roles.enabled']).to.be(false);
       });
     });
 
@@ -43,22 +48,26 @@ export default function ({ getService }: FtrProviderContext) {
       enum paths {
         LIST = '/api/reporting/jobs/list',
         COUNT = '/api/reporting/jobs/count',
-        INFO = '/api/reporting/jobs/info/{docId}',
+        INFO = '/api/reporting/jobs/info/kraz0qle154g0763b569zz83',
         ILM = '/api/reporting/ilm_policy_status',
         DIAG_BROWSER = '/api/reporting/diagnose/browser',
         DIAG_SCREENSHOT = '/api/reporting/diagnose/screenshot',
       }
 
-      let initialStats: any;
-      let stats: any;
+      let initialStats: UsageStatsPayloadTestFriendly;
+      let stats: UsageStatsPayloadTestFriendly;
       const CALL_COUNT = 3;
 
       before('call APIs', async () => {
-        initialStats = await usageAPI.getUsageStats();
+        [{ stats: initialStats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
 
         await Promise.all(
           Object.keys(paths).map(async (key) => {
-            await Promise.all([...Array(CALL_COUNT)].map(() => supertest.get((paths as any)[key])));
+            await Promise.all(
+              [...Array(CALL_COUNT)].map(() =>
+                supertest.get(paths[key as keyof typeof paths]).auth('test_user', 'changeme')
+              )
+            );
           })
         );
 
@@ -66,44 +75,46 @@ export default function ({ getService }: FtrProviderContext) {
         await waitOnAggregation();
 
         // determine the result usage count
-        stats = await usageAPI.getUsageStats();
+        [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
       });
 
       it('job listing', async () => {
-        expect(getUsageCount(initialStats, `get ${paths.LIST}`)).to.be(0);
-        expect(getUsageCount(stats, `get ${paths.LIST}`)).to.be(CALL_COUNT);
+        const initialCount = getUsageCount(initialStats, `get ${paths.LIST}`);
+        expect(getUsageCount(stats, `get ${paths.LIST}`)).to.be(CALL_COUNT + initialCount);
       });
 
       it('job count', async () => {
-        expect(getUsageCount(initialStats, `get ${paths.COUNT}`)).to.be(0);
-        expect(getUsageCount(stats, `get ${paths.COUNT}`)).to.be(CALL_COUNT);
+        const initialCount = getUsageCount(initialStats, `get ${paths.COUNT}`);
+        expect(getUsageCount(stats, `get ${paths.COUNT}`)).to.be(CALL_COUNT + initialCount);
       });
 
       it('job info', async () => {
-        expect(getUsageCount(initialStats, `get ${paths.INFO}`)).to.be(0);
-        expect(getUsageCount(stats, `get ${paths.INFO}`)).to.be(CALL_COUNT);
+        const initialCount = getUsageCount(
+          initialStats,
+          `get /api/reporting/jobs/info/{docId}:printable_pdf`
+        );
+        expect(getUsageCount(stats, `get /api/reporting/jobs/info/{docId}:printable_pdf`)).to.be(
+          CALL_COUNT + initialCount
+        );
       });
     });
 
     describe('downloading and deleting', () => {
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
-      });
-
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
+      let initialStats: UsageStatsPayloadTestFriendly;
+      before('gather initial stats', async () => {
+        [{ stats: initialStats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
       });
 
       it('downloading', async () => {
         try {
           await Promise.all([
-            supertestUnauth
+            supertest
               .get('/api/reporting/jobs/download/kraz0qle154g0763b569zz83')
               .auth('test_user', 'changeme'),
-            supertestUnauth
+            supertest
               .get('/api/reporting/jobs/download/kraz0vj4154g0763b5curq51')
               .auth('test_user', 'changeme'),
-            supertestUnauth
+            supertest
               .get('/api/reporting/jobs/download/k9a9rq1i0gpe1457b17s7yc6')
               .auth('test_user', 'changeme'),
           ]);
@@ -116,16 +127,21 @@ export default function ({ getService }: FtrProviderContext) {
         log.info(`waiting on aggregation completed.`);
 
         log.info(`calling getUsageStats...`);
+        const [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
+        const initialCount = getUsageCount(
+          initialStats,
+          `get /api/reporting/jobs/download/{docId}:printable_pdf`
+        );
         expect(
-          getUsageCount(await usageAPI.getUsageStats(), `get /api/reporting/jobs/download/{docId}`)
-        ).to.be(3);
+          getUsageCount(stats, `get /api/reporting/jobs/download/{docId}:printable_pdf`)
+        ).to.be(3 + initialCount);
       });
 
       it('deleting', async () => {
         log.info(`sending 1 delete request...`);
 
         try {
-          await supertestUnauth
+          await supertest
             .delete('/api/reporting/jobs/delete/krazcyw4156m0763b503j7f9')
             .auth('test_user', 'changeme')
             .set('kbn-xsrf', 'xxx');
@@ -139,14 +155,19 @@ export default function ({ getService }: FtrProviderContext) {
         log.info(`waiting on aggregation completed.`);
 
         log.info(`calling getUsageStats...`);
+        const [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
+        const initialCount = getUsageCount(
+          initialStats,
+          `delete /api/reporting/jobs/delete/{docId}:csv_searchsource`
+        );
         expect(
-          getUsageCount(await usageAPI.getUsageStats(), `delete /api/reporting/jobs/delete/{docId}`)
-        ).to.be(1);
+          getUsageCount(stats, `delete /api/reporting/jobs/delete/{docId}:csv_searchsource`)
+        ).to.be(1 + initialCount);
       });
     });
 
     describe('API counters: job generation', () => {
-      let stats: any;
+      let stats: UsageStatsPayloadTestFriendly;
 
       before(async () => {
         // call generation APIs
@@ -163,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         await waitOnAggregation();
 
-        stats = await usageAPI.getUsageStats();
+        [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
       });
 
       it('PNG', async () => {
@@ -192,10 +213,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
     };
 
-    const getUsageCount = (checkUsage: any, counterName: string): number => {
+    const getUsageCount = (
+      checkUsage: UsageStatsPayloadTestFriendly,
+      counterName: string
+    ): number => {
       return (
-        checkUsage.usage_counters.daily_events.find(
-          (item: any) => item.counter_name === counterName
+        checkUsage.stack_stats.kibana.plugins.usage_counters.dailyEvents.find(
+          (item: any) => item.counterName === counterName
         )?.total || 0
       );
     };

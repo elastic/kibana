@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/guided-onboarding",
-  "owner": "@elastic/platform-onboarding",
-  "runtimeDeps": [],
-  "typeDeps": [],
+  "owner": "@elastic/platform-onboarding"
 }

@@ -21,7 +21,7 @@ Cypress.Commands.add('loginAsEditorUser', () => {
 
 Cypress.Commands.add('loginAsMonitorUser', () => {
   return cy.loginAs({
-    username: ApmUsername.apmMonitorIndices,
+    username: ApmUsername.apmMonitorClusterAndIndices,
     password: 'changeme',
   });
 });
@@ -124,6 +124,16 @@ Cypress.Commands.add(
     });
   }
 );
+
+Cypress.Commands.add('dismissServiceGroupsTour', () => {
+  window.localStorage.setItem(
+    'apm.serviceGroupsTour',
+    JSON.stringify({
+      createGroup: false,
+      editGroup: false,
+    })
+  );
+});
 
 // A11y configuration
 

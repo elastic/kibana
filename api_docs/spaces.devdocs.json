@@ -35,7 +35,13 @@
                 "label": "http",
                 "description": [],
                 "signature": [
-                  "HttpSetup"
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-common.HttpSetup",
+                    "text": "HttpSetup"
+                  }
                 ],
                 "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
                 "deprecated": false,
@@ -350,9 +356,9 @@
             "signature": [
               "(aliases: ",
               {
-                "pluginId": "spaces",
+                "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
-                "docId": "kibSpacesPluginApi",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
                 "section": "def-common.LegacyUrlAliasTarget",
                 "text": "LegacyUrlAliasTarget"
               },
@@ -371,9 +377,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "spaces",
+                    "pluginId": "@kbn/core-saved-objects-common",
                     "scope": "common",
-                    "docId": "kibSpacesPluginApi",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
                     "section": "def-common.LegacyUrlAliasTarget",
                     "text": "LegacyUrlAliasTarget"
                   },
@@ -613,7 +619,13 @@
             "description": [],
             "signature": [
               "(objects: SavedObjectTarget[]) => Promise<",
-              "SavedObjectsCollectMultiNamespaceReferencesResponse",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
+              },
               ">"
             ],
             "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
@@ -902,7 +914,13 @@
             "description": [],
             "signature": [
               "[spaceId: string]:  ",
-              "SavedObjectsImportResponse"
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportResponse",
+                "text": "SavedObjectsImportResponse"
+              }
             ],
             "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
             "deprecated": false,
@@ -2140,7 +2158,13 @@
             ],
             "signature": [
               "<Services extends Partial<",
-              "CoreStart",
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              },
               ">>() => ",
               {
                 "pluginId": "spaces",
@@ -3364,7 +3388,13 @@
             ],
             "signature": [
               "(id: string) => ",
-              "ISavedObjectsPointInTimeFinder",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.ISavedObjectsPointInTimeFinder",
+                "text": "ISavedObjectsPointInTimeFinder"
+              },
               "<unknown, unknown>"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client.ts",
@@ -3439,9 +3469,9 @@
             "signature": [
               "(aliases: ",
               {
-                "pluginId": "spaces",
+                "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
-                "docId": "kibSpacesPluginApi",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
                 "section": "def-common.LegacyUrlAliasTarget",
                 "text": "LegacyUrlAliasTarget"
               },
@@ -3462,9 +3492,9 @@
                 ],
                 "signature": [
                   {
-                    "pluginId": "spaces",
+                    "pluginId": "@kbn/core-saved-objects-common",
                     "scope": "common",
-                    "docId": "kibSpacesPluginApi",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
                     "section": "def-common.LegacyUrlAliasTarget",
                     "text": "LegacyUrlAliasTarget"
                   },
@@ -3477,61 +3507,6 @@
               }
             ],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "spaces",
-        "id": "def-server.LegacyUrlAliasTarget",
-        "type": "Interface",
-        "tags": [],
-        "label": "LegacyUrlAliasTarget",
-        "description": [
-          "\nClient interface for interacting with legacy URL aliases."
-        ],
-        "path": "x-pack/plugins/spaces/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "spaces",
-            "id": "def-server.LegacyUrlAliasTarget.targetSpace",
-            "type": "string",
-            "tags": [],
-            "label": "targetSpace",
-            "description": [
-              "\nThe namespace that the object existed in when it was converted."
-            ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "spaces",
-            "id": "def-server.LegacyUrlAliasTarget.targetType",
-            "type": "string",
-            "tags": [],
-            "label": "targetType",
-            "description": [
-              "\nThe type of the object when it was converted."
-            ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "spaces",
-            "id": "def-server.LegacyUrlAliasTarget.sourceId",
-            "type": "string",
-            "tags": [],
-            "label": "sourceId",
-            "description": [
-              "\nThe original ID of the object, before it was converted."
-            ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3700,7 +3675,13 @@
             ],
             "signature": [
               "(request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => string"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -3717,7 +3698,13 @@
                   "the request."
                 ],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -3827,7 +3814,13 @@
             ],
             "signature": [
               "(request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "spaces",
@@ -3851,7 +3844,13 @@
                   "the request."
                 ],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -3873,7 +3872,13 @@
             ],
             "signature": [
               "(request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => string"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -3890,7 +3895,13 @@
                   "the request."
                 ],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -3912,7 +3923,13 @@
             ],
             "signature": [
               "(request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => boolean"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -3929,7 +3946,13 @@
                   "the request."
                 ],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -3951,7 +3974,13 @@
             ],
             "signature": [
               "(request: ",
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>) => Promise<",
               {
                 "pluginId": "spaces",
@@ -3976,7 +4005,13 @@
                   "the request."
                 ],
                 "signature": [
-                  "KibanaRequest",
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.KibanaRequest",
+                    "text": "KibanaRequest"
+                  },
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/plugins/spaces/server/spaces_service/spaces_service.ts",
@@ -4095,11 +4130,29 @@
         ],
         "signature": [
           "(request: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any>, savedObjectsStart: ",
-          "SavedObjectsServiceStart",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsServiceStart",
+            "text": "SavedObjectsServiceStart"
+          },
           ") => ",
-          "ISavedObjectsRepository"
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-common.ISavedObjectsRepository",
+            "text": "ISavedObjectsRepository"
+          }
         ],
         "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
         "deprecated": false,
@@ -4114,7 +4167,13 @@
             "label": "request",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
@@ -4129,7 +4188,13 @@
             "label": "savedObjectsStart",
             "description": [],
             "signature": [
-              "SavedObjectsServiceStart"
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsServiceStart",
+                "text": "SavedObjectsServiceStart"
+              }
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
             "deprecated": false,
@@ -4151,7 +4216,13 @@
         ],
         "signature": [
           "(request: ",
-          "KibanaRequest",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaRequest",
+            "text": "KibanaRequest"
+          },
           "<unknown, unknown, unknown, any>, baseClient: ",
           {
             "pluginId": "spaces",
@@ -4182,7 +4253,13 @@
             "label": "request",
             "description": [],
             "signature": [
-              "KibanaRequest",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/plugins/spaces/server/spaces_client/spaces_client_service.ts",
@@ -4636,61 +4713,6 @@
       },
       {
         "parentPluginId": "spaces",
-        "id": "def-common.LegacyUrlAliasTarget",
-        "type": "Interface",
-        "tags": [],
-        "label": "LegacyUrlAliasTarget",
-        "description": [
-          "\nClient interface for interacting with legacy URL aliases."
-        ],
-        "path": "x-pack/plugins/spaces/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "spaces",
-            "id": "def-common.LegacyUrlAliasTarget.targetSpace",
-            "type": "string",
-            "tags": [],
-            "label": "targetSpace",
-            "description": [
-              "\nThe namespace that the object existed in when it was converted."
-            ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "spaces",
-            "id": "def-common.LegacyUrlAliasTarget.targetType",
-            "type": "string",
-            "tags": [],
-            "label": "targetType",
-            "description": [
-              "\nThe type of the object when it was converted."
-            ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "spaces",
-            "id": "def-common.LegacyUrlAliasTarget.sourceId",
-            "type": "string",
-            "tags": [],
-            "label": "sourceId",
-            "description": [
-              "\nThe original ID of the object, before it was converted."
-            ],
-            "path": "x-pack/plugins/spaces/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "spaces",
         "id": "def-common.Space",
         "type": "Interface",
         "tags": [],
@@ -4832,6 +4854,21 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "spaces",
+        "id": "def-common.DEFAULT_SPACE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_SPACE_ID",
+        "description": [],
+        "signature": [
+          "\"default\""
+        ],
+        "path": "x-pack/plugins/spaces/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "spaces",
         "id": "def-common.ENTER_SPACE_PATH",

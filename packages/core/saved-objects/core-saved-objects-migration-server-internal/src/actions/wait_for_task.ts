@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
@@ -13,15 +13,16 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
-  RetryableEsClientError,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 
 /** @internal */
 export interface WaitForTaskResponse {
-  error: Option.Option<{ type: string; reason: string; index?: string }>;
+  error: Option.Option<{ type: string; reason?: string; index?: string }>;
   completed: boolean;
   failures: Option.Option<any[]>;
   description?: string;
+  response?: estypes.TasksTaskStatus;
 }
 
 /**
@@ -90,6 +91,7 @@ export const waitForTask =
           error: Option.fromNullable(body.error as estypes.ErrorCauseKeys),
           failures: failures.length > 0 ? Option.some(failures) : Option.none,
           description: body.task.description,
+          response: body.response,
         });
       })
       .catch(catchWaitForTaskCompletionTimeout)

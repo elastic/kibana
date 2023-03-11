@@ -40,6 +40,7 @@ describe('AddData', () => {
         addBasePath={addBasePathMock}
         application={applicationStartMock}
         isDarkMode={false}
+        isCloudEnabled={false}
       />
     );
     expect(component).toMatchSnapshot();

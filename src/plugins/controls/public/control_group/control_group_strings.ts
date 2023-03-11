@@ -9,10 +9,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const ControlGroupStrings = {
-  getControlButtonTitle: () =>
-    i18n.translate('controls.controlGroup.toolbarButtonTitle', {
-      defaultMessage: 'Controls',
-    }),
   emptyState: {
     getBadge: () =>
       i18n.translate('controls.controlGroup.emptyState.badgeText', {

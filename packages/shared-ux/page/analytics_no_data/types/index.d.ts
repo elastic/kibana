@@ -9,12 +9,14 @@ import {
   KibanaNoDataPageServices,
   KibanaNoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-no-data-types';
+import { Observable } from 'rxjs';
 
 /**
  * A list of services that are consumed by this component.
  */
 export interface Services {
   kibanaGuideDocLink: string;
+  customBranding: { hasCustomBranding$: Observable<boolean> };
 }
 
 /**
@@ -30,6 +32,9 @@ export interface KibanaDependencies {
           guide: string;
         };
       };
+    };
+    customBranding: {
+      hasCustomBranding$: Observable<boolean>;
     };
   };
 }
@@ -47,4 +52,6 @@ export type AnalyticsNoDataPageKibanaDependencies = KibanaDependencies &
 export interface AnalyticsNoDataPageProps {
   /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
+  /** if set to true allows creation of an ad-hoc data view from data view editor */
+  allowAdHocDataView?: boolean;
 }

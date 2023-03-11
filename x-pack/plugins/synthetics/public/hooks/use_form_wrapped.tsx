@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { FieldValues, useForm, UseFormProps } from 'react-hook-form';
 
 export function useFormWrapped<TFieldValues extends FieldValues = FieldValues, TContext = any>(
   props?: UseFormProps<TFieldValues, TContext>
 ) {
-  const { register, ...restOfForm } = useForm<TFieldValues>(props);
+  const form = useForm<TFieldValues>(props);
 
   const euiRegister = useCallback(
     (name, ...registerArgs) => {
-      const { ref, ...restOfRegister } = register(name, ...registerArgs);
+      const { ref, ...restOfRegister } = form.register(name, ...registerArgs);
 
       return {
         inputRef: ref,
@@ -23,11 +23,12 @@ export function useFormWrapped<TFieldValues extends FieldValues = FieldValues, T
         ...restOfRegister,
       };
     },
-    [register]
+    [form]
   );
+  const formState = form.formState;
 
-  return {
-    register: euiRegister,
-    ...restOfForm,
-  };
+  return useMemo(
+    () => ({ ...form, register: euiRegister, formState }),
+    [euiRegister, form, formState]
+  );
 }

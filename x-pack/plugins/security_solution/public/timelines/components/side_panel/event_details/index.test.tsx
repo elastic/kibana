@@ -10,7 +10,7 @@ import { EventDetailsPanel } from '.';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   KibanaServices,
   useKibana,
@@ -94,7 +94,7 @@ jest.mock(
   }
 );
 jest.mock('../../../../detections/components/alerts_table/actions');
-jest.mock('../../../../risk_score/containers', () => {
+jest.mock('../../../../explore/containers/risk_score', () => {
   return {
     useRiskScore: jest.fn().mockReturnValue({
       loading: true,

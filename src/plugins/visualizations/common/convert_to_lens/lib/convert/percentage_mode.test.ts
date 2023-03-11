@@ -18,6 +18,7 @@ jest.mock('../metrics/formula', () => ({
 }));
 
 describe('convertToColumnInPercentageMode', () => {
+  const visType = 'heatmap';
   const formula = 'average(some_field)';
   const dataView = stubLogstashDataView;
 
@@ -42,7 +43,7 @@ describe('convertToColumnInPercentageMode', () => {
 
   test('should return null if it is not possible to build the valid formula', () => {
     mockGetFormulaForAgg.mockReturnValue(null);
-    expect(convertToColumnInPercentageMode({ agg, dataView, aggs: [agg] }, {})).toBeNull();
+    expect(convertToColumnInPercentageMode({ agg, dataView, aggs: [agg], visType }, {})).toBeNull();
   });
 
   test('should return percentage mode over range formula if min and max was passed', () => {
@@ -51,7 +52,7 @@ describe('convertToColumnInPercentageMode', () => {
       params: { format: { id: 'percent' }, formula: `((${formula}) - 0) / (100 - 0)` },
     };
     expect(
-      convertToColumnInPercentageMode({ agg, dataView, aggs: [agg] }, { min: 0, max: 100 })
+      convertToColumnInPercentageMode({ agg, dataView, aggs: [agg], visType }, { min: 0, max: 100 })
     ).toEqual(expect.objectContaining(formulaColumn));
   });
 
@@ -60,7 +61,7 @@ describe('convertToColumnInPercentageMode', () => {
       operationType: 'formula',
       params: { format: { id: 'percent' }, formula: `(${formula}) / 10000` },
     };
-    expect(convertToColumnInPercentageMode({ agg, dataView, aggs: [agg] }, {})).toEqual(
+    expect(convertToColumnInPercentageMode({ agg, dataView, aggs: [agg], visType }, {})).toEqual(
       expect.objectContaining(formulaColumn)
     );
   });

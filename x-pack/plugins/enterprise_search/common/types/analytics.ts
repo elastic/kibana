@@ -7,8 +7,17 @@
 
 export interface AnalyticsCollection {
   event_retention_day_length: number;
+  events_datastream: string;
   id: string;
   name: string;
 }
 
 export type AnalyticsCollectionDocument = Omit<AnalyticsCollection, 'id'>;
+
+export interface AnalyticsEventsIndexExists {
+  exists: boolean;
+}
+
+export interface AnalyticsCollectionDataViewId {
+  data_view_id: string | null;
+}

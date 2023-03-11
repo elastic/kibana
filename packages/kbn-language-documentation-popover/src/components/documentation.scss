@@ -1,78 +1,9 @@
-.documentation {
-  display: flex;
-  flex-direction: column;
-
-  & > * {
-    flex: 1;
-    min-height: 0;
-  }
-
-  & > * + * {
-    border-top: $euiBorderThin;
-  }
-}
-
-.documentation__editor {
-
-  & > * + * {
-    border-top: $euiBorderThin;
-  }
-}
-
-.documentation__editorHeader,
-.documentation__editorFooter {
-  padding: $euiSizeS $euiSize;
-}
-
-.documentation__editorFooter {
-  // make sure docs are rendered in front of monaco
-  z-index: 1;
-  background-color: $euiColorLightestShade;
-}
-
-.documentation__editorHeaderGroup,
-.documentation__editorFooterGroup {
-  display: block; // Overrides EUI's styling of `display: flex` on `EuiFlexItem` components
-}
-
-.documentation__editorContent {
-  min-height: 0;
-  position: relative;
-}
-
-.documentation__editorPlaceholder {
-  position: absolute;
-  top: 0;
-  left: $euiSize;
-  right: 0;
-  color: $euiTextSubduedColor;
-  // Matches monaco editor
-  font-family: Menlo, Monaco, 'Courier New', monospace;
-  pointer-events: none;
-}
-
-.documentation__warningText + .documentation__warningText {
-  margin-top: $euiSizeS;
-  border-top: $euiBorderThin;
-  padding-top: $euiSizeS;
-}
-
-.documentation__editorHelp--inline {
-  align-items: center;
-  display: flex;
-  padding: $euiSizeXS;
-
-  & > * + * {
-    margin-left: $euiSizeXS;
-  }
-}
-
-.documentation__editorError {
-  white-space: nowrap;
-}
-
 .documentation__docs {
   background: $euiColorEmptyShade;
+}
+
+.documentation__docsHeader {
+  margin: 0;
 }
 
 .documentation__docs--inline {

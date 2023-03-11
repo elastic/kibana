@@ -5,21 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPopoverTitle,
-  EuiText,
-  EuiListGroupItem,
-  EuiListGroup,
-  EuiTitle,
-  EuiFieldSearch,
-  EuiHighlight,
-  EuiSpacer,
-} from '@elastic/eui';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { groupBy } from 'lodash';
 import type { IndexPattern } from '../../../../../../types';
@@ -35,24 +22,13 @@ import type {
 } from '../..';
 import type { FormulaIndexPatternColumn } from '../formula';
 
-function FormulaHelp({
+export function getDocumentationSections({
   indexPattern,
   operationDefinitionMap,
-  isFullscreen,
 }: {
   indexPattern: IndexPattern;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
-  isFullscreen: boolean;
 }) {
-  const [selectedFunction, setSelectedFunction] = useState<string | undefined>();
-  const scrollTargets = useRef<Record<string, HTMLElement>>({});
-
-  useEffect(() => {
-    if (selectedFunction && scrollTargets.current[selectedFunction]) {
-      scrollTargets.current[selectedFunction].scrollIntoView();
-    }
-  }, [selectedFunction]);
-
   const helpGroups: Array<{
     label: string;
     description?: string;
@@ -199,18 +175,14 @@ max(system.network.in.bytes, reducedTimeRange="30m")
     calculation: calculationFunction,
     math: mathOperations,
     comparison: comparisonOperations,
-  } = useMemo(
-    () =>
-      groupBy(getPossibleFunctions(indexPattern), (key) => {
-        if (key in operationDefinitionMap) {
-          return operationDefinitionMap[key].documentation?.section;
-        }
-        if (key in tinymathFunctions) {
-          return tinymathFunctions[key].section;
-        }
-      }),
-    [operationDefinitionMap, indexPattern]
-  );
+  } = groupBy(getPossibleFunctions(indexPattern), (key) => {
+    if (key in operationDefinitionMap) {
+      return operationDefinitionMap[key].documentation?.section;
+    }
+    if (key in tinymathFunctions) {
+      return tinymathFunctions[key].section;
+    }
+  });
 
   // Es aggs
   helpGroups[2].items.push(
@@ -259,10 +231,6 @@ max(system.network.in.bytes, reducedTimeRange="30m")
           ) : null}
         </>
       ),
-      checked:
-        selectedFunction === `${key}: ${operationDefinitionMap[key].displayName}`
-          ? ('on' as const)
-          : undefined,
     }))
   );
 
@@ -277,16 +245,14 @@ max(system.network.in.bytes, reducedTimeRange="30m")
     items: [],
   });
 
-  const mathFns = useMemo(() => {
-    return mathOperations.sort().map((key) => {
-      const [description, examples] = tinymathFunctions[key].help.split(`\`\`\``);
-      return {
-        label: key,
-        description: description.replace(/\n/g, '\n\n'),
-        examples: examples ? `\`\`\`${examples}\`\`\`` : '',
-      };
-    });
-  }, [mathOperations]);
+  const mathFns = mathOperations.sort().map((key) => {
+    const [description, examples] = tinymathFunctions[key].help.split(`\`\`\``);
+    return {
+      label: key,
+      description: description.replace(/\n/g, '\n\n'),
+      examples: examples ? `\`\`\`${examples}\`\`\`` : '',
+    };
+  });
 
   helpGroups[4].items.push(
     ...mathFns.map(({ label, description, examples }) => {
@@ -313,16 +279,14 @@ max(system.network.in.bytes, reducedTimeRange="30m")
     items: [],
   });
 
-  const comparisonFns = useMemo(() => {
-    return comparisonOperations.sort().map((key) => {
-      const [description, examples] = tinymathFunctions[key].help.split(`\`\`\``);
-      return {
-        label: key,
-        description: description.replace(/\n/g, '\n\n'),
-        examples: examples ? `\`\`\`${examples}\`\`\`` : '',
-      };
-    });
-  }, [comparisonOperations]);
+  const comparisonFns = comparisonOperations.sort().map((key) => {
+    const [description, examples] = tinymathFunctions[key].help.split(`\`\`\``);
+    return {
+      label: key,
+      description: description.replace(/\n/g, '\n\n'),
+      examples: examples ? `\`\`\`${examples}\`\`\`` : '',
+    };
+  });
 
   helpGroups[5].items.push(
     ...comparisonFns.map(({ label, description, examples }) => {
@@ -339,119 +303,12 @@ max(system.network.in.bytes, reducedTimeRange="30m")
     })
   );
 
-  const [searchText, setSearchText] = useState('');
-
-  const normalizedSearchText = searchText.trim().toLocaleLowerCase();
-
-  const filteredHelpGroups = helpGroups
-    .map((group) => {
-      const items = group.items.filter((helpItem) => {
-        return (
-          !normalizedSearchText || helpItem.label.toLocaleLowerCase().includes(normalizedSearchText)
-        );
-      });
-      return { ...group, items };
-    })
-    .filter((group) => {
-      if (group.items.length > 0 || !normalizedSearchText) {
-        return true;
-      }
-      return group.label.toLocaleLowerCase().includes(normalizedSearchText);
-    });
-
-  return (
-    <>
-      <EuiPopoverTitle className="lnsFormula__docsHeader" paddingSize="m">
-        {i18n.translate('xpack.lens.formulaDocumentation.header', {
-          defaultMessage: 'Formula reference',
-        })}
-      </EuiPopoverTitle>
-
-      <EuiFlexGroup
-        className="lnsFormula__docsContent"
-        gutterSize="none"
-        responsive={false}
-        alignItems="stretch"
-      >
-        <EuiFlexItem className="lnsFormula__docsSidebar" grow={1}>
-          <EuiFlexGroup
-            className="lnsFormula__docsSidebarInner"
-            direction="column"
-            gutterSize="none"
-            responsive={false}
-          >
-            <EuiFlexItem className="lnsFormula__docsSearch" grow={false}>
-              <EuiFieldSearch
-                value={searchText}
-                onChange={(e) => {
-                  setSearchText(e.target.value);
-                }}
-                placeholder={i18n.translate('xpack.lens.formulaSearchPlaceholder', {
-                  defaultMessage: 'Search functions',
-                })}
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem className="lnsFormula__docsNav">
-              {filteredHelpGroups.map((helpGroup, index) => {
-                return (
-                  <nav className="lnsFormula__docsNavGroup" key={helpGroup.label}>
-                    <EuiTitle size="xxs">
-                      <h6>
-                        <EuiLink
-                          className="lnsFormula__docsNavGroupLink"
-                          color="text"
-                          onClick={() => {
-                            setSelectedFunction(helpGroup.label);
-                          }}
-                        >
-                          <EuiHighlight search={searchText}>{helpGroup.label}</EuiHighlight>
-                        </EuiLink>
-                      </h6>
-                    </EuiTitle>
-
-                    {helpGroup.items.length ? (
-                      <>
-                        <EuiSpacer size="s" />
-
-                        <EuiListGroup gutterSize="none">
-                          {helpGroup.items.map((helpItem) => {
-                            return (
-                              <EuiListGroupItem
-                                key={helpItem.label}
-                                label={
-                                  <EuiHighlight search={searchText}>{helpItem.label}</EuiHighlight>
-                                }
-                                size="s"
-                                onClick={() => {
-                                  setSelectedFunction(helpItem.label);
-                                }}
-                              />
-                            );
-                          })}
-                        </EuiListGroup>
-                      </>
-                    ) : null}
-                  </nav>
-                );
-              })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
-        <EuiFlexItem className="lnsFormula__docsText" grow={2}>
-          <EuiText size="s">
-            <section
-              className="lnsFormula__docsTextIntro"
-              ref={(el) => {
-                if (el) {
-                  scrollTargets.current[helpGroups[0].label] = el;
-                }
-              }}
-            >
-              <Markdown
-                markdown={i18n.translate('xpack.lens.formulaDocumentation.markdown', {
-                  defaultMessage: `## How it works
+  const sections = {
+    groups: helpGroups,
+    initialSection: (
+      <Markdown
+        markdown={i18n.translate('xpack.lens.formulaDocumentation.markdown', {
+          defaultMessage: `## How it works
 
 Lens formulas let you do math using a combination of Elasticsearch aggregations and
 math functions. There are three main types of functions:
@@ -464,9 +321,9 @@ An example formula that uses all of these:
 
 \`\`\`
 round(100 * moving_average(
-  average(cpu.load.pct),
-  window=10,
-  kql='datacenter.name: east*'
+average(cpu.load.pct),
+window=10,
+kql='datacenter.name: east*'
 ))
 \`\`\`
 
@@ -482,54 +339,16 @@ queries. If your search has a single quote in it, use a backslash to escape, lik
 Math functions can take positional arguments, like pow(count(), 3) is the same as count() * count() * count()
 
 Use the symbols +, -, /, and * to perform basic math.
-                  `,
-                  description:
-                    'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-                })}
-              />
-            </section>
+      `,
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+        })}
+      />
+    ),
+  };
 
-            {helpGroups.slice(1).map((helpGroup, index) => {
-              return (
-                <section
-                  className="lnsFormula__docsTextGroup"
-                  key={helpGroup.label}
-                  ref={(el) => {
-                    if (el) {
-                      scrollTargets.current[helpGroup.label] = el;
-                    }
-                  }}
-                >
-                  <h2>{helpGroup.label}</h2>
-
-                  <p>{helpGroup.description}</p>
-
-                  {helpGroups[index + 1].items.map((helpItem) => {
-                    return (
-                      <article
-                        className="lnsFormula__docsTextItem"
-                        key={helpItem.label}
-                        ref={(el) => {
-                          if (el) {
-                            scrollTargets.current[helpItem.label] = el;
-                          }
-                        }}
-                      >
-                        {helpItem.description}
-                      </article>
-                    );
-                  })}
-                </section>
-              );
-            })}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
+  return sections;
 }
-
-export const MemoizedFormulaHelp = React.memo(FormulaHelp);
 
 export function getFunctionSignatureLabel(
   name: string,

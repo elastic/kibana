@@ -114,7 +114,7 @@ describe('SearchSource', () => {
   });
 
   describe('#getActiveIndexFilter()', () => {
-    test('pase _index from query', () => {
+    test('pass _index from query', () => {
       searchSource.setField('query', {
         language: 'kuery',
         query: `_INDEX : fakebeat and _index : "mybeat-*"`,
@@ -122,7 +122,7 @@ describe('SearchSource', () => {
       expect(searchSource.getActiveIndexFilter()).toMatchObject(['mybeat-*']);
     });
 
-    test('pase _index from filter', () => {
+    test('pass _index from filter', () => {
       const filter = [
         {
           query: { match_phrase: { _index: 'auditbeat-*' } },
@@ -163,7 +163,33 @@ describe('SearchSource', () => {
       expect(searchSource.getActiveIndexFilter()).toMatchObject(['auditbeat-*']);
     });
 
-    test('pase _index from query and filter with negate equals to true', () => {
+    test('pass _index from filter - phrases filter', () => {
+      const filter: Filter[] = [
+        {
+          meta: {
+            type: 'phrases',
+            key: '_index',
+            params: ['auditbeat-*', 'packetbeat-*'],
+            alias: null,
+            negate: false,
+            disabled: false,
+          },
+          query: {
+            bool: {
+              should: [
+                { match_phrase: { _index: 'auditbeat-*' } },
+                { match_phrase: { _index: 'packetbeat-*' } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        },
+      ];
+      searchSource.setField('filter', filter);
+      expect(searchSource.getActiveIndexFilter()).toMatchObject(['auditbeat-*', 'packetbeat-*']);
+    });
+
+    test('pass _index from query and filter with negate equals to true', () => {
       const filter = [
         {
           query: {
@@ -189,7 +215,7 @@ describe('SearchSource', () => {
       expect(searchSource.getActiveIndexFilter()).toMatchObject([]);
     });
 
-    test('pase _index from query and filter with negate equals to true and disabled equals to true', () => {
+    test('pass _index from query and filter with negate equals to true and disabled equals to true', () => {
       const filter = [
         {
           query: {
@@ -903,6 +929,13 @@ describe('SearchSource', () => {
       expect(Object.keys(JSON.parse(searchSourceJSON))).toEqual(['highlightAll', 'from', 'sort']);
     });
 
+    test('should add pit', () => {
+      const pit = { id: 'flimflam', keep_alive: '1m' };
+      searchSource.setField('pit', pit);
+      const { searchSourceJSON } = searchSource.serialize();
+      expect(searchSourceJSON).toBe(JSON.stringify({ pit }));
+    });
+
     test('should serialize filters', () => {
       const filter = [
         {
@@ -976,7 +1009,11 @@ describe('SearchSource', () => {
       },
     ];
 
-    const indexPattern123 = { id: '123', isPersisted: () => true } as DataView;
+    const indexPattern123 = {
+      id: '123',
+      isPersisted: jest.fn(() => true),
+      toSpec: jest.fn(),
+    } as unknown as DataView;
 
     test('should return serialized fields', () => {
       searchSource.setField('index', indexPattern123);
@@ -984,6 +1021,7 @@ describe('SearchSource', () => {
         return filter;
       });
       const serializedFields = searchSource.getSerializedFields();
+      expect(indexPattern123.toSpec).toHaveBeenCalledTimes(0);
       expect(serializedFields).toMatchSnapshot();
     });
 
@@ -993,10 +1031,18 @@ describe('SearchSource', () => {
       const childSearchSource = searchSource.createChild();
       childSearchSource.setField('timeout', '100');
       const serializedFields = childSearchSource.getSerializedFields(true);
+      expect(indexPattern123.toSpec).toHaveBeenCalledTimes(0);
       expect(serializedFields).toMatchObject({
         timeout: '100',
         parent: { index: '123', from: 123 },
       });
+    });
+
+    test('should use spec', () => {
+      indexPattern123.isPersisted = jest.fn(() => false);
+      searchSource.setField('index', indexPattern123);
+      searchSource.getSerializedFields(true, false);
+      expect(indexPattern123.toSpec).toHaveBeenCalledWith(false);
     });
   });
 

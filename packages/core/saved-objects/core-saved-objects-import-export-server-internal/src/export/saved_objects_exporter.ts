@@ -9,7 +9,6 @@
 import type { Readable } from 'stream';
 import { createListStream } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
@@ -21,11 +20,16 @@ import type {
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { sortObjects } from './sort_objects';
 import { SavedObjectsExportError } from './errors';
 import { collectExportedObjects } from './collect_exported_objects';
-import { byIdAscComparator, getPreservedOrderComparator, SavedObjectComparator } from './utils';
+import {
+  byIdAscComparator,
+  getPreservedOrderComparator,
+  type SavedObjectComparator,
+} from './utils';
 
 /**
  * @internal

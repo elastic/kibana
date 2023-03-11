@@ -38,7 +38,7 @@ describe('###Documentation popover content', () => {
   test('Documentation component has a header element referring to the language given', () => {
     const component = mountWithIntl(<LanguageDocumentationPopoverContent language="test" />);
     const title = findTestSubject(component, 'language-documentation-title');
-    expect(title.text()).toEqual('TEST reference');
+    expect(title.text()).toEqual('test reference');
   });
 
   test('Documentation component has a sidebar navigation list with all the section labels', () => {

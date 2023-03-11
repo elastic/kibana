@@ -9,6 +9,7 @@ import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form
 import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { CommentRequestUserType } from '../../../common/api';
+
 import * as i18n from './translations';
 
 const { emptyField } = fieldValidators;
@@ -22,7 +23,7 @@ export const schema: FormSchema<AddCommentFormSchema> = {
     type: FIELD_TYPES.TEXTAREA,
     validations: [
       {
-        validator: emptyField(i18n.COMMENT_REQUIRED),
+        validator: emptyField(i18n.EMPTY_COMMENTS_NOT_ALLOWED),
       },
     ],
   },

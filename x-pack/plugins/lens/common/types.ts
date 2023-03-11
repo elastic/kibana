@@ -20,11 +20,6 @@ export type { OriginalColumn } from './expressions/map_to_columns';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 
-export interface ExistingFields {
-  indexPatternTitle: string;
-  existingFieldNames: string[];
-}
-
 export interface DateRange {
   fromDate: string;
   toDate: string;
@@ -57,9 +52,11 @@ export enum EmptySizeRatios {
 }
 
 export interface SharedPieLayerState {
+  metrics: string[];
   primaryGroups: string[];
   secondaryGroups?: string[];
-  metric?: string;
+  allowMultipleMetrics?: boolean;
+  colorsByDimension?: Record<string, string>;
   collapseFns?: Record<string, CollapseFunction>;
   numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;
@@ -85,6 +82,7 @@ export interface PieVisualizationState {
   palette?: PaletteOutput;
 }
 export interface LegacyMetricState {
+  autoScaleMetricAlignment?: 'left' | 'right' | 'center';
   layerId: string;
   accessor?: string;
   layerType: LayerType;

@@ -8,8 +8,11 @@
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import type { SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { isArray, isNil } from 'lodash/fp';
+import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
+import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
+import { useTourContext } from '../guided_onboarding_tour';
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
@@ -38,8 +41,8 @@ import {
   LinkButton,
   ReputationLinksOverflow,
 } from './helpers';
-import type { HostsTableType } from '../../../hosts/store/model';
-import type { UsersTableType } from '../../../users/store/model';
+import type { HostsTableType } from '../../../explore/hosts/store/model';
+import type { UsersTableType } from '../../../explore/users/store/model';
 
 export { LinkButton, LinkAnchor } from './helpers';
 
@@ -260,12 +263,22 @@ const CaseDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   detailName: string;
   title?: string;
-}> = ({ children, detailName, title }) => {
+  index?: number;
+}> = ({ index, children, detailName, title }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
+  const { activeStep, isTourShown } = useTourContext();
+  const isTourStepActive = useMemo(
+    () =>
+      activeStep === AlertsCasesTourSteps.viewCase &&
+      isTourShown(SecurityStepId.alertsCases) &&
+      index === 0,
+    [activeStep, index, isTourShown]
+  );
+
   const goToCaseDetails = useCallback(
-    async (ev) => {
-      ev.preventDefault();
+    async (ev?) => {
+      if (ev) ev.preventDefault();
       return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         path: getCaseDetailsUrl({ id: detailName, search }),
@@ -274,15 +287,27 @@ const CaseDetailsLinkComponent: React.FC<{
     [detailName, navigateToApp, search]
   );
 
+  useEffect(() => {
+    if (isTourStepActive)
+      document.querySelector(`[tour-step="RelatedCases-accordion"]`)?.scrollIntoView();
+  }, [isTourStepActive]);
+
   return (
-    <LinkAnchor
+    <GuidedOnboardingTourStep
       onClick={goToCaseDetails}
-      href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
-      data-test-subj="case-details-link"
-      aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
+      isTourAnchor={isTourStepActive}
+      step={AlertsCasesTourSteps.viewCase}
+      tourId={SecurityStepId.alertsCases}
     >
-      {children ? children : detailName}
-    </LinkAnchor>
+      <LinkAnchor
+        onClick={goToCaseDetails}
+        href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
+        data-test-subj="case-details-link"
+        aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
+      >
+        {children ? children : detailName}
+      </LinkAnchor>
+    </GuidedOnboardingTourStep>
   );
 };
 export const CaseDetailsLink = React.memo(CaseDetailsLinkComponent);

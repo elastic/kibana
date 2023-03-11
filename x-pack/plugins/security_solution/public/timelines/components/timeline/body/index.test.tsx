@@ -6,8 +6,12 @@
  */
 
 import React from 'react';
+import type { Store } from 'redux';
+import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
+import type { DroppableProps, DraggableProps } from 'react-beautiful-dnd';
 
+import { useKibana, useCurrentUser } from '../../../../common/lib/kibana';
 import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
 import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
@@ -18,7 +22,6 @@ import {
   kibanaObservable,
   mockGlobalState,
   mockTimelineData,
-  mockTimelineModel,
   SUB_PLUGINS_REDUCER,
 } from '../../../../common/mock';
 import { TestProviders } from '../../../../common/mock/test_providers';
@@ -29,15 +32,18 @@ import type { Props } from '.';
 import { StatefulBody } from '.';
 import type { Sort } from './sort';
 import { getDefaultControlColumn } from './control_columns';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import type { UseFieldBrowserOptionsProps } from '../../fields_browser';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
+);
+
 jest.mock('../../../../common/components/user_privileges', () => {
   return {
     useUserPrivileges: () => ({
@@ -49,46 +55,24 @@ jest.mock('../../../../common/components/user_privileges', () => {
   };
 });
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
-  const mockCasesContract = jest.requireActual('@kbn/cases-plugin/public/mocks');
-  return {
-    ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        application: {
-          navigateToApp: jest.fn(),
-          getUrlForApp: jest.fn(),
-          capabilities: {
-            siem: { crud_alerts: true, read_alerts: true },
-          },
-        },
-        cases: mockCasesContract.mockCasesContract(),
-        data: {
-          search: jest.fn(),
-          query: jest.fn(),
-        },
-        uiSettings: {
-          get: jest.fn(),
-        },
-        savedObjects: {
-          client: {},
-        },
-        timelines: {
-          getLastUpdated: jest.fn(),
-          getLoadingPanel: jest.fn(),
-          getFieldBrowser: jest.fn(),
-          getUseDraggableKeyboardWrapper: () =>
-            jest.fn().mockReturnValue({
-              onBlur: jest.fn(),
-              onKeyDown: jest.fn(),
-            }),
-        },
-      },
-    }),
-  };
+const mockUseFieldBrowserOptions = jest.fn();
+const mockUseKibana = useKibana as jest.Mock;
+const mockUseCurrentUser = useCurrentUser as jest.Mock<Partial<ReturnType<typeof useCurrentUser>>>;
+const mockCasesContract = jest.requireActual('@kbn/cases-plugin/public/mocks');
+jest.mock('../../fields_browser', () => ({
+  useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
+}));
+
+const useAddToTimeline = () => ({
+  beginDrag: jest.fn(),
+  cancelDrag: jest.fn(),
+  dragToLocation: jest.fn(),
+  endDrag: jest.fn(),
+  hasDraggableLock: jest.fn(),
+  startDragToTimeline: jest.fn(),
 });
 
+jest.mock('../../../../common/lib/kibana');
 const mockSort: Sort[] = [
   {
     columnId: '@timestamp',
@@ -108,12 +92,48 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: () => mockTimelineModel,
-  useDeepEqualSelector: () => mockTimelineModel,
-}));
+jest.mock('../../../../common/components/link_to', () => {
+  const originalModule = jest.requireActual('../../../../common/components/link_to');
+  return {
+    ...originalModule,
+    useGetSecuritySolutionUrl: () =>
+      jest.fn(({ deepLinkId }: { deepLinkId: string }) => `/${deepLinkId}`),
+    useNavigateTo: () => {
+      return { navigateTo: jest.fn() };
+    },
+    useAppUrl: () => {
+      return { getAppUrl: jest.fn() };
+    },
+  };
+});
 
-jest.mock('../../../../common/components/link_to');
+jest.mock('../../../../common/components/links', () => {
+  const originalModule = jest.requireActual('../../../../common/components/links');
+  return {
+    ...originalModule,
+    useGetSecuritySolutionUrl: () =>
+      jest.fn(({ deepLinkId }: { deepLinkId: string }) => `/${deepLinkId}`),
+    useNavigateTo: () => {
+      return { navigateTo: jest.fn() };
+    },
+    useAppUrl: () => {
+      return { getAppUrl: jest.fn() };
+    },
+  };
+});
+
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/use_open_alert_details',
+  () => {
+    return {
+      useOpenAlertDetailsAction: () => {
+        return {
+          alertDetailsActionItems: [],
+        };
+      },
+    };
+  }
+);
 
 // Prevent Resolver from rendering
 jest.mock('../../graph_overlay');
@@ -129,13 +149,125 @@ jest.mock('../../fields_browser/create_field_button', () => ({
   useCreateFieldButton: () => <></>,
 }));
 
-// SKIP: https://github.com/elastic/kibana/issues/143718
-describe.skip('Body', () => {
-  const mount = useMountAppended();
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+jest.mock('suricata-sid-db', () => {
+  return {
+    db: [],
+  };
+});
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions',
+  () => {
+    return {
+      useAddToCaseActions: () => {
+        return {
+          addToCaseActionItems: [],
+        };
+      },
+    };
+  }
+);
+
+jest.mock('react-beautiful-dnd', () => {
+  const original = jest.requireActual('react-beautiful-dnd');
+  return {
+    ...original,
+    Droppable: ({ children }: { children: DroppableProps['children'] }) =>
+      children(
+        {
+          droppableProps: {
+            'data-rbd-droppable-context-id': '',
+            'data-rbd-droppable-id': '',
+          },
+          innerRef: jest.fn(),
+        },
+        {
+          isDraggingOver: false,
+          isUsingPlaceholder: false,
+        }
+      ),
+    Draggable: ({ children }: { children: DraggableProps['children'] }) =>
+      children(
+        {
+          draggableProps: {
+            'data-rbd-draggable-context-id': '',
+            'data-rbd-draggable-id': '',
+          },
+          innerRef: jest.fn(),
+        },
+        {
+          isDragging: false,
+          isDropAnimating: false,
+        },
+        {
+          draggableId: '',
+          mode: 'SNAP',
+          source: {
+            droppableId: '',
+            index: 0,
+          },
+        }
+      ),
+    DraggableProvided: () => <></>,
+    DraggableStateSnapshot: () => <></>,
+    DraggingStyle: () => <></>,
+    NotDraggingStyle: () => <></>,
+  };
+});
+
+describe('Body', () => {
+  const getWrapper = async (childrenComponent: JSX.Element, store?: { store: Store<State> }) => {
+    const wrapper = mount(childrenComponent, {
+      wrappingComponent: TestProviders,
+      wrappingComponentProps: store ?? {},
+    });
+    await waitFor(() => wrapper.find('[data-test-subj="suricataRefs"]').exists());
+
+    return wrapper;
+  };
   const mockRefetch = jest.fn();
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
+    mockUseCurrentUser.mockReturnValue({ username: 'test-username' });
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          navigateToApp: jest.fn(),
+          getUrlForApp: jest.fn(),
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+          },
+        },
+        cases: mockCasesContract.mockCasesContract(),
+        data: {
+          search: jest.fn(),
+          query: jest.fn(),
+          dataViews: jest.fn(),
+        },
+        uiSettings: {
+          get: jest.fn(),
+        },
+        savedObjects: {
+          client: {},
+        },
+        timelines: {
+          getLastUpdated: jest.fn(),
+          getLoadingPanel: jest.fn(),
+          getFieldBrowser: jest.fn(),
+          getUseAddToTimeline: () => useAddToTimeline,
+        },
+      },
+      useNavigateTo: jest.fn().mockReturnValue({
+        navigateTo: jest.fn(),
+      }),
+    });
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
   });
@@ -145,8 +277,8 @@ describe.skip('Body', () => {
   const props: Props = {
     activePage: 0,
     browserFields: mockBrowserFields,
-    data: mockTimelineData,
-    id: 'timeline-test',
+    data: [mockTimelineData[0]],
+    id: TimelineId.test,
     refetch: mockRefetch,
     renderCellValue: DefaultCellRenderer,
     rowRenderers: defaultRowRenderers,
@@ -162,58 +294,51 @@ describe.skip('Body', () => {
       mockDispatch.mockClear();
     });
 
-    test('it renders the column headers', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
-
+    test('it renders the column headers', async () => {
+      const wrapper = await getWrapper(<StatefulBody {...props} />);
       expect(wrapper.find('[data-test-subj="column-headers"]').first().exists()).toEqual(true);
     });
 
-    test('it renders the scroll container', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
-
+    test('it renders the scroll container', async () => {
+      const wrapper = await getWrapper(<StatefulBody {...props} />);
       expect(wrapper.find('[data-test-subj="timeline-body"]').first().exists()).toEqual(true);
     });
 
-    test('it renders events', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
-
+    test('it renders events', async () => {
+      const wrapper = await getWrapper(<StatefulBody {...props} />);
       expect(wrapper.find('[data-test-subj="events"]').first().exists()).toEqual(true);
     });
-
     test('it renders a tooltip for timestamp', async () => {
+      const { storage } = createSecuritySolutionStorageMock();
       const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
-      const testProps = { ...props, columnHeaders: headersJustTimestamp };
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...testProps} />
-        </TestProviders>
-      );
-      wrapper.update();
-      await waitFor(() => {
-        wrapper.update();
-        headersJustTimestamp.forEach(() => {
-          expect(
-            wrapper
-              .find('[data-test-subj="data-driven-columns"]')
-              .first()
-              .find('[data-test-subj="localized-date-tool-tip"]')
-              .exists()
-          ).toEqual(true);
-        });
+      const state: State = {
+        ...mockGlobalState,
+        timeline: {
+          ...mockGlobalState.timeline,
+          timelineById: {
+            ...mockGlobalState.timeline.timelineById,
+            [TimelineId.test]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.test],
+              id: TimelineId.test,
+              columns: headersJustTimestamp,
+            },
+          },
+        },
+      };
+
+      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const wrapper = await getWrapper(<StatefulBody {...props} />, { store });
+
+      headersJustTimestamp.forEach(() => {
+        expect(
+          wrapper
+            .find('[data-test-subj="data-driven-columns"]')
+            .first()
+            .find('[data-test-subj="localized-date-tool-tip"]')
+            .exists()
+        ).toEqual(true);
       });
-    }, 20000);
+    });
   });
   describe('action on event', () => {
     const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
@@ -231,16 +356,13 @@ describe.skip('Body', () => {
       mockDispatch.mockClear();
     });
 
-    test('Add a note to an event', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
-      addaNoteToEvent(wrapper, 'hello world');
+    test('Add a note to an event', async () => {
+      const wrapper = await getWrapper(<StatefulBody {...props} />);
 
+      addaNoteToEvent(wrapper, 'hello world');
+      wrapper.update();
       expect(mockDispatch).toHaveBeenNthCalledWith(
-        3,
+        2,
         expect.objectContaining({
           payload: {
             eventId: '1',
@@ -255,7 +377,7 @@ describe.skip('Body', () => {
         })
       );
       expect(mockDispatch).toHaveBeenNthCalledWith(
-        4,
+        3,
         timelineActions.pinEvent({
           eventId: '1',
           id: 'timeline-test',
@@ -263,7 +385,7 @@ describe.skip('Body', () => {
       );
     });
 
-    test('Add two notes to an event', () => {
+    test('Add two notes to an event', async () => {
       const { storage } = createSecuritySolutionStorageMock();
       const state: State = {
         ...mockGlobalState,
@@ -280,21 +402,12 @@ describe.skip('Body', () => {
         },
       };
 
-      const store = createStore(
-        state,
-        SUB_PLUGINS_REDUCER,
-        { dataTable: tGridReducer },
-        kibanaObservable,
-        storage
-      );
+      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
-      const Proxy = (proxyProps: Props) => (
-        <TestProviders store={store}>
-          <StatefulBody {...proxyProps} />
-        </TestProviders>
-      );
+      const Proxy = (proxyProps: Props) => <StatefulBody {...proxyProps} />;
 
-      const wrapper = mount(<Proxy {...props} />);
+      const wrapper = await getWrapper(<Proxy {...props} />, { store });
+
       addaNoteToEvent(wrapper, 'hello world');
       mockDispatch.mockClear();
       addaNoteToEvent(wrapper, 'new hello world');
@@ -328,16 +441,12 @@ describe.skip('Body', () => {
       mockDispatch.mockReset();
     });
     test('call the right reduce action to show event details for query tab', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
+      const wrapper = await getWrapper(<StatefulBody {...props} />);
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(2);
-      expect(mockDispatch.mock.calls[1][0]).toEqual({
+      expect(mockDispatch).toBeCalledTimes(1);
+      expect(mockDispatch.mock.calls[0][0]).toEqual({
         payload: {
           id: 'timeline-test',
           panelView: 'eventDetail',
@@ -353,16 +462,12 @@ describe.skip('Body', () => {
     });
 
     test('call the right reduce action to show event details for pinned tab', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...props} tabType={TimelineTabs.pinned} />
-        </TestProviders>
-      );
+      const wrapper = await getWrapper(<StatefulBody {...props} tabType={TimelineTabs.pinned} />);
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(2);
-      expect(mockDispatch.mock.calls[1][0]).toEqual({
+      expect(mockDispatch).toBeCalledTimes(1);
+      expect(mockDispatch.mock.calls[0][0]).toEqual({
         payload: {
           id: 'timeline-test',
           panelView: 'eventDetail',
@@ -378,16 +483,12 @@ describe.skip('Body', () => {
     });
 
     test('call the right reduce action to show event details for notes tab', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...props} tabType={TimelineTabs.notes} />
-        </TestProviders>
-      );
+      const wrapper = await getWrapper(<StatefulBody {...props} tabType={TimelineTabs.notes} />);
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(2);
-      expect(mockDispatch.mock.calls[1][0]).toEqual({
+      expect(mockDispatch).toBeCalledTimes(1);
+      expect(mockDispatch.mock.calls[0][0]).toEqual({
         payload: {
           id: 'timeline-test',
           panelView: 'eventDetail',

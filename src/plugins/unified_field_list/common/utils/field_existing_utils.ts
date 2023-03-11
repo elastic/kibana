@@ -19,7 +19,6 @@ export type SearchHandler = (
 /**
  * The number of docs to sample to determine field empty status.
  */
-const SAMPLE_SIZE = 500;
 
 export interface Field {
   name: string;
@@ -40,7 +39,6 @@ export async function fetchFieldExistence({
   timeFieldName,
   includeFrozen,
   metaFields,
-  useSampling,
 }: {
   search: SearchHandler;
   dataView: DataView;
@@ -49,74 +47,18 @@ export async function fetchFieldExistence({
   toDate?: string;
   timeFieldName?: string;
   includeFrozen: boolean;
-  useSampling: boolean;
   metaFields: string[];
   dataViewsService: DataViewsContract;
 }) {
-  if (useSampling) {
-    return legacyFetchFieldExistenceSampling({
-      search,
-      metaFields,
-      dataView,
-      dataViewsService,
-      dslQuery,
-      fromDate,
-      toDate,
-      timeFieldName,
-      includeFrozen,
-    });
-  }
-
   const allFields = buildFieldList(dataView, metaFields);
   const existingFieldList = await dataViewsService.getFieldsForIndexPattern(dataView, {
     // filled in by data views service
     pattern: '',
-    filter: toQuery(timeFieldName, fromDate, toDate, dslQuery),
+    indexFilter: toQuery(timeFieldName, fromDate, toDate, dslQuery),
   });
   return {
     indexPatternTitle: dataView.title,
     existingFieldNames: existingFields(existingFieldList, allFields),
-  };
-}
-
-async function legacyFetchFieldExistenceSampling({
-  search,
-  metaFields,
-  dataView,
-  dslQuery,
-  fromDate,
-  toDate,
-  timeFieldName,
-  includeFrozen,
-}: {
-  search: SearchHandler;
-  metaFields: string[];
-  dataView: DataView;
-  dataViewsService: DataViewsContract;
-  dslQuery: object;
-  fromDate?: string;
-  toDate?: string;
-  timeFieldName?: string;
-  includeFrozen: boolean;
-}) {
-  const fields = buildFieldList(dataView, metaFields);
-  const runtimeMappings = dataView.getRuntimeMappings();
-
-  const docs = await fetchDataViewStats({
-    search,
-    fromDate,
-    toDate,
-    dslQuery,
-    index: dataView.title,
-    timeFieldName: timeFieldName || dataView.timeFieldName,
-    fields,
-    runtimeMappings,
-    includeFrozen,
-  });
-
-  return {
-    indexPatternTitle: dataView.title,
-    existingFieldNames: legacyExistingFields(docs, fields),
   };
 }
 
@@ -132,64 +74,10 @@ export function buildFieldList(indexPattern: DataView, metaFields: string[]): Fi
       script: field.script,
       // id is a special case - it doesn't show up in the meta field list,
       // but as it's not part of source, it has to be handled separately.
-      isMeta: metaFields.includes(field.name) || field.name === '_id',
+      isMeta: metaFields?.includes(field.name) || field.name === '_id',
       runtimeField: !field.isMapped ? field.runtimeField : undefined,
     };
   });
-}
-
-async function fetchDataViewStats({
-  search,
-  index,
-  dslQuery,
-  timeFieldName,
-  fromDate,
-  toDate,
-  fields,
-  runtimeMappings,
-  includeFrozen,
-}: {
-  search: SearchHandler;
-  index: string;
-  dslQuery: object;
-  timeFieldName?: string;
-  fromDate?: string;
-  toDate?: string;
-  fields: Field[];
-  runtimeMappings: estypes.MappingRuntimeFields;
-  includeFrozen: boolean;
-}) {
-  const query = toQuery(timeFieldName, fromDate, toDate, dslQuery);
-
-  const scriptedFields = fields.filter((f) => f.isScript);
-  const response = await search({
-    index,
-    ...(includeFrozen ? { ignore_throttled: false } : {}),
-    body: {
-      size: SAMPLE_SIZE,
-      query,
-      // Sorted queries are usually able to skip entire shards that don't match
-      sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
-      fields: ['*'],
-      _source: false,
-      runtime_mappings: runtimeMappings,
-      script_fields: scriptedFields.reduce((acc, field) => {
-        acc[field.name] = {
-          script: {
-            lang: field.lang!,
-            source: field.script!,
-          },
-        };
-        return acc;
-      }, {} as Record<string, estypes.ScriptField>),
-      // Small improvement because there is overhead in counting
-      track_total_hits: false,
-      // Per-shard timeout, must be lower than overall. Shards return partial results on timeout
-      timeout: '4500ms',
-    },
-  });
-
-  return response?.hits.hits;
 }
 
 function toQuery(

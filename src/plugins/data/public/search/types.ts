@@ -11,7 +11,7 @@ import type { PackageInfo } from '@kbn/core/server';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
+import { ISearchGeneric, ISearchStartSearchSource, SearchRequest } from '../../common/search';
 import { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies } from './aggs';
 import { SearchUsageCollector } from './collectors';
 import { ISessionsClient, ISessionService } from './session';
@@ -159,4 +159,11 @@ export type SearchResponseWarning =
  * function to prevent the search service from showing warning notifications by default.
  * @public
  */
-export type WarningHandlerCallback = (warnings: SearchResponseWarning) => boolean | undefined;
+export type WarningHandlerCallback = (
+  warnings: SearchResponseWarning,
+  meta: {
+    request: SearchRequest;
+    response: estypes.SearchResponse;
+    requestId: string | undefined;
+  }
+) => boolean | undefined;

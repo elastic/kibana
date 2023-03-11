@@ -9,8 +9,7 @@ import React, { useState } from 'react';
 import { EuiPopover, EuiDescriptionList, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import styled from 'styled-components';
 import type { NarrowDateRange, Anomaly } from '../types';
-import { DraggableScore } from './draggable_score';
-import { escapeDataProviderId } from '../../drag_and_drop/helpers';
+import { Score } from './score';
 import { createDescriptionList } from './create_description_list';
 
 interface Args {
@@ -21,6 +20,7 @@ interface Args {
   index?: number;
   score: Anomaly;
   interval: string;
+  jobName: string;
 }
 
 const Icon = styled(EuiIcon)`
@@ -38,16 +38,13 @@ export const AnomalyScoreComponent = ({
   score,
   interval,
   narrowDateRange,
+  jobName,
 }: Args): JSX.Element => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
       <EuiFlexItem grow={false}>
-        <DraggableScore
-          id={escapeDataProviderId(`anomaly-scores-${jobKey}`)}
-          index={index}
-          score={score}
-        />
+        <Score index={index} score={score} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover
@@ -61,7 +58,14 @@ export const AnomalyScoreComponent = ({
         >
           <EuiDescriptionList
             data-test-subj="anomaly-description-list"
-            listItems={createDescriptionList(score, startDate, endDate, interval, narrowDateRange)}
+            listItems={createDescriptionList(
+              score,
+              startDate,
+              endDate,
+              interval,
+              narrowDateRange,
+              jobName
+            )}
           />
         </EuiPopover>
       </EuiFlexItem>

@@ -10,7 +10,7 @@ import Path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { defaultsDeep } from 'lodash';
 import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { FtrConfigProvider, GenericFtrProviderContext } from '../../public_types';
 import { Config } from './config';

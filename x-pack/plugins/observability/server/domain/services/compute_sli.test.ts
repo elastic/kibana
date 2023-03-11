@@ -8,8 +8,8 @@
 import { computeSLI } from './compute_sli';
 
 describe('computeSLI', () => {
-  it('returns 0 when no total events', () => {
-    expect(computeSLI({ good: 100, total: 0 })).toEqual(0);
+  it('returns -1 when no total events', () => {
+    expect(computeSLI({ good: 100, total: 0 })).toEqual(-1);
   });
 
   it('returns the sli value', () => {

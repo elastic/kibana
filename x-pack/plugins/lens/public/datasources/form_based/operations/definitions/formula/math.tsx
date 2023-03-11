@@ -46,6 +46,8 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
           name: [column.label],
           expression: [astToString(column.params.tinymathAst)],
           onError: ['null'],
+          // cast everything into number
+          castColumns: column.references,
         },
       },
     ];

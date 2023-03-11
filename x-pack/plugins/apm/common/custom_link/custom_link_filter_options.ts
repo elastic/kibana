@@ -10,7 +10,7 @@ import {
   SERVICE_ENVIRONMENT,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../elasticsearch_fieldnames';
+} from '../es_fields/apm';
 
 export const FILTER_OPTIONS = [
   SERVICE_NAME,

@@ -312,7 +312,7 @@ function getLensAttributesPartition(
     layers: [
       {
         primaryGroups: ['col1'],
-        metric: 'col2',
+        metrics: ['col2'],
         layerId: 'layer1',
         layerType: 'data',
         numberDisplay: 'percent',

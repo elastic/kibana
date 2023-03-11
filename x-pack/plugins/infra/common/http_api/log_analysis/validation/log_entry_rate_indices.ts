@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { mappingRuntimeFieldRT } from '../../shared/es_request';
 
 export const LOG_ANALYSIS_VALIDATE_INDICES_PATH =
   '/api/infra/log_analysis/validation/log_entry_rate_indices';
@@ -26,7 +27,7 @@ export const validationIndicesRequestPayloadRT = rt.type({
   data: rt.type({
     fields: rt.array(validationIndicesFieldSpecificationRT),
     indices: rt.array(rt.string),
-    runtimeMappings: rt.UnknownRecord,
+    runtimeMappings: rt.record(rt.string, mappingRuntimeFieldRT),
   }),
 });
 

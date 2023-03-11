@@ -28,6 +28,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
@@ -51,6 +52,7 @@ export interface DependencyCache {
   dataVisualizer: DataVisualizerPluginStart | null;
   dataViews: DataViewsContract | null;
   share: SharePluginStart | null;
+  lens: LensPublicStart | null;
 }
 
 const cache: DependencyCache = {
@@ -75,6 +77,7 @@ const cache: DependencyCache = {
   dataVisualizer: null,
   dataViews: null,
   share: null,
+  lens: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -98,6 +101,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.dataVisualizer = deps.dataVisualizer || null;
   cache.dataViews = deps.dataViews || null;
   cache.share = deps.share || null;
+  cache.lens = deps.lens || null;
 }
 
 export function getTimefilter() {
@@ -244,6 +248,13 @@ export function getShare() {
     throw new Error("share hasn't been initialized");
   }
   return cache.share;
+}
+
+export function getLens() {
+  if (cache.lens === null) {
+    throw new Error("lens hasn't been initialized");
+  }
+  return cache.lens;
 }
 
 export function clearCache() {

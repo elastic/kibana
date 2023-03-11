@@ -35,6 +35,7 @@ import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 import { deleteMonitor } from './delete_monitor';
+import { StatusAlertService } from '../default_alerts/status_alert_service';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -47,6 +48,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     }),
   },
   handler: async ({
+    context,
     request,
     response,
     savedObjectsClient,
@@ -55,8 +57,6 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   }): Promise<any> => {
     // usually id is auto generated, but this is useful for testing
     const { id } = request.query;
-
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
 
     const monitor: SyntheticsMonitor = request.body as SyntheticsMonitor;
     const monitorType = monitor[ConfigKey.MONITOR_TYPE];
@@ -77,6 +77,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     );
 
     try {
+      const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
       const { errors, newMonitor } = await syncNewMonitor({
         normalizedMonitor: validationResult.decodedMonitor,
         server,
@@ -96,6 +97,20 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
             id: newMonitor.id,
           },
         });
+      }
+
+      try {
+        // we do this async, so we don't block the user, error handling will be done on the UI via separate api
+        const statusAlertService = new StatusAlertService(context, server, savedObjectsClient);
+        statusAlertService.createDefaultAlertIfNotExist().then(() => {
+          server.logger.debug(
+            `Successfully created default alert for monitor: ${newMonitor.attributes.name}`
+          );
+        });
+      } catch (e) {
+        server.logger.error(
+          `Error creating default alert: ${e} for monitor: ${newMonitor.attributes.name}`
+        );
       }
 
       return response.ok({ body: newMonitor });
@@ -118,7 +133,7 @@ export const createNewSavedObjectMonitor = async ({
   savedObjectsClient,
   normalizedMonitor,
 }: {
-  id?: string;
+  id: string;
   savedObjectsClient: SavedObjectsClientContract;
   normalizedMonitor: SyntheticsMonitor;
 }) => {
@@ -126,6 +141,8 @@ export const createNewSavedObjectMonitor = async ({
     syntheticsMonitorType,
     formatSecrets({
       ...normalizedMonitor,
+      [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
+      [ConfigKey.CONFIG_ID]: id,
       revision: 1,
     }),
     id
@@ -165,6 +182,8 @@ export const syncNewMonitor = async ({
   let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor> | null = null;
   const monitorWithNamespace = {
     ...normalizedMonitor,
+    [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || newMonitorId,
+    [ConfigKey.CONFIG_ID]: newMonitorId,
     [ConfigKey.NAMESPACE]: preserveNamespace
       ? normalizedMonitor[ConfigKey.NAMESPACE]
       : getMonitorNamespace(server, request, normalizedMonitor[ConfigKey.NAMESPACE]),
@@ -199,7 +218,7 @@ export const syncNewMonitor = async ({
         errors: syncErrors,
         monitor: monitorSavedObject,
         isInlineScript: Boolean((normalizedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-        kibanaVersion: server.kibanaVersion,
+        stackVersion: server.stackVersion,
       })
     );
 

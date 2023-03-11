@@ -10,7 +10,7 @@ import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 
 import {
-  fetchAnalyticsCollectionByName,
+  fetchAnalyticsCollectionById,
   fetchAnalyticsCollections,
 } from './fetch_analytics_collection';
 import { setupAnalyticsCollectionIndex } from './setup_indices';
@@ -22,6 +22,7 @@ jest.mock('./setup_indices', () => ({
 describe('fetch analytics collection lib function', () => {
   const mockClient = {
     asCurrentUser: {
+      get: jest.fn(),
       search: jest.fn(),
     },
     asInternalUser: {},
@@ -100,28 +101,24 @@ describe('fetch analytics collection lib function', () => {
     });
   });
 
-  describe('fetch collection by name', () => {
-    it('should fetch analytics collection by name', async () => {
-      mockClient.asCurrentUser.search.mockImplementationOnce(() =>
-        Promise.resolve({ hits: { hits: [{ _id: 'fakeId', _source: { name: 'example' } }] } })
+  describe('fetch collection by Id', () => {
+    it('should fetch analytics collection by Id', async () => {
+      mockClient.asCurrentUser.get.mockImplementationOnce(() =>
+        Promise.resolve({ _id: 'example', _source: { name: 'example' } })
       );
 
       await expect(
-        fetchAnalyticsCollectionByName(mockClient as unknown as IScopedClusterClient, 'example')
-      ).resolves.toEqual({ id: 'fakeId', name: 'example' });
+        fetchAnalyticsCollectionById(mockClient as unknown as IScopedClusterClient, 'example')
+      ).resolves.toEqual({ id: 'example', name: 'example' });
 
-      expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
+      expect(mockClient.asCurrentUser.get).toHaveBeenCalledWith({
+        id: 'example',
         index: ANALYTICS_COLLECTIONS_INDEX,
-        query: {
-          term: {
-            name: 'example',
-          },
-        },
       });
     });
 
     it('should call setup analytics collection index on index not found error', async () => {
-      mockClient.asCurrentUser.search.mockImplementationOnce(() =>
+      mockClient.asCurrentUser.get.mockImplementationOnce(() =>
         Promise.reject({
           meta: {
             body: {
@@ -131,23 +128,19 @@ describe('fetch analytics collection lib function', () => {
         })
       );
       await expect(
-        fetchAnalyticsCollectionByName(mockClient as unknown as IScopedClusterClient, 'example')
+        fetchAnalyticsCollectionById(mockClient as unknown as IScopedClusterClient, 'example')
       ).resolves.toEqual(undefined);
-      expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
+      expect(mockClient.asCurrentUser.get).toHaveBeenCalledWith({
+        id: 'example',
         index: ANALYTICS_COLLECTIONS_INDEX,
-        query: {
-          term: {
-            name: 'example',
-          },
-        },
       });
       expect(setupAnalyticsCollectionIndex as jest.Mock).toHaveBeenCalledWith(
         mockClient.asCurrentUser
       );
     });
 
-    it('should not call setup connectors on other errors', async () => {
-      mockClient.asCurrentUser.search.mockImplementationOnce(() =>
+    it('should not call setup analytics indices on other errors', async () => {
+      mockClient.asCurrentUser.get.mockImplementationOnce(() =>
         Promise.reject({
           meta: {
             body: {
@@ -158,16 +151,12 @@ describe('fetch analytics collection lib function', () => {
           },
         })
       );
-      await expect(fetchAnalyticsCollectionByName(mockClient as any, 'example')).resolves.toEqual(
+      await expect(fetchAnalyticsCollectionById(mockClient as any, 'example')).resolves.toEqual(
         undefined
       );
-      expect(mockClient.asCurrentUser.search).toHaveBeenCalledWith({
+      expect(mockClient.asCurrentUser.get).toHaveBeenCalledWith({
+        id: 'example',
         index: ANALYTICS_COLLECTIONS_INDEX,
-        query: {
-          term: {
-            name: 'example',
-          },
-        },
       });
       expect(setupAnalyticsCollectionIndex as jest.Mock).not.toHaveBeenCalled();
     });

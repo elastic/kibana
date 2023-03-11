@@ -21,7 +21,7 @@ import {
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
-import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
 import { getSections } from './sections';
 
@@ -85,13 +85,13 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
 function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
   const { core } = useApmPluginContext();
   const location = useLocation();
-  const { urlParams } = useLegacyUrlParams();
+  const apmRouter = useApmRouter();
 
   const sections = getSections({
     transaction,
     basePath: core.http.basePath,
     location,
-    urlParams,
+    apmRouter,
   });
 
   return (

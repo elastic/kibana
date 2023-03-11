@@ -21,7 +21,10 @@ import { getUptimeESMockClient } from '../../requests/test_helpers';
  * @param customRequests client tests can use this paramter to provide their own request mocks,
  * so we don't have to mock them all for each test.
  */
-export const bootstrapDependencies = (customRequests?: any, customPlugins: any = {}) => {
+export const bootstrapDependencies = (
+  customRequests?: any,
+  customPlugins: any = { observability: { getAlertDetailsConfig: () => ({ uptime: true }) } }
+) => {
   const router = {} as UptimeRouter;
   const basePath = {
     prepend: (url: string) => {
@@ -61,6 +64,7 @@ export const createRuleTypeMocks = (recoveredAlerts: Array<Record<string, any>> 
     },
     alertWithLifecycle: jest.fn().mockReturnValue({ scheduleActions, replaceState }),
     getAlertStartedDate: jest.fn().mockReturnValue('2022-03-17T13:13:33.755Z'),
+    getAlertUuid: jest.fn().mockReturnValue('mock-alert-uuid'),
     logger: loggerMock,
   };
 
@@ -80,6 +84,7 @@ export const createRuleTypeMocks = (recoveredAlerts: Array<Record<string, any>> 
 
 const createRecoveredAlerts = (alerts: Array<Record<string, any>>, setContext: jest.Mock) => {
   return alerts.map((alert) => ({
+    getId: () => 'mock-id',
     getState: () => alert,
     setContext,
     context: {},

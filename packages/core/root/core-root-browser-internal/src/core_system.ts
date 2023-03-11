@@ -7,11 +7,13 @@
  */
 
 import { filter, firstValueFrom } from 'rxjs';
+import type { LogLevelId } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InjectedMetadataService,
   type InjectedMetadataParams,
 } from '@kbn/core-injected-metadata-browser-internal';
+import { BrowserLoggingSystem } from '@kbn/core-logging-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import { ThemeService } from '@kbn/core-theme-browser-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -21,7 +23,7 @@ import { ExecutionContextService } from '@kbn/core-execution-context-browser-int
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
 import { HttpService } from '@kbn/core-http-browser-internal';
-import { UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
+import { SettingsService, UiSettingsService } from '@kbn/core-ui-settings-browser-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -34,6 +36,7 @@ import { RenderingService } from '@kbn/core-rendering-browser-internal';
 import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
 import { PluginsService } from '@kbn/core-plugins-browser-internal';
+import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 
@@ -78,6 +81,7 @@ interface ExtendedNavigator {
  * @internal
  */
 export class CoreSystem {
+  private readonly loggingSystem: BrowserLoggingSystem;
   private readonly analytics: AnalyticsService;
   private readonly fatalErrors: FatalErrorsService;
   private readonly injectedMetadata: InjectedMetadataService;
@@ -85,6 +89,7 @@ export class CoreSystem {
   private readonly http: HttpService;
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
+  private readonly settings: SettingsService;
   private readonly chrome: ChromeService;
   private readonly i18n: I18nService;
   private readonly overlay: OverlayService;
@@ -99,6 +104,7 @@ export class CoreSystem {
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
   private readonly executionContext: ExecutionContextService;
+  private readonly customBranding: CustomBrandingService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: CoreSystemParams) {
@@ -106,25 +112,30 @@ export class CoreSystem {
 
     this.rootDomElement = rootDomElement;
 
-    this.i18n = new I18nService();
+    const logLevel: LogLevelId = injectedMetadata.env.mode.dev ? 'all' : 'warn';
+    this.loggingSystem = new BrowserLoggingSystem({ logLevel });
 
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
     });
-    this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
+    this.coreContext = {
+      coreId: Symbol('core'),
+      env: injectedMetadata.env,
+      logger: this.loggingSystem.asLoggerFactory(),
+    };
 
+    this.i18n = new I18nService();
     this.analytics = new AnalyticsService(this.coreContext);
-
     this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
       // Stop Core before rendering any fatal errors into the DOM
       this.stop();
     });
-
     this.theme = new ThemeService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
     this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
+    this.settings = new SettingsService();
     this.overlay = new OverlayService();
     this.chrome = new ChromeService({
       browserSupportsCsp,
@@ -136,9 +147,9 @@ export class CoreSystem {
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();
     this.executionContext = new ExecutionContextService();
-
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreAppsService(this.coreContext);
+    this.customBranding = new CustomBrandingService();
 
     performance.mark(KBN_LOAD_MARKS, {
       detail: LOAD_CORE_CREATED,
@@ -226,7 +237,9 @@ export class CoreSystem {
         executionContext,
       });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
+      const settings = this.settings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
+      const customBranding = this.customBranding.setup({ injectedMetadata });
 
       const application = this.application.setup({ http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
@@ -240,7 +253,9 @@ export class CoreSystem {
         notifications,
         theme,
         uiSettings,
+        settings,
         executionContext,
+        customBranding,
       };
 
       // Services that do not expose contracts at setup
@@ -267,6 +282,7 @@ export class CoreSystem {
       const analytics = this.analytics.start();
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
+      const settings = await this.settings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
       const http = await this.http.start();
       const savedObjects = await this.savedObjects.start({ http });
@@ -293,7 +309,8 @@ export class CoreSystem {
         theme,
         targetDomElement: notificationsTargetDomElement,
       });
-      const application = await this.application.start({ http, theme, overlays });
+      const customBranding = this.customBranding.start();
+      const application = await this.application.start({ http, theme, overlays, customBranding });
 
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
@@ -305,6 +322,7 @@ export class CoreSystem {
         http,
         injectedMetadata,
         notifications,
+        customBranding,
       });
       const deprecations = this.deprecations.start({ http });
 
@@ -324,8 +342,10 @@ export class CoreSystem {
         notifications,
         overlays,
         uiSettings,
+        settings,
         fatalErrors,
         deprecations,
+        customBranding,
       };
 
       await this.plugins.start(core);
@@ -380,6 +400,7 @@ export class CoreSystem {
     this.http.stop();
     this.integrations.stop();
     this.uiSettings.stop();
+    this.settings.stop();
     this.chrome.stop();
     this.i18n.stop();
     this.application.stop();

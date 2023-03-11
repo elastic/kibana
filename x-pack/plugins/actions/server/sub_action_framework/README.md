@@ -346,7 +346,7 @@ The actions framework exports the `registerSubActionConnectorType` to register s
 
 ```
 plugins.actions.registerSubActionConnectorType({
-  id: '.test-sub-action-connector',
+  id: 'test.sub-action-connector',
   name: 'Test: Sub action connector',
   minimumLicenseRequired: 'platinum' as const,
   schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
@@ -355,7 +355,7 @@ plugins.actions.registerSubActionConnectorType({
 });
 ```
 
-You can see a full example in [x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/sub_action_connector.ts](../../../../test/alerting_api_integration/common/fixtures/plugins/alerts/server/sub_action_connector.ts)
+You can see a full example in [x-pack/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts](../../../../test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts)
 
 ### Example: Register sub action connector with custom validators
 
@@ -363,7 +363,7 @@ The sub actions framework allows custom validators during registration of the co
 
 ```typescript
 plugins.actions.registerSubActionConnectorType({
-  id: '.test-sub-action-connector',
+  id: 'test.sub-action-connector',
   name: 'Test: Sub action connector',
   minimumLicenseRequired: 'platinum' as const,
   schema: { config: TestConfigSchema, secrets: TestSecretsSchema },

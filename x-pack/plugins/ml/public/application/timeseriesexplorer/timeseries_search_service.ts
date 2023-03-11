@@ -87,7 +87,7 @@ function getMetricData(
 
     return mlResultsService
       .getMetricData(
-        chartConfig.datafeedConfig.indices,
+        chartConfig.datafeedConfig.indices.join(','),
         entityFields,
         chartConfig.datafeedConfig.query,
         esMetricFunction ?? chartConfig.metricFunction,
@@ -131,7 +131,7 @@ function getChartDetails(
     };
 
     const chartConfig = buildConfigFromDetector(job, detectorIndex);
-    let functionLabel = chartConfig.metricFunction;
+    let functionLabel: string | null = chartConfig.metricFunction;
     if (chartConfig.metricFieldName !== undefined) {
       functionLabel += ' ';
       functionLabel += chartConfig.metricFieldName;
@@ -151,7 +151,7 @@ function getChartDetails(
     } else {
       const entityFieldNames: string[] = blankEntityFields.map((f) => f.fieldName);
       ml.getCardinalityOfFields({
-        index: chartConfig.datafeedConfig.indices,
+        index: chartConfig.datafeedConfig.indices.join(','),
         fieldNames: entityFieldNames,
         query: chartConfig.datafeedConfig.query,
         timeFieldName: chartConfig.timeField,

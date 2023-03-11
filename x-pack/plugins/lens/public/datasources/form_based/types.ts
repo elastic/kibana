@@ -54,6 +54,7 @@ export interface FormBasedLayer {
   linkToLayers?: string[];
   // Partial columns represent the temporary invalid states
   incompleteColumns?: Record<string, IncompleteColumn>;
+  sampling?: number;
 }
 
 export interface FormBasedPersistedState {

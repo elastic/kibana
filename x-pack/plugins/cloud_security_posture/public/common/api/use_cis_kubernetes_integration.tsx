@@ -21,8 +21,6 @@ export const useCisKubernetesIntegration = () => {
   const { http } = useKibana().services;
 
   return useQuery<GetInfoResponse, DefaultPackagesInstallationError>(['integrations'], () =>
-    http.get<GetInfoResponse>(epmRouteService.getInfoPath(CLOUD_SECURITY_POSTURE_PACKAGE_NAME), {
-      query: { experimental: true },
-    })
+    http.get<GetInfoResponse>(epmRouteService.getInfoPath(CLOUD_SECURITY_POSTURE_PACKAGE_NAME))
   );
 };

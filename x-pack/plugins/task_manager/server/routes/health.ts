@@ -12,7 +12,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from '@kbn/core/server';
-import { IClusterClient } from '@kbn/core/server';
+import { IClusterClient, DocLinksServiceSetup } from '@kbn/core/server';
 import { Observable, Subject } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
@@ -60,6 +60,7 @@ export interface HealthRouteParams {
   shouldRunTasks: boolean;
   getClusterClient: () => Promise<IClusterClient>;
   usageCounter?: UsageCounter;
+  docLinks: DocLinksServiceSetup;
 }
 
 export function healthRoute(params: HealthRouteParams): {
@@ -77,6 +78,7 @@ export function healthRoute(params: HealthRouteParams): {
     getClusterClient,
     usageCounter,
     shouldRunTasks,
+    docLinks,
   } = params;
 
   // if "hot" health stats are any more stale than monitored_stats_required_freshness (pollInterval +1s buffer by default)
@@ -111,7 +113,7 @@ export function healthRoute(params: HealthRouteParams): {
     .subscribe(([monitoredHealth, serviceStatus]) => {
       serviceStatus$.next(serviceStatus);
       monitoredHealth$.next(monitoredHealth);
-      logHealthMetrics(monitoredHealth, logger, config, shouldRunTasks);
+      logHealthMetrics(monitoredHealth, logger, config, shouldRunTasks, docLinks);
     });
 
   router.get(

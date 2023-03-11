@@ -50,6 +50,7 @@ describe('esaggs expression function - public', () => {
     metricsAtAllLevels: true,
     partialRows: false,
     timeFields: ['@timestamp', 'utc_time'],
+    probability: 1,
   };
 
   beforeEach(() => {
@@ -88,7 +89,7 @@ describe('esaggs expression function - public', () => {
     expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith(
       {},
       args.aggs.map((agg) => agg.value),
-      { hierarchical: true, partialRows: false }
+      { hierarchical: true, partialRows: false, probability: 1, samplerSeed: undefined }
     );
   });
 
@@ -98,6 +99,8 @@ describe('esaggs expression function - public', () => {
     expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith({}, [], {
       hierarchical: true,
       partialRows: false,
+      probability: 1,
+      samplerSeed: undefined,
     });
   });
 

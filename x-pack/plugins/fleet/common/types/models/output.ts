@@ -25,6 +25,8 @@ export interface NewOutput {
     certificate?: string;
     key?: string;
   } | null;
+  proxy_id?: string | null;
+  shipper?: ShipperOutput | null;
 }
 
 export type OutputSOAttributes = NewOutput & {
@@ -35,3 +37,16 @@ export type OutputSOAttributes = NewOutput & {
 export type Output = NewOutput & {
   id: string;
 };
+
+export interface ShipperOutput {
+  disk_queue_enabled?: boolean | null;
+  disk_queue_path?: string | null;
+  disk_queue_max_size?: number | null;
+  disk_queue_encryption_enabled?: boolean | null;
+  disk_queue_compression_enabled?: boolean | null;
+  compression_level?: number | null;
+  loadbalance?: boolean | null;
+  mem_queue_events?: number | null;
+  queue_flush_timeout?: number | null;
+  max_batch_bytes?: number | null;
+}

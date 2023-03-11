@@ -8,14 +8,15 @@
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
-import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { ClientPluginsStart } from '../../../../../plugin';
-
-import { KpiWrapper } from './kpi_wrapper';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
 interface AvailabilityPanelprops {
   from: string;
   to: string;
+  id: string;
 }
 
 export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
@@ -24,23 +25,39 @@ export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
       observability: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
-  const { monitorId } = useParams<{ monitorId: string }>();
+  const selectedLocation = useSelectedLocation();
+
+  const monitorId = useMonitorQueryId();
+
+  if (!selectedLocation || !monitorId) {
+    return null;
+  }
 
   return (
-    <KpiWrapper>
-      <ExploratoryViewEmbeddable
-        align="left"
-        reportType={ReportTypes.SINGLE_METRIC}
-        attributes={[
-          {
-            time: props,
-            name: 'Monitor availability',
-            dataType: 'synthetics',
-            selectedMetricField: 'monitor_availability',
-            reportDefinitions: { config_id: [monitorId] },
+    <ExploratoryViewEmbeddable
+      id={props.id}
+      align="left"
+      customHeight="70px"
+      reportType={ReportTypes.SINGLE_METRIC}
+      attributes={[
+        {
+          time: props,
+          name: AVAILABILITY_LABEL,
+          dataType: 'synthetics',
+          selectedMetricField: 'monitor_availability',
+          reportDefinitions: {
+            'monitor.id': [monitorId],
+            'observer.geo.name': [selectedLocation?.label],
           },
-        ]}
-      />
-    </KpiWrapper>
+        },
+      ]}
+    />
   );
 };
+
+export const AVAILABILITY_LABEL = i18n.translate(
+  'xpack.synthetics.monitorDetails.summary.availability',
+  {
+    defaultMessage: 'Availability',
+  }
+);

@@ -6,16 +6,13 @@
  * Side Public License, v 1.
  */
 
-import {
-  SavedObjectAttribute,
-  SavedObjectAttributes,
-  SavedObjectReference,
-} from '@kbn/core/public';
+import { SavedObjectAttribute, SavedObjectReference } from '@kbn/core/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
   SerializedSearchSourceFields,
 } from '@kbn/data-plugin/public';
+import { SerializableRecord } from '@kbn/utility-types';
 import { SavedVisState, VisSavedObject } from '../../types';
 
 import { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';
@@ -25,7 +22,7 @@ export function extractReferences({
   attributes,
   references = [],
 }: {
-  attributes: SavedObjectAttributes;
+  attributes: SerializableRecord;
   references: SavedObjectReference[];
 }) {
   const updatedAttributes = { ...attributes };

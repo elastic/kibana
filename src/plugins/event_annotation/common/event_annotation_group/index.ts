@@ -14,12 +14,14 @@ import type { EventAnnotationOutput } from '../types';
 export interface EventAnnotationGroupOutput {
   type: 'event_annotation_group';
   annotations: EventAnnotationOutput[];
+  ignoreGlobalFilters: boolean;
   dataView: IndexPatternExpressionType;
 }
 
 export interface EventAnnotationGroupArgs {
   annotations: EventAnnotationOutput[];
   dataView: IndexPatternExpressionType;
+  ignoreGlobalFilters: boolean;
 }
 
 export function eventAnnotationGroup(): ExpressionFunctionDefinition<
@@ -44,6 +46,16 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
           defaultMessage: 'Data view retrieved with indexPatternLoad',
         }),
       },
+      ignoreGlobalFilters: {
+        types: ['boolean'],
+        default: true,
+        help: i18n.translate(
+          'eventAnnotation.group.args.annotationConfigs.ignoreGlobalFilters.help',
+          {
+            defaultMessage: `Switch to ignore global filters for the annotation`,
+          }
+        ),
+      },
       annotations: {
         types: [
           'manual_point_event_annotation',
@@ -62,6 +74,7 @@ export function eventAnnotationGroup(): ExpressionFunctionDefinition<
         type: 'event_annotation_group',
         annotations: args.annotations.filter((annotation) => !annotation.isHidden),
         dataView: args.dataView,
+        ignoreGlobalFilters: args.ignoreGlobalFilters,
       };
     },
   };

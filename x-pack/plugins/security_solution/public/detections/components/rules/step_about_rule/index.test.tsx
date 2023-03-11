@@ -13,7 +13,7 @@ import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { StepAboutRule } from '.';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_get_jobs';
-import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
+import { mockAboutStepRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { StepRuleDescription } from '../description_step';
 import { stepAboutDefaultValue } from './default_value';
 import type {
@@ -22,7 +22,7 @@ import type {
   RuleStep,
   DefineStepRule,
 } from '../../../pages/detection_engine/rules/types';
-import { DataSourceType } from '../../../pages/detection_engine/rules/types';
+import { DataSourceType, GroupByOptions } from '../../../pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
 import { TestProviders } from '../../../../common/mock';
 
@@ -56,6 +56,12 @@ export const stepDefineStepMLRule: DefineStepRule = {
   timeline: { id: null, title: null },
   eqlOptions: {},
   dataSourceType: DataSourceType.IndexPatterns,
+  groupByFields: ['host.name'],
+  groupByRadioSelection: GroupByOptions.PerRuleExecution,
+  groupByDuration: {
+    unit: 'm',
+    value: 5,
+  },
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,

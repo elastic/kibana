@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/monaco",
-  "owner": "@elastic/kibana-app-services",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/appex-sharedux"
 }

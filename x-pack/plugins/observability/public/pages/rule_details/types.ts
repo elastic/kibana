@@ -6,12 +6,10 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import {
-  Rule,
-  RuleSummary,
-  RuleType,
-  ActionTypeRegistryContract,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { Rule, RuleSummary, RuleType } from '@kbn/triggers-actions-ui-plugin/public';
+import { ALERTS_TAB, EXECUTION_TAB } from './constants';
+
+export type TabId = typeof ALERTS_TAB | typeof EXECUTION_TAB;
 
 export interface RuleDetailsPathParams {
   ruleId: string;
@@ -21,7 +19,7 @@ export interface PageHeaderProps {
 }
 
 export interface FetchRuleProps {
-  ruleId: string;
+  ruleId?: string;
   http: HttpSetup;
 }
 
@@ -35,15 +33,6 @@ export interface FetchRule {
 export interface FetchRuleSummaryProps {
   ruleId: string;
   http: HttpSetup;
-}
-export interface FetchRuleActionConnectorsProps {
-  http: HttpSetup;
-  ruleActions: any[];
-}
-
-export interface FetchRuleExecutionLogProps {
-  http: HttpSetup;
-  ruleId: string;
 }
 
 export interface FetchRuleSummary {
@@ -65,19 +54,3 @@ export interface AlertListItem {
   isMuted: boolean;
   sortPriority: number;
 }
-export interface ItemTitleRuleSummaryProps {
-  children: string;
-}
-export interface ItemValueRuleSummaryProps {
-  itemValue: string;
-  extraSpace?: boolean;
-}
-export interface ActionsProps {
-  ruleActions: any[];
-  actionTypeRegistry: ActionTypeRegistryContract;
-}
-
-export const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
-export const ALERT_LIST_TAB = 'rule_alert_list';
-export const EVENT_ERROR_LOG_TAB = 'rule_error_log_list';
-export const RULE_DETAILS_PAGE_ID = 'rule-details-alerts-o11y';

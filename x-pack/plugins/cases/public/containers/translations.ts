@@ -17,6 +17,10 @@ export const ERROR_DELETING = i18n.translate('xpack.cases.containers.errorDeleti
   defaultMessage: 'Error deleting data',
 });
 
+export const ERROR_UPDATING = i18n.translate('xpack.cases.containers.errorUpdatingTitle', {
+  defaultMessage: 'Error updating data',
+});
+
 export const UPDATED_CASE = (caseTitle: string) =>
   i18n.translate('xpack.cases.containers.updatedCase', {
     values: { caseTitle },

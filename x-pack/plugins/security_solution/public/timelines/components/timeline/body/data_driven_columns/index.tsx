@@ -10,17 +10,20 @@ import React, { useMemo } from 'react';
 import { getOr } from 'lodash/fp';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
-import type { SetEventsLoading, SetEventsDeleted } from '@kbn/timelines-plugin/common';
-import type { Ecs } from '../../../../../../common/ecs';
-import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type {
-  ColumnHeaderOptions,
-  CellValueElementProps,
+  SetEventsDeleted,
+  SetEventsLoading,
   ActionProps,
   ControlColumnProps,
-  TimelineTabs,
   RowCellRender,
+} from '../../../../../../common/types';
+import type {
+  CellValueElementProps,
+  ColumnHeaderOptions,
+  TimelineTabs,
 } from '../../../../../../common/types/timeline';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
 import type { OnRowSelected } from '../../events';
 import type { inputsModel } from '../../../../../common/store';

@@ -13,14 +13,17 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { KibanaServices } from '../../../../common/lib/kibana';
 
-import type { Query, Index } from '../../../../../common/detection_engine/schemas/common';
+import type {
+  IndexPatternArray,
+  RuleQuery,
+} from '../../../../../common/detection_engine/rule_schema';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 
 export const getEsQueryFilter = async (
-  query: Query,
+  query: RuleQuery,
   language: Language,
   filters: unknown,
-  index: Index,
+  index: IndexPatternArray,
   lists: ExceptionListItemSchema[],
   excludeExceptions: boolean = true
 ): Promise<ESBoolQuery> => {

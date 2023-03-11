@@ -24,6 +24,7 @@ interface Props {
   rules: Rule | null;
   onChange: (updatedRules: Rule | null) => void;
   onValidityChange: (isValid: boolean) => void;
+  readOnly?: boolean;
 }
 
 export const JSONRuleEditor = (props: Props) => {
@@ -58,6 +59,24 @@ export const JSONRuleEditor = (props: Props) => {
       setRawRules(JSON.stringify(ruleJSON, null, 2));
     } catch (ignore) {
       // ignore
+    }
+  }
+
+  function conditionallyRenderReformatButton() {
+    if (!props.readOnly) {
+      return (
+        <EuiButton
+          data-test-subj="roleMappingsJSONReformatButton"
+          iconType="broom"
+          onClick={reformatRules}
+          size="s"
+        >
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.autoFormatRuleText"
+            defaultMessage="Reformat"
+          />
+        </EuiButton>
+      );
     }
   }
 
@@ -97,15 +116,14 @@ export const JSONRuleEditor = (props: Props) => {
             scrollBeyondLastLine: false,
             wordWrap: 'on',
             wrappingIndent: 'indent',
+            readOnly: props.readOnly,
+            domReadOnly: props.readOnly,
+            // ToDo: there does not appear to be a way to disable the read-only tooltip
+            // Fortunately this only gets displayed when the 'delete' key is pressed.
           }}
         />
         <EuiSpacer size="s" />
-        <EuiButton iconType="broom" onClick={reformatRules} size="s">
-          <FormattedMessage
-            id="xpack.security.management.editRoleMapping.autoFormatRuleText"
-            defaultMessage="Reformat"
-          />
-        </EuiButton>
+        {conditionallyRenderReformatButton()}
         <EuiSpacer size="s" />
         <EuiText size="s">
           <p>

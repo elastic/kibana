@@ -18,6 +18,7 @@ export type {
   ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeHelpExtensionMenuGitHubLink,
+  ChromeGlobalHelpExtensionMenuLink,
 } from './help_extension';
 export type { ChromeNavControls, ChromeNavControl } from './nav_controls';
 export type { ChromeNavLinks, ChromeNavLink } from './nav_links';

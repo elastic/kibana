@@ -6,6 +6,10 @@
   cursor: alias !important;
 }
 
+.mapLayerToc-droppable-isCombining {
+  background-color: $euiColorEmptyShade !important;
+}
+
 .mapLayerToc-droppable-isDragging * {
   cursor: ns-resize !important;
 }

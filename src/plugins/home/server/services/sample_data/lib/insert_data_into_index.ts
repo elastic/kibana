@@ -47,7 +47,7 @@ export const insertDataIntoIndex = ({
   };
 
   const bulkInsert = async (docs: unknown[]) => {
-    const insertCmd = { index: { _index: index } };
+    const insertCmd = { create: { _index: index } };
     const bulk: unknown[] = [];
     docs.forEach((doc: unknown) => {
       bulk.push(insertCmd);

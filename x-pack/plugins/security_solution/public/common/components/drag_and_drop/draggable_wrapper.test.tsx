@@ -58,7 +58,7 @@ describe('DraggableWrapper', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterEach(() => {
@@ -66,7 +66,9 @@ describe('DraggableWrapper', () => {
     if (portal != null) {
       portal.innerHTML = '';
     }
+  });
 
+  afterAll(() => {
     jest.useRealTimers();
   });
 

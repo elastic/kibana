@@ -19,6 +19,7 @@ import type { InternalUiSettingsServiceStart } from './types';
  */
 export class CoreUiSettingsRouteHandlerContext implements UiSettingsRequestHandlerContext {
   #client?: IUiSettingsClient;
+  #globalClient?: IUiSettingsClient;
 
   constructor(
     private readonly uiSettingsStart: InternalUiSettingsServiceStart,
@@ -32,5 +33,14 @@ export class CoreUiSettingsRouteHandlerContext implements UiSettingsRequestHandl
       );
     }
     return this.#client;
+  }
+
+  public get globalClient() {
+    if (this.#globalClient == null) {
+      this.#globalClient = this.uiSettingsStart.globalAsScopedToClient(
+        this.savedObjectsRouterHandlerContext.client
+      );
+    }
+    return this.#globalClient;
   }
 }

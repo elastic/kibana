@@ -58,6 +58,7 @@ export class HeatmapLegend extends Component<Props, State> {
         })}
         propertyLabel={HEATMAP_COLOR_RAMP_LABEL}
         fieldLabel={this.state.label}
+        invert={false}
       />
     );
   }

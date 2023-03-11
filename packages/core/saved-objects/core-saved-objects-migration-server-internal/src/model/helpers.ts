@@ -8,27 +8,29 @@
 
 import { gt, valid } from 'semver';
 import type {
+  BulkOperationContainer,
   QueryDslBoolQuery,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import * as Either from 'fp-ts/lib/Either';
+import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import type { State } from '../state';
-import type { FetchIndexResponse } from '../actions';
+import type { AliasAction, FetchIndexResponse } from '../actions';
+import type { BulkIndexOperationTuple } from './create_batches';
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
  */
 export function throwBadControlState(p: never): never;
-export function throwBadControlState(controlState: any) {
+export function throwBadControlState(controlState: unknown) {
   throw new Error('Unexpected control state: ' + controlState);
 }
 
 /**
  * A helper function/type for ensuring that all response types are handled.
  */
-export function throwBadResponse(state: State, p: never): never;
-export function throwBadResponse(state: State, res: any): never {
+export function throwBadResponse(state: { controlState: string }, p: never): never;
+export function throwBadResponse(state: { controlState: string }, res: unknown): never {
   throw new Error(
     `${state.controlState} received unexpected action response: ` + JSON.stringify(res)
   );
@@ -68,6 +70,19 @@ export function mergeMigrationMappingPropertyHashes(
   };
 }
 
+/**
+ * If `.kibana` and the version specific aliases both exists and
+ * are pointing to the same index. This version's migration has already
+ * been completed.
+ */
+export function versionMigrationCompleted(
+  currentAlias: string,
+  versionAlias: string,
+  aliases: Record<string, string | undefined>
+): boolean {
+  return aliases[currentAlias] != null && aliases[currentAlias] === aliases[versionAlias];
+}
+
 export function indexBelongsToLaterVersion(indexName: string, kibanaVersion: string): boolean {
   const version = valid(indexVersion(indexName));
   return version != null ? gt(version, kibanaVersion) : false;
@@ -92,12 +107,12 @@ export function addExcludedTypesToBoolQuery(
 
 /**
  * Add the given clauses to the 'must' of the given query
+ * @param filterClauses the clauses to be added to a 'must'
  * @param boolQuery the bool query to be enriched
- * @param mustClauses the clauses to be added to a 'must'
  * @returns a new query container with the enriched query
  */
 export function addMustClausesToBoolQuery(
-  mustClauses: QueryDslQueryContainer[],
+  filterClauses: QueryDslQueryContainer[],
   boolQuery?: QueryDslBoolQuery
 ): QueryDslQueryContainer {
   let must: QueryDslQueryContainer[] = [];
@@ -106,7 +121,7 @@ export function addMustClausesToBoolQuery(
     must = must.concat(boolQuery.must);
   }
 
-  must.push(...mustClauses);
+  must.push(...filterClauses);
 
   return {
     bool: {
@@ -118,12 +133,12 @@ export function addMustClausesToBoolQuery(
 
 /**
  * Add the given clauses to the 'must_not' of the given query
+ * @param filterClauses the clauses to be added to a 'must_not'
  * @param boolQuery the bool query to be enriched
- * @param mustNotClauses the clauses to be added to a 'must_not'
  * @returns a new query container with the enriched query
  */
 export function addMustNotClausesToBoolQuery(
-  mustNotClauses: QueryDslQueryContainer[],
+  filterClauses: QueryDslQueryContainer[],
   boolQuery?: QueryDslBoolQuery
 ): QueryDslQueryContainer {
   let mustNot: QueryDslQueryContainer[] = [];
@@ -132,7 +147,7 @@ export function addMustNotClausesToBoolQuery(
     mustNot = mustNot.concat(boolQuery.must_not);
   }
 
-  mustNot.push(...mustNotClauses);
+  mustNot.push(...filterClauses);
 
   return {
     bool: {
@@ -157,16 +172,17 @@ export function getAliases(
   indices: FetchIndexResponse
 ): Either.Either<
   { type: 'multiple_indices_per_alias'; alias: string; indices: string[] },
-  Record<string, string>
+  Record<string, string | undefined>
 > {
-  const aliases = {} as Record<string, string>;
+  const aliases = {} as Record<string, string | undefined>;
   for (const index of Object.getOwnPropertyNames(indices)) {
     for (const alias of Object.getOwnPropertyNames(indices[index].aliases || {})) {
-      if (aliases[alias] != null) {
+      const secondIndexThisAliasPointsTo = aliases[alias];
+      if (secondIndexThisAliasPointsTo != null) {
         return Either.left({
           type: 'multiple_indices_per_alias',
           alias,
-          indices: [aliases[alias], index],
+          indices: [secondIndexThisAliasPointsTo, index],
         });
       }
       aliases[alias] = index;
@@ -175,3 +191,44 @@ export function getAliases(
 
   return Either.right(aliases);
 }
+
+/**
+ * Build a list of alias actions to remove the provided aliases from the given index.
+ */
+export function buildRemoveAliasActions(
+  index: string,
+  aliases: string[],
+  exclude: string[]
+): AliasAction[] {
+  return aliases.flatMap((alias) => {
+    if (exclude.includes(alias)) {
+      return [];
+    }
+    return [{ remove: { index, alias, must_exist: true } }];
+  });
+}
+
+/**
+ * Given a document, creates a valid body to index the document using the Bulk API.
+ */
+export const createBulkIndexOperationTuple = (doc: SavedObjectsRawDoc): BulkIndexOperationTuple => {
+  return [
+    {
+      index: {
+        _id: doc._id,
+        // use optimistic concurrency control to ensure that outdated
+        // documents are only overwritten once with the latest version
+        ...(typeof doc._seq_no !== 'undefined' && { if_seq_no: doc._seq_no }),
+        ...(typeof doc._primary_term !== 'undefined' && { if_primary_term: doc._primary_term }),
+      },
+    },
+    doc._source,
+  ];
+};
+
+/**
+ * Given a document id, creates a valid body to delete the document using the Bulk API.
+ */
+export const createBulkDeleteOperationBody = (_id: string): BulkOperationContainer => ({
+  delete: { _id },
+});

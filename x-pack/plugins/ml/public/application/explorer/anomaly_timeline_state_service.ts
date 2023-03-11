@@ -19,6 +19,8 @@ import {
 import { isEqual, sortBy, uniq } from 'lodash';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+// FIXME get rid of the static import
+import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type {
   AppStateSelectedCells,
@@ -38,8 +40,6 @@ import { mlJobService } from '../services/job_service';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
 import type { TimeBucketsInterval } from '../util/time_buckets';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
-// FIXME get rid of the static import
-import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import type { Refresh } from '../routing/use_refresh';
 import { StateService } from '../services/state_service';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';

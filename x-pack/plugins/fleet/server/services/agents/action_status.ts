@@ -4,23 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import type { FleetServerAgentAction, ActionStatus, ListWithKuery } from '../../types';
-import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
+import type {
+  FleetServerAgentAction,
+  ActionStatus,
+  ActionErrorResult,
+  ListWithKuery,
+} from '../../types';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX, AGENTS_INDEX } from '../../../common';
 import { appContextService } from '..';
+
+const PRECISION_THRESHOLD = 40000;
 
 /**
  * Return current bulk actions
  */
 export async function getActionStatuses(
   esClient: ElasticsearchClient,
-  options: ListWithKuery
+  options: ListWithKuery & { errorSize: number }
 ): Promise<ActionStatus[]> {
   const actions = await _getActions(esClient, options);
-  const cancelledActions = await _getCancelledActions(esClient);
+  const cancelledActions = await getCancelledActions(esClient);
   let acks: any;
 
   try {
@@ -42,7 +50,7 @@ export async function getActionStatuses(
             agent_count: {
               cardinality: {
                 field: 'agent_id',
-                precision_threshold: 40000, // max value
+                precision_threshold: PRECISION_THRESHOLD, // max value
               },
             },
           },
@@ -65,19 +73,26 @@ export async function getActionStatuses(
       (bucket: any) => bucket.key === action.actionId
     );
     const nbAgentsActioned = action.nbAgentsActioned || action.nbAgentsActionCreated;
-    const nbAgentsAck = Math.min(
-      matchingBucket?.doc_count ?? 0,
-      (matchingBucket?.agent_count as any)?.value ?? 0,
-      nbAgentsActioned
-    );
+    const cardinalityCount = (matchingBucket?.agent_count as any)?.value ?? 0;
+    const docCount = matchingBucket?.doc_count ?? 0;
+    const nbAgentsAck =
+      action.type === 'UPDATE_TAGS'
+        ? Math.min(docCount, nbAgentsActioned)
+        : Math.min(
+            docCount,
+            // only using cardinality count when count lower than precision threshold
+            docCount > PRECISION_THRESHOLD ? docCount : cardinalityCount,
+            nbAgentsActioned
+          );
     const completionTime = (matchingBucket?.max_timestamp as any)?.value_as_string;
     const complete = nbAgentsAck >= nbAgentsActioned;
     const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
 
     let errorCount = 0;
+    let latestErrors: ActionErrorResult[] = [];
     try {
       // query to find errors in action results, cannot do aggregation on text type
-      const res = await esClient.search({
+      const errorResults = await esClient.search({
         index: AGENT_ACTIONS_RESULTS_INDEX,
         track_total_hits: true,
         rest_total_hits_as_int: true,
@@ -95,8 +110,41 @@ export async function getActionStatuses(
           },
         },
         size: 0,
+        aggs: {
+          top_error_hits: {
+            top_hits: {
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+              _source: {
+                includes: ['@timestamp', 'agent_id', 'error'],
+              },
+              size: options.errorSize,
+            },
+          },
+        },
       });
-      errorCount = (res.hits.total as number) ?? 0;
+      errorCount = (errorResults.hits.total as number) ?? 0;
+      latestErrors = ((errorResults.aggregations?.top_error_hits as any)?.hits.hits ?? []).map(
+        (hit: any) => ({
+          agentId: hit._source.agent_id,
+          error: hit._source.error,
+          timestamp: hit._source['@timestamp'],
+        })
+      );
+      if (latestErrors.length > 0) {
+        const hostNames = await getHostNames(
+          esClient,
+          latestErrors.map((errorItem: ActionErrorResult) => errorItem.agentId)
+        );
+        latestErrors.forEach((errorItem: ActionErrorResult) => {
+          errorItem.hostname = hostNames[errorItem.agentId] ?? errorItem.agentId;
+        });
+      }
     } catch (err) {
       if (err.statusCode === 404) {
         // .fleet-actions-results does not yet exist
@@ -110,24 +158,47 @@ export async function getActionStatuses(
       ...action,
       nbAgentsAck: nbAgentsAck - errorCount,
       nbAgentsFailed: errorCount,
-      status:
-        errorCount > 0
-          ? 'FAILED'
-          : complete
-          ? 'COMPLETE'
-          : cancelledAction
-          ? 'CANCELLED'
-          : action.status,
+      status: cancelledAction
+        ? 'CANCELLED'
+        : errorCount > 0 && complete
+        ? 'FAILED'
+        : complete
+        ? 'COMPLETE'
+        : action.status,
       nbAgentsActioned,
       cancellationTime: cancelledAction?.timestamp,
-      completionTime: complete ? completionTime : undefined,
+      completionTime,
+      latestErrors,
     });
   }
 
   return results;
 }
 
-async function _getCancelledActions(
+async function getHostNames(esClient: ElasticsearchClient, agentIds: string[]) {
+  const agentsRes = await esClient.search({
+    index: AGENTS_INDEX,
+    query: {
+      bool: {
+        filter: {
+          terms: {
+            'agent.id': agentIds,
+          },
+        },
+      },
+    },
+    size: agentIds.length,
+    _source: ['local_metadata.host.name'],
+  });
+  const hostNames = agentsRes.hits.hits.reduce((acc: { [key: string]: string }, curr) => {
+    acc[curr._id] = (curr._source as any).local_metadata.host.name;
+    return acc;
+  }, {});
+
+  return hostNames;
+}
+
+export async function getCancelledActions(
   esClient: ElasticsearchClient
 ): Promise<Array<{ actionId: string; timestamp?: string }>> {
   const res = await esClient.search<FleetServerAgentAction>({
@@ -136,7 +207,7 @@ async function _getCancelledActions(
     size: SO_SEARCH_LIMIT,
     query: {
       bool: {
-        must: [
+        filter: [
           {
             term: {
               type: 'CANCEL',
@@ -187,7 +258,10 @@ async function _getActions(
       const source = hit._source!;
 
       if (!acc[source.action_id!]) {
-        const isExpired = source.expiration ? Date.parse(source.expiration) < Date.now() : false;
+        const isExpired =
+          source.expiration && source.type !== 'UPGRADE'
+            ? Date.parse(source.expiration) < Date.now()
+            : false;
         acc[hit._source.action_id] = {
           actionId: hit._source.action_id,
           nbAgentsActionCreated: 0,
@@ -196,11 +270,16 @@ async function _getActions(
           startTime: source.start_time,
           type: source.type,
           nbAgentsActioned: source.total ?? 0,
-          status: isExpired ? 'EXPIRED' : 'IN_PROGRESS',
+          status: isExpired
+            ? 'EXPIRED'
+            : hasRolloutPeriodPassed(source)
+            ? 'ROLLOUT_PASSED'
+            : 'IN_PROGRESS',
           expiration: source.expiration,
           newPolicyId: source.data?.policy_id as string,
           creationTime: source['@timestamp']!,
           nbAgentsFailed: 0,
+          hasRolloutPeriod: !!source.rollout_duration_seconds,
         };
       }
 
@@ -210,3 +289,11 @@ async function _getActions(
     }, {} as { [k: string]: ActionStatus })
   );
 }
+
+export const hasRolloutPeriodPassed = (source: FleetServerAgentAction) =>
+  source.type === 'UPGRADE' && source.rollout_duration_seconds
+    ? Date.now() >
+      moment(source.start_time ?? Date.now())
+        .add(source.rollout_duration_seconds, 'seconds')
+        .valueOf()
+    : false;

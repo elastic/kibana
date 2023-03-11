@@ -7,6 +7,7 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { withSpan } from '@kbn/apm-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
@@ -27,12 +28,14 @@ export const getCapabilitiesResolver =
     applications: string[],
     useDefaultCapabilities: boolean
   ): Promise<Capabilities> => {
-    return resolveCapabilities(
-      capabilities(),
-      switchers(),
-      request,
-      applications,
-      useDefaultCapabilities
+    return withSpan({ name: 'resolve capabilities', type: 'capabilities' }, () =>
+      resolveCapabilities(
+        capabilities(),
+        switchers(),
+        request,
+        applications,
+        useDefaultCapabilities
+      )
     );
   };
 
@@ -43,16 +46,14 @@ export const resolveCapabilities = async (
   applications: string[],
   useDefaultCapabilities: boolean
 ): Promise<Capabilities> => {
-  const mergedCaps = cloneDeep({
+  const mergedCaps: Capabilities = cloneDeep({
     ...capabilities,
-    navLinks: applications.reduce(
-      (acc, app) => ({
-        ...acc,
-        [app]: true,
-      }),
-      capabilities.navLinks
-    ),
+    navLinks: applications.reduce((acc, app) => {
+      acc[app] = true;
+      return acc;
+    }, capabilities.navLinks),
   });
+
   return switchers.reduce(async (caps, switcher) => {
     const resolvedCaps = await caps;
     const changes = await switcher(request, resolvedCaps, useDefaultCapabilities);
@@ -76,11 +77,8 @@ function recursiveApplyChanges<
       }
       return [key, typeof orig === typeof changed ? changed : orig];
     })
-    .reduce(
-      (acc, [key, value]) => ({
-        ...acc,
-        [key]: value,
-      }),
-      {} as TDestination
-    );
+    .reduce((acc, [key, value]) => {
+      acc[key as keyof TDestination] = value;
+      return acc;
+    }, {} as TDestination);
 }

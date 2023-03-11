@@ -5,14 +5,21 @@
  * 2.0.
  */
 
+import { DataProviderType } from '@kbn/timelines-plugin/common';
+
 import { mockBrowserFields } from '../../../common/containers/source/mock';
-import { EXISTS_OPERATOR, IS_OPERATOR } from '../timeline/data_providers/data_provider';
+import {
+  EXISTS_OPERATOR,
+  IS_OPERATOR,
+  IS_ONE_OF_OPERATOR,
+} from '../timeline/data_providers/data_provider';
 
 import {
   getCategorizedFieldNames,
   getExcludedFromSelection,
   getFieldNames,
   getQueryOperatorFromSelection,
+  sanatizeValue,
   selectionsAreValid,
 } from './helpers';
 
@@ -106,6 +113,9 @@ describe('helpers', () => {
             {
               label: 'nestedField.secondAttributes',
             },
+            {
+              label: 'nestedField.thirdAttributes',
+            },
           ],
         },
         { label: 'source', options: [{ label: 'source.ip' }, { label: 'source.port' }] },
@@ -132,6 +142,7 @@ describe('helpers', () => {
               label: 'is',
             },
           ],
+          type: DataProviderType.default,
         })
       ).toBe(true);
     });
@@ -150,6 +161,7 @@ describe('helpers', () => {
               label: 'is',
             },
           ],
+          type: DataProviderType.default,
         })
       ).toBe(false);
     });
@@ -165,9 +177,10 @@ describe('helpers', () => {
           ],
           selectedOperator: [
             {
-              label: 'is',
+              label: 'is one of',
             },
           ],
+          type: DataProviderType.default,
         })
       ).toBe(false);
     });
@@ -186,6 +199,7 @@ describe('helpers', () => {
               label: '',
             },
           ],
+          type: DataProviderType.default,
         })
       ).toBe(false);
     });
@@ -204,6 +218,45 @@ describe('helpers', () => {
               label: 'invalid-operator',
             },
           ],
+          type: DataProviderType.default,
+        })
+      ).toBe(false);
+    });
+
+    test('it should return false when the selected operator is "is one of", and the DataProviderType is template', () => {
+      expect(
+        selectionsAreValid({
+          browserFields: mockBrowserFields,
+          selectedField: [
+            {
+              label: 'destination.bytes',
+            },
+          ],
+          selectedOperator: [
+            {
+              label: 'is one of',
+            },
+          ],
+          type: DataProviderType.template,
+        })
+      ).toBe(false);
+    });
+
+    test('it should return false when the selected operator is "is not one of", and the DataProviderType is template', () => {
+      expect(
+        selectionsAreValid({
+          browserFields: mockBrowserFields,
+          selectedField: [
+            {
+              label: 'destination.bytes',
+            },
+          ],
+          selectedOperator: [
+            {
+              label: 'is not one of',
+            },
+          ],
+          type: DataProviderType.template,
         })
       ).toBe(false);
     });
@@ -220,6 +273,14 @@ describe('helpers', () => {
         expected: IS_OPERATOR,
       },
       {
+        operator: i18n.IS_ONE_OF,
+        expected: IS_ONE_OF_OPERATOR,
+      },
+      {
+        operator: i18n.IS_NOT_ONE_OF,
+        expected: IS_ONE_OF_OPERATOR,
+      },
+      {
         operator: i18n.EXISTS,
         expected: EXISTS_OPERATOR,
       },
@@ -230,7 +291,7 @@ describe('helpers', () => {
     ];
 
     validSelections.forEach(({ operator, expected }) => {
-      test(`it should the expected operator given "${operator}", a valid selection`, () => {
+      test(`it should use the expected operator given "${operator}", a valid selection`, () => {
         expect(
           getQueryOperatorFromSelection([
             {
@@ -282,6 +343,15 @@ describe('helpers', () => {
         ])
       ).toBe(false);
     });
+    test('it returns false when the "is one of" operator is selected', () => {
+      expect(
+        getExcludedFromSelection([
+          {
+            label: i18n.IS_ONE_OF,
+          },
+        ])
+      ).toBe(false);
+    });
 
     test('it returns false when the "exists" operator is selected', () => {
       expect(
@@ -313,6 +383,16 @@ describe('helpers', () => {
       ).toBe(true);
     });
 
+    test('it returns true when "is not one of" is selected', () => {
+      expect(
+        getExcludedFromSelection([
+          {
+            label: i18n.IS_NOT_ONE_OF,
+          },
+        ])
+      ).toBe(true);
+    });
+
     test('it returns true when "does not exist" is selected', () => {
       expect(
         getExcludedFromSelection([
@@ -321,6 +401,21 @@ describe('helpers', () => {
           },
         ])
       ).toBe(true);
+    });
+  });
+
+  describe('sanatizeValue', () => {
+    it("returns a provided value if it's a string or number as a string", () => {
+      expect(sanatizeValue('a string')).toBe('a string');
+      expect(sanatizeValue(1)).toBe('1');
+    });
+
+    it('returns the string interpretation of the first value of an array', () => {
+      expect(sanatizeValue(['a string', 'another value'])).toBe('a string');
+      expect(sanatizeValue([1, 'another value'])).toBe('1');
+      expect(sanatizeValue([])).toBe('');
+      expect(sanatizeValue([null])).toBe('null');
+      expect(sanatizeValue([undefined])).toBe('undefined');
     });
   });
 });

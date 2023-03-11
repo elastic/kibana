@@ -408,6 +408,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     expect(searchStrategySearch).toHaveBeenCalledWith(
       {
         params: {
+          allow_no_indices: true,
           body: {
             _source: false,
             fields: [
@@ -425,6 +426,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
             size: 1000,
             sort: [],
           },
+          ignore_unavailable: true,
           index: ['test-testSpace*'],
         },
       },
@@ -461,6 +463,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     expect(searchStrategySearch).toHaveBeenCalledWith(
       {
         params: {
+          allow_no_indices: true,
           body: {
             _source: false,
             fields: [{ field: '@timestamp', include_unmapped: true }],
@@ -473,6 +476,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
             size: 1000,
             sort: [],
           },
+          ignore_unavailable: true,
           index: ['test-testSpace*'],
         },
       },

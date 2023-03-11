@@ -11,6 +11,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { loadExecutionKPIAggregations } from '../../../lib/rule_api/load_execution_kpi_aggregations';
 import { loadGlobalExecutionKPIAggregations } from '../../../lib/rule_api/load_global_execution_kpi_aggregations';
 import { RuleEventLogListKPI } from './rule_event_log_list_kpi';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({
@@ -26,6 +27,10 @@ jest.mock('../../../lib/rule_api/load_execution_kpi_aggregations', () => ({
 
 jest.mock('../../../lib/rule_api/load_global_execution_kpi_aggregations', () => ({
   loadGlobalExecutionKPIAggregations: jest.fn(),
+}));
+
+jest.mock('../../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
 const mockKpiResponse = {
@@ -48,6 +53,7 @@ const loadGlobalExecutionKPIAggregationsMock =
 describe('rule_event_log_list_kpi', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
     loadExecutionKPIAggregationsMock.mockResolvedValue(mockKpiResponse);
     loadGlobalExecutionKPIAggregationsMock.mockResolvedValue(mockKpiResponse);
   });

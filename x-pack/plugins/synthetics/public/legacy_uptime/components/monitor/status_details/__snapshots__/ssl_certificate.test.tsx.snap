@@ -8,7 +8,7 @@ Array [
 }
 
 <dt
-    class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-normal"
+    class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-m-normal"
   >
     TLS Certificate
   </dt>,
@@ -34,7 +34,7 @@ Array [
       href="/certificates"
     >
       <span
-        class="euiToolTipAnchor"
+        class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <div
           class="euiText emotion-euiText-s"
@@ -63,7 +63,7 @@ Array [
 }
 
 <dt
-    class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-normal"
+    class="euiDescriptionList__title c0 emotion-euiDescriptionList__title-row-m-normal"
   >
     TLS Certificate
   </dt>,

@@ -42,7 +42,9 @@ export const initValidateLogAnalysisIndicesRoute = ({ framework }: InfraBackendL
       // Query each pattern individually, to map correctly the errors
       await Promise.all(
         indices.map(async (index) => {
-          const fieldCaps = await framework.callWithRequest(requestContext, 'fieldCaps', {
+          const fieldCaps = await (
+            await requestContext.core
+          ).elasticsearch.client.asCurrentUser.fieldCaps({
             allow_no_indices: true,
             fields: fields.map((field) => field.name),
             ignore_unavailable: true,

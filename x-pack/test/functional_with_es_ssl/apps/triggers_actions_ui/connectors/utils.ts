@@ -7,10 +7,10 @@
 
 import type SuperTest from 'supertest';
 import { findIndex } from 'lodash';
-
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getTestActionData } from '../../../lib/get_test_data';
+import { getTestActionData, getTestAlertData } from '../../../lib/get_test_data';
 
 export const createSlackConnectorAndObjectRemover = async ({
   getService,
@@ -23,7 +23,7 @@ export const createSlackConnectorAndObjectRemover = async ({
   const testData = getTestActionData();
   const createdAction = await createSlackConnector({
     name: testData.name,
-    supertest,
+    getService,
   });
   objectRemover.add(createdAction.id, 'action', 'actions');
 
@@ -32,17 +32,17 @@ export const createSlackConnectorAndObjectRemover = async ({
 
 export const createSlackConnector = async ({
   name,
-  supertest,
+  getService,
 }: {
   name: string;
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  getService: FtrProviderContext['getService'];
 }) => {
-  const connector = await createConnector({
+  const actions = getService('actions');
+  const connector = await actions.api.createConnector({
     name,
     config: {},
     secrets: { webhookUrl: 'https://test.com' },
     connectorTypeId: '.slack',
-    supertest,
   });
 
   return connector;
@@ -60,29 +60,61 @@ export const getConnectorByName = async (
   return body[i];
 };
 
-export const createConnector = async ({
-  name,
-  config,
-  secrets,
-  connectorTypeId,
-  supertest,
-}: {
-  name: string;
-  config: Record<string, unknown>;
-  secrets: Record<string, unknown>;
-  connectorTypeId: string;
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-}) => {
-  const { body: createdAction } = await supertest
-    .post(`/api/actions/connector`)
-    .set('kbn-xsrf', 'foo')
-    .send({
-      name,
-      config,
-      secrets,
-      connector_type_id: connectorTypeId,
-    })
-    .expect(200);
+export async function createRuleWithActionsAndParams(
+  connectorId: string,
+  testRunUuid: string,
+  params: Record<string, any> = {},
+  overwrites: Record<string, any> = {},
+  supertest: SuperTest.SuperTest<SuperTest.Test>
+) {
+  return await createAlwaysFiringRule(
+    {
+      name: `test-rule-${testRunUuid}`,
+      actions: [
+        {
+          id: connectorId,
+          group: 'default',
+          params: {
+            message: 'from alert 1s',
+            level: 'warn',
+          },
+          frequency: {
+            summary: false,
+            notify_when: RuleNotifyWhen.THROTTLE,
+            throttle: '1m',
+          },
+        },
+      ],
+      params,
+      ...overwrites,
+    },
+    supertest
+  );
+}
 
-  return createdAction;
-};
+async function createAlwaysFiringRule(
+  overwrites: Record<string, any> = {},
+  supertest: SuperTest.SuperTest<SuperTest.Test>
+) {
+  const { body: createdRule } = await supertest
+    .post(`/api/alerting/rule`)
+    .set('kbn-xsrf', 'foo')
+    .send(
+      getTestAlertData({
+        rule_type_id: 'test.always-firing',
+        ...overwrites,
+      })
+    )
+    .expect(200);
+  return createdRule;
+}
+
+export async function getAlertSummary(
+  ruleId: string,
+  supertest: SuperTest.SuperTest<SuperTest.Test>
+) {
+  const { body: summary } = await supertest
+    .get(`/internal/alerting/rule/${encodeURIComponent(ruleId)}/_alert_summary`)
+    .expect(200);
+  return summary;
+}

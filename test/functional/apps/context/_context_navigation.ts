@@ -26,6 +26,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const find = getService('find');
 
+  const checkMainViewFilters = async () => {
+    for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
+      expect(await filterBar.hasFilter(columnName, value, true)).to.eql(true);
+    }
+    expect(await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes()).to.eql({
+      start: PageObjects.timePicker.defaultStartTime,
+      end: PageObjects.timePicker.defaultEndTime,
+    });
+  };
+
   describe('discover - context - back navigation', function contextSize() {
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
@@ -35,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.waitUntilLoadingHasFinished();
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await filterBar.addFilter(columnName, 'is', value);
+        await filterBar.addFilter({ field: columnName, operation: 'is', value });
       }
     });
 
@@ -75,13 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
           await PageObjects.discover.waitForDocTableLoadingComplete();
 
-          for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-            expect(await filterBar.hasFilter(columnName, value)).to.eql(true);
-          }
-          expect(await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes()).to.eql({
-            start: 'Sep 18, 2015 @ 06:31:44.000',
-            end: 'Sep 23, 2015 @ 18:31:44.000',
-          });
+          await checkMainViewFilters();
           return true;
         }
       );
@@ -100,16 +104,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
           await PageObjects.discover.waitForDocTableLoadingComplete();
 
-          for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-            expect(await filterBar.hasFilter(columnName, value)).to.eql(true);
-          }
-          expect(await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes()).to.eql({
-            start: 'Sep 18, 2015 @ 06:31:44.000',
-            end: 'Sep 23, 2015 @ 18:31:44.000',
-          });
+          await checkMainViewFilters();
           return true;
         }
       );
+    });
+
+    it('should go back via breadcrumbs with updated state after a goBack browser', async function () {
+      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+      await rowActions[1].click();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+
+      await PageObjects.common.sleep(5000);
+
+      // update url state
+      await filterBar.removeFilter('agent');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      expect(await filterBar.getFilterCount()).to.eql(2);
+      await checkMainViewFilters();
+
+      await browser.goBack();
+      await PageObjects.context.waitUntilContextLoadingHasFinished();
+
+      expect(await filterBar.getFilterCount()).to.eql(1);
+      const [filterName, filterValue] = TEST_FILTER_COLUMN_NAMES[1];
+      expect(await filterBar.hasFilter(filterName, filterValue, false)).to.eql(true);
+
+      await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      expect(await filterBar.getFilterCount()).to.eql(2);
+      await checkMainViewFilters();
     });
   });
 }

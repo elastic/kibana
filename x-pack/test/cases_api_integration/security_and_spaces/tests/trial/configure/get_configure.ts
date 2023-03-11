@@ -12,15 +12,15 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
-  getServiceNowConnector,
-  createConnector,
   createConfiguration,
   getConfiguration,
   getConfigurationRequest,
   removeServerGeneratedPropertiesFromSavedObject,
   getConfigurationOutput,
+  getServiceNowConnector,
   getServiceNowSimulationServer,
-} from '../../../../common/lib/utils';
+  createConnector,
+} from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

@@ -24,6 +24,7 @@ interface Props {
   license: SecurityLicense;
   onChange: (role: Role) => void;
   validator: RoleValidator;
+  editable?: boolean;
 }
 
 interface State {
@@ -33,6 +34,10 @@ interface State {
 }
 
 export class IndexPrivileges extends Component<Props, State> {
+  static defaultProps: Partial<Props> = {
+    editable: true,
+  };
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -54,7 +59,7 @@ export class IndexPrivileges extends Component<Props, State> {
       // doesn't permit FLS/DLS).
       allowDocumentLevelSecurity: allowRoleDocumentLevelSecurity || !isRoleEnabled(this.props.role),
       allowFieldLevelSecurity: allowRoleFieldLevelSecurity || !isRoleEnabled(this.props.role),
-      isRoleReadOnly: isRoleReadOnly(this.props.role),
+      isRoleReadOnly: !this.props.editable || isRoleReadOnly(this.props.role),
     };
 
     const forms = indices.map((indexPrivilege: RoleIndexPrivilege, idx) => (

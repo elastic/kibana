@@ -92,7 +92,7 @@ describe('StepDefinePackagePolicy', () => {
 
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const render = ({ isUpdate } = { isUpdate: false }) =>
+  const render = () =>
     (renderResult = testRenderer.render(
       <StepDefinePackagePolicy
         agentPolicy={agentPolicy}
@@ -101,7 +101,6 @@ describe('StepDefinePackagePolicy', () => {
         updatePackagePolicy={mockUpdatePackagePolicy}
         validationResults={validationResults}
         submitAttempted={false}
-        isUpdate={isUpdate}
       />
     ));
 
@@ -120,49 +119,6 @@ describe('StepDefinePackagePolicy', () => {
   describe('default API response', () => {
     beforeEach(() => {
       render();
-    });
-
-    it('should set index 1 name to package policy on init if no package policies exist for this package', () => {
-      waitFor(() => {
-        expect(renderResult.getByDisplayValue('apache-1')).toBeInTheDocument();
-        expect(renderResult.getByDisplayValue('desc')).toBeInTheDocument();
-      });
-
-      expect(mockUpdatePackagePolicy.mock.calls[0]).toEqual([
-        {
-          description: 'desc',
-          enabled: true,
-          inputs: [],
-          name: 'apache-1',
-          namespace: 'default',
-          policy_id: 'agent-policy-1',
-          package: {
-            name: 'apache',
-            title: 'Apache',
-            version: '1.0.0',
-          },
-          vars: {
-            'Advanced var': {
-              type: 'bool',
-              value: true,
-            },
-            'Required var': {
-              type: 'bool',
-              value: undefined,
-            },
-            'Show user var': {
-              type: 'string',
-              value: 'showUserVarVal',
-            },
-          },
-        },
-      ]);
-      expect(mockUpdatePackagePolicy.mock.calls[1]).toEqual([
-        {
-          namespace: 'ns',
-          policy_id: 'agent-policy-1',
-        },
-      ]);
     });
 
     it('should display vars coming from package policy', async () => {
@@ -208,7 +164,7 @@ describe('StepDefinePackagePolicy', () => {
   describe('update', () => {
     describe('when package vars are introduced in a new package version', () => {
       it('should display new package vars', () => {
-        render({ isUpdate: true });
+        render();
 
         waitFor(async () => {
           expect(renderResult.getByDisplayValue('showUserVarVal')).toBeInTheDocument();

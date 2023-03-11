@@ -12,11 +12,12 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { TimelineType } from '../../../../../common/types/timeline';
+import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import type { BrowserFields } from '../../../../common/containers/source';
 
 import type { OnDataProviderEdited } from '../events';
 import type { QueryOperator } from './data_provider';
-import { DataProviderType, EXISTS_OPERATOR } from './data_provider';
+import { DataProviderType, EXISTS_OPERATOR, IS_ONE_OF_OPERATOR } from './data_provider';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
 
 import * as i18n from './translations';
@@ -48,7 +49,7 @@ interface OwnProps {
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
-  value: string | number;
+  value: PrimitiveOrArrayOfPrimitives;
   type: DataProviderType;
 }
 
@@ -80,7 +81,7 @@ interface GetProviderActionsProps {
   toggleEnabled: () => void;
   toggleExcluded: () => void;
   toggleType: () => void;
-  value: string | number;
+  value: PrimitiveOrArrayOfPrimitives;
   type: DataProviderType;
 }
 
@@ -138,7 +139,7 @@ export const getProviderActions = ({
       timelineType === TimelineType.template
         ? {
             className: CONVERT_TO_FIELD_CLASS_NAME,
-            disabled: isLoading,
+            disabled: isLoading || operator === IS_ONE_OF_OPERATOR,
             icon: 'visText',
             name:
               type === DataProviderType.template

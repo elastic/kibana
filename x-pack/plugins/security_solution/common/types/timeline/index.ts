@@ -14,17 +14,19 @@ import { NoteSavedObjectToReturnRuntimeType } from './note';
 import type { PinnedEvent } from './pinned_event';
 import { PinnedEventToReturnSavedObjectRuntimeType } from './pinned_event';
 import {
-  alias_purpose as savedObjectResolveAliasPurpose,
-  outcome as savedObjectResolveOutcome,
+  SavedObjectResolveAliasPurpose,
+  SavedObjectResolveAliasTargetId,
+  SavedObjectResolveOutcome,
+} from '../../detection_engine/rule_schema';
+import {
   success,
   success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
-import type { FlowTargetSourceDest } from '../../search_strategy/security_solution/network';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 import type { Maybe } from '../../search_strategy';
 import { Direction } from '../../search_strategy';
+import type { ExpandedDetailType } from '../detail_panel';
 
-export * from './actions';
 export * from './cells';
 export * from './columns';
 export * from './data_provider';
@@ -54,7 +56,11 @@ const SavedColumnHeaderRuntimeType = runtimeTypes.partial({
 const SavedDataProviderQueryMatchBasicRuntimeType = runtimeTypes.partial({
   field: unionWithNullType(runtimeTypes.string),
   displayField: unionWithNullType(runtimeTypes.string),
-  value: unionWithNullType(runtimeTypes.string),
+  value: runtimeTypes.union([
+    runtimeTypes.null,
+    runtimeTypes.string,
+    runtimeTypes.array(runtimeTypes.string),
+  ]),
   displayValue: unionWithNullType(runtimeTypes.string),
   operator: unionWithNullType(runtimeTypes.string),
 });
@@ -316,33 +322,8 @@ export enum TimelineId {
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'timeline-test', // Reserved for testing purposes
+  detectionsAlertDetailsPage = 'detections-alert-details-page',
 }
-
-export enum TableId {
-  usersPageEvents = 'users-page-events',
-  hostsPageEvents = 'hosts-page-events',
-  networkPageEvents = 'network-page-events',
-  hostsPageSessions = 'hosts-page-sessions-v2', // the v2 is to cache bust localstorage settings as default columns were reworked.
-  alertsOnRuleDetailsPage = 'alerts-rules-details-page',
-  alertsOnAlertsPage = 'alerts-page',
-  test = 'table-test', // Reserved for testing purposes
-  alternateTest = 'alternateTest',
-  rulePreview = 'rule-preview',
-  kubernetesPageSessions = 'kubernetes-page-sessions',
-}
-
-export const TableIdLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(TableId.usersPageEvents),
-  runtimeTypes.literal(TableId.hostsPageEvents),
-  runtimeTypes.literal(TableId.networkPageEvents),
-  runtimeTypes.literal(TableId.hostsPageSessions),
-  runtimeTypes.literal(TableId.alertsOnRuleDetailsPage),
-  runtimeTypes.literal(TableId.alertsOnAlertsPage),
-  runtimeTypes.literal(TableId.test),
-  runtimeTypes.literal(TableId.rulePreview),
-  runtimeTypes.literal(TableId.kubernetesPageSessions),
-]);
-export type TableIdLiteral = runtimeTypes.TypeOf<typeof TableIdLiteralRt>;
 
 export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([
   SavedTimelineRuntimeType,
@@ -375,11 +356,11 @@ export type SingleTimelineResponse = runtimeTypes.TypeOf<typeof SingleTimelineRe
 export const ResolvedTimelineSavedObjectToReturnObjectRuntimeType = runtimeTypes.intersection([
   runtimeTypes.type({
     timeline: TimelineSavedToReturnObjectRuntimeType,
-    outcome: savedObjectResolveOutcome,
+    outcome: SavedObjectResolveOutcome,
   }),
   runtimeTypes.partial({
-    alias_target_id: runtimeTypes.string,
-    alias_purpose: savedObjectResolveAliasPurpose,
+    alias_target_id: SavedObjectResolveAliasTargetId,
+    alias_purpose: SavedObjectResolveAliasPurpose,
   }),
 ]);
 
@@ -476,59 +457,7 @@ export interface ScrollToTopEvent {
   timestamp: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type EmptyObject = Record<any, never>;
-
-export type TimelineExpandedEventType =
-  | {
-      panelView?: 'eventDetail';
-      params?: {
-        eventId: string;
-        indexName: string;
-        refetch?: () => void;
-      };
-    }
-  | EmptyObject;
-
-export type TimelineExpandedHostType =
-  | {
-      panelView?: 'hostDetail';
-      params?: {
-        hostName: string;
-      };
-    }
-  | EmptyObject;
-
-export type TimelineExpandedNetworkType =
-  | {
-      panelView?: 'networkDetail';
-      params?: {
-        ip: string;
-        flowTarget: FlowTargetSourceDest;
-      };
-    }
-  | EmptyObject;
-
-export type TimelineExpandedUserType =
-  | {
-      panelView?: 'userDetail';
-      params?: {
-        userName: string;
-      };
-    }
-  | EmptyObject;
-
-export type TimelineExpandedDetailType =
-  | TimelineExpandedEventType
-  | TimelineExpandedHostType
-  | TimelineExpandedNetworkType
-  | TimelineExpandedUserType;
-
-export type TimelineExpandedDetail = {
-  [tab in TimelineTabs]?: TimelineExpandedDetailType;
-};
-
-export type ToggleDetailPanel = TimelineExpandedDetailType & {
+export type ToggleDetailPanel = ExpandedDetailType & {
   tabType?: TimelineTabs;
   id: string;
 };
@@ -648,7 +577,7 @@ export interface DataProviderResult {
 export interface QueryMatchResult {
   field?: Maybe<string>;
   displayField?: Maybe<string>;
-  value?: Maybe<string>;
+  value?: Maybe<string | string[]>;
   displayValue?: Maybe<string>;
   operator?: Maybe<string>;
 }

@@ -6,6 +6,7 @@
  */
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { isDefined } from '@kbn/ml-is-defined';
 import {
   isGetTransformNodesResponseSchema,
   isGetTransformsResponseSchema,
@@ -22,7 +23,6 @@ import {
 
 import { useApi } from './use_api';
 import { TRANSFORM_ERROR_TYPE } from '../common/transform';
-import { isDefined } from '../../../common/types/common';
 
 export type GetTransforms = (forceRefresh?: boolean) => void;
 

@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-export * from './resource_installer';
-export * from './slo_repository';
-export * from './transform_manager';
 export * from './create_slo';
 export * from './delete_slo';
+export * from './fetch_historical_summary';
+export * from './find_slo';
 export * from './get_slo';
-export * from './update_slo';
+export * from './historical_summary_client';
+export * from './resource_installer';
 export * from './sli_client';
+export * from './slo_repository';
+export * from './transform_manager';
+export * from './update_slo';
+export * from './summary_client';

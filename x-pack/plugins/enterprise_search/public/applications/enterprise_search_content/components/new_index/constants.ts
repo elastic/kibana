@@ -8,6 +8,8 @@
 import { EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { languageToText } from '../../utils/language_to_text';
+
 export const NEW_INDEX_TEMPLATE_TYPES: { [key: string]: string } = {
   api: i18n.translate('xpack.enterpriseSearch.content.newIndex.types.api', {
     defaultMessage: 'API endpoint',
@@ -45,142 +47,67 @@ export const UNIVERSAL_LANGUAGE_VALUE = '';
 
 export const SUPPORTED_LANGUAGES: EuiSelectOption[] = [
   {
+    text: languageToText(UNIVERSAL_LANGUAGE_VALUE),
     value: UNIVERSAL_LANGUAGE_VALUE,
-    text: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.supportedLanguages.universalDropDownOptionLabel',
-      {
-        defaultMessage: 'Universal',
-      }
-    ),
   },
   {
-    text: '—',
     disabled: true,
+    text: '—',
   },
   {
+    text: languageToText('zh'),
     value: 'zh',
-    text: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.supportedLanguages.chineseDropDownOptionLabel',
-      {
-        defaultMessage: 'Chinese',
-      }
-    ),
   },
   {
+    text: languageToText('da'),
     value: 'da',
-    text: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.supportedLanguages.danishDropDownOptionLabel',
-      {
-        defaultMessage: 'Danish',
-      }
-    ),
   },
   {
+    text: languageToText('nl'),
     value: 'nl',
-    text: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.supportedLanguages.dutchDropDownOptionLabel',
-      {
-        defaultMessage: 'Dutch',
-      }
-    ),
   },
   {
+    text: languageToText('en'),
     value: 'en',
-    text: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.supportedLanguages.englishDropDownOptionLabel',
-      {
-        defaultMessage: 'English',
-      }
-    ),
   },
   {
+    text: languageToText('fr'),
     value: 'fr',
-    text: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.supportedLanguages.frenchDropDownOptionLabel',
-      {
-        defaultMessage: 'French',
-      }
-    ),
   },
   {
+    text: languageToText('de'),
     value: 'de',
-    text: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.supportedLanguages.germanDropDownOptionLabel',
-      {
-        defaultMessage: 'German',
-      }
-    ),
   },
   {
+    text: languageToText('it'),
     value: 'it',
-    text: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.supportedLanguages.italianDropDownOptionLabel',
-      {
-        defaultMessage: 'Italian',
-      }
-    ),
   },
   {
+    text: languageToText('ja'),
     value: 'ja',
-    text: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.supportedLanguages.japaneseDropDownOptionLabel',
-      {
-        defaultMessage: 'Japanese',
-      }
-    ),
   },
   {
+    text: languageToText('ko'),
     value: 'ko',
-    text: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.supportedLanguages.koreanDropDownOptionLabel',
-      {
-        defaultMessage: 'Korean',
-      }
-    ),
   },
   {
+    text: languageToText('pt'),
     value: 'pt',
-    text: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.supportedLanguages.portugueseDropDownOptionLabel',
-      {
-        defaultMessage: 'Portuguese',
-      }
-    ),
   },
   {
+    text: languageToText('pt-br'),
     value: 'pt-br',
-    text: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.supportedLanguages.portugueseBrazilDropDownOptionLabel',
-      {
-        defaultMessage: 'Portuguese (Brazil)',
-      }
-    ),
   },
   {
+    text: languageToText('ru'),
     value: 'ru',
-    text: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.supportedLanguages.russianDropDownOptionLabel',
-      {
-        defaultMessage: 'Russian',
-      }
-    ),
   },
   {
+    text: languageToText('es'),
     value: 'es',
-    text: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.supportedLanguages.spanishDropDownOptionLabel',
-      {
-        defaultMessage: 'Spanish',
-      }
-    ),
   },
   {
+    text: languageToText('th'),
     value: 'th',
-    text: i18n.translate(
-      'xpack.enterpriseSearch.content.newIndex.supportedLanguages.thaiDropDownOptionLabel',
-      {
-        defaultMessage: 'Thai',
-      }
-    ),
   },
 ];

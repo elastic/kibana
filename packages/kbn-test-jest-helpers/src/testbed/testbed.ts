@@ -56,16 +56,16 @@ const defaultConfig: TestBedConfig = {
   ```
  */
 export function registerTestBed<T extends string = string, P extends object = any>(
-  Component: ComponentType<any>,
-  config: AsyncTestBedConfig
+  Component: ComponentType<P>,
+  config: AsyncTestBedConfig<P>
 ): AsyncSetupFunc<T, Partial<P>>;
 export function registerTestBed<T extends string = string, P extends object = any>(
-  Component: ComponentType<any>,
-  config?: TestBedConfig
+  Component: ComponentType<P>,
+  config?: TestBedConfig<P>
 ): SyncSetupFunc<T, Partial<P>>;
 export function registerTestBed<T extends string = string, P extends object = any>(
-  Component: ComponentType<any>,
-  config?: AsyncTestBedConfig | TestBedConfig
+  Component: ComponentType<P>,
+  config?: AsyncTestBedConfig<P> | TestBedConfig<P>
 ): SetupFunc<T, Partial<P>> {
   const {
     defaultProps = defaultConfig.defaultProps,

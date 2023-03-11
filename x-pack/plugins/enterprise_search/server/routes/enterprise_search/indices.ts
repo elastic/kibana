@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
+import { AlwaysShowPattern } from '../../../common/types/indices';
 
 import type {
   CreateMlInferencePipelineResponse,
@@ -31,23 +32,26 @@ import { createIndex } from '../../lib/indices/create_index';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
-import { fetchMlInferencePipelineHistory } from '../../lib/indices/fetch_ml_inference_pipeline_history';
-import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
+import { getMlInferenceErrors } from '../../lib/indices/pipelines/ml_inference/get_ml_inference_errors';
+import { fetchMlInferencePipelineHistory } from '../../lib/indices/pipelines/ml_inference/get_ml_inference_pipeline_history';
 import { attachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/attach_ml_pipeline';
 import { createAndReferenceMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline';
-import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
-import { getMlInferencePipelines } from '../../lib/ml_inference_pipeline/get_inference_pipelines';
+import { deleteMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
+import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
+import { fetchMlInferencePipelineProcessors } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
+import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
-import { deleteMlInferencePipeline } from '../../lib/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
-import { detachMlInferencePipeline } from '../../lib/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
+import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
+import { revertCustomPipeline } from '../../lib/pipelines/revert_custom_pipeline';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
   isIndexNotFoundException,
+  isPipelineIsInUseException,
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
 import { getPrefixedInferencePipelineProcessorName } from '../../utils/ml_inference_pipeline_utils';
@@ -62,7 +66,11 @@ export function registerIndexRoutes({
     { path: '/internal/enterprise_search/search_indices', validate: false },
     elasticsearchErrorHandler(log, async (context, _, response) => {
       const { client } = (await context.core).elasticsearch;
-      const indices = await fetchIndices(client, '*', false, true, 'search-');
+      const patterns: AlwaysShowPattern = {
+        alias_pattern: 'search-',
+        index_pattern: '.ent-search-engine-documents',
+      };
+      const indices = await fetchIndices(client, '*', false, true, patterns);
 
       return response.ok({
         body: indices,
@@ -114,7 +122,7 @@ export function registerIndexRoutes({
           meta: {
             page: {
               current: page,
-              size: indices.length,
+              size,
               total_pages: totalPages,
               total_results: totalResults,
             },
@@ -189,6 +197,8 @@ export function registerIndexRoutes({
         if (connector) {
           await deleteConnectorById(client, connector.id);
         }
+
+        await deleteIndexPipelines(client, indexName);
 
         await client.asCurrentUser.indices.delete({ index: indexName });
 
@@ -293,6 +303,27 @@ export function registerIndexRoutes({
     })
   );
 
+  router.delete(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/pipelines',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+      const body = await revertCustomPipeline(client, indexName);
+
+      return response.ok({
+        body,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/pipelines',
@@ -360,6 +391,15 @@ export function registerIndexRoutes({
         }),
         body: schema.object({
           destination_field: schema.maybe(schema.nullable(schema.string())),
+          inference_config: schema.maybe(
+            schema.object({
+              zero_shot_classification: schema.maybe(
+                schema.object({
+                  labels: schema.arrayOf(schema.string()),
+                })
+              ),
+            })
+          ),
           model_id: schema.string(),
           pipeline_name: schema.string(),
           source_field: schema.string(),
@@ -375,6 +415,7 @@ export function registerIndexRoutes({
         pipeline_name: pipelineName,
         source_field: sourceField,
         destination_field: destinationField,
+        inference_config: inferenceConfig,
       } = request.body;
 
       let createPipelineResult: CreateMlInferencePipelineResponse | undefined;
@@ -386,6 +427,7 @@ export function registerIndexRoutes({
           modelId,
           sourceField,
           destinationField,
+          inferenceConfig,
           client.asCurrentUser
         );
       } catch (error) {
@@ -571,12 +613,102 @@ export function registerIndexRoutes({
         pipeline: { description: defaultDescription, ...pipeline },
       };
 
-      const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
+      try {
+        const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
 
-      return response.ok({
-        body: simulateResult,
-        headers: { 'content-type': 'application/json' },
-      });
+        return response.ok({
+          body: simulateResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (e) {
+        return createError({
+          errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
+          message: e.message,
+          response,
+          statusCode: 400,
+        });
+      }
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate/{pipelineName}',
+      validate: {
+        body: schema.object({
+          docs: schema.arrayOf(schema.any()),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
+          pipelineName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { docs } = request.body;
+      const indexName = decodeURIComponent(request.params.indexName);
+      const pipelineName = decodeURIComponent(request.params.pipelineName);
+      const { client } = (await context.core).elasticsearch;
+
+      const [indexExists, pipelinesResponse] = await Promise.all([
+        indexOrAliasExists(client, indexName),
+        client.asCurrentUser.ingest.getPipeline({
+          id: pipelineName,
+        }),
+      ]);
+      if (!indexExists) {
+        return createError({
+          errorCode: ErrorCode.INDEX_NOT_FOUND,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.indices.pipelines.indexMissingError',
+            {
+              defaultMessage: 'The index {indexName} does not exist',
+              values: {
+                indexName,
+              },
+            }
+          ),
+          response,
+          statusCode: 404,
+        });
+      }
+      if (!(pipelineName in pipelinesResponse)) {
+        return createError({
+          errorCode: ErrorCode.PIPELINE_NOT_FOUND,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.indices.pipelines.pipelineMissingError',
+            {
+              defaultMessage: 'The pipeline {pipelineName} does not exist',
+              values: {
+                pipelineName,
+              },
+            }
+          ),
+          response,
+          statusCode: 404,
+        });
+      }
+
+      const simulateRequest: IngestSimulateRequest = {
+        docs,
+        pipeline: pipelinesResponse[pipelineName],
+      };
+
+      try {
+        const simulateResult = await client.asCurrentUser.ingest.simulate(simulateRequest);
+
+        return response.ok({
+          body: simulateResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (e) {
+        return createError({
+          errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
+          message: e.message,
+          response,
+          statusCode: 400,
+        });
+      }
     })
   );
 
@@ -697,7 +829,24 @@ export function registerIndexRoutes({
             response,
             statusCode: 404,
           });
+        } else if (isPipelineIsInUseException(error)) {
+          return createError({
+            errorCode: ErrorCode.PIPELINE_IS_IN_USE,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.indices.mlInference.pipelineProcessors.pipelineIsInUseError',
+              {
+                defaultMessage:
+                  "Inference pipeline is used in managed pipeline '{pipelineName}' of a different index",
+                values: {
+                  pipelineName: error.pipelineName,
+                },
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
         }
+
         // otherwise, let the default handler wrap it
         throw error;
       }

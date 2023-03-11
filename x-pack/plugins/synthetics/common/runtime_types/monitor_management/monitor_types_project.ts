@@ -6,13 +6,17 @@
  */
 
 import * as t from 'io-ts';
+import { AlertConfigsCodec } from './alert_config';
 import { ScreenshotOptionCodec } from './monitor_configs';
 
-export const ProjectMonitorThrottlingConfigCodec = t.interface({
-  download: t.number,
-  upload: t.number,
-  latency: t.number,
-});
+export const ProjectMonitorThrottlingConfigCodec = t.union([
+  t.interface({
+    download: t.number,
+    upload: t.number,
+    latency: t.number,
+  }),
+  t.boolean,
+]);
 
 export const ProjectMonitorCodec = t.intersection([
   t.interface({
@@ -36,15 +40,21 @@ export const ProjectMonitorCodec = t.intersection([
     }),
     params: t.record(t.string, t.unknown),
     enabled: t.boolean,
+    alert: AlertConfigsCodec,
     urls: t.union([t.string, t.array(t.string)]),
     hosts: t.union([t.string, t.array(t.string)]),
     max_redirects: t.string,
     wait: t.string,
     hash: t.string,
+    namespace: t.string,
   }),
 ]);
 
 export const ProjectMonitorsRequestCodec = t.interface({
+  monitors: t.array(ProjectMonitorCodec),
+});
+
+export const LegacyProjectMonitorsRequestCodec = t.interface({
   project: t.string,
   keep_stale: t.boolean,
   monitors: t.array(ProjectMonitorCodec),
@@ -68,6 +78,8 @@ export const ProjectMonitorsResponseCodec = t.intersection([
 export type ProjectMonitorThrottlingConfig = t.TypeOf<typeof ProjectMonitorThrottlingConfigCodec>;
 
 export type ProjectMonitor = t.TypeOf<typeof ProjectMonitorCodec>;
+
+export type LegacyProjectMonitorsRequest = t.TypeOf<typeof LegacyProjectMonitorsRequestCodec>;
 
 export type ProjectMonitorsRequest = t.TypeOf<typeof ProjectMonitorsRequestCodec>;
 

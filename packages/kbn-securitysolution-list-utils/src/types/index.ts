@@ -117,3 +117,7 @@ export const exceptionListAgnosticSavedObjectType = EXCEPTION_LIST_NAMESPACE_AGN
 export type SavedObjectType =
   | typeof EXCEPTION_LIST_NAMESPACE
   | typeof EXCEPTION_LIST_NAMESPACE_AGNOSTIC;
+
+export interface DataViewField extends DataViewFieldBase {
+  conflictDescriptions?: Record<string, string[]>;
+}

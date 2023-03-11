@@ -25,7 +25,7 @@ const getLabelTitle = (userAction: UserActionResponse<TagsUserAction>) => {
         {userAction.action === Actions.delete && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <Tags tags={tags} gutterSize="xs" />
+        <Tags tags={tags} gutterSize="xs" color="hollow" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

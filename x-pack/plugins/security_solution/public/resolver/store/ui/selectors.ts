@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 
 import { createSelector } from 'reselect';
 import type { PanelViewAndParameters, ResolverUIState } from '../../types';

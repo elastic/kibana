@@ -14,6 +14,7 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -49,13 +50,20 @@ export const SearchIndexIndexMappings: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiPanel grow={false} hasShadow={false} hasBorder>
-            <EuiTitle size="s">
-              <h3>
-                {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.title', {
-                  defaultMessage: 'About index mappings',
-                })}
-              </h3>
-            </EuiTitle>
+            <EuiFlexGroup justifyContent="center" gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="iInCircle" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h3>
+                    {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.title', {
+                      defaultMessage: 'About index mappings',
+                    })}
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiSpacer size="s" />
             <EuiText size="s">
               <p>
@@ -73,6 +81,39 @@ export const SearchIndexIndexMappings: React.FC = () => {
             <EuiSpacer size="s" />
             <EuiLink href={docLinks.elasticsearchMapping} target="_blank" external>
               {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.docLink', {
+                defaultMessage: 'Learn more',
+              })}
+            </EuiLink>
+          </EuiPanel>
+          <EuiSpacer />
+          <EuiPanel grow={false} hasShadow={false} hasBorder>
+            <EuiFlexGroup justifyContent="center" gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="iInCircle" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h3>
+                    {i18n.translate('xpack.enterpriseSearch.content.searchIndex.transform.title', {
+                      defaultMessage: 'Transform your searchable content',
+                    })}
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.searchIndex.transform.description"
+                  defaultMessage="Want to add custom fields, or use trained ML models to analyze and enrich your indexed documents? Use index-specific ingest pipelines to customize documents to your needs."
+                />
+              </p>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiLink href={docLinks.ingestPipelines} target="_blank" external>
+              {i18n.translate('xpack.enterpriseSearch.content.searchIndex.transform.docLink', {
                 defaultMessage: 'Learn more',
               })}
             </EuiLink>

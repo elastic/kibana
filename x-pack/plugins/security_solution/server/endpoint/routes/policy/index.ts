@@ -36,6 +36,11 @@ export function registerPolicyRoutes(router: IRouter, endpointAppContext: Endpoi
     )
   );
 
+  /**
+   * @deprecated
+   * @removeBy 9.0.0
+   *
+   */
   router.get(
     {
       path: AGENT_POLICY_SUMMARY_ROUTE,

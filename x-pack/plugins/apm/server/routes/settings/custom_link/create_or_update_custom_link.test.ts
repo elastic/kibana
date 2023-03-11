@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { Setup } from '../../../lib/helpers/setup_request';
 import { mockNow } from '../../../utils/test_helpers';
 import { CustomLink } from '../../../../common/custom_link/custom_link_types';
 import { createOrUpdateCustomLink } from './create_or_update_custom_link';
+import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 
 describe('Create or Update Custom link', () => {
   const internalClientIndexMock = jest.fn();
-  const mockedSetup = {
-    internalClient: {
-      index: internalClientIndexMock,
-    },
-    indices: {
-      apmCustomLinkIndex: 'apmCustomLinkIndex',
-    },
-  } as unknown as Setup;
+
+  const mockInternalESClient = {
+    index: internalClientIndexMock,
+  } as unknown as APMInternalESClient;
 
   const customLink = {
     label: 'foo',
@@ -38,12 +34,15 @@ describe('Create or Update Custom link', () => {
   });
 
   it('creates a new custom link', () => {
-    createOrUpdateCustomLink({ customLink, setup: mockedSetup });
+    createOrUpdateCustomLink({
+      customLink,
+      internalESClient: mockInternalESClient,
+    });
     expect(internalClientIndexMock).toHaveBeenCalledWith(
       'create_or_update_custom_link',
       {
         refresh: true,
-        index: 'apmCustomLinkIndex',
+        index: '.apm-custom-link',
         body: {
           '@timestamp': 1570737000000,
           label: 'foo',
@@ -58,13 +57,13 @@ describe('Create or Update Custom link', () => {
     createOrUpdateCustomLink({
       customLinkId: 'bar',
       customLink,
-      setup: mockedSetup,
+      internalESClient: mockInternalESClient,
     });
     expect(internalClientIndexMock).toHaveBeenCalledWith(
       'create_or_update_custom_link',
       {
         refresh: true,
-        index: 'apmCustomLinkIndex',
+        index: '.apm-custom-link',
         id: 'bar',
         body: {
           '@timestamp': 1570737000000,

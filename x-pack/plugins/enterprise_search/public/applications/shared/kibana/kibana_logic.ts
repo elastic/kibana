@@ -18,6 +18,7 @@ import {
   ScopedHistory,
   IUiSettingsClient,
 } from '@kbn/core/public';
+import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import { ProductAccess } from '../../../../common/types';
@@ -29,6 +30,7 @@ type RequiredFieldsOnly<T> = {
   [K in keyof T as T[K] extends Required<T>[K] ? K : never]: T[K];
 };
 interface KibanaLogicProps {
+  application: ApplicationStart;
   config: { host?: string };
   productAccess: ProductAccess;
   // Kibana core
@@ -41,6 +43,7 @@ interface KibanaLogicProps {
   renderHeaderActions(HeaderActions: FC): void;
   // Required plugins
   charts: ChartsPluginStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
   security: SecurityPluginStart;
   uiSettings: IUiSettingsClient;
   // Optional plugins
@@ -55,10 +58,12 @@ export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
 export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
   path: ['enterprise_search', 'kibana_logic'],
   reducers: ({ props }) => ({
+    application: [props.application || {}, {}],
     capabilities: [props.capabilities || {}, {}],
     config: [props.config || {}, {}],
     charts: [props.charts, {}],
     cloud: [props.cloud || {}, {}],
+    guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {

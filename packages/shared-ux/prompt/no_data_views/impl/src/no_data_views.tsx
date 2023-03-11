@@ -24,7 +24,10 @@ type CloseDataViewEditorFn = ReturnType<NoDataViewsPromptServices['openDataViewE
  *
  * Use of this component requires both the `EuiTheme` context as well as a `NoDataViewsPrompt` provider.
  */
-export const NoDataViewsPrompt = ({ onDataViewCreated }: NoDataViewsPromptProps) => {
+export const NoDataViewsPrompt = ({
+  onDataViewCreated,
+  allowAdHocDataView = false,
+}: NoDataViewsPromptProps) => {
   const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink } = useServices();
   const closeDataViewEditor = useRef<CloseDataViewEditorFn>();
 
@@ -54,12 +57,19 @@ export const NoDataViewsPrompt = ({ onDataViewCreated }: NoDataViewsPromptProps)
       onSave: (dataView) => {
         onDataViewCreated(dataView);
       },
+      allowAdHocDataView,
     });
 
     if (setDataViewEditorRef) {
       setDataViewEditorRef(ref);
     }
-  }, [canCreateNewDataView, openDataViewEditor, setDataViewEditorRef, onDataViewCreated]);
+  }, [
+    canCreateNewDataView,
+    openDataViewEditor,
+    allowAdHocDataView,
+    setDataViewEditorRef,
+    onDataViewCreated,
+  ]);
 
   return (
     <NoDataViewsPromptComponent {...{ onClickCreate, canCreateNewDataView, dataViewsDocLink }} />

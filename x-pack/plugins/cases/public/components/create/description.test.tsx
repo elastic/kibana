@@ -22,6 +22,11 @@ jest.mock('../markdown_editor/plugins/lens/use_lens_draft_comment');
 describe('Description', () => {
   let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
+  const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
+  const defaultProps = {
+    draftStorageKey,
+    isLoading: false,
+  };
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
     const { form } = useForm<FormProps>({
@@ -44,7 +49,7 @@ describe('Description', () => {
   it('it renders', async () => {
     const result = appMockRender.render(
       <MockHookWrapperComponent>
-        <Description isLoading={false} />
+        <Description {...defaultProps} />
       </MockHookWrapperComponent>
     );
 
@@ -54,7 +59,7 @@ describe('Description', () => {
   it('it changes the description', async () => {
     const result = appMockRender.render(
       <MockHookWrapperComponent>
-        <Description isLoading={false} />
+        <Description {...defaultProps} />
       </MockHookWrapperComponent>
     );
 

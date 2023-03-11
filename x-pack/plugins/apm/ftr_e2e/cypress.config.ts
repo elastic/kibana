@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { defineConfig } from 'cypress';
+import { defineCypressConfig } from '@kbn/cypress-config';
 import { setupNodeEvents } from './setup_cypress_node_events';
 
-module.exports = defineConfig({
+export default defineCypressConfig({
   projectId: 'omwh6f',
   fileServerFolder: './cypress',
   fixturesFolder: './cypress/fixtures',
@@ -32,6 +32,5 @@ module.exports = defineConfig({
     baseUrl: 'http://localhost:5601',
     supportFile: './cypress/support/e2e.ts',
     specPattern: './cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
-    experimentalSessionAndOrigin: false,
   },
 });

@@ -44,7 +44,7 @@ import { AutocompleteField } from '../autocomplete_field';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useRuleIndices } from '../../../containers/detection_engine/rules/use_rule_indices';
+import { useRuleIndices } from '../../../../detection_engine/rule_management/logic/use_rule_indices';
 
 const CommonUseField = getUseField({ component: Field });
 

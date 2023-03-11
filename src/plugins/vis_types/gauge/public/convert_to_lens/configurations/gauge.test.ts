@@ -68,7 +68,7 @@ describe('getConfiguration', () => {
       })
     ).toEqual({
       colorMode: 'palette',
-      labelMajorMode: 'none',
+      labelMajorMode: 'auto',
       labelMinor: undefined,
       layerId: 'layer-id',
       layerType: 'data',

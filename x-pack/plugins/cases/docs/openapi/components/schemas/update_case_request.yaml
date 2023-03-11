@@ -13,7 +13,9 @@ properties:
       required:
         - id
         - version
-      properties: 
+      properties:
+        assignees:
+          $ref: 'assignees.yaml'
         connector:
           oneOf:
             - $ref: 'connector_properties_none.yaml'

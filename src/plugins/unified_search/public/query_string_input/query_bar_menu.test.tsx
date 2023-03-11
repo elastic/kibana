@@ -94,6 +94,9 @@ describe('Querybar Menu component', () => {
     props = {
       language: 'kuery',
       onQueryChange: jest.fn(),
+      onCloseFilterPopover: jest.fn(),
+      onLocalFilterUpdate: jest.fn(),
+      onLocalFilterCreate: jest.fn(),
       onQueryBarSubmit: jest.fn(),
       toggleFilterBarMenuPopover: jest.fn(),
       openQueryBarMenu: false,

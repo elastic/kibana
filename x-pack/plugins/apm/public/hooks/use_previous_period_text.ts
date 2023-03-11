@@ -22,7 +22,8 @@ export const usePreviousPeriodLabel = () => {
   } = useAnyOfApmParams(
     '/services',
     '/dependencies/*',
-    '/services/{serviceName}'
+    '/services/{serviceName}',
+    '/mobile-services/{serviceName}/*'
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });

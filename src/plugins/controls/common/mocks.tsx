@@ -8,3 +8,4 @@
 
 export * from './control_group/mocks';
 export * from './options_list/mocks';
+export * from './range_slider/mocks';

@@ -26,14 +26,19 @@ export interface EmbeddableOutput {
   editApp?: string;
   editPath?: string;
   defaultTitle?: string;
+  defaultDescription?: string;
   title?: string;
+  description?: string;
   editable?: boolean;
+  // Whether the embeddable can be edited inline by re-requesting the explicit input from the user
+  editableWithExplicitInput?: boolean;
   savedObjectId?: string;
 }
 
 export interface IEmbeddable<
   I extends EmbeddableInput = EmbeddableInput,
-  O extends EmbeddableOutput = EmbeddableOutput
+  O extends EmbeddableOutput = EmbeddableOutput,
+  N = any
 > {
   /**
    * Is this embeddable an instance of a Container class, can it contain
@@ -164,6 +169,11 @@ export interface IEmbeddable<
   getTitle(): string | undefined;
 
   /**
+   * Returns the description of this embeddable.
+   */
+  getDescription(): string | undefined;
+
+  /**
    * Returns the top most parent embeddable, or itself if this embeddable
    * is not within a parent.
    */
@@ -172,15 +182,17 @@ export interface IEmbeddable<
   /**
    * Renders the embeddable at the given node.
    * @param domNode
+   * @returns A React node to mount or void in the case when rendering is done without React.
    */
-  render(domNode: HTMLElement | Element): void;
+  render(domNode: HTMLElement | Element): N | void;
 
   /**
    * Renders a custom embeddable error at the given node.
+   * @param error
    * @param domNode
-   * @returns A callback that will be called on error destroy.
+   * @returns A React node or callback that will be called on error destroy.
    */
-  renderError?(domNode: HTMLElement | Element, error: ErrorLike): () => void;
+  catchError?(error: EmbeddableError, domNode: HTMLElement | Element): N | (() => void);
 
   /**
    * Reload the embeddable so output and rendering is up to date. Especially relevant

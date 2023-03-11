@@ -20,6 +20,7 @@ export const siblingBuckets: TableRequestProcessorsFunction =
       column.metrics
         .filter((row) => /_bucket$/.test(row.type))
         .forEach((metric) => {
+          // @ts-expect-error should be typed
           const fn = bucketTransform[metric.type];
 
           if (fn) {

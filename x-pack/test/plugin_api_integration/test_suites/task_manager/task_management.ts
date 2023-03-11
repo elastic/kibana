@@ -337,9 +337,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         const scheduledTask = await currentTask(task.id);
-        expect(scheduledTask.attempts).to.be.greaterThan(0);
+        expect(scheduledTask.attempts).to.be.greaterThan(1);
         expect(Date.parse(scheduledTask.runAt)).to.be.greaterThan(
-          Date.parse(task.runAt) + 5 * 60 * 1000
+          Date.parse(task.runAt) + 30 * 1000
         );
       });
     });
@@ -656,11 +656,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(task.enabled).to.eql(true);
       });
 
-      // disable the task
-      await bulkDisable([scheduledTask.id]);
-
       await retry.try(async () => {
+        // disable the task
+        await bulkDisable([scheduledTask.id]);
         const task = await currentTask(scheduledTask.id);
+        log.debug(
+          `bulkDisable:task(${scheduledTask.id}) enabled: ${task.enabled}, when runSoon = true`
+        );
         expect(task.enabled).to.eql(false);
       });
 
@@ -671,6 +673,9 @@ export default function ({ getService }: FtrProviderContext) {
         const task = await currentTask(scheduledTask.id);
 
         expect(task.enabled).to.eql(true);
+        log.debug(
+          `bulkEnable:task(${scheduledTask.id}) enabled: ${task.enabled}, when runSoon = true`
+        );
         expect(Date.parse(task.scheduledAt)).to.be.greaterThan(
           Date.parse(scheduledTask.scheduledAt)
         );
@@ -699,6 +704,9 @@ export default function ({ getService }: FtrProviderContext) {
       let disabledTask: SerializedConcreteTaskInstance;
       await retry.try(async () => {
         disabledTask = await currentTask(scheduledTask.id);
+        log.debug(
+          `bulkDisable:task(${scheduledTask.id}) enabled: ${disabledTask.enabled}, when runSoon = false`
+        );
         expect(disabledTask.enabled).to.eql(false);
       });
 
@@ -707,7 +715,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         const task = await currentTask(scheduledTask.id);
-
+        log.debug(
+          `bulkEnable:task(${scheduledTask.id}) enabled: ${task.enabled}, when runSoon = true`
+        );
         expect(task.enabled).to.eql(true);
         expect(Date.parse(task.scheduledAt)).to.eql(Date.parse(disabledTask.scheduledAt));
       });
@@ -761,7 +771,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should mark non-recurring task as failed if task is still running but maxAttempts has been reached', async () => {
       const task = await scheduleTask({
-        taskType: 'sampleOneTimeTaskTimingOut',
+        taskType: 'sampleOneTimeTaskThrowingError',
         params: {},
       });
 

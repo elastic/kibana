@@ -23,6 +23,7 @@ import {
   VECTOR_STYLES,
 } from '../../../../../../common/constants';
 import { GeoJsonVectorLayer } from '../../../vector_layer';
+import { LayerGroup } from '../../../layer_group';
 import { VectorStyle } from '../../../../styles/vector/vector_style';
 import { ESSearchSource } from '../../../../sources/es_search_source';
 import { ESPewPewSource } from '../../../../sources/es_pew_pew_source';
@@ -48,7 +49,11 @@ function getDestinationField(indexPatternTitle: string) {
   return isApmIndex(indexPatternTitle) ? 'server.geo.location' : 'destination.geo.location';
 }
 
-function createSourceLayerDescriptor(indexPatternId: string, indexPatternTitle: string) {
+function createSourceLayerDescriptor(
+  indexPatternId: string,
+  indexPatternTitle: string,
+  parentId: string
+) {
   const sourceDescriptor = ESSearchSource.createDescriptor({
     indexPatternId,
     geoField: getSourceField(indexPatternTitle),
@@ -96,12 +101,17 @@ function createSourceLayerDescriptor(indexPatternId: string, indexPatternTitle: 
       defaultMessage: '{indexPatternTitle} | Source Point',
       values: { indexPatternTitle },
     }),
+    parent: parentId,
     sourceDescriptor,
     style: VectorStyle.createDescriptor(styleProperties),
   });
 }
 
-function createDestinationLayerDescriptor(indexPatternId: string, indexPatternTitle: string) {
+function createDestinationLayerDescriptor(
+  indexPatternId: string,
+  indexPatternTitle: string,
+  parentId: string
+) {
   const sourceDescriptor = ESSearchSource.createDescriptor({
     indexPatternId,
     geoField: getDestinationField(indexPatternTitle),
@@ -149,12 +159,17 @@ function createDestinationLayerDescriptor(indexPatternId: string, indexPatternTi
       defaultMessage: '{indexPatternTitle} | Destination point',
       values: { indexPatternTitle },
     }),
+    parent: parentId,
     sourceDescriptor,
     style: VectorStyle.createDescriptor(styleProperties),
   });
 }
 
-function createLineLayerDescriptor(indexPatternId: string, indexPatternTitle: string) {
+function createLineLayerDescriptor(
+  indexPatternId: string,
+  indexPatternTitle: string,
+  parentId: string
+) {
   const sourceDescriptor = ESPewPewSource.createDescriptor({
     indexPatternId,
     sourceGeoField: getSourceField(indexPatternTitle),
@@ -195,6 +210,7 @@ function createLineLayerDescriptor(indexPatternId: string, indexPatternTitle: st
       defaultMessage: '{indexPatternTitle} | Line',
       values: { indexPatternTitle },
     }),
+    parent: parentId,
     sourceDescriptor,
     style: VectorStyle.createDescriptor(styleProperties),
   });
@@ -204,9 +220,11 @@ export function createSecurityLayerDescriptors(
   indexPatternId: string,
   indexPatternTitle: string
 ): LayerDescriptor[] {
+  const layerGroupDescriptor = LayerGroup.createDescriptor({ label: indexPatternTitle });
   return [
-    createSourceLayerDescriptor(indexPatternId, indexPatternTitle),
-    createDestinationLayerDescriptor(indexPatternId, indexPatternTitle),
-    createLineLayerDescriptor(indexPatternId, indexPatternTitle),
+    createSourceLayerDescriptor(indexPatternId, indexPatternTitle, layerGroupDescriptor.id),
+    createDestinationLayerDescriptor(indexPatternId, indexPatternTitle, layerGroupDescriptor.id),
+    createLineLayerDescriptor(indexPatternId, indexPatternTitle, layerGroupDescriptor.id),
+    layerGroupDescriptor,
   ];
 }

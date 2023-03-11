@@ -10,7 +10,7 @@ import type { HeatmapArguments } from '@kbn/expression-heatmap-plugin/common';
 import type { LayerType } from '../../../common';
 export type ChartShapes = 'heatmap';
 
-export type HeatmapLayerState = HeatmapArguments & {
+export type HeatmapLayerState = Omit<HeatmapArguments, 'palette'> & {
   layerId: string;
   layerType: LayerType;
   valueAccessor?: string;

@@ -50,7 +50,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.dragFieldToWorkspace('geo.dest', 'xyVisChart');
 
       // add filter to force data fetch to set activeData
-      await filterBar.addFilter('bytes', 'is between', '200', '10000');
+      await filterBar.addFilter({
+        field: 'bytes',
+        operation: 'is between',
+        value: { from: '200', to: '10000' },
+      });
 
       await testSubjects.click('lnsSuggestion-worldCountriesByCountOfRecords > lnsSuggestion');
 

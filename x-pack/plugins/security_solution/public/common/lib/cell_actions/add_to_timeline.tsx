@@ -8,10 +8,9 @@
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common/search_strategy';
-import type { DataProvider } from '@kbn/timelines-plugin/common/types';
-import { getPageRowIndex } from '@kbn/timelines-plugin/public';
 import { useDispatch } from 'react-redux';
+import type { TimelineNonEcsData } from '../../../../common/search_strategy';
+import type { DataProvider } from '../../../../common/types';
 import { TimelineId } from '../../../../common/types';
 import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import {
@@ -21,13 +20,16 @@ import {
 import { escapeDataProviderId } from '../../components/drag_and_drop/helpers';
 import { EmptyComponent, useKibanaServices } from './helpers';
 import { addProvider } from '../../../timelines/store/timeline/actions';
+import { getPageRowIndex } from '../../components/data_table/pagination';
 
 export const getAddToTimelineCellAction = ({
   data,
   pageSize,
+  closeCellPopover,
 }: {
   data?: TimelineNonEcsData[][];
   pageSize: number;
+  closeCellPopover?: () => void;
 }) =>
   data && data.length > 0
     ? function AddToTimeline({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) {
@@ -97,6 +99,9 @@ export const getAddToTimelineCellAction = ({
               providers: dataProvider,
             })
           );
+          if (closeCellPopover) {
+            closeCellPopover();
+          }
         }, [dataProvider, dispatch]);
 
         const addToTimelineProps = useMemo(() => {

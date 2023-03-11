@@ -33,10 +33,6 @@
   padding: $euiSizeS;
 }
 
-.lnsFormula__docsHeader {
-  margin: 0;
-}
-
 .lnsFormula__editorFooter {
   // make sure docs are rendered in front of monaco
   z-index: 1;
@@ -96,76 +92,6 @@
 
 .lnsFormula__docs {
   background: $euiColorEmptyShade;
-}
-
-.lnsFormula__docs--inline {
-  display: flex;
-  flex-direction: column;
-  // make sure docs are rendered in front of monaco
-  z-index: 1;
-}
-
-.lnsFormula__docsContent {
-  .lnsFormula__docs--overlay & {
-    height: 40vh;
-    width:  #{'min(75vh, 90vw)'};
-  }
-
-  .lnsFormula__docs--inline & {
-    flex: 1;
-    min-height: 0;
-  }
-
-  & > * + * {
-    border-left: $euiBorderThin;
-  }
-}
-
-.lnsFormula__docsSidebar {
-  background: $euiColorLightestShade;
-}
-
-.lnsFormula__docsSidebarInner {
-  min-height: 0;
-
-  & > * + * {
-    border-top: $euiBorderThin;
-  }
-}
-
-.lnsFormula__docsSearch {
-  padding: $euiSize;
-}
-
-.lnsFormula__docsNav {
-  @include euiYScroll;
-}
-
-.lnsFormula__docsNavGroup {
-  padding: $euiSize;
-
-  & + & {
-    border-top: $euiBorderThin;
-  }
-}
-
-.lnsFormula__docsNavGroupLink {
-  font-weight: inherit;
-}
-
-.lnsFormula__docsText {
-  @include euiYScroll;
-  padding: $euiSize;
-}
-
-.lnsFormula__docsTextGroup,
-.lnsFormula__docsTextItem {
-  margin-top: $euiSizeXXL;
-}
-
-.lnsFormula__docsTextGroup {
-  border-top: $euiBorderThin;
-  padding-top: $euiSizeXXL;
 }
 
 .lnsFormulaOverflow {

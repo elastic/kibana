@@ -37,7 +37,7 @@ export function App() {
 
   useEffect(() => {
     const subscription = expressions
-      ?.execute<null, Datatable>(expression, null)
+      ?.execute<null, Datatable>(expression, null, { partial: true })
       .getData()
       .pipe(pluck('result'))
       .subscribe((value) => setDatatable(value as Datatable));

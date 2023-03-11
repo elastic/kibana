@@ -38,8 +38,13 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
     targetAllPlatforms: true,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
+    dockerNamespace: null,
     dockerPush: false,
+    dockerTag: '',
     dockerTagQualifier: '',
+    downloadFreshNode: true,
+    withExamplePlugins: false,
+    withTestPlugins: true,
   });
 
   getNodeDownloadInfo.mockImplementation((_: Config, platform: Platform) => {

@@ -8,17 +8,16 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataType, TermsParams } from '@kbn/visualizations-plugin/common';
-import uuid from 'uuid';
-import { Series } from '../../../../common/types';
+import { v4 as uuidv4 } from 'uuid';
 import { excludeMetaFromColumn, getFormat, isColumnWithMeta } from './column';
-import { Column, TermsColumn } from './types';
+import { Column, TermsColumn, TermsSeries } from './types';
 
 interface OrderByWithAgg {
   orderAgg?: TermsParams['orderAgg'];
   orderBy: TermsParams['orderBy'];
 }
 
-const getOrderByWithAgg = (series: Series, columns: Column[]): OrderByWithAgg | null => {
+const getOrderByWithAgg = (series: TermsSeries, columns: Column[]): OrderByWithAgg | null => {
   if (series.terms_order_by === '_key') {
     return { orderBy: { type: 'alphabetical' } };
   }
@@ -29,7 +28,7 @@ const getOrderByWithAgg = (series: Series, columns: Column[]): OrderByWithAgg | 
       orderAgg: {
         operationType: 'count',
         sourceField: 'document',
-        columnId: uuid(),
+        columnId: uuidv4(),
         isBucketed: true,
         isSplit: false,
         dataType: 'number',
@@ -56,7 +55,7 @@ const getOrderByWithAgg = (series: Series, columns: Column[]): OrderByWithAgg | 
 };
 
 export const convertToTermsParams = (
-  series: Series,
+  series: TermsSeries,
   columns: Column[],
   secondaryFields: string[]
 ): TermsParams | null => {
@@ -84,10 +83,11 @@ export const convertToTermsParams = (
 
 export const convertToTermsColumn = (
   termFields: [string, ...string[]],
-  series: Series,
+  series: TermsSeries,
   columns: Column[],
   dataView: DataView,
-  isSplit: boolean = false
+  isSplit: boolean = false,
+  label?: string
 ): TermsColumn | null => {
   const [baseField, ...secondaryFields] = termFields;
   const field = dataView.getFieldByName(baseField);
@@ -102,12 +102,13 @@ export const convertToTermsColumn = (
   }
 
   return {
-    columnId: uuid(),
+    columnId: uuidv4(),
     operationType: 'terms',
     dataType: (field.type as DataType) ?? undefined,
     sourceField: field.name,
     isBucketed: true,
     isSplit,
+    label,
     params: { ...params, ...getFormat(series) },
   };
 };

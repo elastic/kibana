@@ -22,6 +22,7 @@ describe('getStateDefaults', () => {
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {
+        "breakdownField": undefined,
         "columns": Array [
           "default_column",
         ],
@@ -55,6 +56,7 @@ describe('getStateDefaults', () => {
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {
+        "breakdownField": undefined,
         "columns": Array [
           "default_column",
         ],

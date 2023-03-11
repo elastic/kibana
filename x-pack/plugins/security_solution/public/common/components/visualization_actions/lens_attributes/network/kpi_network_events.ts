@@ -16,6 +16,7 @@ export const kpiNetworkEventsLensAttributes: LensAttributes = {
       layerId: 'eaadfec7-deaa-4aeb-a403-3b4e516416d2',
       accessor: '370ebd07-5ce0-4f46-a847-0e363c50d037',
       layerType: 'data',
+      autoScaleMetricAlignment: 'left',
     },
     query: {
       query: '',

@@ -18,7 +18,7 @@ get:
     '200':
       description: Indicates a successful call.
       content:
-        application/json; charset=utf-8:
+        application/json:
           schema:
             type: array
             items:
@@ -28,6 +28,12 @@ get:
           examples:
             getReportersResponse:
               $ref: '../components/examples/get_reporters_response.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'
   servers:
     - url: https://localhost:5601
 servers:

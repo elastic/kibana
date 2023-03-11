@@ -23,7 +23,6 @@ import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 
 interface ViewResultsInLensActionProps {
   actionId?: string;
-  agentIds?: string[];
   buttonType: ViewResultsActionButtonType;
   endDate?: string;
   startDate?: string;
@@ -32,14 +31,14 @@ interface ViewResultsInLensActionProps {
 
 const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> = ({
   actionId,
-  agentIds,
   buttonType,
   endDate,
   startDate,
   mode,
 }) => {
   const lensService = useKibana().services.lens;
-  const { data: logsDataView } = useLogsDataView({ skip: !actionId });
+  const isLensAvailable = lensService?.canUseEditor();
+  const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 
   const handleClick = useCallback(
     (event) => {
@@ -54,7 +53,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
               to: endDate ?? 'now',
               mode: mode ?? (startDate || endDate) ? 'absolute' : 'relative',
             },
-            attributes: getLensAttributes(logsDataView, actionId, agentIds),
+            attributes: getLensAttributes(logsDataView, actionId),
           },
           {
             openInNewTab: true,
@@ -63,10 +62,14 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
         );
       }
     },
-    [actionId, agentIds, endDate, lensService, logsDataView, mode, startDate]
+    [actionId, endDate, lensService, logsDataView, mode, startDate]
   );
 
   const isDisabled = useMemo(() => !actionId || !logsDataView, [actionId, logsDataView]);
+
+  if (!isLensAvailable) {
+    return null;
+  }
 
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
@@ -135,7 +138,7 @@ function getLensAttributes(
         legendDisplay: 'default',
         nestedLegend: false,
         layerId: 'layer1',
-        metric: 'ed999e9d-204c-465b-897f-fe1a125b39ed',
+        metrics: ['ed999e9d-204c-465b-897f-fe1a125b39ed'],
         numberDisplay: 'percent',
         primaryGroups: ['8690befd-fd69-4246-af4a-dd485d2a3b38'],
         categoryDisplay: 'default',

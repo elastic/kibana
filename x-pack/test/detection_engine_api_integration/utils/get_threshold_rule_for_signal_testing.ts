@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ThresholdCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { getRuleForSignalTesting } from './get_rule_for_signal_testing';
 
 /**
@@ -19,7 +19,7 @@ export const getThresholdRuleForSignalTesting = (
   index: string[],
   ruleId = 'threshold-rule',
   enabled = true
-): ThresholdCreateSchema => ({
+): ThresholdRuleCreateProps => ({
   ...getRuleForSignalTesting(index, ruleId, enabled),
   type: 'threshold',
   language: 'kuery',

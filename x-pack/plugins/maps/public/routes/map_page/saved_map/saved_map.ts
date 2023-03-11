@@ -9,6 +9,7 @@ import _ from 'lodash';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { ScopedHistory } from '@kbn/core/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
@@ -45,7 +46,6 @@ import {
   getTimeFilter,
   getUsageCollection,
 } from '../../../kibana_services';
-import { goToSpecifiedPath } from '../../../render_app';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { getBreadcrumbs } from './get_breadcrumbs';
@@ -326,7 +326,7 @@ export class SavedMap {
     }
   }
 
-  setBreadcrumbs() {
+  setBreadcrumbs(history: ScopedHistory) {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await whenReady before calling hasUnsavedChanges');
     }
@@ -337,6 +337,7 @@ export class SavedMap {
       getHasUnsavedChanges: this.hasUnsavedChanges,
       originatingApp: this._originatingApp,
       getAppNameFromId: this._getStateTransfer().getAppNameFromId,
+      history,
     });
     getCoreChrome().setBreadcrumbs(breadcrumbs);
   }
@@ -433,11 +434,13 @@ export class SavedMap {
     newTags,
     saveByReference,
     dashboardId,
+    history,
   }: OnSaveProps & {
     returnToOrigin?: boolean;
     newTags?: string[];
     saveByReference: boolean;
     dashboardId?: string | null;
+    history: ScopedHistory;
   }) {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await whenReady before calling save');
@@ -525,8 +528,8 @@ export class SavedMap {
     });
 
     getCoreChrome().docTitle.change(newTitle);
-    this.setBreadcrumbs();
-    goToSpecifiedPath(`/${MAP_PATH}/${this.getSavedObjectId()}${window.location.hash}`);
+    this.setBreadcrumbs(history);
+    history.push(`/${MAP_PATH}/${this.getSavedObjectId()}${window.location.hash}`);
 
     if (this._onSaveCallback) {
       this._onSaveCallback();

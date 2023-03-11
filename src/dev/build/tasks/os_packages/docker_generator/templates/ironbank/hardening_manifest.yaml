@@ -48,10 +48,6 @@ resources:
 
 # List of project maintainers
 maintainers:
-  - email: 'tyler.smalley@elastic.co'
-    name: 'Tyler Smalley'
-    username: 'tylersmalley'
-    cht_member: false
   - email: 'klepal_alexander@bah.com'
     name: 'Alexander Klepal'
     username: 'alexander.klepal'

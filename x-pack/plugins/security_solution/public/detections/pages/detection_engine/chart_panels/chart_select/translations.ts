@@ -28,3 +28,28 @@ export const TREEMAP = i18n.translate(
     defaultMessage: 'Treemap',
   }
 );
+
+export const CHARTS = i18n.translate('xpack.securitySolution.components.chartSelect.chartsOption', {
+  defaultMessage: 'Charts',
+});
+
+export const COUNTS = i18n.translate(
+  'xpack.securitySolution.components.chartSelect.tableOptionTitle',
+  {
+    defaultMessage: 'Counts',
+  }
+);
+
+export const CHARTS_TITLE = i18n.translate(
+  'xpack.securitySolution.components.chartSelect.chartsOptionTitle',
+  {
+    defaultMessage: 'Summary',
+  }
+);
+
+export const LEGEND_TITLE = i18n.translate(
+  'xpack.securitySolution.components.chartSelect.legendTitle',
+  {
+    defaultMessage: 'Select a tab',
+  }
+);

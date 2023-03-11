@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EcsEventOutcome } from '@kbn/core/server';
+import type { EcsEvent } from '@kbn/core/server';
 import type { AuditEvent, AuditLogger } from '@kbn/security-plugin/server';
 import type { OperationDetails } from '.';
 import { DATABASE_CATEGORY, ECS_OUTCOMES, isWriteOperation } from '.';
@@ -21,9 +21,9 @@ interface CreateAuditMsgParams {
  * Audit logger for authorization operations
  */
 export class AuthorizationAuditLogger {
-  private readonly auditLogger?: AuditLogger;
+  private readonly auditLogger: AuditLogger;
 
-  constructor(logger?: AuditLogger) {
+  constructor(logger: AuditLogger) {
     this.auditLogger = logger;
   }
 
@@ -39,7 +39,7 @@ export class AuthorizationAuditLogger {
     const ownerText = entity?.owner === undefined ? 'as any owners' : `as owner "${entity.owner}"`;
 
     let message: string;
-    let outcome: EcsEventOutcome;
+    let outcome: EcsEvent['outcome'];
 
     if (error) {
       message = `Failed attempt to ${operation.verbs.present} ${doc} ${ownerText}`;
@@ -97,6 +97,6 @@ export class AuthorizationAuditLogger {
    * Logs an audit event based on the status of an operation.
    */
   public log(auditMsgParams: CreateAuditMsgParams) {
-    this.auditLogger?.log(AuthorizationAuditLogger.createAuditMsg(auditMsgParams));
+    this.auditLogger.log(AuthorizationAuditLogger.createAuditMsg(auditMsgParams));
   }
 }

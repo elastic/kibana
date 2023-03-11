@@ -19,7 +19,7 @@ describe('agent activity helper', () => {
   ] as ActionStatus[];
 
   beforeEach(() => {
-    jest.useFakeTimers('modern').setSystemTime(new Date('2022-09-14'));
+    jest.useFakeTimers().setSystemTime(new Date('2022-09-14'));
   });
 
   afterEach(() => {

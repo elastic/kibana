@@ -18,6 +18,9 @@ Object {
             "duration": 0,
             "state": Object {
               "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [],
+              ],
               "controlState": "LEGACY_REINDEX",
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
@@ -48,6 +51,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -78,6 +86,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "maps-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "ml-telemetry",
                       },
                     },
@@ -89,6 +102,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
                       },
                     },
                     Object {
@@ -112,19 +130,8 @@ Object {
                       },
                     },
                     Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
-                          },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
-                          },
-                        ],
+                      "term": Object {
+                        "type": "upgrade-assistant-telemetry",
                       },
                     },
                   ],
@@ -175,9 +182,9 @@ Object {
                   },
                 },
               },
-              "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },
@@ -198,6 +205,9 @@ Object {
             "duration": 0,
             "state": Object {
               "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [],
+              ],
               "controlState": "LEGACY_DELETE",
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
@@ -224,6 +234,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "cases-sub-case",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "csp_rule",
                       },
                     },
                     Object {
@@ -258,6 +273,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "maps-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "ml-telemetry",
                       },
                     },
@@ -269,6 +289,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
                       },
                     },
                     Object {
@@ -292,19 +317,8 @@ Object {
                       },
                     },
                     Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
-                          },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
-                          },
-                        ],
+                      "term": Object {
+                        "type": "upgrade-assistant-telemetry",
                       },
                     },
                   ],
@@ -359,9 +373,9 @@ Object {
                   },
                 },
               },
-              "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },
@@ -382,6 +396,9 @@ Object {
             "duration": 0,
             "state": Object {
               "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [],
+              ],
               "controlState": "LEGACY_DELETE",
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
@@ -408,6 +425,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "cases-sub-case",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "csp_rule",
                       },
                     },
                     Object {
@@ -442,6 +464,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "maps-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "ml-telemetry",
                       },
                     },
@@ -453,6 +480,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
                       },
                     },
                     Object {
@@ -476,19 +508,8 @@ Object {
                       },
                     },
                     Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
-                          },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
-                          },
-                        ],
+                      "term": Object {
+                        "type": "upgrade-assistant-telemetry",
                       },
                     },
                   ],
@@ -547,9 +568,9 @@ Object {
                   },
                 },
               },
-              "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },
@@ -570,6 +591,9 @@ Object {
             "duration": 0,
             "state": Object {
               "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [],
+              ],
               "controlState": "DONE",
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
@@ -600,6 +624,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "csp_rule",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "file-upload-telemetry",
                       },
                     },
@@ -630,6 +659,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "maps-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "ml-telemetry",
                       },
                     },
@@ -641,6 +675,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
                       },
                     },
                     Object {
@@ -664,19 +703,8 @@ Object {
                       },
                     },
                     Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
-                          },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
-                          },
-                        ],
+                      "term": Object {
+                        "type": "upgrade-assistant-telemetry",
                       },
                     },
                   ],
@@ -739,9 +767,9 @@ Object {
                   },
                 },
               },
-              "transformedDocBatches": Array [],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },
@@ -800,6 +828,15 @@ Object {
             "duration": 0,
             "state": Object {
               "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [
+                  Object {
+                    "index": Object {
+                      "_id": "1234",
+                    },
+                  },
+                ],
+              ],
               "controlState": "LEGACY_DELETE",
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
@@ -826,6 +863,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "cases-sub-case",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "csp_rule",
                       },
                     },
                     Object {
@@ -860,6 +902,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "maps-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "ml-telemetry",
                       },
                     },
@@ -871,6 +918,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
                       },
                     },
                     Object {
@@ -894,19 +946,8 @@ Object {
                       },
                     },
                     Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
-                          },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
-                          },
-                        ],
+                      "term": Object {
+                        "type": "upgrade-assistant-telemetry",
                       },
                     },
                   ],
@@ -962,15 +1003,9 @@ Object {
                   },
                 },
               },
-              "transformedDocBatches": Array [
-                Array [
-                  Object {
-                    "_id": "1234",
-                  },
-                ],
-              ],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },
@@ -991,6 +1026,15 @@ Object {
             "duration": 0,
             "state": Object {
               "batchSize": 1000,
+              "bulkOperationBatches": Array [
+                Array [
+                  Object {
+                    "index": Object {
+                      "_id": "1234",
+                    },
+                  },
+                ],
+              ],
               "controlState": "FATAL",
               "currentAlias": ".my-so-index",
               "discardCorruptObjects": false,
@@ -1017,6 +1061,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "cases-sub-case",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "csp_rule",
                       },
                     },
                     Object {
@@ -1051,6 +1100,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "maps-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "ml-telemetry",
                       },
                     },
@@ -1062,6 +1116,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "server",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "siem-detection-engine-rule-execution-info",
                       },
                     },
                     Object {
@@ -1085,19 +1144,8 @@ Object {
                       },
                     },
                     Object {
-                      "bool": Object {
-                        "must": Array [
-                          Object {
-                            "match": Object {
-                              "type": "search-session",
-                            },
-                          },
-                          Object {
-                            "match": Object {
-                              "search-session.persisted": false,
-                            },
-                          },
-                        ],
+                      "term": Object {
+                        "type": "upgrade-assistant-telemetry",
                       },
                     },
                   ],
@@ -1157,15 +1205,9 @@ Object {
                   },
                 },
               },
-              "transformedDocBatches": Array [
-                Array [
-                  Object {
-                    "_id": "1234",
-                  },
-                ],
-              ],
               "versionAlias": ".my-so-index_7.11.0",
               "versionIndex": ".my-so-index_7.11.0_001",
+              "waitForMigrationCompletion": false,
             },
           },
         },

@@ -6,75 +6,77 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { ApmDocumentType } from '../../../../common/document_type';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../common/transaction_types';
+  SERVICE_OVERFLOW_COUNT,
+} from '../../../../common/es_fields/apm';
+import { RollupInterval } from '../../../../common/rollup';
+import { ServiceGroup } from '../../../../common/service_groups';
+import { isDefaultTransactionType } from '../../../../common/transaction_types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import {
-  getDocumentTypeFilterForTransactions,
-  getDurationFieldForTransactions,
-  getProcessorEventForTransactions,
-} from '../../../lib/helpers/transactions';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { getDurationFieldForTransactions } from '../../../lib/helpers/transactions';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
-import { ServicesItemsSetup } from './get_services_items';
 import { serviceGroupQuery } from '../../../lib/service_group_query';
-import { ServiceGroup } from '../../../../common/service_groups';
-import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 
 interface AggregationParams {
   environment: string;
   kuery: string;
-  setup: ServicesItemsSetup;
-  searchAggregatedTransactions: boolean;
+  apmEventClient: APMEventClient;
   maxNumServices: number;
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
   randomSampler: RandomSampler;
+  documentType:
+    | ApmDocumentType.ServiceTransactionMetric
+    | ApmDocumentType.TransactionMetric
+    | ApmDocumentType.TransactionEvent;
+  rollupInterval: RollupInterval;
 }
 
 export async function getServiceTransactionStats({
   environment,
   kuery,
-  setup,
-  searchAggregatedTransactions,
+  apmEventClient,
   maxNumServices,
   start,
   end,
   serviceGroup,
   randomSampler,
+  documentType,
+  rollupInterval,
 }: AggregationParams) {
-  const { apmEventClient } = setup;
-
-  const outcomes = getOutcomeAggregation();
+  const outcomes = getOutcomeAggregation(documentType);
 
   const metrics = {
     avg_duration: {
       avg: {
-        field: getDurationFieldForTransactions(searchAggregatedTransactions),
+        field: getDurationFieldForTransactions(documentType),
       },
     },
-    outcomes,
+    ...outcomes,
   };
 
   const response = await apmEventClient.search(
     'get_service_transaction_stats',
     {
       apm: {
-        events: [
-          getProcessorEventForTransactions(searchAggregatedTransactions),
+        sources: [
+          {
+            documentType,
+            rollupInterval,
+          },
         ],
       },
       body: {
@@ -83,9 +85,6 @@ export async function getServiceTransactionStats({
         query: {
           bool: {
             filter: [
-              ...getDocumentTypeFilterForTransactions(
-                searchAggregatedTransactions
-              ),
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -97,6 +96,11 @@ export async function getServiceTransactionStats({
           sample: {
             random_sampler: randomSampler,
             aggs: {
+              overflowCount: {
+                sum: {
+                  field: SERVICE_OVERFLOW_COUNT,
+                },
+              },
               services: {
                 terms: {
                   field: SERVICE_NAME,
@@ -133,33 +137,35 @@ export async function getServiceTransactionStats({
     }
   );
 
-  return (
-    response.aggregations?.sample.services.buckets.map((bucket) => {
-      const topTransactionTypeBucket =
-        bucket.transactionType.buckets.find(
-          ({ key }) =>
-            key === TRANSACTION_REQUEST || key === TRANSACTION_PAGE_LOAD
-        ) ?? bucket.transactionType.buckets[0];
+  return {
+    serviceStats:
+      response.aggregations?.sample.services.buckets.map((bucket) => {
+        const topTransactionTypeBucket =
+          bucket.transactionType.buckets.find(({ key }) =>
+            isDefaultTransactionType(key as string)
+          ) ?? bucket.transactionType.buckets[0];
 
-      return {
-        serviceName: bucket.key as string,
-        transactionType: topTransactionTypeBucket.key as string,
-        environments: topTransactionTypeBucket.environments.buckets.map(
-          (environmentBucket) => environmentBucket.key as string
-        ),
-        agentName: topTransactionTypeBucket.sample.top[0].metrics[
-          AGENT_NAME
-        ] as AgentName,
-        latency: topTransactionTypeBucket.avg_duration.value,
-        transactionErrorRate: calculateFailedTransactionRate(
-          topTransactionTypeBucket.outcomes
-        ),
-        throughput: calculateThroughputWithRange({
-          start,
-          end,
-          value: topTransactionTypeBucket.doc_count,
-        }),
-      };
-    }) ?? []
-  );
+        return {
+          serviceName: bucket.key as string,
+          transactionType: topTransactionTypeBucket.key as string,
+          environments: topTransactionTypeBucket.environments.buckets.map(
+            (environmentBucket) => environmentBucket.key as string
+          ),
+          agentName: topTransactionTypeBucket.sample.top[0].metrics[
+            AGENT_NAME
+          ] as AgentName,
+          latency: topTransactionTypeBucket.avg_duration.value,
+          transactionErrorRate: calculateFailedTransactionRate(
+            topTransactionTypeBucket
+          ),
+          throughput: calculateThroughputWithRange({
+            start,
+            end,
+            value: topTransactionTypeBucket.doc_count,
+          }),
+        };
+      }) ?? [],
+    serviceOverflowCount:
+      response.aggregations?.sample?.overflowCount.value || 0,
+  };
 }

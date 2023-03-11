@@ -224,7 +224,7 @@ describe(__filename, () => {
               {
                 key: 'cluster-id.1',
                 doc_count: 11874,
-                enterpriseSearch: {
+                enterprisesearch: {
                   meta: {},
                   doc_count_error_upper_bound: 0,
                   sum_other_doc_count: 0,
@@ -310,7 +310,7 @@ describe(__filename, () => {
               },
             },
 
-            enterpriseSearch: {
+            enterprisesearch: {
               'ent-search-node-id.1': {
                 health: {
                   'metricbeat-8': {

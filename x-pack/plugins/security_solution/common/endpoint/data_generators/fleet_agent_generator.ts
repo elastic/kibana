@@ -17,6 +17,7 @@ import type {
 import { FleetServerAgentComponentStatuses, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import moment from 'moment';
 import { BaseDataGenerator } from './base_data_generator';
+import { ENDPOINT_ERROR_CODES } from '../constants';
 
 // List of computed (as in, done in code is kibana via
 // https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/common/services/agent_status.ts#L13-L44
@@ -25,7 +26,6 @@ const agentStatusList: readonly AgentStatus[] = [
   'error',
   'online',
   'inactive',
-  'warning',
   'enrolling',
   'unenrolling',
   'updating',
@@ -88,10 +88,10 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
       FleetServerAgentComponentStatuses
     );
     const componentInputPayload =
-      componentStatus === 'failed'
+      componentStatus === 'FAILED'
         ? {
             error: {
-              code: 123,
+              code: ENDPOINT_ERROR_CODES.ES_CONNECTION_ERROR,
               message: 'Unable to connect to Elasticsearch',
             },
           }
@@ -196,8 +196,8 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
   ) {
     const esHit = this.generateEsHit(overrides);
 
-    // Basically: reverse engineer the Fleet `getAgentStatus()` utility:
-    // https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/common/services/agent_status.ts#L13-L44
+    // Basically: reverse engineer the Fleet agent status runtime field:
+    // https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/server/services/agents/build_status_runtime_field.ts
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const fleetServerAgent = esHit._source!;
@@ -218,10 +218,9 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
         fleetServerAgent.last_checkin_status = 'error';
         break;
 
+      // not able to generate agents with inactive status without a valid agent policy
+      // with inactivity_timeout set
       case 'inactive':
-        fleetServerAgent.active = false;
-        break;
-
       case 'offline':
         // current fleet timeout interface for offline is 5 minutes
         // https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/common/services/agent_status.ts#L11
@@ -236,10 +235,6 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
       case 'updating':
         fleetServerAgent.upgrade_started_at = fleetServerAgent.updated_at;
         fleetServerAgent.upgraded_at = undefined;
-        break;
-
-      case 'warning':
-        // NOt able to find anything in fleet
         break;
 
       // default is `online`, which is also the default returned by `generateEsHit()`

@@ -1,10 +1,7 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true,
+    "outDir": "target/types",
   },
   "include": [
     ".storybook/**/*",
@@ -13,9 +10,14 @@
     "server/**/*",
     "../../../typings/**/*"
   ],
-  "references": [
-    { "path": "../../../../src/core/tsconfig.json" },
-    { "path": "../../cloud/tsconfig.json" },
-    { "path": "../../security/tsconfig.json" },
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/cloud-plugin",
+    "@kbn/security-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

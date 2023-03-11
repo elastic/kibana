@@ -27,7 +27,10 @@ export const LabelInput = ({
   dataTestSubj?: string;
   compressed?: boolean;
 }) => {
-  const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
+  const { inputValue, handleInputChange } = useDebouncedValue(
+    { value, onChange },
+    { allowFalsyValue: true }
+  );
   const localKeyHold = useRef(false);
 
   return (

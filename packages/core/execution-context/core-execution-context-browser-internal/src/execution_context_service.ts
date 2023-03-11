@@ -98,6 +98,7 @@ export class ExecutionContextService
 
   private getDefaultContext() {
     return {
+      type: 'application',
       name: this.appId,
       url: window.location.pathname,
     };

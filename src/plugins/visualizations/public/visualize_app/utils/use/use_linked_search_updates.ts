@@ -29,7 +29,7 @@ export const useLinkedSearchUpdates = (
       // SearchSource is a promise-based stream of search results that can inherit from other search sources.
       const { searchSource } = visInstance.vis.data;
 
-      const unlinkFromSavedSearch = () => {
+      const unlinkFromSavedSearch = (showToast: boolean = true) => {
         const searchSourceParent = savedSearch.searchSource;
         const searchSourceGrandparent = searchSourceParent?.getParent();
         const currentIndex = searchSourceParent?.getField('index');
@@ -44,14 +44,16 @@ export const useLinkedSearchUpdates = (
           parentFilters: (searchSourceParent?.getOwnField('filter') as Filter[]) || [],
         });
 
-        services.toastNotifications.addSuccess(
-          i18n.translate('visualizations.linkedToSearch.unlinkSuccessNotificationText', {
-            defaultMessage: `Unlinked from saved search '{searchTitle}'`,
-            values: {
-              searchTitle: savedSearch.title,
-            },
-          })
-        );
+        if (showToast) {
+          services.toastNotifications.addSuccess(
+            i18n.translate('visualizations.linkedToSearch.unlinkSuccessNotificationText', {
+              defaultMessage: `Unlinked from saved search '{searchTitle}'`,
+              values: {
+                searchTitle: savedSearch.title,
+              },
+            })
+          );
+        }
       };
 
       eventEmitter.on('unlinkFromSavedSearch', unlinkFromSavedSearch);

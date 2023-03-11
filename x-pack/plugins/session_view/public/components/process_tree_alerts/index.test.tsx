@@ -6,7 +6,10 @@
  */
 
 import React from 'react';
-import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';
+import {
+  mockAlerts,
+  mockAlertTypeCounts,
+} from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessTreeAlertsDeps, ProcessTreeAlerts } from '.';
 
@@ -14,8 +17,9 @@ describe('ProcessTreeAlerts component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
-  const props: ProcessTreeAlertsDeps = {
+  const processTreeAlertsProps: ProcessTreeAlertsDeps = {
     alerts: mockAlerts,
+    alertTypeCounts: mockAlertTypeCounts,
     onAlertSelected: jest.fn(),
     onShowAlertDetails: jest.fn(),
   };
@@ -26,13 +30,15 @@ describe('ProcessTreeAlerts component', () => {
 
   describe('When ProcessTreeAlerts is mounted', () => {
     it('should return null if no alerts', async () => {
-      renderResult = mockedContext.render(<ProcessTreeAlerts {...props} alerts={[]} />);
+      renderResult = mockedContext.render(
+        <ProcessTreeAlerts {...processTreeAlertsProps} alerts={[]} />
+      );
 
       expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeNull();
     });
 
     it('should return an array of alert details', async () => {
-      renderResult = mockedContext.render(<ProcessTreeAlerts {...props} />);
+      renderResult = mockedContext.render(<ProcessTreeAlerts {...processTreeAlertsProps} />);
 
       expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeTruthy();
       mockAlerts.forEach((alert) => {
@@ -50,7 +56,7 @@ describe('ProcessTreeAlerts component', () => {
     it('should execute onAlertSelected when clicking on an alert', async () => {
       const mockFn = jest.fn();
       renderResult = mockedContext.render(
-        <ProcessTreeAlerts {...props} onAlertSelected={mockFn} />
+        <ProcessTreeAlerts {...processTreeAlertsProps} onAlertSelected={mockFn} />
       );
 
       expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeTruthy();
@@ -61,6 +67,20 @@ describe('ProcessTreeAlerts component', () => {
       expect(testAlertRow).toBeTruthy();
       testAlertRow?.click();
       expect(mockFn).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('ProcessTreeAlertsFilter Render', () => {
+    it('should return ProcessTreeAlertsFilter component when alerts exist', async () => {
+      renderResult = mockedContext.render(<ProcessTreeAlerts {...processTreeAlertsProps} />);
+      expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetailsFilter')).toBeTruthy();
+    });
+
+    it('should not return ProcessTreeAlertsFilter when no alerts exist', async () => {
+      renderResult = mockedContext.render(
+        <ProcessTreeAlerts {...processTreeAlertsProps} alerts={[]} />
+      );
+      expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetailsFilter')).toBeNull();
     });
   });
 });

@@ -11,7 +11,12 @@ import type {
   SavedObjectsMigrationVersion,
 } from '@kbn/core-saved-objects-common';
 
-/** @public */
+/**
+ * Options for creating a saved object.
+ *
+ * @public
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
+ */
 export interface SavedObjectsCreateOptions {
   /**
    * (Not recommended) Specify an id instead of having the saved objects service generate one for you.
@@ -23,5 +28,6 @@ export interface SavedObjectsCreateOptions {
   migrationVersion?: SavedObjectsMigrationVersion;
   /** A semver value that is used when upgrading objects between Kibana versions. */
   coreMigrationVersion?: string;
+  /** Array of referenced saved objects. */
   references?: SavedObjectReference[];
 }

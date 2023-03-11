@@ -39,6 +39,8 @@ import {
   SavedObjectsManagementColumnServiceStart,
 } from '../../../services';
 
+export type ItemId<T> = string | number | ((item: T) => string);
+
 export interface TableProps {
   taggingApi?: SavedObjectsTaggingApi;
   basePath: IBasePath;
@@ -59,7 +61,7 @@ export interface TableProps {
   pageSize: number;
   sort: CriteriaWithPagination<SavedObjectWithMetadata>['sort'];
   items: SavedObjectWithMetadata[];
-  itemId: string | (() => string);
+  itemId: ItemId<SavedObjectWithMetadata>;
   totalItemCount: number;
   onQueryChange: (query: any) => void;
   onTableChange: (table: any) => void;

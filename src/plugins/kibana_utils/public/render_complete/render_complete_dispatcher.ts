@@ -38,8 +38,10 @@ export class RenderCompleteDispatcher {
   }
 
   public setEl(el?: HTMLElement) {
-    this.el = el;
-    this.count = 0;
+    if (this.el !== el) {
+      this.el = el;
+      this.count = 0;
+    }
     if (el) this.dispatchInProgress();
   }
 
@@ -61,7 +63,8 @@ export class RenderCompleteDispatcher {
   public dispatchError() {
     if (!this.el) return;
     this.count++;
-    this.el.setAttribute('data-render-complete', 'false');
+    this.el.setAttribute('data-render-complete', 'true');
+    this.el.setAttribute('data-loading', 'false');
     this.el.setAttribute('data-rendering-count', String(this.count));
   }
 

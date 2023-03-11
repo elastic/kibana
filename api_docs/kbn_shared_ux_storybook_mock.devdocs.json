@@ -183,7 +183,13 @@
             ],
             "signature": [
               "(arg: keyof PropArguments | keyof ServiceArguments, params?: ",
-              "ArgumentParams",
+              {
+                "pluginId": "@kbn/shared-ux-storybook-mock",
+                "scope": "common",
+                "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                "section": "def-common.ArgumentParams",
+                "text": "ArgumentParams"
+              },
               "<PropArguments, ServiceArguments> | undefined) => any"
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
@@ -213,7 +219,13 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "ArgumentParams",
+                  {
+                    "pluginId": "@kbn/shared-ux-storybook-mock",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                    "section": "def-common.ArgumentParams",
+                    "text": "ArgumentParams"
+                  },
                   "<PropArguments, ServiceArguments> | undefined"
                 ],
                 "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
@@ -235,7 +247,13 @@
             ],
             "signature": [
               "(params?: ",
-              "ArgumentParams",
+              {
+                "pluginId": "@kbn/shared-ux-storybook-mock",
+                "scope": "common",
+                "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                "section": "def-common.ArgumentParams",
+                "text": "ArgumentParams"
+              },
               "<PropArguments, {}> | undefined) => Props"
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
@@ -250,7 +268,13 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "ArgumentParams",
+                  {
+                    "pluginId": "@kbn/shared-ux-storybook-mock",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                    "section": "def-common.ArgumentParams",
+                    "text": "ArgumentParams"
+                  },
                   "<PropArguments, {}> | undefined"
                 ],
                 "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
@@ -272,7 +296,13 @@
             ],
             "signature": [
               "(params?: ",
-              "ArgumentParams",
+              {
+                "pluginId": "@kbn/shared-ux-storybook-mock",
+                "scope": "common",
+                "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                "section": "def-common.ArgumentParams",
+                "text": "ArgumentParams"
+              },
               "<PropArguments, ServiceArguments> | undefined) => Services"
             ],
             "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
@@ -287,7 +317,13 @@
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "ArgumentParams",
+                  {
+                    "pluginId": "@kbn/shared-ux-storybook-mock",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxStorybookMockPluginApi",
+                    "section": "def-common.ArgumentParams",
+                    "text": "ArgumentParams"
+                  },
                   "<PropArguments, ServiceArguments> | undefined"
                 ],
                 "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
@@ -305,7 +341,25 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-storybook-mock",
+        "id": "def-common.ArgumentParams",
+        "type": "Type",
+        "tags": [],
+        "label": "ArgumentParams",
+        "description": [
+          "\nType that expresses the arguments available to a story based on the\nprops and services the component consumes."
+        ],
+        "signature": [
+          "{ [P in keyof PropArguments | keyof ServiceArguments]: any; }"
+        ],
+        "path": "packages/shared-ux/storybook/mock/src/mocks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

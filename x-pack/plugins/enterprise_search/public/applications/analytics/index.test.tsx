@@ -10,15 +10,12 @@ import '../__mocks__/kea_logic';
 import '../__mocks__/shallow_useeffect.mock';
 import '../__mocks__/enterprise_search_url.mock';
 
-import { mockKibanaValues } from '../__mocks__/kea_logic';
-
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
-import { AnalyticsFeatureDisabledError } from './components/analytics_feature_disabled_error/analytics_feature_disabled_error';
 import { AnalyticsOverview } from './components/analytics_overview/analytics_overview';
 
 import { Analytics } from '.';
@@ -29,26 +26,14 @@ describe('EnterpriseSearchAnalytics', () => {
   });
 
   it('always renders the overview', () => {
-    mockKibanaValues.uiSettings.get.mockReturnValue(true);
-
     const wrapper = shallow(<Analytics />);
 
     expect(wrapper.find(AnalyticsOverview)).toHaveLength(1);
   });
 
   it('renders VersionMismatchPage when there are mismatching versions', () => {
-    mockKibanaValues.uiSettings.get.mockReturnValue(true);
-
     const wrapper = shallow(<Analytics enterpriseSearchVersion="7.15.0" kibanaVersion="7.16.0" />);
 
     expect(wrapper.find(VersionMismatchPage)).toHaveLength(1);
-  });
-
-  it('renders behavioural analytics is disabled message', () => {
-    mockKibanaValues.uiSettings.get.mockReturnValue(false);
-
-    const wrapper = shallow(<Analytics />);
-
-    expect(wrapper.find(AnalyticsFeatureDisabledError)).toHaveLength(1);
   });
 });

@@ -120,8 +120,6 @@ describe('icmp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                status: 'ga',
-                url: 'test-url',
               },
             ],
             name: 'Cloudflare DNS',
@@ -162,8 +160,6 @@ describe('icmp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                status: 'ga',
-                url: 'test-url',
               },
             ],
             name: 'Cloudflare DNS 2',
@@ -189,9 +185,9 @@ describe('icmp normalizers', () => {
           errors: [
             {
               details:
-                'Multiple hosts are not supported for icmp project monitors in 8.5.0. Please set only 1 host per monitor. You monitor was not created or updated.',
+                '`icmp` project monitors must have exactly one value for field `hosts` in version `8.5.0`. Your monitor was not created or updated.',
               id: 'Cloudflare-DNS-3',
-              reason: 'Unsupported Heartbeat option',
+              reason: 'Invalid Heartbeat configuration',
             },
             {
               details:
@@ -217,8 +213,6 @@ describe('icmp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
-                status: 'ga',
-                url: 'test-url',
               },
             ],
             name: 'Cloudflare DNS 3',

@@ -14,6 +14,7 @@ import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
 import type { Case } from '../../containers/types';
+import type { CasePostRequest } from '../../../common/api';
 import { CaseSeverity, NONE_CONNECTOR_ID } from '../../../common/api';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
@@ -21,7 +22,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { getConnectorById } from '../utils';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
 
 const initialCaseValue: FormProps = {
@@ -44,6 +45,7 @@ interface Props {
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: Case) => Promise<void>;
   attachments?: CaseAttachmentsWithoutOwner;
+  initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
 export const FormContext: React.FC<Props> = ({
@@ -51,8 +53,10 @@ export const FormContext: React.FC<Props> = ({
   children,
   onSuccess,
   attachments,
+  initialValue,
 }) => {
-  const { data: connectors = [], isLoading: isLoadingConnectors } = useGetConnectors();
+  const { data: connectors = [], isLoading: isLoadingConnectors } =
+    useGetSupportedActionConnectors();
   const { owner, appId } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { postCase } = usePostCase();
@@ -128,7 +132,7 @@ export const FormContext: React.FC<Props> = ({
   );
 
   const { form } = useForm<FormProps>({
-    defaultValue: initialCaseValue,
+    defaultValue: { ...initialCaseValue, ...initialValue },
     options: { stripEmptyFields: false },
     schema,
     onSubmit: submitCase,

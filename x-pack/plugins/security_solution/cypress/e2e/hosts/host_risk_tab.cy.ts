@@ -10,7 +10,7 @@ import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import {
   navigateToHostRiskDetailTab,
   openRiskTableFilterAndSelectTheCriticalOption,
-  removeCritialFilter,
+  removeCriticalFilter,
   selectFiveItemsPerPageOption,
 } from '../../tasks/host_risk';
 import {
@@ -27,6 +27,9 @@ describe('risk tab', () => {
     cleanKibana();
     esArchiverLoad('risk_hosts');
     login();
+  });
+
+  beforeEach(() => {
     visit(HOSTS_URL);
     navigateToHostRiskDetailTab();
   });
@@ -38,7 +41,7 @@ describe('risk tab', () => {
   it('renders the table', () => {
     kqlSearch('host.name: "siem-kibana" {enter}');
     cy.get(HOST_BY_RISK_TABLE_CELL).eq(3).should('have.text', 'siem-kibana');
-    cy.get(HOST_BY_RISK_TABLE_CELL).eq(4).should('have.text', '21.00');
+    cy.get(HOST_BY_RISK_TABLE_CELL).eq(4).should('have.text', '21');
     cy.get(HOST_BY_RISK_TABLE_CELL).eq(5).should('have.text', 'Low');
     clearSearchBar();
   });
@@ -48,7 +51,7 @@ describe('risk tab', () => {
 
     cy.get(HOST_BY_RISK_TABLE_CELL).eq(3).should('not.have.text', 'siem-kibana');
 
-    removeCritialFilter();
+    removeCriticalFilter();
   });
 
   it('should be able to change items count per page', () => {

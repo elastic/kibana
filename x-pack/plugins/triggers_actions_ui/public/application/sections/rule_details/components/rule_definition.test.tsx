@@ -215,13 +215,14 @@ function mockRule(overwrite = {}): Rule {
     updatedAt: new Date(),
     consumer: 'alerts',
     notifyWhen: 'onActiveAlert',
+    revision: 0,
     executionStatus: {
       status: 'active',
       lastDuration: 500,
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
     monitoring: {
-      execution: {
+      run: {
         history: [
           {
             success: true,
@@ -244,6 +245,12 @@ function mockRule(overwrite = {}): Rule {
           p50: 200000,
           p95: 300000,
           p99: 300000,
+        },
+        last_run: {
+          timestamp: '2020-08-20T19:23:38Z',
+          metrics: {
+            duration: 500,
+          },
         },
       },
     },

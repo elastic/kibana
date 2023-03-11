@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiBetaBadge,
@@ -60,6 +61,9 @@ const KubernetesSecurityRoutesComponent = ({
   indexPattern,
   globalFilter,
   renderSessionsView,
+  responseActionClick,
+  handleTreeNavSelection,
+  responseActionButtonProps,
 }: KubernetesSecurityDeps) => {
   const [shouldHideCharts, setShouldHideCharts] = useLocalStorage(
     LOCAL_STORAGE_HIDE_WIDGETS_KEY,
@@ -296,6 +300,9 @@ const KubernetesSecurityRoutesComponent = ({
           globalFilter={globalFilterForKubernetes}
           renderSessionsView={renderSessionsView}
           indexPattern={indexPattern}
+          responseActionButtonProps={responseActionButtonProps}
+          responseActionClick={responseActionClick}
+          handleTreeNavSelection={handleTreeNavSelection}
         />
       </Route>
     </Switch>

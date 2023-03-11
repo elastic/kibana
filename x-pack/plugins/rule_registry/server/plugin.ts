@@ -16,7 +16,10 @@ import type {
   IContextProvider,
 } from '@kbn/core/server';
 
-import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
+import type {
+  PluginSetupContract as AlertingSetup,
+  PluginStartContract as AlertingStart,
+} from '@kbn/alerting-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
@@ -24,8 +27,9 @@ import type {
   PluginSetup as DataPluginSetup,
 } from '@kbn/data-plugin/server';
 
+import { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
 import type { RuleRegistryPluginConfig } from './config';
-import { type IRuleDataService, RuleDataService } from './rule_data_plugin_service';
+import { type IRuleDataService, RuleDataService, Dataset } from './rule_data_plugin_service';
 import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
 import type { AlertsClient } from './alert_data_client/alerts_client';
 import type { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
@@ -35,6 +39,7 @@ import { ruleRegistrySearchStrategyProvider, RULE_SEARCH_STRATEGY_NAME } from '.
 export interface RuleRegistryPluginSetupDependencies {
   security?: SecurityPluginSetup;
   data: DataPluginSetup;
+  alerting: AlertingSetup;
 }
 
 export interface RuleRegistryPluginStartDependencies {
@@ -45,6 +50,8 @@ export interface RuleRegistryPluginStartDependencies {
 
 export interface RuleRegistryPluginSetupContract {
   ruleDataService: IRuleDataService;
+  createLifecycleRuleTypeFactory: typeof createLifecycleRuleTypeFactory;
+  dataset: typeof Dataset;
 }
 
 export interface RuleRegistryPluginStartContract {
@@ -103,6 +110,7 @@ export class RuleRegistryPlugin
         const deps = await startDependencies;
         return deps.core.elasticsearch.client.asInternalUser;
       },
+      frameworkAlerts: plugins.alerting.frameworkAlerts,
       pluginStop$: this.pluginStop$,
     });
 
@@ -133,7 +141,11 @@ export class RuleRegistryPlugin
 
     defineRoutes(router);
 
-    return { ruleDataService: this.ruleDataService };
+    return {
+      ruleDataService: this.ruleDataService,
+      createLifecycleRuleTypeFactory,
+      dataset: Dataset,
+    };
   }
 
   public start(

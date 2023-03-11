@@ -9,12 +9,12 @@ import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { EntityAnalyticsHeader } from '.';
 import { Direction, RiskScoreFields, RiskSeverity } from '../../../../../common/search_strategy';
-import type { SeverityCount } from '../../../../common/components/severity/types';
+import type { SeverityCount } from '../../../../explore/components/risk_score/severity/types';
 import { TestProviders } from '../../../../common/mock';
-import { hostsActions } from '../../../../hosts/store';
-import { HostsType } from '../../../../hosts/store/model';
-import { usersActions } from '../../../../users/store';
-import { UsersTableType } from '../../../../users/store/model';
+import { hostsActions } from '../../../../explore/hosts/store';
+import { HostsType } from '../../../../explore/hosts/store/model';
+import { usersActions } from '../../../../explore/users/store';
+import { UsersTableType } from '../../../../explore/users/store/model';
 
 const mockSeverityCount: SeverityCount = {
   [RiskSeverity.low]: 1,
@@ -28,7 +28,7 @@ jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
   useMlCapabilities: () => ({ isPlatinumOrTrialLicense: true, capabilities: {} }),
 }));
 
-jest.mock('../../../../risk_score/containers', () => {
+jest.mock('../../../../explore/containers/risk_score', () => {
   return {
     useRiskScoreKpi: () => ({ severityCount: mockSeverityCount }),
   };

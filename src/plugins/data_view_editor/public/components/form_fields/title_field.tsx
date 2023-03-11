@@ -9,7 +9,7 @@
 import React, { ChangeEvent, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { MatchedItem } from '@kbn/data-views-plugin/public';
 import {
@@ -18,21 +18,20 @@ import {
   ValidationConfig,
   FieldConfig,
 } from '../../shared_imports';
-import { canAppendWildcard, removeSpaces } from '../../lib';
+import { canAppendWildcard } from '../../lib';
 import { schema } from '../form_schema';
 import { RollupIndicesCapsResponse, IndexPatternConfig, MatchedIndicesSet } from '../../types';
-import { matchedIndiciesDefault } from '../data_view_editor_flyout_content';
-
-interface RefreshMatchedIndicesResult {
-  matchedIndicesResult: MatchedIndicesSet;
-  newRollupIndexName?: string;
-}
+import { matchedIndiciesDefault } from '../../data_view_editor_service';
+import { TitleDocsPopover } from './title_docs_popover';
 
 interface TitleFieldProps {
   isRollup: boolean;
-  matchedIndices$: Subject<MatchedIndicesSet>;
+  matchedIndices$: Observable<MatchedIndicesSet>;
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
-  refreshMatchedIndices: (title: string) => Promise<RefreshMatchedIndicesResult>;
+  indexPatternValidationProvider: () => Promise<{
+    matchedIndices: MatchedIndicesSet;
+    rollupIndex: string | null | undefined;
+  }>;
 }
 
 const rollupIndexPatternNoMatchError = {
@@ -55,22 +54,23 @@ const mustMatchError = {
 
 interface MatchesValidatorArgs {
   rollupIndicesCapabilities: Record<string, { error: string }>;
-  refreshMatchedIndices: (title: string) => Promise<RefreshMatchedIndicesResult>;
   isRollup: boolean;
 }
 
 const createMatchesIndicesValidator = ({
   rollupIndicesCapabilities,
-  refreshMatchedIndices,
   isRollup,
 }: MatchesValidatorArgs): ValidationConfig<{}, string, string> => ({
-  validator: async ({ value }) => {
-    const { matchedIndicesResult, newRollupIndexName } = await refreshMatchedIndices(
-      removeSpaces(value)
-    );
+  validator: async ({ customData: { provider } }) => {
+    const { matchedIndices, rollupIndex } = (await provider()) as {
+      matchedIndices: MatchedIndicesSet;
+      rollupIndex?: string;
+    };
+
+    // verifies that the title matches at least one index, alias, or data stream
     const rollupIndices = Object.keys(rollupIndicesCapabilities);
 
-    if (matchedIndicesResult.exactMatchedIndices.length === 0) {
+    if (matchedIndices.exactMatchedIndices.length === 0) {
       return mustMatchError;
     }
 
@@ -79,7 +79,7 @@ const createMatchesIndicesValidator = ({
     }
 
     // A rollup index pattern needs to match one and only one rollup index.
-    const rollupIndexMatches = matchedIndicesResult.exactMatchedIndices.filter((matchedIndex) =>
+    const rollupIndexMatches = matchedIndices.exactMatchedIndices.filter((matchedIndex) =>
       rollupIndices.includes(matchedIndex.name)
     );
 
@@ -90,7 +90,7 @@ const createMatchesIndicesValidator = ({
     }
 
     // Error info is potentially provided via the rollup indices caps request
-    const error = newRollupIndexName && rollupIndicesCapabilities[newRollupIndexName].error;
+    const error = rollupIndex && rollupIndicesCapabilities[rollupIndex].error;
 
     if (error) {
       return {
@@ -109,13 +109,11 @@ interface GetTitleConfigArgs {
   isRollup: boolean;
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
-  refreshMatchedIndices: (title: string) => Promise<RefreshMatchedIndicesResult>;
 }
 
 const getTitleConfig = ({
   isRollup,
   rollupIndicesCapabilities,
-  refreshMatchedIndices,
 }: GetTitleConfigArgs): FieldConfig<string> => {
   const titleFieldConfig = schema.title;
 
@@ -124,7 +122,6 @@ const getTitleConfig = ({
     // note this is responsible for triggering the state update for the selected source list.
     createMatchesIndicesValidator({
       rollupIndicesCapabilities,
-      refreshMatchedIndices,
       isRollup,
     }),
   ];
@@ -139,7 +136,7 @@ export const TitleField = ({
   isRollup,
   matchedIndices$,
   rollupIndicesCapabilities,
-  refreshMatchedIndices,
+  indexPatternValidationProvider,
 }: TitleFieldProps) => {
   const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
   const matchedIndices = useObservable(matchedIndices$, matchedIndiciesDefault).exactMatchedIndices;
@@ -150,15 +147,15 @@ export const TitleField = ({
         isRollup,
         matchedIndices,
         rollupIndicesCapabilities,
-        refreshMatchedIndices,
       }),
-    [isRollup, matchedIndices, rollupIndicesCapabilities, refreshMatchedIndices]
+    [isRollup, matchedIndices, rollupIndicesCapabilities]
   );
 
   return (
     <UseField<string, IndexPatternConfig>
       path="title"
       config={fieldConfig}
+      validationDataProvider={indexPatternValidationProvider}
       componentProps={{
         euiFieldProps: {
           'aria-label': i18n.translate('indexPatternEditor.form.titleAriaLabel', {
@@ -198,6 +195,8 @@ export const TitleField = ({
               isLoading={field.isValidating}
               fullWidth
               data-test-subj="createIndexPatternTitleInput"
+              append={<TitleDocsPopover />}
+              placeholder="example-*"
             />
           </EuiFormRow>
         );

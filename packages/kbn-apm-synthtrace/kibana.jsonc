@@ -1,8 +1,6 @@
 {
-  "type": "shared-common",
+  "type": "shared-server",
   "id": "@kbn/apm-synthtrace",
   "devOnly": true,
-  "owner": "@elastic/apm-ui",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/apm-ui"
 }

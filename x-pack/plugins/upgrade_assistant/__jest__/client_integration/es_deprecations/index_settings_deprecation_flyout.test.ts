@@ -45,7 +45,7 @@ describe('Index settings deprecation flyout', () => {
     });
 
     await act(async () => {
-      testBed = await setupElasticsearchPage(httpSetup, { isReadOnlyMode: false });
+      testBed = await setupElasticsearchPage(httpSetup);
     });
 
     const { actions, component } = testBed;

@@ -1,0 +1,8 @@
+// By default dashboards' react-grid disables all pointer events for <img> tags.
+// We want to revert this behaviour for image embeddable images as they may be interactive.
+// We also don't want to block a native context menu on images.
+/* stylelint-disable-next-line selector-no-qualifying-type */
+.react-grid-item img.imageEmbeddableImage {
+  user-select: initial;
+  pointer-events: initial;
+}

@@ -9,7 +9,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '@kbn/apm-plugin/common/elasticsearch_fieldnames';
+} from '@kbn/apm-plugin/common/es_fields/apm';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateData } from './generate_data';

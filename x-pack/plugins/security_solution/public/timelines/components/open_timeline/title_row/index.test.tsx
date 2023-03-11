@@ -112,7 +112,7 @@ describe('TitleRow', () => {
         </ThemeProvider>
       );
 
-      wrapper.find('[data-test-subj="favorite-selected"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="favorite-selected"]').first().simulate('click');
 
       expect(onAddTimelinesToFavorites).toHaveBeenCalled();
     });

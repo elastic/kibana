@@ -50,27 +50,22 @@ import { createIngestPipeline, deleteRiskScoreIngestPipelines } from './ingest_p
 import { deleteSavedObjects } from './saved_objects';
 import { createStoredScript, deleteStoredScripts } from './stored_scripts';
 
-/**
- * @deleteAll: If set to true, it deletes both old and new version.
- * If set to false, it deletes legacy version only.
- */
 export const deleteRiskScore = ({
   riskScoreEntity,
   spaceId,
-  deleteAll,
 }: {
   riskScoreEntity: RiskScoreEntity;
   spaceId?: string;
-  deleteAll: boolean;
 }) => {
   const transformIds = [
     getRiskScorePivotTransformId(riskScoreEntity, spaceId),
     getRiskScoreLatestTransformId(riskScoreEntity, spaceId),
   ];
   const legacyIngestPipelineNames = [getLegacyIngestPipelineName(riskScoreEntity)];
-  const ingestPipelinesNames = deleteAll
-    ? [...legacyIngestPipelineNames, getIngestPipelineName(riskScoreEntity, spaceId)]
-    : legacyIngestPipelineNames;
+  const ingestPipelinesNames = [
+    ...legacyIngestPipelineNames,
+    getIngestPipelineName(riskScoreEntity, spaceId),
+  ];
 
   const legacyScriptIds = [
     ...(riskScoreEntity === RiskScoreEntity.host
@@ -80,53 +75,57 @@ export const deleteRiskScore = ({
     getLegacyRiskScoreMapScriptId(riskScoreEntity),
     getLegacyRiskScoreReduceScriptId(riskScoreEntity),
   ];
-  const scripts = deleteAll
-    ? [
-        ...legacyScriptIds,
-        ...(riskScoreEntity === RiskScoreEntity.host
-          ? [getRiskScoreInitScriptId(riskScoreEntity, spaceId)]
-          : []),
-        getRiskScoreLevelScriptId(riskScoreEntity, spaceId),
-        getRiskScoreMapScriptId(riskScoreEntity, spaceId),
-        getRiskScoreReduceScriptId(riskScoreEntity, spaceId),
-      ]
-    : legacyScriptIds;
+  const scripts = [
+    ...legacyScriptIds,
+    ...(riskScoreEntity === RiskScoreEntity.host
+      ? [getRiskScoreInitScriptId(riskScoreEntity, spaceId)]
+      : []),
+    getRiskScoreLevelScriptId(riskScoreEntity, spaceId),
+    getRiskScoreMapScriptId(riskScoreEntity, spaceId),
+    getRiskScoreReduceScriptId(riskScoreEntity, spaceId),
+  ];
 
   deleteTransforms(transformIds);
   deleteRiskScoreIngestPipelines(ingestPipelinesNames);
   deleteStoredScripts(scripts);
-  deleteSavedObjects(`${riskScoreEntity}RiskScoreDashboards`, deleteAll);
+  deleteSavedObjects(`${riskScoreEntity}RiskScoreDashboards`);
   deleteRiskScoreIndicies(riskScoreEntity, spaceId);
 };
 
-const installLegacyHostRiskScoreModule = (spaceId: string) => {
+/**
+ * Scripts id and ingest pipeline id do not have Space ID appended in 8.4.
+ * Scripts id and ingest pipeline id in 8.3 and after 8.5 do.
+ */
+const installLegacyHostRiskScoreModule = (spaceId: string, version?: '8.3' | '8.4') => {
   /**
    * Step 1 Upload script: ml_hostriskscore_levels_script
    */
-  createStoredScript(getLegacyRiskHostCreateLevelScriptOptions())
+  createStoredScript(getLegacyRiskHostCreateLevelScriptOptions(version))
     .then(() => {
       /**
        * Step 2 Upload script: ml_hostriskscore_init_script
        */
-      return createStoredScript(getLegacyRiskHostCreateInitScriptOptions());
+      return createStoredScript(getLegacyRiskHostCreateInitScriptOptions(version));
     })
     .then(() => {
       /**
        * Step 3 Upload script: ml_hostriskscore_map_script
        */
-      return createStoredScript(getLegacyRiskHostCreateMapScriptOptions());
+      return createStoredScript(getLegacyRiskHostCreateMapScriptOptions(version));
     })
     .then(() => {
       /**
        * Step 4 Upload script: ml_hostriskscore_reduce_script
        */
-      return createStoredScript(getLegacyRiskHostCreateReduceScriptOptions());
+      return createStoredScript(getLegacyRiskHostCreateReduceScriptOptions(version));
     })
     .then(() => {
       /**
        * Step 5 Upload the ingest pipeline: ml_hostriskscore_ingest_pipeline
        */
-      return createIngestPipeline(getLegacyRiskScoreIngestPipelineOptions(RiskScoreEntity.host));
+      return createIngestPipeline(
+        getLegacyRiskScoreIngestPipelineOptions(RiskScoreEntity.host, version)
+      );
     })
     .then(() => {
       /**
@@ -145,7 +144,7 @@ const installLegacyHostRiskScoreModule = (spaceId: string) => {
        */
       return createTransform(
         getRiskScorePivotTransformId(RiskScoreEntity.host, spaceId),
-        getCreateLegacyMLHostPivotTransformOptions({ spaceId })
+        getCreateLegacyMLHostPivotTransformOptions({ spaceId, version })
       );
     })
     .then(() => {
@@ -188,28 +187,30 @@ const installLegacyHostRiskScoreModule = (spaceId: string) => {
     });
 };
 
-const installLegacyUserRiskScoreModule = async (spaceId = 'default') => {
+const installLegacyUserRiskScoreModule = async (spaceId = 'default', version?: '8.3' | '8.4') => {
   /**
    * Step 1 Upload script: ml_userriskscore_levels_script
    */
-  createStoredScript(getLegacyRiskUserCreateLevelScriptOptions())
+  createStoredScript(getLegacyRiskUserCreateLevelScriptOptions(version))
     .then(() => {
       /**
        * Step 2 Upload script: ml_userriskscore_map_script
        */
-      return createStoredScript(getLegacyRiskUserCreateMapScriptOptions());
+      return createStoredScript(getLegacyRiskUserCreateMapScriptOptions(version));
     })
     .then(() => {
       /**
        * Step 3 Upload script: ml_userriskscore_reduce_script
        */
-      return createStoredScript(getLegacyRiskUserCreateReduceScriptOptions());
+      return createStoredScript(getLegacyRiskUserCreateReduceScriptOptions(version));
     })
     .then(() => {
       /**
        * Step 4 Upload ingest pipeline: ml_userriskscore_ingest_pipeline
        */
-      return createIngestPipeline(getLegacyRiskScoreIngestPipelineOptions(RiskScoreEntity.user));
+      return createIngestPipeline(
+        getLegacyRiskScoreIngestPipelineOptions(RiskScoreEntity.user, version)
+      );
     })
     .then(() => {
       /**
@@ -228,7 +229,7 @@ const installLegacyUserRiskScoreModule = async (spaceId = 'default') => {
        */
       return createTransform(
         getRiskScorePivotTransformId(RiskScoreEntity.user, spaceId),
-        getCreateLegacyMLUserPivotTransformOptions({ spaceId })
+        getCreateLegacyMLUserPivotTransformOptions({ spaceId, version })
       );
     })
     .then(() => {
@@ -272,12 +273,13 @@ const installLegacyUserRiskScoreModule = async (spaceId = 'default') => {
 
 export const installLegacyRiskScoreModule = (
   riskScoreEntity: RiskScoreEntity,
-  spaceId = 'default'
+  spaceId = 'default',
+  version?: '8.3' | '8.4'
 ) => {
   if (riskScoreEntity === RiskScoreEntity.user) {
-    installLegacyUserRiskScoreModule(spaceId);
+    installLegacyUserRiskScoreModule(spaceId, version);
   } else {
-    installLegacyHostRiskScoreModule(spaceId);
+    installLegacyHostRiskScoreModule(spaceId, version);
   }
 };
 

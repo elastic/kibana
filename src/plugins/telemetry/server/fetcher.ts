@@ -6,26 +6,43 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom, Observable, Subscription, timer } from 'rxjs';
+import {
+  BehaviorSubject,
+  exhaustMap,
+  filter,
+  firstValueFrom,
+  merge,
+  mergeMap,
+  Observable,
+  skip,
+  Subscription,
+  takeUntil,
+  timer,
+} from 'rxjs';
 import fetch from 'node-fetch';
 import type { TelemetryCollectionManagerPluginStart } from '@kbn/telemetry-collection-manager-plugin/server';
 import {
-  PluginInitializerContext,
-  Logger,
-  SavedObjectsClientContract,
+  type PluginInitializerContext,
+  type Logger,
+  type SavedObjectsClientContract,
   SavedObjectsClient,
-  CoreStart,
+  type CoreStart,
 } from '@kbn/core/server';
+import { getTelemetryChannelEndpoint } from '../common/telemetry_config';
 import {
-  getTelemetryChannelEndpoint,
+  TELEMETRY_SAVED_OBJECT_TYPE,
+  getTelemetrySavedObject,
+  updateTelemetrySavedObject,
+} from './saved_objects';
+import { getNextAttemptDate } from './get_next_attempt_date';
+import {
   getTelemetryOptIn,
   getTelemetrySendUsageFrom,
   getTelemetryFailureDetails,
-} from '../common/telemetry_config';
-import { getTelemetrySavedObject, updateTelemetrySavedObject } from './telemetry_repository';
+} from './telemetry_config';
 import { PAYLOAD_CONTENT_ENCODING } from '../common/constants';
 import type { EncryptedTelemetryPayload } from '../common/types';
-import { TelemetryConfigType } from './config';
+import type { TelemetryConfigType } from './config';
 import { isReportIntervalExpired } from '../common/is_report_interval_expired';
 
 export interface FetcherTaskDepsStart {
@@ -42,15 +59,19 @@ interface TelemetryConfig {
   lastReported: number | undefined;
 }
 
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
+const HOUR = 60 * MINUTE;
+
 export class FetcherTask {
-  private readonly initialCheckDelayMs = 60 * 1000 * 5;
-  private readonly checkIntervalMs = 60 * 1000 * 60 * 12;
+  private readonly initialCheckDelayMs = 5 * MINUTE;
+  private readonly connectivityCheckIntervalMs = 12 * HOUR;
   private readonly config$: Observable<TelemetryConfigType>;
   private readonly currentKibanaVersion: string;
   private readonly logger: Logger;
-  private intervalId?: Subscription;
-  private lastReported?: number;
-  private isSending = false;
+  private readonly subscriptions = new Subscription();
+  private readonly isOnline$ = new BehaviorSubject<boolean>(false); // Let's initially assume we are not online
+  private readonly lastReported$ = new BehaviorSubject<number>(0);
   private internalRepository?: SavedObjectsClientContract;
   private telemetryCollectionManager?: TelemetryCollectionManagerPluginStart;
 
@@ -61,25 +82,79 @@ export class FetcherTask {
   }
 
   public start({ savedObjects }: CoreStart, { telemetryCollectionManager }: FetcherTaskDepsStart) {
-    this.internalRepository = new SavedObjectsClient(savedObjects.createInternalRepository());
+    this.internalRepository = new SavedObjectsClient(
+      savedObjects.createInternalRepository([TELEMETRY_SAVED_OBJECT_TYPE])
+    );
     this.telemetryCollectionManager = telemetryCollectionManager;
 
-    this.intervalId = timer(this.initialCheckDelayMs, this.checkIntervalMs).subscribe(() =>
-      this.sendIfDue()
-    );
+    this.subscriptions.add(this.validateConnectivity());
+    this.subscriptions.add(this.startSendIfDueSubscription());
   }
 
   public stop() {
-    if (this.intervalId) {
-      this.intervalId.unsubscribe();
-    }
+    this.subscriptions.unsubscribe();
+  }
+
+  /**
+   * Periodically validates the connectivity from the server to our remote telemetry URL.
+   * OPTIONS is less intrusive as it does not contain any payload and is used here to check if the endpoint is reachable.
+   */
+  private validateConnectivity(): Subscription {
+    return timer(this.initialCheckDelayMs, this.connectivityCheckIntervalMs)
+      .pipe(
+        // Skip any further processing if already online
+        filter(() => !this.isOnline$.value),
+        // Fetch current state and configs
+        exhaustMap(async () => await this.getCurrentConfigs()),
+        // Skip if opted-out, or should only send from the browser
+        filter(
+          ({ telemetryOptIn, telemetrySendUsageFrom }) =>
+            telemetryOptIn === true && telemetrySendUsageFrom === 'server'
+        ),
+        // Skip if already failed three times for this version
+        filter(
+          ({ failureCount, failureVersion, currentVersion }) =>
+            !(failureCount > 2 && failureVersion === currentVersion)
+        ),
+        exhaustMap(async ({ telemetryUrl, failureCount }) => {
+          try {
+            await fetch(telemetryUrl, { method: 'options' });
+            this.isOnline$.next(true);
+          } catch (err) {
+            this.logger.error(`Cannot reach the remote telemetry endpoint ${telemetryUrl}`);
+            await this.updateReportFailure({ failureCount });
+          }
+        })
+      )
+      .subscribe();
+  }
+
+  private startSendIfDueSubscription() {
+    return merge(
+      // Attempt to send telemetry...
+      // ... whenever connectivity changes
+      this.isOnline$,
+      // ... when lastReported$ has a new value...
+      this.lastReported$.pipe(
+        filter(Boolean),
+        mergeMap((lastReported) =>
+          // ... set a timer of 24h from there (+ a random seed to avoid concurrent emissions from multiple Kibana instances).
+          // Emitting again every 1 minute after the next attempt date in case we reach a deadlock in further checks (like Kibana is not healthy at the moment of sending).
+          timer(getNextAttemptDate(lastReported), MINUTE).pipe(
+            // Cancel this observable if lastReported$ emits again
+            takeUntil(this.lastReported$.pipe(skip(1)))
+          )
+        )
+      )
+    )
+      .pipe(
+        filter(() => this.isOnline$.value),
+        exhaustMap(() => this.sendIfDue())
+      )
+      .subscribe();
   }
 
   private async sendIfDue() {
-    if (this.isSending) {
-      return;
-    }
-
     // Skip this run if Kibana is not in a healthy state to fetch telemetry.
     if (!(await this.telemetryCollectionManager?.shouldGetTelemetry())) {
       return;
@@ -99,13 +174,11 @@ export class FetcherTask {
     }
 
     let clusters: EncryptedTelemetryPayload = [];
-    this.isSending = true;
 
     try {
       clusters = await this.fetchTelemetry();
     } catch (err) {
       this.logger.warn(`Error fetching usage. (${err})`);
-      this.isSending = false;
       return;
     }
 
@@ -119,7 +192,6 @@ export class FetcherTask {
 
       this.logger.warn(`Error sending telemetry usage data. (${err})`);
     }
-    this.isSending = false;
   }
 
   private async getCurrentConfigs(): Promise<TelemetryConfig> {
@@ -137,6 +209,13 @@ export class FetcherTask {
       telemetrySavedObject,
     });
 
+    const lastReported = telemetrySavedObject ? telemetrySavedObject.lastReported : void 0;
+
+    // If the lastReported value in the SO is more recent than the in-memory one, refresh the memory (another instance or the browser may have reported it)
+    if (lastReported && lastReported > this.lastReported$.value) {
+      this.lastReported$.next(lastReported);
+    }
+
     return {
       telemetryOptIn: getTelemetryOptIn({
         currentKibanaVersion,
@@ -152,15 +231,15 @@ export class FetcherTask {
       failureCount,
       failureVersion,
       currentVersion: currentKibanaVersion,
-      lastReported: telemetrySavedObject ? telemetrySavedObject.lastReported : void 0,
+      lastReported,
     };
   }
 
   private async updateLastReported() {
-    this.lastReported = Date.now();
+    this.lastReported$.next(Date.now());
     updateTelemetrySavedObject(this.internalRepository!, {
       reportFailureCount: 0,
-      lastReported: this.lastReported,
+      lastReported: this.lastReported$.value,
     }).catch((err) => {
       err.message = `Failed to update the telemetry saved object: ${err.message}`;
       this.logger.debug(err);
@@ -168,6 +247,7 @@ export class FetcherTask {
   }
 
   private async updateReportFailure({ failureCount }: { failureCount: number }) {
+    this.isOnline$.next(false);
     updateTelemetrySavedObject(this.internalRepository!, {
       reportFailureCount: failureCount + 1,
       reportFailureVersion: this.currentKibanaVersion,
@@ -180,19 +260,15 @@ export class FetcherTask {
   private shouldSendReport({
     telemetryOptIn,
     telemetrySendUsageFrom,
-    failureCount,
-    failureVersion,
-    currentVersion,
     lastReported,
   }: TelemetryConfig) {
-    if (failureCount > 2 && failureVersion === currentVersion) {
-      return false;
-    }
-
     if (telemetryOptIn && telemetrySendUsageFrom === 'server') {
       // Check both: in-memory and SO-driven value.
       // This will avoid the server retrying over and over when it has issues with storing the state in the SO.
-      if (isReportIntervalExpired(this.lastReported) && isReportIntervalExpired(lastReported)) {
+      if (
+        isReportIntervalExpired(this.lastReported$.value) &&
+        isReportIntervalExpired(lastReported)
+      ) {
         return true;
       }
     }
@@ -210,13 +286,6 @@ export class FetcherTask {
     payload: EncryptedTelemetryPayload
   ): Promise<void> {
     this.logger.debug(`Sending usage stats.`);
-    /**
-     * send OPTIONS before sending usage data.
-     * OPTIONS is less intrusive as it does not contain any payload and is used here to check if the endpoint is reachable.
-     */
-    await fetch(telemetryUrl, {
-      method: 'options',
-    });
 
     await Promise.all(
       payload.map(async ({ clusterUuid, stats }) => {

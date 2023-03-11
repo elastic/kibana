@@ -141,6 +141,8 @@ describe('Security Plugin', () => {
               "grantAsInternalUser": [Function],
               "invalidate": [Function],
               "invalidateAsInternalUser": [Function],
+              "update": [Function],
+              "validate": [Function],
             },
             "getCurrentUser": [Function],
           },

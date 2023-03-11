@@ -9,7 +9,7 @@ import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { AlertParams } from '../../route';
 import {
@@ -17,31 +17,33 @@ import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../../../../lib/helpers/transactions';
-import { Setup } from '../../../../lib/helpers/setup_request';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../../lib/helpers/transaction_error_rate';
+import { APMConfig } from '../../../..';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../../../common/document_type';
 
 export async function getTransactionErrorRateChartPreview({
-  setup,
+  config,
+  apmEventClient,
   alertParams,
 }: {
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   alertParams: AlertParams;
 }) {
-  const { apmEventClient } = setup;
   const { serviceName, environment, transactionType, interval, start, end } =
     alertParams;
 
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
-    ...setup,
+    config,
+    apmEventClient,
     kuery: '',
     start,
     end,
   });
-
-  const outcomes = getOutcomeAggregation();
 
   const params = {
     apm: {
@@ -64,7 +66,6 @@ export async function getTransactionErrorRateChartPreview({
         },
       },
       aggs: {
-        outcomes,
         timeseries: {
           date_histogram: {
             field: '@timestamp',
@@ -74,7 +75,11 @@ export async function getTransactionErrorRateChartPreview({
               max: end,
             },
           },
-          aggs: { outcomes },
+          aggs: getOutcomeAggregation(
+            searchAggregatedTransactions
+              ? ApmDocumentType.TransactionMetric
+              : ApmDocumentType.TransactionEvent
+          ),
         },
       },
     },
@@ -92,7 +97,7 @@ export async function getTransactionErrorRateChartPreview({
   return resp.aggregations.timeseries.buckets.map((bucket) => {
     return {
       x: bucket.key,
-      y: calculateFailedTransactionRate(bucket.outcomes),
+      y: calculateFailedTransactionRate(bucket),
     };
   });
 }

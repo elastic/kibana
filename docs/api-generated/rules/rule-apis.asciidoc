@@ -1,0 +1,10 @@
+[[rule-apis]]
+== Alert and rule APIs
+
+preview::[]
+
+////
+This file includes content that has been generated from https://github.com/elastic/kibana/tree/main/x-pack/plugins/alerting/docs/openapi. Any modifications required must be done in that open API specification.
+////
+
+include::rule-apis-passthru.asciidoc[]

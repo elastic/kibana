@@ -12,7 +12,7 @@ import type { ESClusterInfo, ESLicense, TelemetryEvent } from '../types';
 import type { TaskExecutionPeriod } from '../task';
 import { TELEMETRY_CHANNEL_DETECTION_ALERTS, TASK_METRICS_CHANNEL } from '../constants';
 import { batchTelemetryRecords, tlog, createTaskMetric } from '../helpers';
-import { copyAllowlistedFields, prebuiltRuleAllowlistFields } from '../filterlists';
+import { copyAllowlistedFields, filterList } from '../filterlists';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
   return {
@@ -31,9 +31,10 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
       const startTime = Date.now();
       const taskName = 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry';
       try {
-        const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
+        const [clusterInfoPromise, licenseInfoPromise, packageVersion] = await Promise.allSettled([
           receiver.fetchClusterInfo(),
           receiver.fetchLicenseInfo(),
+          receiver.fetchDetectionRulesPackageVersion(),
         ]);
 
         const clusterInfo =
@@ -44,6 +45,8 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
           licenseInfoPromise.status === 'fulfilled'
             ? licenseInfoPromise.value
             : ({} as ESLicense | undefined);
+        const packageInfo =
+          packageVersion.status === 'fulfilled' ? packageVersion.value : undefined;
 
         const { events: telemetryEvents, count: totalPrebuiltAlertCount } =
           await receiver.fetchPrebuiltRuleAlerts();
@@ -64,7 +67,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
 
         const processedAlerts = telemetryEvents.map(
           (event: TelemetryEvent): TelemetryEvent =>
-            copyAllowlistedFields(prebuiltRuleAllowlistFields, event)
+            copyAllowlistedFields(filterList.prebuiltRulesAlerts, event)
         );
 
         const enrichedAlerts = processedAlerts.map(
@@ -73,6 +76,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
             licence_id: licenseInfo?.uid,
             cluster_uuid: clusterInfo?.cluster_uuid,
             cluster_name: clusterInfo?.cluster_name,
+            package_version: packageInfo?.version,
           })
         );
 

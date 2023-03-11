@@ -9,7 +9,11 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { removeArchiveEntries } from '../archive/storage';
 
-import { ASSETS_SAVED_OBJECT_TYPE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
+import {
+  ASSETS_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+} from '../../../../common';
 import type { PackageAssetReference } from '../../../../common/types';
 import { packagePolicyService } from '../../package_policy';
 import { appContextService } from '../..';
@@ -37,15 +41,26 @@ export async function removeOldAssets(options: {
     (obj: { key: string }) => obj.key
   );
 
+  const packageAssetRefsRes = await soClient.find({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+    filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.name:${pkgName}`,
+    fields: [`${PACKAGES_SAVED_OBJECT_TYPE}.package_assets`],
+  });
+
+  const packageAssetRefs = (
+    (packageAssetRefsRes.saved_objects?.[0]?.attributes as any)?.package_assets ?? []
+  ).map((ref: any) => ref.id);
+
   for (const oldVersion of oldVersions) {
-    await removeAssetsFromVersion(soClient, pkgName, oldVersion);
+    await removeAssetsFromVersion(soClient, pkgName, oldVersion, packageAssetRefs);
   }
 }
 
 async function removeAssetsFromVersion(
   soClient: SavedObjectsClientContract,
   pkgName: string,
-  oldVersion: string
+  oldVersion: string,
+  packageAssetRefs: string[]
 ) {
   // check if any policies are using this package version
   const { total } = await packagePolicyService.list(soClient, {
@@ -73,8 +88,10 @@ async function removeAssetsFromVersion(
     const refs = assets.saved_objects.map(
       (obj) => ({ id: obj.id, type: ASSETS_SAVED_OBJECT_TYPE } as PackageAssetReference)
     );
+    // only delete epm-packages-assets that are not referenced by epm-packages
+    const unusedRefs = refs.filter((ref) => !packageAssetRefs.includes(ref.id));
 
-    await removeArchiveEntries({ savedObjectsClient: soClient, refs });
+    await removeArchiveEntries({ savedObjectsClient: soClient, refs: unusedRefs });
   }
   await finder.close();
 }

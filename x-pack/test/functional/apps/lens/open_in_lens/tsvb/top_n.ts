@@ -27,9 +27,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisualBuilder();
-      await visualBuilder.checkVisualBuilderIsPresent();
       await visualBuilder.resetPage();
       await visualBuilder.clickTopN();
       await visualBuilder.checkTopNTabIsPresent();
@@ -160,12 +157,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
       const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
-      goBackBtn.click();
+      await goBackBtn.click();
       await visualBuilder.checkTopNTabIsPresent();
     });
 
     it('should preserve app filters in lens', async () => {
-      await filterBar.addFilter('extension', 'is', 'css');
+      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'css' });
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');

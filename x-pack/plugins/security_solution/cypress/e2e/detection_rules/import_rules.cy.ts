@@ -6,11 +6,16 @@
  */
 
 import { TOASTER } from '../../screens/alerts_detection_rules';
-import { importRules, importRulesWithOverwriteAll } from '../../tasks/alerts_detection_rules';
+import {
+  expectManagementTableRules,
+  importRules,
+  importRulesWithOverwriteAll,
+} from '../../tasks/alerts_detection_rules';
 import { cleanKibana, deleteAlertsAndRules, reload } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
+const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 
 describe('Import rules', () => {
   before(() => {
@@ -24,26 +29,28 @@ describe('Import rules', () => {
   });
 
   it('Imports a custom rule with exceptions', function () {
-    importRules('7_16_rules.ndjson');
+    importRules(RULES_TO_IMPORT_FILENAME);
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
       cy.get(TOASTER).should(
         'have.text',
-        'Successfully imported 1 ruleSuccessfully imported 2 exceptions.'
+        'Successfully imported 1 ruleSuccessfully imported 1 exception.'
       );
+
+      expectManagementTableRules(['Test Custom Rule']);
     });
   });
 
   it('Shows error toaster when trying to import rule and exception list that already exist', function () {
-    importRules('7_16_rules.ndjson');
+    importRules(RULES_TO_IMPORT_FILENAME);
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
     });
 
     reload();
-    importRules('7_16_rules.ndjson');
+    importRules(RULES_TO_IMPORT_FILENAME);
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
@@ -52,20 +59,20 @@ describe('Import rules', () => {
   });
 
   it('Does not show error toaster when trying to import rule and exception list that already exist when overwrite is true', function () {
-    importRules('7_16_rules.ndjson');
+    importRules(RULES_TO_IMPORT_FILENAME);
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
     });
 
     reload();
-    importRulesWithOverwriteAll('7_16_rules.ndjson');
+    importRulesWithOverwriteAll(RULES_TO_IMPORT_FILENAME);
 
     cy.wait('@import').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
       cy.get(TOASTER).should(
         'have.text',
-        'Successfully imported 1 ruleSuccessfully imported 2 exceptions.'
+        'Successfully imported 1 ruleSuccessfully imported 1 exception.'
       );
     });
   });

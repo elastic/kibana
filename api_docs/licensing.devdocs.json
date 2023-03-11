@@ -440,7 +440,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"invalid\" | \"active\" | \"expired\""
+              "\"active\" | \"invalid\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
@@ -600,6 +600,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
               },
               {
@@ -702,7 +710,7 @@
         "label": "LicenseStatus",
         "description": [],
         "signature": [
-          "\"invalid\" | \"active\" | \"expired\""
+          "\"active\" | \"invalid\" | \"expired\""
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
@@ -963,25 +971,25 @@
             "text": "CheckLicense"
           },
           ", handler: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.RequestHandler",
-            "text": "RequestHandler"
-          },
+          "RequestHandler",
           "<P, Q, B, Context, any, ",
-          "KibanaResponseFactory",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaResponseFactory",
+            "text": "KibanaResponseFactory"
+          },
           ">) => ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.RequestHandler",
-            "text": "RequestHandler"
-          },
+          "RequestHandler",
           "<P, Q, B, Context, any, ",
-          "KibanaResponseFactory",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaResponseFactory",
+            "text": "KibanaResponseFactory"
+          },
           ">"
         ],
         "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
@@ -1017,15 +1025,15 @@
             "label": "handler",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.RequestHandler",
-                "text": "RequestHandler"
-              },
+              "RequestHandler",
               "<P, Q, B, Context, any, ",
-              "KibanaResponseFactory",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaResponseFactory",
+                "text": "KibanaResponseFactory"
+              },
               ">"
             ],
             "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
@@ -1713,7 +1721,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"invalid\" | \"active\" | \"expired\""
+              "\"active\" | \"invalid\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
@@ -1873,6 +1881,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
               },
               {
@@ -2022,7 +2038,7 @@
         "label": "LicenseStatus",
         "description": [],
         "signature": [
-          "\"invalid\" | \"active\" | \"expired\""
+          "\"active\" | \"invalid\" | \"expired\""
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
@@ -2127,10 +2143,6 @@
               "path": "x-pack/plugins/ml/server/plugin.ts"
             },
             {
-              "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/plugin.ts"
-            },
-            {
               "plugin": "remoteClusters",
               "path": "x-pack/plugins/remote_clusters/server/plugin.ts"
             },
@@ -2160,7 +2172,7 @@
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/executors/query.ts"
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/query/query.ts"
             },
             {
               "plugin": "snapshotRestore",
@@ -2320,7 +2332,13 @@
           ],
           "signature": [
             "(clusterClient: ",
-            "IClusterClient",
+            {
+              "pluginId": "@kbn/core-elasticsearch-server",
+              "scope": "common",
+              "docId": "kibKbnCoreElasticsearchServerPluginApi",
+              "section": "def-common.IClusterClient",
+              "text": "IClusterClient"
+            },
             ", pollingFrequency: number) => { license$: ",
             "Observable",
             "<",
@@ -2341,7 +2359,13 @@
               "label": "clusterClient",
               "description": [],
               "signature": [
-                "IClusterClient"
+                {
+                  "pluginId": "@kbn/core-elasticsearch-server",
+                  "scope": "common",
+                  "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                  "section": "def-common.IClusterClient",
+                  "text": "IClusterClient"
+                }
               ],
               "path": "x-pack/plugins/licensing/server/types.ts",
               "deprecated": false,

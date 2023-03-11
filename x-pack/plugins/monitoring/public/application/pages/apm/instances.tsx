@@ -13,7 +13,6 @@ import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useTable } from '../../hooks/use_table';
 import { ApmTemplate } from './apm_template';
-// @ts-ignore
 import { ApmServerInstances } from '../../../components/apm/instances';
 import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';

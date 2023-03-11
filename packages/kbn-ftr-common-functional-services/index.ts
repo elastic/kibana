@@ -19,3 +19,5 @@ export type EsArchiver = ProvidedType<typeof EsArchiverProvider>;
 
 import { EsProvider } from './services/es';
 export type Es = ProvidedType<typeof EsProvider>;
+
+export type { FtrProviderContext } from './services/ftr_provider_context';

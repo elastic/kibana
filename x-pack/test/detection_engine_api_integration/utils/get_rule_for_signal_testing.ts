@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 /**
  * This is a typical signal testing rule that is easy for most basic testing of output of signals.
@@ -18,7 +18,7 @@ export const getRuleForSignalTesting = (
   index: string[],
   ruleId = 'rule-1',
   enabled = true
-): QueryCreateSchema => ({
+): QueryRuleCreateProps => ({
   name: 'Signal Testing Query',
   description: 'Tests a simple query',
   enabled,

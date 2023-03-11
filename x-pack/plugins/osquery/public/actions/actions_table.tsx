@@ -20,6 +20,7 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
+import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
 import type { SearchHit } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
@@ -90,9 +91,13 @@ const ActionsTableComponent = () => {
       );
     }
 
+    const query = item._source.queries[0].query;
+    const singleLine = removeMultilines(query);
+    const content = singleLine.length > 90 ? `${singleLine?.substring(0, 90)}...` : singleLine;
+
     return (
       <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-        {item._source.queries[0].query}
+        {content}
       </EuiCodeBlock>
     );
   }, []);
@@ -196,6 +201,7 @@ const ActionsTableComponent = () => {
           defaultMessage: 'Query',
         }),
         truncateText: true,
+        width: '60%',
         render: renderQueryColumn,
       },
       {
@@ -258,6 +264,13 @@ const ActionsTableComponent = () => {
     [actionsData, pageIndex, pageSize]
   );
 
+  const rowProps = useCallback(
+    (data) => ({
+      'data-test-subj': `row-${data._source.action_id}`,
+    }),
+    []
+  );
+
   return (
     <EuiBasicTable
       items={actionsData?.data?.items ?? EMPTY_ARRAY}
@@ -265,6 +278,8 @@ const ActionsTableComponent = () => {
       columns={columns}
       pagination={pagination}
       onChange={onTableChange}
+      rowProps={rowProps}
+      data-test-subj="liveQueryActionsTable"
     />
   );
 };

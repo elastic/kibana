@@ -12,8 +12,8 @@ import {
   buildUserNamesFilter,
   RiskScoreEntity,
 } from '../../../../common/search_strategy';
-import type { HostRisk, UserRisk } from '../../../risk_score/containers';
-import { useRiskScore } from '../../../risk_score/containers';
+import type { HostRisk, UserRisk } from '../../../explore/containers/risk_score';
+import { useRiskScore } from '../../../explore/containers/risk_score';
 
 export const ONLY_FIRST_ITEM_PAGINATION = {
   cursorStart: 0,
