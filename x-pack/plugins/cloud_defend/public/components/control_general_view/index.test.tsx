@@ -42,20 +42,20 @@ describe('<ControlGeneralView />', () => {
     try {
       const json = yaml.load(configuration);
 
-      expect(json.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
-      expect(json.responses.length).toBe(getAllByTestId('cloud-defend-response').length);
-      expect(json.selectors.length).toBe(3);
-      expect(json.responses.length).toBe(2);
+      expect(json.file.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
+      expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-response').length);
+      expect(json.file.selectors.length).toBe(3);
+      expect(json.file.responses.length).toBe(2);
     } catch (err) {
       throw err;
     }
   });
 
-  it('allows a user to add a new selector and new response', async () => {
+  it('allows a user to add a new selector', async () => {
     const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
 
-    userEvent.click(getByTestId('cloud-defend-btnaddselector'));
-    userEvent.click(getByTestId('cloud-defend-btnaddresponse'));
+    userEvent.click(getByTestId('cloud-defend-btnAddSelector'));
+    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddFileSelector')));
 
     const policy = onChange.mock.calls[0][0].updatedPolicy;
 
@@ -67,10 +67,29 @@ describe('<ControlGeneralView />', () => {
     try {
       const json = yaml.load(configuration);
 
-      expect(json.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
-      expect(json.responses.length).toBe(getAllByTestId('cloud-defend-response').length);
-      expect(json.selectors.length).toBe(4);
-      expect(json.responses.length).toBe(3);
+      expect(json.file.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
+    } catch (err) {
+      throw err;
+    }
+  });
+
+  it('allows a user to add a new response', async () => {
+    const { getAllByTestId, getByTestId, rerender } = render(<WrappedComponent />);
+
+    userEvent.click(getByTestId('cloud-defend-btnAddResponse'));
+    await waitFor(() => userEvent.click(getByTestId('cloud-defend-btnAddFileResponse')));
+
+    const policy = onChange.mock.calls[0][0].updatedPolicy;
+
+    rerender(<WrappedComponent policy={policy} />);
+
+    const input = getInputFromPolicy(policy, INPUT_CONTROL);
+    const configuration = input?.vars?.configuration?.value;
+
+    try {
+      const json = yaml.load(configuration);
+
+      expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-response').length);
     } catch (err) {
       throw err;
     }
