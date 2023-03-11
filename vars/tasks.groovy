@@ -157,6 +157,14 @@ def functionalXpack(Map params = [:]) {
     }
 
     whenChanged([
+      'x-pack/plugins/profling/',
+    ]) {
+      if (githubPr.isPr()) {
+        task(kibanaPipeline.functionalTestProcess('xpack-ProfilingCypress', './test/scripts/jenkins_profiling_cypress.sh'))
+      }
+    }
+
+    whenChanged([
       'x-pack/plugins/synthetics/',
     ]) {
       if (githubPr.isPr()) {
