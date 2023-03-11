@@ -41,14 +41,6 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.profiling.enabled=true',
       ],
     },
-    // testRunner: async (ftrProviderContext: FtrProviderContext) => {
-    //   const result = await cypressTestRunner(ftrProviderContext);
-
-    //   // set exit code explicitly if at least one Cypress test fails
-    //   if (result && (result.status === 'failed' || result.totalFailed > 0)) {
-    //     process.exitCode = 1;
-    //   }
-    // },
   };
 }
 
