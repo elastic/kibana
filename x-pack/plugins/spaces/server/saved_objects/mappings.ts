@@ -30,10 +30,10 @@ export const SpacesSavedObjectMappings = deepFreeze({
     disabledFeatures: {
       type: 'keyword',
     },
-    imageUrl: {
-      type: 'text',
-      index: false,
-    },
+    // imageUrl: {
+    //   type: 'text',
+    //   index: false,
+    // },
     _reserved: {
       type: 'boolean',
     },
