@@ -96,6 +96,7 @@ function CreateConfigurationButton() {
             }
           >
             <EuiButton
+              data-test-subj="apmCreateConfigurationButtonCreateConfigurationButton"
               color="primary"
               fill
               iconType="plusInCircle"
