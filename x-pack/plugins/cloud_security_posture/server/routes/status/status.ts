@@ -17,6 +17,8 @@ import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  VULNERABILITIES_INDEX_PATTERN,
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '../../../common/constants';
 import type { CspApiRequestHandlerContext, CspRouter } from '../../types';
 import type { CspSetupStatus, CspStatusCode, IndexStatus } from '../../../common/types';
@@ -65,15 +67,23 @@ const calculateCspStatusCode = (
     findingsLatest: IndexStatus;
     findings: IndexStatus;
     score: IndexStatus;
+    vulnerabilities: IndexStatus;
+    vulnerabilitiesLatest: IndexStatus;
   },
   installedCspPackagePolicies: number,
   healthyAgents: number,
   timeSinceInstallationInMinutes: number
 ): CspStatusCode => {
   // We check privileges only for the relevant indices for our pages to appear
-  if (indicesStatus.findingsLatest === 'unprivileged' || indicesStatus.score === 'unprivileged')
+  if (
+    indicesStatus.findingsLatest === 'unprivileged' ||
+    indicesStatus.score === 'unprivileged' ||
+    indicesStatus.vulnerabilitiesLatest === 'unprivileged'
+  )
     return 'unprivileged';
   if (indicesStatus.findingsLatest === 'not-empty') return 'indexed';
+  if (indicesStatus.vulnerabilitiesLatest === 'not-empty') return 'indexed';
+
   if (installedCspPackagePolicies === 0) return 'not-installed';
   if (healthyAgents === 0) return 'not-deployed';
   if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
@@ -105,6 +115,8 @@ const getCspStatus = async ({
     findingsLatestIndexStatus,
     findingsIndexStatus,
     scoreIndexStatus,
+    vulnerabilitiesIndexStatus,
+    vulnerabilitiesLatestIndexStatus,
     installation,
     latestCspPackage,
     installedPackagePolicies,
@@ -113,6 +125,8 @@ const getCspStatus = async ({
     checkIndexStatus(esClient.asCurrentUser, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
     checkIndexStatus(esClient.asCurrentUser, FINDINGS_INDEX_PATTERN, logger),
     checkIndexStatus(esClient.asCurrentUser, BENCHMARK_SCORE_INDEX_DEFAULT_NS, logger),
+    checkIndexStatus(esClient.asCurrentUser, VULNERABILITIES_INDEX_PATTERN, logger),
+    checkIndexStatus(esClient.asCurrentUser, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, logger),
     packageService.asInternalUser.getInstallation(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
     packageService.asInternalUser.fetchFindLatestPackage(CLOUD_SECURITY_POSTURE_PACKAGE_NAME),
     getCspPackagePolicies(soClient, packagePolicyService, CLOUD_SECURITY_POSTURE_PACKAGE_NAME, {
@@ -146,6 +160,14 @@ const getCspStatus = async ({
       index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
       status: scoreIndexStatus,
     },
+    {
+      index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+      status: vulnerabilitiesLatestIndexStatus,
+    },
+    {
+      index: VULNERABILITIES_INDEX_PATTERN,
+      status: vulnerabilitiesIndexStatus,
+    },
   ];
 
   const status = calculateCspStatusCode(
@@ -153,6 +175,8 @@ const getCspStatus = async ({
       findingsLatest: findingsLatestIndexStatus,
       findings: findingsIndexStatus,
       score: scoreIndexStatus,
+      vulnerabilitiesLatest: vulnerabilitiesLatestIndexStatus,
+      vulnerabilities: vulnerabilitiesIndexStatus,
     },
     installedPackagePoliciesTotal,
     healthyAgents,
