@@ -23,7 +23,9 @@ export function isSnoozeExpired(snooze: RuleSnoozeSchedule) {
       dtstart: new Date(rRule.dtstart),
       until: rRule.until ? new Date(rRule.until) : null,
       wkst: rRule.wkst ? Weekday.fromStr(rRule.wkst) : null,
-      byweekday: rRule.byweekday ? parseByWeekday(rRule.byweekday) : null,
+      byweekday: rRule.byweekday
+        ? parseByWeekday(rRule.byweekday, rRule.dtstart, rRule.tzid)
+        : null,
     };
 
     const recurrenceRule = new RRule(rRuleOptions);
