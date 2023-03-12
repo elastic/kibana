@@ -20,7 +20,7 @@ const noSuchRemoteClusterMessage = i18n.translate(
   'xpack.infra.sourceConfiguration.noSuchRemoteCluster',
   {
     defaultMessage:
-      'The remote cluster is not configured or not available.\nCheck the metric index settings and make sure they are written correctly.',
+      'A remote cluster has not been configured or is unavailable. Check the metrics indices value under Settings.',
   }
 );
 
