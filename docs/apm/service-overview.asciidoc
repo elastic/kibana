@@ -130,9 +130,14 @@ image::apm/images/spans-dependencies.png[Span type duration and dependencies]
 [[service-cold-start]]
 === Cold start rate
 
-The cold start rate chart is specific to serverless services.
-It displays the percentage of requests that trigger a cold start of a serverless function.
-See <<apm-lambda-cold-start-info>> for more information.
+The cold start rate chart is specific to serverless services, and displays the
+percentage of requests that trigger a cold start of a serverless function.
+A cold start occurs when a serverless function has not been used for a certain period of time.
+Analyzing the cold start rate can be useful for deciding how much memory to allocate to a function,
+or when to remove a large dependency.
+
+The cold start rate chart is currently supported for <<apm-lambda-cold-start-info,AWS Lambda>>
+functions and Azure functions.
 
 [role="screenshot"]
 image::apm/images/lambda-cold-start.png[lambda cold start graph]
