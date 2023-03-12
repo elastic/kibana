@@ -1,0 +1,59 @@
+[role="xpack"]
+[[mobile-service-overview]]
+=== Mobile service overview
+
+Selecting a mobile service brings you to the *Mobile service overview*.
+The *Mobile service overview* contains a wide variety of charts and tables that provide
+high-level visibility into how a mobile service is performing for your users--enabling you
+to make data-driven decisions about how to improve your user experience.
+
+For example, see:
+
+* Crash Rate (Crashes per minute) -- coming soon
+* Slowest App load time -- coming soon
+* Number of sessions
+* Number of HTTP requests
+* Map showing the total number of HTTP requests based on country and region
+* Most used devices, network connection type, OS version, and app version
+* Latency, throughput, and errors over time
+* Service dependencies
+
+All of this and more can help you understand how the performance of your backend impacts
+user experience on the frontend.
+
+[discrete]
+[[mobile-service-stats]]
+=== Quick stats
+
+Reduce your mean time to resolution time with insights into your slowest app load time and crash rate (coming soon).
+Visualize session and HTTP trends, and see where your users are located--enabling you to optimize your infrastructure.
+
+[role="screenshot"]
+image::apm/images/mobile-location.png[mobile service overview centered on location map]
+
+[discrete]
+[[mobile-service-most-used]]
+=== Most used
+
+Optimize your app for a certain device type or operating system based on who your users are.
+
+[role="screenshot"]
+image::apm/images/mobile-most-used.png[mobile service overview showing most used devices, network, OS, and app version]
+
+
+[discrete]
+[[mobile-throughput-transactions]]
+=== Throughput and transactions
+
+include::./service-overview.asciidoc[tag=throughput-transactions]
+
+[discrete]
+[[mobile-error-and-dependencies]]
+=== Failed transaction rate and dependencies
+
+include::./service-overview.asciidoc[tag=ftr]
+
+include::./service-overview.asciidoc[tag=dependencies]
+
+[role="screenshot"]
+image::apm/images/mobile-tp.png[mobile service overview showing latency, throughput, and errors]

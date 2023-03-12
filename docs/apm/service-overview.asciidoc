@@ -2,7 +2,7 @@
 [[service-overview]]
 === Service overview
 
-Selecting a <<services,*service*>> brings you to the *Service overview*.
+Selecting a non-mobile <<services,*service*>> brings you to the *Service overview*.
 The *Service overview* contains a wide variety of charts and tables that provide
 high-level visibility into how a service is performing across your infrastructure:
 
@@ -61,6 +61,7 @@ image::apm/images/latency.png[Service latency]
 [[service-throughput-transactions]]
 === Throughput and transactions
 
+// tag::throughput-transactions[]
 The *Throughput* chart visualizes the average number of transactions per minute for the selected service.
 
 The *Transactions* table displays a list of _transaction groups_ for the
@@ -73,11 +74,13 @@ list of similar transactions on the <<transactions, transactions overview>> page
 
 [role="screenshot"]
 image::apm/images/traffic-transactions.png[Traffic and transactions]
+// end::throughput-transactions[]
 
 [discrete]
 [[service-error-rates]]
 === Failed transaction rate and errors
 
+// tag::ftr[]
 The failed transaction rate represents the percentage of failed transactions from the perspective of the selected service.
 It's useful for visualizing unexpected increases, decreases, or irregular patterns in a service's transactions.
 
@@ -91,6 +94,7 @@ These spans will set `event.outcome=failure` and increase the failed transaction
 
 If there is no HTTP status, both transactions and spans are considered successful unless an error is reported.
 ====
+// end::ftr[]
 
 The *Errors* table provides a high-level view of each error message when it first and last occurred,
 along with the total number of occurrences. This makes it very easy to quickly see which errors affect
@@ -109,6 +113,7 @@ chart indicates that something was happening within the application. This could 
 agent does not have auto-instrumentation for whatever was happening during that time or that the time was spent in the
 application code and not in database or external requests.
 
+// tag::dependencies[]
 The *Dependencies* table displays a list of downstream services or external connections relevant
 to the service at the selected time range. The table displays latency, throughput, failed transaction rate, and the impact of
 each dependency. By default, dependencies are sorted by _Impact_ to show the most used and the slowest dependency.
@@ -119,6 +124,7 @@ requires an agent version ≥ v5.6.3.
 
 [role="screenshot"]
 image::apm/images/spans-dependencies.png[Span type duration and dependencies]
+// end::dependencies[]
 
 [discrete]
 [[service-cold-start]]

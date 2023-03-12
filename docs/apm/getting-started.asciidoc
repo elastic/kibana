@@ -35,6 +35,7 @@ start with:
 Notice something awry? Select a service or trace and dive deeper with:
 
 * <<service-overview>>
+* <<mobile-service-overview>>
 * <<transactions>>
 * <<spans>>
 * <<errors>>
@@ -52,6 +53,8 @@ include::dependencies.asciidoc[]
 include::service-maps.asciidoc[]
 
 include::service-overview.asciidoc[]
+
+include::mobile-service.asciidoc[]
 
 include::transactions.asciidoc[]
 
