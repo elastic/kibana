@@ -7,29 +7,48 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { OnTimeChangeProps } from '@elastic/eui';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 
-const DEFAULT_TIME = {
-  from: 'now-70d',
+const DEFAULT_TIME_RANGE = {
+  from: 'now-7d',
   to: 'now',
 };
-
+// card and panel titles
+export const titles = {
+  cardNoResults: 'Total queries with no results',
+  cardQueries: 'Total queries',
+  panelNoResults: 'Queries - No Results',
+  panelQueries: 'Queries - Total',
+};
 export interface EngineAnalyticsValues {
-  endDate: string;
-  isDateLoading: boolean;
-  isFirstRequest: boolean;
+  defaultDataView: DataView | null;
+  formula: FormulaPublicApi | null;
   isNoResultsCardVisible: boolean;
   noResults: number;
   noResultsPercentage: number;
   queriesCount: number;
   queriesCountPercentage: number;
   searchSessionId: string | undefined;
-  startDate: string;
-  time: { from: string; to: string };
+  timeRange: { from: string; to: string };
 }
 
 export interface EngineAnalyticsActions {
-  setEndDate: (endDate: string) => { endDate: string };
-  setIsDateLoading: () => void;
+  getDefaultDataView: (data: DataPublicPluginStart) => {
+    data: DataPublicPluginStart;
+  };
+  getFormula: (lens: LensPublicStart) => {
+    lens: LensPublicStart;
+  };
+  setDefaultDataView: (defaultDataView: DataView | null) => {
+    defaultDataView: DataView | null;
+  };
+  setFormula: (formula: FormulaPublicApi | null) => {
+    formula: FormulaPublicApi | null;
+  };
+
   setIsLoading: (value: boolean) => { value: boolean };
   setNoResults: (noResults: number) => {
     noResults: number;
@@ -41,8 +60,7 @@ export interface EngineAnalyticsActions {
   setQueriesCardVisible: () => void;
 
   setSearchSessionId: (sessionId: string) => { sessionId: string };
-  setStartDate: (startDate: string) => { startDate: string };
-  setTimeChange: (args: OnTimeChangeProps) => { end: string; start: string };
+  setTimeRange: (args: OnTimeChangeProps) => { end: string; start: string };
   setTotalQueries: (totalQueries: number) => {
     totalQueries: number;
   };
@@ -55,42 +73,51 @@ export const EngineAnalyticsLogic = kea<
   MakeLogicType<EngineAnalyticsValues, EngineAnalyticsActions>
 >({
   actions: {
-    setEndDate: (endDate) => ({ endDate }),
+    getDefaultDataView: (data: DataPublicPluginStart) => ({ data }),
+    getFormula: (lens: LensPublicStart | null) => ({ lens }),
+    setDefaultDataView: (defaultDataView: DataView | null) => ({ defaultDataView }),
+    setFormula: (formula: FormulaPublicApi) => ({ formula }),
     setIsLoading: (value) => ({ value }),
     setNoResults: (noResults) => ({ noResults }),
     setNoResultsCardVisible: false,
     setNoResultsPercentage: (noResultsPercentage) => ({
       noResultsPercentage,
     }),
-    setQueriesCardVisible: true,
+
+    setQueriesCardVisible: true, // we show total queries card by default when page loads
     setSearchSessionId: (sessionId: string) => ({ sessionId }),
-    setStartDate: (startDate) => ({ startDate }),
-    setTime: (start: string, end: string) => ({ from: start, to: end }),
-    setTimeChange: (args: OnTimeChangeProps) => ({ end: args.end, start: args.start }),
+    setTimeRange: (args: OnTimeChangeProps) => ({ end: args.end, start: args.start }),
     setTotalQueries: (totalQueries) => ({ totalQueries }),
     setTotalQueriesPercentage: (totalQueriesPercentage) => ({ totalQueriesPercentage }),
   },
 
+  listeners: ({ actions }) => ({
+    // Load default Data view from Data plugin from Kibana Logic
+    getDefaultDataView: async (input) => {
+      const defaultDataView = (await input?.data?.dataViews?.getDefault()) ?? null;
+      actions.setDefaultDataView(defaultDataView);
+    },
+    // Load formula from Lens plugin from Kibana Logic
+    getFormula: async (input) => {
+      const { formula } = (await input?.lens?.stateHelperApi()) ?? null;
+      actions.setFormula(formula);
+    },
+  }),
   path: ['enterprise_search', 'content', 'engines', 'overview', 'analytics'],
   reducers: ({}) => ({
-    endDate: [
-      DEFAULT_TIME.to,
+    defaultDataView: [
+      null,
       {
-        setEndDate: (_, { endDate }) => endDate,
+        setDefaultDataView: (_, { defaultDataView }) => defaultDataView,
       },
     ],
-    isDateLoading: [
-      false,
+    formula: [
+      null,
       {
-        setTimeChange: () => true,
+        setFormula: (_, { formula }) => formula,
       },
     ],
-    isFirstRequest: [
-      true,
-      {
-        setIsFirstRequest: () => true,
-      },
-    ],
+
     isNoResultsCardVisible: [
       false,
       {
@@ -130,16 +157,11 @@ export const EngineAnalyticsLogic = kea<
         setSearchSessionId: (_, { sessionId }) => sessionId,
       },
     ],
-    startDate: [
-      DEFAULT_TIME.from,
+
+    timeRange: [
+      DEFAULT_TIME_RANGE,
       {
-        setStartDate: (_, { startDate }) => startDate,
-      },
-    ],
-    time: [
-      DEFAULT_TIME,
-      {
-        setTimeChange: (state, { end, start }) => ({
+        setTimeRange: (state, { end, start }) => ({
           ...state,
           from: start,
           to: end,

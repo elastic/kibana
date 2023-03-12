@@ -50,7 +50,7 @@ describe('renderApp', () => {
     const unmount = renderApp(MockApp, kibanaDeps, pluginData);
     expect(mockContainer.querySelector('.hello-world')).not.toBeNull();
 
-    act(async () => (await unmount)());
+    act(() => unmount());
     expect(mockContainer.innerHTML).toEqual('');
   });
 

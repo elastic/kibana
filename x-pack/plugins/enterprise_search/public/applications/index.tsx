@@ -34,7 +34,7 @@ import { mountLicensingLogic } from './shared/licensing';
  * which should be imported and passed in as the first param in plugin.ts.
  */
 
-export const renderApp = async (
+export const renderApp = (
   App: React.FC<InitialAppData>,
   { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
   { config, data }: { config: ClientConfigType; data: ClientData }
@@ -52,8 +52,6 @@ export const renderApp = async (
 
   const EmptyContext: FC = ({ children }) => <>{children}</>;
   const CloudContext = plugins.cloud?.CloudContextProvider || EmptyContext;
-  const defaultDataView = await plugins.data.dataViews.getDefault();
-  const { formula } = await plugins.lens.stateHelperApi();
 
   resetContext({ createStore: true });
   const store = getContext().store;
@@ -66,8 +64,6 @@ export const renderApp = async (
     charts: plugins.charts,
     data: plugins.data,
     lens: plugins.lens,
-    defaultDataView,
-    formula,
     cloud: plugins.cloud,
     uiSettings: core.uiSettings,
     guidedOnboarding: plugins.guidedOnboarding,

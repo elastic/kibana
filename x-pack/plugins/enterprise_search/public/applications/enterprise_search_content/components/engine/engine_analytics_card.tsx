@@ -5,38 +5,34 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+
+import { useValues } from 'kea';
 
 import { EuiCard, EuiFlexItem, EuiIcon, EuiStat, EuiText, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EngineAnalyticsLens,
-  filterBy,
-  lensDataOutputProps,
-} from './engines_lens/engine_analytics_lens';
-import { TimeRange } from '@kbn/es-query';
-import { useValues } from 'kea';
-import { EngineAnalyticsLogic } from './engine_analytics_logic';
 
-export const getIcon = (percentage: number): string => {
+import { EngineAnalyticsLogic, titles } from './engine_analytics_logic';
+
+const getIcon = (percentage: number): string => {
   return percentage >= 0 ? 'sortUp' : 'sortDown';
 };
 
-interface EngineAnalyticsCardProps extends lensDataOutputProps {
+interface EngineAnalyticsCardProps {
   cardDisplay: 'success' | undefined;
-  cardTitle: string;
+  isQueriesCard: boolean;
   onClick: () => void;
-  percentage: number;
-  queries: number;
-  timeRange: TimeRange;
 }
 export const EngineAnalyticsCard: React.FC<EngineAnalyticsCardProps> = ({
   cardDisplay,
-  cardTitle,
+  isQueriesCard,
   onClick,
-  percentage,
-  queries,
 }) => {
+  const { queriesCount, queriesCountPercentage, noResults, noResultsPercentage } =
+    useValues(EngineAnalyticsLogic);
+  const queries = isQueriesCard ? queriesCount : noResults;
+  const percentage = isQueriesCard ? queriesCountPercentage : noResultsPercentage;
+
   return (
     <EuiFlexItem>
       <EuiCard
@@ -47,7 +43,7 @@ export const EngineAnalyticsCard: React.FC<EngineAnalyticsCardProps> = ({
               id="xpack.enterpriseSearch.content.engine.overview.analytics.totalQueries.card.title"
               defaultMessage="{title}"
               values={{
-                title: cardTitle,
+                title: isQueriesCard ? titles.cardQueries : titles.cardNoResults,
               }}
             />
           </EuiText>

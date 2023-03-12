@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { useActions, useValues } from 'kea';
 
 import {
   EuiButtonEmpty,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -18,7 +17,6 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -29,68 +27,63 @@ import { KibanaLogic } from '../../../shared/kibana';
 
 import { EngineAnalyticsCard } from './engine_analytics_card';
 
+import { EngineAnalyticsLogic, titles } from './engine_analytics_logic';
+
 import {
   EngineAnalyticsLens,
-  filterBy,
   getLensMetricLensAttributes,
   getLensXYLensAttributes,
 } from './engines_lens/engine_analytics_lens';
-import { EngineAnalyticsLogic } from './engine_analytics_logic';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
-const DEFAULT_TIME_RANGE = {
-  start: 'now-70d',
-  end: 'now',
-};
 export const EngineAnalytics: React.FC = () => {
-  const {
-    euiTheme: { colors: colors },
-  } = useEuiTheme();
+  const { lens } = useValues(KibanaLogic);
+
+  const { isNoResultsCardVisible, defaultDataView, formula, timeRange } =
+    useValues(EngineAnalyticsLogic);
+  const { data } = useValues(KibanaLogic);
 
   const {
-    isNoResultsCardVisible,
-    queriesCount,
-    queriesCountPercentage,
-    noResults,
-    noResultsPercentage,
-  } = useValues(EngineAnalyticsLogic);
-  const {
-    data: { dataViews, search },
-    formula,
-    defaultDataView,
-  } = useValues(KibanaLogic);
+    setNoResultsCardVisible,
+    setQueriesCardVisible,
+    setSearchSessionId,
+    getDefaultDataView,
+    getFormula,
+    setTimeRange,
+  } = useActions(EngineAnalyticsLogic);
 
-  const { setNoResultsCardVisible, setQueriesCardVisible, setSearchSessionId } =
-    useActions(EngineAnalyticsLogic);
-
-  const [timeRange, setTimeRange] = useState<{ from: string; to: string }>({
-    from: DEFAULT_TIME_RANGE.start,
-    to: DEFAULT_TIME_RANGE.end,
-  });
-
-  const [metricAttributesQueries, setMetricAttributesQueries] = useState<
-    TypedLensByValueInput['attributes'] | null
-  >(null);
-  const [metricAttributesNoResults, setMetricAttributesNoResults] = useState<
-    TypedLensByValueInput['attributes'] | null
-  >(null);
-  const xyAttributes = useMemo(
-    () =>
-      defaultDataView && getLensXYLensAttributes(defaultDataView, formula, !isNoResultsCardVisible),
-    [isNoResultsCardVisible]
-  );
+  // set default data view from kibana logic
+  useEffect(() => {
+    getDefaultDataView(data);
+    getFormula(lens);
+  }, []);
 
   useEffect(() => {
-    setSearchSessionId(search?.session.start());
-    if (defaultDataView) {
-      setMetricAttributesQueries(
-        getLensMetricLensAttributes(defaultDataView, formula, !isNoResultsCardVisible)
-      );
-      setMetricAttributesNoResults(
-        getLensMetricLensAttributes(defaultDataView, formula, isNoResultsCardVisible)
-      );
-    }
+    setSearchSessionId(data?.search?.session.start());
   }, []);
+
+  const xyAttributes = useMemo(
+    () =>
+      defaultDataView &&
+      formula &&
+      getLensXYLensAttributes(defaultDataView, formula, !isNoResultsCardVisible),
+    [isNoResultsCardVisible, defaultDataView, formula]
+  );
+
+  const metricAttributesQueries = useMemo(
+    () =>
+      defaultDataView &&
+      formula &&
+      getLensMetricLensAttributes(defaultDataView, formula, !isNoResultsCardVisible),
+    [defaultDataView, formula]
+  );
+
+  const metricAttributesNoResults = useMemo(
+    () =>
+      defaultDataView &&
+      formula &&
+      getLensMetricLensAttributes(defaultDataView, formula, isNoResultsCardVisible),
+    [defaultDataView, formula]
+  );
 
   return (
     <EuiFlexGroup wrap direction="column">
@@ -113,7 +106,7 @@ export const EngineAnalytics: React.FC = () => {
             <EuiSpacer size="s" />
             <EuiFlexGroup wrap>
               <EuiFlexItem grow>
-                <EuiText color={colors.subduedText} size="s">
+                <EuiText color="subdued" size="s">
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.engine.overview.analytics.subTitle',
                     {
@@ -153,7 +146,7 @@ export const EngineAnalytics: React.FC = () => {
                   id="xpack.enterpriseSearch.content.engine.overview.analytics.chart.title"
                   defaultMessage="{title}"
                   values={{
-                    title: !isNoResultsCardVisible ? 'Queries - Total' : 'Queries - No Results',
+                    title: !isNoResultsCardVisible ? titles.panelQueries : titles.panelNoResults,
                   }}
                 />
               </h2>
@@ -163,9 +156,7 @@ export const EngineAnalytics: React.FC = () => {
             <EuiSuperDatePicker
               start={timeRange.from}
               end={timeRange.to}
-              onTimeChange={({ start, end }) => {
-                setTimeRange({ from: start, to: end });
-              }}
+              onTimeChange={setTimeRange}
               showUpdateButton={false}
               width={'auto'}
               aria-label={i18n.translate(
@@ -176,47 +167,37 @@ export const EngineAnalytics: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        {/* Chart */}
+        {/* Area Chart */}
 
         <EuiFlexGroup wrap>
-          <EngineAnalyticsLens timeRange={timeRange} attributes={xyAttributes} />
+          <EngineAnalyticsLens attributes={xyAttributes} />
         </EuiFlexGroup>
-        {/* Cards */}
-        <div hidden>
+        {/* sets count and percentage values for the cards from onLoad props from lens Metric chart.
+          This div is hidden as the lens metric chart is used to calculate the metrics not display lens chart itself */}
+        <div hidden aria-hidden>
           {metricAttributesQueries ? (
-            <EngineAnalyticsLens
-              attributes={metricAttributesQueries}
-              metricAttributesQueriesFlag
-              timeRange={timeRange}
-            />
+            <EngineAnalyticsLens attributes={metricAttributesQueries} metricAttributesQueriesFlag />
           ) : null}
           {metricAttributesNoResults ? (
             <EngineAnalyticsLens
               attributes={metricAttributesNoResults}
               metricAttributesNoResultsFlag
-              timeRange={timeRange}
             />
           ) : null}
         </div>
-        <EuiFlexGrid columns={2} direction="column">
+        <EuiFlexGroup wrap>
           <EngineAnalyticsCard
-            queries={queriesCount}
-            percentage={queriesCountPercentage}
-            cardTitle="Total queries"
             cardDisplay={!isNoResultsCardVisible ? 'success' : undefined}
             onClick={setQueriesCardVisible}
-            timeRange={timeRange}
+            isQueriesCard
           />
 
           <EngineAnalyticsCard
-            queries={noResults}
-            percentage={noResultsPercentage}
-            cardTitle="Total queries with no results"
             cardDisplay={isNoResultsCardVisible ? 'success' : undefined}
             onClick={setNoResultsCardVisible}
-            timeRange={timeRange}
+            isQueriesCard={false}
           />
-        </EuiFlexGrid>
+        </EuiFlexGroup>
       </EuiPanel>
     </EuiFlexGroup>
   );

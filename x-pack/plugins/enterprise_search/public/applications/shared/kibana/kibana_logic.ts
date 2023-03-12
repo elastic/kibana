@@ -19,9 +19,8 @@ import {
   IUiSettingsClient,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { FormulaPublicApi, LensPublicStart } from '@kbn/lens-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import { ProductAccess } from '../../../../common/types';
@@ -50,19 +49,15 @@ interface KibanaLogicProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
   security: SecurityPluginStart;
   uiSettings: IUiSettingsClient;
+  lens: LensPublicStart;
   // Optional plugins
   cloud?: CloudSetup;
-  defaultDataView?: DataView | null; // should be changed with engine specific data view
-  formula?: FormulaPublicApi;
-  lens?: LensPublicStart;
 }
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
   cloud: Partial<CloudSetup>;
   isCloud: boolean;
   lens: LensPublicStart;
   data: DataPublicPluginStart;
-  defaultDataView: DataView | null;
-  formula: FormulaPublicApi;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
 }
 
@@ -75,11 +70,9 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     charts: [props.charts, {}],
     lens: [props.lens, {}],
     data: [props.data, {}],
-    formula: [props.formula || {}, {}],
     cloud: [props.cloud || {}, {}],
     guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],
-    defaultDataView: [props.defaultDataView || {}, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {
         const deps = { history: props.history, http: HttpLogic.values.http };

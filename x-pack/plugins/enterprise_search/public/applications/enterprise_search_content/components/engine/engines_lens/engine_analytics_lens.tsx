@@ -11,37 +11,31 @@ import { useActions, useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { SavedObjectReference } from '@kbn/core/server';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
+import { i18n } from '@kbn/i18n';
 import {
   DateHistogramIndexPatternColumn,
   FormulaPublicApi,
   PersistedIndexPatternLayer,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
+import { LensByReferenceInput } from '@kbn/lens-plugin/public/embeddable';
 import { MetricVisualizationState } from '@kbn/lens-plugin/public/visualizations/metric/visualization';
 
 import { KibanaLogic } from '../../../../shared/kibana';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { EngineAnalyticsLogic } from '../engine_analytics_logic';
-
-import { i18n } from '@kbn/i18n';
-import { TimeRange } from '@kbn/es-query';
-
-import { SavedObjectReference } from '@kbn/core/server';
-import { LensByReferenceInput } from '@kbn/lens-plugin/public/embeddable';
 
 enum lensTypes {
   lnsXY = 'lnsXY',
   lnsMetric = 'lnsMetric',
 }
 
-const getDataViewId = (dataView: DataView): string => {
-  return dataView && dataView.id ? dataView?.id : '';
-};
 const getReferences = (dataViewId: string, lensType: string): SavedObjectReference[] => {
   const referenceName =
-    lensType == lensTypes.lnsXY ? LENS_LAYERS.xy.layerId : LENS_LAYERS.metrics.layerId;
+    lensType === lensTypes.lnsXY ? LENS_LAYERS.xy.layerId : LENS_LAYERS.metrics.layerId;
   return [
     {
       id: dataViewId,
@@ -61,7 +55,7 @@ export enum filterBy {
   noResults = 'No Results',
 }
 
-export const chartAttributes = {
+const chartAttributes = {
   [filterBy.queries]: {
     chartColor: '#54B399',
     label: i18n.translate(
@@ -72,7 +66,7 @@ export const chartAttributes = {
     ),
   },
   [filterBy.noResults]: {
-    chartColor: '$euiColorVis1',
+    chartColor: '#6092C0',
     label: i18n.translate(
       'xpack.enterpriseSearch.content.engine.overview.analytics.lens.withNoResults.chart.title',
       {
@@ -81,58 +75,7 @@ export const chartAttributes = {
     ),
   },
 };
-
-const LENS_LAYERS = {
-  metrics: {
-    id: 'metric',
-    metricAccessor: 'totalQuery', // col2
-    secondaryMetricAccessor: 'percentage', //col 1
-    layerId: 'metricLayer',
-  },
-  xy: {
-    id: 'xy',
-    x: 'timeStamp',
-    y: 'queriesCount',
-    layerId: 'xYLayer',
-  },
-};
-
-export interface WithLensDataInputProps {
-  filterBy: string;
-  timeRange: TimeRange;
-}
-
-export interface lensDataOutputProps
-  extends lensDataNoResultsLogicOutputProps,
-    lensDataQueriesCardLogicOutputProps {
-  isLoading?: boolean;
-}
-// have two types of card - Queries, noResults
-export interface lensDataNoResultsLogicOutputProps {
-  noResultsMetric?: number; //queriesWithNoResults
-  noResultsSecondaryMetric?: number; //percentage
-}
-
-export interface lensDataQueriesCardLogicOutputProps {
-  queriesMetric?: number; //Total query
-  queriesSecondaryMetric?: number; //percentage
-}
-
-/*
-  lensType -  type of lens : xy / metric
-  xy -> queries or no results
-  metric -> calculate Q, Q%, No res , No Res %
-
-  currentFilter - type of card currently showing
-    * queries
-    * no Results
-
-  //required : "(count(event.customer_data.query) - count(event.customer_data.query, shift='previous')) / abs(count(event.customer_data.query, shift='previous'))",
-   count(event.customer_data.query)
-
-*/
-
-export const getFormula = {
+const getFormula = {
   [filterBy.queries]: {
     total: 'count(event.customer_data.query)',
     percentage:
@@ -142,6 +85,21 @@ export const getFormula = {
     total: "count(kql='event.customer_data.totalResults :0')",
     percentage:
       "(count(kql='event.customer_data.totalResults :0') - count(kql='event.customer_data.totalResults :0', shift='previous')) / abs(count(kql='event.customer_data.totalResults :0', shift='previous'))",
+  },
+};
+
+const LENS_LAYERS = {
+  metrics: {
+    id: 'metric',
+    metricAccessor: 'totalQuery',
+    secondaryMetricAccessor: 'percentage',
+    layerId: 'metricLayer',
+  },
+  xy: {
+    id: 'xy',
+    x: 'timeStamp',
+    y: 'queriesCount',
+    layerId: 'xYLayer',
   },
 };
 
@@ -197,15 +155,12 @@ const getLensMetricformulaInsertOrReplaceFormulaColumn = (
   );
   return dateLayer;
 };
-//constructs XY Lens attributes
+// construct Lens attributes for Area - (lnsXY) chart
 export const getLensXYLensAttributes = (
   defaultDataView: DataView,
   formulaApi: FormulaPublicApi,
   isShowingTotalQueries: boolean
 ): TypedLensByValueInput['attributes'] | null => {
-  // TODO:: check if dataView is null before
-
-  // const dataViewId = defaultDataView && defaultDataView.id ? defaultDataView?.id : '';
   const currentFilter = isShowingTotalQueries ? filterBy.queries : filterBy.noResults;
 
   const columnsData: DateHistogramIndexPatternColumn = {
@@ -247,7 +202,7 @@ export const getLensXYLensAttributes = (
   return {
     visualizationType: lensTypes.lnsXY,
     title: '',
-    references: getReferences(getDataViewId(defaultDataView), lensTypes.lnsXY),
+    references: getReferences(defaultDataView.id ?? '', lensTypes.lnsXY),
     state: {
       datasourceStates: {
         formBased: {
@@ -273,7 +228,7 @@ export const getLensXYLensAttributes = (
   };
 };
 
-//constructs Metric Lens attributes
+// construct Lens attributes for Metric - (lnsMetric) chart
 export const getLensMetricLensAttributes = (
   defaultDataView: DataView,
   formulaApi: FormulaPublicApi,
@@ -282,12 +237,12 @@ export const getLensMetricLensAttributes = (
   const metricState: MetricVisualizationState = {
     layerId: LENS_LAYERS.metrics.layerId,
     layerType: 'data',
-    metricAccessor: LENS_LAYERS.metrics.metricAccessor, //col2
-    secondaryMetricAccessor: LENS_LAYERS.metrics.secondaryMetricAccessor, //col1
+    metricAccessor: LENS_LAYERS.metrics.metricAccessor, // col2
+    secondaryMetricAccessor: LENS_LAYERS.metrics.secondaryMetricAccessor, // col1
     secondaryPrefix: '',
   };
   const totalQueriesBaseLayer: PersistedIndexPatternLayer = {
-    columnOrder: [LENS_LAYERS.metrics.secondaryMetricAccessor], //col1
+    columnOrder: [LENS_LAYERS.metrics.secondaryMetricAccessor], // col1
     columns: {
       [LENS_LAYERS.metrics.secondaryMetricAccessor]: {
         customLabel: true,
@@ -315,10 +270,9 @@ export const getLensMetricLensAttributes = (
   }
 
   const totalQueriesWithNoResultsBaseLayer: PersistedIndexPatternLayer = {
-    columnOrder: [LENS_LAYERS.metrics.metricAccessor], //col2
+    columnOrder: [LENS_LAYERS.metrics.metricAccessor],
     columns: {
       [LENS_LAYERS.metrics.metricAccessor]: {
-        //col2
         customLabel: true,
         dataType: 'number',
         isBucketed: false,
@@ -340,6 +294,7 @@ export const getLensMetricLensAttributes = (
     return null;
   }
   return {
+    references: getReferences(defaultDataView.id ?? '', lensTypes.lnsMetric),
     state: {
       datasourceStates: {
         formBased: {
@@ -363,29 +318,22 @@ export const getLensMetricLensAttributes = (
       query: { language: 'kuery', query: '' },
       visualization: metricState,
     },
-    visualizationType: lensTypes.lnsMetric,
     title: '',
-
-    references: getReferences(getDataViewId(defaultDataView), lensTypes.lnsMetric),
+    visualizationType: lensTypes.lnsMetric,
   };
 };
 interface EngineAnalyticsLensProps {
-  // metricCardType?: metricCardTypes;
-  timeRange: { from: string; to: string };
-  metricAttributesNoResultsFlag?: boolean;
-  metricAttributesQueriesFlag?: boolean;
   attributes: TypedLensByValueInput['attributes'] | null;
+  metricAttributesNoResultsFlag?: boolean; // determines which type of metric attribute we are fetching
+  metricAttributesQueriesFlag?: boolean;
 }
 export const EngineAnalyticsLens: React.FC<EngineAnalyticsLensProps> = ({
-  timeRange,
-  // metricCardType,
   metricAttributesNoResultsFlag,
   metricAttributesQueriesFlag,
   attributes,
 }) => {
   const {
     lens: { EmbeddableComponent },
-    data: { dataViews, search },
   } = useValues(KibanaLogic);
   const {
     setIsLoading,
@@ -394,33 +342,27 @@ export const EngineAnalyticsLens: React.FC<EngineAnalyticsLensProps> = ({
     setNoResults,
     setNoResultsPercentage,
   } = useActions(EngineAnalyticsLogic);
-  const {
-    isNoResultsCardVisible,
-    searchSessionId,
-    // startDate,
-    // endDate,
-    // time,
-  } = useValues(EngineAnalyticsLogic);
+  const { searchSessionId, timeRange } = useValues(EngineAnalyticsLogic);
 
   const displayNone = metricAttributesQueriesFlag || metricAttributesNoResultsFlag ? 'none' : '';
+  const lensChartId =
+    metricAttributesQueriesFlag || metricAttributesNoResultsFlag
+      ? `${lensTypes.lnsMetric}-${attributes?.references?.[0]?.id}`
+      : `${lensTypes.lnsXY}-${attributes?.references?.[0]?.id}`;
 
   const onDataLoad: LensByReferenceInput['onLoad'] = (isLoading, adapters) => {
     setIsLoading(isLoading);
     if (adapters) {
-      if (metricAttributesQueriesFlag) {
-        setTotalQueries(
-          adapters?.tables?.tables?.[LENS_LAYERS.metrics.layerId]?.rows[0]?.totalQuery ?? null
-        );
-        setTotalQueriesPercentage(
-          adapters?.tables?.tables?.[LENS_LAYERS.metrics.layerId]?.rows[0]?.percentage * 100 ?? null
-        );
-      } else if (metricAttributesNoResultsFlag) {
-        setNoResults(
-          adapters?.tables?.tables?.[LENS_LAYERS.metrics.layerId]?.rows[0]?.totalQuery ?? null
-        );
-        setNoResultsPercentage(
-          adapters?.tables?.tables?.[LENS_LAYERS.metrics.layerId]?.rows[0]?.percentage * 100 ?? null
-        );
+      const total =
+        adapters?.tables?.tables?.[LENS_LAYERS.metrics.layerId]?.rows[0]?.totalQuery ?? null;
+      const percentage =
+        adapters?.tables?.tables?.[LENS_LAYERS.metrics.layerId]?.rows[0]?.percentage * 100 ?? null;
+      if (metricAttributesQueriesFlag && !metricAttributesNoResultsFlag) {
+        setTotalQueries(total);
+        setTotalQueriesPercentage(percentage);
+      } else if (metricAttributesNoResultsFlag && !metricAttributesQueriesFlag) {
+        setNoResults(total);
+        setNoResultsPercentage(percentage);
       }
     }
   };
@@ -431,8 +373,8 @@ export const EngineAnalyticsLens: React.FC<EngineAnalyticsLensProps> = ({
         <EuiFlexItem>
           {attributes && searchSessionId ? (
             <EmbeddableComponent
-              id={'engines-analytics-lens-' + `${lensTypes.lnsXY}`}
-              withDefaultActions
+              id={'engines-analytics-lens-' + lensChartId}
+              withDefaultActions={false}
               style={{ display: displayNone, height: 500 }}
               timeRange={timeRange}
               attributes={attributes}
