@@ -24,6 +24,7 @@ import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { FleetPermissionsCallout } from '../../common/components/permissions';
 import { LocationForm } from './location_form';
+import { ManageEmptyState } from './manage_empty_state';
 
 export const AddLocationFlyout = ({
   onSubmit,
@@ -69,32 +70,39 @@ export const AddLocationFlyout = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {!canManagePrivateLocation && <FleetPermissionsCallout />}
-
-          <LocationForm
+          <ManageEmptyState
             privateLocations={privateLocations}
-            hasPermissions={canManagePrivateLocation}
-          />
+            hasFleetPermissions={canManagePrivateLocation}
+            showEmptyLocations={false}
+          >
+            {!canManagePrivateLocation && <FleetPermissionsCallout />}
+            <LocationForm
+              privateLocations={privateLocations}
+              hasPermissions={canManagePrivateLocation}
+            />
+          </ManageEmptyState>
         </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="cross"
-                onClick={closeFlyout}
-                flush="left"
-                isLoading={isLoading}
-              >
-                {CANCEL_LABEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={handleSubmit(onSubmit)} isLoading={isLoading}>
-                {SAVE_LABEL}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
+        {canManagePrivateLocation && (
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="cross"
+                  onClick={closeFlyout}
+                  flush="left"
+                  isLoading={isLoading}
+                >
+                  {CANCEL_LABEL}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton fill onClick={handleSubmit(onSubmit)} isLoading={isLoading}>
+                  {SAVE_LABEL}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        )}
       </EuiFlyout>
     </FormProvider>
   );

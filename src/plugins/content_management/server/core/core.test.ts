@@ -5,8 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { schema } from '@kbn/config-schema';
-
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Core } from './core';
 import { createMemoryStorage, FooContent } from './mocks';
@@ -37,11 +35,14 @@ import { ContentTypeDefinition, StorageContext } from './types';
 const logger = loggingSystemMock.createLogger();
 
 const FOO_CONTENT_ID = 'foo';
-const fooSchema = schema.object({ title: schema.string() });
 
 const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) => {
   const ctx: StorageContext = {
     requestHandlerContext: {} as any,
+    version: {
+      latest: 'v1',
+      request: 'v1',
+    },
   };
 
   const core = new Core({ logger });
@@ -49,12 +50,8 @@ const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) 
   const contentDefinition: ContentTypeDefinition = {
     id: FOO_CONTENT_ID,
     storage: createMemoryStorage(),
-    schemas: {
-      content: {
-        create: { in: { data: fooSchema } },
-        update: { in: { data: fooSchema } },
-        search: { in: { query: schema.any() } },
-      },
+    version: {
+      latest: 'v2',
     },
   };
   const cleanUp = () => {
@@ -108,6 +105,27 @@ describe('Content Core', () => {
           // the content into our "contentRegistry" instance
           expect(contentRegistry.isContentRegistered(FOO_CONTENT_ID)).toBe(true);
           expect(contentRegistry.getDefinition(FOO_CONTENT_ID)).toBe(contentDefinition);
+
+          cleanUp();
+        });
+
+        test('should throw if latest version passed is not valid', () => {
+          const { coreSetup, cleanUp, contentDefinition } = setup();
+
+          const {
+            contentRegistry,
+            api: { register },
+          } = coreSetup;
+
+          expect(contentRegistry.isContentRegistered(FOO_CONTENT_ID)).toBe(false);
+
+          expect(() => {
+            register({ ...contentDefinition, version: undefined } as any);
+          }).toThrowError('Invalid version [undefined]. Must follow the pattern [v${number}]');
+
+          expect(() => {
+            register({ ...contentDefinition, version: { latest: 'v0' } });
+          }).toThrowError('Version must be >= 1');
 
           cleanUp();
         });
