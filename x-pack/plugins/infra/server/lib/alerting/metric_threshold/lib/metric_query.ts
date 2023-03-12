@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { isNotCount, isNotCustom, isNotCountOrCustom } from './metric_expression_params';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { createCustomMetricsAggregations } from '../../../create_custom_metrics_aggregations';
 import {
@@ -46,7 +47,6 @@ export const createBaseFilters = (
   timeframe: { start: number; end: number },
   filterQuery?: string
 ) => {
-  const { metric } = metricParams;
   const rangeFilters = [
     {
       range: {
@@ -58,15 +58,16 @@ export const createBaseFilters = (
     },
   ];
 
-  const metricFieldFilters = metric
-    ? [
-        {
-          exists: {
-            field: metric,
+  const metricFieldFilters =
+    isNotCountOrCustom(metricParams) && metricParams.metric
+      ? [
+          {
+            exists: {
+              field: metricParams.metric,
+            },
           },
-        },
-      ]
-    : [];
+        ]
+      : [];
 
   const parsedFilterQuery = getParsedFilterQuery(filterQuery);
 
@@ -84,11 +85,8 @@ export const getElasticsearchMetricQuery = (
   afterKey?: Record<string, string>,
   fieldsExisted?: Record<string, boolean> | null
 ) => {
-  const { metric, aggType } = metricParams;
-  if (aggType === Aggregators.COUNT && metric) {
-    throw new Error('Cannot aggregate document count with a metric');
-  }
-  if (!['count', 'custom'].includes(aggType) && !metric) {
+  const { aggType } = metricParams;
+  if (isNotCountOrCustom(metricParams) && !metricParams.metric) {
     throw new Error('Can only aggregate without a metric if using the document count aggregator');
   }
 
@@ -96,26 +94,25 @@ export const getElasticsearchMetricQuery = (
   // to the total timeframe (which includes the last period).
   const currentTimeframe = calculateCurrentTimeframe(metricParams, timeframe);
 
-  const metricAggregations =
-    aggType === Aggregators.COUNT
-      ? {}
-      : aggType === Aggregators.RATE
-      ? createRateAggsBuckets(currentTimeframe, 'aggregatedValue', metric)
-      : aggType === Aggregators.P95 || aggType === Aggregators.P99
-      ? createPercentileAggregation(aggType, metric)
-      : aggType === Aggregators.CUSTOM
-      ? createCustomMetricsAggregations(
-          'aggregatedValue',
-          metricParams.customMetrics,
-          metricParams.equation
-        )
-      : {
-          aggregatedValue: {
-            [aggType]: {
-              field: metric,
-            },
+  const metricAggregations = isNotCount(metricParams)
+    ? {}
+    : isNotCustom(metricParams)
+    ? createCustomMetricsAggregations(
+        'aggregatedValue',
+        metricParams.customMetrics,
+        metricParams.equation
+      )
+    : aggType === Aggregators.RATE
+    ? createRateAggsBuckets(currentTimeframe, 'aggregatedValue', metricParams.metric)
+    : aggType === Aggregators.P95 || aggType === Aggregators.P99
+    ? createPercentileAggregation(aggType, metricParams.metric)
+    : {
+        aggregatedValue: {
+          [aggType]: {
+            field: metricParams.metric,
           },
-        };
+        },
+      };
 
   const bucketSelectorAggregations = createBucketSelector(
     metricParams,
