@@ -10,7 +10,7 @@ import { DiscoverSavedSearchContainer } from '../../services/discover_saved_sear
 import { DiscoverDataStateContainer } from '../../services/discover_data_state_container';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import {
-  AppState,
+  DiscoverAppState,
   DiscoverAppStateContainer,
   isEqualState,
 } from '../../services/discover_app_state_container';
@@ -36,7 +36,7 @@ export const buildStateSubscribe =
     loadAndResolveDataView: DiscoverStateContainer['actions']['loadAndResolveDataView'];
     setDataView: DiscoverStateContainer['actions']['setDataView'];
   }) =>
-  async (nextState: AppState) => {
+  async (nextState: DiscoverAppState) => {
     const prevState = appState.getPrevious();
     const savedSearch = savedSearchState.get();
     if (isEqualState(prevState, nextState)) {

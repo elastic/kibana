@@ -33,7 +33,7 @@ import { DiscoverDataStateContainer, getDataStateContainer } from './discover_da
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
 import {
-  AppState,
+  DiscoverAppState,
   DiscoverAppStateContainer,
   getDiscoverAppStateContainer,
   GLOBAL_STATE_URL_KEY,
@@ -393,7 +393,7 @@ export function getDiscoverStateContainer({
 }
 
 export function createSearchSessionRestorationDataProvider(deps: {
-  appStateContainer: StateContainer<AppState>;
+  appStateContainer: StateContainer<DiscoverAppState>;
   data: DataPublicPluginStart;
   getSavedSearch: () => SavedSearch;
 }): SearchSessionInfoProvider {
@@ -432,7 +432,7 @@ function createUrlGeneratorState({
   getSavedSearchId,
   shouldRestoreSearchSession,
 }: {
-  appStateContainer: StateContainer<AppState>;
+  appStateContainer: StateContainer<DiscoverAppState>;
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
   shouldRestoreSearchSession: boolean;

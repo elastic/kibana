@@ -13,7 +13,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getRawRecordType } from '../utils/get_raw_record_type';
-import { AppState } from './discover_app_state_container';
+import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { SEARCH_FIELDS_FROM_SOURCE, SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
@@ -132,7 +132,7 @@ export function getDataStateContainer({
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
-  getAppState: () => AppState;
+  getAppState: () => DiscoverAppState;
   getSavedSearch: () => SavedSearch;
 }): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications } = services;

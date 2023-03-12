@@ -16,7 +16,7 @@ import { loadSavedSearch } from '../utils/load_saved_search';
 import { updateSavedSearch } from '../utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { AppState } from './discover_app_state_container';
+import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { persistSavedSearch } from '../utils/persist_saved_search';
 import { getStateDefaults } from '../utils/get_state_defaults';
@@ -24,18 +24,18 @@ import { getStateDefaults } from '../utils/get_state_defaults';
 export interface LoadParams {
   dataViewSpec?: DataViewSpec;
   dataViewList: DataViewListItem[];
-  appState?: AppState;
+  appState?: DiscoverAppState;
 }
 
 export interface UpdateParams {
   nextDataView: DataView | undefined;
-  nextState: AppState;
+  nextState: DiscoverAppState;
   resetSavedSearch?: boolean;
   filterAndQuery?: boolean;
 }
 
 export interface PersistParams {
-  appState: AppState;
+  appState: DiscoverAppState;
   dataView?: DataView;
   saveOptions: SavedObjectSaveOpts;
 }
@@ -82,7 +82,7 @@ export interface DiscoverSavedSearchContainer {
    * @param dataView
    * @param appState
    */
-  new: (dataView?: DataView, appState?: AppState) => Promise<SavedSearch>;
+  new: (dataView?: DataView, appState?: DiscoverAppState) => Promise<SavedSearch>;
   /**
    * Persist the given saved search
    * Resets the initial and current state of the saved search
@@ -132,7 +132,10 @@ export function getSavedSearchContainer({
   const getTitle = () => savedSearchCurrent$.getValue().title ?? '';
   const getId = () => savedSearchCurrent$.getValue().id;
 
-  const newSavedSearch = async (nextDataView: DataView | undefined, appState?: AppState) => {
+  const newSavedSearch = async (
+    nextDataView: DataView | undefined,
+    appState?: DiscoverAppState
+  ) => {
     addLog('[savedSearch] new', { nextDataView, appState });
     const dataView = nextDataView ?? get().searchSource.getField('index');
     const nextSavedSearch = await getSavedSearch('', {
@@ -204,8 +207,8 @@ export function getSavedSearchContainer({
 
       hasChanged$.next(hasChanged);
       savedSearchCurrent$.next(nextSavedSearch);
-      addLog('[savedSearch] updated savedSearch', nextSavedSearch);
     }
+    addLog('[savedSearch] update done', nextSavedSearch);
     return nextSavedSearch;
   };
 
@@ -266,7 +269,7 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
     !isEqual(prevSearchSource.getField('index'), nextSearchSource.getField('index'));
   const hasChanged = Boolean(savedSearchDiff.length || searchSourceDiff);
   if (hasChanged) {
-    addLog('🔎 [savedSearch] difference between initial and changed version');
+    addLog('[savedSearch] difference between initial and changed version', searchSourceDiff);
   }
   return !hasChanged;
 }

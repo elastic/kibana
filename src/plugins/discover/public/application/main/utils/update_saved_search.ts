@@ -8,10 +8,9 @@
 import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { AppState } from '../services/discover_app_state_container';
+import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { updatePersistedSearchSource } from './update_search_source';
-import { addLog } from '../../../utils/add_log';
 
 export function updateSavedSearch(
   {
@@ -22,12 +21,11 @@ export function updateSavedSearch(
   }: {
     savedSearch: SavedSearch;
     dataView: DataView;
-    state: AppState;
+    state: DiscoverAppState;
     services: DiscoverServices;
   },
   initial: boolean = false
 ) {
-  addLog('updateSavedSearch', { savedSearch, dataView, state, initial });
   if (!initial) {
     updatePersistedSearchSource(savedSearch.searchSource, {
       dataView,
