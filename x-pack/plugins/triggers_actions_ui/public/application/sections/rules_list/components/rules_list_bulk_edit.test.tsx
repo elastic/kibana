@@ -95,10 +95,6 @@ const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'
 );
 const { loadRuleTypes } = jest.requireMock('../../../lib/rule_api/rule_types');
-const { bulkSnoozeRules } = jest.requireMock('../../../lib/rule_api/snooze');
-const { bulkUnsnoozeRules } = jest.requireMock('../../../lib/rule_api/unsnooze');
-const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api/update_api_key');
-
 const { loadRulesWithKueryFilter } = jest.requireMock('../../../lib/rule_api/rules_kuery_filter');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 
