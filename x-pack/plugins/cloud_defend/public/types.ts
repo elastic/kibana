@@ -51,61 +51,97 @@ export interface CloudDefendSecuritySolutionContext {
 /**
  * cloud_defend/control types
  */
-export enum ControlResponseAction {
-  alert = 'alert',
-  block = 'block',
+
+// Currently we support file and process selectors (which match on their respective set of lsm hook points)
+export type SelectorType = 'file' | 'process';
+
+/*
+ * 'stringArray' uses a EuiComboBox
+ * 'flag' is a boolean value which is always 'true'
+ * 'boolean' can be true or false
+ */
+export type SelectorConditionType = 'stringArray' | 'flag' | 'boolean';
+
+export type SelectorCondition =
+  | 'containerImageName'
+  | 'containerImageTag'
+  | 'fullContainerImageName'
+  | 'orchestratorClusterId'
+  | 'orchestratorClusterName'
+  | 'orchestratorNamespace'
+  | 'orchestratorResourceLabel'
+  | 'orchestratorResourceName'
+  | 'orchestratorResourceType'
+  | 'orchestratorResourceLabel'
+  | 'orchestratorType'
+  | 'targetFilePath'
+  | 'ignoreVolumeFiles'
+  | 'ignoreVolumeMounts'
+  | 'operation'
+  | 'processExecutable'
+  | 'processName'
+  | 'processUserName'
+  | 'processUserId'
+  | 'sessionLeaderInteractive'
+  | 'sessionLeaderExecutable'
+  | 'operation';
+
+export interface SelectorConditionOptions {
+  type: SelectorConditionType;
+  selectorType?: SelectorType;
+  not?: SelectorCondition[];
+  values?:
+    | {
+        file?: string[];
+        process?: string[];
+      }
+    | string[];
 }
 
-export enum ControlSelectorCondition {
-  operation = 'operation',
-  containerImageName = 'containerImageName',
-  containerImageTag = 'containerImageTag',
-  targetFilePath = 'targetFilePath',
-  ignoreVolumeFiles = 'ignoreVolumeFiles',
-  ignoreVolumeMounts = 'ignoreVolumeMounts',
-  orchestratorClusterId = 'orchestratorClusterId',
-  orchestratorClusterName = 'orchestratorClusterName',
-  orchestratorNamespace = 'orchestratorNamespace',
-  orchestratorResourceLabel = 'orchestratorResourceLabel',
-  orchestratorResourceName = 'orchestratorResourceName',
-  orchestratorResourceType = 'orchestratorResourceType',
-  orchestratorType = 'orchestratorType',
-}
-
-export enum ControlSelectorBooleanConditions {
-  ignoreVolumeFiles = 'ignoreVolumeFiles',
-  ignoreVolumeMounts = 'ignoreVolumeMounts',
-}
-
-export enum ControlSelectorOperation {
-  createExecutable = 'createExecutable',
-  modifyExecutable = 'modifyExecutable',
-  execMemFd = 'execMemFd',
-}
-
-export enum ControlSelectorOrchestratorType {
-  kubernetes = 'kubernetes',
-}
-
-export interface ControlSelectorConditionUIOptions {
-  [key: string]: {
-    values: string[];
-  };
-}
-
-export const ControlSelectorConditionUIOptionsMap: ControlSelectorConditionUIOptions = {
-  operation: { values: Object.values(ControlSelectorOperation) },
-  orchestratorType: { values: Object.values(ControlSelectorOrchestratorType) },
+export type SelectorConditionsMapProps = {
+  [key in SelectorCondition]: SelectorConditionOptions;
 };
 
-export interface ControlSelector {
+// used to determine UX control and allowed values for each condition
+export const SelectorConditionsMap: SelectorConditionsMapProps = {
+  containerImageName: { type: 'stringArray', not: ['fullContainerImageName'] },
+  containerImageTag: { type: 'stringArray' },
+  fullContainerImageName: {
+    type: 'stringArray',
+    not: ['containerImageName'],
+  },
+  orchestratorClusterId: { type: 'stringArray' },
+  orchestratorClusterName: { type: 'stringArray' },
+  orchestratorNamespace: { type: 'stringArray' },
+  orchestratorResourceLabel: { type: 'stringArray' },
+  orchestratorResourceName: { type: 'stringArray' },
+  orchestratorResourceType: { type: 'stringArray' },
+  orchestratorType: { type: 'stringArray', values: ['kubernetes'] },
+  operation: {
+    type: 'stringArray',
+    values: {
+      file: ['createExecutable', 'modifyExecutable', 'createFile', 'modifyFile', 'deleteFile'],
+      process: ['fork', 'exec'],
+    },
+  },
+  targetFilePath: { selectorType: 'file', type: 'stringArray' },
+  ignoreVolumeFiles: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeMounts'] },
+  ignoreVolumeMounts: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeFiles'] },
+  processExecutable: { selectorType: 'process', type: 'stringArray', not: ['processName'] },
+  processName: { selectorType: 'process', type: 'stringArray', not: ['processExecutable'] },
+  processUserName: { selectorType: 'process', type: 'stringArray' },
+  processUserId: { selectorType: 'process', type: 'stringArray' },
+  sessionLeaderInteractive: { selectorType: 'process', type: 'boolean' },
+  sessionLeaderExecutable: { selectorType: 'process', type: 'stringArray' },
+};
+
+export type ResponseAction = 'log' | 'alert' | 'block';
+
+export interface Selector {
   name: string;
   operation?: string[];
   containerImageName?: string[];
   containerImageTag?: string[];
-  targetFilePath?: string[];
-  ignoreVolumeFiles?: boolean;
-  ignoreVolumeMounts?: boolean;
   orchestratorClusterId?: string[];
   orchestratorClusterName?: string[];
   orchestratorNamespace?: string[];
@@ -114,27 +150,57 @@ export interface ControlSelector {
   orchestratorResourceType?: string[];
   orchestratorType?: string[];
 
-  // ephemeral, used to track selector error state in UI
+  // selector properties
+  targetFilePath?: string[];
+  ignoreVolumeFiles?: boolean;
+  ignoreVolumeMounts?: boolean;
+
+  // process selector properties
+  processExecutable?: string[];
+  processName?: string[];
+  processUserName?: string[];
+  processUserId?: string[];
+  sessionLeaderInteractive?: string[];
+
+  // non yaml fields
+  type: SelectorType;
+  // used to track selector error state in UI
   hasErrors?: boolean;
 }
 
-export interface ControlResponse {
+export interface Response {
   match: string[];
   exclude?: string[];
-  actions: ControlResponseAction[];
+  actions: ResponseAction[];
 
-  // ephemeral, used to track response error state in UI
+  // non yaml fields
+  type: SelectorType;
+  // used to track response error state in UI
   hasErrors?: boolean;
 }
 
-export const DefaultSelector: ControlSelector = {
+export const DefaultFileSelector: Selector = {
+  type: 'file',
   name: 'Untitled',
-  operation: ControlSelectorConditionUIOptionsMap.operation.values,
+  operation: ['createExecutable', 'modifyExecutable'],
 };
 
-export const DefaultResponse: ControlResponse = {
+export const DefaultProcessSelector: Selector = {
+  type: 'process',
+  name: 'Untitled',
+  operation: ['fork', 'exec'],
+};
+
+export const DefaultFileResponse: Response = {
+  type: 'file',
   match: [],
-  actions: [ControlResponseAction.alert],
+  actions: ['alert'],
+};
+
+export const DefaultProcessResponse: Response = {
+  type: 'process',
+  match: [],
+  actions: ['alert'],
 };
 
 export interface OnChangeDeps {
@@ -152,22 +218,22 @@ export interface ViewDeps extends SettingsDeps {
 }
 
 export interface ControlGeneralViewSelectorDeps {
-  selector: ControlSelector;
-  selectors: ControlSelector[];
+  selector: Selector;
+  selectors: Selector[];
   index: number;
-  onChange(selector: ControlSelector, index: number): void;
+  onChange(selector: Selector, index: number): void;
   onRemove(index: number): void;
-  onDuplicate(selector: ControlSelector): void;
+  onDuplicate(selector: Selector): void;
 }
 
 export interface ControlGeneralViewResponseDeps {
-  response: ControlResponse;
-  selectors: ControlSelector[];
-  responses: ControlResponse[];
+  response: Response;
+  selectors: Selector[];
+  responses: Response[];
   index: number;
-  onChange(response: ControlResponse, index: number): void;
+  onChange(response: Response, index: number): void;
   onRemove(index: number): void;
-  onDuplicate(response: ControlResponse): void;
+  onDuplicate(response: Response): void;
 }
 
 export interface ControlFormErrorMap {

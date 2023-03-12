@@ -20,6 +20,7 @@ import { StyledContextMenu, StyledEuiButtonEmpty } from '../styles';
 export interface GroupSelectorProps {
   'data-test-subj'?: string;
   fields: FieldSpec[];
+  groupingId: string;
   groupSelected: string;
   onGroupChange: (groupSelection: string) => void;
   options: Array<{ key: string; label: string }>;
