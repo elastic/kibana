@@ -6,7 +6,7 @@ Selecting a non-mobile <<services,*service*>> brings you to the *Service overvie
 The *Service overview* contains a wide variety of charts and tables that provide
 high-level visibility into how a service is performing across your infrastructure:
 
-* Service details like service version, runtime version, framework, and agent name and version
+* Service details like service version, runtime version, framework, and APM agent name and version
 * Container and orchestration information
 * Cloud provider, machine type, service name, region, and availability zone
 * Serverless function names and event trigger type
@@ -109,7 +109,7 @@ image::apm/images/error-rate.png[failed transaction rate and errors]
 
 The *Time spent by span type* chart visualizes each span type's average duration and helps you determine
 which spans could be slowing down transactions. The "app" label displayed under the
-chart indicates that something was happening within the application. This could signal that the
+chart indicates that something was happening within the application. This could signal that the APM
 agent does not have auto-instrumentation for whatever was happening during that time or that the time was spent in the
 application code and not in database or external requests.
 
@@ -168,7 +168,7 @@ image::apm/images/metadata-icons.png[Service metadata]
 * Service version
 * Runtime name and version
 * Framework name
-* Agent name and version
+* APM agent name and version
 
 *Container information*
 

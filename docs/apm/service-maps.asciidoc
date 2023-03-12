@@ -96,16 +96,16 @@ To learn how to create a machine learning job, see <<machine-learning-integratio
 
 Nodes appear on the map in one of two shapes:
 
-* **Circle**: Instrumented services. Interior icons are based on the language of the agent used.
+* **Circle**: Instrumented services. Interior icons are based on the language of the APM agent used.
 * **Diamond**: Databases, external, and messaging. Interior icons represent the generic type,
 with specific icons for known entities, like Elasticsearch.
 Type and subtype are based on `span.type`, and `span.subtype`.
 
 [float]
 [[service-maps-supported]]
-=== Supported APM Agents
+=== Supported APM agents
 
-Service maps are supported for the following Agent versions:
+Service maps are supported for the following APM agent versions:
 
 [horizontal]
 Go agent:: ≥ v1.7.0

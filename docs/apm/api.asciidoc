@@ -87,15 +87,15 @@ which you can use to automate certain aspects of configuring and deploying Kiban
 [[agent-config-api]]
 === Agent Configuration API
 
-The Agent configuration API allows you to fine-tune your APM agent configuration,
+The APM agent configuration API allows you to fine-tune your APM agent configuration,
 without needing to redeploy your application.
 
-The following Agent configuration APIs are available:
+The following APM agent configuration APIs are available:
 
-* <<apm-update-config>> to create or update an Agent configuration
-* <<apm-delete-config>> to delete an Agent configuration.
-* <<apm-list-config>> to list all Agent configurations.
-* <<apm-search-config>> to search for an Agent configuration.
+* <<apm-update-config>> to create or update an APM agent configuration
+* <<apm-delete-config>> to delete an APM agent configuration.
+* <<apm-list-config>> to list all APM agent configurations.
+* <<apm-search-config>> to search for an APM agent configuration.
 
 [float]
 [[use-agent-config-api]]
@@ -307,7 +307,7 @@ GET  /api/apm/settings/agent-configuration
 ======
 
 `etag`::
-(required) etag is sent by the agent to indicate the etag of the last successfully applied configuration. If the etag matches an existing configuration its `applied_by_agent` property will be set to `true`. Every time a configuration is edited `applied_by_agent` is reset to `false`.
+(required) etag is sent by the APM agent to indicate the etag of the last successfully applied configuration. If the etag matches an existing configuration its `applied_by_agent` property will be set to `true`. Every time a configuration is edited `applied_by_agent` is reset to `false`.
 
 [[apm-search-config-body]]
 ===== Response body
@@ -719,11 +719,11 @@ curl -X DELETE "http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-644fd5a9"
 [[agent-key-api]]
 === APM agent Key API
 
-The Agent Key API allows you to configure agent keys to authorize requests from APM agents to the APM Server.
+The APM agent Key API allows you to configure APM agent keys to authorize requests from APM agents to the APM Server.
 
-The following Agent key APIs are available:
+The following APM agent key APIs are available:
 
-* <<apm-create-agent-key>> to create an agent key
+* <<apm-create-agent-key>> to create an APM agent key
 
 [float]
 [[use-agent-key-api]]
@@ -778,13 +778,13 @@ POST /_security/role/apm_agent_key_user
 ===== Request body
 
 `name`::
-(required, string) Name of the agent key.
+(required, string) Name of the APM agent key.
 
 `privileges`::
 (required, array) APM agent key privileges. It can take one or more of the following values:
 
-  - `event:write`. Required for ingesting agent events.
-  - `config_agent:read`. Required for agents to read agent configuration remotely.
+  - `event:write`. Required for ingesting APM agent events.
+  - `config_agent:read`. Required for APM agents to read agent configuration remotely.
 
 [[apm-agent-key-create-example]]
 ===== Example
