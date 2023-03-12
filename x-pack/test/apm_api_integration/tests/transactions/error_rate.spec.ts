@@ -13,6 +13,8 @@ import {
   APIReturnType,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type ErrorRate =
@@ -42,6 +44,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           transactionType: 'request',
           environment: 'ENVIRONMENT_ALL',
           kuery: '',
+          documentType: ApmDocumentType.TransactionMetric,
+          rollupInterval: RollupInterval.OneMinute,
+          bucketSizeInSeconds: 60,
           ...overrides?.query,
         },
       },
