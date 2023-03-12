@@ -29,7 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('rulesTab');
   }
 
-  describe('rules list', function () {
+  describe('rules list', () => {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -143,7 +143,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('rulesListNotifyBadge-scheduled');
     });
 
-    it.only('should allow rules to be unscheduled', async () => {
+    it('should allow rules to be unscheduled', async () => {
       const rule1 = await createAlert({
         supertest,
         objectRemover,
@@ -181,6 +181,33 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('rulesListNotifyBadge-scheduled');
       await pageObjects.triggersActionsUI.searchAlerts(rule2.name);
       await testSubjects.existOrFail('rulesListNotifyBadge-scheduled');
+    });
+
+    it('can bulk update API key', async () => {
+      const rule1 = await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: { name: 'a' },
+      });
+      const rule2 = await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: { name: 'b' },
+      });
+
+      await refreshAlertsList();
+      await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
+      await testSubjects.click('selectAllRulesButton');
+      await testSubjects.click(`checkboxSelectRow-${rule2.id}`);
+      await testSubjects.click('showBulkActionButton');
+      await testSubjects.click('updateAPIKeys');
+      await testSubjects.existOrFail('updateApiKeyIdsConfirmation');
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await retry.try(async () => {
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql('Updated API key for 1 rule.');
+      });
     });
   });
 };
