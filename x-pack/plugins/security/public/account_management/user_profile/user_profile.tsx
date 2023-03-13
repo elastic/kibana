@@ -188,6 +188,7 @@ function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfi
                 }
               )}
               buttonSize="m"
+              data-test-subj="darkModeButton"
               idSelected={formik.values.data.userSettings.darkMode}
               options={[
                 {

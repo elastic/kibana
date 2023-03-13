@@ -31,15 +31,7 @@ export class UiSettingsUserClient extends BaseUiSettingsClient implements IUserU
   }
 
   async getUserProfileSettings(request: KibanaRequest): Promise<Record<string, string>> {
-    let result = {} as Record<string, string>;
-
-    if (request) {
-      result = (await this.userProfileSettingsClient?.get(request)) || {};
-    } else {
-      this.log.warn('Request not set, unable to retrieve User Settings');
-    }
-
-    return result;
+    return (await this.userProfileSettingsClient?.get(request)) || {};
   }
 
   async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {

@@ -254,7 +254,7 @@ function isDarkMode(
     defaults: Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>;
   }
 ): boolean {
-  const userTheme: string = userSettings.user.darkMode;
+  const userTheme: string = userSettings?.user?.darkMode;
 
   let result;
 

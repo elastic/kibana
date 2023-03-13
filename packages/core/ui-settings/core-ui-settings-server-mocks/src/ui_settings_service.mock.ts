@@ -7,7 +7,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { IUiSettingsClient, IUserUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type {
   InternalUiSettingsServiceSetup,
   InternalUiSettingsServiceStart,
@@ -35,6 +35,16 @@ const createClientMock = () => {
   return mocked;
 };
 
+const createUserClientMock = () => {
+  const mocked = createClientMock();
+  const userClientMocked: jest.Mocked<IUserUiSettingsClient> = {
+    ...mocked,
+    getUserProfileSettings: jest.fn(),
+  };
+
+  return userClientMocked;
+};
+
 const createPrebootMock = () => {
   const mocked: jest.Mocked<InternalUiSettingsServicePreboot> = {
     createDefaultsClient: jest.fn(),
@@ -58,6 +68,8 @@ const createStartMock = () => {
   const mocked: jest.Mocked<InternalUiSettingsServiceStart> = {
     asScopedToClient: jest.fn(),
     globalAsScopedToClient: jest.fn(),
+    userAsScopedToClient: jest.fn(),
+    setUserProfileSettingsClientFactoryProvider: jest.fn(),
   };
 
   mocked.asScopedToClient.mockReturnValue(createClientMock());
@@ -84,5 +96,6 @@ export const uiSettingsServiceMock = {
   createSetupContract: createSetupMock,
   createStartContract: createStartMock,
   createClient: createClientMock,
+  createUserClient: createUserClientMock,
   create: createMock,
 };
