@@ -17,10 +17,13 @@ import {
   EuiFieldPassword,
   EuiCodeBlock,
   EuiTextArea,
+  EuiSelect,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+
+import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
 import type { DataStream, RegistryVarsEntry } from '../../../../../../types';
 
@@ -56,7 +59,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
     isEditPage = false,
   }) => {
     const [isDirty, setIsDirty] = useState<boolean>(false);
-    const { multi, required, type, title, name, description } = varDef;
+    const { multi, required, type, title, name, description, options } = varDef;
     const isInvalid = (isDirty || forceShowErrors) && !!varErrors;
     const errors = isInvalid ? varErrors : null;
     const fieldLabel = title || name;
@@ -72,7 +75,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
           />
         );
       }
-      if (name === 'data_stream.dataset' && packageType === 'input') {
+      if (name === DATASET_VAR_NAME && packageType === 'input') {
         return (
           <DatasetComboBox
             pkgName={packageName}
@@ -152,6 +155,10 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
               disabled={frozen}
             />
           );
+        case 'select':
+          return (
+            <EuiSelect options={options} value={value} onChange={(e) => onChange(e.target.value)} />
+          );
         default:
           return (
             <EuiFieldText
@@ -176,6 +183,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
       isEditPage,
       isInvalid,
       fieldLabel,
+      options,
     ]);
 
     // Boolean cannot be optional by default set to false

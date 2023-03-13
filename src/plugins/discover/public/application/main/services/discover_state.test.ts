@@ -48,7 +48,7 @@ describe('Test discover state', () => {
     stopSync = () => {};
   });
   test('setting app state and syncing to URL', async () => {
-    state.setAppState({ index: 'modified' });
+    state.appState.update({ index: 'modified' });
     state.kbnUrlStateStorage.kbnUrlControls.flush();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
       `"/#?_a=(columns:!(default_column),index:modified,interval:auto,sort:!())"`
@@ -72,23 +72,23 @@ describe('Test discover state', () => {
   });
 
   test('isAppStateDirty returns  whether the current state has changed', async () => {
-    state.setAppState({ index: 'modified' });
+    state.appState.update({ index: 'modified' });
     expect(state.appState.hasChanged()).toBeTruthy();
     state.appState.resetInitialState();
     expect(state.appState.hasChanged()).toBeFalsy();
   });
 
   test('getPreviousAppState returns the state before the current', async () => {
-    state.setAppState({ index: 'first' });
+    state.appState.update({ index: 'first' });
     const stateA = state.appState.getState();
-    state.setAppState({ index: 'second' });
+    state.appState.update({ index: 'second' });
     expect(state.appState.getPrevious()).toEqual(stateA);
   });
 
   test('pauseAutoRefreshInterval sets refreshInterval.pause to true', async () => {
     history.push('/#?_g=(refreshInterval:(pause:!f,value:5000))');
     expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!f,value:5000))');
-    await state.pauseAutoRefreshInterval();
+    await state.actions.pauseAutoRefreshInterval();
     expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!t,value:5000))');
   });
 });

@@ -1,6 +1,7 @@
 get:
-  summary: Packages - Get limited list
-  tags: []
+  summary: Get limited package list
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK

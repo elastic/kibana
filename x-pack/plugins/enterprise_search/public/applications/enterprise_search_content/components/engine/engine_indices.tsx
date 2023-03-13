@@ -33,8 +33,6 @@ import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
 
 import { SEARCH_INDEX_PATH, EngineViewTabs } from '../../routes';
-import { IngestionMethod } from '../../types';
-import { ingestionMethodToText } from '../../utils/indices';
 
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
@@ -132,20 +130,6 @@ export const EngineIndices: React.FC = () => {
             )
           : count,
       sortable: true,
-      truncateText: true,
-      width: '15%',
-    },
-    {
-      field: 'source',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.engine.indices.ingestionMethod.columnTitle',
-        {
-          defaultMessage: 'Ingestion method',
-        }
-      ),
-      render: (source: IngestionMethod) => (
-        <EuiText size="s">{ingestionMethodToText(source)}</EuiText>
-      ),
       truncateText: true,
       width: '15%',
     },

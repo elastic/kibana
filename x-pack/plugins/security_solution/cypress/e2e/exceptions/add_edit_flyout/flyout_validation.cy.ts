@@ -9,7 +9,7 @@ import { getNewRule } from '../../../objects/rule';
 
 import { RULE_STATUS } from '../../../screens/create_new_rule';
 
-import { createCustomRule } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   esArchiverLoad,
@@ -30,13 +30,16 @@ import {
   addExceptionEntryOperatorValue,
   addExceptionFlyoutItemName,
   closeExceptionBuilderFlyout,
+  searchExceptionEntryFieldWithPrefix,
+  selectCurrentEntryField,
+  showFieldConflictsWarningTooltipWithMessage,
+  showMappingConflictsWarningMessage,
 } from '../../../tasks/exceptions';
 import {
   ADD_AND_BTN,
   ADD_OR_BTN,
   ADD_NESTED_BTN,
   ENTRY_DELETE_BTN,
-  FIELD_INPUT,
   LOADING_SPINNER,
   EXCEPTION_ITEM_CONTAINER,
   EXCEPTION_FIELD_LIST,
@@ -64,19 +67,22 @@ import { getExceptionList } from '../../../objects/exception';
 // to test in enzyme and very small changes can inadvertently add
 // bugs. As the complexity within the builder grows, these should
 // ensure the most basic logic holds.
-describe('Exceptions flyout', () => {
+describe('Exceptions flyout', { testIsolation: false }, () => {
   before(() => {
     esArchiverResetKibana();
     // this is a made-up index that has just the necessary
     // mappings to conduct tests, avoiding loading large
     // amounts of data like in auditbeat_exceptions
     esArchiverLoad('exceptions');
+    esArchiverLoad('conflicts_1');
+    esArchiverLoad('conflicts_2');
     login();
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
-      createCustomRule({
+      createRule({
         ...getNewRule(),
-        dataSource: { index: ['auditbeat-*', 'exceptions-*'], type: 'indexPatterns' },
-        exceptionLists: [
+        index: ['auditbeat-*', 'exceptions-*', 'conflicts-*'],
+        enabled: false,
+        exceptions_list: [
           {
             id: response.body.id,
             list_id: getExceptionList().list_id,
@@ -93,6 +99,10 @@ describe('Exceptions flyout', () => {
     goToRuleDetails();
     cy.get(RULE_STATUS).should('have.text', '—');
     goToExceptionsTab();
+  });
+
+  afterEach(() => {
+    closeExceptionBuilderFlyout();
   });
 
   after(() => {
@@ -123,8 +133,6 @@ describe('Exceptions flyout', () => {
     // add value again and button should be enabled again
     addExceptionEntryFieldMatchAnyValue('test', 0);
     cy.get(CONFIRM_BTN).should('be.enabled');
-
-    closeExceptionBuilderFlyout();
   });
 
   it('Validates custom fields correctly', () => {
@@ -138,8 +146,6 @@ describe('Exceptions flyout', () => {
     addExceptionEntryFieldValue('blooberty', 0);
     addExceptionEntryFieldValueValue('blah', 0);
     cy.get(CONFIRM_BTN).should('be.enabled');
-
-    closeExceptionBuilderFlyout();
   });
 
   it('Does not overwrite values and-ed together', () => {
@@ -161,8 +167,6 @@ describe('Exceptions flyout', () => {
     cy.get(LOADING_SPINNER).should('not.exist');
     cy.get(FIELD_INPUT_PARENT).eq(0).should('have.text', 'agent.name');
     cy.get(FIELD_INPUT_PARENT).eq(1).should('have.text', 'c');
-
-    closeExceptionBuilderFlyout();
   });
 
   it('Does not overwrite values or-ed together', () => {
@@ -218,8 +222,6 @@ describe('Exceptions flyout', () => {
       .eq(1)
       .should('have.text', 'user.id.keyword');
     cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).should('not.exist');
-
-    closeExceptionBuilderFlyout();
   });
 
   it('Does not overwrite values of nested entry items', () => {
@@ -290,19 +292,14 @@ describe('Exceptions flyout', () => {
       .find(FIELD_INPUT_PARENT)
       .eq(1)
       .should('have.text', '@timestamp');
-
-    closeExceptionBuilderFlyout();
   });
 
   it('Contains custom index fields', () => {
     // open add exception modal
     openExceptionFlyoutFromEmptyViewerPrompt();
 
-    cy.get(FIELD_INPUT).eq(0).click({ force: true });
-    cy.get(FIELD_INPUT).eq(0).type('unique');
+    searchExceptionEntryFieldWithPrefix('unique');
     cy.get(EXCEPTION_FIELD_LIST).contains('unique_value.test');
-
-    closeExceptionBuilderFlyout();
   });
 
   it('Validates auto-suggested fields correctly', () => {
@@ -317,8 +314,28 @@ describe('Exceptions flyout', () => {
     cy.get(VALUES_INPUT).eq(0).type(`{enter}`);
     cy.get(VALUES_INPUT).eq(0).type(`{downarrow}{enter}`);
     cy.get(CONFIRM_BTN).should('be.enabled');
+  });
 
-    closeExceptionBuilderFlyout();
+  it.skip('Warns users about mapping conflicts on problematic field selection', async () => {
+    // open add exception modal
+    openExceptionFlyoutFromEmptyViewerPrompt();
+
+    // find 'doc_id' field which has mapping conflicts accross different indices
+    searchExceptionEntryFieldWithPrefix('doc_id');
+
+    const warningMessage =
+      'This field is defined as different types across the following indices or is unmapped. This can cause unexpected query results.boolean: conflicts-0002long: conflicts-0001';
+
+    // hovering field should show warning tooltip
+    showFieldConflictsWarningTooltipWithMessage(warningMessage);
+
+    // select problematic field
+    selectCurrentEntryField();
+
+    // check that we show warning after the field selection in form of accordion component
+    // underneath the field component and clicking on which reveals the extended warning message
+    // with conflicts details
+    showMappingConflictsWarningMessage(warningMessage);
   });
 
   // TODO - Add back in error states into modal

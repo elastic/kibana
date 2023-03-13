@@ -52,6 +52,25 @@ describe('isThrottled', () => {
     expect(alert.isThrottled({ throttle: '1m' })).toEqual(true);
   });
 
+  test(`should use actionHash if it was used in a legacy action`, () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          actions: {
+            'slack:alert:1h': { date: new Date() },
+          },
+        },
+      },
+    });
+    clock.tick(30000);
+    alert.scheduleActions('default');
+    expect(
+      alert.isThrottled({ throttle: '1m', actionHash: 'slack:alert:1h', uuid: '111-222' })
+    ).toEqual(true);
+  });
+
   test(`shouldn't throttle when group didn't change and throttle period expired`, () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: {
@@ -87,14 +106,14 @@ describe('isThrottled', () => {
           date: new Date(),
           group: 'default',
           actions: {
-            'slack:1h': { date: new Date() },
+            '111-111': { date: new Date() },
           },
         },
       },
     });
     clock.tick(5000);
     alert.scheduleActions('other-group');
-    expect(alert.isThrottled({ throttle: '1m', actionHash: 'slack:1h' })).toEqual(false);
+    expect(alert.isThrottled({ throttle: '1m', uuid: '111-111' })).toEqual(false);
   });
 
   test(`shouldn't throttle a specific action when group didn't change and throttle period expired`, () => {
@@ -104,14 +123,16 @@ describe('isThrottled', () => {
           date: new Date('2020-01-01'),
           group: 'default',
           actions: {
-            'slack:1h': { date: new Date() },
+            '111-111': { date: new Date() },
           },
         },
       },
     });
     clock.tick(30000);
     alert.scheduleActions('default');
-    expect(alert.isThrottled({ throttle: '15s', actionHash: 'slack:1h' })).toEqual(false);
+    expect(alert.isThrottled({ throttle: '15s', uuid: '111-111', actionHash: 'slack:1h' })).toEqual(
+      false
+    );
   });
 
   test(`shouldn't throttle a specific action when group changes`, () => {
@@ -121,14 +142,14 @@ describe('isThrottled', () => {
           date: new Date(),
           group: 'default',
           actions: {
-            'slack:1h': { date: new Date() },
+            '111-111': { date: new Date() },
           },
         },
       },
     });
     clock.tick(5000);
     alert.scheduleActions('other-group');
-    expect(alert.isThrottled({ throttle: '1m', actionHash: 'slack:1h' })).toEqual(false);
+    expect(alert.isThrottled({ throttle: '1m', uuid: '111-111' })).toEqual(false);
   });
 });
 
@@ -312,7 +333,7 @@ describe('updateLastScheduledActions()', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: {},
     });
-    alert.updateLastScheduledActions('default', 'actionId1');
+    alert.updateLastScheduledActions('default', 'actionId1', '111-111');
     expect(alert.toJSON()).toEqual({
       state: {},
       meta: {
@@ -321,7 +342,36 @@ describe('updateLastScheduledActions()', () => {
           date: new Date().toISOString(),
           group: 'default',
           actions: {
-            actionId1: { date: new Date().toISOString() },
+            '111-111': { date: new Date().toISOString() },
+          },
+        },
+      },
+    });
+  });
+
+  test('removes the objects with an old actionHash', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: {
+        flappingHistory: [],
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+          actions: {
+            'slack:alert:1h': { date: new Date() },
+          },
+        },
+      },
+    });
+    alert.updateLastScheduledActions('default', 'slack:alert:1h', '111-111');
+    expect(alert.toJSON()).toEqual({
+      state: {},
+      meta: {
+        flappingHistory: [],
+        lastScheduledActions: {
+          date: new Date().toISOString(),
+          group: 'default',
+          actions: {
+            '111-111': { date: new Date().toISOString() },
           },
         },
       },

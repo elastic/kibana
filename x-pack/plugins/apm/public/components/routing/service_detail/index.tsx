@@ -6,6 +6,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+} from '@kbn/rule-data-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import qs from 'query-string';
@@ -17,7 +21,7 @@ import { environmentRt } from '../../../../common/environment_rt';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { AlertsOverview } from '../../app/alerts_overview';
+import { AlertsOverview, ALERT_STATUS_ALL } from '../../app/alerts_overview';
 import { ErrorGroupDetails } from '../../app/error_group_details';
 import { ErrorGroupOverview } from '../../app/error_group_overview';
 import { InfraOverview } from '../../app/infra_overview';
@@ -340,16 +344,27 @@ export const serviceDetail = {
           }),
         }),
       },
-      '/services/{serviceName}/alerts': page({
-        tab: 'alerts',
-        title: i18n.translate('xpack.apm.views.alerts.title', {
-          defaultMessage: 'Alerts',
+      '/services/{serviceName}/alerts': {
+        ...page({
+          tab: 'alerts',
+          title: i18n.translate('xpack.apm.views.alerts.title', {
+            defaultMessage: 'Alerts',
+          }),
+          element: <AlertsOverview />,
+          searchBarOptions: {
+            hidden: true,
+          },
         }),
-        element: <AlertsOverview />,
-        searchBarOptions: {
-          hidden: true,
-        },
-      }),
+        params: t.partial({
+          query: t.partial({
+            alertStatus: t.union([
+              t.literal(ALERT_STATUS_ACTIVE),
+              t.literal(ALERT_STATUS_RECOVERED),
+              t.literal(ALERT_STATUS_ALL),
+            ]),
+          }),
+        }),
+      },
       '/services/{serviceName}/': {
         element: <RedirectToDefaultServiceRouteView />,
       },
