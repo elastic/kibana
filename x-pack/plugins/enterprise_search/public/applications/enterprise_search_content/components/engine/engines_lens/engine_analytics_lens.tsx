@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind } from '@elastic/eui';
 
 import { SavedObjectReference } from '@kbn/core/server';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -57,7 +57,7 @@ export enum filterBy {
 
 const chartAttributes = {
   [filterBy.queries]: {
-    chartColor: '#54B399',
+    chartColor: euiPaletteColorBlind()[0],
     label: i18n.translate(
       'xpack.enterpriseSearch.content.engine.overview.analytics.lens.queries.chart.title',
       {
@@ -66,7 +66,7 @@ const chartAttributes = {
     ),
   },
   [filterBy.noResults]: {
-    chartColor: '#6092C0',
+    chartColor: euiPaletteColorBlind()[1],
     label: i18n.translate(
       'xpack.enterpriseSearch.content.engine.overview.analytics.lens.withNoResults.chart.title',
       {
