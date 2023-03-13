@@ -34,16 +34,8 @@ const versionableObjectSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-const getOptionalInOutSchemas = (args: { in: Type<any>; out: Type<any> }) =>
-  schema.maybe(
-    schema.object(
-      {
-        in: args.in,
-        out: args.out,
-      },
-      { unknowns: 'forbid' }
-    )
-  );
+const getOptionalInOutSchemas = (props: { in: Type<any>; out: Type<any> }) =>
+  schema.maybe(schema.object(props, { unknowns: 'forbid' }));
 
 const getSchemas = getOptionalInOutSchemas({
   in: schema.maybe(
