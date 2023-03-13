@@ -586,11 +586,9 @@ describe(`POST ${URL}`, () => {
             type: 'visualization',
             id: 'my-vis',
             error: {
-              ...SavedObjectsErrorHelpers.createConflictError(
-                'visualization',
-                'my-viz',
-                'some-reason'
-              ).output,
+              error: 'some-error',
+              message: 'some-error-message',
+              statusCode: 409,
               metadata: { isNotOverwritable: true },
             },
           },
@@ -598,11 +596,9 @@ describe(`POST ${URL}`, () => {
             type: 'dashboard',
             id: 'my-dashboard',
             error: {
-              ...SavedObjectsErrorHelpers.createConflictError(
-                'visualization',
-                'my-dashboard',
-                'some-reason'
-              ).output,
+              error: 'some-error',
+              message: 'some-error-message',
+              statusCode: 409,
               metadata: { isNotOverwritable: true },
             },
           },
@@ -640,6 +636,7 @@ describe(`POST ${URL}`, () => {
         ({ type, originId, id }) => ({
           id: `default:${type}:${originId}`,
           type: LEGACY_URL_ALIAS_TYPE,
+          references: [],
           attributes: {
             sourceId: originId,
             targetNamespace: 'default',
@@ -650,7 +647,7 @@ describe(`POST ${URL}`, () => {
         })
       );
       savedObjectsClient.bulkCreate.mockResolvedValueOnce({
-        saved_objects: [legacyUrlAliasObj2, legacyUrlAliasObj2],
+        saved_objects: [legacyUrlAliasObj2, legacyUrlAliasObj3],
       });
 
       const result = await supertest(httpSetup.server.listener)
@@ -740,11 +737,9 @@ describe(`POST ${URL}`, () => {
             type: 'visualization',
             id: 'my-vis',
             error: {
-              ...SavedObjectsErrorHelpers.createConflictError(
-                'visualization',
-                'my-viz',
-                'some-reason'
-              ).output,
+              error: 'some-error',
+              message: 'some-error-message',
+              statusCode: 409,
               metadata: { isNotOverwritable: true },
             },
           },
@@ -752,11 +747,9 @@ describe(`POST ${URL}`, () => {
             type: 'dashboard',
             id: 'my-dashboard',
             error: {
-              ...SavedObjectsErrorHelpers.createConflictError(
-                'visualization',
-                'my-dashboard',
-                'some-reason'
-              ).output,
+              error: 'some-error',
+              message: 'some-error-message',
+              statusCode: 409,
               metadata: { isNotOverwritable: true },
             },
           },
@@ -788,8 +781,9 @@ describe(`POST ${URL}`, () => {
           {
             type: obj2.type,
             id: obj2.id,
-            error: SavedObjectsErrorHelpers.decorateEsUnavailableError(new Error('Why not?')).output
-              .payload,
+            attributes: {},
+            references: [],
+            error: { error: 'some-error', message: 'Why not?', statusCode: 503 },
           },
         ],
       });
@@ -798,6 +792,7 @@ describe(`POST ${URL}`, () => {
       const legacyUrlAliasObj1 = {
         id: `default:${obj1.type}:${obj1.originId}`,
         type: LEGACY_URL_ALIAS_TYPE,
+        references: [],
         attributes: {
           sourceId: obj1.originId,
           targetNamespace: 'default',
@@ -841,7 +836,7 @@ describe(`POST ${URL}`, () => {
             type: obj2.type,
             meta: { title: obj2.attributes.title, icon: 'dashboard-icon' },
             error: {
-              error: 'Service Unavailable',
+              error: 'some-error',
               message: 'Why not?',
               statusCode: 503,
               type: 'unknown',
@@ -890,11 +885,9 @@ describe(`POST ${URL}`, () => {
             type: 'visualization',
             id: 'my-vis',
             error: {
-              ...SavedObjectsErrorHelpers.createConflictError(
-                'visualization',
-                'my-viz',
-                'some-reason'
-              ).output,
+              error: 'some-error',
+              message: 'some-error-message',
+              statusCode: 409,
               metadata: { isNotOverwritable: true },
             },
           },
@@ -916,6 +909,7 @@ describe(`POST ${URL}`, () => {
       const legacyUrlAliasObj1 = {
         id: `default:${obj1.type}:${obj1.originId}`,
         type: LEGACY_URL_ALIAS_TYPE,
+        references: [],
         attributes: {
           sourceId: obj1.originId,
           targetNamespace: 'default',
@@ -929,8 +923,9 @@ describe(`POST ${URL}`, () => {
           {
             type: legacyUrlAliasObj1.type,
             id: legacyUrlAliasObj1.id,
-            error: SavedObjectsErrorHelpers.decorateEsUnavailableError(new Error('Why not?')).output
-              .payload,
+            attributes: {},
+            references: [],
+            error: { error: 'some-error', message: 'Why not?', statusCode: 503 },
           },
         ],
       });
@@ -963,16 +958,15 @@ describe(`POST ${URL}`, () => {
         ],
         errors: [
           {
-            id: legacyUrlAliasObj1.attributes.sourceId,
+            id: legacyUrlAliasObj1.id,
             type: legacyUrlAliasObj1.type,
             error: {
-              error: 'Service Unavailable',
+              error: 'some-error',
               message: 'Why not?',
               statusCode: 503,
               type: 'unknown',
-              destinationId: legacyUrlAliasObj1.attributes.targetId,
             },
-            meta: { icon: 'legacy-url-alias-icon' },
+            meta: { title: 'Legacy URL alias (my-vis -> new-id-1)', icon: 'legacy-url-alias-icon' },
           },
         ],
         warnings: [],

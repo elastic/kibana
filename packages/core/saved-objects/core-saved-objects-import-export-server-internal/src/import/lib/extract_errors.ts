@@ -8,17 +8,14 @@
 
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import type { CreatedObject, SavedObject } from '@kbn/core-saved-objects-server';
-import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type { LegacyUrlAlias } from '@kbn/core-saved-objects-base-server-internal';
 
 export function extractErrors(
   // TODO: define saved object type
   savedObjectResults: Array<CreatedObject<unknown>>,
   savedObjectsToImport: Array<SavedObject<any>>,
-  legacyUrlAliasResults: Array<CreatedObject<unknown>>,
-  legacyUrlAliasesToCreate: Map<
-    string,
-    SavedObjectsBulkCreateObject<{ sourceId: string; targetType: string; targetId: string }>
-  >
+  legacyUrlAliasResults: SavedObject[],
+  legacyUrlAliasesToCreate: Map<string, SavedObject<LegacyUrlAlias>>
 ) {
   const errors: SavedObjectsImportFailure[] = [];
   const originalSavedObjectsMap = new Map<string, SavedObject<{ title: string }>>();
@@ -64,12 +61,14 @@ export function extractErrors(
     const legacyUrlAlias = legacyUrlAliasesToCreate.get(legacyUrlAliasResult.id);
     if (legacyUrlAlias) {
       errors.push({
-        id: legacyUrlAlias.attributes.sourceId,
+        id: legacyUrlAlias.id,
         type: legacyUrlAlias.type,
+        meta: {
+          title: `Legacy URL alias (${legacyUrlAlias.attributes.sourceId} -> ${legacyUrlAlias.attributes.targetId})`,
+        },
         error: {
           ...legacyUrlAliasResult.error,
           type: 'unknown',
-          destinationId: legacyUrlAlias.attributes.targetId,
         },
       });
     }

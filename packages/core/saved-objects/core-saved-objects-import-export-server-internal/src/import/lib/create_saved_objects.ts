@@ -9,8 +9,10 @@
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { CreatedObject, SavedObject } from '@kbn/core-saved-objects-server';
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  LEGACY_URL_ALIAS_TYPE,
+  LegacyUrlAlias,
+} from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { extractErrors } from './extract_errors';
 import type { ImportStateMap } from './types';
@@ -98,8 +100,12 @@ export const createSavedObjects = async <T>({
   });
 
   const resolvableErrors = ['conflict', 'ambiguous_conflict', 'missing_references'];
+  const hasResolvableErrors = accumulatedErrors.some(({ error: { type } }) =>
+    resolvableErrors.includes(type)
+  );
+
   let expectedResults: Array<SavedObject<T>> = objectsToCreate;
-  if (!accumulatedErrors.some(({ error: { type } }) => resolvableErrors.includes(type))) {
+  if (!hasResolvableErrors) {
     const bulkCreateResponse = await savedObjectsClient.bulkCreate(objectsToCreate, {
       namespace,
       overwrite,
@@ -118,28 +124,27 @@ export const createSavedObjects = async <T>({
   // Remap results to reflect the object IDs that were submitted for import this ensures that consumers understand the
   // results, and collect legacy URL aliases if in compatibility mode.
   const remappedResults: Array<CreatedObject<T>> = [];
-  const legacyUrlAliases = new Map<
-    string,
-    SavedObjectsBulkCreateObject<{ sourceId: string; targetType: string; targetId: string }>
-  >();
+  const legacyUrlAliases = new Map<string, SavedObject<LegacyUrlAlias>>();
   for (const result of expectedResults) {
     const { id } = objectIdMap.get(`${result.type}:${result.id}`)!;
     // also, include a `destinationId` field if the object create attempt was made with a different ID
     remappedResults.push({ ...result, id, ...(id !== result.id && { destinationId: result.id }) });
 
+    // Indicates that object has been successfully imported.
+    const objectSuccessfullyImported = !hasResolvableErrors && !result.error;
+
     // Indicates that the object has changed ID at some point with the original ID retained as the origin ID, so that
     // legacy URL alias is required to retrieve the object using its original ID.
     const objectRequiresLegacyUrlAlias = result.originId && result.originId !== result.id;
-
-    // In compatibility mode we generate legacy URL aliases for all objects that require them and that were
-    // successfully imported.
-    if (compatibilityMode && objectRequiresLegacyUrlAlias && !result.error) {
+    if (compatibilityMode && objectRequiresLegacyUrlAlias && objectSuccessfullyImported) {
       const legacyUrlAliasId = `${legacyUrlTargetNamespace}:${result.type}:${result.originId}`;
       legacyUrlAliases.set(legacyUrlAliasId, {
         id: legacyUrlAliasId,
         type: LEGACY_URL_ALIAS_TYPE,
+        references: [],
         attributes: {
-          sourceId: result.originId,
+          // We can safely force `originId` here since it's enforced by `objectRequiresLegacyUrlAlias`.
+          sourceId: result.originId!,
           targetNamespace: legacyUrlTargetNamespace,
           targetType: result.type,
           targetId: result.id,
