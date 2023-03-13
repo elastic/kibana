@@ -99,7 +99,7 @@ interface BaseMetricExpressionParams {
 }
 
 export interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
-  aggType: Exclude<Aggregators, Aggregators.COUNT>;
+  aggType: Exclude<Aggregators, [Aggregators.COUNT, Aggregators.CUSTOM]>;
   metric: string;
 }
 

@@ -6,7 +6,6 @@
  */
 
 import {
-  CountMetricExpressionParams,
   CustomMetricExpressionParams,
   MetricExpressionParams,
   NonCountMetricExpressionParams,
@@ -19,16 +18,9 @@ export const isNotCountOrCustom = (
   return aggType !== 'count' && aggType !== 'custom';
 };
 
-export const isNotCustom = (
+export const isCustom = (
   metricExpressionParams: MetricExpressionParams
 ): metricExpressionParams is CustomMetricExpressionParams => {
   const { aggType } = metricExpressionParams;
-  return aggType !== 'custom';
-};
-
-export const isNotCount = (
-  metricExpressionParams: MetricExpressionParams
-): metricExpressionParams is CountMetricExpressionParams => {
-  const { aggType } = metricExpressionParams;
-  return aggType !== 'count';
+  return aggType === 'custom';
 };

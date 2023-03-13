@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { isNotCount, isNotCustom, isNotCountOrCustom } from './metric_expression_params';
+import { isCustom, isNotCountOrCustom } from './metric_expression_params';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { createCustomMetricsAggregations } from '../../../create_custom_metrics_aggregations';
 import {
@@ -87,32 +87,35 @@ export const getElasticsearchMetricQuery = (
 ) => {
   const { aggType } = metricParams;
   if (isNotCountOrCustom(metricParams) && !metricParams.metric) {
-    throw new Error('Can only aggregate without a metric if using the document count aggregator');
+    throw new Error(
+      'Can only aggregate without a metric if using the document count or custom aggregator'
+    );
   }
 
   // We need to make a timeframe that represents the current timeframe as oppose
   // to the total timeframe (which includes the last period).
   const currentTimeframe = calculateCurrentTimeframe(metricParams, timeframe);
 
-  const metricAggregations = isNotCount(metricParams)
-    ? {}
-    : isNotCustom(metricParams)
-    ? createCustomMetricsAggregations(
-        'aggregatedValue',
-        metricParams.customMetrics,
-        metricParams.equation
-      )
-    : aggType === Aggregators.RATE
-    ? createRateAggsBuckets(currentTimeframe, 'aggregatedValue', metricParams.metric)
-    : aggType === Aggregators.P95 || aggType === Aggregators.P99
-    ? createPercentileAggregation(aggType, metricParams.metric)
-    : {
-        aggregatedValue: {
-          [aggType]: {
-            field: metricParams.metric,
+  const metricAggregations =
+    aggType === Aggregators.COUNT
+      ? {}
+      : aggType === Aggregators.RATE
+      ? createRateAggsBuckets(currentTimeframe, 'aggregatedValue', metricParams.metric)
+      : aggType === Aggregators.P95 || aggType === Aggregators.P99
+      ? createPercentileAggregation(aggType, metricParams.metric)
+      : isCustom(metricParams)
+      ? createCustomMetricsAggregations(
+          'aggregatedValue',
+          metricParams.customMetrics,
+          metricParams.equation
+        )
+      : {
+          aggregatedValue: {
+            [aggType]: {
+              field: metricParams.metric,
+            },
           },
-        },
-      };
+        };
 
   const bucketSelectorAggregations = createBucketSelector(
     metricParams,
