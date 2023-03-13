@@ -167,7 +167,7 @@ function AddFilterButton({
 }) {
   return (
     <EuiButtonEmpty
-      data-test-subj="apmAddFilterButtonAddAnotherFilterButton"
+      data-test-subj="apmCustomLinkAddFilterButtonAddAnotherFilterButton"
       iconType="plusInCircle"
       onClick={onClick}
       disabled={isDisabled}
