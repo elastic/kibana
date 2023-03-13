@@ -7,19 +7,13 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
-
 import { Logo, type Props } from './logo';
 
 export const Loader = (props: Props) => (
   <div className="kbnWelcomeView" id="kbn_loading_message" data-test-subj="kbnLoadingMessage">
     <div className="kbnLoaderWrap">
       <Logo {...props} />
-      <div className="kbnWelcomeText">
-        {i18n.translate('core.ui.welcomeMessage', {
-          defaultMessage: 'Loading Project',
-        })}
-      </div>
+      <div className="kbnWelcomeText">Loading Project</div>
       <div className="kbnProgress" />
     </div>
   </div>
