@@ -456,6 +456,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 0,
         "running": false,
         "schedule": Object {
           "interval": "1m",
@@ -676,6 +677,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 0,
         "running": false,
         "schedule": Object {
           "interval": "1m",
@@ -1104,6 +1106,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: null,
         params: { bar: true },
+        revision: 0,
         running: false,
         schedule: { interval: '1m' },
         tags: ['foo'],
@@ -1313,6 +1316,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: null,
         params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
+        revision: 0,
         running: false,
         schedule: { interval: '1m' },
         tags: ['foo'],
@@ -1492,6 +1496,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: null,
         params: { bar: true, parameterThatIsSavedObjectRef: 'action_0' },
+        revision: 0,
         running: false,
         schedule: { interval: '1m' },
         tags: ['foo'],
@@ -1667,6 +1672,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
         running: false,
       },
       {
@@ -1803,6 +1809,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
         running: false,
       },
       {
@@ -1939,6 +1946,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
         running: false,
       },
       {
@@ -2115,6 +2123,7 @@ describe('create()', () => {
         meta: {
           versionApiKeyLastmodified: 'v8.0.0',
         },
+        revision: 0,
         running: false,
       },
       {
@@ -2469,6 +2478,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
         running: false,
       },
       {
@@ -2574,6 +2584,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
         running: false,
       },
       {

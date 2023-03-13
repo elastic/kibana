@@ -94,6 +94,7 @@ describe('bulkEdit()', () => {
       notifyWhen: null,
       actions: [],
       name: 'my rule name',
+      revision: 0,
     },
     references: [],
     version: '123',
@@ -220,6 +221,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -251,6 +253,7 @@ describe('bulkEdit()', () => {
             type: 'alert',
             attributes: expect.objectContaining({
               tags: ['foo', 'test-1'],
+              revision: 1,
             }),
           }),
         ],
@@ -275,6 +278,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -302,6 +306,7 @@ describe('bulkEdit()', () => {
             type: 'alert',
             attributes: expect.objectContaining({
               tags: [],
+              revision: 1,
             }),
           }),
         ],
@@ -326,6 +331,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -354,6 +360,7 @@ describe('bulkEdit()', () => {
             type: 'alert',
             attributes: expect.objectContaining({
               tags: ['test-1', 'test-2'],
+              revision: 1,
             }),
           }),
         ],
@@ -579,6 +586,7 @@ describe('bulkEdit()', () => {
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
               tags: ['foo'],
+              revision: 1,
             },
             references: [{ id: '1', name: 'action_0', type: 'action' }],
           },
@@ -591,6 +599,50 @@ describe('bulkEdit()', () => {
         id: existingRule.id,
         snoozeSchedule: [],
       });
+    });
+
+    test('should only increment revision once for multiple operations', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              revision: 1,
+            },
+          },
+        ],
+      });
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [
+              {
+                id: '687300e0-b882-11ed-ad70-c74a8cf8f386',
+                group: 'default',
+                params: {
+                  message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                },
+              },
+            ],
+          },
+          {
+            field: 'throttle',
+            operation: 'set',
+            value: null,
+          },
+          {
+            field: 'notifyWhen',
+            operation: 'set',
+            value: 'onActiveAlert',
+          },
+        ],
+      });
+
+      expect(result.rules[0]).toHaveProperty('revision', 1);
     });
 
     test("should set timeframe and query in alertsFilter null if doesn't exist", async () => {
@@ -775,6 +827,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -812,6 +865,7 @@ describe('bulkEdit()', () => {
               params: expect.objectContaining({
                 index: ['test-1', 'test-2', 'test-4', 'test-5'],
               }),
+              revision: 1,
             }),
           }),
         ],
@@ -838,6 +892,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -870,6 +925,7 @@ describe('bulkEdit()', () => {
               params: expect.objectContaining({
                 index: ['test-1'],
               }),
+              revision: 1,
             }),
           }),
         ],
@@ -966,6 +1022,7 @@ describe('bulkEdit()', () => {
             type: 'alert',
             attributes: expect.objectContaining({
               snoozeSchedule: [snoozePayload],
+              revision: 0,
             }),
           }),
         ],
@@ -995,6 +1052,7 @@ describe('bulkEdit()', () => {
             id: '1',
             type: 'alert',
             attributes: expect.objectContaining({
+              revision: 0,
               snoozeSchedule: [snoozePayload],
             }),
           }),
@@ -1040,6 +1098,7 @@ describe('bulkEdit()', () => {
             id: '1',
             type: 'alert',
             attributes: expect.objectContaining({
+              revision: 0,
               snoozeSchedule: [...existingSnooze, snoozePayload],
             }),
           }),
@@ -1085,6 +1144,7 @@ describe('bulkEdit()', () => {
             type: 'alert',
             attributes: expect.objectContaining({
               muteAll: true,
+              revision: 0,
               snoozeSchedule: [snoozePayload],
             }),
           }),
@@ -1128,6 +1188,7 @@ describe('bulkEdit()', () => {
             id: '1',
             type: 'alert',
             attributes: expect.objectContaining({
+              revision: 0,
               snoozeSchedule: [existingSnooze[1], existingSnooze[2]],
             }),
           }),
@@ -1172,6 +1233,7 @@ describe('bulkEdit()', () => {
             id: '1',
             type: 'alert',
             attributes: expect.objectContaining({
+              revision: 0,
               snoozeSchedule: [],
             }),
           }),
@@ -1216,6 +1278,7 @@ describe('bulkEdit()', () => {
             id: '1',
             type: 'alert',
             attributes: expect.objectContaining({
+              revision: 0,
               snoozeSchedule: [existingSnooze[0]],
             }),
           }),
@@ -1328,7 +1391,7 @@ describe('bulkEdit()', () => {
       expect(createAPIKeyMock).not.toHaveBeenCalled();
 
       // Explicitly bulk editing the apiKey will set the api key, even if the rule is disabled
-      await rulesClient.bulkEdit({
+      const result = await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
         operations: [
           {
@@ -1339,6 +1402,9 @@ describe('bulkEdit()', () => {
       });
 
       expect(createAPIKeyMock).toHaveBeenCalled();
+
+      // Just API key updates do not result in an increment to revision
+      expect(result.rules[0]).toHaveProperty('revision', 0);
     });
   });
 
@@ -1358,7 +1424,7 @@ describe('bulkEdit()', () => {
       });
     });
 
-    it('should succesfully update tags and index patterns and return updated rule', async () => {
+    it('should successfully update tags and index patterns and return updated rule', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
@@ -1377,6 +1443,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -1417,6 +1484,7 @@ describe('bulkEdit()', () => {
               params: {
                 index: ['index-1', 'index-2', 'index-3'],
               },
+              revision: 1,
             }),
           }),
         ],
@@ -1424,7 +1492,7 @@ describe('bulkEdit()', () => {
       );
     });
 
-    it('should succesfully update rule if tags are updated but index patterns are not', async () => {
+    it('should successfully update rule if tags are updated but index patterns are not', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
@@ -1443,6 +1511,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -1484,6 +1553,7 @@ describe('bulkEdit()', () => {
               params: {
                 index: ['index-1', 'index-2'],
               },
+              revision: 1,
             }),
           }),
         ],
@@ -1491,7 +1561,7 @@ describe('bulkEdit()', () => {
       );
     });
 
-    it('should succesfully update rule if index patterns are updated but tags are not', async () => {
+    it('should successfully update rule if index patterns are updated but tags are not', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
           {
@@ -1510,6 +1580,7 @@ describe('bulkEdit()', () => {
               throttle: null,
               notifyWhen: null,
               actions: [],
+              revision: 0,
             },
             references: [],
             version: '123',
@@ -1551,6 +1622,7 @@ describe('bulkEdit()', () => {
               params: {
                 index: ['index-1', 'index-2', 'index-3'],
               },
+              revision: 1,
             }),
           }),
         ],
