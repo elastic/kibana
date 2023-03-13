@@ -11,6 +11,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { createEsoMigration, pipeMigrations } from '../utils';
 import { RawRule } from '../../../types';
 
+function addRevision(doc: SavedObjectUnsanitizedDoc<RawRule>): SavedObjectUnsanitizedDoc<RawRule> {
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      revision: 0,
+    },
+  };
+}
+
 function addActionUuid(
   doc: SavedObjectUnsanitizedDoc<RawRule>
 ): SavedObjectUnsanitizedDoc<RawRule> {
@@ -36,5 +46,5 @@ export const getMigrations880 = (encryptedSavedObjects: EncryptedSavedObjectsPlu
   createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(addActionUuid)
+    pipeMigrations(addActionUuid, addRevision)
   );

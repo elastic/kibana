@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
+import { omit } from 'lodash';
+
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
-import type { RpcSchemas } from '../../core';
 import { EventBus } from '../../core/event_bus';
 import { update } from './update';
 
@@ -28,41 +28,45 @@ if (!outputSchema) {
 }
 
 const FOO_CONTENT_ID = 'foo';
-const fooDataSchema = schema.object({ title: schema.string() }, { unknowns: 'forbid' });
 
 describe('RPC -> update()', () => {
   describe('Input/Output validation', () => {
-    /**
-     * These tests are for the procedure call itself. Every RPC needs to declare in/out schema
-     * We will test _specific_ validation schema inside the procedure suite below.
-     */
-    test('should validate that a "contentTypeId", an "id" and "data" object is passed', () => {
-      const data = { title: 'hello' };
+    const data = { title: 'hello' };
+    const validInput = { contentTypeId: 'foo', id: '123', version: 'v1', data };
 
+    test('should validate that a "contentTypeId", an "id" and "data" object is passed', () => {
       [
-        { input: { contentTypeId: 'foo', id: '123', data } },
+        { input: validInput },
         {
-          input: { id: '123', data }, // contentTypeId missing
+          input: omit(validInput, 'contentTypeId'),
           expectedError: '[contentTypeId]: expected value of type [string] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo', data }, // id missing
+          input: omit(validInput, 'id'),
           expectedError: '[id]: expected value of type [string] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo', id: '' }, // id must have min 1 char
+          input: { ...validInput, id: '' }, // id must have min 1 char
           expectedError: '[id]: value has length [0] but it must have a minimum length of [1].',
         },
         {
-          input: { contentTypeId: 'foo', id: '123' }, // data missing
+          input: omit(validInput, 'version'),
+          expectedError: '[version]: expected value of type [string] but got [undefined]',
+        },
+        {
+          input: { ...validInput, version: '1' }, // invalid version format
+          expectedError: '[version]: must follow the pattern [v${number}]',
+        },
+        {
+          input: omit(validInput, 'data'),
           expectedError: '[data]: expected value of type [object] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo', id: '123', data: 123 }, // data is not an object
+          input: { ...validInput, data: 123 }, // data is not an object
           expectedError: '[data]: expected value of type [object] but got [number]',
         },
         {
-          input: { contentTypeId: 'foo', id: '123', data, unknown: 'foo' },
+          input: { ...validInput, unknown: 'foo' },
           expectedError: '[unknown]: definition for this key is missing',
         },
       ].forEach(({ input, expectedError }) => {
@@ -81,6 +85,7 @@ describe('RPC -> update()', () => {
         {
           contentTypeId: 'foo',
           id: '123',
+          version: 'v1',
           data: { title: 'hello' },
           options: { any: 'object' },
         },
@@ -94,6 +99,7 @@ describe('RPC -> update()', () => {
           contentTypeId: 'foo',
           data: { title: 'hello' },
           id: '123',
+          version: 'v1',
           options: 123, // Not an object
         },
         inputSchema
@@ -121,24 +127,14 @@ describe('RPC -> update()', () => {
   });
 
   describe('procedure', () => {
-    const createSchemas = (): RpcSchemas => {
-      return {
-        update: {
-          in: {
-            data: fooDataSchema,
-          },
-        },
-      } as any;
-    };
-
-    const setup = ({ contentSchemas = createSchemas() } = {}) => {
+    const setup = () => {
       const contentRegistry = new ContentRegistry(new EventBus());
       const storage = createMockedStorage();
       contentRegistry.register({
         id: FOO_CONTENT_ID,
         storage,
-        schemas: {
-          content: contentSchemas,
+        version: {
+          latest: 'v2',
         },
       });
 
@@ -157,6 +153,7 @@ describe('RPC -> update()', () => {
       const result = await fn(ctx, {
         contentTypeId: FOO_CONTENT_ID,
         id: '123',
+        version: 'v1',
         data: { title: 'Hello' },
       });
 
@@ -166,7 +163,13 @@ describe('RPC -> update()', () => {
       });
 
       expect(storage.update).toHaveBeenCalledWith(
-        { requestHandlerContext: ctx.requestHandlerContext },
+        {
+          requestHandlerContext: ctx.requestHandlerContext,
+          version: {
+            request: 'v1',
+            latest: 'v2', // from the registry
+          },
+        },
         '123',
         { title: 'Hello' },
         undefined
@@ -181,82 +184,16 @@ describe('RPC -> update()', () => {
         ).rejects.toEqual(new Error('Content [unknown] is not registered.'));
       });
 
-      test('should enforce a schema for the data', () => {
-        const { ctx } = setup({ contentSchemas: {} as any });
-        expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '123', data: {} })
-        ).rejects.toEqual(new Error('Schema missing for rpc procedure [update.in.data].'));
-      });
-
-      test('should validate the data sent in input - missing field', () => {
-        const { ctx } = setup();
-        expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '123', data: {} })
-        ).rejects.toEqual(
-          new Error('[title]: expected value of type [string] but got [undefined]')
-        );
-      });
-
-      test('should validate the data sent in input - unknown field', () => {
-        const { ctx } = setup();
-        expect(() =>
-          fn(ctx, {
-            contentTypeId: FOO_CONTENT_ID,
-            id: '123',
-            data: { title: 'Hello', unknownField: 'Hello' },
-          })
-        ).rejects.toEqual(new Error('[unknownField]: definition for this key is missing'));
-      });
-
-      test('should enforce a schema for options if options are passed', () => {
+      test('should throw if the request version is higher than the registered version', () => {
         const { ctx } = setup();
         expect(() =>
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
             id: '123',
             data: { title: 'Hello' },
-            options: { foo: 'bar' },
+            version: 'v7',
           })
-        ).rejects.toEqual(new Error('Schema missing for rpc procedure [update.in.options].'));
-      });
-
-      test('should validate the options', () => {
-        const { ctx } = setup({
-          contentSchemas: {
-            update: {
-              in: {
-                data: fooDataSchema,
-                options: schema.object({ validOption: schema.maybe(schema.boolean()) }),
-              },
-            },
-          } as any,
-        });
-        expect(() =>
-          fn(ctx, {
-            contentTypeId: FOO_CONTENT_ID,
-            id: '123',
-            data: { title: 'Hello' },
-            options: { foo: 'bar' },
-          })
-        ).rejects.toEqual(new Error('[foo]: definition for this key is missing'));
-      });
-
-      test('should validate the result if schema is provided', () => {
-        const { ctx, storage } = setup({
-          contentSchemas: {
-            update: {
-              in: { data: fooDataSchema },
-              out: { result: schema.object({ validField: schema.maybe(schema.boolean()) }) },
-            },
-          } as any,
-        });
-
-        const invalidResult = { wrongField: 'bad' };
-        storage.update.mockResolvedValueOnce(invalidResult);
-
-        expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '123', data: { title: 'Hello' } })
-        ).rejects.toEqual(new Error('[wrongField]: definition for this key is missing'));
+        ).rejects.toEqual(new Error('Invalid version. Latest version is [v2].'));
       });
     });
   });
