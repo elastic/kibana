@@ -116,6 +116,7 @@ export const buildMetricThresholdRule = (
         },
       },
     },
+    revision: 1,
     ...rule,
   };
 };
