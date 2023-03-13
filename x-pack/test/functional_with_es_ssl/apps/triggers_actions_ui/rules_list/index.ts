@@ -8,8 +8,8 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Rules list', function () {
-    // loadTestFile(require.resolve('./rules_list'));
+  describe('Rules list', () => {
+    loadTestFile(require.resolve('./rules_list'));
     loadTestFile(require.resolve('./bulk_actions'));
   });
 };
