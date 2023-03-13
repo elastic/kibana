@@ -15,5 +15,5 @@ export type { CreateIn } from './create';
 export type { UpdateIn } from './update';
 export type { DeleteIn } from './delete';
 export type { SearchIn } from './search';
-export type { ProcedureSchemas } from './types';
+export type { ProcedureSchemas, ServicesDefinition } from './types';
 export type { ProcedureName } from './constants';

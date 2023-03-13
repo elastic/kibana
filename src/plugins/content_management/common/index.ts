@@ -17,6 +17,7 @@ export type {
   UpdateIn,
   DeleteIn,
   SearchIn,
+  ServicesDefinition,
 } from './rpc';
 
 export type { Version } from './types';

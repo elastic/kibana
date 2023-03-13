@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Type, ValidationError } from '@kbn/config-schema';
 import { ObjectMigrationDefinition, ObjectTransform, ObjectTransforms, Version } from './types';
+import { validateObj } from './utils';
 
 /**
  * Extract versions metadata from an object migration definition
@@ -34,26 +34,6 @@ const getVersionsMeta = (migrationDefinition: ObjectMigrationDefinition) => {
     lastSupportedVersion,
     latestVersion,
   };
-};
-
-/**
- * Validate an object based on a schema.
- *
- * @param obj The object to validate
- * @param objSchema The schema to validate the object against
- * @returns null or ValidationError
- */
-const validateObj = (obj: unknown, objSchema?: Type<any>): ValidationError | null => {
-  if (objSchema === undefined) {
-    return null;
-  }
-
-  try {
-    objSchema.validate(obj);
-    return null;
-  } catch (e: any) {
-    return e as ValidationError;
-  }
 };
 
 /**
