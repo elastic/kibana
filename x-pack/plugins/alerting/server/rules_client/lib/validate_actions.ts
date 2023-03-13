@@ -16,7 +16,7 @@ import { parseDuration } from '../../lib';
 
 export async function validateActions(
   context: RulesClientContext,
-  alertType: UntypedNormalizedRuleType,
+  ruleType: UntypedNormalizedRuleType,
   data: Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {
     actions: NormalizedAlertAction[];
   },
@@ -68,7 +68,7 @@ export async function validateActions(
     }
   }
   // check for actions with invalid action groups
-  const { actionGroups: alertTypeActionGroups } = alertType;
+  const { actionGroups: alertTypeActionGroups } = ruleType;
   const usedAlertActionGroups = actions.map((action) => action.group);
   const availableAlertTypeActionGroups = new Set(map(alertTypeActionGroups, 'id'));
   const invalidActionGroups = usedAlertActionGroups.filter(
@@ -117,6 +117,7 @@ export async function validateActions(
   const actionsWithInvalidThrottles = [];
   const actionWithoutQueryAndTimeframe = [];
   const actionsWithInvalidTimeRange = [];
+  const actionsWithAlertsFilterWithoutSummaryGetter = [];
 
   for (const action of actions) {
     const { alertsFilter } = action;
@@ -130,6 +131,11 @@ export async function validateActions(
     }
 
     if (alertsFilter) {
+      // Action has alertsFilter but the ruleType does not support AAD
+      if (!ruleType.getSummarizedAlerts) {
+        actionsWithAlertsFilterWithoutSummaryGetter.push(action);
+      }
+
       // alertsFilter must have at least one of query and timeframe
       if (!alertsFilter.query && !alertsFilter.timeframe) {
         actionWithoutQueryAndTimeframe.push(action);
@@ -186,6 +192,20 @@ export async function validateActions(
             .join(', '),
         },
       })
+    );
+  }
+
+  if (actionsWithAlertsFilterWithoutSummaryGetter.length > 0) {
+    errors.push(
+      i18n.translate(
+        'xpack.alerting.rulesClient.validateActions.actionsWithAlertsFilterWithoutSummaryGetter',
+        {
+          defaultMessage: `This ruleType (${ruleType.name}) can't have an action with Alerts Filter. Actions: [{uuids}]`,
+          values: {
+            uuids: actionsWithAlertsFilterWithoutSummaryGetter.map((a) => a.uuid).join(', '),
+          },
+        }
+      )
     );
   }
 
