@@ -17,7 +17,7 @@ export function Documentation({ label }: Props) {
   const { docLinks } = useApmPluginContext().core;
   return (
     <EuiLink
-      data-test-subj="apmDocumentationLink"
+      data-test-subj="apmCustomLinksDocumentationLink"
       href={docLinks.links.apm.customLinks}
     >
       {label}
