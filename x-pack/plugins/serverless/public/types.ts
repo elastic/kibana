@@ -11,3 +11,5 @@ export interface ServerlessPluginSetup {}
 export interface ServerlessPluginStart {
   setServerlessNavigation: (navigation: JSX.Element) => void;
 }
+
+export type ProjectType = 'oblt' | 'security' | 'es';

@@ -241,6 +241,7 @@ export class ChromeService {
                 breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
                 helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
                 helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
+                navControlsRight$={navControls.getRight$()}
                 kibanaDocLink={docLinks.links.kibana.guide}
                 kibanaVersion={injectedMetadata.getKibanaVersion()}
               />

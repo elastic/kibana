@@ -21,6 +21,7 @@ import {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
+  ChromeNavControl,
 } from '@kbn/core-chrome-browser/src';
 import { Observable } from 'rxjs';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
@@ -28,6 +29,7 @@ import { InternalApplicationStart } from '@kbn/core-application-browser-internal
 import { HeaderBreadcrumbs } from '../header/header_breadcrumbs';
 import { HeaderActionMenu } from '../header/header_action_menu';
 import { HeaderHelpMenu } from '../header/header_help_menu';
+import { HeaderNavControls } from '../header/header_nav_controls';
 
 interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
@@ -39,6 +41,7 @@ interface Props {
   kibanaVersion: string;
   application: InternalApplicationStart;
   navigation: JSX.Element;
+  navControlsRight$: Observable<ChromeNavControl[]>;
 }
 
 export const SolutionHeader = ({
@@ -81,6 +84,10 @@ export const SolutionHeader = ({
           </EuiHeaderSectionItem>
           <EuiHeaderSectionItem border="left">
             <HeaderActionMenu actionMenu$={observables.actionMenu$} />
+          </EuiHeaderSectionItem>
+
+          <EuiHeaderSectionItem>
+            <HeaderNavControls navControls$={observables.navControlsRight$} />
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
       </EuiHeader>
