@@ -29,7 +29,7 @@ interface SetupDeps {
   securityLicense: SecurityLicense;
   logoutUrl: string;
   securityApiClients: SecurityApiClients;
-  showNavLinks: boolean;
+  showNavLinks?: boolean;
 }
 
 interface StartDeps {
@@ -55,7 +55,7 @@ export class SecurityNavControlService {
   private securityApiClients!: SecurityApiClients;
 
   private navControlRegistered!: boolean;
-  private showNavLinks!: boolean;
+  private showNavLinks = true;
 
   private securityFeaturesSubscription?: Subscription;
 
@@ -66,7 +66,7 @@ export class SecurityNavControlService {
     this.securityLicense = securityLicense;
     this.logoutUrl = logoutUrl;
     this.securityApiClients = securityApiClients;
-    this.showNavLinks = showNavLinks;
+    this.showNavLinks = showNavLinks || this.showNavLinks;
   }
 
   public start({ core, authc }: StartDeps): SecurityNavControlServiceStart {

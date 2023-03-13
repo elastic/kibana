@@ -12,7 +12,9 @@
       "serverless",
       "plugin",
     ],
-    "requiredPlugins": [],
+    "requiredPlugins": [
+      "kibanaReact",
+    ],
     "optionalPlugins": [],
     "requiredBundles": []
   }
