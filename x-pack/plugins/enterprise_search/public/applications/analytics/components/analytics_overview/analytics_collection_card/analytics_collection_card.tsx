@@ -26,6 +26,8 @@ import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
 import { i18n } from '@kbn/i18n';
 
+import { AnalyticsCollection } from '../../../../../../common/types/analytics';
+
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { KibanaLogic } from '../../../../shared/kibana';
@@ -73,9 +75,8 @@ const getCardTheme = (euiTheme: EuiThemeComputed) => ({
   },
 });
 
-interface AnalyticsCollectionCardProps
-  extends WithLensDataInputProps,
-    WithLensDataLogicOutputProps {
+interface AnalyticsCollectionCardProps extends WithLensDataLogicOutputProps {
+  collection: AnalyticsCollection;
   isCreatedByEngine?: boolean;
   subtitle?: string;
 }
@@ -105,6 +106,11 @@ export const AnalyticsCollectionCard: React.FC<AnalyticsCollectionCardProps> = (
     id: collection.id,
     section: 'events',
   });
+  const handleCardClick = (event: MouseEvent) => {
+    event?.preventDefault();
+
+    navigateToUrl(collectionViewUrl);
+  };
 
   return (
     <EuiCard
@@ -126,11 +132,7 @@ export const AnalyticsCollectionCard: React.FC<AnalyticsCollectionCardProps> = (
       css={cardStyles.card}
       description={<span css={cardStyles.subtitle}>{subtitle}</span>}
       href={history.createHref(parsePath(collectionViewUrl))}
-      onClick={(event: MouseEvent) => {
-        event?.preventDefault();
-
-        navigateToUrl(collectionViewUrl);
-      }}
+      onClick={handleCardClick}
       footer={
         isLoading ? (
           <EuiFlexGroup alignItems="center" justifyContent="center">
@@ -208,5 +210,6 @@ export const AnalyticsCollectionCard: React.FC<AnalyticsCollectionCardProps> = (
     </EuiCard>
   );
 };
-export const AnalyticsCollectionCardWithLens =
-  withLensData<AnalyticsCollectionCardProps>(AnalyticsCollectionCard);
+export const AnalyticsCollectionCardWithLens = withLensData<
+  AnalyticsCollectionCardProps & WithLensDataInputProps
+>(AnalyticsCollectionCard);
