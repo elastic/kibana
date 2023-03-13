@@ -37,6 +37,8 @@ import {
   COLLAPSE_DETAILS_BUTTON_TEST_ID,
   EXPAND_DETAILS_BUTTON_TEST_ID,
   FLYOUT_HEADER_TITLE_TEST_ID,
+  MITRE_ATTACK_DETAILS_TEST_ID,
+  MITRE_ATTACK_TITLE_TEST_ID,
 } from '../../public/flyout/right/components/test_ids';
 import { getDataTestSubjectSelector } from '../helpers/common';
 
@@ -89,4 +91,10 @@ export const DOCUMENT_DETAILS_FLYOUT_INVESTIGATIONS_TAB_CONTENT = getDataTestSub
 );
 export const DOCUMENT_DETAILS_FLYOUT_HISTORY_TAB_CONTENT = getDataTestSubjectSelector(
   HISTORY_TAB_CONTENT_TEST_ID
+);
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE = getDataTestSubjectSelector(
+  MITRE_ATTACK_TITLE_TEST_ID
+);
+export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_DETAILS = getDataTestSubjectSelector(
+  MITRE_ATTACK_DETAILS_TEST_ID
 );
