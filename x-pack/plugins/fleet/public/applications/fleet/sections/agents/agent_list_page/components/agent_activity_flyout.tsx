@@ -42,6 +42,8 @@ import { Loading } from '../../components';
 
 import { getKuery } from '../utils/get_kuery';
 
+import { AGENT_STATUSES } from '../../services/agent_status';
+
 import { getTodayActions, getOtherDaysActions } from './agent_activity_helper';
 import { ViewErrors } from './view_errors';
 
@@ -98,7 +100,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
         });
         setSearch(kuery);
       }
-      setSelectedStatus(['healthy', 'unhealthy', 'updating', 'offline', 'inactive', 'unenrolled']);
+      setSelectedStatus(AGENT_STATUSES);
 
       onClose();
     } catch (err) {
