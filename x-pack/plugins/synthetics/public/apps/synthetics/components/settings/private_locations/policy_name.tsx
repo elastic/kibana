@@ -43,11 +43,15 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
       ) : (
         agentPolicyId
       )}
-      &nbsp; &nbsp;
-      <EuiBadge color={policy?.agents === 0 ? 'warning' : 'hollow'}>
-        {AGENTS_LABEL}
-        {policy?.agents}
-      </EuiBadge>
+      {canReadAgentPolicies && (
+        <>
+          &nbsp; &nbsp;
+          <EuiBadge color={policy?.agents === 0 ? 'warning' : 'hollow'}>
+            {AGENTS_LABEL}
+            {policy?.agents}
+          </EuiBadge>
+        </>
+      )}
     </EuiText>
   );
 };
