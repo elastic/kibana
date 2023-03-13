@@ -7,6 +7,7 @@
 
 import { journey, step, expect, before, after } from '@elastic/synthetics';
 import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { byTestId } from '@kbn/observability-plugin/e2e/utils';
 import {
   addTestMonitor,
   cleanTestMonitors,
@@ -50,7 +51,8 @@ journey(`MonitorSelector`, async ({ page, params }) => {
   });
 
   step('shows recently viewed monitors', async () => {
-    await page.click('text=' + testMonitor1);
+    await page.waitForSelector(byTestId('monitorNameTitle'));
+    expect(await page.locator(byTestId('monitorNameTitle')).textContent()).toBe(testMonitor1);
     await page.click('[aria-label="Select a different monitor to view its details"]');
     await page.click('text=' + testMonitor2);
 

@@ -129,8 +129,6 @@ export class DataViewEditorService {
   private requireTimestampField: boolean;
   private type = INDEX_PATTERN_TYPE.DEFAULT;
 
-  // state
-  private state = { ...defaultDataViewEditorState };
   private indexPattern = '';
   private allowHidden = false;
 
@@ -165,8 +163,7 @@ export class DataViewEditorService {
   private currentLoadingMatchedIndices = 0;
 
   private updateState = (newState: Partial<DataViewEditorState>) => {
-    this.state = { ...this.state, ...newState };
-    this.state$.next(this.state);
+    this.state$.next({ ...this.state$.getValue(), ...newState });
   };
 
   private getRollupIndexCaps = async () => {
@@ -324,7 +321,8 @@ export class DataViewEditorService {
   };
 
   private loadTimestampFields = async () => {
-    if (this.state.matchedIndices.exactMatchedIndices.length === 0) {
+    const currentState = this.state$.getValue();
+    if (currentState.matchedIndices.exactMatchedIndices.length === 0) {
       this.updateState({ timestampFieldOptions: [], loadingTimestampFields: false });
       return;
     }
@@ -335,7 +333,7 @@ export class DataViewEditorService {
     };
     if (this.type === INDEX_PATTERN_TYPE.ROLLUP) {
       getFieldsOptions.type = INDEX_PATTERN_TYPE.ROLLUP;
-      getFieldsOptions.rollupIndex = this.state.rollupIndexName || '';
+      getFieldsOptions.rollupIndex = currentState.rollupIndexName || '';
     }
 
     let timestampFieldOptions: TimestampOption[] = [];

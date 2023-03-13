@@ -13,41 +13,56 @@ import {
   ruleExecutionStatusToNumber,
   RuleExecutionStatus,
 } from '../../../../../../common/detection_engine/rule_monitoring';
+
 import type { RuleParams } from '../../../rule_schema';
 
 export const createRuleExecutionSummary = (
   rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>
 ): RuleExecutionSummary | null => {
+  if (!rule.monitoring) {
+    // In the rule type the monitoring object is optional because in some cases rules client returns a rule without it.
+    // For instance, when we call RulesClient.create(). Despite the fact that it's always in the rule saved object,
+    // even when it was just created:
+    // https://github.com/elastic/kibana/blob/26eddec70844ffb65e5d3521a7adb52e643c4534/x-pack/plugins/alerting/server/rules_client/methods/create.ts#L155
+    return null;
+  }
+
+  // Data that we need to create rule execution summary is stored in two different "last run" objects within a rule.
+
+  // This last run object is internal to Kibana server and is not exposed via any public HTTP API.
+  // Alerting Framework keeps it for itself and provides via the RulesClient for solutions.
+  const lastRunInternal = rule.monitoring.run.last_run;
+  // This last run object is public - it is exposed via the public Alerting HTTP API.
+  const lastRunPublic = rule.lastRun;
+
   if (rule.running) {
     return {
       last_execution: {
-        date: new Date().toISOString(),
-        message: '',
-        metrics: {},
+        date: lastRunInternal.timestamp,
         status: RuleExecutionStatus.running,
         status_order: ruleExecutionStatusToNumber(RuleExecutionStatus.running),
+        message: '',
+        metrics: {},
       },
     };
   }
 
-  if (!rule.lastRun) {
+  if (!lastRunPublic) {
     return null;
   }
 
-  const ruleExecutionStatus = ruleLastRunOutcomeToExecutionStatus(rule.lastRun.outcome);
+  const ruleExecutionStatus = ruleLastRunOutcomeToExecutionStatus(lastRunPublic.outcome);
 
   return {
     last_execution: {
-      date: rule.monitoring?.run.last_run?.timestamp ?? new Date().toISOString(),
+      date: lastRunInternal.timestamp,
       status: ruleExecutionStatus,
       status_order: ruleExecutionStatusToNumber(ruleExecutionStatus),
-      message: rule.lastRun?.outcomeMsg?.join(' \n') ?? '',
+      message: lastRunPublic.outcomeMsg?.join(' \n') ?? '',
       metrics: {
-        total_indexing_duration_ms:
-          rule.monitoring?.run.last_run.metrics.total_indexing_duration_ms ?? undefined,
-        total_search_duration_ms:
-          rule.monitoring?.run.last_run.metrics.total_search_duration_ms ?? undefined,
-        execution_gap_duration_s: rule.monitoring?.run.last_run.metrics.gap_duration_s ?? undefined,
+        total_indexing_duration_ms: lastRunInternal.metrics.total_indexing_duration_ms ?? undefined,
+        total_search_duration_ms: lastRunInternal.metrics.total_search_duration_ms ?? undefined,
+        execution_gap_duration_s: lastRunInternal.metrics.gap_duration_s ?? undefined,
       },
     },
   };
