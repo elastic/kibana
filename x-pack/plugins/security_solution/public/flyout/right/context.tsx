@@ -18,6 +18,7 @@ import { SecurityPageName } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import type { RightPanelProps } from '.';
+import { useGetFieldsData } from '../../common/hooks/use_get_fields_data';
 
 export interface RightPanelContext {
   /**
@@ -40,6 +41,10 @@ export interface RightPanelContext {
    * The actual raw document object
    */
   searchHit: SearchHit<object> | undefined;
+  /**
+   *
+   */
+  getFieldsData: (field: string) => unknown | unknown[];
 }
 
 export const RightPanelContext = createContext<RightPanelContext | undefined>(undefined);
@@ -66,6 +71,7 @@ export const RightPanelProvider = ({ id, indexName, children }: RightPanelProvid
     runtimeMappings: sourcererDataView.runtimeMappings,
     skip: !id,
   });
+  const getFieldsData = useGetFieldsData(searchHit?.fields);
 
   const contextValue = useMemo(
     () =>
@@ -76,9 +82,17 @@ export const RightPanelProvider = ({ id, indexName, children }: RightPanelProvid
             browserFields: sourcererDataView.browserFields,
             dataFormattedForFieldBrowser,
             searchHit: searchHit as SearchHit<object>,
+            getFieldsData,
           }
         : undefined,
-    [id, indexName, sourcererDataView.browserFields, dataFormattedForFieldBrowser, searchHit]
+    [
+      id,
+      indexName,
+      sourcererDataView.browserFields,
+      dataFormattedForFieldBrowser,
+      searchHit,
+      getFieldsData,
+    ]
   );
 
   if (loading) {

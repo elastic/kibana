@@ -7,11 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const HEADER_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.titleLabel',
-  { defaultMessage: 'Title' }
-);
-
 export const OVERVIEW_TAB = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.overviewTab',
   { defaultMessage: 'Overview' }
