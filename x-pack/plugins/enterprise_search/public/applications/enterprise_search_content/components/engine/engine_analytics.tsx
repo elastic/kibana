@@ -51,9 +51,10 @@ export const EngineAnalytics: React.FC = () => {
     setTimeRange,
   } = useActions(EngineAnalyticsLogic);
 
-  // set default data view from kibana logic
+  // Currently Overview page retrieves events from default data view,
+  // Change to engine specific data view when ready
   useEffect(() => {
-    getDefaultDataView(data);
+    getDefaultDataView(data); // set default data view from kibana logic
     getFormula(lens);
   }, []);
 
@@ -166,13 +167,12 @@ export const EngineAnalytics: React.FC = () => {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-
         {/* Area Chart */}
-
+        {/* TODO:: display empty page when no default data view is set */}
         <EuiFlexGroup wrap>
           <EngineAnalyticsLens attributes={xyAttributes} />
         </EuiFlexGroup>
-        {/* sets count and percentage values for the cards from onLoad props from lens Metric chart.
+        {/* sets count and percentage values for the cards from Lens onLoad
           This div is hidden as the lens metric chart is used to calculate the metrics not display lens chart itself */}
         <div hidden aria-hidden>
           {metricAttributesQueries ? (

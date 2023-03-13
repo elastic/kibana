@@ -35,7 +35,7 @@ export interface EngineAnalyticsValues {
   timeRange: { from: string; to: string };
 }
 
-export interface EngineAnalyticsActions {
+interface EngineAnalyticsActions {
   getDefaultDataView: (data: DataPublicPluginStart) => {
     data: DataPublicPluginStart;
   };
