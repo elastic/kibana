@@ -17,9 +17,9 @@ export const fetchAnalyticsCollectionDataViewId = async (
   dataViewsService: DataViewsService,
   collectionName: string
 ): Promise<AnalyticsCollectionDataViewId> => {
-  const collection = await fetchAnalyticsCollections(elasticsearchClient, collectionName);
+  const collections = await fetchAnalyticsCollections(elasticsearchClient, collectionName);
 
-  const collectionDataView = await dataViewsService.find(collection[0].events_datastream, 1);
+  const collectionDataView = await dataViewsService.find(collections[0].events_datastream, 1);
 
   return { data_view_id: collectionDataView?.[0]?.id || null };
 };
