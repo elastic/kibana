@@ -21,6 +21,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
+import { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
 import { i18n } from '@kbn/i18n';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
@@ -78,7 +79,7 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
 }) => {
   const { euiTheme } = useEuiTheme();
   const analyticsCollectionTableStyles = AnalyticsCollectionTableStyles(euiTheme);
-  const filterOptions = useMemo(
+  const filterOptions = useMemo<Array<{ id: FilterBy; label: string }>>(
     () => [
       {
         css: [analyticsCollectionTableStyles.button],
@@ -102,13 +103,23 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
     from: defaultQuickRanges[0].start,
     to: defaultQuickRanges[0].end,
   });
+  const handleTimeChange = ({ start, end }: OnTimeChangeProps) => {
+    setTimeRange({ from: start, to: end });
+  };
+  const selectedFilterLabel = filterOptions.find(({ id }) => id === filterId)?.label;
 
   return (
     <EuiFlexGroup direction="column">
       <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiSearchBar box={{ placeholder: 'Search collection names' }} />
+            <EuiSearchBar
+              box={{
+                placeholder: i18n.translate('xpack.enterpriseSearch.analytics.searchPlaceholder', {
+                  defaultMessage: 'Search collection names',
+                }),
+              }}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
@@ -116,7 +127,7 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
               css={analyticsCollectionTableStyles.buttonGroup}
-              onChange={(id) => setFilterId(id)}
+              onChange={setFilterId}
               color="primary"
               buttonSize="compressed"
               idSelected={filterId}
@@ -131,9 +142,7 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
                 <EuiSuperDatePicker
                   start={timeRange.from}
                   end={timeRange.to}
-                  onTimeChange={({ start, end }) => {
-                    setTimeRange({ from: start, to: end });
-                  }}
+                  onTimeChange={handleTimeChange}
                   showUpdateButton={false}
                   width="full"
                   commonlyUsedRanges={defaultQuickRanges}
@@ -148,7 +157,7 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
           <AnalyticsCollectionCardWithLens
             key={collection.id}
             collection={collection}
-            subtitle={filterOptions.find(({ id }) => id === filterId)?.label as string}
+            subtitle={selectedFilterLabel}
             filterBy={filterId}
             timeRange={timeRange}
           />
