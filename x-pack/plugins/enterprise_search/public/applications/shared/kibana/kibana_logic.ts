@@ -20,7 +20,7 @@ import {
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { FormulaPublicApi, LensPublicStart } from '@kbn/lens-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
@@ -39,7 +39,6 @@ interface KibanaLogicProps {
   // Kibana core
   capabilities: Capabilities;
   data: DataPublicPluginStart;
-  formula: FormulaPublicApi;
   history: ScopedHistory;
   lens: LensPublicStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
@@ -58,7 +57,6 @@ interface KibanaLogicProps {
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
   cloud: Partial<CloudSetup>;
   data: DataPublicPluginStart;
-  formula: FormulaPublicApi;
   isCloud: boolean;
   lens: LensPublicStart;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
@@ -72,8 +70,10 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     config: [props.config || {}, {}],
     charts: [props.charts, {}],
     cloud: [props.cloud || {}, {}],
+    data: [props.data, {}],
     guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],
+    lens: [props.lens, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {
         const deps = { history: props.history, http: HttpLogic.values.http };
@@ -90,9 +90,6 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
     uiSettings: [props.uiSettings, {}],
-    lens: [props.lens, {}],
-    data: [props.data, {}],
-    formula: [props.formula, {}],
   }),
   selectors: ({ selectors }) => ({
     isCloud: [() => [selectors.cloud], (cloud?: Partial<CloudSetup>) => !!cloud?.isCloudEnabled],

@@ -165,16 +165,16 @@ const initialValues = {
 export const withLensData = <T extends WithLensDataInputProps>(Component: React.FC<T>) => {
   const ComponentWithLensData = (props: Omit<T, keyof WithLensDataLogicOutputProps>) => {
     const {
-      lens: { EmbeddableComponent },
+      lens: { EmbeddableComponent, stateHelperApi },
       data: { dataViews, search },
-      formula,
     } = useValues(KibanaLogic);
     const [dataView, setDataView] = useState<DataView | null>(null);
+    const [formula, setFormula] = useState<FormulaPublicApi | null>(null);
     const [lensData, setLensData] = useState<WithLensDataLogicOutputProps>(initialValues);
     const [searchSessionId, setSearchSessionId] = useState<string>();
     const attributes = useMemo(
-      () => dataView && getLensAttributes(dataView, formula!, props.filterBy),
-      [props.filterBy, dataView]
+      () => dataView && formula && getLensAttributes(dataView, formula, props.filterBy),
+      [props.filterBy, dataView, formula]
     );
     const onDataLoad: LensByReferenceInput['onLoad'] = (isLoading, adapters) => {
       if (isLoading) {
@@ -208,6 +208,10 @@ export const withLensData = <T extends WithLensDataInputProps>(Component: React.
     }, [props.collection.events_datastream]);
     useEffect(() => {
       setSearchSessionId(search.session.start());
+
+      stateHelperApi().then((helper) => {
+        setFormula(helper.formula);
+      });
     }, []);
 
     return (

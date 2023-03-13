@@ -10,6 +10,8 @@ import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { ApplicationStart, Capabilities } from '@kbn/core/public';
 
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { mockHistory } from '../react_router/state.mock';
@@ -28,9 +30,11 @@ export const mockKibanaValues = {
     isCloudEnabled: false,
     deployment_url: 'https://cloud.elastic.co/deployments/some-id',
   },
+  data: dataPluginMock.createStartContract(),
   guidedOnboarding: {},
   history: mockHistory,
   isCloud: false,
+  lens: lensPluginMock.createStartContract(),
   navigateToUrl: jest.fn(),
   productAccess: {
     hasAppSearchAccess: true,
