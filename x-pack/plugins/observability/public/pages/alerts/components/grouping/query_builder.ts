@@ -7,7 +7,7 @@
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { BoolQuery } from '@kbn/es-query';
-import type { NamedAggregation } from '@kbn/securitysolution-grouping';
+import { isNoneGroup, NamedAggregation } from '@kbn/securitysolution-grouping';
 import { getGroupingQuery } from '@kbn/securitysolution-grouping';
 
 const getGroupFields = (groupValue: string) => {
@@ -41,38 +41,29 @@ export const getAlertsGroupingQuery = ({
 }: AlertsGroupingQueryParams) =>
   getGroupingQuery({
     additionalFilters,
-    additionalAggregationsRoot: [
+    from,
+    groupByFields: !isNoneGroup(selectedGroup) ? getGroupFields(selectedGroup) : [],
+    metricsAggregations: !isNoneGroup(selectedGroup)
+      ? getAggregationsByGroupField(selectedGroup)
+      : [],
+    pageNumber: pageIndex * pageSize,
+    rootAggregations: [
       {
-        unitCount0: { value_count: { field: selectedGroup } },
+        unitsCount: { value_count: { field: selectedGroup } },
       },
-      ...(selectedGroup !== 'none'
-        ? [
-            {
-              groupCount0: {
-                cardinality: {
-                  field: selectedGroup,
-                },
-              },
-            },
-          ]
+      ...(!isNoneGroup(selectedGroup)
+        ? [{ groupsCount: { cardinality: { field: selectedGroup } } }]
         : []),
     ],
-    from,
     runtimeMappings,
-    stackByMultipleFields0: selectedGroup !== 'none' ? getGroupFields(selectedGroup) : [],
+    size: pageSize,
     to,
-    additionalStatsAggregationsFields0:
-      selectedGroup !== 'none' ? getAggregationsByGroupField(selectedGroup) : [],
-    stackByMultipleFields0Size: pageSize,
-    stackByMultipleFields0From: pageIndex * pageSize,
-    additionalStatsAggregationsFields1: [],
-    stackByMultipleFields1: [],
   });
 
 const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   const aggMetrics: NamedAggregation[] = [
     {
-      unitCount0: {
+      unitsCount: {
         cardinality: {
           field: 'kibana.alert.rule.uuid',
         },

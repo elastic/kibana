@@ -35,7 +35,7 @@ interface GroupingArgs {
   fields: FieldSpec[];
   groupingId: string;
   onGroupChangeCallback?: (param: { groupByField: string; tableId: string }) => void;
-  tracker: (
+  tracker?: (
     type: UiCounterMetricType,
     event: string | string[],
     count?: number | undefined

@@ -133,6 +133,7 @@ export const AlertsGroupingComponent: React.FC<OwnProps> = ({
           isLoading,
           renderChildComponent,
           takeActionItems: () => [],
+          groupingId: tableId,
         })
       ),
     [
