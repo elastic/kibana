@@ -79,21 +79,17 @@ export const EditControlFlyout = ({
       return;
     }
 
+    const factory = getControlFactory(type) as IEditableControlFactory;
+    if (!factory) throw new EmbeddableFactoryNotFoundError(type);
+    if (factory.presaveTransformFunction) {
+      setInputToReturn(factory.presaveTransformFunction(inputToReturn, embeddable));
+    }
+
     if (currentWidth !== panel.width)
       dispatch(setControlWidth({ width: currentWidth, embeddableId: embeddable.id }));
     if (currentGrow !== panel.grow)
       dispatch(setControlGrow({ grow: currentGrow, embeddableId: embeddable.id }));
 
-    // if the control now has a new type, need to replace the old factory with
-    // one of the correct new type
-    if (panel.type !== type) {
-      const factory = getControlFactory(type);
-      if (!factory) throw new EmbeddableFactoryNotFoundError(type);
-      const editableFactory = factory as IEditableControlFactory;
-      if (editableFactory.presaveTransformFunction) {
-        setInputToReturn(editableFactory.presaveTransformFunction(inputToReturn, embeddable));
-      }
-    }
     closeFlyout();
     await controlGroup.replaceEmbeddable(embeddable.id, inputToReturn, type);
   };

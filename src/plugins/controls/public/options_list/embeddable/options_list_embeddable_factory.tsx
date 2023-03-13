@@ -20,8 +20,9 @@ import {
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
 } from '../../../common/options_list/types';
-import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
 import { OptionsListEditorOptions } from '../components/options_list_editor_options';
+import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
+import { OPTIONS_LIST_DEFAULT_SORT } from '../../../common/options_list/suggestions_sorting';
 
 export class OptionsListEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<OptionsListEmbeddableInput>
@@ -48,8 +49,11 @@ export class OptionsListEmbeddableFactory
       ((newInput.fieldName && !deepEqual(newInput.fieldName, embeddable.getInput().fieldName)) ||
         (newInput.dataViewId && !deepEqual(newInput.dataViewId, embeddable.getInput().dataViewId)))
     ) {
-      // if the field name or data view id has changed in this editing session, selected options are invalid, so reset them.
-      newInput.selectedOptions = [];
+      // if the field name or data view id has changed in this editing session, reset all selections
+      newInput.selectedOptions = undefined;
+      newInput.existsSelected = undefined;
+      newInput.exclude = undefined;
+      newInput.sort = undefined;
     }
     return newInput;
   };
