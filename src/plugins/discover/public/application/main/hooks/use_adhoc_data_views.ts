@@ -7,7 +7,7 @@
  */
 
 import { useCallback, useEffect } from 'react';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
@@ -57,13 +57,13 @@ export const useAdHocDataViews = ({
    */
   const updateAdHocDataViewId = useCallback(
     async (prevDataView: DataView) => {
-      const newDataView = await dataViews.create({ ...prevDataView.toSpec(), id: uuid() });
+      const newDataView = await dataViews.create({ ...prevDataView.toSpec(), id: uuidv4() });
       dataViews.clearInstanceCache(prevDataView.id);
 
       updateFiltersReferences(prevDataView, newDataView);
 
       stateContainer.actions.replaceAdHocDataViewWithId(prevDataView.id!, newDataView);
-      await stateContainer.replaceUrlAppState({ index: newDataView.id });
+      await stateContainer.appState.update({ index: newDataView.id }, true);
 
       setUrlTracking(newDataView);
       return newDataView;

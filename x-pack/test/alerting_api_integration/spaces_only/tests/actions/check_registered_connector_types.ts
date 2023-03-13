@@ -44,6 +44,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.resilient',
           '.teams',
           '.tines',
+          '.torq',
           '.opsgenie',
         ].sort()
       );

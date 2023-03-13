@@ -31,16 +31,29 @@ export async function getAgentUploads(
   esClient: ElasticsearchClient,
   agentId: string
 ): Promise<AgentDiagnostics[]> {
-  const getFile = async (fileId: string) => {
-    if (!fileId) return;
+  const getFile = async (actionId: string) => {
     try {
-      const file = await esClient.get({
+      const fileResponse = await esClient.search({
         index: FILE_STORAGE_METADATA_AGENT_INDEX,
-        id: fileId,
+        query: {
+          bool: {
+            filter: {
+              bool: {
+                must: [{ term: { agent_id: agentId } }, { term: { action_id: actionId } }],
+              },
+            },
+          },
+        },
       });
+      if (fileResponse.hits.hits.length === 0) {
+        appContextService
+          .getLogger()
+          .debug(`No matches for action_id ${actionId} and agent_id ${agentId}`);
+        return;
+      }
       return {
-        id: file._id,
-        ...(file._source as any)?.file,
+        id: fileResponse.hits.hits[0]._id,
+        ...(fileResponse.hits.hits[0]._source as any)?.file,
       };
     } catch (err) {
       if (err.statusCode === 404) {
@@ -54,18 +67,23 @@ export async function getAgentUploads(
 
   const actions = await _getRequestDiagnosticsActions(esClient, agentId);
 
-  const results = [];
+  const results: AgentDiagnostics[] = [];
   for (const action of actions) {
-    const file = await getFile(action.fileId);
-    const fileName = file?.name ?? `${moment(action.timestamp!).format('YYYY-MM-DD HH:mm:ss')}.zip`;
+    const file = await getFile(action.actionId);
+    const fileName =
+      file?.name ??
+      `elastic-agent-diagnostics-${moment
+        .utc(action.timestamp!)
+        .format('YYYY-MM-DDTHH-mm-ss')}Z-00.zip`;
     const filePath = file ? agentRouteService.getAgentFileDownloadLink(file.id, file.name) : '';
     const result = {
       actionId: action.actionId,
       id: file?.id ?? action.actionId,
-      status: file?.Status ?? 'IN_PROGRESS',
+      status: file?.Status ?? (action.error ? 'FAILED' : 'IN_PROGRESS'),
       name: fileName,
       createTime: action.timestamp!,
       filePath,
+      error: action.error,
     };
     results.push(result);
   }
@@ -76,11 +94,12 @@ export async function getAgentUploads(
 async function _getRequestDiagnosticsActions(
   esClient: ElasticsearchClient,
   agentId: string
-): Promise<Array<{ actionId: string; timestamp?: string; fileId: string }>> {
+): Promise<Array<{ actionId: string; timestamp?: string; fileId?: string; error?: string }>> {
   const agentActionRes = await esClient.search<any>({
     index: AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
     size: SO_SEARCH_LIMIT,
+    sort: { '@timestamp': 'desc' },
     query: {
       bool: {
         must: [
@@ -99,14 +118,17 @@ async function _getRequestDiagnosticsActions(
     },
   });
 
-  const agentActionIds = agentActionRes.hits.hits.map((hit) => hit._source?.action_id as string);
+  const agentActions = agentActionRes.hits.hits.map((hit) => ({
+    actionId: hit._source?.action_id as string,
+    timestamp: hit._source?.['@timestamp'],
+  }));
 
-  if (agentActionIds.length === 0) {
+  if (agentActions.length === 0) {
     return [];
   }
 
   try {
-    const actionResults = await esClient.search<any>({
+    const actionResultsRes = await esClient.search<any>({
       index: AGENT_ACTIONS_RESULTS_INDEX,
       ignore_unavailable: true,
       size: SO_SEARCH_LIMIT,
@@ -115,7 +137,7 @@ async function _getRequestDiagnosticsActions(
           must: [
             {
               terms: {
-                action_id: agentActionIds,
+                action_id: agentActions.map((action) => action.actionId),
               },
             },
             {
@@ -127,11 +149,21 @@ async function _getRequestDiagnosticsActions(
         },
       },
     });
-    return actionResults.hits.hits.map((hit) => ({
+    const actionResults = actionResultsRes.hits.hits.map((hit) => ({
       actionId: hit._source?.action_id as string,
       timestamp: hit._source?.['@timestamp'],
-      fileId: hit._source?.data?.file_id as string,
+      fileId: hit._source?.data?.upload_id as string,
+      error: hit._source?.error,
     }));
+    return agentActions.map((action) => {
+      const actionResult = actionResults.find((result) => result.actionId === action.actionId);
+      return {
+        actionId: action.actionId,
+        timestamp: action.timestamp,
+        fileId: actionResult?.fileId,
+        error: actionResult?.error,
+      };
+    });
   } catch (err) {
     if (err.statusCode === 404) {
       // .fleet-actions-results does not yet exist

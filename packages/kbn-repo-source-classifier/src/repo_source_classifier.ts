@@ -177,16 +177,17 @@ export class RepoSourceClassifier {
         case 'functional-tests':
         case 'test-helper':
           return 'tests or mocks';
-        case 'plugin-browser':
         case 'shared-browser':
           return 'browser package';
-        case 'plugin-server':
         case 'shared-server':
           return 'server package';
         case 'shared-scss':
           return 'static';
         case 'shared-common':
           return 'common package';
+        case 'plugin':
+          // classification in plugins is more complicated, fall through to remaining logic
+          break;
         default:
           // @ts-expect-error if there isn't an error here we are missing a case for a package type
           throw new Error(`unexpected package type [${manifest.type}]`);

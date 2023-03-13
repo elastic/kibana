@@ -13,6 +13,7 @@ import {
   RewriteResponseCase,
   handleDisabledApiKeysError,
   rewriteRuleLastRun,
+  rewriteActionsRes,
 } from './lib';
 import {
   RuleTypeParams,
@@ -69,13 +70,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
     : {}),
   ...(actions
     ? {
-        actions: actions.map(({ group, id, actionTypeId, params, frequency }) => ({
-          group,
-          id,
-          params,
-          connector_type_id: actionTypeId,
-          frequency,
-        })),
+        actions: rewriteActionsRes(actions),
       }
     : {}),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),

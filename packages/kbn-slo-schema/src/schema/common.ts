@@ -44,6 +44,13 @@ const summarySchema = t.type({
   errorBudget: errorBudgetSchema,
 });
 
+const historicalSummarySchema = t.intersection([
+  t.type({
+    date: dateType,
+  }),
+  summarySchema,
+]);
+
 const dateRangeSchema = t.type({ from: dateType, to: dateType });
 
 export {
@@ -52,6 +59,7 @@ export {
   dateRangeSchema,
   dateType,
   errorBudgetSchema,
+  historicalSummarySchema,
   statusSchema,
   summarySchema,
 };

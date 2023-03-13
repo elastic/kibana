@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Windows - Looks for unusual process relationships which may indicate execution of malware or persistence mechanisms.",
   "groups": [
     "endpoint",

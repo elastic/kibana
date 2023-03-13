@@ -38,7 +38,8 @@ import { AndOrBadge } from '../and_or_badge';
 
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 import { BuilderLogicButtons } from './logic_buttons';
-import { State, exceptionsBuilderReducer } from './reducer';
+import { getTotalErrorExist } from './selectors';
+import { EntryFieldError, State, exceptionsBuilderReducer } from './reducer';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -60,7 +61,7 @@ const initialState: State = {
   disableAnd: false,
   disableNested: false,
   disableOr: false,
-  errorExists: 0,
+  errors: {},
   exceptions: [],
   exceptionsToDelete: [],
   warningExists: 0,
@@ -121,30 +122,30 @@ export const ExceptionBuilderComponent = ({
   operatorsList,
   allowCustomFieldOptions = false,
 }: ExceptionBuilderProps): JSX.Element => {
-  const [
-    {
-      addNested,
-      andLogicIncluded,
-      disableAnd,
-      disableNested,
-      disableOr,
-      errorExists,
-      warningExists,
-      exceptions,
-      exceptionsToDelete,
-    },
-    dispatch,
-  ] = useReducer(exceptionsBuilderReducer(), {
+  const [state, dispatch] = useReducer(exceptionsBuilderReducer(), {
     ...initialState,
     disableAnd: isAndDisabled,
     disableNested: isNestedDisabled,
     disableOr: isOrDisabled,
   });
 
+  const {
+    addNested,
+    andLogicIncluded,
+    disableAnd,
+    disableNested,
+    disableOr,
+    warningExists,
+    exceptions,
+    exceptionsToDelete,
+  } = state;
+
+  const errorExists = getTotalErrorExist(state);
+
   const setErrorsExist = useCallback(
-    (hasErrors: boolean): void => {
+    (error: EntryFieldError): void => {
       dispatch({
-        errorExists: hasErrors,
+        error,
         type: 'setErrorsExist',
       });
     },

@@ -22,7 +22,7 @@ import { BasicTable } from './basic_table';
 import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type';
 import { Panel } from '../../panel';
 import { useQueryToggle } from '../../../containers/query_toggle';
-import { useInstalledSecurityJobsIds } from '../hooks/use_installed_security_jobs';
+import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import type { State } from '../../../store';
 import { JobIdFilter } from './job_id_filter';
@@ -59,13 +59,13 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     [setQuerySkip, setToggleStatus]
   );
 
-  const { jobIds, loading: loadingJobs } = useInstalledSecurityJobsIds();
+  const { jobNameById, loading: loadingJobs } = useInstalledSecurityJobNameById();
+  const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
 
   const getAnomaliesHostsTableFilterQuerySelector = useMemo(
     () => hostsSelectors.hostsAnomaliesJobIdFilterSelector(),
     []
   );
-
   const selectedJobIds = useDeepEqualSelector((state: State) =>
     getAnomaliesHostsTableFilterQuerySelector(state, type)
   );
@@ -115,7 +115,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     aggregationInterval: selectedInterval,
   });
 
-  const hosts = convertAnomaliesToHosts(tableData, hostName);
+  const hosts = convertAnomaliesToHosts(tableData, jobNameById, hostName);
 
   const columns = getAnomaliesHostTableColumnsCurated(type, startDate, endDate);
   const pagination = {
@@ -151,6 +151,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
                   onSelect={onSelectJobId}
                   selectedJobIds={selectedJobIds}
                   jobIds={jobIds}
+                  jobNameById={jobNameById}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

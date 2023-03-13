@@ -30,6 +30,7 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { lastValueFrom } from 'rxjs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataTableModel } from '../../../common/store/data_table/types';
 import {
   ALERT_ORIGINAL_TIME,
@@ -50,7 +51,6 @@ import type {
   GetExceptionFilter,
   CreateTimeline,
 } from './types';
-import type { Ecs } from '../../../../common/ecs';
 import type {
   TimelineEventsDetailsItem,
   TimelineEventsDetailsRequestOptions,

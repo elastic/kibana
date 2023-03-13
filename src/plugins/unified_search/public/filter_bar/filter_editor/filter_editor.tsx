@@ -32,6 +32,7 @@ import {
   buildEmptyFilter,
   filterToQueryDsl,
   getFilterParams,
+  isCombinedFilter,
 } from '@kbn/es-query';
 import { merge } from 'lodash';
 import React, { Component } from 'react';
@@ -288,13 +289,17 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     );
   }
 
+  private hasCombinedFilterCustomType(filters: Filter[]) {
+    return filters.some((filter) => filter.meta.type === 'custom');
+  }
+
   private renderFiltersBuilderEditor() {
     const { selectedDataView, localFilter } = this.state;
     const flattenedFilters = flattenFilters([localFilter]);
 
     const shouldShowPreview =
       selectedDataView &&
-      (flattenedFilters.length > 1 ||
+      ((flattenedFilters.length > 1 && !this.hasCombinedFilterCustomType(flattenedFilters)) ||
         (flattenedFilters.length === 1 &&
           isFilterValid(
             selectedDataView,
@@ -387,6 +392,10 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
 
   private isUnknownFilterType() {
     const { type } = this.props.filter.meta;
+    if (isCombinedFilter(this.props.filter)) {
+      const { params } = this.props.filter.meta;
+      return params && this.hasCombinedFilterCustomType(params);
+    }
     return !!type && !['phrase', 'phrases', 'range', 'exists', 'combined'].includes(type);
   }
 

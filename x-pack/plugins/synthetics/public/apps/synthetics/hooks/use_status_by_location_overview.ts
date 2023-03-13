@@ -6,15 +6,31 @@
  */
 
 import { useSelector } from 'react-redux';
-import { selectOverviewStatus } from '../state/overview';
+import { OverviewStatusState } from '../../../../common/runtime_types';
+import { selectOverviewStatus } from '../state/overview_status';
 
 export function useStatusByLocationOverview(configId: string, locationName?: string) {
   const { status } = useSelector(selectOverviewStatus);
+
+  return getConfigStatusByLocation(status, configId, locationName);
+}
+
+export const getConfigStatusByLocation = (
+  status: OverviewStatusState | null,
+  configId: string,
+  locationName?: string
+) => {
   if (!locationName || !status) {
     return { status: 'unknown' };
   }
   const allConfigs = status.allConfigs;
-  const config = allConfigs[`${configId}-${locationName}`];
+  const configIdByLocation = `${configId}-${locationName}`;
+  const config = allConfigs[configIdByLocation];
 
-  return { status: config?.status || 'unknown', timestamp: config?.timestamp };
-}
+  return {
+    configIdByLocation,
+    status: config?.status || 'unknown',
+    timestamp: config?.timestamp,
+    ping: config?.ping,
+  };
+};

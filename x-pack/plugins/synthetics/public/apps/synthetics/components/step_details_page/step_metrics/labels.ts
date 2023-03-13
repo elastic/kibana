@@ -27,6 +27,11 @@ export const DCL_TOOLTIP = i18n.translate('xpack.synthetics.coreVitals.dclToolti
     'Triggered when the browser completes parsing the document. Helpful when there are multiple listeners, or logic is executed: domContentLoadedEventEnd - domContentLoadedEventStart.',
 });
 
+export const TRANSFER_SIZE_HELP = i18n.translate('xpack.synthetics.fieldLabels.transferSize', {
+  defaultMessage:
+    'The transferSize property represents the size of the fetched resource. The size includes the response header fields plus the response payload body',
+});
+
 export const LCP_LABEL = i18n.translate('xpack.synthetics.fieldLabels.lcp', {
   defaultMessage: 'Largest contentful paint (LCP)',
 });

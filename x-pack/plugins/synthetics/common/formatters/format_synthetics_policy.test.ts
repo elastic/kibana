@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DataStream } from '../runtime_types';
+import { ConfigKey, DataStream } from '../runtime_types';
 import { formatSyntheticsPolicy } from './format_synthetics_policy';
 
 describe('formatSyntheticsPolicy', () => {
@@ -499,8 +499,11 @@ describe('formatSyntheticsPolicy', () => {
     });
   });
 
-  it('formats http policy', () => {
-    const { formattedPolicy } = formatSyntheticsPolicy(testNewPolicy, DataStream.HTTP, httpPolicy);
+  it.each([true, false])('formats http policy', (isTLSEnabled) => {
+    const { formattedPolicy } = formatSyntheticsPolicy(testNewPolicy, DataStream.HTTP, {
+      ...httpPolicy,
+      [ConfigKey.METADATA]: { is_tls_enabled: isTLSEnabled },
+    });
 
     expect(formattedPolicy).toEqual({
       enabled: true,
@@ -518,7 +521,7 @@ describe('formatSyntheticsPolicy', () => {
               vars: {
                 __ui: {
                   type: 'yaml',
-                  value: '{"is_tls_enabled":false,"is_zip_url_tls_enabled":false}',
+                  value: `{"is_tls_enabled":${isTLSEnabled}}`,
                 },
                 'check.request.body': {
                   type: 'yaml',
@@ -628,11 +631,11 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 'ssl.supported_protocols': {
                   type: 'yaml',
-                  value: '["TLSv1.1","TLSv1.2","TLSv1.3"]',
+                  value: isTLSEnabled ? '["TLSv1.1","TLSv1.2","TLSv1.3"]' : null,
                 },
                 'ssl.verification_mode': {
                   type: 'text',
-                  value: 'full',
+                  value: isTLSEnabled ? 'full' : null,
                 },
                 tags: {
                   type: 'yaml',
@@ -1287,7 +1290,7 @@ const httpPolicy: any = {
   journey_id: '',
   hash: '',
   id: '51ccd9d9-fc3f-4718-ba9d-b6ef80e73fc5',
-  __ui: { is_tls_enabled: false, is_zip_url_tls_enabled: false },
+  __ui: { is_tls_enabled: false },
   urls: 'https://www.google.com',
   max_redirects: '0',
   'url.port': null,

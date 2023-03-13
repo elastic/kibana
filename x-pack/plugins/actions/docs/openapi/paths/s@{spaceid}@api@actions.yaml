@@ -1,0 +1,78 @@
+get:
+  summary: Retrieves all connectors.
+  operationId: legacyGetConnectors
+  deprecated: true
+  description: Deprecated in 7.13.0. Use the get all connectors API instead.
+  tags:
+    - connectors
+  parameters:
+    - $ref: '../components/parameters/space_id.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/action_response_properties.yaml' 
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+  servers:
+    - url: https://localhost:5601
+
+post:
+  summary: Creates a connector.
+  operationId: legacyCreateConnector
+  deprecated: true
+  description: Deprecated in 7.13.0. Use the create connector API instead.
+  tags:
+    - connectors
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          title: Legacy create connector request properties
+          type: object
+          properties:
+            actionTypeId:
+              type: string
+              description: The connector type identifier.
+            config:
+              type: object
+              description: The configuration for the connector. Configuration properties vary depending on the connector type.
+            name:
+              type: string
+              description: The display name for the connector.
+            secrets:
+              type: object
+              description: >
+                The secrets configuration for the connector.
+                Secrets configuration properties vary depending on the connector type.
+                NOTE: Remember these values. You must provide them each time you update the connector.
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+         application/json:
+          schema:
+            $ref: '../components/schemas/action_response_properties.yaml'
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+  servers:
+    - url: https://localhost:5601
+servers:
+  - url: https://localhost:5601
+

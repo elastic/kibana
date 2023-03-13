@@ -10,6 +10,7 @@ import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { ErrorCallOut } from './error_callout';
 import { useStepDetailsBreadcrumbs } from './hooks/use_step_details_breadcrumbs';
 import { WaterfallChartContainer } from './step_waterfall_chart/waterfall/waterfall_chart_container';
 import { NetworkTimingsDonut } from './step_timing_breakdown/network_timings_donut';
@@ -29,13 +30,9 @@ export const StepDetailPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'stepDetail' });
   useTrackPageview({ app: 'synthetics', path: 'stepDetail', delay: 15000 });
 
-  const { data, isFailed, currentStep } = useJourneySteps();
+  const { data, isFailedStep, currentStep } = useJourneySteps();
 
   useStepDetailsBreadcrumbs();
-
-  const activeStep = data?.steps?.find(
-    (step) => step.synthetics?.step?.index === Number(stepIndex)
-  );
 
   const dispatch = useDispatch();
 
@@ -50,6 +47,7 @@ export const StepDetailPage = () => {
 
   return (
     <>
+      <ErrorCallOut step={currentStep} />
       {data?.details?.journey?.config_id && (
         <MonitorDetailsLinkPortal
           configId={data.details.journey.config_id}
@@ -60,20 +58,20 @@ export const StepDetailPage = () => {
         <EuiFlexItem grow={1}>
           <EuiPanel hasShadow={false} hasBorder>
             {data?.details?.journey && currentStep && (
-              <StepImage ping={data?.details?.journey} step={currentStep} isFailed={isFailed} />
+              <StepImage ping={data?.details?.journey} step={currentStep} isFailed={isFailedStep} />
             )}
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={1}>
+            <EuiFlexGroup wrap>
+              <EuiFlexItem grow={1} style={{ minWidth: 150 }}>
                 <NetworkTimingsDonut />
               </EuiFlexItem>
-              <EuiFlexItem grow={1}>
+              <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
                 <BreakdownLegend />
               </EuiFlexItem>
-              <EuiFlexItem grow={2}>
+              <EuiFlexItem grow={2} style={{ minWidth: 200 }}>
                 <NetworkTimingsBreakdown monitorId={data?.details?.journey.monitor.id!} />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -89,7 +87,7 @@ export const StepDetailPage = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder>
-            <EuiFlexGroup>
+            <EuiFlexGroup gutterSize="xl">
               <EuiFlexItem grow={1}>
                 <ObjectWeightList />
               </EuiFlexItem>
@@ -107,7 +105,7 @@ export const StepDetailPage = () => {
         <WaterfallChartContainer
           checkGroup={checkGroupId}
           stepIndex={Number(stepIndex)}
-          activeStep={activeStep}
+          activeStep={currentStep}
         />
       )}
     </>

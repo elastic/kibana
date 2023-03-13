@@ -32,6 +32,8 @@
     "@kbn/test-jest-helpers",
     "@kbn/config-schema",
     "@kbn/storybook",
+    "@kbn/ui-theme",
+    "@kbn/safer-lodash-set",
   ],
   "exclude": [
     "target/**/*",

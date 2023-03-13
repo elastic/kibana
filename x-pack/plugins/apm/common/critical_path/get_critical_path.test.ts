@@ -24,7 +24,7 @@ describe('getCriticalPath', () => {
         exceedsMax: false,
         spanLinksCountById: {},
         traceItemCount: events.length,
-        maxTraceItems: 1000,
+        maxTraceItems: 5000,
       },
       entryTransaction,
     });

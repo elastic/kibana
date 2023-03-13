@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Synthtrace ES Client indexer indexes documents 1`] = `
+exports[`Synthtrace ES Client indexer indexes documents 2`] = `
 Array [
   Object {
     "@timestamp": "2022-01-01T00:00:00.000Z",
@@ -26,6 +26,78 @@ Array [
   Object {
     "@timestamp": "2022-01-01T00:00:00.000Z",
     "metricset": Object {
+      "name": "transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:00:00.000Z",
+    "metricset": Object {
+      "name": "transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:00:00.000Z",
+    "metricset": Object {
+      "name": "service_transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:00:00.000Z",
+    "metricset": Object {
+      "name": "service_transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:00:00.000Z",
+    "metricset": Object {
+      "name": "service_transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:00:00.000Z",
+    "metricset": Object {
+      "name": "service_summary",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:00:00.000Z",
+    "metricset": Object {
+      "name": "service_summary",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:00:00.000Z",
+    "metricset": Object {
+      "name": "service_summary",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:00:00.000Z",
+    "metricset": Object {
       "name": "span_breakdown",
     },
     "processor": Object {
@@ -50,6 +122,51 @@ Array [
   Object {
     "@timestamp": "2022-01-01T00:30:00.000Z",
     "metricset": Object {
+      "name": "transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:30:00.000Z",
+    "metricset": Object {
+      "name": "service_transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:30:00.000Z",
+    "metricset": Object {
+      "name": "service_transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:30:00.000Z",
+    "metricset": Object {
+      "name": "service_summary",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:30:00.000Z",
+    "metricset": Object {
+      "name": "service_summary",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:30:00.000Z",
+    "metricset": Object {
       "name": "span_breakdown",
     },
     "processor": Object {
@@ -60,6 +177,105 @@ Array [
     "@timestamp": "2022-01-01T01:00:00.000Z",
     "metricset": Object {
       "name": "transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T01:00:00.000Z",
+    "metricset": Object {
+      "name": "transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:00:00.000Z",
+    "metricset": Object {
+      "name": "transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T01:00:00.000Z",
+    "metricset": Object {
+      "name": "transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T01:00:00.000Z",
+    "metricset": Object {
+      "name": "service_transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T01:00:00.000Z",
+    "metricset": Object {
+      "name": "service_transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:00:00.000Z",
+    "metricset": Object {
+      "name": "service_transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T01:00:00.000Z",
+    "metricset": Object {
+      "name": "service_transaction",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T01:00:00.000Z",
+    "metricset": Object {
+      "name": "service_summary",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T01:00:00.000Z",
+    "metricset": Object {
+      "name": "service_summary",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T00:00:00.000Z",
+    "metricset": Object {
+      "name": "service_summary",
+    },
+    "processor": Object {
+      "event": "metric",
+    },
+  },
+  Object {
+    "@timestamp": "2022-01-01T01:00:00.000Z",
+    "metricset": Object {
+      "name": "service_summary",
     },
     "processor": Object {
       "event": "metric",

@@ -60,16 +60,7 @@ get:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: Unauthorized
-              message:
-                type: string
-              statusCode:
-                type: integer
-                example: 401
+            $ref: '../components/schemas/401_response.yaml'
   servers:
     - url: https://localhost:5601
 servers:

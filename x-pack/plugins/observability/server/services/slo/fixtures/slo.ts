@@ -6,8 +6,8 @@
  */
 
 import { cloneDeep } from 'lodash';
-import uuid from 'uuid';
-import { SavedObject } from '@kbn/core-saved-objects-common';
+import { v1 as uuidv1 } from 'uuid';
+import { SavedObject } from '@kbn/core-saved-objects-server';
 import { sloSchema, CreateSLOParams } from '@kbn/slo-schema';
 
 import { SO_SLO_TYPE } from '../../../saved_objects';
@@ -48,7 +48,7 @@ export const createAPMTransactionDurationIndicator = (
     service: 'irrelevant',
     transactionName: 'irrelevant',
     transactionType: 'irrelevant',
-    'threshold.us': 500000,
+    threshold: 500,
     ...params,
   },
 });
@@ -80,6 +80,7 @@ const defaultSLO: Omit<SLO, 'id' | 'revision' | 'createdAt' | 'updatedAt'> = {
     syncDelay: new Duration(1, DurationUnit.Minute),
     frequency: new Duration(1, DurationUnit.Minute),
   },
+  enabled: true,
 };
 
 export const createSLOParams = (params: Partial<CreateSLOParams> = {}): CreateSLOParams => ({
@@ -100,7 +101,7 @@ export const createSLO = (params: Partial<SLO> = {}): SLO => {
   const now = new Date();
   return cloneDeep({
     ...defaultSLO,
-    id: uuid.v1(),
+    id: uuidv1(),
     revision: 1,
     createdAt: now,
     updatedAt: now,

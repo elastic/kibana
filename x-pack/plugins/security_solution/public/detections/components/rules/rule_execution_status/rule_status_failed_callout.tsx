@@ -40,7 +40,9 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
       iconType="alert"
       data-test-subj="ruleStatusFailedCallOut"
     >
-      <p>{message}</p>
+      {message.split('\n').map((line) => (
+        <p>{line}</p>
+      ))}
     </EuiCallOut>
   );
 };

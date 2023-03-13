@@ -9,7 +9,7 @@
 import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   createServer,
   getListenerOptions,
@@ -365,7 +365,7 @@ export class HttpServer {
       request.app = {
         ...(request.app ?? {}),
         requestId,
-        requestUuid: uuid.v4(),
+        requestUuid: uuidv4(),
         // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
         // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
         traceId: apm.currentTraceIds['trace.id'],
@@ -516,6 +516,7 @@ export class HttpServer {
   }
 
   private configureRoute(route: RouterRoute) {
+    const optionsLogger = this.log.get('options');
     this.log.debug(`registering route handler for [${route.path}]`);
     // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
     const validate = isSafeMethod(route.method) ? undefined : { payload: true };
@@ -524,7 +525,14 @@ export class HttpServer {
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
+      access: route.options.access ?? (route.path.startsWith('/internal') ? 'internal' : 'public'),
     };
+    // Log HTTP API target consumer.
+    optionsLogger.debug(
+      `access [${kibanaRouteOptions.access}] [${route.method.toUpperCase()}] for path [${
+        route.path
+      }]`
+    );
 
     this.server!.route({
       handler: route.handler,

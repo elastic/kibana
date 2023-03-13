@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { TickFormatter, DomainRange, BarStyleAccessor } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
@@ -62,8 +62,6 @@ export const WaterfallChart = ({
     fetchedNetworkRequests,
   } = useWaterfallContext();
 
-  const chartWrapperDivRef = useRef<HTMLDivElement | null>(null);
-
   const shouldRenderSidebar = !!(sidebarItems && renderSidebarItem);
 
   const chartsToDisplay = useBarCharts({ data });
@@ -112,10 +110,7 @@ export const WaterfallChart = ({
         />
       </WaterfallChartStickyHeaderContainer>
 
-      <WaterfallChartOuterContainer
-        data-test-subj="syntheticsWaterfallChartOuterContainer"
-        ref={chartWrapperDivRef}
-      >
+      <WaterfallChartOuterContainer data-test-subj="syntheticsWaterfallChartOuterContainer">
         <EuiFlexGroup gutterSize="none" responsive={false}>
           {shouldRenderSidebar ? (
             <Sidebar items={sidebarItems!} render={renderSidebarItem!} />

@@ -11,7 +11,7 @@ import { extractErrorMessage, isNonNullable } from '../../../common/utils/helper
 import { RulesTable } from './rules_table';
 import { RulesTableHeader } from './rules_table_header';
 import {
-  useFindCspRules,
+  useFindCspRuleTemplates,
   type RuleSavedObject,
   type RulesQuery,
   type RulesQueryResult,
@@ -74,7 +74,7 @@ export const RulesContainer = () => {
     perPage: pageSize || 10,
   });
 
-  const { data, status, error } = useFindCspRules(
+  const { data, status, error } = useFindCspRuleTemplates(
     {
       filter: rulesQuery.filter,
       search: rulesQuery.search,

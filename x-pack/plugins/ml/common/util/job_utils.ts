@@ -424,14 +424,6 @@ export function createDatafeedId(jobId: string) {
   return `datafeed-${jobId}`;
 }
 
-// Returns a name which is safe to use in elasticsearch aggregations for the supplied
-// field name. Aggregation names must be alpha-numeric and can only contain '_' and '-' characters,
-// so if the supplied field names contains disallowed characters, the provided index
-// identifier is used to return a safe 'dummy' name in the format 'field_index' e.g. field_0, field_1
-export function getSafeAggregationName(fieldName: string, index: number): string {
-  return fieldName.match(/^[a-zA-Z0-9-_.]+$/) ? fieldName : `field_${index}`;
-}
-
 export function uniqWithIsEqual<T extends any[]>(arr: T): T {
   return arr.reduce((dedupedArray, value) => {
     if (dedupedArray.filter((compareValue: any) => isEqual(compareValue, value)).length === 0) {

@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { from, merge } from 'rxjs';
+import { from, merge, EMPTY } from 'rxjs';
 import { catchError, filter, map, mergeMap, concatMap, shareReplay, toArray } from 'rxjs/operators';
 import { Logger } from '@kbn/logging';
+import { getPluginPackagesFilter } from '@kbn/repo-packages';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { PluginWrapper } from '../plugin';
+import { pluginManifestFromPluginPackage } from './plugin_manifest_from_plugin_package';
 import { createPluginInitializerContext, InstanceInfo } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
@@ -48,23 +50,59 @@ export function discover({
     );
   }
 
-  const discoveryResults$ = merge(
+  const fsDiscovery$ = merge(
     from(config.additionalPluginPaths),
     scanPluginSearchPaths(config.pluginSearchPaths, log)
   ).pipe(
-    toArray(),
-    mergeMap((pathAndErrors) => {
-      return pathAndErrors.sort((a, b) => {
-        const pa = typeof a === 'string' ? a : a.path;
-        const pb = typeof b === 'string' ? b : b.path;
-        return pa < pb ? -1 : pa > pb ? 1 : 0;
-      });
-    }),
     concatMap((pluginPathOrError) => {
       return typeof pluginPathOrError === 'string'
         ? createPlugin$(pluginPathOrError, log, coreContext, instanceInfo, nodeInfo)
         : [pluginPathOrError];
-    }),
+    })
+  );
+
+  const pluginPkgDiscovery$ = from(coreContext.env.repoPackages ?? EMPTY).pipe(
+    filter(
+      getPluginPackagesFilter({
+        oss: coreContext.env.cliArgs.oss,
+        examples: coreContext.env.cliArgs.runExamples,
+        paths: config.additionalPluginPaths,
+        parentDirs: config.pluginSearchPaths,
+      })
+    ),
+    map((pkg) => {
+      log.debug(`Successfully discovered plugin package "${pkg.id}"`);
+      const manifest = pluginManifestFromPluginPackage(
+        coreContext.env.packageInfo.version,
+        pkg.manifest
+      );
+      const initializerContext = createPluginInitializerContext({
+        coreContext,
+        opaqueId: Symbol(pkg.id),
+        manifest,
+        instanceInfo,
+        nodeInfo,
+      });
+
+      return new PluginWrapper({
+        path: pkg.directory,
+        manifest,
+        opaqueId: initializerContext.opaqueId,
+        initializerContext,
+      });
+    })
+  );
+
+  const discoveryResults$ = merge(fsDiscovery$, pluginPkgDiscovery$).pipe(
+    toArray(),
+    // ensure that everything is always provided in a consistent order
+    mergeMap((pkgs) =>
+      pkgs.sort((a, b) => {
+        const aComp = typeof a !== 'string' ? a.path : a;
+        const bComp = typeof b !== 'string' ? b.path : b;
+        return aComp.localeCompare(bComp);
+      })
+    ),
     shareReplay()
   );
 

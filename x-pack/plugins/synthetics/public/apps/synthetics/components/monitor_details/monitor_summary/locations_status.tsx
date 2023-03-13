@@ -18,5 +18,5 @@ export const LocationsStatus = ({
 }) => {
   const { locations, loading } = useStatusByLocation({ configId, monitorLocations });
 
-  return <LocationStatusBadges locations={locations} loading={loading} />;
+  return <LocationStatusBadges configId={configId} locations={locations} loading={loading} />;
 };

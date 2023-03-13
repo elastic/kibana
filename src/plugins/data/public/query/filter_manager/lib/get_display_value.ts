@@ -61,10 +61,12 @@ export function getFieldDisplayValueFromFilter(
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: DataViewBase[]): string {
   const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
   const fieldName = getFilterField(filter);
+  const field = indexPattern?.fields.find((f) => f.name === fieldName);
+  const fieldType = field?.type;
   const valueFormatter = getValueFormatter(indexPattern, fieldName);
 
   if (isPhraseFilter(filter) || isScriptedPhraseFilter(filter)) {
-    return getPhraseDisplayValue(filter, valueFormatter);
+    return getPhraseDisplayValue(filter, valueFormatter, fieldType);
   } else if (isPhrasesFilter(filter)) {
     return getPhrasesDisplayValue(filter, valueFormatter);
   } else if (isRangeFilter(filter) || isScriptedRangeFilter(filter)) {

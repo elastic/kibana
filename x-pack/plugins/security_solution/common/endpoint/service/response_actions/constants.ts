@@ -17,6 +17,7 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
   'suspend-process',
   'running-processes',
   'get-file',
+  'execute',
 ] as const;
 
 export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS_NAMES[number];
@@ -30,6 +31,7 @@ export const ENDPOINT_CAPABILITIES = [
   'suspend_process',
   'running_processes',
   'get_file',
+  'execute',
 ] as const;
 
 export type EndpointCapabilities = typeof ENDPOINT_CAPABILITIES[number];
@@ -45,6 +47,31 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'suspend-process',
   'processes',
   'get-file',
+  'execute',
 ] as const;
 
 export type ConsoleResponseActionCommands = typeof CONSOLE_RESPONSE_ACTION_COMMANDS[number];
+
+export type ResponseConsoleRbacControls =
+  | 'writeHostIsolation'
+  | 'writeProcessOperations'
+  | 'writeFileOperations'
+  | 'writeExecuteOperations';
+
+/**
+ * maps the console command to the RBAC control that is required to access it via console
+ */
+export const commandToRBACMap: Record<ConsoleResponseActionCommands, ResponseConsoleRbacControls> =
+  Object.freeze({
+    isolate: 'writeHostIsolation',
+    release: 'writeHostIsolation',
+    'kill-process': 'writeProcessOperations',
+    'suspend-process': 'writeProcessOperations',
+    processes: 'writeProcessOperations',
+    'get-file': 'writeFileOperations',
+    execute: 'writeExecuteOperations',
+  });
+
+// 4 hrs in milliseconds
+// 4 * 60 * 60 * 1000
+export const DEFAULT_EXECUTE_ACTION_TIMEOUT = 14400000;

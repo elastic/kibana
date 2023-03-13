@@ -14,7 +14,7 @@ import { addOwnerToSO } from '.';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { transformConnectorIdToReference } from './user_actions/connector_id';
 
-interface UnsanitizedConfigureConnector {
+export interface UnsanitizedConfigureConnector {
   connector_id: string;
   connector_name: string;
 }
@@ -27,6 +27,26 @@ interface SanitizedConfigureConnector {
     fields: null;
   };
 }
+
+export const createConnectorAttributeMigration = (
+  doc: SavedObjectUnsanitizedDoc<UnsanitizedConfigureConnector>
+): SavedObjectSanitizedDoc<SanitizedConfigureConnector> => {
+  const { connector_id, connector_name, ...restAttributes } = doc.attributes;
+
+  return {
+    ...doc,
+    attributes: {
+      ...restAttributes,
+      connector: {
+        id: connector_id ?? 'none',
+        name: connector_name ?? 'none',
+        type: ConnectorTypes.none,
+        fields: null,
+      },
+    },
+    references: doc.references || [],
+  };
+};
 
 export const configureConnectorIdMigration = (
   doc: SavedObjectUnsanitizedDoc<{ connector?: { id: string } }>
@@ -50,25 +70,7 @@ export const configureConnectorIdMigration = (
 };
 
 export const configureMigrations = {
-  '7.10.0': (
-    doc: SavedObjectUnsanitizedDoc<UnsanitizedConfigureConnector>
-  ): SavedObjectSanitizedDoc<SanitizedConfigureConnector> => {
-    const { connector_id, connector_name, ...restAttributes } = doc.attributes;
-
-    return {
-      ...doc,
-      attributes: {
-        ...restAttributes,
-        connector: {
-          id: connector_id ?? 'none',
-          name: connector_name ?? 'none',
-          type: ConnectorTypes.none,
-          fields: null,
-        },
-      },
-      references: doc.references || [],
-    };
-  },
+  '7.10.0': createConnectorAttributeMigration,
   '7.14.0': (
     doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
   ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {

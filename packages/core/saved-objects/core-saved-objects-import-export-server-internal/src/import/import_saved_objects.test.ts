@@ -20,7 +20,6 @@ import {
 import { Readable } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
 import type {
-  SavedObject,
   SavedObjectsImportFailure,
   SavedObjectsImportWarning,
 } from '@kbn/core-saved-objects-common';
@@ -29,6 +28,7 @@ import type {
   SavedObjectsType,
   ISavedObjectTypeRegistry,
   SavedObjectsImportHook,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';

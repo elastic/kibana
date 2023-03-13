@@ -6,7 +6,7 @@
  */
 
 import { fields } from '../../../common/__mocks__/artificial_logs/fields';
-import { filteredFrequentItems } from '../../../common/__mocks__/artificial_logs/filtered_frequent_items';
+import { filteredFrequentItemSets } from '../../../common/__mocks__/artificial_logs/filtered_frequent_item_sets';
 
 import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 import { getSimpleHierarchicalTreeLeaves } from './get_simple_hierarchical_tree_leaves';
@@ -14,7 +14,7 @@ import { getSimpleHierarchicalTreeLeaves } from './get_simple_hierarchical_tree_
 describe('getSimpleHierarchicalTreeLeaves', () => {
   it('returns the hierarchical tree leaves', () => {
     const simpleHierarchicalTree = getSimpleHierarchicalTree(
-      filteredFrequentItems,
+      filteredFrequentItemSets,
       true,
       false,
       fields

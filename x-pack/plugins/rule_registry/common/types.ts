@@ -185,14 +185,6 @@ const bucketAggsTempsSchemas: t.Type<BucketAggsSchemas> = t.exact(
   })
 );
 
-export const bucketAggsSchemas = t.intersection([
-  bucketAggsTempsSchemas,
-  t.partial({
-    aggs: t.union([t.record(t.string, bucketAggsTempsSchemas), t.undefined]),
-    aggregations: t.union([t.record(t.string, bucketAggsTempsSchemas), t.undefined]),
-  }),
-]);
-
 /**
  * Schemas for the metrics Aggregations
  *
@@ -287,10 +279,21 @@ export const metricsAggsSchemas = t.exact(
         }),
       })
     ),
-    aggs: t.undefined,
-    aggregations: t.undefined,
   })
 );
+
+export const bucketAggsSchemas = t.intersection([
+  bucketAggsTempsSchemas,
+  t.exact(
+    t.partial({
+      aggs: t.record(t.string, t.intersection([bucketAggsTempsSchemas, metricsAggsSchemas])),
+      aggregations: t.record(
+        t.string,
+        t.intersection([bucketAggsTempsSchemas, metricsAggsSchemas])
+      ),
+    })
+  ),
+]);
 
 export type PutIndexTemplateRequest = estypes.IndicesPutIndexTemplateRequest & {
   body?: { composed_of?: string[] };

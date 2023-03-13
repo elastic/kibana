@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiLoadingSpinner, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiLoadingSpinner, EuiText, EuiTextColor } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { usePrivateLocationPermissions } from './hooks/use_private_location_permission';
+import { useFleetPermissions } from '../../../hooks';
 import { selectAgentPolicies } from '../../../state/private_locations';
 
 export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
-  const { canReadAgentPolicies } = usePrivateLocationPermissions();
+  const { canReadAgentPolicies } = useFleetPermissions();
 
   const { basePath } = useSyntheticsSettingsContext();
 
@@ -28,25 +28,38 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
 
   return (
     <EuiText size="s">
-      <p>
-        {canReadAgentPolicies && (
-          <EuiTextColor color="subdued">
-            {policy ? (
-              <EuiLink href={`${basePath}/app/fleet/policies/${agentPolicyId}`}>
-                {policy?.name}
-              </EuiLink>
-            ) : (
-              <EuiText color="danger" size="s" className="eui-displayInline">
-                {POLICY_IS_DELETED}
-              </EuiText>
-            )}
-          </EuiTextColor>
-        )}
-      </p>
+      {canReadAgentPolicies ? (
+        <EuiTextColor color="subdued">
+          {policy ? (
+            <EuiLink href={`${basePath}/app/fleet/policies/${agentPolicyId}`}>
+              {policy?.name}
+            </EuiLink>
+          ) : (
+            <EuiText color="danger" size="s" className="eui-displayInline">
+              {POLICY_IS_DELETED}
+            </EuiText>
+          )}
+        </EuiTextColor>
+      ) : (
+        agentPolicyId
+      )}
+      {canReadAgentPolicies && (
+        <>
+          &nbsp; &nbsp;
+          <EuiBadge color={policy?.agents === 0 ? 'warning' : 'hollow'}>
+            {AGENTS_LABEL}
+            {policy?.agents}
+          </EuiBadge>
+        </>
+      )}
     </EuiText>
   );
 };
 
 const POLICY_IS_DELETED = i18n.translate('xpack.synthetics.monitorManagement.deletedPolicy', {
   defaultMessage: 'Policy is deleted',
+});
+
+const AGENTS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.agents', {
+  defaultMessage: 'Agents: ',
 });

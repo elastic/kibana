@@ -1,6 +1,11 @@
 {
   "journeyName": "GET /internal/security/session",
   "scalabilitySetup": {
+    "responseTimeThreshold": {
+      "threshold1": 1000,
+      "threshold2": 3000,
+      "threshold3": 5000
+    },
     "warmup": [
       {
         "action": "constantUsersPerSec",
@@ -12,11 +17,11 @@
       {
         "action": "rampUsersPerSec",
         "minUsersCount": 10,
-        "maxUsersCount": 700,
-        "duration": "345s"
+        "maxUsersCount": 610,
+        "duration": "150s"
       }
     ],
-    "maxDuration": "8m"
+    "maxDuration": "5m"
   },
   "testData": {
     "esArchives": [],

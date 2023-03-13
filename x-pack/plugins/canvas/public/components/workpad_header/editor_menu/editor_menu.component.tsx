@@ -14,7 +14,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import { SolutionToolbarPopover } from '@kbn/presentation-util-plugin/public';
+import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
 
 const strings = {
   getEditorMenuButtonLabel: () =>
@@ -145,11 +145,9 @@ export const EditorMenu: FC<Props> = ({
   ];
 
   return (
-    <SolutionToolbarPopover
+    <ToolbarPopover
       ownFocus
       label={strings.getEditorMenuButtonLabel()}
-      iconType="arrowDown"
-      iconSide="right"
       panelPaddingSize="none"
       data-test-subj="canvasEditorMenuButton"
     >
@@ -165,6 +163,6 @@ export const EditorMenu: FC<Props> = ({
           data-test-subj="canvasEditorContextMenu"
         />
       )}
-    </SolutionToolbarPopover>
+    </ToolbarPopover>
   );
 };

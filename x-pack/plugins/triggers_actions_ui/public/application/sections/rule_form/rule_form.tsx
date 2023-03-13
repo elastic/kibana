@@ -67,7 +67,7 @@ import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilitie
 import { SolutionFilter } from './solution_filter';
 import './rule_form.scss';
 import { useKibana } from '../../../common/lib/kibana';
-import { recoveredActionGroupMessage } from '../../constants';
+import { recoveredActionGroupMessage, summaryMessage } from '../../constants';
 import { IsEnabledResult, IsDisabledResult } from '../../lib/check_rule_type_enabled';
 import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
 import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compare';
@@ -647,6 +647,7 @@ export const RuleForm = ({
             setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
             messageVariables={selectedRuleType.actionVariables}
             defaultActionGroupId={defaultActionGroupId}
+            hasSummary={selectedRuleType.hasGetSummarizedAlerts}
             featureId={connectorFeatureId}
             isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
               isActionGroupDisabledForActionType(selectedRuleType, actionGroupId, actionTypeId)
@@ -672,6 +673,8 @@ export const RuleForm = ({
             setActionParamsProperty={setActionParamsProperty}
             actionTypeRegistry={actionTypeRegistry}
             setActionFrequencyProperty={setActionFrequencyProperty}
+            defaultSummaryMessage={ruleTypeModel?.defaultSummaryMessage || summaryMessage}
+            minimumThrottleInterval={[ruleInterval, ruleIntervalUnit]}
           />
         </>
       ) : null}

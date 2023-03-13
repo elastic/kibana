@@ -12,7 +12,6 @@ import type {
   LogLevel,
   RuleExecutionEventType,
   RuleExecutionStatus,
-  RuleExecutionSummary,
   SortFieldOfRuleExecutionResult,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
 
@@ -22,26 +21,6 @@ import type {
  *   - execution events such as recent failures and status changes
  */
 export interface IRuleExecutionLogForRoutes {
-  /**
-   * Fetches a list of current execution summaries of multiple rules.
-   * @param ruleIds A list of saved object ids of multiple rules (`rule.id`).
-   * @returns A dict with rule IDs as keys and execution summaries as values.
-   * @throws AggregateError if any of the rule status requests fail.
-   */
-  getExecutionSummariesBulk(ruleIds: string[]): Promise<RuleExecutionSummariesByRuleId>;
-
-  /**
-   * Fetches current execution summary of a given rule.
-   * @param ruleId Saved object id of the rule (`rule.id`).
-   */
-  getExecutionSummary(ruleId: string): Promise<RuleExecutionSummary | null>;
-
-  /**
-   * Deletes the current execution summary if it exists.
-   * @param ruleId Saved object id of the rule (`rule.id`).
-   */
-  clearExecutionSummary(ruleId: string): Promise<void>;
-
   /**
    * Fetches plain execution events of a given rule from Event Log. This includes debug, info, and
    * error messages that executor functions write during a rule execution to the log.
@@ -103,5 +82,3 @@ export interface GetExecutionResultsArgs {
   /** Number of results to fetch per page. */
   perPage: number;
 }
-
-export type RuleExecutionSummariesByRuleId = Record<string, RuleExecutionSummary | null>;

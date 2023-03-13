@@ -18,11 +18,12 @@
     "@kbn/i18n",
     "@kbn/es-query",
     "@kbn/embeddable-plugin",
-    "@kbn/kibana-utils-plugin",
     "@kbn/core-ui-settings-browser",
     "@kbn/datemath",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/shared-ux-utility",
+    "@kbn/ui-actions-plugin",
+    "@kbn/kibana-utils-plugin",
   ],
   "exclude": [
     "target/**/*",

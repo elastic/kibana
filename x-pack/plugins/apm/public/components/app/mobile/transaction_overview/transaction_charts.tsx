@@ -36,6 +36,7 @@ export function MobileTransactionCharts({
 }) {
   return (
     <AnnotationsContextProvider
+      serviceName={serviceName}
       environment={environment}
       start={start}
       end={end}

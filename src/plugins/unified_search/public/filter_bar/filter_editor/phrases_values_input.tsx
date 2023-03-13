@@ -54,7 +54,12 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesValuesInputProps> {
             id: 'unifiedSearch.filter.filterEditor.valuesSelectPlaceholder',
             defaultMessage: 'Select values',
           })}
+          aria-label={intl.formatMessage({
+            id: 'unifiedSearch.filter.filterEditor.valuesSelectPlaceholder',
+            defaultMessage: 'Select values',
+          })}
           delimiter=","
+          isCaseSensitive={true}
           options={options}
           getLabel={(option) => option}
           selectedOptions={values || []}

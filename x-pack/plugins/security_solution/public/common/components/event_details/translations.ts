@@ -106,6 +106,13 @@ export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.al
   defaultMessage: 'Agent status',
 });
 
+export const QUARANTINED_FILE_PATH = i18n.translate(
+  'xpack.securitySolution.detections.alerts.quarantinedFilePath',
+  {
+    defaultMessage: 'Quarantined file path',
+  }
+);
+
 export const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleType', {
   defaultMessage: 'Rule type',
 });

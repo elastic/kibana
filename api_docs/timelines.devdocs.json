@@ -923,7 +923,7 @@
               "EuiButtonIconPropsForAnchor",
               ", ",
               "EuiButtonIconPropsForButton",
-              "> & { type?: \"reset\" | \"button\" | \"submit\" | undefined; } & ",
+              "> & { type?: \"button\" | \"reset\" | \"submit\" | undefined; } & ",
               "EuiButtonIconProps",
               " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }) | (",
               "DisambiguateSet",
@@ -2388,7 +2388,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "string | number | (string | number)[]"
+              "string | number | boolean | (string | number | boolean)[]"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
@@ -2402,7 +2402,7 @@
             "label": "displayValue",
             "description": [],
             "signature": [
-              "string | number | undefined"
+              "string | number | boolean | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
@@ -2459,7 +2459,13 @@
             "description": [],
             "signature": [
               "(data: ",
-              "Ecs",
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.EcsSecurityExtension",
+                "text": "EcsSecurityExtension"
+              },
               ") => boolean"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
@@ -2474,7 +2480,13 @@
                 "label": "data",
                 "description": [],
                 "signature": [
-                  "Ecs"
+                  {
+                    "pluginId": "@kbn/securitysolution-ecs",
+                    "scope": "common",
+                    "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                    "section": "def-common.EcsSecurityExtension",
+                    "text": "EcsSecurityExtension"
+                  }
                 ],
                 "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
                 "deprecated": false,
@@ -2493,7 +2505,13 @@
             "description": [],
             "signature": [
               "({ contextId, data, isDraggable, scopeId, }: { contextId?: string | undefined; data: ",
-              "Ecs",
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.EcsSecurityExtension",
+                "text": "EcsSecurityExtension"
+              },
               "; isDraggable: boolean; scopeId: string; }) => React.ReactNode"
             ],
             "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
@@ -2533,7 +2551,13 @@
                     "label": "data",
                     "description": [],
                     "signature": [
-                      "Ecs"
+                      {
+                        "pluginId": "@kbn/securitysolution-ecs",
+                        "scope": "common",
+                        "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                        "section": "def-common.EcsSecurityExtension",
+                        "text": "EcsSecurityExtension"
+                      }
                     ],
                     "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
                     "deprecated": false,
@@ -2972,7 +2996,7 @@
             "label": "language",
             "description": [],
             "signature": [
-              "\"eql\" | \"lucene\" | \"kuery\""
+              "\"kuery\" | \"eql\" | \"lucene\""
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
@@ -3351,7 +3375,13 @@
             "signature": [
               "Maybe",
               "<",
-              "Ecs",
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.EcsSecurityExtension",
+                "text": "EcsSecurityExtension"
+              },
               "> | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
@@ -3600,7 +3630,13 @@
             "label": "ecs",
             "description": [],
             "signature": [
-              "Ecs"
+              {
+                "pluginId": "@kbn/securitysolution-ecs",
+                "scope": "common",
+                "docId": "kibKbnSecuritysolutionEcsPluginApi",
+                "section": "def-common.EcsSecurityExtension",
+                "text": "EcsSecurityExtension"
+              }
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
@@ -3974,7 +4010,13 @@
             "text": "TimelineNonEcsData"
           },
           "[]; ecsData?: ",
-          "Ecs",
+          {
+            "pluginId": "@kbn/securitysolution-ecs",
+            "scope": "common",
+            "docId": "kibKbnSecuritysolutionEcsPluginApi",
+            "section": "def-common.EcsSecurityExtension",
+            "text": "EcsSecurityExtension"
+          },
           " | undefined; eventId: string; globalFilters?: ",
           {
             "pluginId": "@kbn/es-query",
@@ -4018,7 +4060,7 @@
         "signature": [
           "Pick<",
           "EuiDataGridColumn",
-          ", \"schema\" | \"id\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; dataTableCellActions?: ",
+          ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; dataTableCellActions?: ",
           "DataTableCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
@@ -4045,7 +4087,7 @@
         "label": "DataProvidersAnd",
         "description": [],
         "signature": [
-          "{ name: string; type?: ",
+          "{ type?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4053,7 +4095,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | undefined; id: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          " | undefined; id: string; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4113,7 +4155,7 @@
         "label": "EntityType",
         "description": [],
         "signature": [
-          "\"sessions\" | \"alerts\" | \"events\""
+          "\"alerts\" | \"events\" | \"sessions\""
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,
@@ -4219,7 +4261,7 @@
         "label": "TimelineKpiStrategyRequest",
         "description": [],
         "signature": [
-          "{ params?: ",
+          "{ id?: string | undefined; params?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -4227,7 +4269,7 @@
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           },
-          " | undefined; id?: string | undefined; timerange?: ",
+          " | undefined; timerange?: ",
           {
             "pluginId": "timelines",
             "scope": "common",

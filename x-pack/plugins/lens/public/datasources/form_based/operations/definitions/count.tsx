@@ -23,7 +23,6 @@ import {
   isColumnOfType,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
-import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
@@ -91,8 +90,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
   input: 'field',
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
-      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
-      getDisallowedPreviousShiftMessage(layer, columnId),
+      getInvalidFieldMessage(layer, columnId, indexPattern),
       getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   allowAsReference: true,
@@ -103,10 +101,16 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       sourceField: field.name,
     };
   },
-  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
+  getPossibleOperationForField: ({
+    aggregationRestrictions,
+    aggregatable,
+    type,
+    timeSeriesMetric,
+  }) => {
     if (
       type === 'document' ||
       (aggregatable &&
+        timeSeriesMetric !== 'counter' &&
         (!aggregationRestrictions || aggregationRestrictions.value_count) &&
         supportedTypes.has(type))
     ) {

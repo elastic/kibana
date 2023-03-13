@@ -11,9 +11,9 @@ import { reduce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { EuiButton } from '@elastic/eui';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { BasicAlertDataContext } from '../../../event_details/investigation_guide_view';
 import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
-import type { Ecs } from '../../../../../../common/ecs';
 import OsqueryLogo from './osquery_icon/osquery.svg';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
 

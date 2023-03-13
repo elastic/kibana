@@ -463,7 +463,7 @@ describe('IndexPattern Field Item', () => {
     expect(wrapper.find(FieldVisualizeButton).exists()).toBeFalsy();
   });
 
-  it('should not request field stats for geo fields but render Visualize button', async () => {
+  it('should request examples for geo fields and render Visualize button', async () => {
     const wrapper = await getComponent({
       ...defaultProps,
       field: {
@@ -482,7 +482,9 @@ describe('IndexPattern Field Item', () => {
     expect(loadFieldStats).toHaveBeenCalled();
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
-    expect(wrapper.find(FieldStats).text()).toBe('Analysis is not available for this field.');
+    expect(wrapper.find(FieldStats).text()).toBe(
+      'Lens is unable to create visualizations with this field because it does not contain data. To create a visualization, drag and drop a different field.'
+    );
     expect(wrapper.find(FieldVisualizeButton).exists()).toBeTruthy();
   });
 

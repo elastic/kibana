@@ -127,7 +127,7 @@ export const OPSGENIE_DOCUMENTATION = i18n.translate(
 export const OPSGENIE_ALIAS_HELP = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.fieldAliasHelpText',
   {
-    defaultMessage: 'The unique alert identifier used for de-deduplication in Opsgenie.',
+    defaultMessage: 'The unique alert identifier used for deduplication in Opsgenie.',
   }
 );
 

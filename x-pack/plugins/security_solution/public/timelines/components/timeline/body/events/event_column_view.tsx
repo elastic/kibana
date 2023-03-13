@@ -7,13 +7,13 @@
 
 import React, { useMemo } from 'react';
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type {
   ControlColumnProps,
   RowCellRender,
   SetEventsDeleted,
   SetEventsLoading,
 } from '../../../../../../common/types';
-import type { Ecs } from '../../../../../../common/ecs';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import type { OnRowSelected } from '../../events';
 import { EventsTrData, EventsTdGroupActions } from '../../styles';

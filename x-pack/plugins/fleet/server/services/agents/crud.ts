@@ -13,7 +13,7 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
-import type { FleetServerAgent } from '../../../common/types';
+import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
 import { isAgentUpgradeable } from '../../../common/services';
 import { AGENTS_INDEX } from '../../constants';
@@ -194,7 +194,7 @@ export async function getAgentsByKuery(
   soClient: SavedObjectsClientContract,
   options: ListWithKuery & {
     showInactive: boolean;
-    getTotalInactive?: boolean;
+    getStatusSummary?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
     pitId?: string;
@@ -205,7 +205,7 @@ export async function getAgentsByKuery(
   total: number;
   page: number;
   perPage: number;
-  totalInactive?: number;
+  statusSummary?: Record<AgentStatus, number>;
 }> {
   const {
     page = 1,
@@ -214,10 +214,10 @@ export async function getAgentsByKuery(
     sortOrder = options.sortOrder ?? 'desc',
     kuery,
     showInactive = false,
+    getStatusSummary = false,
     showUpgradeable,
     searchAfter,
     pitId,
-    getTotalInactive = false,
   } = options;
   const filters = [];
 
@@ -238,8 +238,24 @@ export async function getAgentsByKuery(
   const secondarySort: estypes.Sort = isDefaultSort
     ? [{ 'local_metadata.host.hostname.keyword': { order: 'asc' } }]
     : [];
+
+  const statusSummary: Record<AgentStatus, number> = {
+    online: 0,
+    error: 0,
+    inactive: 0,
+    offline: 0,
+    updating: 0,
+    unenrolled: 0,
+    degraded: 0,
+    enrolling: 0,
+    unenrolling: 0,
+  };
+
   const queryAgents = async (from: number, size: number) =>
-    esClient.search<FleetServerAgent, { totalInactive?: { doc_count: number } }>({
+    esClient.search<
+      FleetServerAgent,
+      { status: { buckets: Array<{ key: AgentStatus; doc_count: number }> } }
+    >({
       from,
       size,
       track_total_hits: true,
@@ -247,7 +263,7 @@ export async function getAgentsByKuery(
       runtime_mappings: runtimeFields,
       fields: Object.keys(runtimeFields),
       sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
-      post_filter: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
+      query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
       ...(pitId
         ? {
             pit: {
@@ -260,13 +276,7 @@ export async function getAgentsByKuery(
             ignore_unavailable: true,
           }),
       ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
-      ...(getTotalInactive && {
-        aggregations: {
-          totalInactive: {
-            filter: { bool: { must: { terms: { status: ['inactive', 'unenrolled'] } } } },
-          },
-        },
-      }),
+      ...(getStatusSummary && { aggs: { status: { terms: { field: 'status' } } } }),
     });
   let res;
   try {
@@ -278,10 +288,6 @@ export async function getAgentsByKuery(
 
   let agents = res.hits.hits.map(searchHitToAgent);
   let total = res.hits.total as number;
-  let totalInactive = 0;
-  if (getTotalInactive && res.aggregations) {
-    totalInactive = res.aggregations?.totalInactive?.doc_count ?? 0;
-  }
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
   if (showUpgradeable) {
@@ -303,12 +309,18 @@ export async function getAgentsByKuery(
     }
   }
 
+  if (getStatusSummary) {
+    res.aggregations?.status.buckets.forEach((bucket) => {
+      statusSummary[bucket.key] = bucket.doc_count;
+    });
+  }
+
   return {
     agents,
     total,
     page,
     perPage,
-    ...(getTotalInactive && { totalInactive }),
+    ...(getStatusSummary ? { statusSummary } : {}),
   };
 }
 
@@ -477,7 +489,7 @@ export async function bulkUpdateAgents(
     {
       update: {
         _id: agentId,
-        retry_on_conflict: 3,
+        retry_on_conflict: 5,
       },
     },
     {

@@ -9,10 +9,12 @@ import { isEmpty } from 'lodash';
 import React, { memo, useCallback, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHighlight,
   EuiComboBox,
   EuiFormRow,
   EuiLink,
-  EuiSelectableListItem,
   EuiTextColor,
 } from '@elastic/eui';
 import type { UserProfileWithAvatar, UserProfile } from '@kbn/user-profile-components';
@@ -113,18 +115,42 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
 
     const renderOption = useCallback(
       (option: EuiComboBoxOptionOption, searchValue: string, contentClassName: string) => {
-        const { user, data, value } = option as EuiComboBoxOptionOption<string> &
-          UserProfileWithAvatar;
+        const { user, data } = option as EuiComboBoxOptionOption<string> & UserProfileWithAvatar;
+
+        const displayName = getUserDisplayName(user);
 
         return (
-          <EuiSelectableListItem
-            key={value}
-            prepend={<UserAvatar user={user} avatar={data.avatar} size="s" />}
-            className={contentClassName}
-            append={<EuiTextColor color="subdued">{user.email}</EuiTextColor>}
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexStart"
+            gutterSize="s"
+            responsive={false}
           >
-            {getUserDisplayName(user)}
-          </EuiSelectableListItem>
+            <EuiFlexItem grow={false}>
+              <UserAvatar user={user} avatar={data.avatar} size="s" />
+            </EuiFlexItem>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              gutterSize="none"
+              responsive={false}
+            >
+              <EuiFlexItem>
+                <EuiHighlight search={searchValue} className={contentClassName}>
+                  {displayName}
+                </EuiHighlight>
+              </EuiFlexItem>
+              {user.email && user.email !== displayName ? (
+                <EuiFlexItem grow={false}>
+                  <EuiTextColor color={'subdued'}>
+                    <EuiHighlight search={searchValue} className={contentClassName}>
+                      {user.email}
+                    </EuiHighlight>
+                  </EuiTextColor>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexGroup>
         );
       },
       []
@@ -165,6 +191,7 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
           onChange={onComboChange}
           onSearchChange={onSearchComboChange}
           renderOption={renderOption}
+          rowHeight={35}
         />
       </EuiFormRow>
     );

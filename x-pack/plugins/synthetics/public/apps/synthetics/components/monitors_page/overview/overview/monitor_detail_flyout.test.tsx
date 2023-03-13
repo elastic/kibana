@@ -12,7 +12,7 @@ import { MonitorDetailFlyout } from './monitor_detail_flyout';
 import * as observabilityPublic from '@kbn/observability-plugin/public';
 import * as monitorDetail from '../../../../hooks/use_monitor_detail';
 import * as statusByLocation from '../../../../hooks/use_status_by_location';
-import * as monitorDetailLocator from '../../hooks/use_monitor_detail_locator';
+import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
 
 jest.mock('@kbn/observability-plugin/public');
 

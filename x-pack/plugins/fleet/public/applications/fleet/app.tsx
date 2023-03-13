@@ -10,11 +10,14 @@ import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
+import { Router, Redirect, Switch, useRouteMatch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
@@ -61,6 +64,8 @@ import { SettingsApp } from './sections/settings';
 import { DebugPage } from './sections/debug';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
+
+const queryClient = new QueryClient();
 
 const ErrorLayout: FunctionComponent<{ isAddIntegrationsPath: boolean }> = ({
   isAddIntegrationsPath,
@@ -257,18 +262,21 @@ export const FleetAppContext: React.FC<{
                 <KibanaVersionContext.Provider value={kibanaVersion}>
                   <KibanaThemeProvider theme$={theme$}>
                     <EuiThemeProvider darkMode={isDarkMode}>
-                      <UIExtensionsContext.Provider value={extensions}>
-                        <FleetStatusProvider>
-                          <Router history={history}>
-                            <PackageInstallProvider
-                              notifications={startServices.notifications}
-                              theme$={theme$}
-                            >
-                              <FlyoutContextProvider>{children}</FlyoutContextProvider>
-                            </PackageInstallProvider>
-                          </Router>
-                        </FleetStatusProvider>
-                      </UIExtensionsContext.Provider>
+                      <QueryClientProvider client={queryClient}>
+                        <ReactQueryDevtools initialIsOpen={false} />
+                        <UIExtensionsContext.Provider value={extensions}>
+                          <FleetStatusProvider>
+                            <Router history={history}>
+                              <PackageInstallProvider
+                                notifications={startServices.notifications}
+                                theme$={theme$}
+                              >
+                                <FlyoutContextProvider>{children}</FlyoutContextProvider>
+                              </PackageInstallProvider>
+                            </Router>
+                          </FleetStatusProvider>
+                        </UIExtensionsContext.Provider>
+                      </QueryClientProvider>
                     </EuiThemeProvider>
                   </KibanaThemeProvider>
                 </KibanaVersionContext.Provider>

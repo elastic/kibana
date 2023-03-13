@@ -76,7 +76,7 @@ export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
   useEffect(() => {
     if (hasFailedLoadingDataView && notifications) {
       notifications.toasts.addDanger(
-        i18n.translate('xpack.infra.hostsTable.errorOnCreateOrLoadDataview', {
+        i18n.translate('xpack.infra.hostsViewPage.errorOnCreateOrLoadDataview', {
           defaultMessage:
             'There was an error trying to load or create the Data View: {metricAlias}',
           values: { metricAlias },

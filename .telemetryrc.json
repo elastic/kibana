@@ -5,5 +5,10 @@
     "exclude": [
       "src/plugins/kibana_usage_collection/server/collectors/config_usage/register_config_usage_collector.ts"
     ]
+  },
+  {
+    "output": "src/plugins/telemetry/schema/kbn_packages.json",
+    "root": "packages/",
+    "exclude": []
   }
 ]

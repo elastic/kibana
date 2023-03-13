@@ -34,7 +34,11 @@ function RulesPage() {
   const {
     http,
     docLinks,
-    triggersActionsUi: { getAddAlertFlyout: AddAlertFlyout, getRulesList: RuleList },
+    triggersActionsUi: {
+      getAddAlertFlyout: AddAlertFlyout,
+      getRulesList: RuleList,
+      getRulesSettingsLink: RulesSettingsLink,
+    },
   } = useKibana().services;
 
   const { status, setStatus, lastResponse, setLastResponse } = useRulesPageStateContainer();
@@ -83,6 +87,7 @@ function RulesPage() {
               defaultMessage="Create rule"
             />
           </EuiButton>,
+          <RulesSettingsLink />,
           <EuiButtonEmpty
             href={docLinks.links.observability.createAlerts}
             target="_blank"
@@ -103,7 +108,6 @@ function RulesPage() {
           <RuleList
             filteredRuleTypes={filteredRuleTypes}
             showActionFilter={false}
-            showCreateRuleButton={false}
             ruleDetailsRoute="alerts/rules/:ruleId"
             statusFilter={status}
             onStatusFilterChange={setStatus}

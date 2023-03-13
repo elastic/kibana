@@ -22,7 +22,7 @@ import {
 } from '../services/files';
 
 export const TYPE = 'fleet:check-deleted-files-task';
-export const VERSION = '1.0.0';
+export const VERSION = '1.0.1';
 const TITLE = 'Fleet Deleted Files Periodic Tasks';
 const TIMEOUT = '2m';
 const SCOPE = ['fleet'];

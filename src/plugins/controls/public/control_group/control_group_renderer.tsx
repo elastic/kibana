@@ -6,34 +6,36 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { isEqual } from 'lodash';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
-import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import { compareFilters } from '@kbn/es-query';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { pluginServices } from '../services';
-import { getDefaultControlGroupInput } from '../../common';
 import {
+  ControlGroupCreationOptions,
   ControlGroupInput,
   ControlGroupOutput,
   ControlGroupReduxState,
   CONTROL_GROUP_TYPE,
 } from './types';
-import { ControlGroupContainer } from './embeddable/control_group_container';
+import { pluginServices } from '../services';
+import { getDefaultControlGroupInput } from '../../common';
 import { controlGroupReducers } from './state/control_group_reducers';
 import { controlGroupInputBuilder } from './control_group_input_builder';
+import { ControlGroupContainer } from './embeddable/control_group_container';
+import { ControlGroupContainerFactory } from './embeddable/control_group_container_factory';
 
 export interface ControlGroupRendererProps {
   filters?: Filter[];
-  getInitialInput: (
+  getCreationOptions: (
     initialInput: Partial<ControlGroupInput>,
     builder: typeof controlGroupInputBuilder
-  ) => Promise<Partial<ControlGroupInput>>;
+  ) => Promise<ControlGroupCreationOptions>;
   onLoadComplete?: (controlGroup: ControlGroupContainer) => void;
   timeRange?: TimeRange;
   query?: Query;
@@ -41,14 +43,14 @@ export interface ControlGroupRendererProps {
 
 export const ControlGroupRenderer = ({
   onLoadComplete,
-  getInitialInput,
+  getCreationOptions,
   filters,
   timeRange,
   query,
 }: ControlGroupRendererProps) => {
   const controlGroupRef = useRef(null);
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
-  const id = useMemo(() => uuid.v4(), []);
+  const id = useMemo(() => uuidv4(), []);
   /**
    * Use Lifecycles to load initial control group container
    */
@@ -57,16 +59,26 @@ export const ControlGroupRenderer = ({
     () => {
       const { embeddable } = pluginServices.getServices();
       (async () => {
-        const factory = embeddable.getEmbeddableFactory<
+        const factory = embeddable.getEmbeddableFactory(CONTROL_GROUP_TYPE) as EmbeddableFactory<
           ControlGroupInput,
           ControlGroupOutput,
-          IEmbeddable<ControlGroupInput, ControlGroupOutput>
-        >(CONTROL_GROUP_TYPE);
-        const newControlGroup = (await factory?.create({
-          id,
-          ...getDefaultControlGroupInput(),
-          ...(await getInitialInput(getDefaultControlGroupInput(), controlGroupInputBuilder)),
-        })) as ControlGroupContainer;
+          ControlGroupContainer
+        > & {
+          create: ControlGroupContainerFactory['create'];
+        };
+        const { initialInput, settings } = await getCreationOptions(
+          getDefaultControlGroupInput(),
+          controlGroupInputBuilder
+        );
+        const newControlGroup = (await factory?.create(
+          {
+            id,
+            ...getDefaultControlGroupInput(),
+            ...initialInput,
+          },
+          undefined,
+          settings
+        )) as ControlGroupContainer;
 
         if (controlGroupRef.current) {
           newControlGroup.render(controlGroupRef.current);
@@ -105,7 +117,11 @@ export const ControlGroupRenderer = ({
 };
 
 export const useControlGroupContainerContext = () =>
-  useReduxEmbeddableContext<ControlGroupReduxState, typeof controlGroupReducers>();
+  useReduxEmbeddableContext<
+    ControlGroupReduxState,
+    typeof controlGroupReducers,
+    ControlGroupContainer
+  >();
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export

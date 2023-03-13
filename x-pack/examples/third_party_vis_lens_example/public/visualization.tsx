@@ -181,9 +181,4 @@ export const getRotatingNumberVisualization = ({
       domElement
     );
   },
-
-  getErrorMessages(state) {
-    // Is it possible to break it?
-    return undefined;
-  },
 });

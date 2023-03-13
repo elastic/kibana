@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Windows - Looks for processes that are unusual to all Windows hosts. Such unusual processes may indicate execution of unauthorized software, malware, or persistence mechanisms.",
   "groups": [
     "endpoint",

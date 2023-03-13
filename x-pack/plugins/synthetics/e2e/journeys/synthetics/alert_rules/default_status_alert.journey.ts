@@ -8,7 +8,7 @@
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
 import { RetryService } from '@kbn/ftr-common-functional-services';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
 import { getReasonMessage } from '../../../../server/legacy_uptime/lib/alerts/status_check';
 import { syntheticsAppPageProvider } from '../../../page_objects/synthetics/synthetics_app';
@@ -50,7 +50,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('Go to monitors page', async () => {
-    await syntheticsApp.navigateToOverview(true);
+    await syntheticsApp.navigateToOverview(true, 15);
   });
 
   step('should create default status alert', async () => {
@@ -143,7 +143,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   });
 
   step('Adds another down monitor and it auto adds the alert', async () => {
-    const monitorId = uuid.v4();
+    const monitorId = uuidv4();
     const name = `Test Monitor 2`;
     configId2 = await services.addTestMonitor(name, {
       type: 'http',
@@ -193,7 +193,8 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     });
 
     await page.click(byTestId('alert-status-filter-active-button'));
-    await page.waitForTimeout(5 * 1000);
+    await syntheticsApp.waitForLoadingToFinish();
+    await page.waitForTimeout(10 * 1000);
 
     await page.click('[aria-label="View in app"]');
     await page.click(byTestId('syntheticsMonitorOverviewTab'));

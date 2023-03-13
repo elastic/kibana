@@ -27,7 +27,7 @@ import {
   Hashes,
   ParsedDllManifest,
 } from '../common';
-import { BundleRefModule } from './bundle_ref_module';
+import { BundleRemoteModule } from './bundle_remote_module';
 
 /**
  * sass-loader creates about a 40% overhead on the overall optimizer runtime, and
@@ -88,6 +88,7 @@ export class PopulateBundleCachePlugin {
             const path = getModulePath(module);
             const parsedPath = parseFilePath(path);
 
+            // TODO: Does this need to be updated to support @kbn/ packages?
             if (!parsedPath.dirs.includes('node_modules')) {
               addReferenced(path);
 
@@ -113,8 +114,8 @@ export class PopulateBundleCachePlugin {
             continue;
           }
 
-          if (module instanceof BundleRefModule) {
-            bundleRefExportIds.push(module.ref.exportId);
+          if (module instanceof BundleRemoteModule) {
+            bundleRefExportIds.push(module.req.full);
             continue;
           }
 
@@ -140,7 +141,7 @@ export class PopulateBundleCachePlugin {
         const sortedDllRefKeys = Array.from(dllRefKeys).sort(ascending((p) => p));
 
         bundle.cache.set({
-          bundleRefExportIds: bundleRefExportIds.sort(ascending((p) => p)),
+          remoteBundleImportReqs: bundleRefExportIds.sort(ascending((p) => p)),
           optimizerCacheKey: workerConfig.optimizerCacheKey,
           cacheKey: bundle.createCacheKey(
             referencedPaths,

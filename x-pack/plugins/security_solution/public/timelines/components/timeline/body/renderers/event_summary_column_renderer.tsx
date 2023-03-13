@@ -10,8 +10,8 @@ import { isEqual } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
 import styled from 'styled-components';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
-import type { Ecs } from '../../../../../../common/ecs';
 import type { ColumnRenderer } from './column_renderer';
 import { EVENT_SUMMARY_FIELD_NAME } from './constants';
 import { getRowRenderer } from './get_row_renderer';

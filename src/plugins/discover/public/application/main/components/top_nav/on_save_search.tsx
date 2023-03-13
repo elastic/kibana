@@ -53,7 +53,7 @@ async function saveDataSource({
           navigateTo(`/view/${encodeURIComponent(id)}`);
         } else {
           // Update defaults so that "reload saved query" functions correctly
-          state.resetAppState(savedSearch);
+          state.appState.resetWithSavedSearch(savedSearch);
           services.chrome.docTitle.change(savedSearch.title!);
 
           setBreadcrumbsTitle(
@@ -169,7 +169,7 @@ export async function onSaveSearch({
         savedSearch.tags = currentTags;
       }
     } else {
-      state.resetInitialAppState();
+      state.appState.resetInitialState();
     }
     onSaveCb?.();
     return response;
@@ -187,7 +187,7 @@ export async function onSaveSearch({
       onClose={onClose ?? (() => {})}
     />
   );
-  showSaveModal(saveModal, services.core.i18n.Context);
+  showSaveModal(saveModal);
 }
 
 const SaveSearchObjectModal: React.FC<{

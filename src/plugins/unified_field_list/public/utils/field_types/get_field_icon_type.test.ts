@@ -43,6 +43,6 @@ describe('UnifiedFieldList getFieldIconType()', () => {
         type: 'string',
         esTypes: ['_id'],
       } as DataViewField)
-    ).toBe('string');
+    ).toBe('keyword');
   });
 });

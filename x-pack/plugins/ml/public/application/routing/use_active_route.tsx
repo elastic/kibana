@@ -96,6 +96,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
     name: PLUGIN_ID,
     type: 'application',
     page: activeRoute?.path ?? '/overview',
+    id: activeRoute?.path,
   });
 
   return activeRoute ?? routesMap['/overview'];

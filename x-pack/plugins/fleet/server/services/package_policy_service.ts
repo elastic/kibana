@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type {
-  ElasticsearchClient,
-  RequestHandlerContext,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import type {
@@ -50,7 +46,9 @@ export interface PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
-    }
+    },
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
   ): Promise<PackagePolicy>;
 
   bulkCreate(
@@ -108,7 +106,13 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean; force?: boolean }
+    options?: {
+      user?: AuthenticatedUser;
+      skipUnassignFromAgentPolicies?: boolean;
+      force?: boolean;
+    },
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
   ): Promise<PostDeletePackagePoliciesResponse>;
 
   upgrade(
@@ -146,9 +150,13 @@ export interface PackagePolicyClient {
       ? PostDeletePackagePoliciesResponse
       : A extends 'packagePolicyPostCreate'
       ? PackagePolicy
+      : A extends 'packagePolicyUpdate'
+      ? UpdatePackagePolicy
       : NewPackagePolicy,
-    context: RequestHandlerContext,
-    request: KibanaRequest
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
   ): Promise<
     A extends 'packagePolicyDelete'
       ? void
@@ -156,13 +164,25 @@ export interface PackagePolicyClient {
       ? void
       : A extends 'packagePolicyPostCreate'
       ? PackagePolicy
+      : A extends 'packagePolicyUpdate'
+      ? UpdatePackagePolicy
       : NewPackagePolicy
   >;
 
-  runDeleteExternalCallbacks(deletedPackagePolicies: DeletePackagePoliciesResponse): Promise<void>;
+  runDeleteExternalCallbacks(
+    deletedPackagePolicies: DeletePackagePoliciesResponse,
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
+  ): Promise<void>;
 
   runPostDeleteExternalCallbacks(
-    deletedPackagePolicies: PostDeletePackagePoliciesResponse
+    deletedPackagePolicies: PostDeletePackagePoliciesResponse,
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
   ): Promise<void>;
 
   getUpgradePackagePolicyInfo(

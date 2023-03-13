@@ -20,6 +20,7 @@
     "@kbn/alerting-plugin",
     "@kbn/utility-types",
     "@kbn/es-query",
+    "@kbn/securitysolution-ecs",
     "@kbn/securitysolution-t-grid",
     "@kbn/rule-data-utils",
     "@kbn/rule-registry-plugin",
@@ -31,6 +32,8 @@
     "@kbn/i18n",
     "@kbn/security-plugin",
     "@kbn/safer-lodash-set",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/logging",
   ],
   "exclude": [
     "target/**/*",

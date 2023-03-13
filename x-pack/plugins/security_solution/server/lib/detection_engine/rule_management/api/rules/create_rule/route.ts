@@ -55,7 +55,6 @@ export const createRuleRoute = (
         ]);
 
         const rulesClient = ctx.alerting.getRulesClient();
-        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
         const savedObjectsClient = ctx.core.savedObjects.client;
         const exceptionsClient = ctx.lists?.getExceptionListClient();
 
@@ -99,9 +98,7 @@ export const createRuleRoute = (
           params: request.body,
         });
 
-        const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(createdRule.id);
-
-        const [validated, errors] = transformValidate(createdRule, ruleExecutionSummary);
+        const [validated, errors] = transformValidate(createdRule);
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {

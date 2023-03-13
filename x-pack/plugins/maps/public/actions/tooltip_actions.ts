@@ -29,7 +29,14 @@ export function openOnClickTooltip(tooltipState: TooltipState) {
       return (
         isLocked &&
         !_.isEqual(location, tooltipState.location) &&
-        !_.isEqual(features, tooltipState.features)
+        !_.isEqual(
+          features.map(({ id, layerId }) => {
+            return { id, layerId };
+          }),
+          tooltipState.features.map(({ id, layerId }) => {
+            return { id, layerId };
+          })
+        )
       );
     });
 

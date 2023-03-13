@@ -43,7 +43,7 @@ const EditModalComponent: FC<EditModalProps> = ({ listDetails, onSave, onCancel 
       )}
       <EuiModalHeader>
         <EuiModalHeaderTitle data-test-subj="editModalTitle">
-          <h1>{i18n.EXCEPTION_LIST_HEADER_EDIT_MODAL_TITLE(listDetails.name)}</h1>
+          {i18n.EXCEPTION_LIST_HEADER_EDIT_MODAL_TITLE(listDetails.name)}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 

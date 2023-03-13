@@ -7,6 +7,7 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/localhost_services';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -16,6 +17,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalTestsConfig = await readConfigFile(
     require.resolve('../functional/config.base.js')
   );
+
+  const hostIp = getLocalhostRealIp();
 
   return {
     ...kibanaCommonTestsConfig.getAll(),
@@ -41,6 +44,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+        `--xpack.fleet.agents.fleet_server.hosts=["https://${hostIp}:8220"]`,
+        `--xpack.fleet.agents.elasticsearch.host=http://${hostIp}:${kibanaCommonTestsConfig.get(
+          'servers.elasticsearch.port'
+        )}`,
         // always install Endpoint package by default when Fleet sets up
         `--xpack.fleet.packages.0.name=endpoint`,
         `--xpack.fleet.packages.0.version=latest`,

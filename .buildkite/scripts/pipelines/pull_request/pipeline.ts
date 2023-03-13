@@ -171,6 +171,19 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/webpack_bundle_analyzer.yml'));
     }
 
+    if (
+      (await doAnyChangesMatch([
+        /\.docnav\.json$/,
+        /\.apidocs\.json$/,
+        /\.devdocs\.json$/,
+        /\.mdx$/,
+        /^dev_docs\/.*(png|gif|jpg|jpeg|webp)$/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:build-next-docs')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_next_docs.yml'));
+    }
+
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     uploadPipeline(pipeline.join('\n'));

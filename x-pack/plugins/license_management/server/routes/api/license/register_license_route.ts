@@ -33,7 +33,7 @@ export function registerLicenseRoute({
             acknowledge: Boolean(req.query.acknowledge),
             client,
             licensing,
-            license: req.body,
+            licenses: [req.body.license as any],
           }),
         });
       } catch (error) {

@@ -67,13 +67,7 @@ export function useMetricsExplorerData(
           body: JSON.stringify({
             forceInterval: options.forceInterval,
             dropLastBucket: options.dropLastBucket != null ? options.dropLastBucket : true,
-            metrics:
-              options.aggregation === 'count'
-                ? [{ aggregation: 'count' }]
-                : options.metrics.map((metric) => ({
-                    aggregation: metric.aggregation,
-                    field: metric.field,
-                  })),
+            metrics: options.aggregation === 'count' ? [{ aggregation: 'count' }] : options.metrics,
             groupBy: options.groupBy,
             afterKey,
             limit: options.limit,
@@ -117,6 +111,7 @@ export function useMetricsExplorerData(
       },
       onReject: (e: unknown) => {
         setError(e as Error);
+        setData(null);
         setLoading(false);
       },
     },

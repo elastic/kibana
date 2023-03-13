@@ -9,7 +9,11 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import { TEST_NOW_ARIA_LABEL, TEST_SCHEDULED_LABEL } from '../monitor_add_edit/form/run_test_btn';
+import {
+  TEST_NOW_ARIA_LABEL,
+  TEST_SCHEDULED_LABEL,
+  PRIVATE_AVAILABLE_LABEL,
+} from '../monitor_add_edit/form/run_test_btn';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import {
   manualTestMonitorAction,
@@ -21,24 +25,28 @@ export const RunTestManually = () => {
 
   const { monitor } = useSelectedMonitor();
 
-  const hasPublicLocation = () => {
-    return monitor?.locations.some((loc) => loc.isServiceManaged);
-  };
+  const hasPublicLocation = monitor?.locations.some((loc) => loc.isServiceManaged);
 
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor?.config_id));
 
-  const content = testInProgress ? TEST_SCHEDULED_LABEL : TEST_NOW_ARIA_LABEL;
+  const content = !hasPublicLocation
+    ? PRIVATE_AVAILABLE_LABEL
+    : testInProgress
+    ? TEST_SCHEDULED_LABEL
+    : TEST_NOW_ARIA_LABEL;
 
   return (
     <EuiToolTip content={content} key={content}>
       <EuiButton
         color="success"
         iconType="beaker"
-        isDisabled={!hasPublicLocation()}
+        isDisabled={!hasPublicLocation}
         isLoading={!Boolean(monitor) || testInProgress}
         onClick={() => {
           if (monitor) {
-            dispatch(manualTestMonitorAction.get(monitor.config_id));
+            dispatch(
+              manualTestMonitorAction.get({ configId: monitor.config_id, name: monitor.name })
+            );
           }
         }}
       >

@@ -5,21 +5,35 @@
  * 2.0.
  */
 
-import type { AlertResponse, CommentResponse } from '../../../common/api';
+import type {
+  AlertResponse,
+  AllCommentsResponse,
+  BulkGetAttachmentsResponse,
+  CaseResponse,
+  CommentResponse,
+  CommentsResponse,
+} from '../../../common/api';
 import type { CasesClient } from '../client';
 
 import type { CasesClientInternal } from '../client_internal';
-import type { IAllCommentsResponse, ICaseResponse, ICommentsResponse } from '../typedoc_interfaces';
 import type { CasesClientArgs } from '../types';
-import type { AddArgs } from './add';
 import { addComment } from './add';
-import type { BulkCreateArgs } from './bulk_create';
+import type {
+  BulkCreateArgs,
+  AddArgs,
+  DeleteAllArgs,
+  DeleteArgs,
+  FindArgs,
+  GetAllAlertsAttachToCase,
+  GetAllArgs,
+  GetArgs,
+  UpdateArgs,
+  BulkGetArgs,
+} from './types';
 import { bulkCreate } from './bulk_create';
-import type { DeleteAllArgs, DeleteArgs } from './delete';
 import { deleteAll, deleteComment } from './delete';
-import type { FindArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './get';
 import { find, get, getAll, getAllAlertsAttachToCase } from './get';
-import type { UpdateArgs } from './update';
+import { bulkGet } from './bulk_get';
 import { update } from './update';
 
 /**
@@ -29,8 +43,9 @@ export interface AttachmentsSubClient {
   /**
    * Adds an attachment to a case.
    */
-  add(params: AddArgs): Promise<ICaseResponse>;
-  bulkCreate(params: BulkCreateArgs): Promise<ICaseResponse>;
+  add(params: AddArgs): Promise<CaseResponse>;
+  bulkCreate(params: BulkCreateArgs): Promise<CaseResponse>;
+  bulkGet(params: BulkGetArgs): Promise<BulkGetAttachmentsResponse>;
   /**
    * Deletes all attachments associated with a single case.
    */
@@ -42,7 +57,7 @@ export interface AttachmentsSubClient {
   /**
    * Retrieves all comments matching the search criteria.
    */
-  find(findArgs: FindArgs): Promise<ICommentsResponse>;
+  find(findArgs: FindArgs): Promise<CommentsResponse>;
   /**
    * Retrieves all alerts attach to a case given a single case ID
    */
@@ -50,7 +65,7 @@ export interface AttachmentsSubClient {
   /**
    * Gets all attachments for a single case.
    */
-  getAll(getAllArgs: GetAllArgs): Promise<IAllCommentsResponse>;
+  getAll(getAllArgs: GetAllArgs): Promise<AllCommentsResponse>;
   /**
    * Retrieves a single attachment for a case.
    */
@@ -60,7 +75,7 @@ export interface AttachmentsSubClient {
    *
    * The request must include all fields for the attachment. Even the fields that are not changing.
    */
-  update(updateArgs: UpdateArgs): Promise<ICaseResponse>;
+  update(updateArgs: UpdateArgs): Promise<CaseResponse>;
 }
 
 /**
@@ -76,6 +91,7 @@ export const createAttachmentsSubClient = (
   const attachmentSubClient: AttachmentsSubClient = {
     add: (params: AddArgs) => addComment(params, clientArgs),
     bulkCreate: (params: BulkCreateArgs) => bulkCreate(params, clientArgs),
+    bulkGet: (params) => bulkGet(params, clientArgs, casesClient),
     deleteAll: (deleteAllArgs: DeleteAllArgs) => deleteAll(deleteAllArgs, clientArgs),
     delete: (deleteArgs: DeleteArgs) => deleteComment(deleteArgs, clientArgs),
     find: (findArgs: FindArgs) => find(findArgs, clientArgs),

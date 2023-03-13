@@ -6,80 +6,9 @@
  */
 
 import moment from 'moment';
-import { getDisallowedPreviousShiftMessage, resolveTimeShift } from './time_shift_utils';
-import { FormBasedLayer } from './types';
+import { resolveTimeShift } from './time_shift_utils';
 
 describe('time_shift_utils', () => {
-  describe('getDisallowedPreviousShiftMessage', () => {
-    const layer: FormBasedLayer = {
-      indexPatternId: '',
-      columnOrder: [],
-      columns: {
-        a: {
-          operationType: 'date_histogram',
-          dataType: 'date',
-          isBucketed: true,
-          label: '',
-          references: [],
-          sourceField: 'timestamp',
-        },
-        b: {
-          operationType: 'count',
-          dataType: 'number',
-          isBucketed: false,
-          label: 'non shifted',
-          references: [],
-          sourceField: 'records',
-        },
-        c: {
-          operationType: 'count',
-          dataType: 'number',
-          isBucketed: false,
-          label: 'shifted',
-          timeShift: '1d',
-          references: [],
-          sourceField: 'records',
-        },
-      },
-    };
-
-    it('shoud not produce an error for no shift', () => {
-      expect(getDisallowedPreviousShiftMessage(layer, 'b')).toBeUndefined();
-    });
-
-    it('shoud not produce an error for non-previous shift', () => {
-      expect(getDisallowedPreviousShiftMessage(layer, 'c')).toBeUndefined();
-    });
-
-    it('shoud produce an error for previous shift with date histogram', () => {
-      expect(
-        getDisallowedPreviousShiftMessage(
-          {
-            ...layer,
-            columns: { ...layer.columns, c: { ...layer.columns.c, timeShift: 'previous' } },
-          },
-          'c'
-        )
-      ).toHaveLength(1);
-    });
-
-    it('shoud not produce an error for previous shift without date histogram', () => {
-      expect(
-        getDisallowedPreviousShiftMessage(
-          {
-            ...layer,
-            columns: {
-              ...layer.columns,
-              a: { ...layer.columns.a, operationType: 'terms' },
-              c: { ...layer.columns.c, timeShift: 'previous' },
-            },
-          },
-          'c'
-        )
-      ).toBeUndefined();
-    });
-  });
-
   describe('resolveTimeShift', () => {
     const dateString = '2022-11-02T00:00:00.000Z';
     // shift by 2 days + 2500 s (to get a shift which is not a multiple of the given interval)
@@ -111,6 +40,10 @@ describe('time_shift_utils', () => {
         // the raw value is 261700s, but that's not a multiple of the range interval
         // so it will be rounded to the next interval multiple
         .toBe('261000s');
+    });
+
+    it('should convert previous relative time shift to seconds (rounded) when a date histogram is present', () => {
+      expect(resolveTimeShift(`previous`, getDateRange(), 100, true)).toBe('171000s');
     });
 
     it('should always include the passed date in the computed interval', () => {

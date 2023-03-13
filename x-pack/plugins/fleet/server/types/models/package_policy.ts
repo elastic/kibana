@@ -85,6 +85,8 @@ const ExperimentalDataStreamFeatures = schema.arrayOf(
     features: schema.object({
       synthetic_source: schema.boolean(),
       tsdb: schema.boolean(),
+      doc_value_only_numeric: schema.boolean(),
+      doc_value_only_other: schema.boolean(),
     }),
   })
 );
@@ -125,14 +127,7 @@ const CreatePackagePolicyProps = {
       name: schema.string(),
       title: schema.maybe(schema.string()),
       version: schema.string(),
-      experimental_data_stream_features: schema.maybe(
-        schema.arrayOf(
-          schema.object({
-            data_stream: schema.string(),
-            features: schema.object({ synthetic_source: schema.boolean(), tsdb: schema.boolean() }),
-          })
-        )
-      ),
+      experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
     })
   ),
   // Deprecated TODO create remove issue

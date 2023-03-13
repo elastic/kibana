@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
@@ -15,13 +15,31 @@ export const StepDetailsLinkIcon = ({
   stepIndex,
   checkGroup,
   configId,
+  asButton,
+  label,
+  target = '_self',
 }: {
   checkGroup: string;
+  label?: string;
   configId: string;
   stepIndex?: number;
+  asButton?: boolean;
+  target?: '_self' | '_blank';
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
   const selectedLocation = useSelectedLocation();
+
+  if (asButton) {
+    return (
+      <EuiButtonEmpty
+        flush="left"
+        iconType="apmTrace"
+        href={`${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${selectedLocation?.id}`}
+      >
+        {label ?? VIEW_DETAILS}
+      </EuiButtonEmpty>
+    );
+  }
 
   return (
     <EuiButtonIcon
@@ -29,7 +47,7 @@ export const StepDetailsLinkIcon = ({
       title={VIEW_DETAILS}
       size="s"
       href={`${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${selectedLocation?.id}`}
-      target="_self"
+      target={target}
       iconType="apmTrace"
     />
   );

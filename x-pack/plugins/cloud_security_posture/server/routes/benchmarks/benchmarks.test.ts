@@ -258,7 +258,7 @@ describe('benchmarks API', () => {
       });
     });
 
-    describe('test addPackagePolicyCspRules', () => {
+    describe('test addPackagePolicyCspRuleTemplates', () => {
       it('should retrieve the rules count by the filtered benchmark type', async () => {
         const benchmark = 'cis_k8s';
         mockSoClient.find.mockResolvedValueOnce({

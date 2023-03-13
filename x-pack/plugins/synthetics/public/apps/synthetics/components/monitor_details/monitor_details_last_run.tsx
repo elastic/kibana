@@ -6,7 +6,7 @@
  */
 import React, { ReactElement } from 'react';
 import moment from 'moment';
-import { EuiDescriptionList, EuiLoadingContent } from '@elastic/eui';
+import { EuiDescriptionList, EuiLoadingContent, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
@@ -21,7 +21,20 @@ export const MonitorDetailsLastRun: React.FC = () => {
     description = <EuiLoadingContent lines={1} />;
   }
 
-  return <EuiDescriptionList listItems={[{ title: LAST_RUN_LABEL, description }]} />;
+  return (
+    <EuiDescriptionList
+      listItems={[
+        {
+          title: LAST_RUN_LABEL,
+          description: (
+            <EuiToolTip content={moment(latestPing?.timestamp).format('LLL')} position="bottom">
+              <>{description}</>
+            </EuiToolTip>
+          ),
+        },
+      ]}
+    />
+  );
 };
 
 const LAST_RUN_LABEL = i18n.translate('xpack.synthetics.monitorLastRun.lastRunLabel', {

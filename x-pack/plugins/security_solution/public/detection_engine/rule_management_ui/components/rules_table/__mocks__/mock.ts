@@ -13,7 +13,10 @@ import type {
   DefineStepRule,
   ScheduleStepRule,
 } from '../../../../../detections/pages/detection_engine/rules/types';
-import { DataSourceType } from '../../../../../detections/pages/detection_engine/rules/types';
+import {
+  DataSourceType,
+  GroupByOptions,
+} from '../../../../../detections/pages/detection_engine/rules/types';
 import type { FieldValueQueryBar } from '../../../../../detections/components/rules/query_bar';
 import { fillEmptySeverityMappings } from '../../../../../detections/pages/detection_engine/rules/helpers';
 import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
@@ -230,6 +233,11 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
   groupByFields: [],
+  groupByRadioSelection: GroupByOptions.PerRuleExecution,
+  groupByDuration: {
+    unit: 'm',
+    value: 5,
+  },
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({

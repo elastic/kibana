@@ -12,6 +12,7 @@ import { THREAT_INTELLIGENCE_BASE_PATH } from '@kbn/threat-intelligence-plugin/p
 import type { SourcererDataView } from '@kbn/threat-intelligence-plugin/public/types';
 import type { Store } from 'redux';
 import { useSelector } from 'react-redux';
+import { useUserPrivileges } from '../common/components/user_privileges';
 import { useSetUrlParams } from '../management/components/artifact_list_page/hooks/use_set_url_params';
 import { BlockListForm } from '../management/pages/blocklist/view/components/blocklist_form';
 import { BlocklistsApiClient } from '../management/pages/blocklist/services';
@@ -49,6 +50,7 @@ const ThreatIntelligence = memo(() => {
     getUseInvestigateInTimeline: useInvestigateInTimeline,
 
     blockList: {
+      canWriteBlocklist: useUserPrivileges().endpointPrivileges.canWriteBlocklist,
       exceptionListApiClient: BlocklistsApiClient.getInstance(http),
       useSetUrlParams,
       // @ts-ignore

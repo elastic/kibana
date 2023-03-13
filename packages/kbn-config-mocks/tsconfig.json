@@ -15,6 +15,7 @@
     "@kbn/utility-types",
     "@kbn/doc-links",
     "@kbn/repo-info",
+    "@kbn/repo-packages",
   ],
   "exclude": [
     "target/**/*",

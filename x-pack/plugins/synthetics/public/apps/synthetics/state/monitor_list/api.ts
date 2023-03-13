@@ -31,7 +31,9 @@ function toMonitorManagementListQueryArgs(
     query: pageState.query,
     tags: pageState.tags,
     locations: pageState.locations,
-    monitorType: pageState.monitorType,
+    monitorTypes: pageState.monitorTypes,
+    projects: pageState.projects,
+    schedules: pageState.schedules,
     searchFields: [],
   };
 }

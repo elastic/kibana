@@ -43,6 +43,7 @@ const sloSchema = t.type({
   objective: objectiveSchema,
   settings: settingsSchema,
   revision: t.number,
+  enabled: t.boolean,
   createdAt: dateType,
   updatedAt: dateType,
 });

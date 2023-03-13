@@ -179,6 +179,18 @@ export function initRoutes(
 
   router.post(
     {
+      path: '/session/_run_cleanup',
+      validate: false,
+    },
+    async (context, request, response) => {
+      const [, { taskManager }] = await core.getStartServices();
+      await taskManager.runSoon(SESSION_INDEX_CLEANUP_TASK_NAME);
+      return response.ok();
+    }
+  );
+
+  router.post(
+    {
       path: '/session/toggle_cleanup_task',
       validate: { body: schema.object({ enabled: schema.boolean() }) },
     },

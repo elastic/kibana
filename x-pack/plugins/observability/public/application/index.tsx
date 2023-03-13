@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Route, Router, Switch } from 'react-router-dom';
+import { Router, Switch } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { i18n } from '@kbn/i18n';
+import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
@@ -53,6 +57,7 @@ export const renderApp = ({
   ObservabilityPageTemplate,
   usageCollection,
   isDev,
+  kibanaVersion,
 }: {
   core: CoreStart;
   config: ConfigSchema;
@@ -62,6 +67,7 @@ export const renderApp = ({
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   usageCollection: UsageCollectionSetup;
   isDev?: boolean;
+  kibanaVersion: string;
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
@@ -77,37 +83,50 @@ export const renderApp = ({
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);
 
+  const queryClient = new QueryClient();
+
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   ReactDOM.render(
-    <ApplicationUsageTrackingProvider>
-      <KibanaThemeProvider theme$={theme$}>
-        <KibanaContextProvider
-          services={{ ...core, ...plugins, storage: new Storage(localStorage), isDev }}
-        >
-          <PluginContext.Provider
-            value={{
-              config,
-              appMountParameters,
-              observabilityRuleTypeRegistry,
-              ObservabilityPageTemplate,
+    <EuiErrorBoundary>
+      <ApplicationUsageTrackingProvider>
+        <KibanaThemeProvider theme$={theme$}>
+          <KibanaContextProvider
+            services={{
+              ...core,
+              ...plugins,
+              storage: new Storage(localStorage),
+              isDev,
+              kibanaVersion,
             }}
           >
-            <Router history={history}>
-              <EuiThemeProvider darkMode={isDarkMode}>
-                <i18nCore.Context>
-                  <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
-                    <HasDataContextProvider>
-                      <App />
-                    </HasDataContextProvider>
-                  </RedirectAppLinks>
-                </i18nCore.Context>
-              </EuiThemeProvider>
-            </Router>
-          </PluginContext.Provider>
-        </KibanaContextProvider>
-      </KibanaThemeProvider>
-    </ApplicationUsageTrackingProvider>,
+            <PluginContext.Provider
+              value={{
+                config,
+                appMountParameters,
+                observabilityRuleTypeRegistry,
+                ObservabilityPageTemplate,
+              }}
+            >
+              <Router history={history}>
+                <EuiThemeProvider darkMode={isDarkMode}>
+                  <i18nCore.Context>
+                    <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
+                      <QueryClientProvider client={queryClient}>
+                        <HasDataContextProvider>
+                          <App />
+                        </HasDataContextProvider>
+                        <ReactQueryDevtools />
+                      </QueryClientProvider>
+                    </RedirectAppLinks>
+                  </i18nCore.Context>
+                </EuiThemeProvider>
+              </Router>
+            </PluginContext.Provider>
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
+      </ApplicationUsageTrackingProvider>
+    </EuiErrorBoundary>,
     element
   );
   return () => {

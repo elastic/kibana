@@ -6,6 +6,7 @@
  */
 
 import { useMemo, useState } from 'react';
+import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataProvider } from '@kbn/timelines-plugin/common';
 import { TimelineId } from '../../../../../../common/types/timeline';
@@ -14,9 +15,12 @@ import { combineQueries } from '../../../../lib/kuery';
 import { useTimelineEvents } from '../../../../../timelines/containers';
 import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
+import type { TimeRange } from '../../../../store/inputs/model';
 
 export interface UseInsightQuery {
   dataProviders: DataProvider[];
+  filters: Filter[];
+  relativeTimerange: TimeRange | null;
 }
 
 export interface UseInsightQueryResult {
@@ -26,7 +30,11 @@ export interface UseInsightQueryResult {
   hasError: boolean;
 }
 
-export const useInsightQuery = ({ dataProviders }: UseInsightQuery): UseInsightQueryResult => {
+export const useInsightQuery = ({
+  dataProviders,
+  filters,
+  relativeTimerange,
+}: UseInsightQuery): UseInsightQueryResult => {
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const { browserFields, selectedPatterns, indexPattern, dataViewId } = useSourcererDataView(
@@ -41,7 +49,7 @@ export const useInsightQuery = ({ dataProviders }: UseInsightQuery): UseInsightQ
           dataProviders,
           indexPattern,
           browserFields,
-          filters: [],
+          filters,
           kqlQuery: {
             query: '',
             language: 'kuery',
@@ -54,7 +62,7 @@ export const useInsightQuery = ({ dataProviders }: UseInsightQuery): UseInsightQ
       setHasError(true);
       return null;
     }
-  }, [browserFields, dataProviders, esQueryConfig, hasError, indexPattern]);
+  }, [browserFields, dataProviders, esQueryConfig, hasError, indexPattern, filters]);
 
   const [isQueryLoading, { events, totalCount }] = useTimelineEvents({
     dataViewId,
@@ -65,6 +73,9 @@ export const useInsightQuery = ({ dataProviders }: UseInsightQuery): UseInsightQ
     language: 'kuery',
     limit: 1,
     runtimeMappings: {},
+    ...(relativeTimerange
+      ? { startDate: relativeTimerange?.from, endDate: relativeTimerange?.to }
+      : {}),
   });
   const [oldestEvent] = events;
   const timestamp =

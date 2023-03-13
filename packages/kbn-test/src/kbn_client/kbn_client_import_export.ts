@@ -25,6 +25,7 @@ interface ImportApiResponse {
   success: boolean;
   [key: string]: unknown;
 }
+
 export class KbnClientImportExport {
   constructor(
     public readonly log: ToolingLog,
@@ -92,7 +93,7 @@ export class KbnClientImportExport {
     const src = this.resolveAndValidatePath(path);
     this.log.debug('unloading docs from archive at', src);
 
-    const objects = await parseArchive(src);
+    const objects = await parseArchive(src, { stripSummary: true });
     this.log.info('deleting', objects.length, 'objects', { space: options?.space });
 
     const { deleted, missing } = await this.savedObjects.bulkDelete({

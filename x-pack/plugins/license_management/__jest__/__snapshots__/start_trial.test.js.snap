@@ -33,7 +33,7 @@ exports[`StartTrial component when trial is allowed display for basic license 1`
               <a
                 class="euiLink emotion-euiLink-primary"
                 href="https://www.elastic.co/subscriptions"
-                rel="noopener"
+                rel="noopener noreferrer"
                 target="_blank"
               >
                 subscription features
@@ -107,7 +107,7 @@ exports[`StartTrial component when trial is allowed should display for expired e
               <a
                 class="euiLink emotion-euiLink-primary"
                 href="https://www.elastic.co/subscriptions"
-                rel="noopener"
+                rel="noopener noreferrer"
                 target="_blank"
               >
                 subscription features
@@ -181,7 +181,7 @@ exports[`StartTrial component when trial is allowed should display for expired p
               <a
                 class="euiLink emotion-euiLink-primary"
                 href="https://www.elastic.co/subscriptions"
-                rel="noopener"
+                rel="noopener noreferrer"
                 target="_blank"
               >
                 subscription features
@@ -255,7 +255,7 @@ exports[`StartTrial component when trial is allowed should display for gold lice
               <a
                 class="euiLink emotion-euiLink-primary"
                 href="https://www.elastic.co/subscriptions"
-                rel="noopener"
+                rel="noopener noreferrer"
                 target="_blank"
               >
                 subscription features

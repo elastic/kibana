@@ -25,7 +25,7 @@ import {
 import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
 import { syncAgentConfigsToApmPackagePolicies } from '../../fleet/sync_agent_configs_to_apm_package_policies';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
-import { createInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { createInternalESClientWithContext } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 
 // get list of configurations
 const agentConfigurationRoute = createApmServerRoute({
@@ -39,7 +39,7 @@ const agentConfigurationRoute = createApmServerRoute({
     >;
   }> => {
     const { context, request, params, config } = resources;
-    const internalESClient = await createInternalESClient({
+    const internalESClient = await createInternalESClientWithContext({
       context,
       request,
       debug: params.query._inspect,
@@ -68,7 +68,7 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
     const { name, environment, _inspect } = params.query;
     const service = { name, environment };
 
-    const internalESClient = await createInternalESClient({
+    const internalESClient = await createInternalESClientWithContext({
       context,
       request,
       debug: _inspect,
@@ -114,7 +114,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
     } = resources;
     const { service } = params.body;
 
-    const internalESClient = await createInternalESClient({
+    const internalESClient = await createInternalESClientWithContext({
       context,
       request,
       debug: params.query._inspect,
@@ -179,7 +179,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
     } = resources;
     const { body, query } = params;
 
-    const internalESClient = await createInternalESClient({
+    const internalESClient = await createInternalESClientWithContext({
       context,
       request,
       debug: params.query._inspect,
@@ -258,7 +258,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
       mark_as_applied_by_agent: markAsAppliedByAgent,
     } = params.body;
 
-    const internalESClient = await createInternalESClient({
+    const internalESClient = await createInternalESClientWithContext({
       context,
       request,
       debug: params.query._inspect,
@@ -323,7 +323,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   }> => {
     const { context, request, params, config } = resources;
     const [internalESClient, apmEventClient] = await Promise.all([
-      createInternalESClient({
+      createInternalESClientWithContext({
         context,
         request,
         debug: params.query._inspect,

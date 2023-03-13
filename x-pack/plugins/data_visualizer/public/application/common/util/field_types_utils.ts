@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { SupportedFieldType } from '../../../../common/types';
+import type { SupportedFieldType } from '../../../../common/types';
 import { SUPPORTED_FIELD_TYPES } from '../../../../common/constants';
 
 export const getJobTypeLabel = (type: string) => {

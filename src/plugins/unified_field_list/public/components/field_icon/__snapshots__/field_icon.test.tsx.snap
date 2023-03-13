@@ -16,13 +16,6 @@ exports[`UnifiedFieldList <FieldIcon /> renders Document type properly 1`] = `
 />
 `;
 
-exports[`UnifiedFieldList <FieldIcon /> renders Histogram type properly 1`] = `
-<FieldIcon
-  label="Histogram"
-  type="number"
-/>
-`;
-
 exports[`UnifiedFieldList <FieldIcon /> renders properly 1`] = `
 <FieldIcon
   label="Date"

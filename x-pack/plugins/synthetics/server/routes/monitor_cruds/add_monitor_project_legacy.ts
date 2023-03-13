@@ -39,15 +39,17 @@ export const addSyntheticsProjectMonitorRouteLegacy: SyntheticsStreamingRouteFac
     syntheticsMonitorClient,
     subject,
   }): Promise<any> => {
+    const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
+
     try {
-      const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
-      const spaceId = server.spaces.spacesService.getSpaceId(request);
+      const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
+
       const { keep_stale: keepStale, project: projectId } = request.body || {};
-      const { publicLocations, privateLocations } = await getAllLocations(
+      const { publicLocations, privateLocations } = await getAllLocations({
         server,
         syntheticsMonitorClient,
-        savedObjectsClient
-      );
+        savedObjectsClient,
+      });
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
       const pushMonitorFormatter = new ProjectMonitorFormatterLegacy({
@@ -76,7 +78,13 @@ export const addSyntheticsProjectMonitorRouteLegacy: SyntheticsStreamingRouteFac
         failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
       });
     } catch (error) {
-      subject?.error(error);
+      if (error?.output?.statusCode === 404) {
+        const spaceId = server.spaces.spacesService.getSpaceId(request);
+        subject?.next(`Unable to create monitors. Kibana space '${spaceId}' does not exist.`);
+        subject?.next({ failedMonitors: monitors.map((m) => m.id) });
+      } else {
+        subject?.error(error);
+      }
     } finally {
       subject?.complete();
     }

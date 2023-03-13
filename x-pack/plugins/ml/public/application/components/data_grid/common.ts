@@ -46,7 +46,7 @@ import { RuntimeMappings } from '../../../../common/types/fields';
 import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 
 export const INIT_MAX_COLUMNS = 10;
-export const COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED = 10000;
+export const COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLD = 10000;
 
 export const euiDataGridStyle: EuiDataGridStyle = {
   border: 'all',

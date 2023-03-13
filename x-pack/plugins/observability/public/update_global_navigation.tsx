@@ -8,7 +8,7 @@
 import { Subject } from 'rxjs';
 import { AppNavLinkStatus, AppUpdater, ApplicationStart, AppDeepLink } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
-import { casesFeatureId } from '../common';
+import { casesFeatureId, sloFeatureId } from '../common';
 
 export function updateGlobalNavigation({
   capabilities,
@@ -20,7 +20,12 @@ export function updateGlobalNavigation({
   updater$: Subject<AppUpdater>;
 }) {
   const { apm, logs, metrics, uptime } = capabilities.navLinks;
-  const someVisible = Object.values({ apm, logs, metrics, uptime }).some((visible) => visible);
+  const someVisible = Object.values({
+    apm,
+    logs,
+    metrics,
+    uptime,
+  }).some((visible) => visible);
 
   const updatedDeepLinks = deepLinks.map((link) => {
     switch (link.id) {
@@ -37,15 +42,17 @@ export function updateGlobalNavigation({
           ...link,
           navLinkStatus: someVisible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
         };
-      case 'slos':
-        return {
-          ...link,
-          navLinkStatus: someVisible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
-        };
       case 'rules':
         return {
           ...link,
           navLinkStatus: someVisible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+        };
+      case 'slos':
+        return {
+          ...link,
+          navLinkStatus: !!capabilities[sloFeatureId]?.read
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.hidden,
         };
       default:
         return link;
@@ -54,6 +61,9 @@ export function updateGlobalNavigation({
 
   updater$.next(() => ({
     deepLinks: updatedDeepLinks,
-    navLinkStatus: someVisible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    navLinkStatus:
+      someVisible || !!capabilities[sloFeatureId]?.read
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
   }));
 }

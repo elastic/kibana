@@ -128,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
     return await supertest.get('/api/console/autocomplete_entities').query(query);
   };
 
-  describe('/api/console/autocomplete_entities', () => {
+  describe('/api/console/autocomplete_entities', function () {
     const indexName = 'test-index-1';
     const aliasName = 'test-alias-1';
     const indexTemplateName = 'test-index-template-1';
@@ -238,8 +238,16 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.mappings).to.eql({});
     });
 
-    it('should return mappings with fields setting is set to true', async () => {
+    it('should not return mappings with fields setting is set to true without the list of indices is provided', async () => {
       const response = await sendRequest({ fields: true });
+
+      const { body, status } = response;
+      expect(status).to.be(200);
+      expect(Object.keys(body.mappings)).to.not.contain(indexName);
+    });
+
+    it('should return mappings with fields setting is set to true and the list of indices is provided', async () => {
+      const response = await sendRequest({ fields: true, fieldsIndices: indexName });
 
       const { body, status } = response;
       expect(status).to.be(200);

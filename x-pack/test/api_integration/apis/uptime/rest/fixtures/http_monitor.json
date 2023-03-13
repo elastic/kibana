@@ -18,12 +18,7 @@
   "config_id": "",
   "timeout": "3m",
   "__ui": {
-    "is_tls_enabled": false,
-    "is_zip_url_tls_enabled": false,
-    "script_source": {
-      "is_generated_script": false,
-      "file_name": "test-file.name"
-    }
+    "is_tls_enabled": false
   },
   "max_redirects": "3",
   "password": "test",

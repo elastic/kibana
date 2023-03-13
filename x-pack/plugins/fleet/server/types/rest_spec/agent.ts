@@ -20,7 +20,9 @@ export const GetAgentsRequestSchema = {
       perPage: schema.number({ defaultValue: 20 }),
       kuery: schema.maybe(schema.string()),
       showInactive: schema.boolean({ defaultValue: false }),
+      withMetrics: schema.boolean({ defaultValue: false }),
       showUpgradeable: schema.boolean({ defaultValue: false }),
+      getStatusSummary: schema.boolean({ defaultValue: false }),
       sortField: schema.maybe(schema.string()),
       sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
     },
@@ -38,6 +40,9 @@ export const GetOneAgentRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
+  query: schema.object({
+    withMetrics: schema.boolean({ defaultValue: false }),
+  }),
 };
 
 export const PostNewAgentActionRequestSchema = {
@@ -52,6 +57,12 @@ export const PostNewAgentActionRequestSchema = {
 export const PostCancelActionRequestSchema = {
   params: schema.object({
     actionId: schema.string(),
+  }),
+};
+
+export const PostRetrieveAgentsByActionsRequestSchema = {
+  body: schema.object({
+    actionIds: schema.arrayOf(schema.string()),
   }),
 };
 
@@ -115,7 +126,16 @@ export const PostBulkAgentUpgradeRequestSchema = {
   }),
 };
 
-export const PutAgentReassignRequestSchema = {
+export const PutAgentReassignRequestSchemaDeprecated = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+  body: schema.object({
+    policy_id: schema.string(),
+  }),
+};
+
+export const PostAgentReassignRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
@@ -202,5 +222,6 @@ export const GetActionStatusRequestSchema = {
     page: schema.number({ defaultValue: 0 }),
     perPage: schema.number({ defaultValue: 20 }),
     kuery: schema.maybe(schema.string()),
+    errorSize: schema.number({ defaultValue: 5 }),
   }),
 };

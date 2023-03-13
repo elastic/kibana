@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Cloudtrail - Looks for unusual errors. Rare and unusual errors may simply indicate an impending service failure but they can also be byproducts of attempted or successful persistence, privilege escalation, defense evasion, discovery, lateral movement, or collection activity by a threat actor.",
   "groups": [
     "security",

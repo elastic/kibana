@@ -17,7 +17,7 @@ properties:
       The type of authentication to use. The default value is false, which means
       basic authentication is used instead of open authorization (OAuth).
     default: false
-    type: string
+    type: boolean
   jwtKeyId:
     description: >
       The key identifier assigned to the JWT verifier map of your OAuth application.

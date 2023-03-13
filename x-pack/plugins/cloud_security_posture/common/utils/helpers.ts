@@ -18,7 +18,7 @@ import {
   CLOUDBEAT_VANILLA,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../constants';
-import { BenchmarkId } from '../types';
+import type { BenchmarkId, Score } from '../types';
 
 /**
  * @example
@@ -72,3 +72,15 @@ export function assert(condition: any, msg?: string): asserts condition {
     throw new Error(msg);
   }
 }
+
+/**
+ * @param value value is [0, 1] range
+ */
+export const roundScore = (value: number): Score => Number((value * 100).toFixed(1));
+
+export const calculatePostureScore = (passed: number, failed: number): Score => {
+  const total = passed + failed;
+  if (total === 0) return total;
+
+  return roundScore(passed / (passed + failed));
+};

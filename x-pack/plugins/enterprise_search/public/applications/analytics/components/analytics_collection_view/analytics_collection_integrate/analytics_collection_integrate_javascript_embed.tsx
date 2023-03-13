@@ -12,6 +12,8 @@ import { EuiCodeBlock, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../../shared/doc_links';
+
 export const javascriptEmbedSteps = (webClientSrc: string, analyticsDNSUrl: string) => [
   {
     title: i18n.translate(
@@ -82,7 +84,7 @@ export const javascriptEmbedSteps = (webClientSrc: string, analyticsDNSUrl: stri
               values={{
                 link: (
                   <EuiLink
-                    href="http://www.elastic.co"
+                    href={docLinks.behavioralAnalyticsEvents}
                     target="_blank"
                     data-telemetry-id={
                       'entSearch-analytics-integrate-javascriptEmbed-trackEventDocumentationLink'
@@ -99,8 +101,13 @@ export const javascriptEmbedSteps = (webClientSrc: string, analyticsDNSUrl: stri
               }}
             />
           </p>
-          <EuiCodeBlock language="html" isCopyable>
-            {`<script src="${webClientSrc}" data-dsn="${analyticsDNSUrl}" defer></script>`}
+          <EuiCodeBlock language="javascript" isCopyable>
+            {`window.elasticAnalytics.trackEvent("click", {
+  category: "product",
+  action: "add_to_cart",
+  label: "product_id",
+  value: "123"
+});`}
           </EuiCodeBlock>
         </EuiText>
       </>

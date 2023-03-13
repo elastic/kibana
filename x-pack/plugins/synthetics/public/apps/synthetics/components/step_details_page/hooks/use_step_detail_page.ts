@@ -7,6 +7,7 @@
 
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
+import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 
@@ -23,6 +24,8 @@ export const useStepDetailPage = () => {
 
   const stepIndex = Number(stepIndexString);
 
+  const selectedLocation = useSelectedLocation();
+
   const { data: journey, stepEnds } = useJourneySteps(checkGroupId);
 
   const memoized = useMemo(
@@ -35,7 +38,13 @@ export const useStepDetailPage = () => {
   const { basePath } = useSyntheticsSettingsContext();
 
   const handleStepHref = (stepNo: number) =>
-    `${basePath}/app/synthetics/monitor/${monitorId}/test-run/${checkGroupId}/step/${stepNo}`;
+    getStepDetailLink({
+      basePath,
+      monitorId,
+      checkGroupId,
+      stepIndex: stepNo,
+      locationId: selectedLocation?.id,
+    });
 
   return {
     checkGroupId,
@@ -52,7 +61,7 @@ export const useStepDetailLink = ({
   stepIndex,
 }: {
   checkGroupId?: string;
-  stepIndex: string;
+  stepIndex: number | string;
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
 
@@ -60,9 +69,33 @@ export const useStepDetailLink = ({
     monitorId: string;
   }>();
 
+  const selectedLocation = useSelectedLocation();
+
   if (!checkGroupId) {
     return '';
   }
 
-  return `${basePath}/app/synthetics/monitor/${monitorId}/test-run/${checkGroupId}/step/${stepIndex}`;
+  return getStepDetailLink({
+    basePath,
+    stepIndex,
+    monitorId,
+    checkGroupId,
+    locationId: selectedLocation?.id,
+  });
+};
+
+const getStepDetailLink = ({
+  checkGroupId,
+  stepIndex,
+  basePath,
+  monitorId,
+  locationId,
+}: {
+  checkGroupId: string;
+  locationId?: string;
+  stepIndex: number | string;
+  basePath: string;
+  monitorId: string;
+}) => {
+  return `${basePath}/app/synthetics/monitor/${monitorId}/test-run/${checkGroupId}/step/${stepIndex}?locationId=${locationId}`;
 };

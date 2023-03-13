@@ -11,8 +11,8 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DataPublicPluginStart, ISearchOptions } from '@kbn/data-plugin/public';
 import seedrandom from 'seedrandom';
 import { isDefined } from '@kbn/ml-is-defined';
+import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 import { RANDOM_SAMPLER_PROBABILITIES } from '../../constants/random_sampler';
-import { buildBaseFilterCriteria } from '../../../../../common/utils/query_utils';
 import type {
   DocumentCountStats,
   OverallStatsSearchStrategyParams,

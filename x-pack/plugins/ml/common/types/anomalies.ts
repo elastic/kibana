@@ -228,6 +228,10 @@ export interface AnomalyRecordDoc {
      * Indicates a reduction of anomaly score if the bucket contains fewer samples than historically expected.
      */
     incomplete_bucket_penalty?: boolean;
+    /**
+     * Indicates whether the prior distribution of the observed time series is multi-modal or has a single mode.
+     */
+    multimodal_distribution?: boolean;
   };
 }
 

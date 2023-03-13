@@ -99,6 +99,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
+
   const {
     data,
     isLoading,

@@ -19,6 +19,7 @@ import { UsersType } from '../../../users/store/model';
 jest.mock('../../../containers/risk_score');
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../../common/lib/kibana');
+
 describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
   'Risk Tab Body entityType: %s',
   (riskEntity) => {

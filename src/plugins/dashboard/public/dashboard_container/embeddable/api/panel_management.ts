@@ -12,7 +12,7 @@ import {
   IEmbeddable,
   PanelState,
 } from '@kbn/embeddable-plugin/public';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   IPanelPlacementArgs,
@@ -46,30 +46,33 @@ export async function replacePanel(
   previousPanelState: DashboardPanelState<EmbeddableInput>,
   newPanelState: Partial<PanelState>,
   generateNewId?: boolean
-) {
+): Promise<string> {
   let panels;
+  let panelId;
+
   if (generateNewId) {
     // replace panel can be called with generateNewId in order to totally destroy and recreate the embeddable
+    panelId = uuidv4();
     panels = { ...this.input.panels };
     delete panels[previousPanelState.explicitInput.id];
-    const newId = uuid.v4();
-    panels[newId] = {
+    panels[panelId] = {
       ...previousPanelState,
       ...newPanelState,
       gridData: {
         ...previousPanelState.gridData,
-        i: newId,
+        i: panelId,
       },
       explicitInput: {
         ...newPanelState.explicitInput,
-        id: newId,
+        id: panelId,
       },
     };
   } else {
     // Because the embeddable type can change, we have to operate at the container level here
+    panelId = previousPanelState.explicitInput.id;
     panels = {
       ...this.input.panels,
-      [previousPanelState.explicitInput.id]: {
+      [panelId]: {
         ...previousPanelState,
         ...newPanelState,
         gridData: {
@@ -77,16 +80,18 @@ export async function replacePanel(
         },
         explicitInput: {
           ...newPanelState.explicitInput,
-          id: previousPanelState.explicitInput.id,
+          id: panelId,
         },
       },
     };
   }
 
-  return this.updateInput({
+  await this.updateInput({
     panels,
     lastReloadRequestTime: new Date().getTime(),
   });
+
+  return panelId;
 }
 
 export function showPlaceholderUntil<TPlacementMethodArgs extends IPanelPlacementArgs>(
@@ -98,7 +103,7 @@ export function showPlaceholderUntil<TPlacementMethodArgs extends IPanelPlacemen
   const originalPanelState = {
     type: PLACEHOLDER_EMBEDDABLE,
     explicitInput: {
-      id: uuid.v4(),
+      id: uuidv4(),
       disabledActions: [
         'ACTION_CUSTOMIZE_PANEL',
         'CUSTOM_TIME_RANGE',

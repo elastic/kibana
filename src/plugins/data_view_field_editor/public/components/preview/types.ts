@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type {
   RuntimeType,
@@ -15,8 +14,9 @@ import type {
   RuntimePrimitiveTypes,
 } from '../../shared_imports';
 import type { RuntimeFieldPainlessError } from '../../types';
+import type { PreviewController } from './preview_controller';
 
-export type From = 'cluster' | 'custom';
+export type DocumentSource = 'cluster' | 'custom';
 
 export interface EsDocument {
   _id: string;
@@ -41,6 +41,20 @@ interface PreviewError {
         reason?: string;
         [key: string]: unknown;
       };
+}
+
+export interface PreviewState {
+  pinnedFields: Record<string, boolean>;
+  isLoadingDocuments: boolean;
+  customId: string | undefined;
+  documents: EsDocument[];
+  currentIdx: number;
+  documentSource: DocumentSource;
+  scriptEditorValidation: {
+    isValidating: boolean;
+    isValid: boolean;
+    message: string | null;
+  };
 }
 
 export interface FetchDocError {
@@ -93,6 +107,7 @@ export interface Change {
 export type ChangeSet = Record<string, Change>;
 
 export interface Context {
+  controller: PreviewController;
   fields: FieldPreview[];
   fieldPreview$: BehaviorSubject<FieldPreview[] | undefined>;
   error: PreviewError | null;
@@ -104,12 +119,6 @@ export interface Context {
   };
   isPreviewAvailable: boolean;
   isLoadingPreview: boolean;
-  currentDocument: {
-    value?: EsDocument;
-    id?: string;
-    isLoading: boolean;
-    isCustomId: boolean;
-  };
   documents: {
     loadSingle: (id: string) => void;
     loadFromCluster: () => Promise<void>;
@@ -119,26 +128,11 @@ export interface Context {
     isVisible: boolean;
     setIsVisible: (isVisible: boolean) => void;
   };
-  from: {
-    value: From;
-    set: (value: From) => void;
-  };
   navigation: {
     isFirstDoc: boolean;
     isLastDoc: boolean;
-    next: () => void;
-    prev: () => void;
   };
   reset: () => void;
-  pinnedFields: {
-    value: { [key: string]: boolean };
-    set: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
-  };
-  validation: {
-    setScriptEditorValidation: React.Dispatch<
-      React.SetStateAction<{ isValid: boolean; isValidating: boolean; message: string | null }>
-    >;
-  };
 }
 
 export type PainlessExecuteContext =

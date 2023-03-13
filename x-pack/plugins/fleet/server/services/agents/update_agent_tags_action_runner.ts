@@ -6,26 +6,21 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { uniq } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Agent } from '../../types';
 
-import { AGENTS_INDEX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
+import { AGENTS_INDEX } from '../../constants';
 
 import { appContextService } from '../app_context';
 
-import { agentPolicyService } from '../agent_policy';
+import { ActionRunner } from './action_runner';
 
-import { SO_SEARCH_LIMIT } from '../../../common/constants';
-
-import { ActionRunner, MAX_RETRY_COUNT } from './action_runner';
-
-import { BulkActionTaskType } from './bulk_actions_resolver';
+import { BulkActionTaskType } from './bulk_action_types';
 import { filterHostedPolicies } from './filter_hosted_agents';
 import { bulkCreateAgentActionResults, createAgentAction } from './actions';
-import { getElasticsearchQuery } from './crud';
+import { MAX_RETRY_COUNT } from './retry_helper';
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -49,26 +44,6 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
 
   protected getActionType() {
     return 'UPDATE_TAGS';
-  }
-
-  async processAgentsInBatches(): Promise<{ actionId: string }> {
-    const { updated, took } = await updateTagsBatch(
-      this.soClient,
-      this.esClient,
-      [],
-      {},
-      {
-        tagsToAdd: this.actionParams?.tagsToAdd,
-        tagsToRemove: this.actionParams?.tagsToRemove,
-        actionId: this.actionParams.actionId,
-        total: this.actionParams.total,
-        kuery: this.actionParams.kuery,
-        retryCount: this.retryParams.retryCount,
-      }
-    );
-
-    appContextService.getLogger().info(`processed ${updated} agents, took ${took}ms`);
-    return { actionId: this.actionParams.actionId! };
   }
 }
 
@@ -97,51 +72,39 @@ export async function updateTagsBatch(
   );
   const agentIds = filteredAgents.map((agent) => agent.id);
 
-  let query: estypes.QueryDslQueryContainer | undefined;
-  if (options.kuery !== undefined) {
-    const hostedPolicies = await agentPolicyService.list(soClient, {
-      kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
-      perPage: SO_SEARCH_LIMIT,
-    });
-    const hostedIds = hostedPolicies.items.map((item) => item.id);
-
-    const extraFilters = [];
-    if (options.tagsToAdd.length === 1 && options.tagsToRemove.length === 0) {
-      extraFilters.push(`NOT (tags:${options.tagsToAdd[0]})`);
-    } else if (options.tagsToRemove.length === 1 && options.tagsToAdd.length === 0) {
-      extraFilters.push(`tags:${options.tagsToRemove[0]}`);
-    }
-    const DEFAULT_STATUS_FILTER =
-      'status:online or (status:error or status:degraded) or (status:updating or status:unenrolling or status:enrolling) or status:offline';
-    // removing default staus filters, as it is a runtime field and doesn't work with updateByQuery
-    // this is a quick fix for bulk update tags with default filters
-    const kuery = options.kuery === DEFAULT_STATUS_FILTER ? '' : options.kuery;
-    query = getElasticsearchQuery(kuery, false, false, hostedIds, extraFilters);
-  } else {
-    query = {
-      terms: {
-        _id: agentIds,
-      },
-    };
+  const actionId = options.actionId ?? uuidv4();
+  if (agentIds.length === 0) {
+    appContextService.getLogger().debug('No agents to update tags, returning');
+    return { actionId, updated: 0, took: 0 };
   }
+
+  appContextService
+    .getLogger()
+    .debug(
+      `Agents to update tags in batch: ${agentIds.length}, tagsToAdd: ${options.tagsToAdd}, tagsToRemove: ${options.tagsToRemove}`
+    );
 
   let res;
   try {
     res = await esClient.updateByQuery({
-      query,
+      query: {
+        terms: {
+          _id: agentIds,
+        },
+      },
       index: AGENTS_INDEX,
       refresh: true,
       wait_for_completion: true,
       script: {
-        source: `   
+        source: `
       if (ctx._source.tags == null) {
         ctx._source.tags = [];
       }
-      if (params.tagsToAdd.length == 1 && params.tagsToRemove.length == 1) { 
+      if (params.tagsToAdd.length == 1 && params.tagsToRemove.length == 1) {
         ctx._source.tags.replaceAll(tag -> params.tagsToRemove[0] == tag ? params.tagsToAdd[0] : tag);
       } else {
         ctx._source.tags.removeAll(params.tagsToRemove);
-      } 
+      }
       ctx._source.tags.addAll(params.tagsToAdd);
 
       LinkedHashSet uniqueSet = new LinkedHashSet();
@@ -166,58 +129,81 @@ export async function updateTagsBatch(
 
   appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
 
-  const actionId = options.actionId ?? uuid();
-
-  if (options.retryCount === undefined) {
-    // creating an action doc so that update tags  shows up in activity
-    await createAgentAction(esClient, {
-      id: actionId,
-      agents: options.kuery === undefined ? agentIds : [],
-      created_at: new Date().toISOString(),
-      type: 'UPDATE_TAGS',
-      total: res.total,
-    });
-  }
-
   // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
-  const getUuidArray = (count: number) => Array.from({ length: count }, () => uuid());
+  const getUuidArray = (count: number) => Array.from({ length: count }, () => uuidv4());
+
+  const updatedCount = res.updated ?? 0;
+  const updatedIds = getUuidArray(updatedCount);
+
+  const failures = res.failures ?? [];
+  const failureCount = failures.length;
+
+  const isLastRetry = options.retryCount === MAX_RETRY_COUNT;
+
+  const versionConflictCount = res.version_conflicts ?? 0;
+  const versionConflictIds = isLastRetry ? getUuidArray(versionConflictCount) : [];
+
+  // creating an action doc so that update tags  shows up in activity
+  // the logic only saves agent count in the action that updated, failed or in case of last retry, conflicted
+  // this ensures that the action status count will be accurate
+  await createAgentAction(esClient, {
+    id: actionId,
+    agents: updatedIds
+      .concat(failures.map((failure) => failure.id))
+      .concat(isLastRetry ? versionConflictIds : []),
+    created_at: new Date().toISOString(),
+    type: 'UPDATE_TAGS',
+    total: options.total ?? res.total,
+  });
+  appContextService
+    .getLogger()
+    .debug(
+      `action doc wrote on ${
+        updatedCount + failureCount + (isLastRetry ? versionConflictCount : 0)
+      } agentIds, updated: ${updatedCount}, failed: ${failureCount}, version_conflicts: ${versionConflictCount}`
+    );
 
   // writing successful action results
-  if (res.updated ?? 0 > 0) {
+  if (updatedCount > 0) {
     await bulkCreateAgentActionResults(
       esClient,
-      (options.kuery === undefined ? agentIds : getUuidArray(res.updated!)).map((id) => ({
+      updatedIds.map((id) => ({
         agentId: id,
         actionId,
       }))
     );
+    appContextService.getLogger().debug(`action updated result wrote on ${updatedCount} agents`);
   }
 
   // writing failures from es update
-  if (res.failures && res.failures.length > 0) {
+  if (failures.length > 0) {
     await bulkCreateAgentActionResults(
       esClient,
-      res.failures.map((failure) => ({
+      failures.map((failure) => ({
         agentId: failure.id,
         actionId,
         error: failure.cause.reason,
       }))
     );
+    appContextService.getLogger().debug(`action failed result wrote on ${failureCount} agents`);
   }
 
-  if (res.version_conflicts ?? 0 > 0) {
+  if (versionConflictCount > 0) {
     // write out error results on last retry, so action is not stuck in progress
     if (options.retryCount === MAX_RETRY_COUNT) {
       await bulkCreateAgentActionResults(
         esClient,
-        getUuidArray(res.version_conflicts!).map((id) => ({
+        versionConflictIds.map((id) => ({
           agentId: id,
           actionId,
           error: 'version conflict on last retry',
         }))
       );
+      appContextService
+        .getLogger()
+        .debug(`action conflict result wrote on ${versionConflictCount} agents`);
     }
-    throw new Error(`version conflict of ${res.version_conflicts} agents`);
+    throw new Error(`version conflict of ${versionConflictCount} agents`);
   }
 
   return { actionId, updated: res.updated, took: res.took };

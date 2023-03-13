@@ -11,7 +11,8 @@ import { CreateOptions } from '../rules_client';
 import {
   RewriteRequestCase,
   RewriteResponseCase,
-  rewriteActions,
+  rewriteActionsReq,
+  rewriteActionsRes,
   handleDisabledApiKeysError,
   verifyAccessAndContext,
   countUsageOfPredefinedIds,
@@ -45,11 +46,13 @@ export const bodySchema = schema.object({
 const rewriteBodyReq: RewriteRequestCase<CreateOptions<RuleTypeParams>['data']> = ({
   rule_type_id: alertTypeId,
   notify_when: notifyWhen,
+  actions,
   ...rest
 }) => ({
   ...rest,
   alertTypeId,
   notifyWhen,
+  actions: rewriteActionsReq(actions),
 });
 
 const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
@@ -87,12 +90,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     last_execution_date: lastExecutionDate,
     last_duration: lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params }) => ({
-    group,
-    id,
-    params,
-    connector_type_id: actionTypeId,
-  })),
+  actions: rewriteActionsRes(actions),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
   ...(nextRun ? { next_run: nextRun } : {}),
 });
@@ -128,7 +126,6 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
               await rulesClient.create<RuleTypeParams>({
                 data: rewriteBodyReq({
                   ...rule,
-                  actions: rewriteActions(rule.actions),
                   notify_when: rule.notify_when as RuleNotifyWhenType,
                 }),
                 options: { id: params?.id },

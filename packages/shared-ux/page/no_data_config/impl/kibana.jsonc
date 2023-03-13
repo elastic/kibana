@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/shared-ux-page-no-data-config",
-  "owner": "@elastic/kibana-global-experience"
+  "owner": "@elastic/appex-sharedux"
 }

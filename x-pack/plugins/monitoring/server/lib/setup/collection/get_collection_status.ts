@@ -26,7 +26,7 @@ interface Bucket {
   };
 }
 
-type COLLECTION_PRODUCT_NAMES = Exclude<INDEX_PATTERN_TYPES, 'enterprise_search'>;
+type COLLECTION_PRODUCT_NAMES = Exclude<INDEX_PATTERN_TYPES, 'enterprisesearch'>;
 
 const NUMBER_OF_SECONDS_AGO_TO_LOOK = 30;
 

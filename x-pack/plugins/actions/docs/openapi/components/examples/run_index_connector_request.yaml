@@ -1,0 +1,7 @@
+summary: Run an index connector.
+value:
+  params:
+    documents:
+      - id: my_doc_id
+        name: my_doc_name
+        message: hello, world

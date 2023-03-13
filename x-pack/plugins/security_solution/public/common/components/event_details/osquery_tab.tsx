@@ -9,7 +9,7 @@ import { EuiCode, EuiEmptyPrompt, EuiNotificationBadge, EuiSpacer } from '@elast
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Ecs } from '../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { PERMISSION_DENIED } from '../../../detection_engine/rule_response_actions/osquery/translations';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
@@ -117,7 +117,6 @@ export const useOsqueryTab = ({
   const actionItems = actionsData?.data.items || [];
 
   const ruleName = expandedEventFieldsObject.kibana?.alert?.rule?.name;
-  const agentIds = expandedEventFieldsObject.agent?.id;
 
   return {
     id: EventsViewType.osqueryView,
@@ -135,12 +134,7 @@ export const useOsqueryTab = ({
             emptyPrompt
           ) : (
             <>
-              <OsqueryResults
-                agentIds={agentIds}
-                ruleName={ruleName}
-                actionItems={actionItems}
-                ecsData={ecsData}
-              />
+              <OsqueryResults ruleName={ruleName} actionItems={actionItems} ecsData={ecsData} />
               <EuiSpacer size="s" />
             </>
           )}

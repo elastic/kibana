@@ -10,17 +10,19 @@ import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import { ActionType } from '../types';
-import { actionsMock, actionsClientMock } from '../mocks';
-import { pick } from 'lodash';
+import { actionsMock } from '../mocks';
+import {
+  asHttpRequestExecutionSource,
+  asSavedObjectExecutionSource,
+} from './action_execution_source';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
 
-const actionsClient = actionsClientMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const eventLogger = eventLoggerMock.create();
@@ -32,18 +34,17 @@ const executeParams = {
   },
   executionId: '123abc',
   request: {} as KibanaRequest,
+  actionExecutionId: '2',
 };
 
 const spacesMock = spacesServiceMock.createStartContract();
 const loggerMock: ReturnType<typeof loggingSystemMock.createLogger> =
   loggingSystemMock.createLogger();
 
-const getActionsClientWithRequest = jest.fn();
 actionExecutor.initialize({
   logger: loggerMock,
   spaces: spacesMock,
   getServices: () => services,
-  getActionsClientWithRequest,
   actionTypeRegistry,
   encryptedSavedObjectsClient,
   eventLogger,
@@ -67,7 +68,6 @@ actionExecutor.initialize({
 beforeEach(() => {
   jest.resetAllMocks();
   spacesMock.getSpaceId.mockReturnValue('some-namespace');
-  getActionsClientWithRequest.mockResolvedValue(actionsClient);
   loggerMock.get.mockImplementation(() => loggerMock);
 });
 
@@ -83,6 +83,7 @@ test('successfully executes', async () => {
     id: '1',
     type: 'action',
     attributes: {
+      name: '1',
       actionTypeId: 'test',
       config: {
         bar: true,
@@ -93,14 +94,6 @@ test('successfully executes', async () => {
     },
     references: [],
   };
-  const actionResult = {
-    id: actionSavedObject.id,
-    name: actionSavedObject.id,
-    ...pick(actionSavedObject.attributes, 'actionTypeId', 'config'),
-    isPreconfigured: false,
-    isDeprecated: false,
-  };
-  actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   await actionExecutor.execute(executeParams);
@@ -139,6 +132,13 @@ test('successfully executes', async () => {
             "kind": "action",
           },
           "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "1",
+              "name": "1",
+            },
             "alert": Object {
               "rule": Object {
                 "execution": Object {
@@ -170,6 +170,292 @@ test('successfully executes', async () => {
             "outcome": "success",
           },
           "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "1",
+              "name": "1",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "1",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action executed: test:1: 1",
+        },
+      ],
+    ]
+  `);
+});
+
+test('successfully executes when http_request source is specified', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      name: '1',
+      actionTypeId: 'test',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+    },
+    references: [],
+  };
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  await actionExecutor.execute({
+    ...executeParams,
+    source: asHttpRequestExecutionSource(httpServerMock.createKibanaRequest()),
+  });
+
+  expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+    'action',
+    '1',
+    { namespace: 'some-namespace' }
+  );
+
+  expect(actionTypeRegistry.get).toHaveBeenCalledWith('test');
+  expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('1', 'test', {
+    notifyUsage: true,
+  });
+
+  expect(actionType.executor).toHaveBeenCalledWith({
+    actionId: '1',
+    services: expect.anything(),
+    config: {
+      bar: true,
+    },
+    secrets: {
+      baz: true,
+    },
+    params: { foo: true },
+    logger: loggerMock,
+  });
+
+  expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
+  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-start",
+            "kind": "action",
+          },
+          "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "source": "http_request",
+                "uuid": "2",
+              },
+              "id": "1",
+              "name": "1",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "1",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action started: test:1: 1",
+        },
+      ],
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute",
+            "kind": "action",
+            "outcome": "success",
+          },
+          "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "source": "http_request",
+                "uuid": "2",
+              },
+              "id": "1",
+              "name": "1",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "1",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action executed: test:1: 1",
+        },
+      ],
+    ]
+  `);
+});
+
+test('successfully executes when saved_object source is specified', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      name: '1',
+      actionTypeId: 'test',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+    },
+    references: [],
+  };
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  await actionExecutor.execute({
+    ...executeParams,
+    source: asSavedObjectExecutionSource({
+      id: '573891ae-8c48-49cb-a197-0cd5ec34a88b',
+      type: 'alert',
+    }),
+  });
+
+  expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+    'action',
+    '1',
+    { namespace: 'some-namespace' }
+  );
+
+  expect(actionTypeRegistry.get).toHaveBeenCalledWith('test');
+  expect(actionTypeRegistry.isActionExecutable).toHaveBeenCalledWith('1', 'test', {
+    notifyUsage: true,
+  });
+
+  expect(actionType.executor).toHaveBeenCalledWith({
+    actionId: '1',
+    services: expect.anything(),
+    config: {
+      bar: true,
+    },
+    secrets: {
+      baz: true,
+    },
+    params: { foo: true },
+    logger: loggerMock,
+  });
+
+  expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
+  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-start",
+            "kind": "action",
+          },
+          "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "source": "alert",
+                "uuid": "2",
+              },
+              "id": "1",
+              "name": "1",
+            },
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "1",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action started: test:1: 1",
+        },
+      ],
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute",
+            "kind": "action",
+            "outcome": "success",
+          },
+          "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "source": "alert",
+                "uuid": "2",
+              },
+              "id": "1",
+              "name": "1",
+            },
             "alert": Object {
               "rule": Object {
                 "execution": Object {
@@ -209,7 +495,6 @@ test('successfully executes with preconfigured connector', async () => {
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   await actionExecutor.execute({ ...executeParams, actionId: 'preconfigured' });
 
-  expect(actionsClient.get).not.toHaveBeenCalled();
   expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
 
   expect(actionTypeRegistry.get).toHaveBeenCalledWith('test');
@@ -240,6 +525,13 @@ test('successfully executes with preconfigured connector', async () => {
             "kind": "action",
           },
           "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "preconfigured",
+              "name": "Preconfigured",
+            },
             "alert": Object {
               "rule": Object {
                 "execution": Object {
@@ -252,6 +544,7 @@ test('successfully executes with preconfigured connector', async () => {
                 "id": "preconfigured",
                 "namespace": "some-namespace",
                 "rel": "primary",
+                "space_agnostic": true,
                 "type": "action",
                 "type_id": "test",
               },
@@ -271,6 +564,13 @@ test('successfully executes with preconfigured connector', async () => {
             "outcome": "success",
           },
           "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "preconfigured",
+              "name": "Preconfigured",
+            },
             "alert": Object {
               "rule": Object {
                 "execution": Object {
@@ -283,6 +583,7 @@ test('successfully executes with preconfigured connector', async () => {
                 "id": "preconfigured",
                 "namespace": "some-namespace",
                 "rel": "primary",
+                "space_agnostic": true,
                 "type": "action",
                 "type_id": "test",
               },
@@ -310,6 +611,7 @@ test('successfully executes as a task', async () => {
     id: '1',
     type: 'action',
     attributes: {
+      name: '1',
       actionTypeId: 'test',
       config: {
         bar: true,
@@ -320,14 +622,6 @@ test('successfully executes as a task', async () => {
     },
     references: [],
   };
-  const actionResult = {
-    id: actionSavedObject.id,
-    name: actionSavedObject.id,
-    ...pick(actionSavedObject.attributes, 'actionTypeId', 'config'),
-    isPreconfigured: false,
-    isDeprecated: false,
-  };
-  actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
@@ -361,18 +655,11 @@ test('provides empty config when config and / or secrets is empty', async () => 
     id: '1',
     type: 'action',
     attributes: {
+      name: '1',
       actionTypeId: 'test',
     },
     references: [],
   };
-  const actionResult = {
-    id: actionSavedObject.id,
-    name: actionSavedObject.id,
-    actionTypeId: actionSavedObject.attributes.actionTypeId,
-    isPreconfigured: false,
-    isDeprecated: false,
-  };
-  actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   await actionExecutor.execute(executeParams);
@@ -401,18 +688,11 @@ test('throws an error when config is invalid', async () => {
     id: '1',
     type: 'action',
     attributes: {
+      name: '1',
       actionTypeId: 'test',
     },
     references: [],
   };
-  const actionResult = {
-    id: actionSavedObject.id,
-    name: actionSavedObject.id,
-    actionTypeId: actionSavedObject.attributes.actionTypeId,
-    isPreconfigured: false,
-    isDeprecated: false,
-  };
-  actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
@@ -442,18 +722,11 @@ test('throws an error when connector is invalid', async () => {
     id: '1',
     type: 'action',
     attributes: {
+      name: '1',
       actionTypeId: 'test',
     },
     references: [],
   };
-  const actionResult = {
-    id: actionSavedObject.id,
-    name: actionSavedObject.id,
-    actionTypeId: actionSavedObject.attributes.actionTypeId,
-    isPreconfigured: false,
-    isDeprecated: false,
-  };
-  actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
@@ -485,18 +758,11 @@ test('throws an error when params is invalid', async () => {
     id: '1',
     type: 'action',
     attributes: {
+      name: '1',
       actionTypeId: 'test',
     },
     references: [],
   };
-  const actionResult = {
-    id: actionSavedObject.id,
-    name: actionSavedObject.id,
-    actionTypeId: actionSavedObject.attributes.actionTypeId,
-    isPreconfigured: false,
-    isDeprecated: false,
-  };
-  actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
@@ -510,7 +776,9 @@ test('throws an error when params is invalid', async () => {
 });
 
 test('throws an error when failing to load action through savedObjectsClient', async () => {
-  actionsClient.get.mockRejectedValueOnce(new Error('No access'));
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(
+    new Error('No access')
+  );
   await expect(actionExecutor.execute(executeParams)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"No access"`
   );
@@ -528,18 +796,11 @@ test('throws an error if actionType is not enabled', async () => {
     id: '1',
     type: 'action',
     attributes: {
+      name: '1',
       actionTypeId: 'test',
     },
     references: [],
   };
-  const actionResult = {
-    id: actionSavedObject.id,
-    name: actionSavedObject.id,
-    actionTypeId: actionSavedObject.attributes.actionTypeId,
-    isPreconfigured: false,
-    isDeprecated: false,
-  };
-  actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
@@ -564,6 +825,7 @@ test('should not throws an error if actionType is preconfigured', async () => {
     id: '1',
     type: 'action',
     attributes: {
+      name: '1',
       actionTypeId: 'test',
       config: {
         bar: true,
@@ -574,14 +836,6 @@ test('should not throws an error if actionType is preconfigured', async () => {
     },
     references: [],
   };
-  const actionResult = {
-    id: actionSavedObject.id,
-    name: actionSavedObject.id,
-    ...pick(actionSavedObject.attributes, 'actionTypeId', 'config', 'secrets'),
-    isPreconfigured: false,
-    isDeprecated: false,
-  };
-  actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
@@ -610,7 +864,6 @@ test('throws an error when passing isESOCanEncrypt with value of false', async (
   customActionExecutor.initialize({
     logger: loggingSystemMock.create().get(),
     spaces: spacesMock,
-    getActionsClientWithRequest,
     getServices: () => services,
     actionTypeRegistry,
     encryptedSavedObjectsClient,
@@ -629,7 +882,6 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
   customActionExecutor.initialize({
     logger: loggingSystemMock.create().get(),
     spaces: spacesMock,
-    getActionsClientWithRequest,
     getServices: () => services,
     actionTypeRegistry,
     encryptedSavedObjectsClient,
@@ -661,7 +913,6 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   await actionExecutor.execute({ ...executeParams, actionId: 'preconfigured' });
 
-  expect(actionsClient.get).not.toHaveBeenCalled();
   expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
 
   expect(actionTypeRegistry.get).toHaveBeenCalledWith('test');
@@ -692,6 +943,13 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
             "kind": "action",
           },
           "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "preconfigured",
+              "name": "Preconfigured",
+            },
             "alert": Object {
               "rule": Object {
                 "execution": Object {
@@ -704,6 +962,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
                 "id": "preconfigured",
                 "namespace": "some-namespace",
                 "rel": "primary",
+                "space_agnostic": true,
                 "type": "action",
                 "type_id": "test",
               },
@@ -723,6 +982,13 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
             "outcome": "success",
           },
           "kibana": Object {
+            "action": Object {
+              "execution": Object {
+                "uuid": "2",
+              },
+              "id": "preconfigured",
+              "name": "Preconfigured",
+            },
             "alert": Object {
               "rule": Object {
                 "execution": Object {
@@ -735,6 +1001,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
                 "id": "preconfigured",
                 "namespace": "some-namespace",
                 "rel": "primary",
+                "space_agnostic": true,
                 "type": "action",
                 "type_id": "test",
               },
@@ -815,6 +1082,7 @@ test('writes to event log for execute timeout', async () => {
     consumer: 'test-consumer',
     relatedSavedObjects: [],
     request: {} as KibanaRequest,
+    actionExecutionId: '2',
   });
   expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
   expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
@@ -823,6 +1091,13 @@ test('writes to event log for execute timeout', async () => {
       kind: 'action',
     },
     kibana: {
+      action: {
+        execution: {
+          uuid: '2',
+        },
+        name: undefined,
+        id: 'action1',
+      },
       alert: {
         rule: {
           consumer: 'test-consumer',
@@ -833,16 +1108,17 @@ test('writes to event log for execute timeout', async () => {
       },
       saved_objects: [
         {
+          id: 'action1',
+          namespace: 'some-namespace',
           rel: 'primary',
           type: 'action',
-          id: 'action1',
           type_id: 'test',
-          namespace: 'some-namespace',
         },
       ],
       space_ids: ['some-namespace'],
     },
-    message: `action: test:action1: 'action-1' execution cancelled due to timeout - exceeded default timeout of "5m"`,
+    message:
+      'action: test:action1: \'action-1\' execution cancelled due to timeout - exceeded default timeout of "5m"',
   });
 });
 
@@ -860,6 +1136,13 @@ test('writes to event log for execute and execute start', async () => {
       kind: 'action',
     },
     kibana: {
+      action: {
+        execution: {
+          uuid: '2',
+        },
+        name: 'action-1',
+        id: '1',
+      },
       alert: {
         rule: {
           execution: {
@@ -869,43 +1152,16 @@ test('writes to event log for execute and execute start', async () => {
       },
       saved_objects: [
         {
+          id: '1',
+          namespace: 'some-namespace',
           rel: 'primary',
           type: 'action',
-          id: '1',
           type_id: 'test',
-          namespace: 'some-namespace',
         },
       ],
       space_ids: ['some-namespace'],
     },
     message: 'action started: test:1: action-1',
-  });
-  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
-    event: {
-      action: 'execute',
-      kind: 'action',
-      outcome: 'success',
-    },
-    kibana: {
-      alert: {
-        rule: {
-          execution: {
-            uuid: '123abc',
-          },
-        },
-      },
-      saved_objects: [
-        {
-          rel: 'primary',
-          type: 'action',
-          id: '1',
-          type_id: 'test',
-          namespace: 'some-namespace',
-        },
-      ],
-      space_ids: ['some-namespace'],
-    },
-    message: 'action executed: test:1: action-1',
   });
 });
 
@@ -933,6 +1189,13 @@ test('writes to event log for execute and execute start when consumer and relate
       kind: 'action',
     },
     kibana: {
+      action: {
+        execution: {
+          uuid: '2',
+        },
+        name: 'action-1',
+        id: '1',
+      },
       alert: {
         rule: {
           consumer: 'test-consumer',
@@ -944,57 +1207,23 @@ test('writes to event log for execute and execute start when consumer and relate
       },
       saved_objects: [
         {
+          id: '1',
+          namespace: 'some-namespace',
           rel: 'primary',
           type: 'action',
-          id: '1',
           type_id: 'test',
-          namespace: 'some-namespace',
         },
         {
+          id: '12',
+          namespace: undefined,
           rel: 'primary',
           type: 'alert',
-          id: '12',
           type_id: '.rule-type',
         },
       ],
       space_ids: ['some-namespace'],
     },
     message: 'action started: test:1: action-1',
-  });
-  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
-    event: {
-      action: 'execute',
-      kind: 'action',
-      outcome: 'success',
-    },
-    kibana: {
-      alert: {
-        rule: {
-          consumer: 'test-consumer',
-          execution: {
-            uuid: '123abc',
-          },
-          rule_type_id: '.rule-type',
-        },
-      },
-      saved_objects: [
-        {
-          rel: 'primary',
-          type: 'action',
-          id: '1',
-          type_id: 'test',
-          namespace: 'some-namespace',
-        },
-        {
-          rel: 'primary',
-          type: 'alert',
-          id: '12',
-          type_id: '.rule-type',
-        },
-      ],
-      space_ids: ['some-namespace'],
-    },
-    message: 'action executed: test:1: action-1',
   });
 });
 
@@ -1009,8 +1238,8 @@ function setupActionExecutorMock() {
   const actionSavedObject = {
     id: '1',
     type: 'action',
-    name: 'action-1',
     attributes: {
+      name: 'action-1',
       actionTypeId: 'test',
       config: {
         bar: true,
@@ -1021,14 +1250,6 @@ function setupActionExecutorMock() {
     },
     references: [],
   };
-  const actionResult = {
-    id: actionSavedObject.id,
-    name: actionSavedObject.name,
-    ...pick(actionSavedObject.attributes, 'actionTypeId', 'config'),
-    isPreconfigured: false,
-    isDeprecated: false,
-  };
-  actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   return actionType.executor;

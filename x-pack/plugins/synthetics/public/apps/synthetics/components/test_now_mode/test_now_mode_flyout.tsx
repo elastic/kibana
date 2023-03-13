@@ -25,10 +25,12 @@ import { TestNowMode } from './test_now_mode';
 
 export interface TestRun {
   id: string;
+  name: string;
   monitor: MonitorFields;
 }
 
 export function TestNowModeFlyout({
+  name,
   testRun,
   onClose,
   onDone,
@@ -37,6 +39,7 @@ export function TestNowModeFlyout({
   errors,
   serviceError,
 }: {
+  name: string;
   serviceError?: Error;
   errors: ServiceLocationErrors;
   testRun?: TestRun;
@@ -56,7 +59,9 @@ export function TestNowModeFlyout({
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2>{TEST_RESULTS}</h2>
+          <h2>
+            {name}-{TEST_RESULTS}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

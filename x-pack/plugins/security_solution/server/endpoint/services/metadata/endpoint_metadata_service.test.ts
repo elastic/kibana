@@ -74,30 +74,6 @@ describe('EndpointMetadataService', () => {
     });
   });
 
-  describe('#doesUnitedIndexExist', () => {
-    it('should return true if united index found', async () => {
-      esClient.search.mockResponse(unitedMetadataSearchResponseMock());
-      const doesIndexExist = await metadataService.doesUnitedIndexExist(esClient);
-
-      expect(doesIndexExist).toEqual(true);
-    });
-
-    it('should return false if united index not found', async () => {
-      esClient.search.mockRejectedValue({
-        meta: { body: { error: { type: 'index_not_found_exception' } } },
-      });
-      const doesIndexExist = await metadataService.doesUnitedIndexExist(esClient);
-
-      expect(doesIndexExist).toEqual(false);
-    });
-
-    it('should throw wrapped error if es error other than index not found', async () => {
-      esClient.search.mockRejectedValue({});
-      const response = metadataService.doesUnitedIndexExist(esClient);
-      await expect(response).rejects.toThrow(EndpointError);
-    });
-  });
-
   describe('#getHostMetadataList', () => {
     let agentPolicyServiceMock: jest.Mocked<AgentPolicyServiceInterface>;
 
@@ -120,6 +96,28 @@ describe('EndpointMetadataService', () => {
         }
       );
       await expect(metadataListResponse).rejects.toThrow(EndpointError);
+    });
+
+    it('should not throw if index not found', async () => {
+      esClient.search.mockRejectedValue({
+        meta: { body: { error: { type: 'index_not_found_exception' } } },
+      });
+      const metadataListResponse = await metadataService.getHostMetadataList(
+        esClient,
+        soClient,
+        testMockedContext.fleetServices,
+        {
+          page: 0,
+          pageSize: 10,
+          kuery: '',
+          hostStatuses: [],
+        }
+      );
+
+      expect(metadataListResponse).toEqual({
+        data: [],
+        total: 0,
+      });
     });
 
     it('should correctly list HostMetadata', async () => {

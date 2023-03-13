@@ -174,6 +174,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
             notifications.toasts.addSuccess({
               title: 'Uploaded files',
             });
+            refetch();
           }}
           onDone={(ids) => {
             notifications.toasts.addSuccess({

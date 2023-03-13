@@ -186,6 +186,10 @@ export class UptimeEsClient {
   }
 }
 
+export function createEsParams<T extends estypes.SearchRequest>(params: T): T {
+  return params;
+}
+
 function getInspectEnabled(uiSettings?: CoreRequestHandlerContext['uiSettings']) {
   if (!uiSettings) {
     return false;

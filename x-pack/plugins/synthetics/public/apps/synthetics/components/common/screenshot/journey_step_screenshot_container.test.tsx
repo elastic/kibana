@@ -83,7 +83,8 @@ describe('JourneyStepScreenshotContainer', () => {
     );
 
     const img = getByAltText('First step');
-    const euiPopoverMessage = 'You are in a dialog. To close this dialog, hit escape.';
+    const euiPopoverMessage =
+      'You are in a dialog. Press Escape, or tap/click outside the dialog to close.';
     expect(queryByText(euiPopoverMessage)).toBeNull();
     fireEvent.mouseEnter(img);
     await waitFor(() => getByText(euiPopoverMessage));

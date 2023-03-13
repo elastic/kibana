@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 export function generateUniqueKey() {
-  return uuid.v4().replace(/-/g, '');
+  return uuidv4().replace(/-/g, '');
 }
 
 export function getTestAlertData(overwrites = {}) {

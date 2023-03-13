@@ -41,9 +41,11 @@ import { deleteMlInferencePipeline } from '../../lib/indices/pipelines/ml_infere
 import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
+import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
 import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
+import { revertCustomPipeline } from '../../lib/pipelines/revert_custom_pipeline';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
@@ -120,7 +122,7 @@ export function registerIndexRoutes({
           meta: {
             page: {
               current: page,
-              size: indices.length,
+              size,
               total_pages: totalPages,
               total_results: totalResults,
             },
@@ -195,6 +197,8 @@ export function registerIndexRoutes({
         if (connector) {
           await deleteConnectorById(client, connector.id);
         }
+
+        await deleteIndexPipelines(client, indexName);
 
         await client.asCurrentUser.indices.delete({ index: indexName });
 
@@ -294,6 +298,27 @@ export function registerIndexRoutes({
 
       return response.ok({
         body: createResult,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.delete(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/pipelines',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+      const body = await revertCustomPipeline(client, indexName);
+
+      return response.ok({
+        body,
         headers: { 'content-type': 'application/json' },
       });
     })

@@ -17,7 +17,6 @@ import {
   mlFunctionToESAggregation,
   isJobIdValid,
   prefixDatafeedId,
-  getSafeAggregationName,
   getLatestDataOrBucketTimestamp,
   getEarliestDatafeedStartTime,
   resolveMaxTimeInterval,
@@ -563,18 +562,6 @@ describe('ML - job utils', () => {
 
     test('returns datafeed-prefix-job from job"', () => {
       expect(prefixDatafeedId('job', 'prefix-')).toBe('datafeed-prefix-job');
-    });
-  });
-
-  describe('getSafeAggregationName', () => {
-    test('"foo" should be "foo"', () => {
-      expect(getSafeAggregationName('foo', 0)).toBe('foo');
-    });
-    test('"foo.bar" should be "foo.bar"', () => {
-      expect(getSafeAggregationName('foo.bar', 0)).toBe('foo.bar');
-    });
-    test('"foo&bar" should be "field_0"', () => {
-      expect(getSafeAggregationName('foo&bar', 0)).toBe('field_0');
     });
   });
 

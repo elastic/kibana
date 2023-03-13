@@ -265,10 +265,10 @@
           },
           "<Config, ExecutionContext, FactoryContext> implements Omit<",
           {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Presentable",
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Presentable",
             "text": "Presentable"
           },
           "<FactoryContext>, \"getHref\">,",
@@ -2350,10 +2350,10 @@
           },
           "<Config, ExecutionContext, FactoryContext> extends Partial<Omit<",
           {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Presentable",
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Presentable",
             "text": "Presentable"
           },
           "<FactoryContext>, \"getHref\">>,",

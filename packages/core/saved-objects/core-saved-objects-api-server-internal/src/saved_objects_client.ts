@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import { type SavedObject, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
@@ -43,7 +43,6 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
 /**
  * Core internal implementation of {@link SavedObjectsClientContract}

@@ -27,7 +27,7 @@ import type {
 export function buildActiveMappings(
   typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties
 ): IndexMapping {
-  const mapping = defaultMapping();
+  const mapping = getBaseMappings();
 
   const mergedProperties = validateAndMerge(mapping.properties, typeDefinitions);
 
@@ -114,7 +114,7 @@ function findChangedProp(actual: any, expected: any) {
  *
  * @returns {IndexMapping}
  */
-function defaultMapping(): IndexMapping {
+export function getBaseMappings(): IndexMapping {
   return {
     dynamic: 'strict',
     properties: {

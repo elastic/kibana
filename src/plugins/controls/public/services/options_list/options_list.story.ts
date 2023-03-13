@@ -20,7 +20,6 @@ let optionsListRequestMethod = async (request: OptionsListRequest, abortSignal: 
         r({
           suggestions: {},
           totalCardinality: 100,
-          rejected: false,
         }),
       120
     )
@@ -33,5 +32,12 @@ export const replaceOptionsListMethod = (
 export const optionsListServiceFactory: OptionsListServiceFactory = () => {
   return {
     runOptionsListRequest: optionsListRequestMethod,
+    clearOptionsListCache: jest.fn(),
+    getAllowExpensiveQueries: jest.fn().mockReturnValue(Promise.resolve(true)),
+    optionsListResponseWasFailure: jest
+      .fn()
+      .mockReturnValue(
+        false
+      ) as unknown as ControlsOptionsListService['optionsListResponseWasFailure'],
   };
 };

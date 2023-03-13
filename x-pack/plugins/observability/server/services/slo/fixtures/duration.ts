@@ -7,12 +7,28 @@
 
 import { Duration, DurationUnit } from '../../../domain/models';
 
+export function oneQuarter(): Duration {
+  return new Duration(1, DurationUnit.Quarter);
+}
+
+export function thirtyDays(): Duration {
+  return new Duration(30, DurationUnit.Day);
+}
+
+export function oneMonth(): Duration {
+  return new Duration(1, DurationUnit.Month);
+}
+
 export function sevenDays(): Duration {
   return new Duration(7, DurationUnit.Day);
 }
 
 export function oneWeek(): Duration {
   return new Duration(1, DurationUnit.Week);
+}
+
+export function twoWeeks(): Duration {
+  return new Duration(2, DurationUnit.Week);
 }
 
 export function sixHours(): Duration {

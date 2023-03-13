@@ -27,8 +27,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
   writeAccess: true,
   handler: async ({ request, server, savedObjectsClient }): Promise<any> => {
     const { namespaces, ...data } = request.body as SyntheticsParam;
-
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
+    const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
 
     const result = await savedObjectsClient.create(syntheticsParamType, data, {
       initialNamespaces: (namespaces ?? []).length > 0 ? namespaces : [spaceId],

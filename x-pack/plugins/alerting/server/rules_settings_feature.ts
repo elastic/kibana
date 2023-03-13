@@ -55,7 +55,7 @@ export const rulesSettingsFeature: KibanaFeatureConfig = {
   subFeatures: [
     {
       name: i18n.translate('xpack.alerting.feature.flappingSettingsSubFeatureName', {
-        defaultMessage: 'Flapping Detection',
+        defaultMessage: 'Flapping detection',
       }),
       privilegeGroups: [
         {

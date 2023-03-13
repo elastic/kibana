@@ -5,15 +5,33 @@
  * 2.0.
  */
 
-import { takeLeading } from 'redux-saga/effects';
+import { call, put, takeEvery } from 'redux-saga/effects';
 
-import { fetchEffectFactory } from '../utils/fetch_effect';
-import { executeEsQueryAction } from './actions';
+import { Action } from 'redux-actions';
+import { serializeHttpFetchError } from '../utils/http_error';
+import { EsActionPayload, EsActionResponse, executeEsQueryAction } from './actions';
 import { executeEsQueryAPI } from './api';
 
 export function* executeEsQueryEffect() {
-  yield takeLeading(
-    executeEsQueryAction.get,
-    fetchEffectFactory(executeEsQueryAPI, executeEsQueryAction.success, executeEsQueryAction.fail)
+  const inProgressRequests = new Set<string>();
+
+  yield takeEvery(
+    String(executeEsQueryAction.get),
+    function* (action: Action<EsActionPayload>): Generator {
+      try {
+        if (!inProgressRequests.has(action.payload.name)) {
+          inProgressRequests.add(action.payload.name);
+
+          const response = (yield call(executeEsQueryAPI, action.payload)) as EsActionResponse;
+
+          inProgressRequests.delete(action.payload.name);
+
+          yield put(executeEsQueryAction.success(response));
+        }
+      } catch (e) {
+        inProgressRequests.delete(action.payload.name);
+        yield put(executeEsQueryAction.fail(serializeHttpFetchError(e, action.payload)));
+      }
+    }
   );
 }

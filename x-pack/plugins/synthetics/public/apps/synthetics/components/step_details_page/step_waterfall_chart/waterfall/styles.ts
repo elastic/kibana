@@ -107,16 +107,18 @@ export const WaterfallChartChartContainer = euiStyled.div<WaterfallChartChartCon
 `;
 
 export const WaterfallTooltipResponsiveMaxWidth = euiStyled.div`
-  margin-top: 16px;
   max-width: 90vw;
 `;
 
 export const WaterfallChartTooltip = euiStyled(WaterfallTooltipResponsiveMaxWidth)`
-  background-color: ${(props) => props.theme.eui.euiColorDarkestShade};
+  background-color: ${({ theme: { eui, darkMode } }) =>
+    darkMode ? eui.euiColorDarkestShade : eui.euiColorEmptyShade};
   border-radius: ${(props) => props.theme.eui.euiBorderRadius};
-  color: ${(props) => props.theme.eui.euiColorLightestShade};
+  color: ${({ theme: { eui, darkMode } }) =>
+    !darkMode ? eui.euiColorDarkestShade : eui.euiColorLightestShade};
   padding: ${(props) => props.theme.eui.euiSizeS};
   .euiToolTip__arrow {
-    background-color: ${(props) => props.theme.eui.euiColorDarkestShade};
+    background-color: ${({ theme: { eui, darkMode } }) =>
+      darkMode ? eui.euiColorDarkestShade : eui.euiColorEmptyShade};
   }
 `;

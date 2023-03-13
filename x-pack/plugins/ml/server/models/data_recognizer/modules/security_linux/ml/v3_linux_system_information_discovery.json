@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Linux - Looks for commands related to system information discovery from an unusual user context. This can be due to uncommon troubleshooting activity or due to a compromised account. A compromised account may be used to engage in system information discovery to gather detailed information about system configuration and software versions. This may be a precursor to the selection of a persistence mechanism or a method of privilege elevation.",
   "groups": [
     "security",

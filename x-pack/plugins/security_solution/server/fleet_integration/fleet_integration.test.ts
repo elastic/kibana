@@ -7,7 +7,12 @@
 
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 import {
   createNewPackagePolicyMock,
   deletePackagePolicyMock,
@@ -84,6 +89,9 @@ describe('ingest_integration tests ', () => {
   });
 
   describe('package policy init callback (atifacts manifest initialisation tests)', () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
     const createNewEndpointPolicyInput = (manifest: ManifestSchema) => ({
       type: 'endpoint',
       enabled: true,
@@ -106,7 +114,13 @@ describe('ingest_integration tests ', () => {
         exceptionListClient
       );
 
-      return callback(createNewPackagePolicyMock(), requestContextMock.convertContext(ctx), req);
+      return callback(
+        createNewPackagePolicyMock(),
+        soClient,
+        esClient,
+        requestContextMock.convertContext(ctx),
+        req
+      );
     };
 
     const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
@@ -258,6 +272,8 @@ describe('ingest_integration tests ', () => {
   });
 
   describe('package policy post create callback', () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const logger = loggingSystemMock.create().get('ingest_integration.test');
     const callback = getPackagePolicyPostCreateCallback(logger, exceptionListClient);
     const policyConfig = generator.generatePolicyPackagePolicy() as PackagePolicy;
@@ -275,6 +291,8 @@ describe('ingest_integration tests ', () => {
       };
       const postCreatedPolicyConfig = await callback(
         policyConfig,
+        soClient,
+        esClient,
         requestContextMock.convertContext(ctx),
         req
       );
@@ -312,6 +330,8 @@ describe('ingest_integration tests ', () => {
       };
       const postCreatedPolicyConfig = await callback(
         policyConfig,
+        soClient,
+        esClient,
         requestContextMock.convertContext(ctx),
         req
       );
@@ -326,6 +346,9 @@ describe('ingest_integration tests ', () => {
     });
   });
   describe('package policy update callback (when the license is below platinum)', () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
     beforeEach(() => {
       licenseEmitter.next(Gold); // set license level to gold
     });
@@ -341,7 +364,7 @@ describe('ingest_integration tests ', () => {
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       await expect(() =>
-        callback(policyConfig, requestContextMock.convertContext(ctx), req)
+        callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
       ).rejects.toThrow('Requires Platinum license');
     });
     it('updates successfully if no paid features are turned on in the policy', async () => {
@@ -358,6 +381,8 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(
         policyConfig,
+        soClient,
+        esClient,
         requestContextMock.convertContext(ctx),
         req
       );
@@ -366,6 +391,9 @@ describe('ingest_integration tests ', () => {
   });
 
   describe('package policy update callback (when the license is at least platinum)', () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
     beforeEach(() => {
       licenseEmitter.next(Platinum); // set license level to platinum
     });
@@ -383,6 +411,8 @@ describe('ingest_integration tests ', () => {
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
       const updatedPolicyConfig = await callback(
         policyConfig,
+        soClient,
+        esClient,
         requestContextMock.convertContext(ctx),
         req
       );
@@ -391,9 +421,12 @@ describe('ingest_integration tests ', () => {
   });
 
   describe('package policy delete callback', () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
     const invokeDeleteCallback = async (): Promise<void> => {
       const callback = getPackagePolicyDeleteCallback(exceptionListClient);
-      await callback(deletePackagePolicyMock());
+      await callback(deletePackagePolicyMock(), soClient, esClient);
     };
 
     let removedPolicies: PostDeletePackagePoliciesResponse;

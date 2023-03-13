@@ -13,7 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
 import { generateId } from '../../id_generator';
-import { DatasourcePublicAPI, Datasource } from '../../types';
+import { DatasourcePublicAPI, Datasource, FrameDatasourceAPI } from '../../types';
 
 jest.mock('../../id_generator');
 
@@ -496,8 +496,8 @@ describe('Textbased Data Source', () => {
     });
   });
 
-  describe('#getErrorMessages', () => {
-    it('should use the results of getErrorMessages directly when single layer', () => {
+  describe('#getUserMessages', () => {
+    it('should use the results of getUserMessages directly when single layer', () => {
       const state = {
         layers: {
           a: {
@@ -539,10 +539,43 @@ describe('Textbased Data Source', () => {
           },
         },
       } as unknown as TextBasedPrivateState;
-      expect(TextBasedDatasource.getErrorMessages(state, indexPatterns)).toEqual([
-        { longMessage: 'error 1', shortMessage: 'error 1' },
-        { longMessage: 'error 2', shortMessage: 'error 2' },
-      ]);
+      expect(
+        TextBasedDatasource.getUserMessages(state, {
+          frame: { dataViews: indexPatterns } as unknown as FrameDatasourceAPI,
+          setState: () => {},
+        })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "visualization",
+              },
+              Object {
+                "id": "textBasedLanguagesQueryInput",
+              },
+            ],
+            "fixableInEditor": true,
+            "longMessage": "error 1",
+            "severity": "error",
+            "shortMessage": "error 1",
+          },
+          Object {
+            "displayLocations": Array [
+              Object {
+                "id": "visualization",
+              },
+              Object {
+                "id": "textBasedLanguagesQueryInput",
+              },
+            ],
+            "fixableInEditor": true,
+            "longMessage": "error 2",
+            "severity": "error",
+            "shortMessage": "error 2",
+          },
+        ]
+      `);
     });
   });
 

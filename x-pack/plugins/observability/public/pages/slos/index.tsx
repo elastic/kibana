@@ -5,38 +5,44 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { ObservabilityAppServices } from '../../application/types';
-import { paths } from '../../config';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
-import { isSloFeatureEnabled } from './helpers/is_slo_feature_enabled';
-import { SLOS_BREADCRUMB_TEXT, SLOS_PAGE_TITLE } from './translations';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useLicense } from '../../hooks/use_license';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
 import { SloListWelcomePrompt } from './components/slo_list_welcome_prompt';
-import PageNotFound from '../404';
+import { AutoRefreshButton } from './components/auto_refresh_button';
+import { paths } from '../../config';
+import type { ObservabilityAppServices } from '../../application/types';
+import { HeaderTitle } from './components/header_title';
 
 export function SlosPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana<ObservabilityAppServices>().services;
-  const { ObservabilityPageTemplate, config } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
+  const { hasWriteCapabilities } = useCapabilities();
+  const { hasAtLeast } = useLicense();
 
-  const {
-    loading,
-    sloList: { total },
-  } = useFetchSloList({ refetch: false });
+  const { isInitialLoading, isLoading, sloList } = useFetchSloList();
+
+  const { total } = sloList || {};
+
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(true);
 
   useBreadcrumbs([
     {
       href: basePath.prepend(paths.observability.slos),
-      text: SLOS_BREADCRUMB_TEXT,
+      text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
+        defaultMessage: 'SLOs',
+      }),
     },
   ]);
 
@@ -44,34 +50,44 @@ export function SlosPage() {
     navigateToUrl(basePath.prepend(paths.observability.sloCreate));
   };
 
-  if (!isSloFeatureEnabled(config)) {
-    return <PageNotFound />;
-  }
+  const handleToggleAutoRefresh = () => {
+    setIsAutoRefreshing(!isAutoRefreshing);
+  };
 
-  if (loading) {
+  if (isInitialLoading) {
     return null;
   }
 
-  if (total === 0) {
+  if ((!isLoading && total === 0) || !hasAtLeast('platinum')) {
     return <SloListWelcomePrompt />;
   }
 
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: SLOS_PAGE_TITLE,
+        pageTitle: <HeaderTitle />,
         rightSideItems: [
-          <EuiButton color="primary" fill onClick={handleClickCreateSlo}>
-            {i18n.translate('xpack.observability.slos.sloList.pageHeader.createNewButtonLabel', {
+          <EuiButton
+            color="primary"
+            data-test-subj="slosPage-createNewSloButton"
+            disabled={!hasWriteCapabilities}
+            fill
+            onClick={handleClickCreateSlo}
+          >
+            {i18n.translate('xpack.observability.slo.sloList.pageHeader.createNewButtonLabel', {
               defaultMessage: 'Create new SLO',
             })}
           </EuiButton>,
+          <AutoRefreshButton
+            isAutoRefreshing={isAutoRefreshing}
+            onClick={handleToggleAutoRefresh}
+          />,
         ],
         bottomBorder: false,
       }}
       data-test-subj="slosPage"
     >
-      <SloList />
+      <SloList autoRefresh={isAutoRefreshing} />
     </ObservabilityPageTemplate>
   );
 }

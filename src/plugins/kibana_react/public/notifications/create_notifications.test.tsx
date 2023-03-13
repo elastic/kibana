@@ -162,7 +162,7 @@ test('can display success, warning and danger toasts', () => {
   expect(notifications.toasts.add.mock.calls[2][0]).toMatchInlineSnapshot(`
     Object {
       "color": "danger",
-      "iconType": "alert",
+      "iconType": "error",
       "onClose": undefined,
       "text": MountPoint {
         "reactNode": <React.Fragment />,

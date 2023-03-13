@@ -29,6 +29,7 @@ import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { rulesSettingsClientMock } from '../rules_settings_client.mock';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
@@ -115,6 +116,7 @@ describe('Task Runner Factory', () => {
         max: 1000,
       },
     },
+    getRulesSettingsClientWithRequest: jest.fn().mockReturnValue(rulesSettingsClientMock.create()),
   };
 
   beforeEach(() => {

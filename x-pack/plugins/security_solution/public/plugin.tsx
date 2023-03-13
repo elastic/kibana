@@ -30,7 +30,7 @@ import type {
   StartedSubPlugins,
   StartPluginsDependencies,
 } from './types';
-import { initTelemetry } from './common/lib/telemetry';
+import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { SOLUTION_NAME } from './common/translations';
 
@@ -58,6 +58,7 @@ import { getLazyEndpointGenericErrorsListExtension } from './management/pages/po
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
+
 import type { SecurityAppStore } from './common/store/types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -82,6 +83,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   readonly prebuiltRulesPackageVersion?: string;
   private config: SecuritySolutionUiConfigType;
+  private telemetry: TelemetryService;
+
   readonly experimentalFeatures: ExperimentalFeatures;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -90,6 +93,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
+
+    this.telemetry = new TelemetryService();
   }
   private appUpdater$ = new Subject<AppUpdater>();
 
@@ -119,6 +124,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
       APP_UI_ID
     );
+    const telemetryContext = {
+      prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion,
+    };
+    this.telemetry.setup({ analytics: core.analytics }, telemetryContext);
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
@@ -158,6 +167,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         securityLayout: {
           getPluginWrapper: () => SecuritySolutionTemplateWrapper,
         },
+        telemetry: this.telemetry.start(),
       };
       return services;
     };
@@ -190,7 +200,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         return renderApp({
           ...params,
-          services: await startServices(params),
+          services,
           store,
           usageCollection: plugins.usageCollection,
           subPluginRoutes: getSubPluginRoutesByCapabilities(
@@ -394,6 +404,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
         landingPages: new subPluginClasses.LandingPages(),
+        cloudDefend: new subPluginClasses.CloudDefend(),
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
       };
@@ -421,6 +432,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
       landingPages: subPlugins.landingPages.start(),
+      cloudDefend: subPlugins.cloudDefend.start(),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
       threatIntelligence: subPlugins.threatIntelligence.start(),
     };

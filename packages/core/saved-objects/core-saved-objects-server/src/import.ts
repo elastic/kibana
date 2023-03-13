@@ -8,11 +8,11 @@
 
 import { Readable } from 'stream';
 import {
-  SavedObject,
   SavedObjectsImportRetry,
   SavedObjectsImportWarning,
   SavedObjectsImportResponse,
 } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '..';
 
 /**
  * Utility class used to import savedObjects.

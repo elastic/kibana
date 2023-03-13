@@ -56,7 +56,7 @@ const cleanUpFilter = (filter: Filter) => {
 export function buildCombinedFilter(
   relation: BooleanRelation,
   filters: Filter[],
-  indexPattern: DataViewBase,
+  indexPattern: Pick<DataViewBase, 'id'>,
   disabled: FilterMeta['disabled'] = false,
   negate: FilterMeta['negate'] = false,
   alias?: FilterMeta['alias'],

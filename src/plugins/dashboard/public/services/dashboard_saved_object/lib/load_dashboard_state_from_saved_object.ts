@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { has } from 'lodash';
 
 import {
@@ -63,7 +63,7 @@ export const loadDashboardStateFromSavedObject = async ({
   } = data;
 
   const savedObjectId = id;
-  const embeddableId = uuid.v4();
+  const embeddableId = uuidv4();
 
   const newDashboardState = { ...DEFAULT_DASHBOARD_INPUT, id: embeddableId };
 

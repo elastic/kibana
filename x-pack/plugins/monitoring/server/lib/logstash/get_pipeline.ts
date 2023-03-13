@@ -6,6 +6,10 @@
  */
 
 import { get } from 'lodash';
+import {
+  PostLogstashPipelineRequestParams,
+  PostLogstashPipelineRequestPayload,
+} from '../../../common/http_api/logstash';
 import { PipelineNotFoundError } from '../errors';
 import { getPipelineStateDocument } from './get_pipeline_state_document';
 import { getPipelineStatsAggregation } from './get_pipeline_stats_aggregation';
@@ -120,7 +124,11 @@ export function _enrichStateWithStatsAggregation(
 }
 
 export async function getPipeline(
-  req: LegacyRequest,
+  req: LegacyRequest<
+    PostLogstashPipelineRequestParams,
+    unknown,
+    PostLogstashPipelineRequestPayload
+  >,
   config: MonitoringConfig,
   clusterUuid: string,
   pipelineId: string,
@@ -129,8 +137,8 @@ export async function getPipeline(
   // Determine metrics' timeseries interval based on version's timespan
   const minIntervalSeconds = Math.max(config.ui.min_interval_seconds, 30);
   const timeseriesInterval = calculateTimeseriesInterval(
-    Number(version.firstSeen),
-    Number(version.lastSeen),
+    req.payload.timeRange.min,
+    req.payload.timeRange.max,
     Number(minIntervalSeconds)
   );
 

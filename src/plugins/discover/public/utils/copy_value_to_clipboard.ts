@@ -81,7 +81,7 @@ export const copyColumnValuesToClipboard = async ({
   let withFormula = nameFormattedResult.withFormula;
 
   const valuesFormatted = [...Array(rowsCount)].map((_, rowIndex) => {
-    const result = valueToStringConverter(rowIndex, columnId, { disableMultiline: true });
+    const result = valueToStringConverter(rowIndex, columnId, { compatibleWithCSV: true });
     withFormula = withFormula || result.withFormula;
     return result.formattedString;
   });

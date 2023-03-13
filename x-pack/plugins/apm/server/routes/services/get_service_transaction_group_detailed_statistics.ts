@@ -5,32 +5,34 @@
  * 2.0.
  */
 
-import { keyBy } from 'lodash';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { keyBy } from 'lodash';
+import { ApmDocumentType } from '../../../common/document_type';
 import {
-  EVENT_OUTCOME,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
-import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../typings/timeseries';
-import {
-  getDocumentTypeFilterForTransactions,
-  getDurationFieldForTransactions,
-  getProcessorEventForTransactions,
-} from '../../lib/helpers/transactions';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../lib/helpers/latency_aggregation_type';
-import { calculateFailedTransactionRate } from '../../lib/helpers/transaction_error_rate';
-import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import {
+  getDocumentTypeFilterForTransactions,
+  getDurationFieldForTransactions,
+  getProcessorEventForTransactions,
+} from '../../lib/helpers/transactions';
+import {
+  calculateFailedTransactionRate,
+  getOutcomeAggregation,
+} from '../../lib/helpers/transaction_error_rate';
 
 export async function getServiceTransactionGroupDetailedStatistics({
   environment,
@@ -131,12 +133,11 @@ export async function getServiceTransactionGroupDetailedStatistics({
                 },
                 aggs: {
                   ...getLatencyAggregation(latencyAggregationType, field),
-                  [EVENT_OUTCOME]: {
-                    terms: {
-                      field: EVENT_OUTCOME,
-                      include: [EventOutcome.failure, EventOutcome.success],
-                    },
-                  },
+                  ...getOutcomeAggregation(
+                    searchAggregatedTransactions
+                      ? ApmDocumentType.TransactionMetric
+                      : ApmDocumentType.TransactionEvent
+                  ),
                 },
               },
             },
@@ -164,7 +165,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
     }));
     const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
       x: timeseriesBucket.key,
-      y: calculateFailedTransactionRate(timeseriesBucket[EVENT_OUTCOME]),
+      y: calculateFailedTransactionRate(timeseriesBucket),
     }));
     const transactionGroupTotalDuration =
       bucket.transaction_group_total_duration.value || 0;

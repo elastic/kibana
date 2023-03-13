@@ -29,7 +29,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
   public setup(core: CoreSetup<FixtureStartDeps>, { features, alerting }: FixtureSetupDeps) {
     features.registerKibanaFeature({
-      id: 'alertsFixture',
+      id: 'fecAlertsTestPlugin',
       name: 'Alerts',
       app: ['alerts', 'kibana'],
       category: { id: 'foo', label: 'foo' },
@@ -73,7 +73,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           name: 'Default',
         },
       ],
-      producer: 'alertsFixture',
+      producer: 'fecAlertsTestPlugin',
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
@@ -94,16 +94,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         },
       },
       async (ctx, req, res) => {
-        // Kibana might set transactiopnSampleRate < 1.0 on CI, so we need to
-        // enforce transaction creation to prevent the test from failing.
-        const transaction = apmAgent.startTransaction();
-        const subscription = req.events.completed$.subscribe(() => {
-          setTimeout(() => {
-            transaction?.end();
-            subscription.unsubscribe();
-          }, 1_000);
-        });
-
         const coreCtx = await ctx.core;
         await coreCtx.elasticsearch.client.asInternalUser.ping();
 

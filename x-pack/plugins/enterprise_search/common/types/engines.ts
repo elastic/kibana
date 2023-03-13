@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
+import { HealthStatus, FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export interface EnterpriseSearchEnginesResponse {
   meta: {
@@ -13,6 +13,7 @@ export interface EnterpriseSearchEnginesResponse {
     size: number;
     total: number;
   };
+  params: { q?: string; from: number; size: number };
   results: EnterpriseSearchEngine[];
 }
 
@@ -34,5 +35,15 @@ export interface EnterpriseSearchEngineIndex {
   count: number;
   health: HealthStatus | 'unknown';
   name: string;
-  source: 'api' | 'connector' | 'crawler';
+}
+
+export interface EnterpriseSearchEngineFieldCapabilities {
+  created: string;
+  field_capabilities: FieldCapsResponse;
+  name: string;
+  updated: string;
+}
+export interface EnterpriseSearchSchemaField {
+  field_name: string;
+  field_type: string[];
 }

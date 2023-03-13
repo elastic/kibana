@@ -64,7 +64,6 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
     const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
 
     const rulesClient = ctx.alerting.getRulesClient();
-    const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
     const savedObjectsClient = ctx.core.savedObjects.client;
 
     const rules = await Promise.all(
@@ -91,19 +90,12 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
             return getIdBulkError({ id, ruleId });
           }
 
-          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(migratedRule.id);
-
           await deleteRules({
             ruleId: migratedRule.id,
             rulesClient,
-            ruleExecutionLog,
           });
 
-          return transformValidateBulkError(
-            idOrRuleIdOrUnknown,
-            migratedRule,
-            ruleExecutionSummary
-          );
+          return transformValidateBulkError(idOrRuleIdOrUnknown, migratedRule);
         } catch (err) {
           return transformBulkError(idOrRuleIdOrUnknown, err);
         }

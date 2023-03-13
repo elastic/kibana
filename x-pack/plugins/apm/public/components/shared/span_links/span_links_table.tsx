@@ -23,7 +23,7 @@ import { SpanLinkDetails } from '../../../../common/span_links';
 import { asDuration } from '../../../../common/utils/formatters';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { ServiceLink } from '../service_link';
+import { ServiceLink } from '../links/apm/service_link';
 import { getSpanIcon } from '../span_icon/get_span_icon';
 
 interface Props {

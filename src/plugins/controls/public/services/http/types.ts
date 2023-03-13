@@ -9,5 +9,6 @@
 import { CoreSetup } from '@kbn/core/public';
 
 export interface ControlsHTTPService {
+  get: CoreSetup['http']['get'];
   fetch: CoreSetup['http']['fetch'];
 }

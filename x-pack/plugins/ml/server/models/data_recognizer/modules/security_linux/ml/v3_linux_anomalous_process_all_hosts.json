@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Linux - Looks for processes that are unusual to all Linux hosts. Such unusual processes may indicate unauthorized software, malware, or persistence mechanisms.",
   "groups": [
     "auditbeat",

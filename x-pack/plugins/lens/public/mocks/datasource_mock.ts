@@ -63,10 +63,9 @@ export function createMockDatasource(
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called
     publicAPIMock,
-    getErrorMessages: jest.fn((_state, _indexPatterns) => undefined),
+    getUserMessages: jest.fn((_state, _deps) => []),
     checkIntegrity: jest.fn((_state, _indexPatterns) => []),
     isTimeBased: jest.fn(),
-    isValidColumn: jest.fn(),
     isEqual: jest.fn(),
     getUsedDataView: jest.fn((state, layer) => 'mockip'),
     getUsedDataViews: jest.fn(),

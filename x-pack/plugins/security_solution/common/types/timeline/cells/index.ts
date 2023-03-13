@@ -6,9 +6,8 @@
  */
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { ColumnHeaderOptions, RowRenderer } from '../..';
-import type { Ecs } from '../../../ecs';
 import type { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 
 /** The following props are provided to the function called by `renderCellValue` */
@@ -18,7 +17,6 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   data: TimelineNonEcsData[];
   ecsData?: Ecs;
   eventId: string; // _id
-  globalFilters?: Filter[];
   header: ColumnHeaderOptions;
   isDraggable: boolean;
   isTimeline?: boolean; // Default cell renderer is used for both the alert table and timeline. This allows us to cheaply separate concerns
@@ -30,5 +28,4 @@ export type CellValueElementProps = EuiDataGridCellValueElementProps & {
   truncate?: boolean;
   key?: string;
   closeCellPopover?: () => void;
-  enableActions?: boolean;
 };

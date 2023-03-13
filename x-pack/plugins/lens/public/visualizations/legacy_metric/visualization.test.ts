@@ -384,12 +384,4 @@ describe('metric_visualization', () => {
       `);
     });
   });
-
-  describe('#getErrorMessages', () => {
-    it('returns undefined if no error is raised', () => {
-      const error = metricVisualization.getErrorMessages(exampleState());
-
-      expect(error).not.toBeDefined();
-    });
-  });
 });

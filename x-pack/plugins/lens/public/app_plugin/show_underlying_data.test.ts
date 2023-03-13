@@ -16,6 +16,9 @@ describe('getLayerMetaInfo', () => {
     navLinks: { discover: true },
     discover: { show: true },
   };
+  const indexPatternsMap = {
+    test: createMockedIndexPattern(),
+  };
   it('should return error in case of no data', () => {
     expect(
       getLayerMetaInfo(
@@ -24,7 +27,7 @@ describe('getLayerMetaInfo', () => {
         createMockVisualization('testVisualization'),
         {},
         undefined,
-        {},
+        indexPatternsMap,
         undefined,
         capabilities
       ).error
@@ -43,7 +46,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
-        {},
+        indexPatternsMap,
         undefined,
         capabilities
       ).error
@@ -58,7 +61,7 @@ describe('getLayerMetaInfo', () => {
         createMockVisualization('testVisualization'),
         {},
         undefined,
-        {},
+        indexPatternsMap,
         undefined,
         capabilities
       ).error
@@ -73,7 +76,7 @@ describe('getLayerMetaInfo', () => {
         createMockVisualization('testVisualization'),
         {},
         {},
-        {},
+        indexPatternsMap,
         undefined,
         capabilities
       ).error
@@ -88,7 +91,7 @@ describe('getLayerMetaInfo', () => {
         undefined,
         {},
         undefined,
-        {},
+        indexPatternsMap,
         undefined,
         capabilities
       ).error
@@ -103,7 +106,7 @@ describe('getLayerMetaInfo', () => {
         createMockVisualization('testVisualization'),
         undefined,
         {},
-        {},
+        indexPatternsMap,
         undefined,
         capabilities
       ).error
@@ -126,7 +129,7 @@ describe('getLayerMetaInfo', () => {
           datatable1: { type: 'datatable', columns: [], rows: [] },
           datatable2: { type: 'datatable', columns: [], rows: [] },
         },
-        {},
+        indexPatternsMap,
         undefined,
         capabilities
       ).error
@@ -154,7 +157,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
-        {},
+        indexPatternsMap,
         undefined,
         capabilities
       ).error
@@ -181,7 +184,7 @@ describe('getLayerMetaInfo', () => {
         createMockVisualization('testVisualization'),
         {},
         {},
-        {},
+        indexPatternsMap,
         undefined,
         capabilities
       ).error
@@ -203,7 +206,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
-        {},
+        indexPatternsMap,
         undefined,
         capabilities
       ).error
@@ -226,7 +229,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
-        {},
+        indexPatternsMap,
         undefined,
         {
           navLinks: { discover: false },
@@ -243,7 +246,7 @@ describe('getLayerMetaInfo', () => {
         {
           datatable1: { type: 'datatable', columns: [], rows: [] },
         },
-        {},
+        indexPatternsMap,
         undefined,
         {
           navLinks: { discover: true },

@@ -32,7 +32,6 @@ import type {
   SimpleSavedObject,
   SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-browser';
-
 import { SimpleSavedObjectImpl } from './simple_saved_object';
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
@@ -104,6 +103,7 @@ const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
  * HTTP API for interacting with Saved Objects.
  *
  * @internal
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export class SavedObjectsClient implements SavedObjectsClientContract {
   private http: HttpSetup;

@@ -29,16 +29,11 @@ export const getTelemetryOptIn: GetTelemetryOptIn = ({
     return configTelemetryOptIn;
   }
 
-  if (typeof telemetrySavedObject.enabled !== 'boolean') {
-    return configTelemetryOptIn;
-  }
+  // If `enabled` is not available in the SO, fall back to the config value.
+  const savedOptIn = telemetrySavedObject.enabled ?? configTelemetryOptIn;
 
-  const savedOptIn = telemetrySavedObject.enabled;
-
-  // if enabled is true, return it
+  // if the stored value is true, return it
   if (savedOptIn === true) return savedOptIn;
-
-  // TODO: Should we split the logic below into another OptIn getter?
 
   // Additional check if they've already opted out (enabled: false):
   // - if the Kibana version has changed by at least a minor version,
@@ -49,7 +44,7 @@ export const getTelemetryOptIn: GetTelemetryOptIn = ({
   // if the last kibana version isn't set, or is somehow not a string, return null
   if (typeof lastKibanaVersion !== 'string') return null;
 
-  // if version hasn't changed, just return enabled value
+  // if version hasn't changed, just return the stored value
   if (lastKibanaVersion === currentKibanaVersion) return savedOptIn;
 
   const lastSemver = parseSemver(lastKibanaVersion);
@@ -64,7 +59,7 @@ export const getTelemetryOptIn: GetTelemetryOptIn = ({
     if (currentSemver.minor > lastSemver.minor) return null;
   }
 
-  // current version X.Y is not greater than last version X.Y, return enabled
+  // current version X.Y is not greater than last version X.Y, return the stored value
   return savedOptIn;
 };
 

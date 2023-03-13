@@ -23,6 +23,7 @@ import {
 } from '../../../../lib/helpers/transaction_error_rate';
 import { APMConfig } from '../../../..';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../../../common/document_type';
 
 export async function getTransactionErrorRateChartPreview({
   config,
@@ -43,8 +44,6 @@ export async function getTransactionErrorRateChartPreview({
     start,
     end,
   });
-
-  const outcomes = getOutcomeAggregation();
 
   const params = {
     apm: {
@@ -67,7 +66,6 @@ export async function getTransactionErrorRateChartPreview({
         },
       },
       aggs: {
-        outcomes,
         timeseries: {
           date_histogram: {
             field: '@timestamp',
@@ -77,7 +75,11 @@ export async function getTransactionErrorRateChartPreview({
               max: end,
             },
           },
-          aggs: { outcomes },
+          aggs: getOutcomeAggregation(
+            searchAggregatedTransactions
+              ? ApmDocumentType.TransactionMetric
+              : ApmDocumentType.TransactionEvent
+          ),
         },
       },
     },
@@ -95,7 +97,7 @@ export async function getTransactionErrorRateChartPreview({
   return resp.aggregations.timeseries.buckets.map((bucket) => {
     return {
       x: bucket.key,
-      y: calculateFailedTransactionRate(bucket.outcomes),
+      y: calculateFailedTransactionRate(bucket),
     };
   });
 }

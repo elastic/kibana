@@ -172,7 +172,8 @@ describe('Add Integration - Real API', () => {
 
   it('should filter integrations by category', () => {
     setupIntegrations();
-    cy.getBySel(getIntegrationCategories('aws')).click();
+    cy.getBySel(getIntegrationCategories('aws')).click({ scrollBehavior: false });
+
     cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).contains('AWS').should('exist');
     cy.getBySel(INTEGRATION_LIST).find('.euiCard').should('have.length.greaterThan', 29);
 

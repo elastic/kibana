@@ -15,7 +15,6 @@ import {
   EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
-  EuiTitle,
   EuiFlexItem,
   EuiIcon,
   EuiFlexGroup,
@@ -135,40 +134,36 @@ const ConnectorAddModal = ({
   return (
     <EuiModal className="actConnectorModal" data-test-subj="connectorAddModal" onClose={closeModal}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <EuiFlexGroup gutterSize="m" alignItems="center">
-            {actionTypeModel && actionTypeModel.iconClass ? (
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={actionTypeModel.iconClass} size="xl" />
-              </EuiFlexItem>
-            ) : null}
+        <EuiFlexGroup gutterSize="m" alignItems="center">
+          {actionTypeModel && actionTypeModel.iconClass ? (
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
-                <EuiFlexItem>
-                  <EuiTitle size="s">
-                    <h3 id="flyoutTitle">
-                      <FormattedMessage
-                        defaultMessage="{actionTypeName} connector"
-                        id="xpack.triggersActionsUI.sections.addModalConnectorForm.flyoutTitle"
-                        values={{
-                          actionTypeName: actionType.name,
-                        }}
-                      />
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-                {actionTypeModel && actionTypeModel.isExperimental && (
-                  <EuiFlexItem className="betaBadgeFlexItem" grow={false}>
-                    <EuiBetaBadge
-                      label={betaBadgeProps.label}
-                      tooltipContent={betaBadgeProps.tooltipContent}
-                    />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
+              <EuiIcon type={actionTypeModel.iconClass} size="xl" />
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiModalHeaderTitle>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
+              <EuiFlexItem>
+                <EuiModalHeaderTitle size="s" component="h3" id="flyoutTitle">
+                  <FormattedMessage
+                    defaultMessage="{actionTypeName} connector"
+                    id="xpack.triggersActionsUI.sections.addModalConnectorForm.flyoutTitle"
+                    values={{
+                      actionTypeName: actionType.name,
+                    }}
+                  />
+                </EuiModalHeaderTitle>
+              </EuiFlexItem>
+              {actionTypeModel && actionTypeModel.isExperimental && (
+                <EuiFlexItem className="betaBadgeFlexItem" grow={false}>
+                  <EuiBetaBadge
+                    label={betaBadgeProps.label}
+                    tooltipContent={betaBadgeProps.tooltipContent}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalHeader>
 
       <EuiModalBody>

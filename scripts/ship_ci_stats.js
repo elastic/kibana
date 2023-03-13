@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/dev-utils').shipCiStatsCli();
+require('@kbn/ci-stats-shipper-cli');

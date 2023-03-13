@@ -7,7 +7,7 @@
  */
 
 import { URL } from 'url';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { Request, RouteOptions } from '@hapi/hapi';
 import { fromEvent, NEVER } from 'rxjs';
 import { shareReplay, first, filter } from 'rxjs/operators';
@@ -131,8 +131,8 @@ export class CoreKibanaRequest<
     // KibanaRequest in conjunction with scoped Elasticsearch and SavedObjectsClient in order to pass credentials.
     // In these cases, the ids default to a newly generated UUID.
     const appState = request.app as KibanaRequestState | undefined;
-    this.id = appState?.requestId ?? uuid.v4();
-    this.uuid = appState?.requestUuid ?? uuid.v4();
+    this.id = appState?.requestId ?? uuidv4();
+    this.uuid = appState?.requestUuid ?? uuidv4();
     this.rewrittenUrl = appState?.rewrittenUrl;
 
     this.url = request.url ?? new URL('https://fake-request/url');
@@ -201,6 +201,7 @@ export class CoreKibanaRequest<
       xsrfRequired:
         ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.xsrfRequired ??
         true, // some places in LP call KibanaRequest.from(request) manually. remove fallback to true before v8
+      access: this.getAccess(request),
       tags: request.route?.settings?.tags || [],
       timeout: {
         payload: payloadTimeout,
@@ -221,6 +222,13 @@ export class CoreKibanaRequest<
       method,
       options,
     };
+  }
+  /** infer route access from path if not declared */
+  private getAccess(request: RawRequest): 'internal' | 'public' {
+    return (
+      ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.access ??
+      (request.path.startsWith('/internal') ? 'internal' : 'public')
+    );
   }
 
   private getAuthRequired(request: RawRequest): boolean | 'optional' {

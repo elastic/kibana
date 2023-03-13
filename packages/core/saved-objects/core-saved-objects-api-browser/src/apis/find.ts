@@ -15,6 +15,7 @@ export type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-a
  * Browser options for finding saved objects
  *
  * @public
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
@@ -25,6 +26,7 @@ export type SavedObjectsFindOptions = Omit<
  * Return type of the Saved Objects `find()` method.
  *
  * @public
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
  */
 export interface SavedObjectsFindResponse<T = unknown, A = unknown>
   extends SavedObjectsBatchResponse<T> {

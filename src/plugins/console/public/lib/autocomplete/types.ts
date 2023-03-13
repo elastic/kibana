@@ -13,6 +13,7 @@ export interface ResultTerm {
   insertValue?: string;
   name?: string;
   value?: string;
+  score?: number;
 }
 
 export interface DataAutoCompleteRulesOneOf {
@@ -25,6 +26,14 @@ export interface DataAutoCompleteRulesOneOf {
 
 export interface AutoCompleteContext {
   autoCompleteSet?: null | ResultTerm[];
+  /**
+   * Stores a state for async results, e.g. fields suggestions based on the mappings definition.
+   */
+  asyncResultsState?: {
+    isLoading: boolean;
+    lastFetched: number | null;
+    results: Promise<ResultTerm[]>;
+  };
   endpoint?: null | {
     paramsAutocomplete: {
       getTopLevelComponents: (method?: string | null) => unknown;

@@ -1,5 +1,6 @@
 {
   "type": "shared-common",
   "id": "@kbn/core-analytics-browser-mocks",
+  "devOnly": true,
   "owner": "@elastic/kibana-core"
 }

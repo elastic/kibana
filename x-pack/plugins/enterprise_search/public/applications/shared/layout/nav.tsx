@@ -19,7 +19,6 @@ import {
   SEARCH_EXPERIENCES_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
-import { enableEnginesSection } from '../../../../common/ui_settings_keys';
 import {
   ENGINES_PATH,
   SEARCH_INDICES_PATH,
@@ -31,9 +30,9 @@ import { KibanaLogic } from '../kibana';
 import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
-  const { productAccess, uiSettings } = useValues(KibanaLogic);
+  const { productAccess } = useValues(KibanaLogic);
 
-  const enginesSectionEnabled = uiSettings?.get<boolean>(enableEnginesSection, false);
+  const enginesSectionEnabled = productAccess.hasSearchEnginesAccess;
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
@@ -180,6 +179,16 @@ export const useEnterpriseSearchNav = () => {
               to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
             }),
           },
+          {
+            id: 'searchExperiences',
+            name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
+              defaultMessage: 'Search Experiences',
+            }),
+            ...generateNavLink({
+              shouldNotCreateHref: true,
+              to: SEARCH_EXPERIENCES_PLUGIN.URL,
+            }),
+          },
         ],
         name: i18n.translate('xpack.enterpriseSearch.nav.searchTitle', {
           defaultMessage: 'Search',
@@ -270,17 +279,6 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
               ...generateNavLink({
                 shouldNotCreateHref: true,
                 to: `${enginePath}/${EngineViewTabs.INDICES}`,
-              }),
-            },
-
-            {
-              id: 'enterpriseSearchEngineDocuments',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.documentsTitle', {
-                defaultMessage: 'Documents',
-              }),
-              ...generateNavLink({
-                shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.DOCUMENTS}`,
               }),
             },
             {

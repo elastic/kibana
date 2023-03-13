@@ -6,14 +6,15 @@
  */
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { AlertInstanceContext, RecoveredActionGroup } from '../types';
+import { AlertInstanceContext, RecoveredActionGroup, RuleNotifyWhen } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
 import { Alert } from '../alert/alert';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
-import { processAlerts, setFlapping } from '../lib';
+import { getAlertsForNotification, processAlerts } from '../lib';
 import { logAlerts } from '../task_runner/log_alerts';
+import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
 
 const scheduleActions = jest.fn();
 const replaceState = jest.fn(() => ({ scheduleActions }));
@@ -58,6 +59,12 @@ jest.mock('../lib', () => {
     ...original,
     processAlerts: jest.fn(),
     setFlapping: jest.fn(),
+  };
+});
+
+jest.mock('../lib/get_alerts_for_notification', () => {
+  return {
+    getAlertsForNotification: jest.fn(),
   };
 });
 
@@ -124,6 +131,7 @@ describe('Legacy Alerts Client', () => {
       logger,
       maxAlerts: 1000,
       canSetRecoveryContext: false,
+      autoRecoverAlerts: true,
     });
   });
 
@@ -194,6 +202,19 @@ describe('Legacy Alerts Client', () => {
       currentRecoveredAlerts: {},
       recoveredAlerts: {},
     });
+    (getAlertsForNotification as jest.Mock).mockReturnValue({
+      newAlerts: {},
+      activeAlerts: {
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+      },
+      currentActiveAlerts: {
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+      },
+      currentRecoveredAlerts: {},
+      recoveredAlerts: {},
+    });
     const alertsClient = new LegacyAlertsClient({
       logger,
       maxAlerts: 1000,
@@ -213,6 +234,8 @@ describe('Legacy Alerts Client', () => {
       ruleLabel: `ruleLogPrefix`,
       ruleRunMetricsStore,
       shouldLogAndScheduleActionsForAlerts: true,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      notifyWhen: RuleNotifyWhen.CHANGE,
     });
 
     expect(processAlerts).toHaveBeenCalledWith({
@@ -227,14 +250,24 @@ describe('Legacy Alerts Client', () => {
       previouslyRecoveredAlerts: {},
       hasReachedAlertLimit: false,
       alertLimit: 1000,
-      setFlapping: true,
+      autoRecoverAlerts: true,
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
     });
 
-    expect(setFlapping).toHaveBeenCalledWith(
+    expect(getAlertsForNotification).toHaveBeenCalledWith(
+      {
+        enabled: true,
+        lookBackWindow: 20,
+        statusChangeThreshold: 4,
+      },
+      RuleNotifyWhen.CHANGE,
+      'default',
+      {},
       {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
         '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
       },
+      {},
       {}
     );
 

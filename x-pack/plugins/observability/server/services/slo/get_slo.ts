@@ -6,34 +6,23 @@
  */
 
 import { GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
-import { IndicatorData, SLO, SLOId, SLOWithSummary } from '../../domain/models';
+import { SLO, SLOId, SLOWithSummary, Summary } from '../../domain/models';
 import { SLORepository } from './slo_repository';
-import { SLIClient } from './sli_client';
-import { computeSLI, computeErrorBudget, computeSummaryStatus } from '../../domain/services';
+import { SummaryClient } from './summary_client';
 
 export class GetSLO {
-  constructor(private repository: SLORepository, private sliClient: SLIClient) {}
+  constructor(private repository: SLORepository, private summaryClient: SummaryClient) {}
 
   public async execute(sloId: string): Promise<GetSLOResponse> {
     const slo = await this.repository.findById(sloId);
+    const summaryBySlo = await this.summaryClient.fetchSummary([slo]);
 
-    const indicatorDataBySlo = await this.sliClient.fetchCurrentSLIData([slo]);
-    const sloWithSummary = computeSloWithSummary(slo, indicatorDataBySlo);
+    const sloWithSummary = mergeSloWithSummary(slo, summaryBySlo);
 
-    return this.toResponse(sloWithSummary);
-  }
-
-  private toResponse(slo: SLOWithSummary): GetSLOResponse {
-    return getSLOResponseSchema.encode(slo);
+    return getSLOResponseSchema.encode(sloWithSummary);
   }
 }
 
-function computeSloWithSummary(
-  slo: SLO,
-  indicatorDataBySlo: Record<SLOId, IndicatorData>
-): SLOWithSummary {
-  const sliValue = computeSLI(indicatorDataBySlo[slo.id]);
-  const errorBudget = computeErrorBudget(slo, indicatorDataBySlo[slo.id]);
-  const status = computeSummaryStatus(slo, sliValue, errorBudget);
-  return { ...slo, summary: { status, sliValue, errorBudget } };
+function mergeSloWithSummary(slo: SLO, summaryBySlo: Record<SLOId, Summary>): SLOWithSummary {
+  return { ...slo, summary: summaryBySlo[slo.id] };
 }

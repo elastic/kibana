@@ -113,12 +113,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('lnsFieldListPanel-buttonGroup-topValuesButton');
         });
 
-        it('should show a placeholder message about geo points field', async () => {
+        it('should show examples for geo points field', async () => {
           const [fieldId] = await PageObjects.lens.findFieldIdsByType('geo_point');
           await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
-          const message = await testSubjects.getVisibleText('lnsFieldListPanel-missingFieldStats');
-          expect(message).to.eql('Analysis is not available for this field.');
+          // check for top values chart
+          await testSubjects.existOrFail('lnsFieldListPanel-topValues');
+          const topValuesRows = await testSubjects.findAll('lnsFieldListPanel-topValues-bucket');
+          expect(topValuesRows.length).to.eql(11);
         });
 
         it('should show stats for a numeric runtime field', async () => {

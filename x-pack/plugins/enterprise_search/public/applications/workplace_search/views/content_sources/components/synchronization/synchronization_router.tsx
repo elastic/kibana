@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Switch } from 'react-router-dom';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import {
   SYNC_FREQUENCY_PATH,

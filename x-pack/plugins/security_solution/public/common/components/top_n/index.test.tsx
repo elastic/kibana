@@ -36,15 +36,15 @@ jest.mock('react-router-dom', () => {
     useHistory: () => ({
       useHistory: jest.fn(),
     }),
+    useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
   };
 });
 
 jest.mock('../link_to');
 jest.mock('../../lib/kibana');
 jest.mock('../../../timelines/store/timeline/actions');
-jest.mock('../visualization_actions', () => ({
-  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
-}));
+jest.mock('../visualization_actions/actions');
+jest.mock('../visualization_actions/lens_embeddable');
 const field = 'process.name';
 const value = 'nice';
 

@@ -25,7 +25,7 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.pickFieldsStep.bucketSpan.description"
-          defaultMessage="The interval for time series analysis, typically between 15m and 1h."
+          defaultMessage="The interval for time series analysis, typically 15m–1h."
         />
       }
     >

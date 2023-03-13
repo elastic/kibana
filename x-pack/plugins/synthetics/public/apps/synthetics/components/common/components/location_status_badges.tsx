@@ -16,16 +16,18 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EXPAND_LOCATIONS_LABEL } from '../../monitors_page/management/monitor_list_table/labels';
 import { LocationsStatus } from '../../../hooks';
+import { useMonitorDetailLocator } from '../../../hooks/use_monitor_detail_locator';
 const DEFAULT_DISPLAY_COUNT = 3;
 
 export const LocationStatusBadges = ({
   loading,
   locations,
+  configId,
 }: {
   locations: LocationsStatus;
   loading: boolean;
+  configId: string;
 }) => {
   const [toDisplay, setToDisplay] = useState(DEFAULT_DISPLAY_COUNT);
 
@@ -36,15 +38,15 @@ export const LocationStatusBadges = ({
   const locationsToDisplay = locations.slice(0, toDisplay);
 
   return (
-    <EuiFlexGroup wrap gutterSize="xs" style={{ maxWidth: 450 }}>
+    <EuiFlexGroup wrap gutterSize="xs" css={{ maxWidth: 450, overflow: 'hidden' }}>
       {locationsToDisplay.map((loc) => (
-        <EuiFlexItem key={loc.id} grow={false}>
-          <EuiBadge
-            iconType={() => <EuiIcon size="s" type="dot" color={loc.color} />}
-            color="hollow"
-          >
-            {loc.label}
-          </EuiBadge>
+        <EuiFlexItem key={loc.id} grow={false} css={{ overflow: 'hidden' }}>
+          <MonitorDetailLinkForLocation
+            configId={configId}
+            locationId={loc.id}
+            locationLabel={loc.label}
+            color={loc.color}
+          />
         </EuiFlexItem>
       ))}
       {locations.length > toDisplay && (
@@ -71,7 +73,7 @@ export const LocationStatusBadges = ({
         </EuiFlexItem>
       )}
       {toDisplay > DEFAULT_DISPLAY_COUNT && (
-        <EuiFlexItem key={locations.length - 3} grow={false}>
+        <EuiFlexItem key={locations.length - 3} grow={false} css={{ overflow: 'hidden' }}>
           <EuiToolTip content={COLLAPSE_LOCATIONS_LABEL}>
             <EuiBadge
               color="hollow"
@@ -89,9 +91,51 @@ export const LocationStatusBadges = ({
   );
 };
 
+const MonitorDetailLinkForLocation = ({
+  configId,
+  locationId,
+  locationLabel,
+  color,
+}: {
+  configId: string;
+  locationId: string;
+  locationLabel: string;
+  color: string;
+}) => {
+  const monitorDetailLinkUrl = useMonitorDetailLocator({
+    configId,
+    locationId,
+  });
+
+  return (
+    <EuiBadge
+      iconType={() => <EuiIcon size="s" type="dot" color={color} />}
+      color="hollow"
+      iconOnClickAriaLabel={CLICK_LOCATION_LABEL}
+      iconOnClick={() => {
+        // Empty
+      }}
+      href={monitorDetailLinkUrl ?? '/'}
+    >
+      {locationLabel}
+    </EuiBadge>
+  );
+};
+
+const EXPAND_LOCATIONS_LABEL = i18n.translate(
+  'xpack.synthetics.management.monitorList.locations.expand',
+  {
+    defaultMessage: 'Click to view remaining locations',
+  }
+);
+
 const COLLAPSE_LOCATIONS_LABEL = i18n.translate(
   'xpack.synthetics.management.monitorList.locations.collapse',
   {
     defaultMessage: 'Click to collapse locations',
   }
 );
+
+const CLICK_LOCATION_LABEL = i18n.translate('xpack.synthetics.management.location.clickMessage', {
+  defaultMessage: 'Click to view details for this location.',
+});

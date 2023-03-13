@@ -17,6 +17,8 @@ export interface CategoryFacet {
   count: number;
   id: string;
   title: string;
+  parent_id?: string;
+  parent_title?: string;
 }
 
 export const UPDATES_AVAILABLE = 'updates_available';

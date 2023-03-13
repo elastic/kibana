@@ -514,7 +514,7 @@
         "label": "ImportQuerySchema",
         "description": [],
         "signature": [
-          "{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; as_new_list?: boolean | undefined; }"
+          "{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; overwrite_action_connectors?: boolean | undefined; as_new_list?: boolean | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/import_query_schema/index.ts",
         "deprecated": false,
@@ -529,7 +529,7 @@
         "label": "ImportQuerySchemaDecoded",
         "description": [],
         "signature": [
-          "Omit<{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; as_new_list?: boolean | undefined; }, \"overwrite\" | \"overwrite_exceptions\" | \"as_new_list\"> & { overwrite: boolean; overwrite_exceptions: boolean; as_new_list: boolean; }"
+          "Omit<{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; overwrite_action_connectors?: boolean | undefined; as_new_list?: boolean | undefined; }, \"overwrite\" | \"overwrite_exceptions\" | \"overwrite_action_connectors\" | \"as_new_list\"> & { overwrite: boolean; overwrite_exceptions: boolean; overwrite_action_connectors: boolean; as_new_list: boolean; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/import_query_schema/index.ts",
         "deprecated": false,
@@ -850,7 +850,7 @@
         "tags": [],
         "label": "DefaultUuid",
         "description": [
-          "\nTypes the DefaultUuid as:\n  - If null or undefined, then a default string uuid.v4() will be\n    created otherwise it will be checked just against an empty string"
+          "\nTypes the DefaultUuid as:\n  - If null or undefined, then a default string uuidv4() will be\n    created otherwise it will be checked just against an empty string"
         ],
         "signature": [
           "Type",
@@ -911,6 +911,8 @@
           "<{ overwrite: ",
           "Type",
           "<boolean, string | boolean | undefined, unknown>; overwrite_exceptions: ",
+          "Type",
+          "<boolean, string | boolean | undefined, unknown>; overwrite_action_connectors: ",
           "Type",
           "<boolean, string | boolean | undefined, unknown>; as_new_list: ",
           "Type",

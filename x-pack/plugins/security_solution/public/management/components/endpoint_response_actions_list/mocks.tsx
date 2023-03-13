@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 import type {
   ResponseActionsApiCommandNames,
@@ -42,12 +42,12 @@ export const getActionListMock = async ({
 }): Promise<ActionListApiResponse> => {
   const endpointActionGenerator = new EndpointActionGenerator('seed');
 
-  const agentIds = _agentIds ?? [uuid.v4()];
+  const agentIds = _agentIds ?? [uuidv4()];
 
   const data: ActionListApiResponse['data'] = agentIds.map((id) => {
     const actionIds = Array(actionCount)
       .fill(1)
-      .map(() => uuid.v4());
+      .map(() => uuidv4());
 
     const actionDetails: ActionListApiResponse['data'] = actionIds.map((actionId) => {
       return endpointActionGenerator.generateActionDetails({

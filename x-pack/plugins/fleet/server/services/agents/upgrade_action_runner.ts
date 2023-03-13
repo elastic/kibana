@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 
 import { isAgentUpgradeable } from '../../../common/services';
@@ -24,7 +24,8 @@ import type { GetAgentsOptions } from './crud';
 import { bulkUpdateAgents } from './crud';
 import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
-import { BulkActionTaskType } from './bulk_actions_resolver';
+import { BulkActionTaskType } from './bulk_action_types';
+import { getCancelledActions } from './action_status';
 
 export class UpgradeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -39,6 +40,11 @@ export class UpgradeActionRunner extends ActionRunner {
     return 'UPGRADE';
   }
 }
+
+const isActionIdCancelled = async (esClient: ElasticsearchClient, actionId: string) => {
+  const cancelledActions = await getCancelledActions(esClient);
+  return cancelledActions.filter((action) => action.actionId === actionId).length > 0;
+};
 
 export async function upgradeBatch(
   soClient: SavedObjectsClientContract,
@@ -108,6 +114,24 @@ export async function upgradeBatch(
     options.upgradeDurationSeconds
   );
 
+  if (options.actionId && (await isActionIdCancelled(esClient, options.actionId))) {
+    appContextService
+      .getLogger()
+      .info(
+        `Skipping batch of actionId:${options.actionId} of ${givenAgents.length} agents as the upgrade was cancelled`
+      );
+    return {
+      actionId: options.actionId,
+    };
+  }
+  if (options.actionId) {
+    appContextService
+      .getLogger()
+      .info(
+        `Continuing batch of actionId:${options.actionId} of ${givenAgents.length} agents of upgrade`
+      );
+  }
+
   await bulkUpdateAgents(
     esClient,
     agentsToUpdate.map((agent) => ({
@@ -120,7 +144,7 @@ export async function upgradeBatch(
     errors
   );
 
-  const actionId = options.actionId ?? uuid();
+  const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
 
   await createAgentAction(esClient, {

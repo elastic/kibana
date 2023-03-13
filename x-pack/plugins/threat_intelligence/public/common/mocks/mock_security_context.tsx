@@ -54,6 +54,7 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
   deregisterQuery: () => {},
 
   blockList: {
+    canWriteBlocklist: true,
     exceptionListApiClient: {},
     useSetUrlParams: () => (params, replace) => {},
     getFlyoutComponent: () => (<div />) as unknown as NamedExoticComponent<BlockListFlyoutProps>,

@@ -20,6 +20,7 @@ export const GetCertsParamsType = t.intersection([
     sortBy: t.string,
     direction: t.string,
     size: t.number,
+    filters: t.unknown,
   }),
 ]);
 

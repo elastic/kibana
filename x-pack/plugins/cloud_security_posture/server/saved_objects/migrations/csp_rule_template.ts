@@ -16,7 +16,7 @@ import {
   CspRuleTemplateV870,
 } from '../../../common/schemas/csp_rule_template';
 
-function migrateCspRuleMetadata(
+function migrateCspRuleTemplatesToV840(
   doc: SavedObjectUnsanitizedDoc<CspRuleTemplateV830>,
   context: SavedObjectMigrationContext
 ): SavedObjectUnsanitizedDoc<CspRuleTemplateV840> {
@@ -37,19 +37,29 @@ function migrateCspRuleMetadata(
   };
 }
 
-function migrateCspRuleTemplateDeprecateState(
+function migrateCspRuleTemplatesToV870(
   doc: SavedObjectUnsanitizedDoc<CspRuleTemplateV840>,
   context: SavedObjectMigrationContext
 ): SavedObjectUnsanitizedDoc<CspRuleTemplateV870> {
   // Keeps only metadata, deprecated state
   const { muted, enabled, ...attributes } = doc.attributes;
+
   return {
     ...doc,
-    attributes,
+    attributes: {
+      metadata: {
+        ...attributes.metadata,
+        benchmark: {
+          ...attributes.metadata.benchmark,
+          // CSPM introduced in 8.7, so we can assume all docs from 8.4.0 are KSPM
+          posture_type: 'kspm',
+        },
+      },
+    },
   };
 }
 
 export const cspRuleTemplateMigrations: SavedObjectMigrationMap = {
-  '8.4.0': migrateCspRuleMetadata,
-  '8.7.0': migrateCspRuleTemplateDeprecateState,
+  '8.4.0': migrateCspRuleTemplatesToV840,
+  '8.7.0': migrateCspRuleTemplatesToV870,
 };

@@ -37,7 +37,8 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
     const servicesStart = createMockEndpointAppContextServiceStartContract();
 
-    packagePolicyService = servicesStart.packagePolicyService as jest.Mocked<PackagePolicyClient>;
+    packagePolicyService = servicesStart.endpointFleetServicesFactory.asInternalUser()
+      .packagePolicy as jest.Mocked<PackagePolicyClient>;
 
     endpointAppContextServices = new EndpointAppContextService();
     endpointAppContextServices.setup(createMockEndpointAppContextServiceSetupContract());

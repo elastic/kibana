@@ -195,6 +195,8 @@ export default function (providerContext: FtrProviderContext) {
             status: 'IN_PROGRESS',
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 0,
+            hasRolloutPeriod: false,
+            latestErrors: [],
           },
           {
             actionId: 'action3',
@@ -207,6 +209,8 @@ export default function (providerContext: FtrProviderContext) {
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 0,
             completionTime: '2022-09-15T12:00:00.000Z',
+            hasRolloutPeriod: false,
+            latestErrors: [],
           },
           {
             actionId: 'action4',
@@ -218,6 +222,8 @@ export default function (providerContext: FtrProviderContext) {
             expiration: '2022-09-14T10:00:00.000Z',
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 0,
+            hasRolloutPeriod: false,
+            latestErrors: [],
           },
           {
             actionId: 'action5',
@@ -231,6 +237,8 @@ export default function (providerContext: FtrProviderContext) {
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 0,
             cancellationTime: '2022-09-15T11:00:00.000Z',
+            hasRolloutPeriod: false,
+            latestErrors: [],
           },
           {
             actionId: 'action7',
@@ -244,6 +252,15 @@ export default function (providerContext: FtrProviderContext) {
             creationTime: '2022-09-15T10:00:00.000Z',
             nbAgentsFailed: 1,
             completionTime: '2022-09-15T11:00:00.000Z',
+            hasRolloutPeriod: false,
+            latestErrors: [
+              {
+                agentId: 'agent1',
+                error: 'agent already assigned',
+                timestamp: '2022-09-15T11:00:00.000Z',
+                hostname: 'agent1',
+              },
+            ],
           },
         ]);
       });

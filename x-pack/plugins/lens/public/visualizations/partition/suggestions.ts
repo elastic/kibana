@@ -267,7 +267,11 @@ export function suggestions({
         ],
       },
       previewIcon: 'bullseye',
-      hide: true,
+      hide:
+        groups.length !== 2 ||
+        table.changeType === 'reduced' ||
+        hasIntervalScale(groups) ||
+        (state && state.shape === 'mosaic'),
     });
   }
 
@@ -279,7 +283,7 @@ export function suggestions({
       title: i18n.translate('xpack.lens.pie.waffleSuggestionLabel', {
         defaultMessage: 'As Waffle',
       }),
-      score: state?.shape === PieChartTypes.WAFFLE ? 0.7 : 0.5,
+      score: state?.shape === PieChartTypes.WAFFLE ? 0.7 : 0.4,
       state: {
         shape: PieChartTypes.WAFFLE,
         palette: mainPalette || state?.palette,
@@ -307,7 +311,11 @@ export function suggestions({
         ],
       },
       previewIcon: 'bullseye',
-      hide: true,
+      hide:
+        groups.length !== 1 ||
+        table.changeType === 'reduced' ||
+        hasIntervalScale(groups) ||
+        (state && state.shape === 'waffle'),
     });
   }
 

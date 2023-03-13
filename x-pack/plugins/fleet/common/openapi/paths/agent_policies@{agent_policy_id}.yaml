@@ -5,8 +5,9 @@ parameters:
     in: path
     required: true
 get:
-  summary: Agent policy - Info
-  tags: []
+  summary: Get agent policy by ID
+  tags:
+    - Agent policies
   responses:
     '200':
       description: OK
@@ -19,12 +20,15 @@ get:
                 $ref: ../components/schemas/agent_policy.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: agent-policy-info
   description: Get one agent policy
   parameters: []
 put:
-  summary: Agent policy - Update
-  tags: []
+  summary: Update agent policy by ID
+  tags:
+    - Agent policies
   responses:
     '200':
       description: OK
@@ -37,11 +41,13 @@ put:
                 $ref: ../components/schemas/agent_policy.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: update-agent-policy
   requestBody:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/new_agent_policy.yaml
+          $ref: ../components/schemas/agent_policy_update_request.yaml
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

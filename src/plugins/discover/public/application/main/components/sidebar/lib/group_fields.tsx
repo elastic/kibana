@@ -36,22 +36,30 @@ export interface SelectedFieldsResult {
   selectedFieldsMap: Record<string, boolean>;
 }
 
-export function getSelectedFields(
-  dataView: DataView | undefined,
-  columns: string[]
-): SelectedFieldsResult {
+export function getSelectedFields({
+  dataView,
+  columns,
+  allFields,
+  isPlainRecord,
+}: {
+  dataView: DataView | undefined;
+  columns: string[];
+  allFields: DataViewField[] | null;
+  isPlainRecord: boolean;
+}): SelectedFieldsResult {
   const result: SelectedFieldsResult = {
     selectedFields: [],
     selectedFieldsMap: {},
   };
-  if (!Array.isArray(columns) || !columns.length) {
+  if (!Array.isArray(columns) || !columns.length || !allFields) {
     return INITIAL_SELECTED_FIELDS_RESULT;
   }
 
   // add selected columns, that are not part of the data view, to be removable
   for (const column of columns) {
     const selectedField =
-      dataView?.getFieldByName?.(column) ||
+      (!isPlainRecord && dataView?.getFieldByName?.(column)) ||
+      allFields.find((field) => field.name === column) || // for example to pick a `nested` root field or find a selected field in text-based response
       ({
         name: column,
         displayName: column,

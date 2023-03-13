@@ -328,9 +328,7 @@ export class CustomIconModal extends Component<Props, State> {
         initialFocus=".mapsCustomIconForm__image"
       >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <h3>{title}</h3>
-          </EuiModalHeaderTitle>
+          <EuiModalHeaderTitle component="h3">{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" gutterSize="m">

@@ -14,8 +14,14 @@ export interface AlertContextMeta {
   series?: MetricsExplorerSeries;
 }
 
-export type MetricExpression = Omit<MetricExpressionParams, 'metric' | 'timeSize' | 'timeUnit'> & {
+export type MetricExpression = Omit<
+  MetricExpressionParams,
+  'metric' | 'timeSize' | 'timeUnit' | 'metrics' | 'equation' | 'customMetrics'
+> & {
   metric?: MetricExpressionParams['metric'];
+  customMetrics?: MetricExpressionParams['customMetrics'];
+  label?: MetricExpressionParams['label'];
+  equation?: MetricExpressionParams['equation'];
   timeSize?: MetricExpressionParams['timeSize'];
   timeUnit?: MetricExpressionParams['timeUnit'];
 };
@@ -30,6 +36,7 @@ export enum AGGREGATION_TYPES {
   CARDINALITY = 'cardinality',
   P95 = 'p95',
   P99 = 'p99',
+  CUSTOM = 'custom',
 }
 
 export interface MetricThresholdAlertParams {

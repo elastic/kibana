@@ -167,7 +167,7 @@ export const useCasesToast = () => {
       }
     },
     showSuccessToast: (title: string) => {
-      toasts.addSuccess(title);
+      toasts.addSuccess({ title, className: 'eui-textBreakWord' });
     },
   };
 };

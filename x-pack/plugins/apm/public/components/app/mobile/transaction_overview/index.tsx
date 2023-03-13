@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
@@ -17,11 +16,11 @@ import { useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { TransactionsTable } from '../../../shared/transactions_table';
 import { replace } from '../../../shared/links/url_helpers';
 import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 import { MobileTransactionCharts } from './transaction_charts';
+import { MobileTreemap } from '../charts/mobile_treemap';
 
 export function MobileTransactionOverview() {
   const {
@@ -51,7 +50,7 @@ export function MobileTransactionOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { transactionType, fallbackToTransactions } = useApmServiceContext();
+  const { transactionType } = useApmServiceContext();
 
   const history = useHistory();
 
@@ -65,16 +64,18 @@ export function MobileTransactionOverview() {
       <EuiFlexItem>
         <EuiHorizontalRule />
       </EuiFlexItem>
-      {fallbackToTransactions && (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <AggregatedTransactionsBadge />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-        </>
-      )}
+      <EuiFlexItem grow={10}>
+        <EuiPanel hasBorder={true}>
+          <MobileTreemap
+            serviceName={serviceName}
+            kuery={kueryWithMobileFilters}
+            environment={environment}
+            start={start}
+            end={end}
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiSpacer size="s" />
       <MobileTransactionCharts
         transactionType={transactionType}
         serviceName={serviceName}
@@ -90,7 +91,7 @@ export function MobileTransactionOverview() {
         <TransactionsTable
           hideViewTransactionsLink
           numberOfTransactionsPerPage={25}
-          showAggregationAccurateCallout
+          showMaxTransactionGroupsExceededWarning
           environment={environment}
           kuery={kueryWithMobileFilters}
           start={start}

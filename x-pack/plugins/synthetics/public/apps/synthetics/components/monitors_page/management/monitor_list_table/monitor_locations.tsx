@@ -34,7 +34,9 @@ export const MonitorLocations = ({ locations, monitorId, status }: Props) => {
     })
     .filter(Boolean) as LocationsStatus;
 
-  return <LocationStatusBadges locations={locationsToDisplay} loading={false} />;
+  return (
+    <LocationStatusBadges configId={monitorId} locations={locationsToDisplay} loading={false} />
+  );
 };
 
 function getLocationStatusColor(

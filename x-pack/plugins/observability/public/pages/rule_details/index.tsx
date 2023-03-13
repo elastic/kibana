@@ -39,10 +39,13 @@ import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { fromQuery, toQuery } from '../../utils/url';
+import {
+  defaultTimeRange,
+  getDefaultAlertSummaryTimeRange,
+} from '../../utils/alert_summary_widget';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
-import { getAlertSummaryWidgetTimeRange } from './helpers';
 
 import {
   EXECUTION_TAB,
@@ -68,15 +71,16 @@ import { ObservabilityAppServices } from '../../application/types';
 
 export function RuleDetailsPage() {
   const {
+    charts,
     http,
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
       ruleTypeRegistry,
-      getEditAlertFlyout,
+      getEditAlertFlyout: EditAlertFlyout,
       getRuleEventLogList,
       getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
-      getRuleStatusPanel,
+      getRuleStatusPanel: RuleStatusPanel,
       getRuleDefinition,
     },
     application: { capabilities, navigateToUrl },
@@ -90,6 +94,11 @@ export function RuleDetailsPage() {
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const history = useHistory();
   const location = useLocation();
+
+  const chartThemes = {
+    theme: charts.theme.useChartsTheme(),
+    baseTheme: charts.theme.useChartsBaseTheme(),
+  };
 
   const filteredRuleTypes = useMemo(
     () => observabilityRuleTypeRegistry.list(),
@@ -112,7 +121,7 @@ export function RuleDetailsPage() {
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
   const [alertSummaryWidgetTimeRange, setAlertSummaryWidgetTimeRange] = useState(
-    getAlertSummaryWidgetTimeRange
+    getDefaultAlertSummaryTimeRange
   );
   const ruleQuery = useRef<Query[]>([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
@@ -124,13 +133,16 @@ export function RuleDetailsPage() {
   });
   const tabsRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
+  }, [esQuery]);
+
   const onAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
-    const timeRange = getAlertSummaryWidgetTimeRange();
-    setAlertSummaryWidgetTimeRange(timeRange);
+    setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
     await locators.get(ruleDetailsLocatorID)?.navigate(
       {
-        rangeFrom: timeRange.utcFrom,
-        rangeTo: timeRange.utcTo,
+        rangeFrom: defaultTimeRange.from,
+        rangeTo: defaultTimeRange.to,
         ruleId,
         status,
         tabId: ALERTS_TAB,
@@ -275,6 +287,7 @@ export function RuleDetailsPage() {
                   featureIds={featureIds}
                   query={esQuery}
                   showExpandToDetails={false}
+                  showAlertStatusWithFlapping
                 />
               )}
             </EuiFlexItem>
@@ -380,16 +393,17 @@ export function RuleDetailsPage() {
     >
       <EuiFlexGroup wrap gutterSize="m">
         <EuiFlexItem style={{ minWidth: 350 }}>
-          {getRuleStatusPanel({
-            rule,
-            isEditable: hasEditButton,
-            requestRefresh: reloadRule,
-            healthColor: getHealthColor(rule.executionStatus.status),
-            statusMessage,
-          })}
+          <RuleStatusPanel
+            rule={rule}
+            isEditable={hasEditButton}
+            requestRefresh={reloadRule}
+            healthColor={getHealthColor(rule.executionStatus.status)}
+            statusMessage={statusMessage}
+          />
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
+            chartThemes={chartThemes}
             featureIds={featureIds}
             onClick={onAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}
@@ -409,14 +423,15 @@ export function RuleDetailsPage() {
           onTabIdChange(tab.id as TabId);
         }}
       />
-      {editFlyoutVisible &&
-        getEditAlertFlyout({
-          initialRule: rule,
-          onClose: () => {
+      {editFlyoutVisible && (
+        <EditAlertFlyout
+          initialRule={rule}
+          onClose={() => {
             setEditFlyoutVisible(false);
-          },
-          onSave: reloadRule,
-        })}
+          }}
+          onSave={reloadRule}
+        />
+      )}
       <DeleteModalConfirmation
         onDeleted={() => {
           setRuleToDelete([]);

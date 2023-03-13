@@ -9,18 +9,10 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-common.ApmSynthtraceEsClient",
+        "id": "def-server.ApmSynthtraceEsClient",
         "type": "Class",
         "tags": [],
         "label": "ApmSynthtraceEsClient",
@@ -31,7 +23,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-common.ApmSynthtraceEsClient.Unnamed",
+            "id": "def-server.ApmSynthtraceEsClient.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -45,7 +37,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-common.ApmSynthtraceEsClient.Unnamed.$1",
+                "id": "def-server.ApmSynthtraceEsClient.Unnamed.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "options",
@@ -68,7 +60,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-common.ApmSynthtraceEsClient.clean",
+            "id": "def-server.ApmSynthtraceEsClient.clean",
             "type": "Function",
             "tags": [],
             "label": "clean",
@@ -84,7 +76,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-common.ApmSynthtraceEsClient.updateComponentTemplate",
+            "id": "def-server.ApmSynthtraceEsClient.updateComponentTemplate",
             "type": "Function",
             "tags": [],
             "label": "updateComponentTemplate",
@@ -104,7 +96,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-common.ApmSynthtraceEsClient.updateComponentTemplate.$1",
+                "id": "def-server.ApmSynthtraceEsClient.updateComponentTemplate.$1",
                 "type": "Enum",
                 "tags": [],
                 "label": "name",
@@ -119,7 +111,7 @@
               },
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-common.ApmSynthtraceEsClient.updateComponentTemplate.$2",
+                "id": "def-server.ApmSynthtraceEsClient.updateComponentTemplate.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "modify",
@@ -140,7 +132,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-common.ApmSynthtraceEsClient.refresh",
+            "id": "def-server.ApmSynthtraceEsClient.refresh",
             "type": "Function",
             "tags": [],
             "label": "refresh",
@@ -156,7 +148,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-common.ApmSynthtraceEsClient.refresh.$1",
+                "id": "def-server.ApmSynthtraceEsClient.refresh.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "dataStreams",
@@ -174,7 +166,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-common.ApmSynthtraceEsClient.getDefaultPipeline",
+            "id": "def-server.ApmSynthtraceEsClient.getDefaultPipeline",
             "type": "Function",
             "tags": [],
             "label": "getDefaultPipeline",
@@ -190,7 +182,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-common.ApmSynthtraceEsClient.getDefaultPipeline.$1",
+                "id": "def-server.ApmSynthtraceEsClient.getDefaultPipeline.$1",
                 "type": "boolean",
                 "tags": [],
                 "label": "includeSerialization",
@@ -208,7 +200,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-common.ApmSynthtraceEsClient.pipeline",
+            "id": "def-server.ApmSynthtraceEsClient.pipeline",
             "type": "Function",
             "tags": [],
             "label": "pipeline",
@@ -224,7 +216,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-common.ApmSynthtraceEsClient.pipeline.$1",
+                "id": "def-server.ApmSynthtraceEsClient.pipeline.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "cb",
@@ -244,7 +236,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-common.ApmSynthtraceEsClient.getVersion",
+            "id": "def-server.ApmSynthtraceEsClient.getVersion",
             "type": "Function",
             "tags": [],
             "label": "getVersion",
@@ -260,7 +252,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-common.ApmSynthtraceEsClient.index",
+            "id": "def-server.ApmSynthtraceEsClient.index",
             "type": "Function",
             "tags": [],
             "label": "index",
@@ -292,7 +284,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-common.ApmSynthtraceEsClient.index.$1",
+                "id": "def-server.ApmSynthtraceEsClient.index.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "streamOrGenerator",
@@ -331,7 +323,7 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-common.ApmSynthtraceKibanaClient",
+        "id": "def-server.ApmSynthtraceKibanaClient",
         "type": "Class",
         "tags": [],
         "label": "ApmSynthtraceKibanaClient",
@@ -342,7 +334,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-common.ApmSynthtraceKibanaClient.Unnamed",
+            "id": "def-server.ApmSynthtraceKibanaClient.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -356,7 +348,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-common.ApmSynthtraceKibanaClient.Unnamed.$1",
+                "id": "def-server.ApmSynthtraceKibanaClient.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -367,7 +359,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/apm-synthtrace",
-                    "id": "def-common.ApmSynthtraceKibanaClient.Unnamed.$1.logger",
+                    "id": "def-server.ApmSynthtraceKibanaClient.Unnamed.$1.logger",
                     "type": "Object",
                     "tags": [],
                     "label": "logger",
@@ -381,7 +373,7 @@
                   },
                   {
                     "parentPluginId": "@kbn/apm-synthtrace",
-                    "id": "def-common.ApmSynthtraceKibanaClient.Unnamed.$1.target",
+                    "id": "def-server.ApmSynthtraceKibanaClient.Unnamed.$1.target",
                     "type": "string",
                     "tags": [],
                     "label": "target",
@@ -397,7 +389,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-common.ApmSynthtraceKibanaClient.fetchLatestApmPackageVersion",
+            "id": "def-server.ApmSynthtraceKibanaClient.fetchLatestApmPackageVersion",
             "type": "Function",
             "tags": [],
             "label": "fetchLatestApmPackageVersion",
@@ -413,7 +405,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-common.ApmSynthtraceKibanaClient.installApmPackage",
+            "id": "def-server.ApmSynthtraceKibanaClient.installApmPackage",
             "type": "Function",
             "tags": [],
             "label": "installApmPackage",
@@ -427,7 +419,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-common.ApmSynthtraceKibanaClient.installApmPackage.$1",
+                "id": "def-server.ApmSynthtraceKibanaClient.installApmPackage.$1",
                 "type": "string",
                 "tags": [],
                 "label": "packageVersion",
@@ -450,7 +442,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-common.createLogger",
+        "id": "def-server.createLogger",
         "type": "Function",
         "tags": [],
         "label": "createLogger",
@@ -459,9 +451,9 @@
           "(logLevel: ",
           {
             "pluginId": "@kbn/apm-synthtrace",
-            "scope": "common",
+            "scope": "server",
             "docId": "kibKbnApmSynthtracePluginApi",
-            "section": "def-common.LogLevel",
+            "section": "def-server.LogLevel",
             "text": "LogLevel"
           },
           ") => ",
@@ -473,7 +465,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-common.createLogger.$1",
+            "id": "def-server.createLogger.$1",
             "type": "Enum",
             "tags": [],
             "label": "logLevel",
@@ -481,9 +473,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/apm-synthtrace",
-                "scope": "common",
+                "scope": "server",
                 "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-common.LogLevel",
+                "section": "def-server.LogLevel",
                 "text": "LogLevel"
               }
             ],
@@ -501,7 +493,7 @@
     "enums": [
       {
         "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-common.LogLevel",
+        "id": "def-server.LogLevel",
         "type": "Enum",
         "tags": [],
         "label": "LogLevel",
@@ -512,6 +504,14 @@
         "initialIsOpen": false
       }
     ],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
     "misc": [],
     "objects": []
   }

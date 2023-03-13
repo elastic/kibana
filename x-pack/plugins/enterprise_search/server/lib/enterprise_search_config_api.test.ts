@@ -70,6 +70,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
       name: 'someuser',
       access: {
         app_search: true,
+        search_engines: true,
         workplace_search: false,
       },
       app_search: {
@@ -123,6 +124,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
       kibanaVersion: '1.0.0',
       access: {
         hasAppSearchAccess: true,
+        hasSearchEnginesAccess: true,
         hasWorkplaceSearchAccess: false,
       },
       publicUrl: 'http://some.vanity.url',
@@ -136,6 +138,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
       kibanaVersion: '1.0.0',
       access: {
         hasAppSearchAccess: false,
+        hasSearchEnginesAccess: false,
         hasWorkplaceSearchAccess: false,
       },
       publicUrl: undefined,

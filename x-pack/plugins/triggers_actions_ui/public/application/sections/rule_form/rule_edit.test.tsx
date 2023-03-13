@@ -21,9 +21,13 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-jest.mock('../../lib/rule_api', () => ({
+jest.mock('../../lib/rule_api/rule_types', () => ({
   loadRuleTypes: jest.fn(),
+}));
+jest.mock('../../lib/rule_api/update', () => ({
   updateRule: jest.fn().mockRejectedValue({ body: { message: 'Fail message' } }),
+}));
+jest.mock('../../lib/rule_api/health', () => ({
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
@@ -83,7 +87,7 @@ describe('rule_edit', () => {
       },
     };
 
-    const { loadRuleTypes } = jest.requireMock('../../lib/rule_api');
+    const { loadRuleTypes } = jest.requireMock('../../lib/rule_api/rule_types');
     const ruleTypes = [
       {
         id: 'my-rule-type',
@@ -170,6 +174,7 @@ describe('rule_edit', () => {
         status: 'unknown',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
       },
+      revision: 0,
       ...initialRuleFields,
     };
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);

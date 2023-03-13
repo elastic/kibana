@@ -112,6 +112,7 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
       },
       async exportExceptionList({
         id,
+        includeExpiredExceptions,
         listId,
         namespaceType,
         onError,
@@ -123,6 +124,7 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
           const blob = await Api.exportExceptionList({
             http,
             id,
+            includeExpiredExceptions,
             listId,
             namespaceType,
             signal: abortCtrl.signal,

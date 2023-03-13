@@ -5,10 +5,11 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { waitForActiveAlert } from '../../common/utils/wait_for_active_alert';
+import { createApmRule } from '../alerts/alerting_api_helper';
 
 export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -22,37 +23,41 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
   const end = Date.now();
   const goService = 'synth-go';
 
-  async function getServiceAlerts(serviceName: string) {
+  async function getServiceAlerts({
+    serviceName,
+    environment,
+  }: {
+    serviceName: string;
+    environment: string;
+  }) {
     return apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/alerts_count',
       params: {
         path: { serviceName },
+        query: {
+          start: new Date(start).toISOString(),
+          end: new Date(end + 5 * 60 * 1000).toISOString(),
+          environment,
+        },
       },
     });
   }
 
-  async function createRule() {
-    return supertest
-      .post(`/api/alerting/rule`)
-      .set('kbn-xsrf', 'true')
-      .send({
-        params: {
-          serviceName: goService,
-          transactionType: '',
-          windowSize: 99,
-          windowUnit: 'y',
-          threshold: 100,
-          aggregationType: 'avg',
-          environment: 'testing',
-        },
-        consumer: 'apm',
-        schedule: { interval: '1m' },
-        tags: ['apm'],
-        name: `Latency threshold | ${goService}`,
-        rule_type_id: ApmRuleType.TransactionDuration,
-        notify_when: 'onActiveAlert',
-        actions: [],
-      });
+  function createRule() {
+    return createApmRule({
+      supertest,
+      name: `Latency threshold | ${goService}`,
+      params: {
+        serviceName: goService,
+        transactionType: '',
+        windowSize: 99,
+        windowUnit: 'y',
+        threshold: 100,
+        aggregationType: AggregationType.Avg,
+        environment: 'testing',
+      },
+      ruleTypeId: ApmRuleType.TransactionDuration,
+    });
   }
 
   registry.when('Service alerts', { config: 'basic', archives: [] }, () => {
@@ -110,7 +115,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
     describe('with alerts', () => {
       let ruleId: string;
       before(async () => {
-        const { body: createdRule } = await createRule();
+        const createdRule = await createRule();
         ruleId = createdRule.id;
         await waitForActiveAlert({ ruleId, esClient, log });
       });
@@ -121,7 +126,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
       });
 
       it('returns the correct number of alerts', async () => {
-        const response = await getServiceAlerts(goService);
+        const response = await getServiceAlerts({ serviceName: goService, environment: 'testing' });
         expect(response.status).to.be(200);
         expect(response.body.serviceName).to.be(goService);
         expect(response.body.alertsCount).to.be(1);
@@ -130,7 +135,7 @@ export default function ServiceAlerts({ getService }: FtrProviderContext) {
 
     describe('without alerts', () => {
       it('returns the correct number of alerts', async () => {
-        const response = await getServiceAlerts(goService);
+        const response = await getServiceAlerts({ serviceName: goService, environment: 'foo' });
         expect(response.status).to.be(200);
         expect(response.body.serviceName).to.be(goService);
         expect(response.body.alertsCount).to.be(0);

@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Security: Linux - Looks for commands related to system network connection discovery from an unusual user context. This can be due to uncommon troubleshooting activity or due to a compromised account. A compromised account may be used by a threat actor to engage in system network connection discovery to increase their understanding of connected services and systems. This information may be used to shape follow-up behaviors such as lateral movement or additional discovery.",
   "groups": [
     "security",

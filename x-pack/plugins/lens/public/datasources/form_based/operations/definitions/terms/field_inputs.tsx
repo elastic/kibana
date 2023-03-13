@@ -102,7 +102,7 @@ export function FieldInputs({
           // * a field of unsupported type should be removed
           // * a field that has been used
           // * a scripted field was used in a singular term, should be marked as invalid for multi-terms
-          const filteredOperationByField = Object.keys(operationSupportMatrix.operationByField)
+          const filteredOperationByField = [...operationSupportMatrix.operationByField.keys()]
             .filter((key) => {
               if (key === value) {
                 return true;
@@ -120,9 +120,12 @@ export function FieldInputs({
               }
             })
             .reduce<OperationSupportMatrix['operationByField']>((memo, key) => {
-              memo[key] = operationSupportMatrix.operationByField[key];
+              const fieldOps = operationSupportMatrix.operationByField.get(key);
+              if (fieldOps) {
+                memo.set(key, fieldOps);
+              }
               return memo;
-            }, {});
+            }, new Map());
 
           const shouldShowError = Boolean(
             value &&

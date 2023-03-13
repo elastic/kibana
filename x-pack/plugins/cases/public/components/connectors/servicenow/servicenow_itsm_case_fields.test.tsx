@@ -71,15 +71,11 @@ describe('ServiceNowITSM Fields', () => {
       onChoicesSuccess(mockChoices);
     });
 
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(0).text()).toEqual(
-      'Urgency: 2 - High'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(1).text()).toEqual(
-      'Severity: 1 - Critical'
-    );
-    expect(wrapper.find('[data-test-subj="card-list-item"]').at(2).text()).toEqual(
-      'Impact: 3 - Moderate'
-    );
+    const nodes = wrapper.find('[data-test-subj="card-list-item"]').hostNodes();
+
+    expect(nodes.at(0).text()).toEqual('Urgency: 2 - High');
+    expect(nodes.at(1).text()).toEqual('Severity: 1 - Critical');
+    expect(nodes.at(2).text()).toEqual('Impact: 3 - Moderate');
   });
 
   it('transforms the categories to options correctly', async () => {

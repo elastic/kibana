@@ -7,7 +7,7 @@
 
 import { failure } from 'io-ts/lib/PathReporter';
 import { getOr } from 'lodash/fp';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
@@ -92,7 +92,7 @@ export const persistNote = async ({
     if (getOr(null, 'output.statusCode', err) === 403) {
       const noteToReturn: NoteResult = {
         ...note,
-        noteId: uuid.v1(),
+        noteId: uuidv1(),
         version: '',
         timelineId: '',
         timelineVersion: '',

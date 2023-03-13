@@ -395,7 +395,7 @@ describe('AddInferencePipelineFlyout', () => {
       );
       const actionButton = wrapper.find(EuiButton);
       expect(actionButton).toHaveLength(1);
-      expect(actionButton.prop('children')).toBe('Create');
+      expect(actionButton.prop('children')).toBe('Create pipeline');
       expect(actionButton.prop('color')).toBe('success');
       actionButton.prop('onClick')!({} as any);
       expect(actions.createPipeline).toHaveBeenCalledTimes(1);

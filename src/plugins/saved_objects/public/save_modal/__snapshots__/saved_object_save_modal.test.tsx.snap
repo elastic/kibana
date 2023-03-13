@@ -8,17 +8,15 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <h1>
-        <FormattedMessage
-          defaultMessage="Save {objectType}"
-          id="savedObjects.saveModal.saveTitle"
-          values={
-            Object {
-              "objectType": "visualization",
-            }
+      <FormattedMessage
+        defaultMessage="Save {objectType}"
+        id="savedObjects.saveModal.saveTitle"
+        values={
+          Object {
+            "objectType": "visualization",
           }
-        />
-      </h1>
+        }
+      />
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
@@ -109,17 +107,15 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <h1>
-        <FormattedMessage
-          defaultMessage="Save {objectType}"
-          id="savedObjects.saveModal.saveTitle"
-          values={
-            Object {
-              "objectType": "visualization",
-            }
+      <FormattedMessage
+        defaultMessage="Save {objectType}"
+        id="savedObjects.saveModal.saveTitle"
+        values={
+          Object {
+            "objectType": "visualization",
           }
-        />
-      </h1>
+        }
+      />
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
@@ -210,17 +206,15 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <h1>
-        <FormattedMessage
-          defaultMessage="Save {objectType}"
-          id="savedObjects.saveModal.saveTitle"
-          values={
-            Object {
-              "objectType": "visualization",
-            }
+      <FormattedMessage
+        defaultMessage="Save {objectType}"
+        id="savedObjects.saveModal.saveTitle"
+        values={
+          Object {
+            "objectType": "visualization",
           }
-        />
-      </h1>
+        }
+      />
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
@@ -311,17 +305,15 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <h1>
-        <FormattedMessage
-          defaultMessage="Save {objectType}"
-          id="savedObjects.saveModal.saveTitle"
-          values={
-            Object {
-              "objectType": "visualization",
-            }
+      <FormattedMessage
+        defaultMessage="Save {objectType}"
+        id="savedObjects.saveModal.saveTitle"
+        values={
+          Object {
+            "objectType": "visualization",
           }
-        />
-      </h1>
+        }
+      />
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>

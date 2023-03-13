@@ -6,9 +6,9 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { calculatePostureScore } from '../../../common/utils/helpers';
 import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
 import type { PosturePolicyTemplate, Stats } from '../../../common/types';
-import { calculatePostureScore } from './get_stats';
 
 export interface ScoreTrendDoc {
   '@timestamp': string;

@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiLink,
   EuiText,
-  EuiBadge,
   EuiSpacer,
   EuiDescriptionList,
   EuiLoadingContent,
@@ -19,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { capitalize } from 'lodash';
 import { TagsBadges } from './tag_badges';
 import { useFormatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 import { PanelWithTitle } from './panel_with_title';
@@ -32,6 +30,7 @@ import {
   MonitorFields,
   Ping,
 } from '../../../../../../common/runtime_types';
+import { MonitorTypeBadge } from './monitor_type_badge';
 
 const TitleLabel = euiStyled(EuiDescriptionListTitle)`
   width: 40%;
@@ -41,19 +40,25 @@ const DescriptionLabel = euiStyled(EuiDescriptionListDescription)`
   width: 60%;
 `;
 
+export interface MonitorDetailsPanelProps {
+  latestPing?: Ping;
+  loading: boolean;
+  configId: string;
+  monitor: EncryptedSyntheticsSavedMonitor | null;
+  hideEnabled?: boolean;
+  hideLocations?: boolean;
+  hasBorder?: boolean;
+}
+
 export const MonitorDetailsPanel = ({
   monitor,
   latestPing,
   loading,
   configId,
   hideEnabled = false,
-}: {
-  latestPing?: Ping;
-  loading: boolean;
-  configId: string;
-  monitor: EncryptedSyntheticsSavedMonitor | null;
-  hideEnabled?: boolean;
-}) => {
+  hideLocations = false,
+  hasBorder = true,
+}: MonitorDetailsPanelProps) => {
   const dispatch = useDispatch();
 
   if (!monitor) {
@@ -61,7 +66,12 @@ export const MonitorDetailsPanel = ({
   }
 
   return (
-    <PanelWithTitle paddingSize="m" title={MONITOR_DETAILS_LABEL} titleLeftAlign>
+    <PanelWithTitle
+      paddingSize="m"
+      title={MONITOR_DETAILS_LABEL}
+      titleLeftAlign
+      hasBorder={hasBorder}
+    >
       <WrapperStyle>
         <EuiSpacer size="s" />
         <EuiDescriptionList type="column" compressed align="left">
@@ -113,18 +123,19 @@ export const MonitorDetailsPanel = ({
           <DescriptionLabel>{configId}</DescriptionLabel>
           <TitleLabel>{MONITOR_TYPE_LABEL}</TitleLabel>
           <DescriptionLabel>
-            <EuiBadge>
-              {monitor?.type === 'browser'
-                ? capitalize(monitor?.type)
-                : monitor?.type?.toUpperCase()}
-            </EuiBadge>
+            <MonitorTypeBadge monitor={monitor} />
           </DescriptionLabel>
           <TitleLabel>{FREQUENCY_LABEL}</TitleLabel>
           <DescriptionLabel>{frequencyStr(monitor[ConfigKey.SCHEDULE])}</DescriptionLabel>
-          <TitleLabel>{LOCATIONS_LABEL}</TitleLabel>
-          <DescriptionLabel>
-            <LocationsStatus configId={monitor.id} monitorLocations={monitor.locations} />
-          </DescriptionLabel>
+
+          {!hideLocations && (
+            <>
+              <TitleLabel>{LOCATIONS_LABEL}</TitleLabel>
+              <DescriptionLabel>
+                <LocationsStatus configId={configId} monitorLocations={monitor.locations} />
+              </DescriptionLabel>
+            </>
+          )}
 
           <TitleLabel>{TAGS_LABEL}</TitleLabel>
           <DescriptionLabel>

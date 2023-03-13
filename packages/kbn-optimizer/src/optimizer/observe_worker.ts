@@ -12,7 +12,7 @@ import { fork, type ChildProcess } from 'child_process';
 import * as Rx from 'rxjs';
 import { map, takeUntil, first, ignoreElements } from 'rxjs/operators';
 
-import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRefs } from '../common';
+import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRemotes } from '../common';
 
 import { observeStdio$ } from './observe_stdio';
 import { OptimizerConfig } from './optimizer_config';
@@ -60,7 +60,6 @@ function usingWorkerProc<T>(config: OptimizerConfig, fn: (proc: ChildProcess) =>
     (): ProcResource => {
       const proc = fork(require.resolve('../worker/run_worker'), [], {
         execArgv: [
-          '--openssl-legacy-provider',
           `--require=@kbn/babel-register/install`,
           ...(inspectFlag && config.inspectWorkers
             ? [`${inspectFlag}=${inspectPortCounter++}`]
@@ -113,6 +112,8 @@ function initWorker(
     })
   );
 
+  const remotes = BundleRemotes.fromBundles(config.bundles).toSpecJson();
+
   return Rx.concat(
     msg$.pipe(first((msg) => msg === 'init')),
     Rx.defer(() => {
@@ -120,7 +121,7 @@ function initWorker(
         args: [
           JSON.stringify(workerConfig),
           JSON.stringify(bundles.map((b) => b.toSpec())),
-          BundleRefs.fromBundles(config.bundles).toSpecJson(),
+          remotes,
         ],
       });
       return [];

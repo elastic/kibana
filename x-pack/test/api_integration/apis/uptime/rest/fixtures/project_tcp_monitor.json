@@ -11,7 +11,8 @@
       "schedule": 1,
       "tags": [ "service:smtp", "org:google" ],
       "privateLocations": [ "BEEP" ],
-      "hash": "ekrjelkjrelkjre"
+      "hash": "ekrjelkjrelkjre",
+      "ssl.verification_mode": "strict"
     },
     {
       "locations": [ "localhost" ],

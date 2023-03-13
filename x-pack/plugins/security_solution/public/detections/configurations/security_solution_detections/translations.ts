@@ -12,3 +12,9 @@ export const SUPPRESSED_ALERT_TOOLTIP = (numAlertsSuppressed: number) =>
     defaultMessage: 'Alert has {numAlertsSuppressed} suppressed alerts',
     values: { numAlertsSuppressed },
   });
+
+/** The default minimum width of a column (when a width for the column type is not specified) */
+export const DEFAULT_TABLE_COLUMN_MIN_WIDTH = 180; // px
+
+/** The default minimum width of a column of type `date` */
+export const DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH = 190; // px

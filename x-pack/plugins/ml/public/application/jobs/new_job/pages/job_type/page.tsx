@@ -21,7 +21,6 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 
 import { useMlContext } from '../../../../contexts/ml';
-import { isSavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { timeBasedIndexCheck } from '../../../../util/index_utils';
@@ -46,7 +45,7 @@ export const Page: FC = () => {
 
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
 
-  const { currentSavedSearch, currentDataView } = mlContext;
+  const { currentDataView, selectedSavedSearch } = mlContext;
 
   const isTimeBasedIndex = timeBasedIndexCheck(currentDataView);
   const hasGeoFields = useMemo(
@@ -58,27 +57,27 @@ export const Page: FC = () => {
     [currentDataView]
   );
   const indexWarningTitle =
-    !isTimeBasedIndex && isSavedSearchSavedObject(currentSavedSearch)
+    !isTimeBasedIndex && selectedSavedSearch
       ? i18n.translate(
           'xpack.ml.newJob.wizard.jobType.dataViewFromSavedSearchNotTimeBasedMessage',
           {
             defaultMessage:
               '{savedSearchTitle} uses data view {dataViewName} which is not time based',
             values: {
-              savedSearchTitle: currentSavedSearch.attributes.title as string,
-              dataViewName: currentDataView.title,
+              savedSearchTitle: selectedSavedSearch.title ?? '',
+              dataViewName: currentDataView.getName(),
             },
           }
         )
       : i18n.translate('xpack.ml.newJob.wizard.jobType.dataViewNotTimeBasedMessage', {
           defaultMessage: 'Data view {dataViewName} is not time based',
-          values: { dataViewName: currentDataView.title },
+          values: { dataViewName: currentDataView.getName() },
         });
 
-  const pageTitleLabel = isSavedSearchSavedObject(currentSavedSearch)
+  const pageTitleLabel = selectedSavedSearch
     ? i18n.translate('xpack.ml.newJob.wizard.jobType.savedSearchPageTitleLabel', {
         defaultMessage: 'saved search {savedSearchTitle}',
-        values: { savedSearchTitle: currentSavedSearch.attributes.title as string },
+        values: { savedSearchTitle: selectedSavedSearch.title ?? '' },
       })
     : i18n.translate('xpack.ml.newJob.wizard.jobType.dataViewPageTitleLabel', {
         defaultMessage: 'data view {dataViewName}',
@@ -93,23 +92,23 @@ export const Page: FC = () => {
   };
 
   const getUrlParams = () => {
-    return !isSavedSearchSavedObject(currentSavedSearch)
+    return !selectedSavedSearch
       ? `?index=${currentDataView.id}`
-      : `?savedSearchId=${currentSavedSearch.id}`;
+      : `?savedSearchId=${selectedSavedSearch.id}`;
   };
 
   const addSelectionToRecentlyAccessed = async () => {
-    const title = !isSavedSearchSavedObject(currentSavedSearch)
-      ? currentDataView.title
-      : (currentSavedSearch.attributes.title as string);
+    const title = !selectedSavedSearch
+      ? currentDataView.getName()
+      : selectedSavedSearch.title ?? '';
     const mlLocator = share.url.locators.get(ML_APP_LOCATOR)!;
 
     const dataVisualizerLink = await mlLocator.getUrl(
       {
         page: ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
         pageState: {
-          ...(currentSavedSearch?.id
-            ? { savedSearchId: currentSavedSearch.id }
+          ...(selectedSavedSearch?.id
+            ? { savedSearchId: selectedSavedSearch.id }
             : { index: currentDataView.id }),
         },
       },
@@ -167,7 +166,7 @@ export const Page: FC = () => {
       }),
       description: i18n.translate('xpack.ml.newJob.wizard.jobType.populationDescription', {
         defaultMessage:
-          'Detect activity that is unusual compared to the behavior of the population.',
+          'Detect unusual activity in a population. Recommended for high cardinality data.',
       }),
       id: 'mlJobTypeLinkPopulationJob',
     },
@@ -235,7 +234,7 @@ export const Page: FC = () => {
         defaultMessage: 'Geo',
       }),
       description: i18n.translate('xpack.ml.newJob.wizard.jobType.geoDescription', {
-        defaultMessage: 'Detect anomalies in the geographic location of the input data.',
+        defaultMessage: 'Detect anomalies in the geographic location of the data.',
       }),
       id: 'mlJobTypeLinkGeoJob',
     });
@@ -295,7 +294,7 @@ export const Page: FC = () => {
         <EuiFlexGrid gutterSize="l" columns={4}>
           <DataRecognizer
             indexPattern={currentDataView}
-            savedSearch={currentSavedSearch}
+            savedSearch={selectedSavedSearch}
             results={recognizerResults}
           />
         </EuiFlexGrid>

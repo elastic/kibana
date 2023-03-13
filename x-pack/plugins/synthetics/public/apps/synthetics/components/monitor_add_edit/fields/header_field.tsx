@@ -17,6 +17,7 @@ export interface HeaderFieldProps {
   onChange: (value: Record<string, string>) => void;
   onBlur?: () => void;
   'data-test-subj'?: string;
+  readOnly?: boolean;
 }
 
 export const HeaderField = ({
@@ -25,6 +26,7 @@ export const HeaderField = ({
   onChange,
   onBlur,
   'data-test-subj': dataTestSubj,
+  readOnly,
 }: HeaderFieldProps) => {
   const defaultValueKeys = Object.keys(defaultValue).filter((key) => key !== 'Content-Type'); // Content-Type is a secret header we hide from the user
   const formattedDefaultValues: Pair[] = [
@@ -65,6 +67,7 @@ export const HeaderField = ({
       onChange={setHeaders}
       onBlur={() => onBlur?.()}
       data-test-subj={dataTestSubj}
+      readOnly={readOnly}
     />
   );
 };

@@ -391,7 +391,9 @@ function GraphWorkspace(options) {
   };
 
   // ======= Miscellaneous functions
-
+  /**
+   * @type void
+   */
   this.clearGraph = function () {
     this.stopLayout();
     this.nodes = [];
@@ -487,13 +489,18 @@ function GraphWorkspace(options) {
 
   //====== Layout functions ========
 
+  /**
+   * @type void
+   */
   this.stopLayout = function () {
     if (this.force) {
       this.force.stop();
     }
     this.force = null;
   };
-
+  /**
+   * @type void
+   */
   this.runLayout = function () {
     this.stopLayout();
     // The set of nodes and edges we present to the d3 layout algorithms

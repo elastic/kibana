@@ -131,7 +131,9 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
     });
 
     filteredPackageComponents.forEach((component) => {
-      packageErrorUnits.push(...filter(component.units, { status: 'failed' }));
+      packageErrorUnits.push(
+        ...filter(component.units, (u) => u.status === 'DEGRADED' || u.status === 'FAILED')
+      );
     });
     return packageErrorUnits;
   }, [agent.components, packagePolicy]);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   Column,
   ColumnWithMeta,
@@ -81,7 +81,7 @@ export const convertToLens: ConvertGaugeVisToLensVisualization = async (vis, tim
     }
   }
 
-  const layerId = uuid();
+  const layerId = uuidv4();
   const indexPatternId = dataView.id!;
 
   const metricAccessor = layerConfig.metrics[0];

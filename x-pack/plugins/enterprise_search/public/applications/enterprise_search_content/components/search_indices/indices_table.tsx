@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { Meta } from '../../../../../common/types';
+import { healthColorsMap } from '../../../shared/constants/health_colors';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
@@ -32,19 +33,12 @@ import {
   ingestionStatusToText,
 } from '../../utils/ingestion_status_helpers';
 
-const healthColorsMap = {
-  green: 'success',
-  red: 'danger',
-  unavailable: '',
-  yellow: 'warning',
-};
-
 interface IndicesTableProps {
   indices: ElasticsearchViewIndex[];
   isLoading?: boolean;
   meta: Meta;
   onChange: (criteria: CriteriaWithPagination<ElasticsearchViewIndex>) => void;
-  onDelete: (index: ElasticsearchViewIndex) => void;
+  onDelete: (indexName: string) => void;
 }
 
 export const IndicesTable: React.FC<IndicesTableProps> = ({
@@ -181,7 +175,7 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
                 },
               }
             ),
-          onClick: (index) => onDelete(index),
+          onClick: (index) => onDelete(index.name),
           type: 'icon',
         },
       ],

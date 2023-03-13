@@ -36,7 +36,9 @@ import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
 import { ConnectorSyncRules } from './connector/sync_rules/connector_rules';
 import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
 import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
+import { CrawlerConfiguration } from './crawler/crawler_configuration/crawler_configuration';
 import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
+import { NoConnectorRecord } from './crawler/no_connector_record';
 import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
@@ -56,6 +58,7 @@ export enum SearchIndexTabId {
   SCHEDULING = 'scheduling',
   // crawler indices
   DOMAIN_MANAGEMENT = 'domain_management',
+  CRAWLER_CONFIGURATION = 'crawler_configuration',
 }
 
 export const SearchIndex: React.FC = () => {
@@ -68,22 +71,34 @@ export const SearchIndex: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
 
   /**
-   * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index
+   * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index.
+   * This needs to be checked for any of the 3 registered search guideIds
    * Putting it here guarantees that if a user is viewing an index with data, it'll be marked as complete
    */
   const { guidedOnboarding } = useValues(KibanaLogic);
-  const isDataStepActive = useObservable(
-    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('search', 'add_data')
+  const isAppGuideActive = useObservable(
+    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('appSearch', 'add_data')
+  );
+  const isWebsiteGuideActive = useObservable(
+    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('websiteSearch', 'add_data')
+  );
+  const isDatabaseGuideActive = useObservable(
+    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('databaseSearch', 'add_data')
   );
   useEffect(() => {
-    if (isDataStepActive && index?.count) {
-      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('search', 'add_data');
+    if (isAppGuideActive && index?.count) {
+      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('appSearch', 'add_data');
+    } else if (isWebsiteGuideActive && index?.count) {
+      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('websiteSearch', 'add_data');
+    } else if (isDatabaseGuideActive && index?.count) {
+      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
     }
-  }, [isDataStepActive, index?.count]);
+  }, [isAppGuideActive, isWebsiteGuideActive, isDatabaseGuideActive, index?.count]);
 
   useEffect(() => {
     if (
       isConnectorIndex(index) &&
+      index.name === indexName &&
       index.connector.is_native &&
       index.connector.service_type === null
     ) {
@@ -154,6 +169,16 @@ export const SearchIndex: React.FC = () => {
       }),
     },
     {
+      content: <CrawlerConfiguration />,
+      id: SearchIndexTabId.CRAWLER_CONFIGURATION,
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.searchIndex.crawlerConfigurationTabLabel',
+        {
+          defaultMessage: 'Configuration',
+        }
+      ),
+    },
+    {
       content: <AutomaticCrawlScheduler />,
       id: SearchIndexTabId.SCHEDULING,
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
@@ -200,12 +225,16 @@ export const SearchIndex: React.FC = () => {
         rightSideItems: getHeaderActions(index),
       }}
     >
-      <>
-        {indexName === index?.name && (
-          <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
-        )}
-        {isCrawlerIndex(index) && <CrawlCustomSettingsFlyout />}
-      </>
+      {isCrawlerIndex(index) && !index.connector ? (
+        <NoConnectorRecord />
+      ) : (
+        <>
+          {indexName === index?.name && (
+            <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+          )}
+          {isCrawlerIndex(index) && <CrawlCustomSettingsFlyout />}
+        </>
+      )}
     </EnterpriseSearchContentPageTemplate>
   );
 };

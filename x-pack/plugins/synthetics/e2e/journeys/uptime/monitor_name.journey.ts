@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { journey, step, expect, Page } from '@elastic/synthetics';
 import { byTestId } from '@kbn/observability-plugin/e2e/utils';
 import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
@@ -13,7 +13,7 @@ import { monitorManagementPageProvider } from '../../page_objects/uptime/monitor
 journey(`MonitorName`, async ({ page, params }: { page: Page; params: any }) => {
   recordVideo(page);
 
-  const name = `Test monitor ${uuid.v4()}`;
+  const name = `Test monitor ${uuidv4()}`;
   const uptime = monitorManagementPageProvider({ page, kibanaUrl: params.kibanaUrl });
 
   const createBasicMonitor = async () => {

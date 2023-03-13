@@ -41,11 +41,9 @@ export async function scheduleSourceMapMigration({
   taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
       title: 'Migrate fleet source map artifacts',
-      description:
-        'Migrates fleet source map artifacts to `.apm-source-map` index',
+      description: `Migrates fleet source map artifacts to "${APM_SOURCE_MAP_INDEX}" index`,
       timeout: '1h',
       maxAttempts: 5,
-      maxConcurrency: 1,
       createTaskRunner() {
         const taskState: TaskState = { isAborted: false };
 

@@ -64,6 +64,7 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
       embeddable,
       layer.dataView!.id!,
       layer.geoField,
+      layer.query,
       selectedSplitField,
       share
     );
@@ -87,6 +88,7 @@ export const CompatibleLayer: FC<Props> = ({ embeddable, layer, layerIndex }) =>
           runInRealTime,
           sourceDataView: layer.dataView,
           geoField: layer.geoField,
+          layerLevelQuery: layer.query,
           splitField: selectedSplitField,
         });
 

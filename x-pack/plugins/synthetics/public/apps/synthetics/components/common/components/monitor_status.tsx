@@ -9,6 +9,28 @@ import { EuiBadge, EuiDescriptionList, EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSyntheticsMonitor } from '../../../../../../common/runtime_types';
 
+export const BadgeStatus = ({
+  status,
+  isBrowserType,
+}: {
+  status?: string;
+  isBrowserType: boolean;
+}) => {
+  return !status || status === 'unknown' ? (
+    <EuiBadge color="default" data-test-subj="monitorLatestStatusPending">
+      {PENDING_LABEL}
+    </EuiBadge>
+  ) : status === 'up' ? (
+    <EuiBadge color="success" data-test-subj="monitorLatestStatusUp">
+      {isBrowserType ? SUCCESS_LABEL : UP_LABEL}
+    </EuiBadge>
+  ) : (
+    <EuiBadge color="danger" data-test-subj="monitorLatestStatusDown">
+      {isBrowserType ? FAILED_LABEL : DOWN_LABEL}
+    </EuiBadge>
+  );
+};
+
 export const MonitorStatus = ({
   loading,
   monitor,
@@ -21,29 +43,22 @@ export const MonitorStatus = ({
   status?: string;
 }) => {
   const isBrowserType = monitor.type === 'browser';
-
-  const badge =
-    loading && !monitor ? (
-      <EuiLoadingContent lines={1} />
-    ) : !status || status === 'unknown' ? (
-      <EuiBadge color="default" data-test-subj="monitorLatestStatusPending">
-        {PENDING_LABEL}
-      </EuiBadge>
-    ) : status === 'up' ? (
-      <EuiBadge color="success" data-test-subj="monitorLatestStatusUp">
-        {isBrowserType ? SUCCESS_LABEL : UP_LABEL}
-      </EuiBadge>
-    ) : (
-      <EuiBadge color="danger" data-test-subj="monitorLatestStatusDown">
-        {isBrowserType ? FAILED_LABEL : DOWN_LABEL}
-      </EuiBadge>
-    );
+  const loadingContent = loading && !monitor;
 
   return (
     <EuiDescriptionList
       align="left"
       compressed={compressed}
-      listItems={[{ title: STATUS_LABEL, description: badge }]}
+      listItems={[
+        {
+          title: STATUS_LABEL,
+          description: loadingContent ? (
+            <EuiLoadingContent lines={1} />
+          ) : (
+            <BadgeStatus status={status} isBrowserType={isBrowserType} />
+          ),
+        },
+      ]}
     />
   );
 };

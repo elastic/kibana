@@ -7,7 +7,7 @@
 
 import { addExcludeFrozenToQuery } from './add_exclude_frozen_to_query';
 
-describe('Util: addExcludeFrozenToQuery()', () => {
+describe('addExcludeFrozenToQuery', () => {
   test('Validation checks.', () => {
     expect(
       addExcludeFrozenToQuery({

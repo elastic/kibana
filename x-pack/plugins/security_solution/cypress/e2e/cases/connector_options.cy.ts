@@ -73,9 +73,7 @@ describe('Cases connector incident fields', () => {
     cy.get(CONNECTOR_TITLE).should('have.text', getIbmResilientConnectorOptions().title);
     cy.get(CONNECTOR_CARD_DETAILS).should(
       'have.text',
-      `${
-        getIbmResilientConnectorOptions().title
-      }Incident Types: ${getIbmResilientConnectorOptions().incidentTypes.join(', ')}Severity: ${
+      `Incident Types: ${getIbmResilientConnectorOptions().incidentTypes.join(', ')}Severity: ${
         getIbmResilientConnectorOptions().severity
       }`
     );

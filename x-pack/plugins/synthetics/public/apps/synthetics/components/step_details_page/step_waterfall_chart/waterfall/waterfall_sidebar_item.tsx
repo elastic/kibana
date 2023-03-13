@@ -20,12 +20,12 @@ interface SidebarItemProps {
   highestIndex: number;
 }
 
-export const WaterfallSidebarItem = ({
+export const WaterfallSidebarItem = React.memo(function WaterfallSidebarItem({
   item,
   highestIndex,
   renderFilterScreenReaderText,
   onClick,
-}: SidebarItemProps) => {
+}: SidebarItemProps) {
   const [buttonRef, setButtonRef] = useState<RefObject<HTMLButtonElement | null>>();
   const { status, offsetIndex, index, isHighlighted, url } = item;
 
@@ -91,4 +91,4 @@ export const WaterfallSidebarItem = ({
       )}
     </SideBarItemHighlighter>
   );
-};
+});

@@ -90,7 +90,7 @@ export function ScriptRecorderFields({ onChange, script, fileName, isEditable }:
           ownFocus
           onClose={() => setShowScript(false)}
           aria-labelledby="syntheticsBrowserScriptBlockHeader"
-          closeButtonAriaLabel={CLOSE_BUTTON_LABEL}
+          closeButtonProps={{ 'aria-label': CLOSE_BUTTON_LABEL }}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">

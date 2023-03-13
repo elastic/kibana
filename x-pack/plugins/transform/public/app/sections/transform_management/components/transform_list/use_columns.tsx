@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -29,46 +29,14 @@ import {
   isPivotTransform,
   TransformId,
 } from '../../../../../../common/types/transform';
-import { TransformStats } from '../../../../../../common/types/transform_stats';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { getTransformProgress, TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
-// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
-const STATE_COLOR = {
-  aborting: 'warning',
-  failed: 'danger',
-  indexing: 'primary',
-  started: 'primary',
-  stopped: 'hollow',
-  stopping: 'hollow',
-  waiting: 'hollow',
-} as const;
-
-export const getTaskStateBadge = (
-  state: TransformStats['state'],
-  reason?: TransformStats['reason']
-) => {
-  const color = STATE_COLOR[state];
-
-  if (state === TRANSFORM_STATE.FAILED && reason !== undefined) {
-    return (
-      <EuiToolTip content={reason}>
-        <EuiBadge className="transform__TaskStateBadge" color={color}>
-          {state}
-        </EuiBadge>
-      </EuiToolTip>
-    );
-  }
-
-  return (
-    <EuiBadge className="transform__TaskStateBadge" color={color}>
-      {state}
-    </EuiBadge>
-  );
-};
+import { TransformHealthColoredDot } from './transform_health_colored_dot';
+import { TransformTaskStateBadge } from './transform_task_state_badge';
 
 export const useColumns = (
   expandedRowItemIds: TransformId[],
@@ -99,6 +67,7 @@ export const useColumns = (
     EuiTableFieldDataColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableFieldDataColumnType<TransformListRow>,
+    EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
@@ -233,7 +202,7 @@ export const useColumns = (
       sortable: (item: TransformListRow) => item.stats.state,
       truncateText: true,
       render(item: TransformListRow) {
-        return getTaskStateBadge(item.stats.state, item.stats.reason);
+        return <TransformTaskStateBadge state={item.stats.state} reason={item.stats.reason} />;
       },
       width: '100px',
     },
@@ -266,7 +235,7 @@ export const useColumns = (
         return (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             {isBatchTransform && (
-              <Fragment>
+              <>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
                   <EuiProgress
                     value={progress}
@@ -281,10 +250,10 @@ export const useColumns = (
                 <EuiFlexItem style={{ width: '35px' }} grow={false}>
                   <EuiText size="xs">{`${progress}%`}</EuiText>
                 </EuiFlexItem>
-              </Fragment>
+              </>
             )}
             {!isBatchTransform && (
-              <Fragment>
+              <>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
                   {/* If not stopped, failed or waiting show the animated progress bar */}
                   {item.stats.state !== TRANSFORM_STATE.STOPPED &&
@@ -302,10 +271,20 @@ export const useColumns = (
                 <EuiFlexItem style={{ width: '35px' }} grow={false}>
                   &nbsp;
                 </EuiFlexItem>
-              </Fragment>
+              </>
             )}
           </EuiFlexGroup>
         );
+      },
+      width: '100px',
+    },
+    {
+      name: i18n.translate('xpack.transform.health', { defaultMessage: 'Health' }),
+      'data-test-subj': 'transformListColumnHealth',
+      sortable: (item: TransformListRow) => item.stats.health.status,
+      truncateText: true,
+      render(item: TransformListRow) {
+        return <TransformHealthColoredDot healthStatus={item.stats.health.status} />;
       },
       width: '100px',
     },

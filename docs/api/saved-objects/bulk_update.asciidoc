@@ -4,7 +4,9 @@
 <titleabbrev>Bulk update objects</titleabbrev>
 ++++
 
-experimental[] Update the attributes for multiple existing {kib} saved objects.
+deprecated::[8.7.0, To be removed in an upcoming version]
+
+Update the attributes for multiple existing {kib} saved objects.
 
 [[saved-objects-api-bulk-update-request]]
 ==== Request

@@ -35,7 +35,7 @@ import {
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
   DeletePackageRequestSchemaDeprecated,
-  BulkUpgradePackagesFromRegistryRequestSchema,
+  BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
   UpdatePackageRequestSchema,
   UpdatePackageRequestSchemaDeprecated,
@@ -53,6 +53,7 @@ import {
   bulkInstallPackagesFromRegistryHandler,
   getStatsHandler,
   updatePackageHandler,
+  getVerificationKeyIdHandler,
 } from './handlers';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
@@ -149,7 +150,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.post(
     {
       path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
-      validate: BulkUpgradePackagesFromRegistryRequestSchema,
+      validate: BulkInstallPackagesFromRegistryRequestSchema,
       fleetAuthz: {
         integrations: { installPackages: true, upgradePackages: true },
       },
@@ -185,6 +186,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     deletePackageHandler
+  );
+
+  router.get(
+    {
+      path: EPM_API_ROUTES.VERIFICATION_KEY_ID,
+      validate: false,
+      fleetAuthz: {
+        integrations: { readPackageInfo: true },
+      },
+    },
+    getVerificationKeyIdHandler
   );
 
   // deprecated since 8.0
@@ -244,7 +256,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     async (context, request, response) => {
-      const newRequest = { ...request, params: splitPkgKey(request.params.pkgkey) } as any;
+      const newRequest = {
+        ...request,
+        params: splitPkgKey(request.params.pkgkey),
+        query: request.query,
+      } as any;
       const resp: IKibanaResponse<InstallPackageResponse> = await installPackageFromRegistryHandler(
         context,
         newRequest,

@@ -15,8 +15,7 @@ import type {
   DataMsg,
   DataTotalHits$,
   SavedSearchData,
-} from './use_saved_search';
-
+} from '../services/discover_data_state_container';
 /**
  * Sends COMPLETE message to the main$ observable with the information
  * that no documents have been found, allowing Discover to show a no

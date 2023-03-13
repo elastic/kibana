@@ -273,6 +273,19 @@ export const filterOutUnprocessableValueLists = async <
   return { filteredExceptions, unprocessableValueListExceptions };
 };
 
+export const removeExpiredExceptions = <
+  T extends ExceptionListItemSchema | CreateExceptionListItemSchema
+>(
+  lists: T[],
+  startedAt: Date
+): T[] =>
+  lists.filter((listItem) => {
+    if (listItem.expire_time && new Date(listItem.expire_time) < startedAt) {
+      return false;
+    }
+    return true;
+  });
+
 export const buildExceptionFilter = async <
   T extends ExceptionListItemSchema | CreateExceptionListItemSchema
 >({
@@ -281,17 +294,21 @@ export const buildExceptionFilter = async <
   chunkSize,
   alias = null,
   listClient,
+  startedAt,
 }: {
   lists: T[];
   excludeExceptions: boolean;
   chunkSize: number;
   alias: string | null;
   listClient: ListClient;
+  startedAt: Date;
 }): Promise<{ filter: Filter | undefined; unprocessedExceptions: T[] }> => {
+  const filteredLists = removeExpiredExceptions<T>(lists, startedAt);
+
   // Remove exception items with large value lists. These are evaluated
   // elsewhere for the moment being.
   const [exceptionsWithoutValueLists, valueListExceptions] = partition(
-    lists,
+    filteredLists,
     (item): item is T => !hasLargeValueList(item.entries)
   );
 

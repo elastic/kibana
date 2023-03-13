@@ -13,7 +13,7 @@ import { useStartServices } from '../../../../hooks';
 
 export function useHistoryBlock(isEdited: boolean) {
   const history = useHistory();
-  const { overlays, application } = useStartServices();
+  const { overlays, application, http } = useStartServices();
 
   useEffect(() => {
     if (!isEdited) {
@@ -32,11 +32,10 @@ export function useHistoryBlock(isEdited: boolean) {
             }),
           }
         );
-
         if (confirmRes) {
+          const url = http.basePath.prepend(state.pathname) + state.hash + state.search;
           unblock();
-
-          application.navigateToUrl(state.pathname + state.hash + state.search, {
+          application.navigateToUrl(url, {
             state: state.state,
           });
         }
@@ -46,5 +45,5 @@ export function useHistoryBlock(isEdited: boolean) {
     });
 
     return unblock;
-  }, [history, isEdited, overlays, application]);
+  }, [history, isEdited, overlays, application, http.basePath]);
 }

@@ -7,7 +7,7 @@
  */
 import { useState, useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { DataMsg } from './use_saved_search';
+import { DataMsg } from '../services/discover_data_state_container';
 
 export function useDataState<T extends DataMsg>(data$: BehaviorSubject<T>) {
   const [fetchState, setFetchState] = useState<T>(data$.getValue());

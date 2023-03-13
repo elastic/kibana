@@ -10,7 +10,9 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import type { Agent } from '../../types';
 import { AgentReassignmentError } from '../../errors';
 
-import { getAgentsById } from './crud';
+import { SO_SEARCH_LIMIT } from '../../constants';
+
+import { getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
 import type { GetAgentsOptions } from '.';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
@@ -36,16 +38,41 @@ export async function updateAgentTags(
       }
     }
   } else if ('kuery' in options) {
+    const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
+
+    const filters = [];
+    if (options.kuery !== '') {
+      filters.push(options.kuery);
+    }
+    if (tagsToAdd.length === 1 && tagsToRemove.length === 0) {
+      filters.push(`NOT (tags:${tagsToAdd[0]})`);
+    } else if (tagsToRemove.length === 1 && tagsToAdd.length === 0) {
+      filters.push(`tags:${tagsToRemove[0]}`);
+    }
+
+    const kuery = filters.map((filter) => `(${filter})`).join(' AND ');
+    const pitId = await openPointInTime(esClient);
+
+    // calculate total count
+    const res = await getAgentsByKuery(esClient, soClient, {
+      kuery,
+      showInactive: options.showInactive ?? false,
+      perPage: 0,
+      pitId,
+    });
+
     return await new UpdateAgentTagsActionRunner(
       esClient,
       soClient,
       {
         ...options,
-        kuery: options.kuery,
+        kuery,
         tagsToAdd,
         tagsToRemove,
+        batchSize,
+        total: res.total,
       },
-      { pitId: '' }
+      { pitId }
     ).runActionAsyncWithRetry();
   }
 

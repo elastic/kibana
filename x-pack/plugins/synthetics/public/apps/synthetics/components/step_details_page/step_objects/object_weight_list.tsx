@@ -13,7 +13,9 @@ import { useObjectMetrics } from '../hooks/use_object_metrics';
 
 export const ObjectWeightList = () => {
   const objectMetrics = useObjectMetrics();
-
+  const hasAnyThresholdBreach = objectMetrics.items.some(
+    ({ weightDelta }) => Math.abs(Number(weightDelta)) > 5
+  );
   return (
     <>
       <EuiFlexGroup>
@@ -29,16 +31,18 @@ export const ObjectWeightList = () => {
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <div>
-        {objectMetrics.items.map(({ label, mimeType, weightPercent, weight }) => (
+        {objectMetrics.items.map(({ label, mimeType, weightPercent, weight, weightDelta }) => (
           <Fragment key={mimeType}>
             <ColorPalette
+              hasAnyThresholdBreach={hasAnyThresholdBreach}
               label={label}
               mimeType={mimeType}
               percent={weightPercent}
               value={weight}
               loading={objectMetrics.loading}
+              delta={Number(weightDelta)}
             />
             <EuiSpacer size="m" />{' '}
           </Fragment>

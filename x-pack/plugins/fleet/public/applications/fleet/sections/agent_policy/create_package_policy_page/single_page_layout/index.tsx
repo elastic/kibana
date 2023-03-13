@@ -27,7 +27,7 @@ import { useCancelAddPackagePolicy } from '../hooks';
 import { splitPkgKey } from '../../../../../../../common/services';
 import { generateNewAgentPolicyWithDefaults } from '../../../../services';
 import type { NewAgentPolicy } from '../../../../types';
-import { useConfig, sendGetAgentStatus, useGetPackageInfoByKey } from '../../../../hooks';
+import { useConfig, sendGetAgentStatus, useGetPackageInfoByKeyQuery } from '../../../../hooks';
 import {
   Loading,
   Error as ErrorComponent,
@@ -97,7 +97,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion, { full: true, prerelease });
+  } = useGetPackageInfoByKeyQuery(pkgName, pkgVersion, { full: true, prerelease });
   const packageInfo = useMemo(() => {
     if (packageInfoData && packageInfoData.item) {
       return packageInfoData.item;
@@ -267,6 +267,34 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
+  const replaceDefineStepView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'package-policy-replace-define-step'
+  );
+
+  if (replaceDefineStepView && extensionView) {
+    throw new Error(
+      "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
+    );
+  }
+
+  const replaceStepConfigurePackagePolicy =
+    replaceDefineStepView && packageInfo?.name ? (
+      !isInitialized ? (
+        <Loading />
+      ) : (
+        <ExtensionWrapper>
+          <replaceDefineStepView.Component
+            agentPolicy={agentPolicy}
+            packageInfo={packageInfo}
+            newPolicy={packagePolicy}
+            onChange={handleExtensionViewOnChange}
+            validationResults={validationResults}
+            isEditPage={false}
+          />
+        </ExtensionWrapper>
+      )
+    ) : undefined;
 
   const stepConfigurePackagePolicy = useMemo(
     () =>
@@ -329,7 +357,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         defaultMessage: 'Configure integration',
       }),
       'data-test-subj': 'dataCollectionSetupStep',
-      children: stepConfigurePackagePolicy,
+      children: replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
     },
     {
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {

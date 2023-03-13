@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { InfraLoadingPanel } from '../../../../components/loading';
@@ -13,7 +13,9 @@ import { useMetricsDataViewContext } from '../hooks/use_data_view';
 import { UnifiedSearchBar } from './unified_search_bar';
 import { HostsTable } from './hosts_table';
 import { HostsViewProvider } from '../hooks/use_hosts_view';
-import { MetricsTrend } from './metrics_trend/metrics_trend';
+import { KPICharts } from './kpi_charts/kpi_charts';
+import { Tabs } from './tabs/tabs';
+import { AlertsQueryProvider } from '../hooks/use_alerts_query';
 
 export const HostContainer = () => {
   const { metricsDataView, isDataViewLoading, hasFailedLoadingDataView } =
@@ -36,9 +38,19 @@ export const HostContainer = () => {
       <UnifiedSearchBar dataView={metricsDataView} />
       <EuiSpacer />
       <HostsViewProvider>
-        <MetricsTrend />
-        <EuiSpacer />
-        <HostsTable />
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            <KPICharts />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <HostsTable />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AlertsQueryProvider>
+              <Tabs />
+            </AlertsQueryProvider>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </HostsViewProvider>
     </>
   );

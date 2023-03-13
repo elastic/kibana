@@ -194,12 +194,12 @@ export class ExecuteReportTask implements ReportingTask {
       ...doc,
     });
 
-    this.logger.debug(
+    this.logger.info(
       `Claiming ${claimedReport.jobtype} ${report._id} ` +
-        `[_index: ${report._index}]  ` +
-        `[_seq_no: ${report._seq_no}]  ` +
-        `[_primary_term: ${report._primary_term}]  ` +
-        `[attempts: ${report.attempts}]  ` +
+        `[_index: ${report._index}] ` +
+        `[_seq_no: ${report._seq_no}] ` +
+        `[_primary_term: ${report._primary_term}] ` +
+        `[attempts: ${report.attempts}] ` +
         `[process_expiration: ${expirationTime}]`
     );
 

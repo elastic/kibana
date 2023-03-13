@@ -172,7 +172,7 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
               <a
                 class="euiLink emotion-euiLink-primary"
                 href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
-                rel="noopener"
+                rel="noopener noreferrer"
                 target="_blank"
               >
                 docs

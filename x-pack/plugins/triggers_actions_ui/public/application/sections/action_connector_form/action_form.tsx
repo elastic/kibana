@@ -65,6 +65,9 @@ export interface ActionAccordionFormProps {
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
   hideActionHeader?: boolean;
   hideNotifyWhen?: boolean;
+  defaultSummaryMessage?: string;
+  hasSummary?: boolean;
+  minimumThrottleInterval?: [number | undefined, string];
 }
 
 interface ActiveActionConnectorState {
@@ -91,6 +94,9 @@ export const ActionForm = ({
   isActionGroupDisabledForActionType,
   hideActionHeader,
   hideNotifyWhen,
+  defaultSummaryMessage,
+  hasSummary,
+  minimumThrottleInterval,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -389,17 +395,16 @@ export const ActionForm = ({
                   (_item: RuleAction, i: number) => i !== index
                 );
                 setActions(updatedActions);
-                setIsAddActionPanelOpen(
-                  updatedActions.filter((item: RuleAction) => item.id !== actionItem.id).length ===
-                    0
-                );
+                setIsAddActionPanelOpen(updatedActions.length === 0);
                 setActiveActionItem(undefined);
               }}
               hideNotifyWhen={hideNotifyWhen}
+              defaultSummaryMessage={defaultSummaryMessage}
+              hasSummary={hasSummary}
+              minimumThrottleInterval={minimumThrottleInterval}
             />
           );
         })}
-      <EuiSpacer size="m" />
       {isAddActionPanelOpen ? (
         <>
           <EuiFlexGroup id="alertActionTypeTitle" justifyContent="spaceBetween">
@@ -449,9 +454,11 @@ export const ActionForm = ({
         </>
       ) : (
         <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow>
             <EuiButton
-              size="s"
+              size="m"
+              fullWidth
+              iconType="plusInCircle"
               data-test-subj="addAlertActionButton"
               onClick={() => setIsAddActionPanelOpen(true)}
             >

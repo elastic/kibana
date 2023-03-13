@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { EuiFlyout, EuiFlyoutFooter, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
-import type { Ecs } from '../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useKibana } from '../../../common/lib/kibana';
 import { OsqueryEventDetailsFooter } from './osquery_flyout_footer';
 import { ACTION_OSQUERY } from './translations';

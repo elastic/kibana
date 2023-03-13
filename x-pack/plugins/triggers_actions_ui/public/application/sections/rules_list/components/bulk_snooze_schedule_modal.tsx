@@ -158,8 +158,8 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
               id="xpack.triggersActionsUI.sections.rulesList.bulkSnoozeScheduleModal.modalTitle"
               defaultMessage="Add snooze schedule"
             />
-            <EuiSpacer size="s" />
           </EuiModalHeaderTitle>
+          <EuiSpacer size="s" />
         </EuiModalHeader>
         <EuiModalBody>
           <RuleSnoozeScheduler

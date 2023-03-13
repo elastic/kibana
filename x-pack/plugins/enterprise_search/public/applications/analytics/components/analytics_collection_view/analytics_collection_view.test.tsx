@@ -10,11 +10,12 @@ import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 import { mockUseParams } from '../../../__mocks__/react_router';
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 
 import { shallow } from 'enzyme';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
+import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
 
 import { AnalyticsCollectionIntegrate } from './analytics_collection_integrate/analytics_collection_integrate';
 import { AnalyticsCollectionSettings } from './analytics_collection_settings';
@@ -27,10 +28,12 @@ const mockValues = {
     id: '1',
     name: 'Analytics Collection 1',
   } as AnalyticsCollection,
+  dataViewId: '1234-1234-1234',
 };
 
 const mockActions = {
   fetchAnalyticsCollection: jest.fn(),
+  fetchAnalyticsCollectionDataViewId: jest.fn(),
 };
 
 describe('AnalyticsOverview', () => {
@@ -72,6 +75,32 @@ describe('AnalyticsOverview', () => {
       const wrapper = shallow(<AnalyticsCollectionView />);
 
       expect(wrapper.prop('pageViewTelemetry')).toBe('View Analytics Collection - settings');
+    });
+
+    it('send correct pageHeader rightSideItems when dataViewId exists', async () => {
+      setMockValues(mockValues);
+      setMockActions(mockActions);
+
+      const rightSideItems = shallow(<AnalyticsCollectionView />)
+        ?.find(EnterpriseSearchAnalyticsPageTemplate)
+        ?.prop('pageHeader')?.rightSideItems;
+
+      expect(rightSideItems).toHaveLength(1);
+
+      expect((rightSideItems?.[0] as ReactElement).props?.children?.props?.href).toBe(
+        "/app/discover#/?_a=(index:'1234-1234-1234')"
+      );
+    });
+
+    it('hide pageHeader rightSideItems when dataViewId not exists', async () => {
+      setMockValues({ ...mockValues, dataViewId: null });
+      setMockActions(mockActions);
+
+      const wrapper = shallow(<AnalyticsCollectionView />);
+
+      expect(
+        wrapper?.find(EnterpriseSearchAnalyticsPageTemplate)?.prop('pageHeader')?.rightSideItems
+      ).toBeUndefined();
     });
   });
 });

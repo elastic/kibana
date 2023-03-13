@@ -5,17 +5,10 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { FC, useCallback, useMemo } from 'react';
 
-import {
-  useIsWithinMaxBreakpoint,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
 
 import { useUrlState } from '@kbn/ml-url-state';
 import { useStorage } from '@kbn/ml-local-storage';
@@ -27,7 +20,7 @@ import {
   FROZEN_TIER_PREFERENCE,
 } from '@kbn/ml-date-picker';
 
-import { useCss } from '../../hooks/use_css';
+import moment from 'moment';
 import { useDataSource } from '../../hooks/use_data_source';
 import {
   AIOPS_FROZEN_TIER_PREFERENCE,
@@ -35,9 +28,11 @@ import {
   type AiOpsStorageMapped,
 } from '../../types/storage';
 
-export const PageHeader: FC = () => {
-  const { aiopsPageHeader, dataViewTitleHeader } = useCss();
+const dataViewTitleHeader = css({
+  minWidth: '300px',
+});
 
+export const PageHeader: FC = () => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
 
@@ -57,7 +52,12 @@ export const PageHeader: FC = () => {
 
   const updateTimeState: FullTimeRangeSelectorProps['callback'] = useCallback(
     (update) => {
-      setGlobalState({ time: { from: update.start.string, to: update.end.string } });
+      setGlobalState({
+        time: {
+          from: moment(update.start.epoch).toISOString(),
+          to: moment(update.end.epoch).toISOString(),
+        },
+      });
     },
     [setGlobalState]
   );
@@ -67,49 +67,32 @@ export const PageHeader: FC = () => {
     [dataView.timeFieldName]
   );
 
-  const isWithinLBreakpoint = useIsWithinMaxBreakpoint('l');
-
   return (
-    <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem>
-        <EuiPageContentHeader css={aiopsPageHeader}>
-          <EuiPageContentHeaderSection>
-            <div css={dataViewTitleHeader}>
-              <EuiTitle size="s">
-                <h2>{dataView.getName()}</h2>
-              </EuiTitle>
-            </div>
-          </EuiPageContentHeaderSection>
-
-          {isWithinLBreakpoint ? <EuiSpacer size="m" /> : null}
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="flexEnd"
-            gutterSize="s"
-            data-test-subj="aiopsTimeRangeSelectorSection"
-          >
-            {hasValidTimeField ? (
-              <EuiFlexItem grow={false}>
-                <FullTimeRangeSelector
-                  frozenDataPreference={frozenDataPreference}
-                  setFrozenDataPreference={setFrozenDataPreference}
-                  dataView={dataView}
-                  query={undefined}
-                  disabled={false}
-                  timefilter={timefilter}
-                  callback={updateTimeState}
-                />
-              </EuiFlexItem>
-            ) : null}
+    <EuiPageHeader
+      pageTitle={<div css={dataViewTitleHeader}>{dataView.getName()}</div>}
+      rightSideItems={[
+        <EuiFlexGroup gutterSize="s" data-test-subj="aiopsTimeRangeSelectorSection">
+          {hasValidTimeField ? (
             <EuiFlexItem grow={false}>
-              <DatePickerWrapper
-                isAutoRefreshOnly={!hasValidTimeField}
-                showRefresh={!hasValidTimeField}
+              <FullTimeRangeSelector
+                frozenDataPreference={frozenDataPreference}
+                setFrozenDataPreference={setFrozenDataPreference}
+                dataView={dataView}
+                query={undefined}
+                disabled={false}
+                timefilter={timefilter}
+                callback={updateTimeState}
               />
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageContentHeader>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          ) : null}
+          <DatePickerWrapper
+            isAutoRefreshOnly={!hasValidTimeField}
+            showRefresh={!hasValidTimeField}
+            width="full"
+            flexGroup={false}
+          />
+        </EuiFlexGroup>,
+      ]}
+    />
   );
 };

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
+import type { HostEcs, UserEcs } from '@kbn/securitysolution-ecs';
 import type { CommonFields, Maybe, RiskScoreFields, RiskSeverity, SortField } from '../../..';
-import type { HostEcs } from '../../../../ecs/host';
-import type { UserEcs } from '../../../../ecs/user';
 
 export interface UserRiskScoreItem {
   _id?: Maybe<string>;

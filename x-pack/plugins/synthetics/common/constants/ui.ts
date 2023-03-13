@@ -7,6 +7,8 @@
 
 export const MONITOR_ROUTE = '/monitor/:monitorId?';
 
+export const MONITOR_NOT_FOUND_ROUTE = '/monitor-not-found/:monitorId';
+
 export const MONITOR_HISTORY_ROUTE = '/monitor/:monitorId/history';
 
 export const MONITOR_ERRORS_ROUTE = '/monitor/:monitorId/errors';
@@ -24,6 +26,8 @@ export const MONITORS_ROUTE = '/monitors';
 export const GETTING_STARTED_ROUTE = '/monitors/getting-started';
 
 export const SETTINGS_ROUTE = '/settings';
+
+export const PRIVATE_LOCATIOSN_ROUTE = '/settings/private-locations';
 
 export const SYNTHETICS_SETTINGS_ROUTE = '/settings/:tabId';
 

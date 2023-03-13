@@ -10,6 +10,7 @@ import type {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';
 
@@ -34,6 +35,12 @@ export type RuleExecutionStatuses = typeof RuleExecutionStatusValues[number];
 
 export const RuleLastRunOutcomeValues = ['succeeded', 'warning', 'failed'] as const;
 export type RuleLastRunOutcomes = typeof RuleLastRunOutcomeValues[number];
+
+export const RuleLastRunOutcomeOrderMap: Record<RuleLastRunOutcomes, number> = {
+  succeeded: 0,
+  warning: 10,
+  failed: 20,
+};
 
 export enum RuleExecutionStatusErrorReasons {
   Read = 'read',
@@ -71,6 +78,7 @@ export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
 export interface RuleAction {
+  uuid?: string;
   group: string;
   id: string;
   actionTypeId: string;
@@ -82,8 +90,21 @@ export interface RuleAction {
   };
 }
 
-export interface RuleAggregations {
-  alertExecutionStatus: { [status: string]: number };
+export interface AggregateOptions {
+  search?: string;
+  defaultSearchOperator?: 'AND' | 'OR';
+  searchFields?: string[];
+  hasReference?: {
+    type: string;
+    id: string;
+  };
+  filter?: string | KueryNode;
+  page?: number;
+  perPage?: number;
+}
+
+export interface RuleAggregationFormattedResult {
+  ruleExecutionStatus: { [status: string]: number };
   ruleLastRunOutcome: { [status: string]: number };
   ruleEnabledStatus: { enabled: number; disabled: number };
   ruleMutedStatus: { muted: number; unmuted: number };
@@ -93,6 +114,7 @@ export interface RuleAggregations {
 
 export interface RuleLastRun {
   outcome: RuleLastRunOutcomes;
+  outcomeOrder?: number;
   warning?: RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons | null;
   outcomeMsg?: string[] | null;
   alertsCount: {
@@ -139,7 +161,9 @@ export interface Rule<Params extends RuleTypeParams = never> {
   isSnoozedUntil?: Date | null;
   lastRun?: RuleLastRun | null;
   nextRun?: Date | null;
+  revision: number;
   running?: boolean | null;
+  viewInAppRelativeUrl?: string;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;
@@ -161,6 +185,8 @@ export type SanitizedRuleConfig = Pick<
   | 'updatedAt'
   | 'throttle'
   | 'notifyWhen'
+  | 'muteAll'
+  | 'snoozeSchedule'
 > & {
   producer: string;
   ruleTypeId: string;
@@ -193,6 +219,7 @@ export interface ActionVariable {
   description: string;
   deprecated?: boolean;
   useWithTripleBracesInTemplates?: boolean;
+  usesPublicBaseUrl?: boolean;
 }
 
 export interface RuleMonitoringHistory extends SavedObjectAttributes {

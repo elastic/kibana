@@ -6,11 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { omit, mapValues, range, flatten } from 'lodash';
 import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
-import { alwaysFiringAlertType } from '@kbn/alerting-fixture-plugin/server/plugin';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
@@ -149,7 +148,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Rule Details', function () {
     describe('Header', function () {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
         const rule = await createRuleWithSmallInterval(testRunUuid);
@@ -317,7 +316,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Edit rule button', function () {
-      const ruleName = uuid.v4();
+      const ruleName = uuidv4();
       const updatedRuleName = `Changed Rule Name ${ruleName}`;
 
       before(async () => {
@@ -404,7 +403,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
-        await testSubjects.setValue('ruleNameInput', uuid.v4(), {
+        await testSubjects.setValue('ruleNameInput', uuidv4(), {
           clearWithKeyboard: true,
         });
 
@@ -422,7 +421,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Edit rule with deleted connector', function () {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
 
       afterEach(async () => {
         await objectRemover.removeAll();
@@ -600,7 +599,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Edit rule with legacy rule-level notify values', function () {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
 
       afterEach(async () => {
         await objectRemover.removeAll();
@@ -658,7 +657,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('View In App', function () {
-      const ruleName = uuid.v4();
+      const ruleName = uuidv4();
 
       beforeEach(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
@@ -711,7 +710,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Alerts', function () {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       let rule: any;
 
       before(async () => {
@@ -747,30 +746,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // refresh to ensure Api call and UI are looking at freshest output
         await browser.refresh();
 
-        // Get action groups
-        const { actionGroups } = alwaysFiringAlertType;
-
         // If the tab exists, click on the alert list
         await pageObjects.triggersActionsUI.maybeClickOnAlertTab();
 
         // Verify content
         await testSubjects.existOrFail('alertsList');
 
-        const actionGroupNameFromId = (actionGroupId: string) =>
-          actionGroups.find(
-            (actionGroup: { id: string; name: string }) => actionGroup.id === actionGroupId
-          )?.name;
-
         const summary = await getAlertSummary(rule.id);
         const dateOnAllAlertsFromApiResponse: Record<string, string> = mapValues(
           summary.alerts,
           (a) => a.activeStartDate
         );
-
-        const actionGroupNameOnAllInstancesFromApiResponse = mapValues(summary.alerts, (a) => {
-          const name = actionGroupNameFromId(a.actionGroupId);
-          return name ? ` (${name})` : '';
-        });
 
         log.debug(
           `API RESULT: ${Object.entries(dateOnAllAlertsFromApiResponse)
@@ -782,21 +768,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(alertsList.map((a) => omit(a, 'duration'))).to.eql([
           {
             alert: 'us-central',
-            status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-central']}`,
+            status: `Active`,
             start: moment(dateOnAllAlertsFromApiResponse['us-central'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             alert: 'us-east',
-            status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-east']}`,
+            status: `Active`,
             start: moment(dateOnAllAlertsFromApiResponse['us-east'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             alert: 'us-west',
-            status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-west']}`,
+            status: `Active`,
             start: moment(dateOnAllAlertsFromApiResponse['us-west'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
@@ -921,7 +907,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Alert Pagination', function () {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       let rule: any;
 
       before(async () => {
@@ -996,7 +982,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Execution log', () => {
-      const testRunUuid = uuid.v4();
+      const testRunUuid = uuidv4();
       let rule: any;
 
       before(async () => {
@@ -1048,20 +1034,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await refreshButton.click();
 
         // List, date picker, and status picker all exists
-        await testSubjects.existOrFail('ruleEventLogList');
+        await testSubjects.existOrFail('eventLogList');
         await testSubjects.existOrFail('ruleEventLogListDatePicker');
-        await testSubjects.existOrFail('ruleEventLogStatusFilterButton');
+        await testSubjects.existOrFail('eventLogStatusFilterButton');
 
-        let statusFilter = await testSubjects.find('ruleEventLogStatusFilterButton');
+        let statusFilter = await testSubjects.find('eventLogStatusFilterButton');
         let statusNumber = await statusFilter.findByCssSelector('.euiNotificationBadge');
 
         expect(statusNumber.getVisibleText()).to.eql(0);
 
         await statusFilter.click();
-        await testSubjects.click('ruleEventLogStatusFilter-success');
+        await testSubjects.click('eventLogStatusFilter-success');
         await statusFilter.click();
 
-        statusFilter = await testSubjects.find('ruleEventLogStatusFilterButton');
+        statusFilter = await testSubjects.find('eventLogStatusFilterButton');
         statusNumber = await statusFilter.findByCssSelector('.euiNotificationBadge');
 
         expect(statusNumber.getVisibleText()).to.eql(1);

@@ -438,6 +438,17 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.kbnanalytics",
             "type": "string",
             "tags": [],

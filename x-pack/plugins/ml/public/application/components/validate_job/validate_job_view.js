@@ -84,9 +84,7 @@ const LoadingSpinner = () => (
 const Modal = ({ close, title, children }) => (
   <EuiModal onClose={close} style={{ width: '800px' }}>
     <EuiModalHeader>
-      <EuiModalHeaderTitle>
-        <h1>{title}</h1>
-      </EuiModalHeaderTitle>
+      <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
     </EuiModalHeader>
 
     <EuiModalBody>{children}</EuiModalBody>

@@ -69,7 +69,9 @@ export const TagsBadges = ({ tags, onClick }: Props) => {
             content={
               <>
                 {tags.slice(toDisplay, tags.length).map((tag) => (
-                  <EuiText size="s">{tag}</EuiText>
+                  <EuiText key={tag} size="s">
+                    {tag}
+                  </EuiText>
                 ))}
               </>
             }
@@ -110,7 +112,7 @@ const EXPAND_TAGS_LABEL = i18n.translate('xpack.synthetics.management.monitorLis
 });
 
 const COLLAPSE_TAGS_LABEL = i18n.translate(
-  'xpack.synthetics.management.monitorList.tags.collpase',
+  'xpack.synthetics.management.monitorList.tags.collapse',
   {
     defaultMessage: 'Click to collapse tags',
   }

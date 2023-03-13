@@ -39,3 +39,6 @@ export const RulesSettingsLink = () => {
     </>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { RulesSettingsLink as default };

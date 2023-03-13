@@ -92,11 +92,16 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
       type: embeddable.type,
       explicitInput: { ...newInput },
     };
-    dashboard.replacePanel(panelToReplace, newPanel, true);
+    const replacedPanelId = await dashboard.replacePanel(panelToReplace, newPanel, true);
 
     const title = dashboardAddToLibraryActionStrings.getSuccessMessage(
       embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
     );
+
+    if (dashboard.getExpandedPanelId() !== undefined) {
+      dashboard.setExpandedPanelId(replacedPanelId);
+    }
+
     this.toastsService.addSuccess({
       title,
       'data-test-subj': 'addPanelToLibrarySuccess',

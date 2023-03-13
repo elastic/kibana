@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Metrics: Hosts - Identify unusual spikes in inbound traffic across hosts.",
   "groups": [
     "hosts",

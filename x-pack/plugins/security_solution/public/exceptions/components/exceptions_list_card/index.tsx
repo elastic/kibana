@@ -33,6 +33,7 @@ import { ListExceptionItems } from '../list_exception_items';
 import { useListDetailsView } from '../../hooks';
 import { useExceptionsListCard } from '../../hooks/use_exceptions_list.card';
 import { ManageRules } from '../manage_rules';
+import { ExportExceptionsListModal } from '../export_exceptions_list_modal';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
@@ -47,11 +48,15 @@ interface ExceptionsListCardProps {
   }) => () => Promise<void>;
   handleExport: ({
     id,
+    includeExpiredExceptions,
     listId,
+    name,
     namespaceType,
   }: {
     id: string;
+    includeExpiredExceptions: boolean;
     listId: string;
+    name: string;
     namespaceType: NamespaceType;
   }) => () => Promise<void>;
   readOnly: boolean;
@@ -115,6 +120,9 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
       emptyViewerTitle,
       emptyViewerBody,
       emptyViewerButtonText,
+      handleCancelExportModal,
+      handleConfirmExportModal,
+      showExportModal,
     } = useExceptionsListCard({
       exceptionsList,
       handleExport,
@@ -246,6 +254,12 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
             onSave={onSaveManageRules}
             onCancel={onCancelManageRules}
             onRuleSelectionChange={onRuleSelectionChange}
+          />
+        ) : null}
+        {showExportModal ? (
+          <ExportExceptionsListModal
+            handleCloseModal={handleCancelExportModal}
+            onModalConfirm={handleConfirmExportModal}
           />
         ) : null}
       </EuiFlexGroup>

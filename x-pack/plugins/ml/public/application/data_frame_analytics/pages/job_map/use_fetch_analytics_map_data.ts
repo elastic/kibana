@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import { asyncForEach } from '@kbn/std';
 import { uniqWith, isEqual } from 'lodash';
 import cytoscape from 'cytoscape';
 import { ml } from '../../../services/ml_api_service';
@@ -23,11 +24,11 @@ interface GetDataObjectParameter {
 export const useFetchAnalyticsMapData = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([]);
-  const [nodeDetails, setNodeDetails] = useState<Record<string, any>>({});
   const [error, setError] = useState<any>();
   const [message, setMessage] = useState<string | undefined>();
   // Keeps track of which nodes have been used as root so we can refetch related nodes on refresh
   const [usedAsRoot, setUsedAsRoot] = useState<Record<string, string | undefined>>({});
+  const nodeDetails = useRef<Record<string, any>>({});
 
   const fetchAndSetElements = async (idToUse: string, treatAsRoot: boolean, type?: string) => {
     setIsLoading(true);
@@ -57,11 +58,11 @@ export const useFetchAnalyticsMapData = () => {
     if (nodeElements?.length > 0) {
       if (treatAsRoot === false) {
         setElements(nodeElements);
-        setNodeDetails(details);
+        nodeDetails.current = details;
       } else {
         const uniqueElements = uniqWith([...nodeElements, ...elements], isEqual);
         setElements(uniqueElements);
-        setNodeDetails({ ...details, ...nodeDetails });
+        nodeDetails.current = { ...details, ...nodeDetails.current };
       }
     }
     setIsLoading(false);
@@ -88,11 +89,9 @@ export const useFetchAnalyticsMapData = () => {
 
     // If related nodes had been fetched from any node then refetch
     if (Object.keys(usedAsRoot).length) {
-      for (const nodeId in usedAsRoot) {
-        if (usedAsRoot.hasOwnProperty(nodeId)) {
-          await fetchAndSetElements(nodeId, true, usedAsRoot[nodeId]);
-        }
-      }
+      await asyncForEach(Object.keys(usedAsRoot), async (nodeId) => {
+        await fetchAndSetElements(nodeId, true, usedAsRoot[nodeId]);
+      });
     }
   };
 
@@ -102,7 +101,7 @@ export const useFetchAnalyticsMapData = () => {
     fetchAndSetElementsWrapper,
     isLoading,
     message,
-    nodeDetails,
+    nodeDetails: nodeDetails.current,
     setElements,
     setError,
   };

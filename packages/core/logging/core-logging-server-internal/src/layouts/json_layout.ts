@@ -9,7 +9,7 @@
 import moment from 'moment-timezone';
 import { merge } from '@kbn/std';
 import { schema } from '@kbn/config-schema';
-import { Ecs } from '@kbn/ecs';
+import { Ecs, EcsVersion } from '@kbn/ecs';
 import { LogRecord, Layout } from '@kbn/logging';
 
 const { literal, object } = schema;
@@ -43,7 +43,7 @@ export class JsonLayout implements Layout {
     const transactionId = record.meta?.transaction?.id ?? record.transactionId;
 
     const log: Ecs = {
-      ecs: { version: '8.4.0' },
+      ecs: { version: EcsVersion },
       '@timestamp': moment(record.timestamp).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
       message: record.message,
       error: JsonLayout.errorToSerializableObject(record.error),

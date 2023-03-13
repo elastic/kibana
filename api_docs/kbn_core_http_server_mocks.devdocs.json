@@ -338,17 +338,7 @@
         "label": "InternalHttpServicePrebootMock",
         "description": [],
         "signature": [
-          "{ auth: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.HttpAuth",
-            "text": "HttpAuth"
-          },
-          "; server: ",
-          "Server",
-          "; externalUrl: ",
+          "{ externalUrl: ",
           {
             "pluginId": "@kbn/core-http-server-internal",
             "scope": "common",
@@ -364,6 +354,16 @@
             "section": "def-common.ICspConfig",
             "text": "ICspConfig"
           },
+          "; auth: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.HttpAuth",
+            "text": "HttpAuth"
+          },
+          "; server: ",
+          "Server",
           "; registerStaticDir: jest.MockInstance<void, [path: string, dirPath: string]>; registerRouteHandlerContext: jest.MockInstance<any, [pluginOpaqueId: symbol, contextName: never, provider: ",
           {
             "pluginId": "@kbn/core-http-server",
@@ -421,9 +421,7 @@
         "label": "InternalHttpServiceSetupMock",
         "description": [],
         "signature": [
-          "{ server: ",
-          "Server",
-          "; externalUrl: ",
+          "{ externalUrl: ",
           {
             "pluginId": "@kbn/core-http-server-internal",
             "scope": "common",
@@ -439,6 +437,8 @@
             "section": "def-common.ICspConfig",
             "text": "ICspConfig"
           },
+          "; server: ",
+          "Server",
           "; registerStaticDir: jest.MockInstance<void, [path: string, dirPath: string]>; registerRouteHandlerContext: jest.MockInstance<any, [pluginOpaqueId: symbol, contextName: never, provider: ",
           {
             "pluginId": "@kbn/core-http-server",
@@ -553,7 +553,7 @@
           },
           ">) => void]>; } & Omit<",
           "InternalHttpServiceSetup",
-          ", \"createRouter\" | \"auth\" | \"basePath\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; createRouter: jest.MockedFunction<(path: string) => ",
+          ", \"createRouter\" | \"basePath\" | \"auth\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; createRouter: jest.MockedFunction<(path: string) => ",
           {
             "pluginId": "@kbn/core-http-router-server-mocks",
             "scope": "common",
@@ -804,9 +804,7 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<",
-                  "Readable",
-                  "> | ",
+                  "<Buffer> | ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -814,7 +812,9 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<Buffer> | undefined; plugins?: ",
+                  "<",
+                  "Readable",
+                  "> | undefined; plugins?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -843,8 +843,8 @@
                     "text": "DeepPartialObject"
                   },
                   "<",
-                  "Boom",
-                  "<any>> | ",
+                  "ResponseObject",
+                  "> | ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -853,8 +853,8 @@
                     "text": "DeepPartialObject"
                   },
                   "<",
-                  "ResponseObject",
-                  "> | undefined; readonly preResponses?: ",
+                  "Boom",
+                  "<any>> | undefined; readonly preResponses?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",

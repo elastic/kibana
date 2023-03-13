@@ -116,16 +116,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('median-partial-warning');
         await testSubjects.click('lns-indexPatternDimension-median');
         await PageObjects.lens.waitForVisualization('xyVisChart');
-        await PageObjects.lens.assertEditorWarning(
-          'Median of kubernetes.container.memory.available.bytes uses a function that is unsupported by rolled up data. Select a different function or change the time range.'
+        await PageObjects.lens.assertMessageListContains(
+          'Median of kubernetes.container.memory.available.bytes uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+          'warning'
         );
       });
       it('shows warnings in dashboards as well', async () => {
         await PageObjects.lens.save('New', false, false, false, 'new');
 
         await PageObjects.dashboard.waitForRenderComplete();
-        await PageObjects.lens.assertInlineWarning(
-          'Median of kubernetes.container.memory.available.bytes uses a function that is unsupported by rolled up data. Select a different function or change the time range.'
+        await PageObjects.lens.assertMessageListContains(
+          'Median of kubernetes.container.memory.available.bytes uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+          'warning'
         );
       });
     });

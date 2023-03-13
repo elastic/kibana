@@ -44,7 +44,7 @@ export const defaultRangeAnnotationLabel = i18n.translate(
   }
 );
 
-const isDateHistogram = (
+export const isDateHistogram = (
   dataLayers: XYDataLayerConfig[],
   frame?: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'> | undefined
 ) =>
@@ -475,8 +475,6 @@ export const getAnnotationsConfiguration = ({
   frame: Pick<FramePublicAPI, 'datasourceLayers'>;
   layer: XYAnnotationLayerConfig;
 }) => {
-  const hasDateHistogram = isDateHistogram(getDataLayers(state.layers), frame);
-
   const groupLabel = getAxisName('x', { isHorizontal: isHorizontalChart(state.layers) });
 
   const emptyButtonLabels = {
@@ -503,10 +501,6 @@ export const getAnnotationsConfiguration = ({
         ),
         accessors: getAnnotationsAccessorColorConfig(layer),
         dataTestSubj: 'lnsXY_xAnnotationsPanel',
-        invalid: !hasDateHistogram,
-        invalidMessage: i18n.translate('xpack.lens.xyChart.addAnnotationsLayerLabelDisabledHelp', {
-          defaultMessage: 'Annotations require a time based chart to work. Add a date histogram.',
-        }),
         requiredMinDimensionCount: 0,
         supportsMoreColumns: true,
         supportFieldFormat: false,
