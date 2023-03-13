@@ -1351,7 +1351,8 @@ describe('migration actions', () => {
     it('rejects if there are failures', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        'existing_index_with_write_block'
+        'existing_index_with_write_block',
+        1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
       const task = waitForPickupUpdatedMappingsTask({
@@ -1370,7 +1371,8 @@ describe('migration actions', () => {
     it('rejects if there is an error', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        'no_such_index'
+        'no_such_index',
+        1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
       const task = waitForPickupUpdatedMappingsTask({
@@ -1385,7 +1387,8 @@ describe('migration actions', () => {
     it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        '.kibana_1'
+        '.kibana_1',
+        1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
       const task = waitForPickupUpdatedMappingsTask({
@@ -1408,7 +1411,8 @@ describe('migration actions', () => {
     it('resolves right when successful', async () => {
       const res = (await pickupUpdatedMappings(
         client,
-        'existing_index_with_docs'
+        'existing_index_with_docs',
+        1000
       )()) as Either.Right<UpdateByQueryResponse>;
 
       const task = waitForPickupUpdatedMappingsTask({
@@ -1471,6 +1475,7 @@ describe('migration actions', () => {
             title: { type: 'text' },
           },
         },
+        batchSize: 1000,
       })();
       expect(Either.isRight(res)).toBe(true);
       const taskId = (res as Either.Right<UpdateAndPickupMappingsResponse>).right.taskId;

@@ -36,6 +36,7 @@ describe('updateAndPickupMappings', () => {
       client,
       index: 'new_index',
       mappings: { properties: {} },
+      batchSize: 1000,
     });
     try {
       await task();
@@ -65,6 +66,7 @@ describe('updateAndPickupMappings', () => {
           },
         },
       },
+      batchSize: 1000,
     });
     try {
       await task();
