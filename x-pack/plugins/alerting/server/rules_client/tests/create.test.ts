@@ -3230,7 +3230,7 @@ describe('create()', () => {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
       },
-      getSummarizedAlerts: () => {},
+      getSummarizedAlerts: jest.fn().mockResolvedValue({}),
     }));
 
     const data = getMockData({
@@ -3280,7 +3280,7 @@ describe('create()', () => {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
       },
-      getSummarizedAlerts: () => {},
+      getSummarizedAlerts: jest.fn().mockResolvedValue({}),
     }));
 
     const data = getMockData({

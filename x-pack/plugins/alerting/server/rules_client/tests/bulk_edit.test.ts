@@ -645,7 +645,24 @@ describe('bulkEdit()', () => {
       expect(result.rules[0]).toHaveProperty('revision', 1);
     });
 
-    test("should set timeframe and query in alertsFilter null if doesn't exist", async () => {
+    test("should set timeframe in alertsFilter null if doesn't exist", async () => {
+      ruleTypeRegistry.get.mockReturnValue({
+        id: 'myType',
+        name: 'Test',
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'custom', name: 'Not the Default' },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        async executor() {
+          return { state: {} };
+        },
+        producer: 'alerts',
+        getSummarizedAlerts: jest.fn().mockResolvedValue({}),
+      });
       const existingAction = {
         frequency: {
           notifyWhen: 'onActiveAlert',
@@ -696,7 +713,7 @@ describe('bulkEdit()', () => {
                   actionRef: 'action_1',
                   uuid: '222',
                   alertsFilter: {
-                    query: null,
+                    query: { kql: 'test:1', dsl: 'test' },
                     timeframe: null,
                   },
                 },
@@ -769,6 +786,7 @@ describe('bulkEdit()', () => {
               updatedAt: '2019-02-12T21:01:22.479Z',
               updatedBy: 'elastic',
               tags: ['foo'],
+              revision: 1,
             },
             references: [{ id: '1', name: 'action_0', type: 'action' }],
           },
@@ -782,7 +800,10 @@ describe('bulkEdit()', () => {
           {
             ...newAction,
             alertsFilter: {
-              query: null,
+              query: {
+                dsl: 'test',
+                kql: 'test:1',
+              },
               timeframe: null,
             },
           },

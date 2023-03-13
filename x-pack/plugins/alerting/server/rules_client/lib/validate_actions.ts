@@ -200,9 +200,10 @@ export async function validateActions(
       i18n.translate(
         'xpack.alerting.rulesClient.validateActions.actionsWithAlertsFilterWithoutSummaryGetter',
         {
-          defaultMessage: `This ruleType (${ruleType.name}) can't have an action with Alerts Filter. Actions: [{uuids}]`,
+          defaultMessage: `This ruleType ({ruleType}) can't have an action with Alerts Filter. Actions: [{uuids}]`,
           values: {
             uuids: actionsWithAlertsFilterWithoutSummaryGetter.map((a) => a.uuid).join(', '),
+            ruleType: ruleType.name,
           },
         }
       )
