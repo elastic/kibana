@@ -15,3 +15,5 @@ export type { ContentType } from './content_type';
 export type { ContentStorage, ContentTypeDefinition, StorageContext } from './types';
 
 export type { ContentRegistry } from './registry';
+
+export type { ContentCrud } from './crud';

@@ -11,6 +11,9 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 const migrationSchema = schema.object({
+  algorithm: schema.oneOf([schema.literal('v2'), schema.literal('zdt')], {
+    defaultValue: 'v2',
+  }),
   batchSize: schema.number({ defaultValue: 1_000 }),
   maxBatchSizeBytes: schema.byteSize({ defaultValue: '100mb' }), // 100mb is the default http.max_content_length Elasticsearch config value
   discardUnknownObjects: schema.maybe(
@@ -42,6 +45,13 @@ export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMi
 const soSchema = schema.object({
   maxImportPayloadBytes: schema.byteSize({ defaultValue: 26_214_400 }),
   maxImportExportSize: schema.number({ defaultValue: 10_000 }),
+  /* @internal Conditionally set default, dependening on if kibana's running from a dist build or not */
+  allowHttpApiAccess: schema.conditional(
+    schema.contextRef('dist'),
+    true,
+    schema.boolean({ defaultValue: true }),
+    schema.boolean({ defaultValue: false })
+  ),
 });
 
 export type SavedObjectsConfigType = TypeOf<typeof soSchema>;
@@ -50,11 +60,11 @@ export const savedObjectsConfig: ServiceConfigDescriptor<SavedObjectsConfigType>
   path: 'savedObjects',
   schema: soSchema,
 };
-
 export class SavedObjectConfig {
   public maxImportPayloadBytes: number;
   public maxImportExportSize: number;
-
+  /* @internal depend on env: see https://github.com/elastic/dev/issues/2200 */
+  public allowHttpApiAccess: boolean;
   public migration: SavedObjectsMigrationConfigType;
 
   constructor(
@@ -64,5 +74,6 @@ export class SavedObjectConfig {
     this.maxImportPayloadBytes = rawConfig.maxImportPayloadBytes.getValueInBytes();
     this.maxImportExportSize = rawConfig.maxImportExportSize;
     this.migration = rawMigrationConfig;
+    this.allowHttpApiAccess = rawConfig.allowHttpApiAccess;
   }
 }

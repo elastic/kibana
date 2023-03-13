@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           healthDescription: TRANSFORM_HEALTH_DESCRIPTION.green,
           healthLabel: TRANSFORM_HEALTH_LABEL.green,
-          healthStatus: TRANSFORM_HEALTH.GREEN,
+          healthStatus: TRANSFORM_HEALTH.green,
         },
       },
       {
@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           healthDescription: TRANSFORM_HEALTH_DESCRIPTION.green,
           healthLabel: TRANSFORM_HEALTH_LABEL.green,
-          healthStatus: TRANSFORM_HEALTH.GREEN,
+          healthStatus: TRANSFORM_HEALTH.green,
         },
       },
       {
@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           healthDescription: TRANSFORM_HEALTH_DESCRIPTION.yellow,
           healthLabel: TRANSFORM_HEALTH_LABEL.yellow,
-          healthStatus: TRANSFORM_HEALTH.YELLOW,
+          healthStatus: TRANSFORM_HEALTH.yellow,
         },
       },
       {
@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           healthDescription: TRANSFORM_HEALTH_DESCRIPTION.green,
           healthLabel: TRANSFORM_HEALTH_LABEL.green,
-          healthStatus: TRANSFORM_HEALTH.GREEN,
+          healthStatus: TRANSFORM_HEALTH.green,
         },
       },
       {
@@ -103,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           healthDescription: TRANSFORM_HEALTH_DESCRIPTION.green,
           healthLabel: TRANSFORM_HEALTH_LABEL.green,
-          healthStatus: TRANSFORM_HEALTH.GREEN,
+          healthStatus: TRANSFORM_HEALTH.green,
         },
       },
     ];
@@ -114,7 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       for (const testData of testDataList) {
         if (
-          testData.expected.healthStatus === TRANSFORM_HEALTH.YELLOW &&
+          testData.expected.healthStatus === TRANSFORM_HEALTH.yellow &&
           testData.type === 'pivot'
         ) {
           testData.originalConfig.pivot.aggregations['products.base_price.fail'] = {
@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.api.createTransform(
           testData.originalConfig.id,
           testData.originalConfig,
-          testData.expected.healthStatus === TRANSFORM_HEALTH.YELLOW
+          testData.expected.healthStatus === TRANSFORM_HEALTH.yellow
         );
       }
       await transform.testResources.setKibanaTimeZoneToUTC();
@@ -169,7 +169,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.table.assertTransformExpandedRowHealth(
             testData.expected.healthDescription,
-            testData.expected.healthStatus !== TRANSFORM_HEALTH.GREEN
+            testData.expected.healthStatus !== TRANSFORM_HEALTH.green
           );
 
           await transform.table.clearSearchString(testDataList.length);

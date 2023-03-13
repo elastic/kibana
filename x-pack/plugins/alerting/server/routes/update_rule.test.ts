@@ -42,6 +42,7 @@ describe('updateRuleRoute', () => {
     updatedAt: new Date(),
     actions: [
       {
+        uuid: '1234-5678',
         group: 'default',
         id: '2',
         actionTypeId: 'test',
@@ -58,6 +59,7 @@ describe('updateRuleRoute', () => {
     notify_when: mockedAlert.notifyWhen,
     actions: [
       {
+        uuid: '1234-5678',
         group: mockedAlert.actions[0].group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
@@ -114,6 +116,7 @@ describe('updateRuleRoute', () => {
                 "params": Object {
                   "baz": true,
                 },
+                "uuid": "1234-5678",
               },
             ],
             "name": "abc",

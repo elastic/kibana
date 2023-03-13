@@ -27,7 +27,7 @@ import { AddLocationFlyout } from './add_location_flyout';
 import { ClientPluginsStart } from '../../../../plugin';
 import { getServiceLocations } from '../../../state/actions';
 import { PrivateLocationsList } from './locations_list';
-import { useLocationsAPI } from './hooks/use_locations_api';
+import { usePrivateLocationsAPI } from './hooks/use_locations_api';
 import {
   getAgentPoliciesAction,
   selectAddingNewPrivateLocation,
@@ -49,7 +49,7 @@ export const ManageLocationsFlyout = () => {
 
   const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
 
-  const { onSubmit, loading, privateLocations, onDelete } = useLocationsAPI({
+  const { onSubmit, loading, privateLocations, onDelete } = usePrivateLocationsAPI({
     isOpen,
   });
 
@@ -164,7 +164,7 @@ export const NEED_PERMISSIONS = i18n.translate(
 );
 
 export const NEED_FLEET_READ_AGENT_POLICIES_PERMISSION = i18n.translate(
-  'xpack.synthetics.monitorManagement.needFleetReadAgentPoliciesPermission',
+  'xpack.synthetics.monitorManagement.needFleetReadAgentPoliciesPermissionUptime',
   {
     defaultMessage:
       'You are not authorized to access Fleet. Fleet permissions are required to create new private locations.',

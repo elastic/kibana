@@ -2172,7 +2172,7 @@
             },
             {
               "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/executors/query.ts"
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/query/query.ts"
             },
             {
               "plugin": "snapshotRestore",

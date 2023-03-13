@@ -41,6 +41,7 @@ describe('bulkEditInternalRulesRoute', () => {
         params: {
           foo: true,
         },
+        uuid: '123-456',
       },
     ],
     consumer: 'bar',
@@ -58,6 +59,7 @@ describe('bulkEditInternalRulesRoute', () => {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
+    revision: 0,
   };
 
   const mockedAlerts: Array<SanitizedRule<{}>> = [mockedAlert];
@@ -111,6 +113,7 @@ describe('bulkEditInternalRulesRoute', () => {
                 params: {
                   foo: true,
                 },
+                uuid: '123-456',
               },
             ],
           }),

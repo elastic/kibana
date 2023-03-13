@@ -33,8 +33,6 @@ import { healthColorsMap } from '../../../shared/constants/health_colors';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { SEARCH_INDEX_PATH } from '../../routes';
-import { IngestionMethod } from '../../types';
-import { ingestionMethodToText } from '../../utils/indices';
 
 import { EngineError } from '../engine/engine_error';
 
@@ -104,20 +102,6 @@ export const EngineListIndicesFlyout: React.FC = () => {
         }
       ),
       sortable: true,
-      truncateText: true,
-      width: '15%',
-    },
-    {
-      field: 'source',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.enginesList.indicesFlyout.table.ingestionMethod.columnTitle',
-        {
-          defaultMessage: 'Ingestion method',
-        }
-      ),
-      render: (source: IngestionMethod) => (
-        <EuiText size="s">{ingestionMethodToText(source)}</EuiText>
-      ),
       truncateText: true,
       width: '15%',
     },

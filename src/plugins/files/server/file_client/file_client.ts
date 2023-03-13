@@ -43,6 +43,8 @@ import {
 
 export type UploadOptions = Omit<BlobUploadOptions, 'id'>;
 
+const fourMiB = 4 * 1024 * 1024;
+
 export function createFileClient({
   fileKindDescriptor,
   auditLogger,
@@ -211,17 +213,28 @@ export class FileClientImpl implements FileClient {
    * @param options - Options for the upload
    */
   public upload = async (
-    id: string,
+    file: FileJSON,
     rs: Readable,
     options?: UploadOptions
   ): ReturnType<BlobStorageClient['upload']> => {
+    const { maxSizeBytes } = this.fileKindDescriptor;
+    const { transforms = [], ...blobOptions } = options || {};
+
+    let maxFileSize: number = typeof maxSizeBytes === 'number' ? maxSizeBytes : fourMiB;
+
+    if (typeof maxSizeBytes === 'function') {
+      const sizeLimitPerFile = maxSizeBytes(file);
+      if (typeof sizeLimitPerFile === 'number') {
+        maxFileSize = sizeLimitPerFile;
+      }
+    }
+
+    transforms.push(enforceMaxByteSizeTransform(maxFileSize));
+
     return this.blobStorageClient.upload(rs, {
-      ...options,
-      transforms: [
-        ...(options?.transforms || []),
-        enforceMaxByteSizeTransform(this.fileKindDescriptor.maxSizeBytes ?? Infinity),
-      ],
-      id,
+      ...blobOptions,
+      transforms,
+      id: file.id,
     });
   };
 

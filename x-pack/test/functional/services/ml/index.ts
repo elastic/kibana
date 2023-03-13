@@ -115,11 +115,26 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobTable = MachineLearningJobTableProvider(context, commonUI, customUrls);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
   const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, commonUI);
-  const jobWizardCategorization = MachineLearningJobWizardCategorizationProvider(context);
-  const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, commonUI, customUrls);
-  const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
-  const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
+  const jobWizardCategorization = MachineLearningJobWizardCategorizationProvider(
+    context,
+    commonFieldStatsFlyout
+  );
+  const jobWizardCommon = MachineLearningJobWizardCommonProvider(
+    context,
+    commonUI,
+    customUrls,
+    commonFieldStatsFlyout
+  );
   const jobWizardGeo = MachineLearningJobWizardGeoProvider(context);
+  const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(
+    context,
+    commonFieldStatsFlyout
+  );
+  const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(
+    context,
+    commonFieldStatsFlyout
+  );
+
   const lensVisualizations = MachineLearningLensVisualizationsProvider(context, commonUI);
   const navigation = MachineLearningNavigationProvider(context);
   const overviewPage = MachineLearningOverviewPageProvider(context);
@@ -178,9 +193,9 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     jobWizardAdvanced,
     jobWizardCategorization,
     jobWizardCommon,
+    jobWizardGeo,
     jobWizardMultiMetric,
     jobWizardPopulation,
-    jobWizardGeo,
     lensVisualizations,
     mlNodesPanel,
     navigation,

@@ -16,7 +16,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getEqlRuleForSignalTesting,
   getRuleForSignalTesting,
@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     describe('"kql" rule type', () => {

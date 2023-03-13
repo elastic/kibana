@@ -12,7 +12,7 @@ get:
     - $ref: '../components/parameters/space_id.yaml'
     - in: query
       name: includeComments
-      description: Determines whether case comments are returned.
+      description: Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
       deprecated: true
       schema:
         type: boolean

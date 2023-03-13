@@ -7,20 +7,27 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors, throwIfAnyTypeNotVisibleByAPI } from './utils';
+import {
+  catchAndReturnBoomErrors,
+  logWarnOnExternalRequest,
+  throwIfAnyTypeNotVisibleByAPI,
+} from './utils';
 
 interface RouteDependencies {
+  config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
 }
 
 export const registerBulkUpdateRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger }: RouteDependencies
 ) => {
+  const { allowHttpApiAccess } = config;
   router.put(
     {
       path: '/_bulk_update',
@@ -46,17 +53,21 @@ export const registerBulkUpdateRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
-      logger.warn(
-        "The bulk update saved object API '/api/saved_objects/_bulk_update' is deprecated."
-      );
+      logWarnOnExternalRequest({
+        method: 'put',
+        path: '/api/saved_objects/_bulk_update',
+        req,
+        logger,
+      });
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsBulkUpdate({ request: req }).catch(() => {});
 
       const { savedObjects } = await context.core;
 
       const typesToCheck = [...new Set(req.body.map(({ type }) => type))];
-      throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
-
+      if (!allowHttpApiAccess) {
+        throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
+      }
       const savedObject = await savedObjects.client.bulkUpdate(req.body);
       return res.ok({ body: savedObject });
     })
