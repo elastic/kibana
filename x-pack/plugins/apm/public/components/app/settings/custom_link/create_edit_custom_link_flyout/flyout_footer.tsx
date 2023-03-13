@@ -34,7 +34,7 @@ export function FlyoutFooter({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="apmFlyoutFooterCloseButton"
+            data-test-subj="apmCustomLinkFlyoutFooterCloseButton"
             iconType="cross"
             onClick={onClose}
             flush="left"
