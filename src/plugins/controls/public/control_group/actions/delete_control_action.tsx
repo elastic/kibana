@@ -8,16 +8,15 @@
 
 import React from 'react';
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { ViewMode, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { ViewMode, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
+import { ACTION_DELETE_CONTROL } from '.';
 import { pluginServices } from '../../services';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlEmbeddable, DataControlInput } from '../../types';
-import { isControlGroup } from '../embeddable/control_group_container';
-
-export const ACTION_DELETE_CONTROL = 'deleteControl';
+import { isControlGroup } from '../embeddable/control_group_helpers';
 
 export interface DeleteControlActionContext {
   embeddable: ControlEmbeddable<DataControlInput>;
@@ -79,7 +78,6 @@ export class DeleteControlAction implements Action<DeleteControlActionContext> {
     if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
-
     this.openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
       confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
       cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),

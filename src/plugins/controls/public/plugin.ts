@@ -28,8 +28,8 @@ import {
   IEditableControlFactory,
   ControlInput,
 } from './types';
-import { DeleteControlAction } from './control_group/actions/delete_control_action';
-import { EditControlAction } from './control_group/actions/edit_control_action';
+// import { DeleteControlAction } from './control_group/actions/delete_control_action';
+// import { EditControlAction } from './control_group/actions/edit_control_action';
 
 export class ControlsPlugin
   implements
@@ -118,10 +118,12 @@ export class ControlsPlugin
     this.startControlsKibanaServices(coreStart, startPlugins).then(async () => {
       const { uiActions } = startPlugins;
 
+      const { DeleteControlAction } = await import('./control_group/actions/delete_control_action');
       const deleteControlAction = new DeleteControlAction();
       uiActions.registerAction(deleteControlAction);
       uiActions.attachAction(PANEL_HOVER_TRIGGER, deleteControlAction.id);
 
+      const { EditControlAction } = await import('./control_group/actions/edit_control_action');
       const editControlAction = new EditControlAction(deleteControlAction);
       uiActions.registerAction(editControlAction);
       uiActions.attachAction(PANEL_HOVER_TRIGGER, editControlAction.id);

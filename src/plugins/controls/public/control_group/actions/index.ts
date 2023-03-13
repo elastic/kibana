@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { ACTION_EDIT_CONTROL } from './edit_control_action';
-export { ACTION_DELETE_CONTROL } from './delete_control_action';
+export const ACTION_EDIT_CONTROL = 'editControl';
+export const ACTION_DELETE_CONTROL = 'deleteControl';

@@ -13,15 +13,14 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { ControlGroupContainer } from '..';
 import { pluginServices } from '../../services';
 import { EditControlFlyout } from './edit_control_flyout';
 import { DeleteControlAction } from './delete_control_action';
 import { ControlGroupStrings } from '../control_group_strings';
+import { ACTION_EDIT_CONTROL, ControlGroupContainer } from '..';
 import { ControlEmbeddable, DataControlInput } from '../../types';
-import { isControlGroup, setFlyoutRef } from '../embeddable/control_group_container';
-
-export const ACTION_EDIT_CONTROL = 'editControl';
+import { setFlyoutRef } from '../embeddable/control_group_container';
+import { isControlGroup } from '../embeddable/control_group_helpers';
 
 export interface EditControlActionContext {
   embeddable: ControlEmbeddable<DataControlInput>;
@@ -103,8 +102,8 @@ export class EditControlAction implements Action<EditControlActionContext> {
               embeddable={embeddable}
               removeControl={() => this.deleteControlAction.execute({ embeddable })}
               closeFlyout={() => {
-                flyoutInstance.close();
                 setFlyoutRef(undefined);
+                flyoutInstance.close();
               }}
             />
           </ReduxWrapper>
@@ -115,8 +114,8 @@ export class EditControlAction implements Action<EditControlActionContext> {
         'aria-label': ControlGroupStrings.manageControl.getFlyoutEditTitle(),
         outsideClickCloses: false,
         onClose: (flyout) => {
-          flyout.close();
           setFlyoutRef(undefined);
+          flyout.close();
         },
         ownFocus: true,
       }

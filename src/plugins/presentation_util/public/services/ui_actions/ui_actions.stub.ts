@@ -5,12 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
 import { PluginServiceFactory } from '../create';
 import { PresentationUiActionsService } from './types';
 
 type CapabilitiesServiceFactory = PluginServiceFactory<PresentationUiActionsService>;
 
-export const uiActionsServiceFactory: CapabilitiesServiceFactory = () => ({
-  getTriggerCompatibleActions: () => Promise.resolve([]),
-});
+export const uiActionsServiceFactory: CapabilitiesServiceFactory = () => {
+  const { getTriggerCompatibleActions } = uiActionsPluginMock.createStartContract();
+  return { getTriggerCompatibleActions };
+};

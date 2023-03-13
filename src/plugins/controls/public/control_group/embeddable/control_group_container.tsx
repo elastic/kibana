@@ -16,7 +16,7 @@ import _ from 'lodash';
 import { ReduxEmbeddablePackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { Container, EmbeddableFactory, IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import { Container, EmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   ControlGroupInput,
   ControlGroupOutput,
@@ -54,10 +54,6 @@ import { ACTION_DELETE_CONTROL, ACTION_EDIT_CONTROL } from '../actions';
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
   flyoutRef = newRef;
-};
-
-export const isControlGroup = (embeddable: IEmbeddable): embeddable is ControlGroupContainer => {
-  return embeddable.isContainer && embeddable.type === CONTROL_GROUP_TYPE;
 };
 
 export class ControlGroupContainer extends Container<
