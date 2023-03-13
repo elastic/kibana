@@ -81,6 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
             executionStatus: { status: 'pending', lastExecutionDate: '2022-12-20T09:10:15.500Z' },
             ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
             running: false,
+            revision: 0,
           },
           omitFields
         )

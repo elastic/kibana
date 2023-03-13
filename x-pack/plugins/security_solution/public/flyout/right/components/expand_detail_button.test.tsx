@@ -22,7 +22,7 @@ describe('<ExpandDetailButton />', () => {
     const panelContextValue = {
       eventId: 'eventId',
       indexName: 'indexName',
-    };
+    } as unknown as RightPanelContext;
 
     const { getByTestId } = render(
       <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
