@@ -125,6 +125,7 @@ function createCoreRequestHandlerContextMock() {
     uiSettings: {
       client: uiSettingsServiceMock.createClient(),
       globalClient: uiSettingsServiceMock.createClient(),
+      userClient: uiSettingsServiceMock.createUserClient(),
     },
     deprecations: {
       client: deprecationsServiceMock.createClient(),

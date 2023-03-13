@@ -68,6 +68,7 @@ export const Settings = (props: Props) => {
   const [groupedSettings, setGroupedSettings] = useState<Record<UiSettingsScope, GroupedSettings>>({
     namespace: mapSettings(settings),
     global: mapSettings(globalSettings),
+    user: {},
   });
 
   const [categoryCounts, setCategoryCounts] = useState<
@@ -75,17 +76,20 @@ export const Settings = (props: Props) => {
   >({
     namespace: initCategoryCounts(groupedSettings.namespace),
     global: initCategoryCounts(groupedSettings.global),
+    user: {},
   });
 
   const [categories, setCategories] = useState<Record<UiSettingsScope, string[]>>({
     namespace: initCategories(groupedSettings.namespace),
     global: initCategories(groupedSettings.global),
+    user: [],
   });
 
   const [queryState, setQueryState] = useState<AdvancedSettingsState>({
     filteredSettings: {
       global: {},
       namespace: {},
+      user: {},
     },
     footerQueryMatched: false,
     query: Query.parse(''),
@@ -287,6 +291,7 @@ export const Settings = (props: Props) => {
     const filteredSettings = {
       namespace: mapSettings(Query.execute(query, settings)),
       global: mapSettings(Query.execute(query, globalSettings)),
+      user: {},
     };
 
     return {
