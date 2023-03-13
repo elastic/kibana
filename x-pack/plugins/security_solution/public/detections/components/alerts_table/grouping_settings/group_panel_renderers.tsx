@@ -25,7 +25,7 @@ import type { GenericBuckets } from '../../../../../common/search_strategy';
 import { PopoverItems } from '../../../../common/components/popover_items';
 import { COLUMN_TAGS } from '../../../pages/detection_engine/rules/translations';
 
-export const getSelectedGroupButtonContent = (
+export const renderGroupPanel = (
   selectedGroup: string,
   bucket: RawBucket<AlertsGroupingAggregation>
 ) => {

@@ -102,6 +102,16 @@ describe('KbnUrlStateStorage', () => {
       expect(cb).toBeCalledWith(expect.any(Error));
     });
 
+    it('should notify about errors throttled', () => {
+      const cb = jest.fn();
+      urlStateStorage = createKbnUrlStateStorage({ useHash: false, history, onGetError: cb });
+      const key = '_s';
+      history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
+      urlStateStorage.get(key);
+      urlStateStorage.get(key);
+      expect(cb).toBeCalledTimes(1);
+    });
+
     describe('withNotifyOnErrors integration', () => {
       test('toast is shown', () => {
         const toasts = coreMock.createStart().notifications.toasts;
