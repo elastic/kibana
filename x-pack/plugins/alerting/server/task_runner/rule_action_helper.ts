@@ -39,21 +39,21 @@ export const isSummaryActionPerRuleRun = (action: RuleAction) => {
 
 export const isSummaryActionThrottled = ({
   action,
-  summaryActions,
+  throttledSummaryActions,
   logger,
 }: {
   action?: RuleAction;
-  summaryActions?: ThrottledActions;
+  throttledSummaryActions?: ThrottledActions;
   logger: Logger;
 }) => {
   if (!isActionOnInterval(action)) {
     return false;
   }
-  if (!summaryActions) {
+  if (!throttledSummaryActions) {
     return false;
   }
-  const triggeredSummaryAction = summaryActions[action?.uuid!];
-  if (!triggeredSummaryAction) {
+  const throttledAction = throttledSummaryActions[action?.uuid!];
+  if (!throttledAction) {
     return false;
   }
   let throttleMills = 0;
@@ -63,7 +63,7 @@ export const isSummaryActionThrottled = ({
     logger.debug(`Action'${action?.actionTypeId}:${action?.id}', has an invalid throttle interval`);
   }
 
-  const throttled = triggeredSummaryAction.date.getTime() + throttleMills > Date.now();
+  const throttled = throttledAction.date.getTime() + throttleMills > Date.now();
 
   if (throttled) {
     logger.debug(

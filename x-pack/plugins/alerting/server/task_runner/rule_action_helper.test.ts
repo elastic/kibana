@@ -175,12 +175,12 @@ describe('rule_action_helper', () => {
       jest.useRealTimers();
     });
     const logger = { debug: jest.fn() } as unknown as Logger;
-    const summaryActions = { '111-111': { date: new Date('2020-01-01T00:00:00.000Z') } };
+    const throttledSummaryActions = { '111-111': { date: new Date('2020-01-01T00:00:00.000Z') } };
 
     test('should return false if the action does not have throttle filed', () => {
       const result = isSummaryActionThrottled({
         action: mockAction,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);
@@ -189,7 +189,7 @@ describe('rule_action_helper', () => {
     test('should return false if the action does not have frequency field', () => {
       const result = isSummaryActionThrottled({
         action: mockOldAction,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);
@@ -201,7 +201,7 @@ describe('rule_action_helper', () => {
           ...mockSummaryAction,
           frequency: { ...mockSummaryAction.frequency, notifyWhen: 'onActiveAlert' },
         } as RuleAction,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);
@@ -213,7 +213,7 @@ describe('rule_action_helper', () => {
           ...mockSummaryAction,
           frequency: { ...mockSummaryAction.frequency, throttle: null },
         } as RuleAction,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);
@@ -222,7 +222,7 @@ describe('rule_action_helper', () => {
     test('should return false if the action is not in the task instance', () => {
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
-        summaryActions: { '123-456': { date: new Date('2020-01-01T00:00:00.000Z') } },
+        throttledSummaryActions: { '123-456': { date: new Date('2020-01-01T00:00:00.000Z') } },
         logger,
       });
       expect(result).toBe(false);
@@ -232,7 +232,7 @@ describe('rule_action_helper', () => {
       jest.advanceTimersByTime(3600000 * 2);
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
-        summaryActions: { '123-456': { date: new Date('2020-01-01T00:00:00.000Z') } },
+        throttledSummaryActions: { '123-456': { date: new Date('2020-01-01T00:00:00.000Z') } },
         logger,
       });
       expect(result).toBe(false);
@@ -241,7 +241,7 @@ describe('rule_action_helper', () => {
     test('should return true for a throttling action', () => {
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(true);
@@ -250,7 +250,7 @@ describe('rule_action_helper', () => {
     test('should return false if the action is broken', () => {
       const result = isSummaryActionThrottled({
         action: undefined,
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);
@@ -259,7 +259,7 @@ describe('rule_action_helper', () => {
     test('should return false if there is no summary action in the state', () => {
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
-        summaryActions: undefined,
+        throttledSummaryActions: undefined,
         logger,
       });
       expect(result).toBe(false);
@@ -275,7 +275,7 @@ describe('rule_action_helper', () => {
             throttle: '1',
           },
         },
-        summaryActions,
+        throttledSummaryActions,
         logger,
       });
       expect(result).toBe(false);

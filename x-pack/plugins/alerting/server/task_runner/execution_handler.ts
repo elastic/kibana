@@ -14,10 +14,16 @@ import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/s
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { GetSummarizedAlertsFnOpts, parseDuration, RawRule, ThrottledActions } from '../types';
+import {
+  GetSummarizedAlertsFnOpts,
+  parseDuration,
+  RawRule,
+  CombinedSummarizedAlerts,
+  ThrottledActions,
+} from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
-import { ExecutionHandlerOptions, RuleTaskInstance } from './types';
+import { Executable, ExecutionHandlerOptions, RuleTaskInstance } from './types';
 import { TaskRunnerContext } from './task_runner_factory';
 import { transformActionParams, transformSummaryActionParams } from './transform_action_params';
 import { Alert } from '../alert';
@@ -36,8 +42,8 @@ import {
   getSummaryActionsFromTaskState,
   isActionOnInterval,
   isSummaryAction,
-  isSummaryActionThrottled,
   isSummaryActionPerRuleRun,
+  isSummaryActionThrottled,
 } from './rule_action_helper';
 
 enum Reasons {
@@ -133,7 +139,7 @@ export class ExecutionHandler<
       actions: this.rule.actions,
       summaryActions: this.taskInstance.state?.summaryActions,
     });
-    const executables = this.generateExecutables(alerts, throttledSummaryActions);
+    const executables = await this.generateExecutables(alerts, throttledSummaryActions);
 
     if (!!executables.length) {
       const {
@@ -152,7 +158,7 @@ export class ExecutionHandler<
 
       this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
 
-      for (const { action, alert } of executables) {
+      for (const { action, alert, summarizedAlerts } of executables) {
         const { actionTypeId } = action;
         const actionGroup = action.group as ActionGroupIds;
 
@@ -197,18 +203,7 @@ export class ExecutionHandler<
         ruleRunMetricsStore.incrementNumberOfTriggeredActions();
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
-        if (isSummaryAction(action)) {
-          const summarizedAlerts = await this.getSummarizedAlerts({
-            action,
-            spaceId,
-            ruleId,
-          });
-          this.logNumberOfFilteredAlerts({
-            numberOfAlerts: Object.keys(alerts).length,
-            numberOfSummarizedAlerts: summarizedAlerts.all.count,
-            action,
-          });
-
+        if (isSummaryAction(action) && summarizedAlerts) {
           if (isSummaryActionPerRuleRun(action) && summarizedAlerts.all.count === 0) {
             continue;
           }
@@ -483,27 +478,40 @@ export class ExecutionHandler<
     };
   }
 
-  private generateExecutables(
+  private async generateExecutables(
     alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>,
-    summaryActions: ThrottledActions
-  ) {
+    throttledSummaryActions: ThrottledActions
+  ): Promise<Array<Executable<State, Context, ActionGroupIds, RecoveryActionGroupId>>> {
     const executables = [];
 
     for (const action of this.rule.actions) {
+      const alertsArray = Object.entries(alerts);
+      const summarizedAlerts = await this.getSummarizedAlerts({
+        action,
+        spaceId: this.taskInstance.params.spaceId,
+        ruleId: this.taskInstance.params.alertId,
+        throttledSummaryActions,
+      });
+
+      if (summarizedAlerts !== null) {
+        this.logNumberOfFilteredAlerts({
+          numberOfAlerts: alertsArray.length,
+          numberOfSummarizedAlerts: summarizedAlerts.all.count,
+          action,
+        });
+      }
+
       if (isSummaryAction(action)) {
-        if (
-          this.canFetchSummarizedAlerts(action) &&
-          !isSummaryActionThrottled({
-            action,
-            summaryActions,
-            logger: this.logger,
-          })
-        ) {
-          executables.push({ action });
+        if (summarizedAlerts !== null) {
+          executables.push({ action, summarizedAlerts });
         }
         continue;
       }
-      for (const [alertId, alert] of Object.entries(alerts)) {
+
+      for (const [alertId, alert] of alertsArray) {
+        if (alert.isFilteredOut(summarizedAlerts)) {
+          continue;
+        }
         const actionGroup = this.getActionGroup(alert);
 
         if (!this.ruleTypeActionGroups!.has(actionGroup)) {
@@ -541,11 +549,33 @@ export class ExecutionHandler<
     action,
     ruleId,
     spaceId,
+    throttledSummaryActions,
   }: {
     action: RuleAction;
     ruleId: string;
     spaceId: string;
-  }) {
+    throttledSummaryActions: ThrottledActions;
+  }): Promise<CombinedSummarizedAlerts | null> {
+    if (!this.canFetchSummarizedAlerts(action)) {
+      return null;
+    }
+
+    // we fetch summarizedAlerts to filter alerts in memory as well
+    if (!isSummaryAction(action) && !action.alertsFilter) {
+      return null;
+    }
+
+    if (
+      isSummaryAction(action) &&
+      isSummaryActionThrottled({
+        action,
+        throttledSummaryActions,
+        logger: this.logger,
+      })
+    ) {
+      return null;
+    }
+
     let options: GetSummarizedAlertsFnOpts = {
       ruleId,
       spaceId,

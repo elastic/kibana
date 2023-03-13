@@ -621,3 +621,31 @@ describe('resetPendingRecoveredCount', () => {
     expect(alert.getPendingRecoveredCount()).toEqual(0);
   });
 });
+
+describe('isFilteredOut', () => {
+  const summarizedAlerts = {
+    all: { count: 1, data: [{ kibana: { alert: { instance: { id: 1 } } } }] },
+    new: { count: 0, data: [] },
+    ongoing: { count: 0, data: [] },
+    recovered: { count: 0, data: [] },
+  };
+
+  test('returns false if summarizedAlerts is null', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3 },
+    });
+    expect(alert.isFilteredOut(null)).toBe(false);
+  });
+  test('returns false if the alert is in summarizedAlerts', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta: { pendingRecoveredCount: 3 },
+    });
+    expect(alert.isFilteredOut(null)).toBe(false);
+  });
+  test('returns true if the alert is not in summarizedAlerts', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('2', {
+      meta: { pendingRecoveredCount: 3 },
+    });
+    expect(alert.isFilteredOut(summarizedAlerts)).toBe(true);
+  });
+});

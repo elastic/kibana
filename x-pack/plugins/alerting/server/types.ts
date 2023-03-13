@@ -150,19 +150,18 @@ export interface GetSummarizedAlertsFnOpts {
 
 // TODO - add type for these alerts when we determine which alerts-as-data
 // fields will be made available in https://github.com/elastic/kibana/issues/143741
+
+interface SummarizedAlertsChunk {
+  count: number;
+  data: unknown[];
+}
 export interface SummarizedAlerts {
-  new: {
-    count: number;
-    data: unknown[];
-  };
-  ongoing: {
-    count: number;
-    data: unknown[];
-  };
-  recovered: {
-    count: number;
-    data: unknown[];
-  };
+  new: SummarizedAlertsChunk;
+  ongoing: SummarizedAlertsChunk;
+  recovered: SummarizedAlertsChunk;
+}
+export interface CombinedSummarizedAlerts extends SummarizedAlerts {
+  all: SummarizedAlertsChunk;
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
