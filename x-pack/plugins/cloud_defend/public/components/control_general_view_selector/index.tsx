@@ -6,6 +6,9 @@
  */
 import React, { useState, useMemo, useCallback, FormEvent } from 'react';
 import {
+  EuiBadge,
+  EuiIcon,
+  EuiToolTip,
   EuiAccordion,
   EuiButtonIcon,
   EuiPopover,
@@ -20,16 +23,23 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import {
   ControlGeneralViewSelectorDeps,
   ControlFormErrorMap,
-  ControlSelectorCondition,
-  ControlSelectorConditionUIOptionsMap,
-  ControlSelectorBooleanConditions,
-  ControlSelector,
+  Selector,
+  SelectorCondition,
+  SelectorConditionsMap,
 } from '../../types';
+import {
+  getSelectorConditions,
+  camelToSentenceCase,
+  getSelectorTypeIcon,
+  conditionCombinationInvalid,
+  getRestrictedValuesForCondition,
+} from '../../common/utils';
 import * as i18n from '../control_general_view/translations';
 import {
   VALID_SELECTOR_NAME_REGEX,
@@ -40,18 +50,57 @@ import {
 
 interface ConditionProps {
   label: string;
-  prop: string;
-  onRemoveCondition(prop: string): void;
+  prop: SelectorCondition;
+  onRemoveCondition(prop: SelectorCondition): void;
+}
+
+interface BooleanConditionProps extends ConditionProps {
+  selector: Selector;
+  onChangeBooleanCondition(prop: SelectorCondition, value: boolean): void;
 }
 
 interface StringArrayConditionProps extends ConditionProps {
-  selector: ControlSelector;
+  selector: Selector;
   errorMap: ControlFormErrorMap;
-  onAddValueToCondition(prop: string, value: string): void;
-  onChangeStringArrayCondition(prop: string, value: string[]): void;
+  onAddValueToCondition(prop: SelectorCondition, value: string): void;
+  onChangeStringArrayCondition(prop: SelectorCondition, value: string[]): void;
 }
 
-const BooleanCondition = ({ label, prop, onRemoveCondition }: ConditionProps) => {
+const BooleanCondition = ({
+  label,
+  prop,
+  selector,
+  onChangeBooleanCondition,
+  onRemoveCondition,
+}: BooleanConditionProps) => {
+  const value = selector[prop as keyof Selector] as boolean;
+  const onChange = useCallback(
+    (e) => {
+      onChangeBooleanCondition(prop, e.target.checked);
+    },
+    [onChangeBooleanCondition, prop]
+  );
+
+  return (
+    <EuiFormRow label={label} fullWidth={true} key={prop}>
+      <EuiFlexGroup alignItems="center" gutterSize="m">
+        <EuiFlexItem>
+          <EuiCheckbox id={prop} label={label} checked={value} onChange={onChange} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="cross"
+            onClick={() => onRemoveCondition(prop)}
+            aria-label="Remove condition"
+            data-test-subj={'cloud-defend-btnremovecondition-' + prop}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
+  );
+};
+
+const FlagCondition = ({ label, prop, onRemoveCondition }: ConditionProps) => {
   return (
     <EuiFormRow label={label} fullWidth={true} key={prop}>
       <EuiFlexGroup alignItems="center" gutterSize="m">
@@ -84,13 +133,13 @@ const StringArrayCondition = ({
   onAddValueToCondition,
   onChangeStringArrayCondition,
 }: StringArrayConditionProps) => {
-  const values = selector[prop as keyof ControlSelector] as string[];
+  const values = selector[prop as keyof Selector] as string[];
   const selectedOptions =
     values?.map((option) => {
       return { label: option, value: option };
     }) || [];
 
-  const restrictedValues = ControlSelectorConditionUIOptionsMap[prop]?.values;
+  const restrictedValues = getRestrictedValuesForCondition(selector.type, prop);
 
   return (
     <EuiFormRow
@@ -144,6 +193,10 @@ export const ControlGeneralViewSelector = ({
   onDuplicate,
   onChange,
 }: ControlGeneralViewSelectorDeps) => {
+  // ensure most recently added is open by default
+  const [accordionState, setAccordionState] = useState<'open' | 'closed'>(
+    selectors.length - 1 === index ? 'open' : 'closed'
+  );
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [isAddConditionOpen, setAddConditionOpen] = useState(false);
   const [errorMap, setErrorMap] = useState<ControlFormErrorMap>({});
@@ -164,13 +217,17 @@ export const ControlGeneralViewSelector = ({
     setAddConditionOpen(false);
   }, []);
 
-  const remainingProps = useMemo(() => {
-    return Object.keys(ControlSelectorCondition).filter(
-      (condition) => !selector.hasOwnProperty(condition)
-    );
-  }, [selector]);
+  const availableConditions = useMemo(() => getSelectorConditions(selector.type), [selector]);
 
-  const conditionsAdded = Object.keys(ControlSelectorCondition).length - remainingProps.length;
+  const remainingConditions = useMemo(() => {
+    return availableConditions.filter((condition) => !selector.hasOwnProperty(condition));
+  }, [availableConditions, selector]);
+
+  const conditionsAdded = useMemo(() => {
+    return Object.keys(selector).filter(
+      (key) => !['type', 'hasErrors', 'name'].includes(key)
+    ) as SelectorCondition[];
+  }, [selector]);
 
   const onRemoveClicked = useCallback(() => {
     // we prevent the removal of the last selector to avoid an empty state
@@ -214,7 +271,7 @@ export const ControlGeneralViewSelector = ({
       const updatedSelector = { ...selector };
 
       updatedSelector.name = value;
-      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded === 0;
+      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded.length === 0;
 
       onChange(updatedSelector, index);
     },
@@ -222,7 +279,7 @@ export const ControlGeneralViewSelector = ({
   );
 
   const onChangeStringArrayCondition = useCallback(
-    (prop: string, values: string[]) => {
+    (prop: SelectorCondition, values: string[]) => {
       const updatedSelector = { ...selector, [prop]: values };
       const errors = [];
 
@@ -233,7 +290,7 @@ export const ControlGeneralViewSelector = ({
       values.forEach((value) => {
         const bytes = new Blob([value]).size;
 
-        if (prop === ControlSelectorCondition.targetFilePath) {
+        if (prop === 'targetFilePath') {
           if (bytes > MAX_FILE_PATH_VALUE_LENGTH_BYTES) {
             errors.push(i18n.errorValueLengthExceeded);
           }
@@ -248,7 +305,7 @@ export const ControlGeneralViewSelector = ({
         delete errorMap[prop];
       }
 
-      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded === 0;
+      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded.length === 0;
       setErrorMap({ ...errorMap });
 
       onChange(updatedSelector, index);
@@ -266,8 +323,10 @@ export const ControlGeneralViewSelector = ({
   );
 
   const onAddCondition = useCallback(
-    (prop: string) => {
-      if (prop in ControlSelectorBooleanConditions) {
+    (prop: SelectorCondition) => {
+      const valueType = SelectorConditionsMap[prop].type;
+
+      if (valueType === 'flag' || valueType === 'boolean') {
         onChangeBooleanCondition(prop, true);
       } else {
         onChangeStringArrayCondition(prop, []);
@@ -284,7 +343,7 @@ export const ControlGeneralViewSelector = ({
 
       delete errorMap[prop];
       setErrorMap({ ...errorMap });
-      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded === 1;
+      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded.length === 1;
 
       onChange(updatedSelector, index);
       closeAddCondition();
@@ -293,9 +352,9 @@ export const ControlGeneralViewSelector = ({
   );
 
   const onAddValueToCondition = useCallback(
-    (prop: string, searchValue: string) => {
+    (prop: SelectorCondition, searchValue: string) => {
       const value = searchValue.trim();
-      const values = selector[prop as keyof ControlSelector] as string[];
+      const values = selector[prop as keyof Selector] as string[];
 
       if (values && values.indexOf(value) === -1) {
         onChangeStringArrayCondition(prop, [...values, value]);
@@ -309,60 +368,93 @@ export const ControlGeneralViewSelector = ({
       return prev.concat(errorMap[current]);
     }, []);
 
-    if (conditionsAdded === 0) {
+    if (conditionsAdded.length === 0) {
       errs.push(i18n.errorConditionRequired);
     }
 
     return errs;
   }, [errorMap, conditionsAdded]);
 
+  const onToggleAccordion = useCallback((isOpen: boolean) => {
+    setAccordionState(isOpen ? 'open' : 'closed');
+  }, []);
+
   return (
     <EuiAccordion
       id={selector.name}
+      forceState={accordionState}
+      onToggle={onToggleAccordion}
       data-test-subj="cloud-defend-selector"
       paddingSize="m"
-      buttonContent={selector.name}
+      buttonContent={
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem>
+            <EuiToolTip content={i18n.getSelectorIconTooltip(selector.type)}>
+              <EuiIcon color="primary" type={getSelectorTypeIcon(selector.type)} />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <b>{selector.name}</b>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
       css={styles.accordion}
-      initialIsOpen={index === 0}
       extraAction={
-        <EuiPopover
-          id={selector.name}
-          button={
-            <EuiButtonIcon
-              iconType="boxesHorizontal"
-              onClick={onTogglePopover}
-              aria-label="Selector options"
-              data-test-subj="cloud-defend-btnselectorpopover"
-            />
-          }
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-        >
-          <EuiContextMenuPanel
-            size="s"
-            items={[
-              <EuiContextMenuItem
-                key="duplicate"
-                icon="copy"
-                onClick={onDuplicateClicked}
-                data-test-subj="cloud-defend-btnduplicateselector"
-              >
-                {i18n.duplicate}
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                key="remove"
-                icon="trash"
-                disabled={selectors.length < 2}
-                onClick={onRemoveClicked}
-                data-test-subj="cloud-defend-btndeleteselector"
-              >
-                {i18n.remove}
-              </EuiContextMenuItem>,
-            ]}
-          />
-        </EuiPopover>
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          {accordionState === 'closed' && (
+            <div>
+              <EuiText css={styles.conditionsBadge} size="xs">
+                <b>{i18n.conditions}</b>
+              </EuiText>
+              <EuiBadge title={conditionsAdded.join(',')} color="hollow">
+                {conditionsAdded.length}
+              </EuiBadge>
+              <div css={styles.verticalDivider} />
+            </div>
+          )}
+          <EuiFlexItem>
+            <EuiPopover
+              id={selector.name}
+              button={
+                <EuiButtonIcon
+                  iconType="boxesHorizontal"
+                  onClick={onTogglePopover}
+                  aria-label="Selector options"
+                  data-test-subj="cloud-defend-btnselectorpopover"
+                />
+              }
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+            >
+              <EuiContextMenuPanel
+                size="s"
+                items={[
+                  <EuiContextMenuItem
+                    key="duplicate"
+                    icon="copy"
+                    onClick={onDuplicateClicked}
+                    data-test-subj="cloud-defend-btnduplicateselector"
+                  >
+                    {i18n.duplicate}
+                  </EuiContextMenuItem>,
+                  <EuiContextMenuItem
+                    key="remove"
+                    icon="trash"
+                    disabled={selectors.length < 2}
+                    onClick={onRemoveClicked}
+                    data-test-subj="cloud-defend-btndeleteselector"
+                  >
+                    {i18n.remove}
+                  </EuiContextMenuItem>,
+                ]}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiForm component="form" error={errors} isInvalid={errors.length > 0}>
@@ -381,33 +473,43 @@ export const ControlGeneralViewSelector = ({
             maxLength={MAX_SELECTOR_NAME_LENGTH}
           />
         </EuiFormRow>
-        {Object.keys(selector).map((prop: string) => {
-          if (['name', 'hasErrors'].indexOf(prop) === -1) {
-            const label = i18n.getConditionLabel(prop);
+        {conditionsAdded.map((prop) => {
+          const label = camelToSentenceCase(prop);
+          const valueType = SelectorConditionsMap[prop].type;
 
-            if (prop in ControlSelectorBooleanConditions) {
-              return (
-                <BooleanCondition
-                  key={prop}
-                  label={label}
-                  prop={prop}
-                  onRemoveCondition={onRemoveCondition}
-                />
-              );
-            } else {
-              return (
-                <StringArrayCondition
-                  key={prop}
-                  label={label}
-                  prop={prop}
-                  selector={selector}
-                  errorMap={errorMap}
-                  onAddValueToCondition={onAddValueToCondition}
-                  onChangeStringArrayCondition={onChangeStringArrayCondition}
-                  onRemoveCondition={onRemoveCondition}
-                />
-              );
-            }
+          if (valueType === 'flag') {
+            return (
+              <FlagCondition
+                key={prop}
+                label={label}
+                prop={prop}
+                onRemoveCondition={onRemoveCondition}
+              />
+            );
+          } else if (valueType === 'boolean') {
+            return (
+              <BooleanCondition
+                key={prop}
+                label={label}
+                selector={selector}
+                prop={prop}
+                onChangeBooleanCondition={onChangeBooleanCondition}
+                onRemoveCondition={onRemoveCondition}
+              />
+            );
+          } else {
+            return (
+              <StringArrayCondition
+                key={prop}
+                label={label}
+                prop={prop}
+                selector={selector}
+                errorMap={errorMap}
+                onAddValueToCondition={onAddValueToCondition}
+                onChangeStringArrayCondition={onChangeStringArrayCondition}
+                onRemoveCondition={onRemoveCondition}
+              />
+            );
           }
         })}
       </EuiForm>
@@ -431,14 +533,18 @@ export const ControlGeneralViewSelector = ({
       >
         <EuiContextMenuPanel
           size="s"
-          items={remainingProps.map((prop) => {
+          items={remainingConditions.map((prop) => {
+            const label = camelToSentenceCase(prop);
+            const disabled = conditionCombinationInvalid(conditionsAdded, prop);
+
             return (
               <EuiContextMenuItem
                 data-test-subj={`cloud-defend-addmenu-${prop}`}
                 key={prop}
                 onClick={() => onAddCondition(prop)}
+                disabled={disabled}
               >
-                {i18n.getConditionLabel(prop)}
+                {label}
               </EuiContextMenuItem>
             );
           })}
