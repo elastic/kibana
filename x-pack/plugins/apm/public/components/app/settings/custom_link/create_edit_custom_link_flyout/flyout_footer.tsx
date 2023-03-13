@@ -49,7 +49,7 @@ export function FlyoutFooter({
             <DeleteButton customLinkId={customLinkId} onDelete={onDelete} />
           )}
           <EuiButton
-            data-test-subj="apmFlyoutFooterSaveButton"
+            data-test-subj="apmCustomLinkFlyoutFooterSaveButton"
             form="customLink_form"
             fill
             type="submit"
