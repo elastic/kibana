@@ -61,7 +61,7 @@ import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
-
+import type { TelemetryClientStart } from './common/lib/telemetry';
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
@@ -121,6 +121,7 @@ export type StartServices = CoreStart &
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
     isSidebarEnabled$: BehaviorSubject<boolean>;
+    telemetry: TelemetryClientStart;
   };
 
 export interface PluginSetup {

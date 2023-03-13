@@ -30,7 +30,7 @@ import type {
   StartedSubPlugins,
   StartPluginsDependencies,
 } from './types';
-import { initTelemetry } from './common/lib/telemetry';
+import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { SOLUTION_NAME } from './common/translations';
 
@@ -83,6 +83,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   readonly prebuiltRulesPackageVersion?: string;
   private config: SecuritySolutionUiConfigType;
+  private telemetry: TelemetryService;
+
   readonly experimentalFeatures: ExperimentalFeatures;
   private isSidebarEnabled$: BehaviorSubject<boolean>;
 
@@ -93,6 +95,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+    this.telemetry = new TelemetryService();
   }
   private appUpdater$ = new Subject<AppUpdater>();
 
@@ -122,6 +125,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
       APP_UI_ID
     );
+    const telemetryContext = {
+      prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion,
+    };
+    this.telemetry.setup({ analytics: core.analytics }, telemetryContext);
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
@@ -162,6 +169,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           getPluginWrapper: () => SecuritySolutionTemplateWrapper,
         },
         isSidebarEnabled$: this.isSidebarEnabled$,
+        telemetry: this.telemetry.start(),
       };
       return services;
     };

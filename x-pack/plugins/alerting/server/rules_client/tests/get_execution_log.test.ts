@@ -91,6 +91,7 @@ const BaseRuleSavedObject: SavedObject<RawRule> = {
       error: null,
       warning: null,
     },
+    revision: 0,
   },
   references: [],
 };

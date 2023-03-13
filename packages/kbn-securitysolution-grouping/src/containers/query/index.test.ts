@@ -11,8 +11,9 @@ import { getGroupingQuery, MAX_QUERY_SIZE } from '.';
 
 const testProps: GroupingQueryArgs = {
   additionalFilters: [],
-  additionalAggregationsRoot: [],
-  additionalStatsAggregationsFields0: [
+  from: '2022-12-28T15:35:32.871Z',
+  groupByFields: ['host.name'],
+  metricsAggregations: [
     {
       alertsCount: {
         cardinality: {
@@ -49,14 +50,10 @@ const testProps: GroupingQueryArgs = {
       },
     },
   ],
-  additionalStatsAggregationsFields1: [],
-  from: '2022-12-28T15:35:32.871Z',
+  pageNumber: 0,
+  rootAggregations: [],
   runtimeMappings: {},
-  stackByMultipleFields0: ['host.name'],
-  stackByMultipleFields0Size: 25,
-  stackByMultipleFields0From: 0,
-  stackByMultipleFields1: [],
-  stackByMultipleFields1Size: 10,
+  size: 25,
   to: '2023-02-23T06:59:59.999Z',
 };
 describe('group selector', () => {
@@ -65,12 +62,12 @@ describe('group selector', () => {
   });
   it('Sets terms query when single stackBy field requested', () => {
     const result = getGroupingQuery(testProps);
-    expect(result.aggs.stackByMultipleFields0.multi_terms).toBeUndefined();
-    expect(result.aggs.stackByMultipleFields0.terms).toEqual({
+    expect(result.aggs.groupByFields.multi_terms).toBeUndefined();
+    expect(result.aggs.groupByFields.terms).toEqual({
       field: 'host.name',
       size: MAX_QUERY_SIZE,
     });
-    expect(result.aggs.stackByMultipleFields0.aggs).toEqual({
+    expect(result.aggs.groupByFields.aggs).toEqual({
       bucket_truncate: { bucket_sort: { from: 0, size: 25 } },
       alertsCount: { cardinality: { field: 'kibana.alert.uuid' } },
       rulesCountAggregation: { cardinality: { field: 'kibana.alert.rule.rule_id' } },
@@ -85,7 +82,7 @@ describe('group selector', () => {
   it('Sets terms query when single stackBy field requested additionalAggregationsRoot', () => {
     const result = getGroupingQuery({
       ...testProps,
-      additionalAggregationsRoot: [
+      rootAggregations: [
         {
           alertsCount: {
             terms: {
@@ -111,10 +108,10 @@ describe('group selector', () => {
   it('Sets terms query when multiple stackBy fields requested', () => {
     const result = getGroupingQuery({
       ...testProps,
-      stackByMultipleFields0: ['kibana.alert.rule.name', 'kibana.alert.rule.description'],
+      groupByFields: ['kibana.alert.rule.name', 'kibana.alert.rule.description'],
     });
-    expect(result.aggs.stackByMultipleFields0.terms).toBeUndefined();
-    expect(result.aggs.stackByMultipleFields0.multi_terms).toEqual({
+    expect(result.aggs.groupByFields.terms).toBeUndefined();
+    expect(result.aggs.groupByFields.multi_terms).toEqual({
       terms: [{ field: 'kibana.alert.rule.name' }, { field: 'kibana.alert.rule.description' }],
       size: MAX_QUERY_SIZE,
     });
