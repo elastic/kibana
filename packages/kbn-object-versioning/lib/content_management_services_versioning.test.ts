@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { set } from '@kbn/safer-lodash-set';
-import type { ServiceDefinition as ContentManagementServiceDefinition } from '@kbn/content-management-plugin/common';
+// import type { ServiceDefinition as ContentManagementServiceDefinition } from '@kbn/content-management-plugin/common';
 import { getTransforms } from './content_management_services_versioning';
 
 // Create an object at the specific path (e.g. "get.in.options") with the specific value

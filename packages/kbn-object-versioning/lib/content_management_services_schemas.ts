@@ -9,6 +9,7 @@
 import { isConfigSchema, schema } from '@kbn/config-schema';
 import type { Type } from '@kbn/config-schema';
 
+// Validate that the value is a function
 const functionSchema = schema.any({
   validate: (value) => {
     if (typeof value !== 'function') {
@@ -17,6 +18,7 @@ const functionSchema = schema.any({
   },
 });
 
+// Validate that the value is a kbn config Schema (Type<any>)
 const kbnConfigSchema = schema.any({
   validate: (value) => {
     if (!isConfigSchema(value)) {
@@ -25,6 +27,7 @@ const kbnConfigSchema = schema.any({
   },
 });
 
+// VersionableObject schema
 const versionableObjectSchema = schema.object(
   {
     schema: schema.maybe(kbnConfigSchema),
@@ -37,6 +40,8 @@ const versionableObjectSchema = schema.object(
 const getOptionalInOutSchemas = (props: { in: Type<any>; out: Type<any> }) =>
   schema.maybe(schema.object(props, { unknowns: 'forbid' }));
 
+// Schema to validate the "get" service objects
+// The "bulkGet" and "delete" services also use this schema as they allow the same objects IN/OUT
 const getSchemas = getOptionalInOutSchemas({
   in: schema.maybe(
     schema.object(
@@ -56,6 +61,8 @@ const getSchemas = getOptionalInOutSchemas({
   ),
 });
 
+// Schema to validate the "create" service objects
+// The "update" service also uses this schema as they allow the same objects IN/OUT
 const createSchemas = getOptionalInOutSchemas({
   in: schema.maybe(
     schema.object(
@@ -76,6 +83,7 @@ const createSchemas = getOptionalInOutSchemas({
   ),
 });
 
+// Schema to validate the "search" service objects
 const searchSchemas = getOptionalInOutSchemas({
   in: schema.maybe(
     schema.object(
@@ -96,7 +104,7 @@ const searchSchemas = getOptionalInOutSchemas({
   ),
 });
 
-export const definitionSchema = schema.object(
+export const serviceDefinitionSchema = schema.object(
   {
     get: getSchemas,
     bulkGet: getSchemas,

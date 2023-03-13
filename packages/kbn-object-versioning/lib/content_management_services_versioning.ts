@@ -7,7 +7,7 @@
  */
 
 import type { ServicesDefinition as ContentManagementServicesDefinition } from '@kbn/content-management-plugin/common';
-import { definitionSchema } from './content_management_services_schemas';
+import { serviceDefinitionSchema } from './content_management_services_schemas';
 
 import { Version } from './types';
 import { validateObj } from './utils';
@@ -16,7 +16,7 @@ export const getTransforms = (
   definition: ContentManagementServicesDefinition,
   requestVersion: Version
 ) => {
-  const error = validateObj(definition, definitionSchema);
+  const error = validateObj(definition, serviceDefinitionSchema);
   if (error !== null) {
     throw new Error(`Invalid content management services definition. [${error}]`);
   }
