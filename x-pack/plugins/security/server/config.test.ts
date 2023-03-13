@@ -71,6 +71,7 @@ describe('config schema', () => {
           "lifespan": "P30D",
         },
         "showInsecureClusterWarning": true,
+        "showNavLinks": true,
       }
     `);
 
@@ -125,6 +126,7 @@ describe('config schema', () => {
           "lifespan": "P30D",
         },
         "showInsecureClusterWarning": true,
+        "showNavLinks": true,
       }
     `);
 
@@ -178,6 +180,7 @@ describe('config schema', () => {
           "lifespan": "P30D",
         },
         "showInsecureClusterWarning": true,
+        "showNavLinks": true,
       }
     `);
   });
