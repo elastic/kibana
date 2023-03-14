@@ -71,7 +71,7 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
       <EuiPageContentBody data-test-subj="transformPageCreateTransform">
         {searchItemsError !== undefined && (
           <>
-            <EuiCallOut title={searchItemsError} color="danger" iconType="alert" />
+            <EuiCallOut title={searchItemsError} color="danger" iconType="warning" />
             <EuiSpacer size="l" />
           </>
         )}
