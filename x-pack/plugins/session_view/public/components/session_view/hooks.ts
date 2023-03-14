@@ -66,7 +66,12 @@ export const useFetchSessionViewProcessEvents = (
         if (isRefetch || lastPage.events.length >= PROCESS_EVENTS_PER_PAGE) {
           const filtered = lastPage.events.filter((event) => {
             const action = event.event?.action;
-            return action && [EventAction.fork, EventAction.exec, EventAction.end].includes(action);
+            return (
+              action &&
+              (action.includes(EventAction.fork) ||
+                action.includes(EventAction.exec) ||
+                action.includes(EventAction.end))
+            );
           });
 
           const cursor = filtered?.[filtered.length - 1]?.['@timestamp'];
@@ -82,7 +87,12 @@ export const useFetchSessionViewProcessEvents = (
       getPreviousPageParam: (firstPage, pages) => {
         const filtered = firstPage.events.filter((event) => {
           const action = event.event?.action;
-          return action && [EventAction.fork, EventAction.exec, EventAction.end].includes(action);
+          return (
+            action &&
+            (action.includes(EventAction.fork) ||
+              action.includes(EventAction.exec) ||
+              action.includes(EventAction.end))
+          );
         });
 
         const atBeginning = pages.length > 1 && filtered.length < PROCESS_EVENTS_PER_PAGE;

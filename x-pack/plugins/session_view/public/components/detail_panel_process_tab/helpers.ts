@@ -10,8 +10,6 @@ import { DetailPanelProcess, DetailPanelProcessLeader } from '../../types';
 import { DASH } from '../../constants';
 import { dataOrDash } from '../../utils/data_or_dash';
 
-const FILTER_FORKS_EXECS = [EventAction.fork, EventAction.exec];
-
 const DEFAULT_PROCESS_DATA: DetailPanelProcessLeader = {
   id: DASH,
   name: DASH,
@@ -130,26 +128,16 @@ export const getDetailPanelProcess = (process: Process | null): DetailPanelProce
   // we grab the executable from each process lifecycle event to give an indication
   // of the processes journey. Processes can sometimes exec multiple times, so it's good
   // information to have.
-  processData.executable = [];
-  process.events.forEach((event) => {
-    if (
-      event.process?.executable &&
-      event.event?.action &&
-      FILTER_FORKS_EXECS.includes(event.event.action)
-    ) {
-      processData.executable.push([event.process.executable, `(${event.event.action})`]);
-    }
-  });
-  if (!processData.executable.length) {
-    // if there were no forks, execs (due to bad data), check if we at least have an executable for some event
-    const executable = process.getDetails().process?.executable;
-
-    if (executable) {
-      processData.executable.push([executable]);
-    } else {
-      processData.executable = DEFAULT_PROCESS_DATA.executable;
-    }
+  const executables = details.process?.previous?.map((exe) => exe.executable) || [];
+  if (details.process?.executable) {
+    executables.push(details.process?.executable);
   }
+
+  processData.executable = executables.map((exe, i) => {
+    const action = i === 0 ? EventAction.fork : EventAction.exec;
+
+    return [exe, `(${action})`];
+  });
 
   processData.entryLeader = getDetailPanelProcessLeader(details?.process?.entry_leader);
   processData.sessionLeader = getDetailPanelProcessLeader(details?.process?.session_leader);

@@ -8,6 +8,7 @@
 import { waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
 import { sessionViewProcessEventsMock } from '../../../common/mocks/responses/session_view_process_events.mock';
+import { sessionViewProcessEventsMergedMock } from '../../../common/mocks/responses/session_view_process_events_merged.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { SessionView } from '.';
 import userEvent from '@testing-library/user-event';
@@ -129,7 +130,7 @@ describe('SessionView component', () => {
         });
       });
 
-      it('should show items on the list, and auto selects session leader', async () => {
+      it('should show items on the list', async () => {
         render();
 
         await waitFor(() => {
@@ -168,6 +169,20 @@ describe('SessionView component', () => {
 
         await waitFor(() => {
           expect(renderResult.getAllByTestId('sessionView:sessionViewRefreshButton')).toBeTruthy();
+        });
+      });
+    });
+
+    describe('And data contains merged process events', () => {
+      beforeEach(async () => {
+        mockedApi.mockResolvedValue(sessionViewProcessEventsMergedMock);
+      });
+
+      it('should show items on the list', async () => {
+        render();
+
+        await waitFor(() => {
+          expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toBeTruthy();
         });
       });
     });
