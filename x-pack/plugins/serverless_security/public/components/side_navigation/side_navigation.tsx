@@ -7,8 +7,6 @@
 
 import React, { useCallback } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { i18n } from '@kbn/i18n';
-import { SolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import {
   EuiButtonIcon,
   EuiCollapsibleNav,
@@ -16,6 +14,8 @@ import {
   EuiThemeProvider,
   useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { SolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import { SolutionSideNav } from '@kbn/security-solution-side-nav';
 import {
   usePartitionFooterNavItems,
@@ -82,7 +82,7 @@ export const SecuritySideNavigation: React.FC = () => {
                   items={items}
                   footerItems={footerItems}
                   selectedId={selectedId}
-                  panelBottomOffset={undefined}
+                  panelTopOffset={`calc(${euiTheme.size.l} * 2)`}
                 />
               }
               closeFlyoutButtonPosition={'inside'}
