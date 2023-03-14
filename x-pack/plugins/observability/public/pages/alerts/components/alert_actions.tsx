@@ -125,6 +125,7 @@ export function AlertActions({
         ? [
             <EuiContextMenuItem
               data-test-subj="add-to-existing-case-action"
+              key="addToExistingCase"
               onClick={handleAddToExistingCaseClick}
               size="s"
             >
@@ -134,6 +135,7 @@ export function AlertActions({
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               data-test-subj="add-to-new-case-action"
+              key="addToNewCase"
               onClick={handleAddToNewCaseClick}
               size="s"
             >
