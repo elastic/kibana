@@ -20,29 +20,28 @@ export const AggDescription: FC = memo(({ children }) => {
     }
   );
   return (
-      <EuiDescribedFormGroup
-        title={
-          <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <h3>{title}</h3>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <FunctionHelpPopover />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.aggSelect.description"
-            defaultMessage="Analysis functions to be performed. For example, sum, count."
-          />
-        }
-      >
-        <EuiFormRow>
-          <>{children}</>
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-    </>
+    <EuiDescribedFormGroup
+      title={
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <h3>{title}</h3>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FunctionHelpPopover />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.aggSelect.description"
+          defaultMessage="Analysis functions to be performed. For example, sum, count."
+        />
+      }
+    >
+      <EuiFormRow>
+        <>{children}</>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
   );
 });
 
