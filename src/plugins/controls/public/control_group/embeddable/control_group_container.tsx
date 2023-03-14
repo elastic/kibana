@@ -16,7 +16,7 @@ import _ from 'lodash';
 import { ReduxEmbeddablePackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { Container, EmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
+import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   ControlGroupInput,
   ControlGroupOutput,
@@ -49,7 +49,6 @@ import {
   getRangeSliderPanelState,
   getTimeSliderPanelState,
 } from '../control_group_input_builder';
-import { ACTION_DELETE_CONTROL, ACTION_EDIT_CONTROL } from '../actions';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -187,18 +186,6 @@ export class ControlGroupContainer extends Container<
           this.recalculateFilters();
           const childOrderCache = cachedChildEmbeddableOrder(input.panels);
           childOrderCache.idsInOrder.forEach((id) => this.getChild(id)?.refreshInputFromParent());
-        })
-    );
-
-    this.subscriptions.add(
-      this.getInput$()
-        .pipe(distinctUntilChanged((a, b) => a.viewMode === b.viewMode))
-        .subscribe(({ viewMode }) => {
-          if (viewMode !== ViewMode.EDIT) {
-            this.updateInput({ disabledActions: [ACTION_EDIT_CONTROL, ACTION_DELETE_CONTROL] });
-          } else {
-            this.updateInput({ disabledActions: undefined });
-          }
         })
     );
 

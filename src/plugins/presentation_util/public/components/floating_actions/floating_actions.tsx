@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { FC, ReactElement, useEffect, useState } from 'react';
+import { TypedUseSelectorHook } from 'react-redux';
 import classNames from 'classnames';
 
 import { IEmbeddable, panelHoverTrigger, PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
@@ -13,25 +14,30 @@ import { Action } from '@kbn/ui-actions-plugin/public';
 
 import { pluginServices } from '../../services';
 import './floating_actions.scss';
+import { ReduxEmbeddableState } from '../../redux_embeddables';
 
 export interface FloatingActionsProps {
-  embeddable?: IEmbeddable;
+  children: ReactElement;
+  select: TypedUseSelectorHook<ReduxEmbeddableState>;
+
   className?: string;
   isEnabled?: boolean;
-  children: ReactElement;
-  disabledActions?: string[];
+  embeddable?: IEmbeddable;
 }
 
 export const FloatingActions: FC<FloatingActionsProps> = ({
+  select,
+  children,
+  isEnabled,
   embeddable,
   className = '',
-  isEnabled,
-  children,
-  disabledActions,
 }) => {
   const {
     uiActions: { getTriggerCompatibleActions },
   } = pluginServices.getServices();
+
+  const viewMode = select((state) => state.explicitInput.viewMode);
+  const disabledActions = select((state) => state.explicitInput.disabledActions);
 
   const [floatingActions, setFloatingActions] = useState<JSX.Element | undefined>(undefined);
 
@@ -65,7 +71,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     };
 
     getActions();
-  }, [embeddable, getTriggerCompatibleActions, isEnabled, disabledActions]);
+  }, [embeddable, getTriggerCompatibleActions, viewMode, disabledActions]);
 
   return (
     <div className="presentationUtil__floatingActionsWrapper">

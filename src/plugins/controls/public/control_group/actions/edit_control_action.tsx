@@ -76,9 +76,9 @@ export class EditControlAction implements Action<EditControlActionContext> {
     if (isErrorEmbeddable(embeddable)) return false;
     const controlGroup = embeddable.parent;
     const factory = this.getEmbeddableFactory(embeddable.type);
+
     return Boolean(
-      !isErrorEmbeddable(embeddable) &&
-        controlGroup &&
+      controlGroup &&
         isControlGroup(controlGroup) &&
         controlGroup.getInput().viewMode === ViewMode.EDIT &&
         factory &&
