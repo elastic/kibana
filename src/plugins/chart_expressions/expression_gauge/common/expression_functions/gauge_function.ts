@@ -232,6 +232,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
             handlers.getExecutionContext?.()?.description,
         },
         canNavigateToLens: Boolean(handlers?.variables?.canNavigateToLens),
+        overrides: handlers.variables?.overrides ?? {},
       },
     };
   },

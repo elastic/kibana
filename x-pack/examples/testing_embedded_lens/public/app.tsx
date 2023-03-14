@@ -16,6 +16,16 @@ import {
   EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiPanel,
   EuiCallOut,
+  EuiColorPicker,
+  EuiFormRow,
+  EuiPopover,
+  useColorPickerState,
+  EuiSwitch,
+  EuiNotificationBadge,
+  EuiCodeBlock,
+  EuiIcon,
+  EuiToolTip,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -43,6 +53,64 @@ import type { StartDependencies } from './plugin';
 
 type RequiredType = 'date' | 'string' | 'number';
 type FieldsMap = Record<RequiredType, string>;
+type LensAttributesByType<StateType> = Extract<
+  TypedLensByValueInput['attributes'],
+  { state: { visualization: StateType } }
+>;
+
+function OverrideSwitch<T extends object>({
+  rowLabel,
+  controlLabel,
+  value,
+  override,
+  setOverrideValue,
+  helpText,
+}: {
+  rowLabel: string;
+  controlLabel: string;
+  helpText?: string;
+  value: T | undefined;
+  override: T;
+  setOverrideValue: (v: T | undefined) => void;
+}) {
+  return (
+    <EuiFormRow
+      label={
+        <EuiToolTip
+          content={<CodeExample propName="overrides" code={JSON.stringify(override, null, 2)} />}
+          position="right"
+        >
+          <span>
+            {rowLabel} <EuiIcon type="questionInCircle" color="subdued" />
+          </span>
+        </EuiToolTip>
+      }
+      helpText={helpText}
+      display="columnCompressedSwitch"
+      hasChildLabel={false}
+    >
+      <EuiSwitch
+        label={controlLabel}
+        name="switch"
+        checked={Boolean(value)}
+        onChange={() => {
+          setOverrideValue(value ? undefined : override);
+        }}
+        compressed
+      />
+    </EuiFormRow>
+  );
+}
+
+function CodeExample({ propName, code }: { propName: string; code: string }) {
+  return (
+    <EuiCodeBlock language="jsx" paddingSize="none">
+      {`
+<LensEmbeddable ${propName}={${code}} />
+      `}
+    </EuiCodeBlock>
+  );
+}
 
 function getInitialType(dataView: DataView) {
   return dataView.isTimeBased() ? 'date' : 'number';
@@ -78,6 +146,13 @@ function getColumnFor(type: RequiredType, fieldName: string, isBucketed: boolean
           maxBars: 'auto',
           format: undefined,
           parentFormat: undefined,
+          ranges: [
+            {
+              from: 0,
+              to: 1000,
+              label: '',
+            },
+          ],
         },
       } as RangeIndexPatternColumn;
     }
@@ -162,12 +237,12 @@ function getBaseAttributes(
 
 // Generate a Lens state based on some app-specific input parameters.
 // `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
-function getLensAttributes(
+function getLensAttributesXY(
   defaultIndexPattern: DataView,
   fields: FieldsMap,
-  chartType: 'bar_stacked' | 'line' | 'area',
+  chartType: XYState['preferredSeriesType'],
   color: string
-): TypedLensByValueInput['attributes'] {
+): LensAttributesByType<XYState> {
   const baseAttributes = getBaseAttributes(defaultIndexPattern, fields);
 
   const xyConfig: XYState = {
@@ -184,7 +259,7 @@ function getLensAttributes(
         yConfig: [{ forAccessor: 'col2', color }],
       },
     ],
-    legend: { isVisible: true, position: 'right' },
+    legend: { isVisible: true, position: 'right', showSingleSeries: true },
     preferredSeriesType: chartType,
     tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
     valueLabels: 'hide',
@@ -203,7 +278,7 @@ function getLensAttributes(
 function getLensAttributesHeatmap(
   defaultIndexPattern: DataView,
   fields: FieldsMap
-): TypedLensByValueInput['attributes'] {
+): LensAttributesByType<HeatmapVisualizationState> {
   const initialType = getInitialType(defaultIndexPattern);
   const dataLayer = getDataLayer(initialType, fields[initialType]);
   const heatmapDataLayer = {
@@ -252,7 +327,7 @@ function getLensAttributesHeatmap(
 function getLensAttributesDatatable(
   defaultIndexPattern: DataView,
   fields: FieldsMap
-): TypedLensByValueInput['attributes'] {
+): LensAttributesByType<DatatableVisualizationState> {
   const initialType = getInitialType(defaultIndexPattern);
   const baseAttributes = getBaseAttributes(defaultIndexPattern, fields, initialType);
 
@@ -274,8 +349,9 @@ function getLensAttributesDatatable(
 
 function getLensAttributesGauge(
   defaultIndexPattern: DataView,
-  fields: FieldsMap
-): TypedLensByValueInput['attributes'] {
+  fields: FieldsMap,
+  shape: GaugeVisualizationState['shape'] = 'horizontalBullet'
+): LensAttributesByType<GaugeVisualizationState> {
   const dataLayer = getDataLayer('number', fields.number, false);
   const gaugeDataLayer = {
     columnOrder: ['col1'],
@@ -288,7 +364,7 @@ function getLensAttributesGauge(
   const gaugeConfig: GaugeVisualizationState = {
     layerId: 'layer1',
     layerType: 'data',
-    shape: 'horizontalBullet',
+    shape,
     ticksPosition: 'auto',
     labelMajorMode: 'auto',
     metricAccessor: 'col1',
@@ -306,7 +382,7 @@ function getLensAttributesGauge(
 function getLensAttributesPartition(
   defaultIndexPattern: DataView,
   fields: FieldsMap
-): TypedLensByValueInput['attributes'] {
+): LensAttributesByType<PieVisualizationState> {
   const baseAttributes = getBaseAttributes(defaultIndexPattern, fields, 'number');
   const pieConfig: PieVisualizationState = {
     layers: [
@@ -317,7 +393,7 @@ function getLensAttributesPartition(
         layerType: 'data',
         numberDisplay: 'percent',
         categoryDisplay: 'default',
-        legendDisplay: 'default',
+        legendDisplay: 'show',
       },
     ],
     shape: 'pie',
@@ -350,8 +426,34 @@ function getFieldsByType(dataView: DataView) {
   return fields as FieldsMap;
 }
 
-function isXYChart(attributes: TypedLensByValueInput['attributes']) {
+function isXYChart(
+  attributes: TypedLensByValueInput['attributes']
+): attributes is LensAttributesByType<XYState> {
   return attributes.visualizationType === 'lnsXY';
+}
+
+function isPieChart(
+  attributes: TypedLensByValueInput['attributes']
+): attributes is LensAttributesByType<PieVisualizationState> {
+  return attributes.visualizationType === 'lnsPie';
+}
+
+function isHeatmapChart(
+  attributes: TypedLensByValueInput['attributes']
+): attributes is LensAttributesByType<HeatmapVisualizationState> {
+  return attributes.visualizationType === 'lnsHeatmap';
+}
+
+function isDatatable(
+  attributes: TypedLensByValueInput['attributes']
+): attributes is LensAttributesByType<DatatableVisualizationState> {
+  return attributes.visualizationType === 'lnsDatatable';
+}
+
+function isGaugeChart(
+  attributes: TypedLensByValueInput['attributes']
+): attributes is LensAttributesByType<GaugeVisualizationState> {
+  return attributes.visualizationType === 'lnsGague';
 }
 
 function checkAndParseSO(newSO: string) {
@@ -394,18 +496,20 @@ export const App = (props: {
     to: 'now',
   });
 
+  const [color, setColor, errors] = useColorPickerState('#D6BF57');
+
   const defaultCharts = [
     {
       id: 'bar_stacked',
-      attributes: getLensAttributes(props.defaultDataView, fields, 'bar_stacked', 'green'),
+      attributes: getLensAttributesXY(props.defaultDataView, fields, 'bar_stacked', color),
     },
     {
       id: 'line',
-      attributes: getLensAttributes(props.defaultDataView, fields, 'line', 'green'),
+      attributes: getLensAttributesXY(props.defaultDataView, fields, 'line', color),
     },
     {
       id: 'area',
-      attributes: getLensAttributes(props.defaultDataView, fields, 'area', 'green'),
+      attributes: getLensAttributesXY(props.defaultDataView, fields, 'area', color),
     },
     { id: 'pie', attributes: getLensAttributesPartition(props.defaultDataView, fields) },
     { id: 'table', attributes: getLensAttributesDatatable(props.defaultDataView, fields) },
@@ -433,7 +537,7 @@ export const App = (props: {
     [charts]
   );
 
-  const currentAttributes = useMemo(() => {
+  const currentAttributes: TypedLensByValueInput['attributes'] = useMemo(() => {
     try {
       return JSON.parse(currentSO.current);
     } catch (e) {
@@ -442,9 +546,28 @@ export const App = (props: {
   }, [currentValid, currentSO]);
 
   const isDisabled = !currentAttributes;
-  const isColorDisabled = isDisabled || !isXYChart(currentAttributes);
 
   useDebounce(() => setErrorDebounced(hasParsingError), 500, [hasParsingError]);
+
+  const [xyOverride, setXYOverride] = useState<
+    Record<'axisX' | 'axisLeft' | 'axisRight', { hide: boolean }> | undefined
+  >();
+  const [settingsOverride, setSettingsOverride] = useState<
+    Record<'settings', { legendAction: 'ignore' }> | undefined
+  >();
+  const [pieOverride, setPieOverride] = useState<
+    Record<'partition', { fillOutside: boolean }> | undefined
+  >();
+
+  const [attributesPopoverOpen, setAttributesPopoverOpen] = useState(false);
+  const [overridesPopoverOpen, setOverridesPopoverOpen] = useState(false);
+  const [panelPopoverOpen, setPanelPopoverOpen] = useState(false);
+
+  const hasOverridesEnabled = isXYChart(currentAttributes)
+    ? xyOverride || settingsOverride
+    : isPieChart(currentAttributes)
+    ? pieOverride || settingsOverride
+    : false;
 
   return (
     <KibanaContextProvider services={{ uiSettings: props.core.uiSettings }}>
@@ -475,29 +598,265 @@ export const App = (props: {
                   <EuiSpacer />
                   <EuiFlexGroup wrap>
                     <EuiFlexItem grow={false}>
-                      <EuiButton
-                        data-test-subj="lns-example-change-color"
-                        onClick={() => {
-                          const newColor = `rgb(${[1, 2, 3].map(() =>
-                            Math.floor(Math.random() * 256)
-                          )})`;
-                          const newAttributes = JSON.stringify(
-                            getLensAttributes(
-                              props.defaultDataView,
-                              fields,
-                              currentAttributes.state.visualization.preferredSeriesType,
-                              newColor
-                            ),
-                            null,
-                            2
-                          );
-                          currentSO.current = newAttributes;
-                          saveValidSO(newAttributes);
-                        }}
-                        isDisabled={isColorDisabled}
+                      <EuiPopover
+                        button={
+                          <EuiButton
+                            data-test-subj="lns-example-change-attributes"
+                            onClick={() => setAttributesPopoverOpen(!attributesPopoverOpen)}
+                            iconType="arrowDown"
+                            iconSide="right"
+                            color="primary"
+                          >
+                            Lens Attributes
+                          </EuiButton>
+                        }
+                        isOpen={attributesPopoverOpen}
+                        closePopover={() => setAttributesPopoverOpen(false)}
                       >
-                        Change color
-                      </EuiButton>
+                        <div style={{ width: 300 }}>
+                          {isXYChart(currentAttributes) ? (
+                            <EuiFormRow label="Pick color" display="columnCompressed">
+                              <EuiColorPicker
+                                onChange={(newColor, output) => {
+                                  setColor(newColor, output);
+                                  // for sake of semplicity of this example change it locally and then shallow copy it
+                                  const dataLayer = currentAttributes.state.visualization.layers[0];
+                                  if ('yConfig' in dataLayer && dataLayer.yConfig) {
+                                    dataLayer.yConfig[0].color = newColor;
+                                    // this will make a string copy of it
+                                    const newAttributes = JSON.stringify(
+                                      currentAttributes,
+                                      null,
+                                      2
+                                    );
+                                    currentSO.current = newAttributes;
+                                    saveValidSO(newAttributes);
+                                  }
+                                }}
+                                color={
+                                  currentAttributes.state.visualization.layers[0]?.yConfig[0]
+                                    .color ?? 'green'
+                                }
+                                isInvalid={!!errors}
+                              />
+                            </EuiFormRow>
+                          ) : null}
+                          {isPieChart(currentAttributes) ? (
+                            <EuiFormRow label="Show values" display="columnCompressedSwitch">
+                              <EuiSwitch
+                                label="As percentage"
+                                name="switch"
+                                checked={
+                                  currentAttributes.state.visualization.layers[0].numberDisplay ===
+                                  'percent'
+                                }
+                                onChange={() => {
+                                  currentAttributes.state.visualization.layers[0].numberDisplay =
+                                    currentAttributes.state.visualization.layers[0]
+                                      .numberDisplay === 'percent'
+                                      ? 'value'
+                                      : 'percent';
+                                  // this will make a string copy of it
+                                  const newAttributes = JSON.stringify(currentAttributes, null, 2);
+                                  currentSO.current = newAttributes;
+                                  saveValidSO(newAttributes);
+                                }}
+                                compressed
+                              />
+                            </EuiFormRow>
+                          ) : null}
+                        </div>
+                      </EuiPopover>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiPopover
+                        button={
+                          <EuiButton
+                            data-test-subj="lns-example-change-overrides"
+                            onClick={() => setOverridesPopoverOpen(!overridesPopoverOpen)}
+                            iconType="arrowDown"
+                            iconSide="right"
+                            isDisabled={isDatatable(currentAttributes)}
+                          >
+                            Overrides{' '}
+                            <EuiNotificationBadge
+                              color={hasOverridesEnabled ? 'accent' : 'subdued'}
+                            >
+                              {hasOverridesEnabled ? 'ON' : 'OFF'}
+                            </EuiNotificationBadge>
+                          </EuiButton>
+                        }
+                        isOpen={overridesPopoverOpen}
+                        closePopover={() => setOverridesPopoverOpen(false)}
+                      >
+                        <div style={{ width: 400 }}>
+                          <EuiPopoverTitle>Overrides</EuiPopoverTitle>
+                          <EuiText size="s">
+                            <p>
+                              Overrides are local to the Embeddable and forgotten when the
+                              visualization is open in the Editor. They should be used carefully for
+                              specific tweaks within the integration.
+                            </p>
+                            <p>
+                              There are mainly 2 use cases for overrides:
+                              <ul>
+                                <li>Specific styling/tuning feature missing in Lens</li>
+                                <li>Disable specific chart behaviour</li>
+                              </ul>
+                            </p>
+                            <p>Here&#39;s some examples:</p>
+                          </EuiText>
+                          <EuiSpacer />
+                          {isPieChart(currentAttributes) || isXYChart(currentAttributes) ? (
+                            <OverrideSwitch
+                              override={{
+                                settings: { legendAction: 'ignore' },
+                              }}
+                              value={settingsOverride}
+                              setOverrideValue={setSettingsOverride}
+                              rowLabel="Legend override"
+                              controlLabel="Disable legend popup"
+                              helpText={`This override disabled the legend filter popup locally, via the special "ignore" value.`}
+                            />
+                          ) : null}
+                          {isPieChart(currentAttributes) ? (
+                            <OverrideSwitch
+                              override={{
+                                partition: { fillOutside: true },
+                              }}
+                              value={pieOverride}
+                              setOverrideValue={setPieOverride}
+                              rowLabel="Partition override"
+                              controlLabel="Label outsides"
+                            />
+                          ) : null}
+                          {isXYChart(currentAttributes) ? (
+                            <OverrideSwitch
+                              override={{
+                                axisX: { hide: true },
+                                axisLeft: { hide: true },
+                                axisRight: { hide: true },
+                              }}
+                              value={xyOverride}
+                              setOverrideValue={setXYOverride}
+                              rowLabel="Axis override"
+                              controlLabel="Hide all axes"
+                            />
+                          ) : null}
+                        </div>
+                      </EuiPopover>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiPopover
+                        button={
+                          <EuiButton
+                            data-test-subj="lns-example-change-overrides"
+                            onClick={() => setPanelPopoverOpen(!panelPopoverOpen)}
+                            iconType="arrowDown"
+                            iconSide="right"
+                          >
+                            Embeddable settings
+                          </EuiButton>
+                        }
+                        isOpen={panelPopoverOpen}
+                        closePopover={() => setPanelPopoverOpen(false)}
+                      >
+                        <div style={{ width: 400 }}>
+                          <EuiPopoverTitle>Embeddable settings</EuiPopoverTitle>
+                          <EuiText size="s">
+                            <p>
+                              It is possible to control and customize how the Embeddables is shown,
+                              disabling the interactivity of the chart or filtering out default
+                              actions.
+                            </p>
+                          </EuiText>
+                          <EuiSpacer />
+                          <EuiFormRow
+                            label="Enable triggers"
+                            display="columnCompressedSwitch"
+                            helpText="This setting controls the interactivity of the chart: when disabled the chart won't bubble any event on user action."
+                          >
+                            <EuiSwitch
+                              showLabel={false}
+                              label="Enable triggers"
+                              name="switch"
+                              checked={enableTriggers}
+                              onChange={() => {
+                                toggleTriggers(!enableTriggers);
+                              }}
+                              compressed
+                            />
+                          </EuiFormRow>
+                          <EuiFormRow
+                            label="Enable default action"
+                            display="columnCompressedSwitch"
+                            helpText="When disabled the default panel actions (i.e. CSV download)"
+                          >
+                            <EuiSwitch
+                              showLabel={false}
+                              label="Enable default action"
+                              name="switch"
+                              checked={enableDefaultAction}
+                              onChange={() => {
+                                setEnableDefaultAction(!enableDefaultAction);
+                              }}
+                              compressed
+                            />
+                          </EuiFormRow>
+                          <EuiSpacer />
+                          <p>It is also possible to pass custom actions to the panel:</p>
+                          <EuiSpacer />
+                          <EuiFormRow
+                            label={
+                              <EuiToolTip
+                                display="block"
+                                content={
+                                  <CodeExample
+                                    propName="extraActions"
+                                    code={`[
+  {
+    id: 'testAction',
+    type: 'link',
+    getIconType: () => 'save',
+    async isCompatible(
+      context: ActionExecutionContext<object>
+    ): Promise<boolean> {
+      return true;
+    },
+    execute: async (context: ActionExecutionContext<object>) => {
+      alert('I am an extra action');
+      return;
+    },
+    getDisplayName: () => 
+      'Extra action',
+  }
+]`}
+                                  />
+                                }
+                                position="right"
+                              >
+                                <span>
+                                  Show custom action{' '}
+                                  <EuiIcon type="questionInCircle" color="subdued" />
+                                </span>
+                              </EuiToolTip>
+                            }
+                            display="columnCompressedSwitch"
+                            helpText="Pass a consumer defined action to show in the panel context menu."
+                          >
+                            <EuiSwitch
+                              showLabel={false}
+                              label="Show custom action"
+                              name="switch"
+                              checked={enableExtraAction}
+                              onChange={() => {
+                                setEnableExtraAction(!enableExtraAction);
+                              }}
+                              compressed
+                            />
+                          </EuiFormRow>
+                        </div>
+                      </EuiPopover>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiButton
@@ -552,43 +911,7 @@ export const App = (props: {
                           );
                         }}
                       >
-                        Edit in Lens (new tab)
-                      </EuiButton>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        aria-label="Enable triggers"
-                        data-test-subj="lns-example-triggers"
-                        isDisabled={isDisabled}
-                        onClick={() => {
-                          toggleTriggers((prevState) => !prevState);
-                        }}
-                      >
-                        {enableTriggers ? 'Disable triggers' : 'Enable triggers'}
-                      </EuiButton>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        aria-label="Enable extra action"
-                        data-test-subj="lns-example-extra-action"
-                        isDisabled={isDisabled}
-                        onClick={() => {
-                          setEnableExtraAction((prevState) => !prevState);
-                        }}
-                      >
-                        {enableExtraAction ? 'Disable extra action' : 'Enable extra action'}
-                      </EuiButton>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        aria-label="Enable default actions"
-                        data-test-subj="lns-example-default-action"
-                        isDisabled={isDisabled}
-                        onClick={() => {
-                          setEnableDefaultAction((prevState) => !prevState);
-                        }}
-                      >
-                        {enableDefaultAction ? 'Disable default action' : 'Enable default action'}
+                        Open in Lens (new tab)
                       </EuiButton>
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -602,6 +925,11 @@ export const App = (props: {
                         style={{ height: 500 }}
                         timeRange={time}
                         attributes={currentAttributes}
+                        overrides={{
+                          ...settingsOverride,
+                          ...xyOverride,
+                          ...pieOverride,
+                        }}
                         onLoad={(val) => {
                           setIsLoading(val);
                         }}

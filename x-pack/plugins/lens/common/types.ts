@@ -17,6 +17,11 @@ import { layerTypes } from './layer_types';
 import { CollapseFunction } from './expressions';
 
 export type { OriginalColumn } from './expressions/map_to_columns';
+export type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
+export type { AllowedSettingsOverriddes } from '@kbn/charts-plugin/common';
+export type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
+export type { AllowedHeatmapOverrides } from '@kbn/expression-heatmap-plugin/common';
+export type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
 

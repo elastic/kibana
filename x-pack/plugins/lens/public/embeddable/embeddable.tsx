@@ -102,7 +102,15 @@ import {
   UserMessagesDisplayLocationId,
 } from '../types';
 
-import { getEditPath, DOC_TYPE } from '../../common';
+import {
+  getEditPath,
+  DOC_TYPE,
+  type AllowedPartitionOverrides,
+  type AllowedSettingsOverriddes,
+  type AllowedGaugeOverrides,
+  type AllowedHeatmapOverrides,
+  type AllowedXYOverrides,
+} from '../../common';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
@@ -150,6 +158,19 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
 
 export type LensByValueInput = {
   attributes: LensSavedObjectAttributes;
+  /**
+   * Overrides can tweak the style of the final embeddable and are executed at the end of the Lens rendering pipeline.
+   * Each visualization type offers various type of overrides, per component (i.e. 'setting', 'axisX', 'partition', etc...)
+   *
+   * While it is not possible to pass function/callback/handlers to the renderer, it is possible to overwrite
+   * the current behaviour by passing the "ignore" string to the override prop (i.e. onBrushEnd: "ignore" to stop brushing)
+   */
+  overrides?:
+    | AllowedSettingsOverriddes
+    | AllowedXYOverrides
+    | AllowedPartitionOverrides
+    | AllowedHeatmapOverrides
+    | AllowedGaugeOverrides;
 } & LensBaseEmbeddableInput;
 
 export type LensByReferenceInput = SavedObjectEmbeddableInput & LensBaseEmbeddableInput;
@@ -467,8 +488,18 @@ export class Embeddable
         .pipe(
           distinctUntilChanged((a, b) =>
             fastIsEqual(
-              ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
-              ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
+              [
+                'attributes' in a && a.attributes,
+                'savedObjectId' in a && a.savedObjectId,
+                'overrides' in a && a.overrides,
+                'disableTriggers' in a && a.disableTriggers,
+              ],
+              [
+                'attributes' in b && b.attributes,
+                'savedObjectId' in b && b.savedObjectId,
+                'overrides' in b && b.overrides,
+                'disableTriggers' in b && b.disableTriggers,
+              ]
             )
           ),
           skip(1)
@@ -867,6 +898,7 @@ export class Embeddable
               variables={{
                 embeddableTitle: this.getTitle(),
                 ...(input.palette ? { theme: { palette: input.palette } } : {}),
+                ...('overrides' in input ? { overrides: input.overrides } : {}),
               }}
               searchSessionId={this.getInput().searchSessionId}
               handleEvent={this.handleEvent}

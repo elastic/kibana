@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Position, RecursivePartial, AxisStyle } from '@elastic/charts';
+import { Position, type RecursivePartial, type AxisStyle } from '@elastic/charts';
 
 export const MULTILAYER_TIME_AXIS_STYLE: RecursivePartial<AxisStyle> = {
   tickLabel: {

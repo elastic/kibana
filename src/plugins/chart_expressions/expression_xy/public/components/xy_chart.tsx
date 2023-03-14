@@ -51,6 +51,7 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import type {
   FilterEvent,
   BrushEvent,
@@ -226,6 +227,7 @@ export function XYChart({
   renderComplete,
   uiState,
   timeFormat,
+  overrides,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -940,6 +942,7 @@ export function XYChart({
                   }
                 : undefined
             }
+            {...getOverridesFor(overrides, 'settings')}
           />
           <XYCurrentTime
             enabled={Boolean(args.addTimeMarker && isTimeViz)}
@@ -968,6 +971,7 @@ export function XYChart({
             showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
             showDuplicatedTicks={xAxisConfig?.showDuplicates}
             timeAxisLayerCount={shouldUseNewTimeAxis ? 2 : 0}
+            {...getOverridesFor(overrides, 'axisX')}
           />
           {isSplitChart && splitTable && (
             <SplitChart
@@ -999,6 +1003,10 @@ export function XYChart({
                 domain={getYAxisDomain(axis)}
                 showOverlappingLabels={axis.showOverlappingLabels}
                 showDuplicatedTicks={axis.showDuplicates}
+                {...getOverridesFor(
+                  overrides,
+                  /left/i.test(axis.groupId) ? 'axisLeft' : 'axisRight'
+                )}
               />
             );
           })}
