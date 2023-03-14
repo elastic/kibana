@@ -170,7 +170,6 @@ export const createAttachmentServiceMock = (): AttachmentServiceMock => {
     find: jest.fn(),
     countAlertsAttachedToCase: jest.fn(),
     executeCaseActionsAggregations: jest.fn(),
-    valueCountAlertsAttachedToCase: jest.fn(),
     executeCaseAggregations: jest.fn(),
   };
 

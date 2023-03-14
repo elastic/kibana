@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RawRule, IntervalSchedule } from '../../types';
-import { updateMonitoring, getNextRun } from '../../lib';
+import { resetMonitoringLastRun, getNextRun } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -84,11 +85,7 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
       ...attributes,
       ...(!existingApiKey && (await createNewAPIKeySet(context, { attributes, username }))),
       ...(attributes.monitoring && {
-        monitoring: updateMonitoring({
-          monitoring: attributes.monitoring,
-          timestamp: now.toISOString(),
-          duration: 0,
-        }),
+        monitoring: resetMonitoringLastRun(attributes.monitoring),
       }),
       nextRun: getNextRun({ interval: schedule.interval }),
       enabled: true,
@@ -114,7 +111,14 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
   if (attributes.scheduledTaskId) {
     // If scheduledTaskId defined in rule SO, make sure it exists
     try {
-      await context.taskManager.get(attributes.scheduledTaskId);
+      const task = await context.taskManager.get(attributes.scheduledTaskId);
+
+      // Check whether task status is unrecognized. If so, we want to delete
+      // this task and create a fresh one
+      if (task.status === TaskStatus.Unrecognized) {
+        await context.taskManager.removeIfExists(attributes.scheduledTaskId);
+        scheduledTaskIdToCreate = id;
+      }
     } catch (err) {
       scheduledTaskIdToCreate = id;
     }

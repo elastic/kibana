@@ -8,8 +8,8 @@
 import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import { DataViewsContract } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { DiscoverAppStateContainer } from '../../../application/main/services/discover_app_state_container';
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
-import { DiscoverStateContainer as DiscoverGetStateReturn } from '../../../application/main/services/discover_state';
 import { GetStateReturn as ContextGetStateReturn } from '../../../application/context/services/context_state';
 import { popularizeField } from '../../../utils/popularize_field';
 
@@ -70,7 +70,7 @@ export function getStateColumnActions({
   dataView: DataView;
   dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
-  setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
+  setAppState: DiscoverAppStateContainer['update'] | ContextGetStateReturn['setAppState'];
   columns?: string[];
   sort: string[][] | undefined;
 }) {

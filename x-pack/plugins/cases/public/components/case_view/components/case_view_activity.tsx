@@ -7,8 +7,8 @@
 
 /* eslint-disable complexity */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useGetCaseUsers } from '../../../containers/use_get_case_users';
@@ -30,9 +30,15 @@ import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from '../translations';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useFindCaseUserActions } from '../../../containers/use_find_case_user_actions';
+import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_user_actions_stats';
 import { AssignUsers } from './assign_users';
+import { UserActionsActivityBar } from '../../user_actions_activity_bar';
 import type { Assignee } from '../../user_profiles/types';
 import { convertToCaseUserWithProfileInfo } from '../../user_profiles/user_converter';
+import type { UserActivityParams } from '../../user_actions_activity_bar/types';
+import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+import { CaseViewTabs } from '../case_view_tabs';
+import { DescriptionWrapper } from '../../description/description_wrapper';
 
 const buildUserProfilesMap = (users?: CaseUsers): Map<string, UserProfileWithAvatar> => {
   const userProfiles = new Map();
@@ -81,7 +87,13 @@ export const CaseViewActivity = ({
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
 }) => {
+  const [userActivityQueryParams, setUserActivityQueryParams] = useState<UserActivityParams>({
+    type: 'all',
+    sortOrder: 'asc',
+  });
+
   const { permissions } = useCasesContext();
+
   const { caseAssignmentAuthorized, pushToServiceAuthorized } = useCasesFeatures();
 
   const { data: caseConnectors, isLoading: isLoadingCaseConnectors } = useGetCaseConnectors(
@@ -89,8 +101,12 @@ export const CaseViewActivity = ({
   );
 
   const { data: userActionsData, isLoading: isLoadingUserActions } = useFindCaseUserActions(
-    caseData.id
+    caseData.id,
+    userActivityQueryParams
   );
+
+  const { data: userActionsStats, isLoading: isLoadingUserActionsStats } =
+    useGetCaseUserActionsStats(caseData.id);
 
   const { data: caseUsers, isLoading: isLoadingCaseUsers } = useGetCaseUsers(caseData.id);
 
@@ -179,42 +195,76 @@ export const CaseViewActivity = ({
       ? [caseUsers.reporter]
       : [convertToCaseUserWithProfileInfo(caseData.createdBy)];
 
+  const handleUserActionsActivityChanged = useCallback(
+    (params: UserActivityParams) => {
+      setUserActivityQueryParams((oldParams) => ({
+        ...oldParams,
+        type: params.type,
+        sortOrder: params.sortOrder,
+      }));
+    },
+    [setUserActivityQueryParams]
+  );
+
+  const isLoadingDescription = isLoading && loadingKey === 'description';
+
   return (
     <>
       <EuiFlexItem grow={6}>
-        {(isLoadingUserActions || isLoadingCaseConnectors) && (
-          <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
-        )}
-        {showUserActions && (
+        <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
+        <DescriptionWrapper
+          isLoadingDescription={isLoadingDescription}
+          data={caseData}
+          userProfiles={userProfiles}
+          onUpdateField={onUpdateField}
+        />
+        <EuiSpacer size="l" />
+        <EuiFlexItem grow={false}>
+          <UserActionsActivityBar
+            onUserActionsActivityChanged={handleUserActionsActivityChanged}
+            params={userActivityQueryParams}
+            userActionsStats={userActionsStats}
+            isLoading={isLoadingUserActionsStats}
+          />
+        </EuiFlexItem>
+        <EuiSpacer size="l" />
+
+        <EuiSkeletonText
+          lines={8}
+          data-test-subj="case-view-loading-content"
+          isLoading={isLoadingUserActions || isLoadingCaseConnectors}
+        >
           <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
             <EuiFlexItem>
-              <UserActions
-                userProfiles={userProfiles}
-                currentUserProfile={currentUserProfile}
-                getRuleDetailsHref={ruleDetailsNavigation?.href}
-                onRuleDetailsClick={ruleDetailsNavigation?.onClick}
-                caseConnectors={caseConnectors}
-                caseUserActions={userActionsData.userActions}
-                data={caseData}
-                actionsNavigation={actionsNavigation}
-                isLoadingDescription={isLoading && loadingKey === 'description'}
-                isLoadingUserActions={isLoadingUserActions}
-                onShowAlertDetails={onShowAlertDetails}
-                onUpdateField={onUpdateField}
-                statusActionButton={
-                  permissions.update ? (
-                    <StatusActionButton
-                      status={caseData.status}
-                      onStatusChanged={changeStatus}
-                      isLoading={isLoading && loadingKey === 'status'}
-                    />
-                  ) : null
-                }
-                useFetchAlertData={useFetchAlertData}
-              />
+              {showUserActions && (
+                <UserActions
+                  userProfiles={userProfiles}
+                  currentUserProfile={currentUserProfile}
+                  getRuleDetailsHref={ruleDetailsNavigation?.href}
+                  onRuleDetailsClick={ruleDetailsNavigation?.onClick}
+                  caseConnectors={caseConnectors}
+                  caseUserActions={userActionsData.userActions}
+                  data={caseData}
+                  actionsNavigation={actionsNavigation}
+                  isLoadingUserActions={isLoadingUserActions}
+                  onShowAlertDetails={onShowAlertDetails}
+                  onUpdateField={onUpdateField}
+                  statusActionButton={
+                    permissions.update ? (
+                      <StatusActionButton
+                        status={caseData.status}
+                        onStatusChanged={changeStatus}
+                        isLoading={isLoading && loadingKey === 'status'}
+                      />
+                    ) : null
+                  }
+                  filterOptions={userActivityQueryParams.type}
+                  useFetchAlertData={useFetchAlertData}
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
+        </EuiSkeletonText>
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
