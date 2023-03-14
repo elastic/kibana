@@ -15,10 +15,8 @@ import {
   EuiToolTip,
   EuiPanel,
 } from '@elastic/eui';
-import * as esKuery from '@kbn/es-query';
 import { ALERT_ICONS } from '../../../common/constants';
 import {
-  EventAction,
   ProcessEvent,
   ProcessEventAlert,
   ProcessEventAlertCategory,
@@ -37,8 +35,6 @@ export interface ProcessTreeAlertDeps {
   onShowAlertDetails: (alertUuid: string) => void;
 }
 
-const MAX_OUTPUT_PREVIEW_LENGTH = 30;
-
 export const ProcessTreeAlert = ({
   alert,
   isInvestigated,
@@ -49,7 +45,7 @@ export const ProcessTreeAlert = ({
 }: ProcessTreeAlertDeps) => {
   const styles = useStyles({ isInvestigated, isSelected });
 
-  const { event, process } = alert;
+  const { event } = alert;
   const { uuid, rule, workflow_status: status } = alert.kibana?.alert || {};
   const category = event?.category?.[0];
   const alertIconType = useMemo(() => {
@@ -62,37 +58,6 @@ export const ProcessTreeAlert = ({
       selectAlert(uuid);
     }
   }, [isInvestigated, uuid, selectAlert]);
-
-  const getTextOutputMatch = useCallback(() => {
-    const text = process?.io?.text;
-    const query = rule?.parameters?.query;
-
-    if (query && text) {
-      const parsed = esKuery.fromKueryExpression(query);
-      const indexOf = parsed.arguments.findIndex((token: any) =>
-        token.value.includes('process.io.text')
-      );
-
-      if (indexOf > -1) {
-        const token = parsed.arguments[indexOf + 1];
-
-        if (token.value) {
-          const value = token.value
-            .replace(/@kuery-wildcard@/g, '*')
-            .replace(/(^|(?<!\\))\*/g, '.*')
-            .trim();
-          const regex = new RegExp(value);
-          const match = text.match(regex);
-
-          if (match) {
-            return match[0].substring(0, MAX_OUTPUT_PREVIEW_LENGTH);
-          }
-        }
-      }
-    }
-
-    return '';
-  }, [process?.io?.text, rule?.parameters?.query]);
 
   const handleExpandClick = useCallback(() => {
     if (uuid) {
@@ -172,11 +137,6 @@ export const ProcessTreeAlert = ({
         <EuiFlexItem grow={false}>
           <EuiBadge css={styles.actionBadge}>{event?.action}</EuiBadge>
         </EuiFlexItem>
-        {event?.action === EventAction.text_output && (
-          <EuiFlexItem grow={false}>
-            <span css={styles.outputPreview}>{getTextOutputMatch()}</span>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </div>
   );
