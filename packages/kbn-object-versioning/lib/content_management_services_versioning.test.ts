@@ -264,7 +264,7 @@ describe('CM services getTransforms()', () => {
             in: {
               options: {
                 schema: schema.object({
-                  foo: schema.string(),
+                  version1: schema.string(),
                 }),
                 up: (pre) => ({ ...pre, version2: 'added' }),
               },
@@ -283,7 +283,7 @@ describe('CM services getTransforms()', () => {
             in: {
               options: {
                 schema: schema.object({
-                  foo: schema.string(),
+                  version1: schema.string(),
                   version2: schema.string(),
                 }),
                 up: (pre) => ({ ...pre, version3: 'added' }),
@@ -325,7 +325,7 @@ describe('CM services getTransforms()', () => {
       test('should up transform an object', () => {
         const requestVersion = 1;
         const transforms = getTransforms(definitions, requestVersion);
-        const initial = { foo: 'option version 1' };
+        const initial = { version1: 'option version 1' };
         const upTransform = transforms.get.in.options.up(initial);
         expect(upTransform.value).toEqual({ ...initial, version2: 'added', version3: 'added' });
       });
@@ -335,7 +335,7 @@ describe('CM services getTransforms()', () => {
         const transforms = getTransforms(definitions, requestVersion);
         const upTransform = transforms.get.in.options.up({ unknown: 'foo' });
         expect(upTransform.error?.message).toBe(
-          '[foo]: expected value of type [string] but got [undefined]'
+          '[version1]: expected value of type [string] but got [undefined]'
         );
       });
 
