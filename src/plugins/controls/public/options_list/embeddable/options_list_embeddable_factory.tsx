@@ -22,7 +22,6 @@ import {
 } from '../../../common/options_list/types';
 import { OptionsListEditorOptions } from '../components/options_list_editor_options';
 import { ControlEmbeddable, DataControlField, IEditableControlFactory } from '../../types';
-import { OPTIONS_LIST_DEFAULT_SORT } from '../../../common/options_list/suggestions_sorting';
 
 export class OptionsListEmbeddableFactory
   implements EmbeddableFactoryDefinition, IEditableControlFactory<OptionsListEmbeddableInput>

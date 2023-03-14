@@ -8,9 +8,9 @@
 
 import React from 'react';
 
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { ViewMode, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { ViewMode, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { ACTION_DELETE_CONTROL } from '.';
 import { pluginServices } from '../../services';
