@@ -197,7 +197,7 @@ export const FunctionHelpPopover: FC = memo(() => {
       id: 14,
       function: 'non_null_sum, high_non_null_sum, low_non_null_sum',
       description: i18n.translate(
-        'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.nonZeroCount',
+        'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.nonNullSum',
         {
           defaultMessage:
             'These functions are useful if your data is sparse. Buckets without values are ignored and buckets with a zero value are analyzed.',
