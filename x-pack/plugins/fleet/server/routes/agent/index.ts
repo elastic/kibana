@@ -32,6 +32,7 @@ import {
   PostBulkRequestDiagnosticsActionRequestSchema,
   ListAgentUploadsRequestSchema,
   GetAgentUploadFileRequestSchema,
+  PostRetrieveAgentsByActionsRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
@@ -56,6 +57,7 @@ import {
   getAgentUploadsHandler,
   getAgentUploadFileHandler,
   postAgentsReassignHandler,
+  postRetrieveAgentsByActionsHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
@@ -167,6 +169,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       createAgentAction: AgentService.createAgentAction,
       getAgentActions: AgentService.getAgentActions,
     })
+  );
+  // Get agents by Action_Ids
+  router.post(
+    {
+      path: AGENT_API_ROUTES.LIST_PATTERN,
+      validate: PostRetrieveAgentsByActionsRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true }, // Authorizations?
+      },
+    },
+    postRetrieveAgentsByActionsHandler
   );
 
   router.post(
