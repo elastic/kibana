@@ -761,6 +761,23 @@
       },
       {
         "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.WithRequiredProperty",
+        "type": "Type",
+        "tags": [],
+        "label": "WithRequiredProperty",
+        "description": [
+          "\nTakes a type and makes selected properties required.\n"
+        ],
+        "signature": [
+          "Omit<Type, Key> & { [Property in Key]-?: Type[Property]; }"
+        ],
+        "path": "packages/kbn-utility-types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
         "id": "def-common.Writable",
         "type": "Type",
         "tags": [],
