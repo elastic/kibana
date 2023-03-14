@@ -18,6 +18,5 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/safer-lodash-set",
-    "@kbn/content-management-plugin",
   ]
 }
