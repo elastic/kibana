@@ -7,12 +7,12 @@
 
 import { shallow } from 'enzyme';
 
-import { getSelectedGroupButtonContent } from '.';
+import { renderGroupPanel } from '.';
 
-describe('getSelectedGroupButtonContent', () => {
+describe('renderGroupPanel', () => {
   it('renders correctly when the field renderer exists', () => {
     const wrapperRuleName = shallow(
-      getSelectedGroupButtonContent('kibana.alert.rule.name', {
+      renderGroupPanel('kibana.alert.rule.name', {
         key: ['Rule name test', 'Some description'],
         doc_count: 10,
       })!
@@ -20,7 +20,7 @@ describe('getSelectedGroupButtonContent', () => {
 
     expect(wrapperRuleName.find('[data-test-subj="rule-name-group-renderer"]')).toBeTruthy();
     const wrapperHostName = shallow(
-      getSelectedGroupButtonContent('host.name', {
+      renderGroupPanel('host.name', {
         key: 'Host',
         doc_count: 2,
       })!
@@ -28,7 +28,7 @@ describe('getSelectedGroupButtonContent', () => {
 
     expect(wrapperHostName.find('[data-test-subj="host-name-group-renderer"]')).toBeTruthy();
     const wrapperUserName = shallow(
-      getSelectedGroupButtonContent('user.name', {
+      renderGroupPanel('user.name', {
         key: 'User test',
         doc_count: 1,
       })!
@@ -36,7 +36,7 @@ describe('getSelectedGroupButtonContent', () => {
 
     expect(wrapperUserName.find('[data-test-subj="host-name-group-renderer"]')).toBeTruthy();
     const wrapperSourceIp = shallow(
-      getSelectedGroupButtonContent('source.ip', {
+      renderGroupPanel('source.ip', {
         key: 'sourceIp',
         doc_count: 23,
       })!
@@ -46,7 +46,7 @@ describe('getSelectedGroupButtonContent', () => {
   });
 
   it('returns undefined when the renderer does not exist', () => {
-    const wrapper = getSelectedGroupButtonContent('process.name', {
+    const wrapper = renderGroupPanel('process.name', {
       key: 'process',
       doc_count: 10,
     });
