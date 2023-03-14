@@ -20,7 +20,9 @@ import {
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 
 export const FunctionHelpPopover: FC = memo(() => {
-  const { services: { docLinks } } = useMlKibana();
+  const {
+    services: { docLinks },
+  } = useMlKibana();
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
@@ -58,7 +60,7 @@ export const FunctionHelpPopover: FC = memo(() => {
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.nonZeroCount',
         {
           defaultMessage:
-            'Detect anomalies when the number of events in a bucket is anomalous, but it ignores cases where the bucket count is zero.',
+            'Detect anomalies when the number of events in a bucket is anomalous, but ignore cases where the bucket count is zero.',
         }
       ),
     },
@@ -79,7 +81,7 @@ export const FunctionHelpPopover: FC = memo(() => {
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.latLong',
         {
-          defaultMessage: 'Detects anomalies in the geographic location of the input data.',
+          defaultMessage: 'Detect anomalies in the geographic location of the input data.',
         }
       ),
     },
@@ -101,7 +103,7 @@ export const FunctionHelpPopover: FC = memo(() => {
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.min',
         {
           defaultMessage:
-            'Detects anomalies in the arithmetic minimum of a value. The minimum value is calculated for each bucket.',
+            'Detect anomalies in the arithmetic minimum of a value, which is calculated for each bucket.',
         }
       ),
     },
@@ -112,7 +114,7 @@ export const FunctionHelpPopover: FC = memo(() => {
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.max',
         {
           defaultMessage:
-            'Detects anomalies in the arithmetic maximum of a value. The maximum value is calculated for each bucket.',
+            'Detect anomalies in the arithmetic maximum of a value, which is calculated for each bucket.',
         }
       ),
     },
@@ -123,7 +125,7 @@ export const FunctionHelpPopover: FC = memo(() => {
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.median',
         {
           defaultMessage:
-            'Detect anomalies in the statistical median of a value. The median value is calculated for each bucket.',
+            'Detect anomalies in the statistical median of a value, which is calculated for each bucket.',
         }
       ),
     },
@@ -134,7 +136,7 @@ export const FunctionHelpPopover: FC = memo(() => {
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.mean',
         {
           defaultMessage:
-            'Detect anomalies in the arithmetic mean of a value. The mean value is calculated for each bucket.',
+            'Detect anomalies in the arithmetic mean of a value, which is calculated for each bucket.',
         }
       ),
     },
@@ -145,7 +147,7 @@ export const FunctionHelpPopover: FC = memo(() => {
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.metric',
         {
           defaultMessage:
-            'Combines min, max, and mean functions. You can use it as a shorthand for a combined analysis. If you do not specify a function in a detector, this is the default function.',
+            'Combine min, max, and mean functions. Use it as a shorthand for a combined analysis. This is the default function.',
         }
       ),
     },
@@ -166,7 +168,7 @@ export const FunctionHelpPopover: FC = memo(() => {
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.rare',
         {
-          defaultMessage: 'Detects anomalies according to the number of distinct rare values.',
+          defaultMessage: 'Detect anomalies according to the number of distinct rare values.',
         }
       ),
     },
@@ -177,7 +179,7 @@ export const FunctionHelpPopover: FC = memo(() => {
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.freqRare',
         {
           defaultMessage:
-            'Detects anomalies according to the number of times (frequency) rare values occur.',
+            'Detect anomalies according to the number of times (frequency) rare values occur.',
         }
       ),
     },
