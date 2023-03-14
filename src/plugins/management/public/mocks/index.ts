@@ -39,6 +39,7 @@ const createSetupContract = (): ManagementSetup => ({
       state: {},
     })),
   },
+  setIsSidebarEnabled: jest.fn(() => true),
 });
 
 const createStartContract = (): ManagementStart => ({

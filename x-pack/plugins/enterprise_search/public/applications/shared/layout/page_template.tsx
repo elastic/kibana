@@ -73,7 +73,11 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
         ),
       }}
       isEmptyState={isEmptyState && !isLoading}
-      solutionNav={solutionNav ? { icon: 'logoEnterpriseSearch', ...solutionNav } : undefined}
+      solutionNav={
+        solutionNav && solutionNav.items
+          ? { icon: 'logoEnterpriseSearch', ...solutionNav }
+          : undefined
+      }
     >
       {setPageChrome}
       {readOnlyMode && (

@@ -40,6 +40,7 @@ export type UrlStateType =
   | 'explore'
   | 'dashboards'
   | 'indicators'
+  | 'cloud_defend'
   | 'cloud_posture'
   | 'findings'
   | 'entity_analytics'
@@ -82,6 +83,7 @@ export const securityNavKeys = [
   SecurityPageName.cloudSecurityPostureDashboard,
   SecurityPageName.cloudSecurityPostureFindings,
   SecurityPageName.cloudSecurityPostureBenchmarks,
+  SecurityPageName.cloudDefendPolicies,
   SecurityPageName.entityAnalytics,
   SecurityPageName.dataQuality,
 ] as const;

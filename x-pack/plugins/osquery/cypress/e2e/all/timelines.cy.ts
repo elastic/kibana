@@ -6,12 +6,11 @@
  */
 
 import { takeOsqueryActionWithParams } from '../../tasks/live_query';
-import { login } from '../../tasks/login';
-import { ROLES } from '../../test';
+import { ROLE, login } from '../../tasks/login';
 
 describe('ALL - Timelines', () => {
   beforeEach(() => {
-    login(ROLES.soc_manager);
+    login(ROLE.soc_manager);
   });
 
   it('should substitute osquery parameter on non-alert event take action', () => {

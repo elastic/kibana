@@ -6,8 +6,9 @@
  */
 
 import {
-  TIMELINE_CHECKBOX,
   BULK_ACTIONS,
+  EXPORT_TIMELINE,
+  TIMELINE_CHECKBOX,
   EXPAND_NOTES_BTN,
   EXPORT_TIMELINE_ACTION,
   IMPORT_BTN,
@@ -16,16 +17,12 @@ import {
   TIMELINES_TABLE,
   TIMELINE,
   TIMELINE_NAME,
+  TIMELINE_ITEM_ACTION_BTN,
 } from '../screens/timelines';
+import { SELECT_ALL_CHECKBOX } from '../screens/shared';
 
 export const expandNotes = () => {
   cy.get(EXPAND_NOTES_BTN).click();
-};
-
-export const exportTimeline = (timelineId: string) => {
-  cy.get(TIMELINE_CHECKBOX(timelineId)).click({ force: true });
-  cy.get(BULK_ACTIONS).click({ force: true });
-  cy.get(EXPORT_TIMELINE_ACTION).click();
 };
 
 export const importTimeline = (timeline: string) => {
@@ -47,4 +44,24 @@ export const openTimeline = (id?: string) => {
 
 export const waitForTimelinesPanelToBeLoaded = () => {
   cy.get(TIMELINES_TABLE).should('exist');
+};
+
+export const exportTimeline = (timelineId: string) => {
+  cy.get(TIMELINE_ITEM_ACTION_BTN(timelineId)).click();
+  cy.get(EXPORT_TIMELINE).click();
+};
+
+export const selectTimeline = (timelineId: string) => {
+  cy.get(TIMELINE_CHECKBOX(timelineId)).click();
+};
+
+export const selectAllTimelines = () => {
+  cy.get(SELECT_ALL_CHECKBOX).should('exist');
+  cy.get(SELECT_ALL_CHECKBOX).click();
+};
+
+export const exportSelectedTimelines = () => {
+  cy.get(BULK_ACTIONS).click();
+  cy.get(EXPORT_TIMELINE_ACTION).should('not.be.disabled');
+  cy.get(EXPORT_TIMELINE_ACTION).click();
 };

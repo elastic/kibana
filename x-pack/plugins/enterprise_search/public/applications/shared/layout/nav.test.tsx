@@ -105,7 +105,7 @@ describe('useEnterpriseSearchContentNav', () => {
     mockKibanaValues.uiSettings.get.mockReturnValue(false);
 
     const esNav = useEnterpriseSearchNav();
-    const searchNav = esNav.find((item) => item.id === 'search');
+    const searchNav = esNav?.find((item) => item.id === 'search');
     expect(searchNav).not.toBeUndefined();
     expect(searchNav).toEqual({
       id: 'search',
@@ -135,7 +135,7 @@ describe('useEnterpriseSearchContentNav', () => {
     setMockValues({ productAccess: workplaceSearchProductAccess });
 
     const esNav = useEnterpriseSearchNav();
-    const searchNav = esNav.find((item) => item.id === 'search');
+    const searchNav = esNav?.find((item) => item.id === 'search');
     expect(searchNav).not.toBeUndefined();
     expect(searchNav).toEqual({
       id: 'search',
@@ -170,7 +170,7 @@ describe('useEnterpriseSearchContentNav', () => {
     setMockValues({ productAccess: appSearchProductAccess });
 
     const esNav = useEnterpriseSearchNav();
-    const searchNav = esNav.find((item) => item.id === 'search');
+    const searchNav = esNav?.find((item) => item.id === 'search');
     expect(searchNav).not.toBeUndefined();
     expect(searchNav).toEqual({
       id: 'search',
@@ -204,7 +204,7 @@ describe('useEnterpriseSearchContentNav', () => {
     setMockValues({ productAccess: fullProductAccess });
 
     const esNav = useEnterpriseSearchNav();
-    expect(esNav.find((item) => item.id === 'enginesSearch')).toBeUndefined();
+    expect(esNav?.find((item) => item.id === 'enginesSearch')).toBeUndefined();
   });
 });
 
@@ -304,7 +304,7 @@ describe('useEnterpriseSearchContentNav Engines feature flag', () => {
     setMockValues({ productAccess: fullProductAccess });
 
     const esNav = useEnterpriseSearchNav();
-    expect(esNav.find((item) => item.id === 'standaloneExperiences')).toBeUndefined();
+    expect(esNav?.find((item) => item.id === 'standaloneExperiences')).toBeUndefined();
   });
   it('excludes App Search when the user has no access to it', () => {
     const fullProductAccess: ProductAccess = {
@@ -315,7 +315,7 @@ describe('useEnterpriseSearchContentNav Engines feature flag', () => {
     setMockValues({ productAccess: fullProductAccess });
 
     const esNav = useEnterpriseSearchNav();
-    const standAloneNav = esNav.find((item) => item.id === 'standaloneExperiences');
+    const standAloneNav = esNav?.find((item) => item.id === 'standaloneExperiences');
     expect(standAloneNav).not.toBeUndefined();
     expect(standAloneNav).toEqual({
       id: 'standaloneExperiences',
@@ -338,7 +338,7 @@ describe('useEnterpriseSearchContentNav Engines feature flag', () => {
     setMockValues({ productAccess: fullProductAccess });
 
     const esNav = useEnterpriseSearchNav();
-    const standAloneNav = esNav.find((item) => item.id === 'standaloneExperiences');
+    const standAloneNav = esNav?.find((item) => item.id === 'standaloneExperiences');
     expect(standAloneNav).not.toBeUndefined();
     expect(standAloneNav).toEqual({
       id: 'standaloneExperiences',
@@ -444,14 +444,14 @@ describe('useEnterpriseSearchEngineNav', () => {
   it('returns selected engine sub nav items', () => {
     const engineName = 'my-test-engine';
     const navItems = useEnterpriseSearchEngineNav(engineName);
-    expect(navItems.map((ni) => ni.name)).toEqual([
+    expect(navItems?.map((ni) => ni.name)).toEqual([
       'Overview',
       'Content',
       'Search',
       'Behavioral Analytics',
       'Standalone Experiences',
     ]);
-    const searchItem = navItems.find((ni) => ni.id === 'enginesSearch');
+    const searchItem = navItems?.find((ni) => ni.id === 'enginesSearch');
     expect(searchItem).not.toBeUndefined();
     expect(searchItem!.items).not.toBeUndefined();
     // @ts-ignore
@@ -501,14 +501,14 @@ describe('useEnterpriseSearchEngineNav', () => {
   it('returns selected engine without tabs when isEmpty', () => {
     const engineName = 'my-test-engine';
     const navItems = useEnterpriseSearchEngineNav(engineName, true);
-    expect(navItems.map((ni) => ni.name)).toEqual([
+    expect(navItems?.map((ni) => ni.name)).toEqual([
       'Overview',
       'Content',
       'Search',
       'Behavioral Analytics',
       'Standalone Experiences',
     ]);
-    const searchItem = navItems.find((ni) => ni.id === 'enginesSearch');
+    const searchItem = navItems?.find((ni) => ni.id === 'enginesSearch');
     expect(searchItem).not.toBeUndefined();
     expect(searchItem!.items).not.toBeUndefined();
     // @ts-ignore

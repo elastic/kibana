@@ -1,0 +1,9 @@
+{
+  "prefix": "serverlessSearch",
+  "paths": {
+    "serverlessSearch": "."
+  },
+  "translations": [
+    "translations/ja-JP.json"
+  ]
+}
