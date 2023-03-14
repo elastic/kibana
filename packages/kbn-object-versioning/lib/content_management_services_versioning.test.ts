@@ -202,10 +202,15 @@ describe('CM services getTransforms()', () => {
     describe('validate objects', () => {
       const setup = (definitions: ServiceDefinitionVersioned) => {
         const transforms = getTransforms(definitions, 1);
+
+        // We flatten the object and extract the paths so we can later make sure that
+        // each of them have "up()" and "down()" that are callable. Even if they simply proxy
+        // the data that we send them in.
         const flattened = flattenObject(transforms);
         const paths = Object.keys(flattened);
 
         // Remove the last section of the path as that's where our ServiceObject is
+        // e.g. path === "get.in.options.up" --> the versionable object is at "get.in.options"
         const serviceObjectPaths = paths.map((path) => {
           const index = path.lastIndexOf('.');
           if (index < 0) {
@@ -245,11 +250,13 @@ describe('CM services getTransforms()', () => {
 
       test('each of the services objects must have a up, down and validate method', () => {
         const { transforms, serviceObjectPaths } = setup({ 1: {} });
+
+        // Test every service object...
         serviceObjectPaths.forEach((path) => {
           const serviceObject = get(transforms, path);
 
           // We haven't passed any definition for any object. We still expect the
-          // up(), down() and validate() method to exist and to be callable
+          // up(), down() methods to exist and to be callable
           const data = { foo: 'bar' };
           expect(serviceObject.up(data).value).toBe(data);
           expect(serviceObject.down(data).value).toBe(data);
