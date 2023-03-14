@@ -13,6 +13,8 @@ export type Alerts = Array<
 
 export interface AlertsWithAgentType {
   alerts: Alerts;
-  agents: string[];
+  agentIds: string[];
   alertIds: string[];
+  ruleId?: string;
+  ruleName?: string;
 }

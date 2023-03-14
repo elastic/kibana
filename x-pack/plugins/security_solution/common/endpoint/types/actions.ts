@@ -183,6 +183,9 @@ export interface EndpointActionData<
   comment?: string;
   parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
+  alert_ids?: string[];
+  rule_id?: string;
+  rule_name?: string;
 }
 
 export interface FleetActionResponseData {
@@ -368,6 +371,9 @@ export interface ActionDetails<
   comment?: string;
   /** parameters submitted with action */
   parameters?: TParameters;
+  alertIds?: string[];
+  ruleId?: string;
+  ruleName?: string;
 }
 
 export interface ActionDetailsApiResponse<

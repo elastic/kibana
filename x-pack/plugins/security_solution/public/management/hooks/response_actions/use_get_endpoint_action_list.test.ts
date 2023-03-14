@@ -51,6 +51,7 @@ describe('useGetEndpointActionList hook', () => {
         pageSize: 20,
         startDate: 'now-5d',
         endDate: 'now',
+        withRuleActions: true,
       })
     );
 
@@ -73,7 +74,7 @@ describe('useGetEndpointActionList hook', () => {
     await renderReactQueryHook(
       () =>
         useGetEndpointActionList(
-          {},
+          { withRuleActions: true },
           {
             queryKey: ['1', '2'],
             enabled: false,

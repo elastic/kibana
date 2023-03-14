@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { reduce, each } from 'lodash';
+import { reduce, each, uniq } from 'lodash';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { EndpointAppContext } from '../../../endpoint/types';
 import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
@@ -23,7 +24,7 @@ interface ScheduleNotificationActions {
 
 interface AlertsWithAgentType {
   alerts: Alerts;
-  agents: string[];
+  agentIds: string[];
   alertIds: string[];
 }
 
@@ -35,32 +36,42 @@ export const scheduleNotificationResponseActions = (
 ) => {
   const filteredAlerts = (signals as Alerts).filter((alert) => alert.agent?.id);
 
-  const { alerts, agents, alertIds }: AlertsWithAgentType = reduce(
+  const { alerts, agentIds, alertIds }: AlertsWithAgentType = reduce(
     filteredAlerts,
     (acc, alert) => {
       const agentId = alert.agent?.id;
       if (agentId !== undefined) {
         return {
           alerts: [...acc.alerts, alert],
-          agents: [...acc.agents, agentId],
+          agentIds: uniq([...acc.agentIds, agentId]),
           alertIds: [...acc.alertIds, (alert as unknown as { _id: string })._id],
         };
       }
       return acc;
     },
-    { alerts: [], agents: [], alertIds: [] } as AlertsWithAgentType
+    { alerts: [], agentIds: [], alertIds: [] } as AlertsWithAgentType
   );
 
   each(responseActions, (responseAction) => {
     if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY && osqueryCreateAction) {
-      osqueryResponseAction(responseAction, osqueryCreateAction, { alerts, alertIds, agents });
+      osqueryResponseAction(responseAction, osqueryCreateAction, {
+        alerts,
+        alertIds,
+        agentIds,
+      });
     }
     if (
       responseAction.actionTypeId === RESPONSE_ACTION_TYPES.ENDPOINT &&
       endpointAppContext &&
       hasEnterpriseLicense
     ) {
-      endpointResponseAction(responseAction, endpointAppContext, { alerts, alertIds, agents });
+      endpointResponseAction(responseAction, endpointAppContext, {
+        alerts,
+        alertIds,
+        agentIds,
+        ruleId: alerts[0][ALERT_RULE_UUID],
+        ruleName: alerts[0][ALERT_RULE_NAME],
+      });
     }
   });
 };

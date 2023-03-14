@@ -5,11 +5,18 @@
  * 2.0.
  */
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFilterGroup, EuiSuperUpdateButton } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFilterGroup,
+  EuiSuperUpdateButton,
+  EuiFilterButton,
+} from '@elastic/eui';
 import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { useGetEndpointActionList } from '../../../hooks';
 import {
   type DateRangePickerValues,
@@ -33,6 +40,8 @@ export const ActionsLogFilters = memo(
     onRefreshChange,
     onTimeChange,
     showHostsFilter,
+    displayAutomatedResponses,
+    toggleDisplayAutomatedResponses,
     'data-test-subj': dataTestSubj,
   }: {
     dateRangePickerState: DateRangePickerValues;
@@ -47,6 +56,8 @@ export const ActionsLogFilters = memo(
     onTimeChange: ({ start, end }: DurationRange) => void;
     onClick: ReturnType<typeof useGetEndpointActionList>['refetch'];
     showHostsFilter: boolean;
+    displayAutomatedResponses: boolean;
+    toggleDisplayAutomatedResponses: (newState: boolean) => void;
     'data-test-subj'?: string;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -73,15 +84,30 @@ export const ActionsLogFilters = memo(
             onChangeFilterOptions={onChangeStatusesFilter}
             data-test-subj={dataTestSubj}
           />
+          <EuiFilterButton
+            hasActiveFilters={displayAutomatedResponses}
+            onClick={() => {
+              toggleDisplayAutomatedResponses(!displayAutomatedResponses);
+            }}
+            data-test-subj={dataTestSubj}
+          >
+            <FormattedMessage
+              // TODO:
+              id="xpack.fleet.agentList.showUpgradeableFilterLabel"
+              defaultMessage="Automated"
+            />
+          </EuiFilterButton>
         </>
       );
     }, [
       dataTestSubj,
+      displayAutomatedResponses,
       isFlyout,
       onChangeCommandsFilter,
       onChangeHostsFilter,
       onChangeStatusesFilter,
       showHostsFilter,
+      toggleDisplayAutomatedResponses,
     ]);
 
     const onClickRefreshButton = useCallback(() => onClick(), [onClick]);

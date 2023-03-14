@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { each, uniq } from 'lodash';
+import { each } from 'lodash';
 import type { EndpointAppContext } from '../../../endpoint/types';
 import type { RuleResponseEndpointAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import type { AlertsWithAgentType } from './types';
@@ -13,13 +13,15 @@ import type { AlertsWithAgentType } from './types';
 export const endpointResponseAction = (
   responseAction: RuleResponseEndpointAction,
   endpointAppContext: EndpointAppContext,
-  { alertIds, agents }: AlertsWithAgentType
+  { alertIds, agentIds, ruleId, ruleName }: AlertsWithAgentType
 ) =>
-  each(uniq(agents), (agent) =>
+  each(agentIds, (agent) =>
     endpointAppContext.service.getActionCreateService().createAction({
       endpoint_ids: [agent],
       alert_ids: alertIds,
       comment: responseAction.params.comment,
       command: responseAction.params.command,
+      rule_id: ruleId,
+      rule_name: ruleName,
     })
   );

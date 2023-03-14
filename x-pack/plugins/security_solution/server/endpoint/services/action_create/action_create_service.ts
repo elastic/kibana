@@ -57,6 +57,8 @@ export class ActionCreateService {
     payload: TypeOf<typeof ResponseActionBodySchema> & {
       command: ResponseActionsApiCommandNames;
       user?: ReturnType<AuthenticationServiceStart['getCurrentUser']>;
+      rule_id?: string;
+      rule_name?: string;
     },
     casesClient?: CasesClient
   ): Promise<{ data: ActionDetails }> {
@@ -108,6 +110,9 @@ export class ActionCreateService {
         data: {
           command: payload.command,
           comment: payload.comment ?? undefined,
+          ...(payload.alert_ids ? { alert_ids: payload.alert_ids } : {}),
+          ...(payload.rule_id ? { rule_id: payload.rule_id } : {}),
+          ...(payload.rule_name ? { rule_name: payload.rule_name } : {}),
           parameters: getActionParameters() ?? undefined,
         },
       } as Omit<EndpointAction, 'agents' | 'user_id' | '@timestamp'>,

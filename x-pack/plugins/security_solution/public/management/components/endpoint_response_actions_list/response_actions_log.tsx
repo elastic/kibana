@@ -70,6 +70,7 @@ export const ResponseActionsLog = memo<
       statuses: [],
       userIds: [],
       withOutputs: [],
+      withRuleActions: true,
     });
 
     // update query state from URL params
@@ -187,6 +188,13 @@ export const ResponseActionsLog = memo<
       [setQueryParams]
     );
 
+    const onChangeDisplayAutomatedResponses = useCallback(
+      (withRuleActions: boolean) => {
+        setQueryParams((prevState) => ({ ...prevState, withRuleActions }));
+      },
+      [setQueryParams]
+    );
+
     // handle onChange
     const handleTableOnChange = useCallback(
       ({ page: _page }: CriteriaWithPagination<ActionListApiResponse['data'][number]>) => {
@@ -245,6 +253,8 @@ export const ResponseActionsLog = memo<
           onRefreshChange={onRefreshChange}
           onTimeChange={onTimeChange}
           showHostsFilter={showHostNames}
+          displayAutomatedResponses={queryParams.withRuleActions}
+          toggleDisplayAutomatedResponses={onChangeDisplayAutomatedResponses}
           data-test-subj={dataTestSubj}
         />
         {isFetched && !totalItemCount ? (

@@ -151,6 +151,7 @@ export const EndpointActionListRequestSchema = {
         }),
       ])
     ),
+    withRuleActions: schema.boolean({ defaultValue: true }),
   }),
 };
 
