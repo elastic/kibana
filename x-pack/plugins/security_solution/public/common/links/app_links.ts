@@ -18,16 +18,16 @@ import type { StartPlugins } from '../../types';
 
 const casesLinks = getCasesLinkItems();
 
-export const links: AppLinkItems = Object.freeze([
+export const links = Object.freeze([
   dashboardsLandingLinks,
   detectionLinks,
   cloudSecurityPostureRootLinks,
   timelinesLinks,
   casesLinks,
   threatHuntingLandingLinks,
-  indicatorsLinks,
   gettingStartedLinks,
   managementLinks,
+  indicatorsLinks,
 ]);
 
 export const getFilteredLinks = async (
@@ -43,8 +43,8 @@ export const getFilteredLinks = async (
     timelinesLinks,
     casesLinks,
     threatHuntingLandingLinks,
-    indicatorsLinks,
     gettingStartedLinks,
     managementFilteredLinks,
+    indicatorsLinks,
   ]);
 };
