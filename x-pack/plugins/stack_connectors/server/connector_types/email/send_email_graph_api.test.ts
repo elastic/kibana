@@ -90,6 +90,7 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },
@@ -107,7 +108,7 @@ describe('sendEmailGraphApi', () => {
           "validateStatus": [Function],
         },
       ]
-      `);
+    `);
   });
 
   test('email was sent on behalf of the user "from" mailbox', async () => {
@@ -180,6 +181,7 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },
@@ -197,7 +199,7 @@ describe('sendEmailGraphApi', () => {
           "validateStatus": [Function],
         },
       ]
-      `);
+    `);
   });
 
   test('sendMail request was sent to the custom configured Graph API URL', async () => {
@@ -269,6 +271,7 @@ describe('sendEmailGraphApi', () => {
             "maxSockets": Infinity,
             "maxTotalSockets": Infinity,
             "options": Object {
+              "noDelay": true,
               "path": null,
               "rejectUnauthorized": true,
             },
@@ -286,7 +289,7 @@ describe('sendEmailGraphApi', () => {
           "validateStatus": [Function],
         },
       ]
-      `);
+    `);
   });
 
   test('throw the exception and log the proper error if message was not sent successfuly', async () => {

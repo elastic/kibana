@@ -63,6 +63,7 @@ it('builds a generated plugin into a viable archive', async () => {
     {
       cwd: PLUGIN_DIR,
       all: true,
+      env: { NODE_OPTIONS: '--openssl-legacy-provider' },
     }
   );
 

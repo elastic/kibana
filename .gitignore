@@ -75,6 +75,7 @@ npm-debug.log*
 .ci/pipeline-library/build/
 .ci/runbld
 .ci/bash_standard_lib.sh
+.ci/nodejs_build/workdir
 .gradle
 .vagrant
 .envrc

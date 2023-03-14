@@ -75,7 +75,11 @@ elif [[ "$UNAME" == "Darwin" ]]; then
 fi
 echo " -- Running on OS: $OS"
 
-nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$nodeVersion/node-v$nodeVersion-${OS}-${classifier}"
+if [[ "$OS" = "linux" ]]; then
+  nodeUrl="https://github.com/azasypkin/kibana/releases/download/nodej-custom/node-v$NODE_VERSION-${OS}-${classifier}"
+else
+  nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$nodeVersion/node-v$nodeVersion-${OS}-${classifier}"
+fi
 
 if [[ "$installNode" == "true" ]]; then
   echo " -- node: version=v${nodeVersion} dir=$nodeDir"

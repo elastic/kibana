@@ -18,12 +18,16 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
     ? 'win-x64/node.exe'
     : `node-v${version}-${arch}.tar.gz`;
 
-  const url = `https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v${version}/${downloadName}`;
+  const baseUrl =
+    arch === 'linux-x64' || arch === 'linux-arm64'
+      ? 'https://github.com/azasypkin/kibana/releases/download/nodej-custom/'
+      : `https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v${version}/`;
+
   const downloadPath = config.resolveFromRepo('.node_binaries', version, basename(downloadName));
   const extractDir = config.resolveFromRepo('.node_binaries', version, arch);
 
   return {
-    url,
+    url: `${baseUrl}${downloadName}`,
     downloadName,
     downloadPath,
     extractDir,

@@ -158,7 +158,8 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 const getAgentDownloadUrl = async (version: string): Promise<string> => {
   const { log } = getRuntimeServices();
   const downloadArch =
-    { arm64: 'arm64', x64: 'x86_64' }[process.arch] ?? `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
+    { arm64: 'arm64', x64: 'x86_64' }[process.arch as 'arm64' | 'x64'] ??
+    `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
   const agentFile = `elastic-agent-${version}-linux-${downloadArch}.tar.gz`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${version}/${agentFile}`;
 
