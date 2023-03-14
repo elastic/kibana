@@ -1676,6 +1676,38 @@
             "path": "x-pack/plugins/security/server/audit/audit_events.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditKibana.unauthorized_spaces",
+            "type": "Object",
+            "tags": [],
+            "label": "unauthorized_spaces",
+            "description": [
+              "\nSet of space IDs that are not authorized for an action."
+            ],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditKibana.unauthorized_types",
+            "type": "Object",
+            "tags": [],
+            "label": "unauthorized_types",
+            "description": [
+              "\nSet of types that are not authorized for an action."
+            ],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/audit/audit_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
