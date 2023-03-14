@@ -7,7 +7,7 @@
  */
 
 import { ObjectMigrationDefinition, ObjectTransform, ObjectTransforms, Version } from './types';
-import { validateObj } from './utils';
+import { validateObj, validateVersion } from './utils';
 
 /**
  * Extract versions metadata from an object migration definition
@@ -18,11 +18,11 @@ import { validateObj } from './utils';
 const getVersionsMeta = (migrationDefinition: ObjectMigrationDefinition) => {
   const versions = Object.keys(migrationDefinition)
     .map((version) => {
-      const parsed = parseInt(version, 10);
-      if (Number.isNaN(parsed)) {
+      const { result, value } = validateVersion(version);
+      if (!result) {
         throw new Error(`Invalid version number [${version}].`);
       }
-      return parsed;
+      return value as number;
     })
     .sort((a, b) => a - b);
 
@@ -102,6 +102,14 @@ export const initTransform =
 
     const getVersion = (v: Version | 'latest'): Version => (v === 'latest' ? latestVersion : v);
 
+    const validateFn = (obj: object, version: number) => {
+      const { schema } = migrationDefinition[version] ?? {};
+      if (schema) {
+        return validateObj(obj, schema);
+      }
+      return null;
+    };
+
     return {
       up: (obj, to = 'latest', { validate = true }: { validate?: boolean } = {}) => {
         try {
@@ -112,8 +120,8 @@ export const initTransform =
             };
           }
 
-          if (validate && migrationDefinition[requestVersion].schema) {
-            const error = validateObj(obj, migrationDefinition[requestVersion].schema!);
+          if (validate) {
+            const error = validateFn(obj, requestVersion);
             if (error) {
               return { error, value: null };
             }
@@ -157,15 +165,15 @@ export const initTransform =
             };
           }
 
-          const fns = getTransformFns(fromVersion, requestVersion, migrationDefinition);
-          const value = fns.reduce((acc, fn) => fn(acc), obj);
-
-          if (validate && migrationDefinition[requestVersion].schema) {
-            const error = validateObj(value, migrationDefinition[requestVersion].schema!);
+          if (validate) {
+            const error = validateFn(obj, fromVersion);
             if (error) {
               return { error, value: null };
             }
           }
+
+          const fns = getTransformFns(fromVersion, requestVersion, migrationDefinition);
+          const value = fns.reduce((acc, fn) => fn(acc), obj);
 
           return { value, error: null };
         } catch (e) {

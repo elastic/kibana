@@ -141,17 +141,13 @@ describe('object transform', () => {
     });
 
     describe('validation', () => {
-      test('it should validate the object before up transform', () => {
+      test('it should validate the object before down transform', () => {
         const fooTransforms = setup(1);
 
-        // Fake a badly transformed object
-        v2Tv1Transform.mockReturnValue({
-          badlyTransformed: true,
-        } as any);
-
-        const { error } = fooTransforms.down({ firstName: 'John', lastName: 'Snow' });
+        const { error } = fooTransforms.down({ bad: 'Unknown' });
+        expect(error).not.toBe(null);
         expect(error!.message).toBe(
-          '[fullName]: expected value of type [string] but got [undefined]'
+          '[firstName]: expected value of type [string] but got [undefined]'
         );
       });
 

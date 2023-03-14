@@ -41,7 +41,7 @@ const getOptionalInOutSchemas = (props: { in: Type<any>; out: Type<any> }) =>
   schema.maybe(schema.object(props, { unknowns: 'forbid' }));
 
 // Schema to validate the "get" service objects
-// The "bulkGet" and "delete" services also use this schema as they allow the same objects IN/OUT
+// Note: the "bulkGet" and "delete" services also use this schema as they allow the same IN/OUT objects
 const getSchemas = getOptionalInOutSchemas({
   in: schema.maybe(
     schema.object(
@@ -62,7 +62,7 @@ const getSchemas = getOptionalInOutSchemas({
 });
 
 // Schema to validate the "create" service objects
-// The "update" service also uses this schema as they allow the same objects IN/OUT
+// Note: the "update" service also uses this schema as they allow the same IN/OUT objects
 const createSchemas = getOptionalInOutSchemas({
   in: schema.maybe(
     schema.object(

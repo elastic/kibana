@@ -7,6 +7,7 @@
  */
 
 import type { Type, ValidationError } from '@kbn/config-schema';
+import { Version } from './types';
 
 /**
  * Validate an object based on a schema.
@@ -25,5 +26,25 @@ export const validateObj = (obj: unknown, objSchema?: Type<any>): ValidationErro
     return null;
   } catch (e: any) {
     return e as ValidationError;
+  }
+};
+
+export const validateVersion = (version: unknown): { result: boolean; value: Version | null } => {
+  if (typeof version === 'string') {
+    const isValid = /^\d+$/.test(version);
+    if (isValid) {
+      const parsed = parseInt(version, 10);
+      if (Number.isNaN(parsed)) {
+        return { result: false, value: null };
+      }
+      return { result: true, value: parsed };
+    }
+    return { result: false, value: null };
+  } else {
+    const isValid = Number.isInteger(version);
+    return {
+      result: isValid,
+      value: isValid ? (version as Version) : null,
+    };
   }
 };
