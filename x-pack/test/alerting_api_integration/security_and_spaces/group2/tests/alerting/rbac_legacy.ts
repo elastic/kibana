@@ -102,22 +102,28 @@ export default function alertTests({ getService }: FtrProviderContext) {
               // these cases were invalid pre 7.10.0 and remain invalid post 7.10.0
               break;
             case 'space_1_all at space1':
-            case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'superuser at space1':
               await resetTaskStatus(migratedAlertId);
               await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
 
               await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
+              await rescheduleTask(migratedAlertId);
 
               await ensureAlertIsRunning();
 
-              await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
+              await retry.try(async () => {
+                const updateResponse = await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
+                expect(updateResponse.statusCode).to.eql(200);
+              });
 
               await ensureAlertIsRunning();
 
               // update alert as user with privileges - so it is no longer a legacy alert
-              const updatedKeyResponse = await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
-              expect(updatedKeyResponse.statusCode).to.eql(204);
+              await retry.try(async () => {
+                const updatedKeyResponse = await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
+                expect(updatedKeyResponse.statusCode).to.eql(204);
+              });
 
               await ensureAlertIsRunning();
               break;
@@ -126,10 +132,14 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
 
               await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
+              await rescheduleTask(migratedAlertId);
 
               await ensureAlertIsRunning();
 
-              await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
+              await retry.try(async () => {
+                const updateResponse = await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
+                expect(updateResponse.statusCode).to.eql(200);
+              });
 
               // attempt to update alert as user with no Alerts privileges - as it is no longer a legacy alert
               // this should fail, as the user doesn't have the `updateApiKey` privilege for Alerts
@@ -149,10 +159,14 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
 
               await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
+              await rescheduleTask(migratedAlertId);
 
               await ensureAlertIsRunning();
 
-              await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
+              await retry.try(async () => {
+                const updateResponse = await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
+                expect(updateResponse.statusCode).to.eql(200);
+              });
 
               // attempt to update alert as user with no Actions privileges - as it is no longer a legacy alert
               // this should fail, as the user doesn't have the `execute` privilege for Actions
@@ -203,28 +217,30 @@ export default function alertTests({ getService }: FtrProviderContext) {
             expect(swapResponse.body.attributes.meta.versionApiKeyLastmodified).to.eql(
               'pre-7.10.0'
             );
+          }
 
+          async function rescheduleTask(alertId: string) {
             // Get scheduled task id
-            // const getResponse = await supertestWithoutAuth
-            //   .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${alertId}`)
-            //   .auth(user.username, user.password)
-            //   .expect(200);
+            const getResponse = await supertestWithoutAuth
+              .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${alertId}`)
+              .auth(user.username, user.password)
+              .expect(200);
 
             // loading the archive likely caused the task to fail so ensure it's rescheduled to run in 2 seconds,
             // otherwise this test will stall for 5 minutes
             // no other attributes are touched, only runAt, so unless it would have ran when runAt expired, it
             // won't run now
-            // await supertest
-            //   .put(
-            //     `${getUrlPrefix(space.id)}/api/alerts_fixture/${
-            //       getResponse.body.scheduled_task_id
-            //     }/reschedule_task`
-            //   )
-            //   .set('kbn-xsrf', 'foo')
-            //   .send({
-            //     runAt: getRunAt(2000),
-            //   })
-            //   .expect(200);
+            await supertest
+              .put(
+                `${getUrlPrefix(space.id)}/api/alerts_fixture/${
+                  getResponse.body.scheduled_task_id
+                }/reschedule_task`
+              )
+              .set('kbn-xsrf', 'foo')
+              .send({
+                runAt: getRunAt(2000),
+              })
+              .expect(200);
           }
 
           async function ensureAlertIsRunning() {
@@ -268,15 +284,15 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
           async function updateAlertSoThatItIsNoLongerLegacy(alertId: string) {
             // update the alert as super user (to avoid privilege limitations) so that it is no longer a legacy alert
-            await alertUtils.updateAlwaysFiringAction({
+            return await alertUtils.updateAlwaysFiringAction({
               alertId,
               actionId: MIGRATED_ACTION_ID,
               user: Superuser,
               reference,
               overwrites: {
                 name: 'Updated Alert',
-                schedule: { interval: '2s' },
-                throttle: '2s',
+                schedule: { interval: '5s' },
+                throttle: '5s',
               },
             });
           }
@@ -286,8 +302,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
   });
 }
 
-// function getRunAt(delayInMs: number) {
-//   const runAt = new Date();
-//   runAt.setMilliseconds(new Date().getMilliseconds() + delayInMs);
-//   return runAt.toISOString();
-// }
+function getRunAt(delayInMs: number) {
+  const runAt = new Date();
+  runAt.setMilliseconds(new Date().getMilliseconds() + delayInMs);
+  return runAt.toISOString();
+}
