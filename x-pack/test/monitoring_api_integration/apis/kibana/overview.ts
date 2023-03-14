@@ -10,7 +10,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { getTestRunner } from '../../utils/test_runner';
 
-import response from '../../fixtures/kibana/overview.json';
+import clusterOverviewResponse from '../../fixtures/kibana/cluster_overview.json';
+import kibanaOverviewResponse from '../../fixtures/kibana/kibana_overview.json';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -27,6 +28,16 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   testRunner(() => {
+    it('should get kibana rules at cluster level', async () => {
+      const { body } = await supertest
+        .post('/api/monitoring/v1/clusters/rSEDbJNIQmOE-v9n2rV5cA')
+        .set('kbn-xsrf', 'xxx')
+        .send({ timeRange, codePaths: ['all'] })
+        .expect(200);
+
+      expect(body[0].kibana.rules).to.eql(clusterOverviewResponse[0].kibana.rules);
+    });
+
     it('should summarize kibana instances with stats', async () => {
       const { body } = await supertest
         .post('/api/monitoring/v1/clusters/rSEDbJNIQmOE-v9n2rV5cA/kibana')
@@ -34,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ timeRange })
         .expect(200);
 
-      expect(body).to.eql(response);
+      expect(body).to.eql(kibanaOverviewResponse);
     });
   });
 }
