@@ -25046,6 +25046,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.getAgentsByActionsPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getAgentsByActionsPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
