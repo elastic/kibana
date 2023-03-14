@@ -24,6 +24,7 @@ import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { jsonSchemaRoutes } from './routes/json_schema';
 import { notificationsRoutes } from './routes/notifications';
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import { PLUGIN_ID } from '../common/constants/app';
@@ -236,6 +237,7 @@ export class MlServerPlugin
     });
     trainedModelsRoutes(routeInit);
     notificationsRoutes(routeInit);
+    jsonSchemaRoutes(routeInit);
     alertingRoutes(routeInit, sharedServicesProviders);
 
     initMlServerLog({ log: this.log });

@@ -135,6 +135,7 @@ export const METRICSET_NAME = 'metricset.name';
 export const METRICSET_INTERVAL = 'metricset.interval';
 
 export const LABEL_NAME = 'labels.name';
+export const LABEL_TELEMETRY_AUTO_VERSION = 'labels.telemetry_auto_version';
 
 export const HOST = 'host';
 export const HOST_HOSTNAME = 'host.hostname'; // Do not use. Please use `HOST_NAME` instead.
