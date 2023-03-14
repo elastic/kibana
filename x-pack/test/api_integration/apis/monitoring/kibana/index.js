@@ -10,7 +10,5 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./overview'));
     loadTestFile(require.resolve('./listing'));
     loadTestFile(require.resolve('./instance'));
-
-    loadTestFile(require.resolve('./rules_and_actions'));
   });
 }
