@@ -92,15 +92,6 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       padding: `${size.xs} ${size.s}`,
     };
 
-    const outputPreview: CSSObject = {
-      backgroundColor: colors.ink,
-      fontFamily: font.familyCode,
-      color: colors.ghost,
-      fontSize: size.m,
-      padding: size.xs,
-      whiteSpace: 'nowrap',
-    };
-
     return {
       alert,
       alertStatus,
@@ -108,7 +99,6 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       actionBadge,
       processPanel,
       processAlertDisplayContainer,
-      outputPreview,
     };
   }, [euiTheme, isInvestigated, isSelected, euiVars]);
 
