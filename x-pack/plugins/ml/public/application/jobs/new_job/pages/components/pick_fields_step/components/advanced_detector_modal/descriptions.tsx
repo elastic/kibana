@@ -20,7 +20,6 @@ export const AggDescription: FC = memo(({ children }) => {
     }
   );
   return (
-    <>
       <EuiDescribedFormGroup
         title={
           <EuiFlexGroup gutterSize="none">
