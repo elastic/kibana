@@ -342,7 +342,7 @@ export const EngineAnalyticsLens: React.FC<EngineAnalyticsLensProps> = ({
     setNoResults,
     setNoResultsPercentage,
   } = useActions(EngineAnalyticsLogic);
-  const { searchSessionId, timeRange } = useValues(EngineAnalyticsLogic);
+  const { timeRange } = useValues(EngineAnalyticsLogic);
 
   const displayNone = metricAttributesQueriesFlag || metricAttributesNoResultsFlag ? 'none' : '';
   const lensChartId =
@@ -371,14 +371,13 @@ export const EngineAnalyticsLens: React.FC<EngineAnalyticsLensProps> = ({
     <>
       <EuiFlexGroup>
         <EuiFlexItem>
-          {attributes && searchSessionId ? (
+          {attributes ? (
             <EmbeddableComponent
               id={'engines-analytics-lens-' + lensChartId}
               withDefaultActions={false}
               style={{ display: displayNone, height: 500 }}
               timeRange={timeRange}
               attributes={attributes}
-              searchSessionId={searchSessionId}
               onLoad={onDataLoad}
               viewMode={ViewMode.VIEW}
             />

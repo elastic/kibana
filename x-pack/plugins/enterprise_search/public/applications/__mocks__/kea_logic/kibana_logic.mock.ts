@@ -10,12 +10,22 @@ import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 
-import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { mockHistory } from '../react_router/state.mock';
 
+const lensPluginMock: LensPublicStart = {
+  EmbeddableComponent: jest.fn(),
+  stateHelperApi: jest.fn().mockResolvedValue({
+    formula: jest.fn(),
+  }),
+  SaveModalComponent: jest.fn(),
+  canUseEditor: jest.fn(),
+  navigateToPrefilledEditor: jest.fn(),
+  getXyVisTypes: jest.fn(),
+};
 export const mockKibanaValues = {
   application: {
     getUrlForApp: jest.fn(
@@ -45,12 +55,8 @@ export const mockKibanaValues = {
   setChromeIsVisible: jest.fn(),
   setDocTitle: jest.fn(),
   renderHeaderActions: jest.fn(),
-  lens: {
-    ...lensPluginMock.createStartContract(),
-  },
-  data: {
-    ...dataPluginMock.createStartContract(),
-  },
+  lens: lensPluginMock,
+  data: dataPluginMock.createStartContract(),
 };
 
 jest.mock('../../shared/kibana', () => ({
