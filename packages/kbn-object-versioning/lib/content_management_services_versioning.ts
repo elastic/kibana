@@ -115,8 +115,8 @@ export const getTransforms = (
   });
 
   // Initiate transform for specific request version
+  const transformForCurrentRequest = {};
 
-  const transformForCurrentRequest = {} as ServiceTransforms;
   serviceObjectPaths.forEach((path) => {
     const versionableObject: ObjectMigrationDefinition = get(
       serviceDefinitionWithVersionableObjects,
@@ -126,5 +126,5 @@ export const getTransforms = (
     set(transformForCurrentRequest, path, objectTransforms);
   });
 
-  return transformForCurrentRequest;
+  return transformForCurrentRequest as ServiceTransforms;
 };
