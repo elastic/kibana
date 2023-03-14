@@ -21,7 +21,7 @@ import {
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
-import { ProductAccess } from '../../../../common/types';
+import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
 
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';
@@ -31,9 +31,10 @@ type RequiredFieldsOnly<T> = {
 };
 interface KibanaLogicProps {
   application: ApplicationStart;
-  config: { host?: string };
-  productAccess: ProductAccess;
+  config: ClientConfigType;
   isSidebarEnabled: boolean;
+  productAccess: ProductAccess;
+  productFeatures: ProductFeatures;
   // Kibana core
   capabilities: Capabilities;
   history: ScopedHistory;
@@ -77,6 +78,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
       {},
     ],
     productAccess: [props.productAccess, {}],
+    productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
     security: [props.security, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
