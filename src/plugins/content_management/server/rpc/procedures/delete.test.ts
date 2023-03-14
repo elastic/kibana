@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
+import { omit } from 'lodash';
+
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
-import type { RpcSchemas } from '../../core';
 import { EventBus } from '../../core/event_bus';
 import { deleteProc } from './delete';
 
@@ -31,24 +31,30 @@ const FOO_CONTENT_ID = 'foo';
 
 describe('RPC -> delete()', () => {
   describe('Input/Output validation', () => {
-    /**
-     * These tests are for the procedure call itself. Every RPC needs to declare in/out schema
-     * We will test _specific_ validation schema inside the procedure in separate tests.
-     */
+    const validInput = { contentTypeId: 'foo', id: '123', version: 'v1' };
+
     test('should validate that a contentTypeId and an id is passed', () => {
       [
-        { input: { contentTypeId: 'foo', id: '123' } },
+        { input: validInput },
         {
-          input: { id: '777' }, // contentTypeId missing
+          input: omit(validInput, 'contentTypeId'),
           expectedError: '[contentTypeId]: expected value of type [string] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo', id: '123', unknown: 'foo' },
+          input: { ...validInput, unknown: 'foo' },
           expectedError: '[unknown]: definition for this key is missing',
         },
         {
-          input: { contentTypeId: 'foo', id: '' }, // id must have min 1 char
+          input: { ...validInput, id: '' }, // id must have min 1 char
           expectedError: '[id]: value has length [0] but it must have a minimum length of [1].',
+        },
+        {
+          input: omit(validInput, 'version'),
+          expectedError: '[version]: expected value of type [string] but got [undefined]',
+        },
+        {
+          input: { ...validInput, version: '1' }, // invalid version format
+          expectedError: '[version]: must follow the pattern [v${number}]',
         },
       ].forEach(({ input, expectedError }) => {
         const error = validate(input, inputSchema);
@@ -70,6 +76,7 @@ describe('RPC -> delete()', () => {
         {
           contentTypeId: 'foo',
           id: '123',
+          version: 'v1',
           options: { any: 'object' },
         },
         inputSchema
@@ -81,6 +88,7 @@ describe('RPC -> delete()', () => {
         {
           contentTypeId: 'foo',
           id: '123',
+          version: 'v1',
           options: 123, // Not an object
         },
         inputSchema
@@ -108,18 +116,14 @@ describe('RPC -> delete()', () => {
   });
 
   describe('procedure', () => {
-    const createSchemas = (): RpcSchemas => {
-      return {} as any;
-    };
-
-    const setup = ({ contentSchemas = createSchemas() } = {}) => {
+    const setup = () => {
       const contentRegistry = new ContentRegistry(new EventBus());
       const storage = createMockedStorage();
       contentRegistry.register({
         id: FOO_CONTENT_ID,
         storage,
-        schemas: {
-          content: contentSchemas,
+        version: {
+          latest: 'v2',
         },
       });
 
@@ -135,7 +139,7 @@ describe('RPC -> delete()', () => {
       const expected = 'DeleteResult';
       storage.delete.mockResolvedValueOnce(expected);
 
-      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234' });
+      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, version: 'v1', id: '1234' });
 
       expect(result).toEqual({
         contentTypeId: FOO_CONTENT_ID,
@@ -143,7 +147,13 @@ describe('RPC -> delete()', () => {
       });
 
       expect(storage.delete).toHaveBeenCalledWith(
-        { requestHandlerContext: ctx.requestHandlerContext },
+        {
+          requestHandlerContext: ctx.requestHandlerContext,
+          version: {
+            request: 'v1',
+            latest: 'v2', // from the registry
+          },
+        },
         '1234',
         undefined
       );
@@ -157,43 +167,15 @@ describe('RPC -> delete()', () => {
         );
       });
 
-      test('should enforce a schema for options if options are passed', () => {
+      test('should throw if the request version is higher than the registered version', () => {
         const { ctx } = setup();
         expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', options: { foo: 'bar' } })
-        ).rejects.toEqual(new Error('Schema missing for rpc procedure [delete.in.options].'));
-      });
-
-      test('should validate the options', () => {
-        const { ctx } = setup({
-          contentSchemas: {
-            delete: {
-              in: {
-                options: schema.object({ validOption: schema.maybe(schema.boolean()) }),
-              },
-            },
-          } as any,
-        });
-        expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', options: { foo: 'bar' } })
-        ).rejects.toEqual(new Error('[foo]: definition for this key is missing'));
-      });
-
-      test('should validate the result if schema is provided', () => {
-        const { ctx, storage } = setup({
-          contentSchemas: {
-            delete: {
-              out: { result: schema.object({ validField: schema.maybe(schema.boolean()) }) },
-            },
-          } as any,
-        });
-
-        const invalidResult = { wrongField: 'bad' };
-        storage.delete.mockResolvedValueOnce(invalidResult);
-
-        expect(() => fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234' })).rejects.toEqual(
-          new Error('[wrongField]: definition for this key is missing')
-        );
+          fn(ctx, {
+            contentTypeId: FOO_CONTENT_ID,
+            id: '1234',
+            version: 'v7',
+          })
+        ).rejects.toEqual(new Error('Invalid version. Latest version is [v2].'));
       });
     });
   });

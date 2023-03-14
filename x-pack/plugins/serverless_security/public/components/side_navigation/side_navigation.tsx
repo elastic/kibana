@@ -16,7 +16,7 @@ import {
   EuiThemeProvider,
   useEuiTheme,
 } from '@elastic/eui';
-import { SideNavigation } from '@kbn/shared-ux-side-navigation';
+import { SolutionSideNav } from '@kbn/security-solution-side-nav';
 import {
   usePartitionFooterNavItems,
   useSideNavItems,
@@ -78,7 +78,7 @@ export const SecuritySideNavigation: React.FC = () => {
               name={translatedNavTitle}
               icon={'logoSecurity'}
               children={
-                <SideNavigation
+                <SolutionSideNav
                   items={items}
                   footerItems={footerItems}
                   selectedId={selectedId}

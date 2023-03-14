@@ -5,107 +5,90 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { SideNavigation } from '@kbn/shared-ux-side-navigation';
-import type { SideNavItem } from '@kbn/shared-ux-side-navigation';
+import React, { useMemo } from 'react';
+import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { SolutionSideNav, type SolutionSideNavItem } from '@kbn/security-solution-side-nav';
+import useObservable from 'react-use/lib/useObservable';
 import { SecurityPageName } from '../../../../app/types';
-import { getAncestorLinksInfo, type NavigationLink } from '../../../links';
+import { getAncestorLinksInfo } from '../../../links';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useGetSecuritySolutionLinkProps } from '../../links';
+import { useNavLinks } from '../../../links/nav_links';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
-import { bottomNavOffset } from '../../../lib/helpers';
 import { track } from '../../../lib/telemetry';
-import { useNavLinks } from '../../../links/nav_links';
+import { useKibana } from '../../../lib/kibana';
+
+export const EUI_HEADER_HEIGHT = '93px';
+export const BOTTOM_BAR_HEIGHT = '50px';
 
 const isFooterNavItem = (id: SecurityPageName) =>
   id === SecurityPageName.landing || id === SecurityPageName.administration;
-
-type FormatSideNavItems = (navItems: NavigationLink) => SideNavItem;
-
-/**
- * Returns a function to format generic `NavigationLink` array to the `SideNavItem` type
- */
-const useFormatSideNavItem = (): FormatSideNavItems => {
-  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
-
-  const formatSideNavItem: FormatSideNavItems = useCallback(
-    (navLinkItem) => {
-      const formatDefaultItem = (navItem: NavigationLink): SideNavItem => ({
-        id: navItem.id,
-        label: navItem.title,
-        ...getSecuritySolutionLinkProps({
-          deepLinkId: navItem.id,
-        }),
-        ...(navItem.categories && navItem.categories.length > 0
-          ? { categories: navItem.categories }
-          : {}),
-        ...(navItem.links && navItem.links.length > 0
-          ? {
-              items: navItem.links.reduce<SideNavItem[]>((acc, current) => {
-                if (!current.disabled) {
-                  acc.push({
-                    id: current.id,
-                    label: current.title,
-                    description: current.description,
-                    isBeta: current.isBeta,
-                    betaOptions: current.betaOptions,
-                    ...getSecuritySolutionLinkProps({ deepLinkId: current.id }),
-                  });
-                }
-                return acc;
-              }, []),
-            }
-          : {}),
-      });
-
-      const formatGetStartedItem = (navItem: NavigationLink): SideNavItem => ({
-        id: navItem.id,
-        label: navItem.title.toUpperCase(),
-        labelSize: 'xs',
-        iconType: 'launch',
-        ...getSecuritySolutionLinkProps({
-          deepLinkId: navItem.id,
-        }),
-        appendSeparator: true,
-      });
-
-      if (navLinkItem.id === SecurityPageName.landing) {
-        return formatGetStartedItem(navLinkItem);
-      }
-      return formatDefaultItem(navLinkItem);
-    },
-    [getSecuritySolutionLinkProps]
-  );
-
-  return formatSideNavItem;
-};
+const isGetStartedNavItem = (id: SecurityPageName) => id === SecurityPageName.landing;
 
 /**
  * Returns the formatted `items` and `footerItems` to be rendered in the navigation
  */
-const useSideNavItems = () => {
+const useSolutionSideNavItems = () => {
   const navLinks = useNavLinks();
-  const formatSideNavItem = useFormatSideNavItem();
+  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
 
   const sideNavItems = useMemo(() => {
-    const mainNavItems: SideNavItem[] = [];
-    const footerNavItems: SideNavItem[] = [];
+    const mainNavItems: SolutionSideNavItem[] = [];
+    const footerNavItems: SolutionSideNavItem[] = [];
     navLinks.forEach((navLink) => {
       if (navLink.disabled) {
         return;
       }
 
-      if (isFooterNavItem(navLink.id)) {
-        footerNavItems.push(formatSideNavItem(navLink));
+      let sideNavItem: SolutionSideNavItem;
+      if (isGetStartedNavItem(navLink.id)) {
+        sideNavItem = {
+          id: navLink.id,
+          label: navLink.title.toUpperCase(),
+          labelSize: 'xs',
+          iconType: 'launch',
+          ...getSecuritySolutionLinkProps({
+            deepLinkId: navLink.id,
+          }),
+          appendSeparator: true,
+        };
       } else {
-        mainNavItems.push(formatSideNavItem(navLink));
+        // generic links
+        sideNavItem = {
+          id: navLink.id,
+          label: navLink.title,
+          ...getSecuritySolutionLinkProps({
+            deepLinkId: navLink.id,
+          }),
+          ...(navLink.categories?.length && { categories: navLink.categories }),
+          ...(navLink.links?.length && {
+            items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
+              if (!current.disabled) {
+                acc.push({
+                  id: current.id,
+                  label: current.title,
+                  description: current.description,
+                  isBeta: current.isBeta,
+                  betaOptions: current.betaOptions,
+                  ...getSecuritySolutionLinkProps({ deepLinkId: current.id }),
+                });
+              }
+              return acc;
+            }, []),
+          }),
+        };
+      }
+
+      if (isFooterNavItem(navLink.id)) {
+        footerNavItems.push(sideNavItem);
+      } else {
+        mainNavItems.push(sideNavItem);
       }
     });
 
     return [mainNavItems, footerNavItems];
-  }, [navLinks, formatSideNavItem]);
+  }, [navLinks, getSecuritySolutionLinkProps]);
 
   return sideNavItems;
 };
@@ -120,29 +103,42 @@ const useSelectedId = (): SecurityPageName => {
   return selectedId;
 };
 
+const usePanelTopOffset = (): string | undefined => {
+  const {
+    chrome: { hasHeaderBanner$ },
+  } = useKibana().services;
+  const hasHeaderBanner = useObservable(hasHeaderBanner$());
+  const { euiTheme } = useEuiTheme();
+  return hasHeaderBanner ? `calc(${EUI_HEADER_HEIGHT} + ${euiTheme.size.xl})` : undefined;
+};
+
+const usePanelBottomOffset = (): string | undefined => {
+  const isPolicySettingsVisible = useIsPolicySettingsBarVisible();
+  const [isTimelineBottomBarVisible] = useShowTimeline();
+  return isTimelineBottomBarVisible || isPolicySettingsVisible ? BOTTOM_BAR_HEIGHT : undefined;
+};
+
 /**
  * Main security navigation component.
  * It takes the links to render from the generic application `links` configs.
  */
 export const SecuritySideNav: React.FC = () => {
-  const [items, footerItems] = useSideNavItems();
+  const [items, footerItems] = useSolutionSideNavItems();
   const selectedId = useSelectedId();
-
-  const isPolicySettingsVisible = useIsPolicySettingsBarVisible();
-  const [isTimelineBottomBarVisible] = useShowTimeline();
-  const bottomOffset =
-    isTimelineBottomBarVisible || isPolicySettingsVisible ? bottomNavOffset : undefined;
+  const panelTopOffset = usePanelTopOffset();
+  const panelBottomOffset = usePanelBottomOffset();
 
   if (items.length === 0 && footerItems.length === 0) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;
   }
 
   return (
-    <SideNavigation
+    <SolutionSideNav
       items={items}
       footerItems={footerItems}
       selectedId={selectedId}
-      panelBottomOffset={bottomOffset}
+      panelTopOffset={panelTopOffset}
+      panelBottomOffset={panelBottomOffset}
       tracker={track}
     />
   );

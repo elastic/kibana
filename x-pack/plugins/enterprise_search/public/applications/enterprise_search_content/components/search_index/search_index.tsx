@@ -78,6 +78,7 @@ export const SearchIndex: React.FC = () => {
   const {
     guidedOnboarding,
     productAccess: { hasAppSearchAccess },
+    productFeatures: { hasDefaultIngestPipeline },
   } = useValues(KibanaLogic);
   const isAppGuideActive = useObservable(
     guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('appSearch', 'add_data')
@@ -202,7 +203,7 @@ export const SearchIndex: React.FC = () => {
     ...ALL_INDICES_TABS,
     ...(isConnectorIndex(index) ? CONNECTOR_TABS : []),
     ...(isCrawlerIndex(index) ? CRAWLER_TABS : []),
-    PIPELINES_TAB,
+    ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
   ];
 
   const selectedTab = tabs.find((tab) => tab.id === tabId);

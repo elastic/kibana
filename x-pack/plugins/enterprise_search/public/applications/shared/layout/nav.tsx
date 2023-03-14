@@ -30,7 +30,7 @@ import { KibanaLogic } from '../kibana';
 import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
-  const { isSidebarEnabled, productAccess } = useValues(KibanaLogic);
+  const { isSidebarEnabled, productAccess, productFeatures } = useValues(KibanaLogic);
 
   if (!isSidebarEnabled) return undefined;
   const enginesSectionEnabled = productAccess.hasSearchEnginesAccess;
@@ -60,17 +60,21 @@ export const useEnterpriseSearchNav = () => {
             to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SEARCH_INDICES_PATH,
           }),
         },
-        {
-          id: 'settings',
-          name: i18n.translate('xpack.enterpriseSearch.nav.contentSettingsTitle', {
-            defaultMessage: 'Settings',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            shouldShowActiveForSubroutes: true,
-            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SETTINGS_PATH,
-          }),
-        },
+        ...(productFeatures.hasDefaultIngestPipeline
+          ? [
+              {
+                id: 'settings',
+                name: i18n.translate('xpack.enterpriseSearch.nav.contentSettingsTitle', {
+                  defaultMessage: 'Settings',
+                }),
+                ...generateNavLink({
+                  shouldNotCreateHref: true,
+                  shouldShowActiveForSubroutes: true,
+                  to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SETTINGS_PATH,
+                }),
+              },
+            ]
+          : []),
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
         defaultMessage: 'Content',

@@ -63,6 +63,7 @@ import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrappe
 import type { Explore } from './explore';
 import type { NavigationLink } from './common/links';
 
+import type { TelemetryClientStart } from './common/lib/telemetry';
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
@@ -122,6 +123,7 @@ export type StartServices = CoreStart &
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
     isSidebarEnabled$: BehaviorSubject<boolean>;
+    telemetry: TelemetryClientStart;
   };
 
 export interface PluginSetup {

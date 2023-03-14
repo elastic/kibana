@@ -7,3 +7,5 @@
 
 export const PLUGIN_ID = 'serverless';
 export const PLUGIN_NAME = 'serverless';
+
+export const API_SWITCH_PROJECT = '/api/serverless/switch_project';
