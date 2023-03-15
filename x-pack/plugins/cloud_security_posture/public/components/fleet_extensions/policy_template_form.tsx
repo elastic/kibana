@@ -138,14 +138,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // is resetting the validation error state to the value before
       // running the setEnabledPolicyInput function. This is a workaround to
       // ensure the validation error state is reset if there are errors.
-      const intervalId = setInterval(() => {
+      setTimeout(() => {
         if (hasValidationError.current.length > 0) {
           setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
           hasValidationError.current = [];
         }
-      }, 300);
-
-      return () => clearInterval(intervalId);
+      }, 500);
     });
 
     return (
