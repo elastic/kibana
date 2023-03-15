@@ -7,14 +7,15 @@
  */
 
 import { omit } from 'lodash';
+
+import { schema } from '@kbn/config-schema';
+import { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
-import { create } from './create';
 import { getServiceObjectTransformFactory } from '../services_transforms_factory';
-import { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
-import { schema } from '@kbn/config-schema';
+import { create } from './create';
 
 const { fn, schemas } = create;
 

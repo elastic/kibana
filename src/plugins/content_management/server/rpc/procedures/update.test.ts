@@ -8,14 +8,14 @@
 
 import { omit } from 'lodash';
 
+import { schema } from '@kbn/config-schema';
+import { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
-import { update } from './update';
-import { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
-import { schema } from '@kbn/config-schema';
 import { getServiceObjectTransformFactory } from '../services_transforms_factory';
+import { update } from './update';
 
 const { fn, schemas } = update;
 
