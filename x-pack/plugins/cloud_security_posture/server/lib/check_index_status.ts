@@ -12,23 +12,27 @@ export const checkIndexStatus = async (
   esClient: ElasticsearchClient,
   index: string,
   logger: Logger,
-  postureType: 'cspm' | 'kspm' | 'all' = 'all',
+  postureType: 'cspm' | 'kspm' | 'all' = 'all'
 ): Promise<IndexStatus> => {
-
-  const query = postureType === 'all' ? ({
-    match_all: {},
-  }) : ( {bool: {
-    filter: {
-      term: {
-        'rule.benchmark.posture_type': postureType,
-      },
-    },
-  }})
+  const query =
+    postureType === 'all'
+      ? {
+          match_all: {},
+        }
+      : {
+          bool: {
+            filter: {
+              term: {
+                'rule.benchmark.posture_type': postureType,
+              },
+            },
+          },
+        };
 
   try {
     const queryResult = await esClient.search({
       index,
-      query: query,
+      query,
       size: 1,
     });
 
@@ -43,4 +47,3 @@ export const checkIndexStatus = async (
     return 'empty';
   }
 };
-

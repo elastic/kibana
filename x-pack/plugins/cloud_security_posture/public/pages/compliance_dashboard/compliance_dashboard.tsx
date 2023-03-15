@@ -239,23 +239,28 @@ export const ComplianceDashboard = () => {
         }),
         isSelected: selectedTab === CSPM_POLICY_TEMPLATE,
         onClick: () => setSelectedTab(CSPM_POLICY_TEMPLATE),
-        content: (<>{hasFindingsCspm ? (<CloudPosturePage query={getCspmDashboardData}>
-          <div data-test-subj={CLOUD_DASHBOARD_CONTAINER}>
-            
-            <IntegrationPostureDashboard
-              dashboardType={CSPM_POLICY_TEMPLATE}
-              complianceData={getCspmDashboardData.data}
-              notInstalledConfig={getNotInstalledConfig(
-                CSPM_POLICY_TEMPLATE,
-                cspmIntegrationLink
-              )}
-              isIntegrationInstalled={
-                getSetupStatus.data?.cspm?.status !== 'unprivileged' &&
-                getSetupStatus.data?.cspm?.status !== 'not-installed'
-              }
-            />
-          </div>
-        </CloudPosturePage>) : (<NoFindingsStates posturetype={'cspm'}/>)}
+        content: (
+          <>
+            {hasFindingsCspm ? (
+              <CloudPosturePage query={getCspmDashboardData}>
+                <div data-test-subj={CLOUD_DASHBOARD_CONTAINER}>
+                  <IntegrationPostureDashboard
+                    dashboardType={CSPM_POLICY_TEMPLATE}
+                    complianceData={getCspmDashboardData.data}
+                    notInstalledConfig={getNotInstalledConfig(
+                      CSPM_POLICY_TEMPLATE,
+                      cspmIntegrationLink
+                    )}
+                    isIntegrationInstalled={
+                      getSetupStatus.data?.cspm?.status !== 'unprivileged' &&
+                      getSetupStatus.data?.cspm?.status !== 'not-installed'
+                    }
+                  />
+                </div>
+              </CloudPosturePage>
+            ) : (
+              <NoFindingsStates posturetype={'cspm'} />
+            )}
           </>
         ),
       },
@@ -266,23 +271,28 @@ export const ComplianceDashboard = () => {
         isSelected: selectedTab === KSPM_POLICY_TEMPLATE,
         onClick: () => setSelectedTab(KSPM_POLICY_TEMPLATE),
         content: (
-         <>{hasFindingsKspm ? (<CloudPosturePage query={getKspmDashboardData}>
-          <div data-test-subj={KUBERNETES_DASHBOARD_CONTAINER}>
-            <IntegrationPostureDashboard
-              dashboardType={KSPM_POLICY_TEMPLATE}
-              complianceData={getKspmDashboardData.data}
-              notInstalledConfig={getNotInstalledConfig(
-                KSPM_POLICY_TEMPLATE,
-                kspmIntegrationLink
-              )}
-              isIntegrationInstalled={
-                getSetupStatus.data?.kspm?.status !== 'unprivileged' &&
-                getSetupStatus.data?.kspm?.status !== 'not-installed'
-              }
-            />
-          </div>
-        </CloudPosturePage>) : (<NoFindingsStates posturetype={'kspm'}/>)}
-          </> 
+          <>
+            {hasFindingsKspm ? (
+              <CloudPosturePage query={getKspmDashboardData}>
+                <div data-test-subj={KUBERNETES_DASHBOARD_CONTAINER}>
+                  <IntegrationPostureDashboard
+                    dashboardType={KSPM_POLICY_TEMPLATE}
+                    complianceData={getKspmDashboardData.data}
+                    notInstalledConfig={getNotInstalledConfig(
+                      KSPM_POLICY_TEMPLATE,
+                      kspmIntegrationLink
+                    )}
+                    isIntegrationInstalled={
+                      getSetupStatus.data?.kspm?.status !== 'unprivileged' &&
+                      getSetupStatus.data?.kspm?.status !== 'not-installed'
+                    }
+                  />
+                </div>
+              </CloudPosturePage>
+            ) : (
+              <NoFindingsStates posturetype={'kspm'} />
+            )}
+          </>
         ),
       },
     ],
@@ -297,7 +307,7 @@ export const ComplianceDashboard = () => {
     ]
   );
 
-  //if (!hasFindingsKspm && !hasFindingsCspm) return <NoFindingsStates posturetype={'cspm'}/>;
+  // if (!hasFindingsKspm && !hasFindingsCspm) return <NoFindingsStates posturetype={'cspm'}/>;
   // if (!hasFindingsCspm) return <NoFindingsStates posturetype={'cspm'}/>;
   // if (!hasFindingsKspm) return <NoFindingsStates posturetype={'kspm'}/>;
 
