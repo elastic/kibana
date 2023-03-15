@@ -24,7 +24,7 @@ export const Expand: Story<void> = () => {
   const panelContextValue = {
     eventId: 'eventId',
     indexName: 'indexName',
-  };
+  } as unknown as RightPanelContext;
 
   return (
     <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
