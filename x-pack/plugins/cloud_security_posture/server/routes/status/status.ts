@@ -85,10 +85,11 @@ export const calculateCspStatusCode = (
   if (indicesStatus.findingsLatest === 'unprivileged' || indicesStatus.score === 'unprivileged')
     return 'unprivileged';
   if (!installedPolicyTemplates.includes(postureTypeCheck)) return 'not-installed';
-  if (indicesStatus.findings === 'not-empty') return 'indexed';
   if (healthyAgents === 0) return 'not-deployed';
+  if (indicesStatus.findingsLatest === 'empty' && indicesStatus.findings === 'empty'  && timeSinceInstallationInMinutes < INDEX_TIMEOUT_IN_MINUTES) return 'waiting_for_results';
+  if (indicesStatus.findingsLatest === 'empty' && indicesStatus.findings === 'empty'  && timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
   if (indicesStatus.findingsLatest === 'empty') return 'indexing';
-  if (timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
+  if (indicesStatus.findings === 'not-empty') return 'indexed';
 
   throw new Error('Could not determine csp status');
 };
@@ -162,7 +163,7 @@ const getCspStatus = async ({
     ),
     getInstalledPolicyTemplates(packagePolicyService, soClient),
   ]);
-console.log(installation)
+ 
   const healthyAgentsKspm = await getHealthyAgents(
     soClient,
     installedPackagePoliciesKspm.items,

@@ -55,7 +55,7 @@ describe('calculateCspStatusCode test', () => {
       ['cspm']
     );
 
-    expect(statusCode).toMatch('indexed');
+    expect(statusCode).toMatch('not-deployed');
   });
   it('Verify status when there are findings ,installed policies and healthy agents', async () => {
     const statusCode = calculateCspStatusCode(
@@ -99,13 +99,13 @@ describe('calculateCspStatusCode test', () => {
       },
       1,
       1,
-      10,
+      9,
       ['cspm']
     );
 
-    expect(statusCode).toMatch('indexing');
+    expect(statusCode).toMatch('waiting_for_results');
   });
-  it('Verify status when there are installed policies, healthy agents and no findings for more than 10 minutes', async () => {
+  it('Verify status when there are installed policies, healthy agents and no findings and been more than 10 minutes', async () => {
     const statusCode = calculateCspStatusCode(
       POSTURE_TYPE_CSPM,
       {
@@ -120,5 +120,21 @@ describe('calculateCspStatusCode test', () => {
     );
 
     expect(statusCode).toMatch('index-timeout');
+  });
+  it('Verify status when there are installed policies, healthy agents past findings but no recent findings', async () => {
+    const statusCode = calculateCspStatusCode(
+      POSTURE_TYPE_CSPM,
+      {
+        findingsLatest: 'empty',
+        findings: 'not-empty',
+        score: 'not-empty',
+      },
+      1,
+      1,
+      0,
+      ['cspm']
+    );
+
+    expect(statusCode).toMatch('indexing');
   });
 });
