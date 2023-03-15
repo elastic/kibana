@@ -39,7 +39,7 @@ export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...
   const { error: errorString, cause, message } = data;
 
   return (
-    <EuiCallOut title={title} color="danger" iconType="alert" {...rest}>
+    <EuiCallOut title={title} color="danger" iconType="warning" {...rest}>
       <div data-test-subj="sectionErrorMessage">{message || errorString}</div>
       {cause && (
         <Fragment>

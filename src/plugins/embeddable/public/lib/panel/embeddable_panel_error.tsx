@@ -72,7 +72,7 @@ export function EmbeddablePanelError({
         </EuiText>
       }
       data-test-subj="embeddableStackError"
-      iconType="alert"
+      iconType="warning"
       iconColor="danger"
       layout="vertical"
       actions={
