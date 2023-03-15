@@ -30,18 +30,18 @@ export const ServerlessSearchCollapsibleNavigation = ({
       label: 'Indices',
       onClick: navigateTo('/app/enterprise_search/content/search_indices'),
     },
-    {
-      label: 'Engines',
-      onClick: navigateTo('/app/enterprise_search/content/engines'),
-    },
+    // {
+    //   label: 'Engines',
+    //   onClick: navigateTo('/app/enterprise_search/content/engines'),
+    // },
     {
       label: 'API keys',
       onClick: navigateTo('/app/management/security/api_keys'),
     },
-    {
-      label: 'Ingest pipelines',
-      onClick: navigateTo('/app/management/ingest/ingest_pipelines'),
-    },
+    // {
+    //   label: 'Ingest pipelines',
+    //   onClick: navigateTo('/app/management/ingest/ingest_pipelines'),
+    // },
   ];
 
   return (
