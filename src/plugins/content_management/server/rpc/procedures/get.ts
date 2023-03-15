@@ -27,6 +27,9 @@ export const get: ProcedureDefinition<Context, GetIn<string>> = {
         request: version,
         latest: contentDefinition.version.latest,
       },
+      utils: {
+        getTransforms: ctx.getTransformsFactory(contentTypeId),
+      },
     };
     const result = await crudInstance.get(storageContext, id, options);
 
