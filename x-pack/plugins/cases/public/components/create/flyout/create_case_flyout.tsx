@@ -48,7 +48,7 @@ const maskOverlayClassName = 'create-case-flyout-mask-overlay';
 const GlobalStyle = createGlobalStyle<{ theme: { eui: { euiZLevel5: number } } }>`
   .${maskOverlayClassName} {
     ${({ theme }) => `
-    z-index: ${theme.eui.euiZLevel5};
+    z-index: ${theme.eui.euiZLevel5} !important;
   `}
   }
 `;
