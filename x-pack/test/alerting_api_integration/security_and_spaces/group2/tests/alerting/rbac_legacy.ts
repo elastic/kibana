@@ -108,23 +108,18 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
 
               await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
-              await rescheduleTask(migratedAlertId);
-
-              await ensureAlertIsRunning();
 
               await retry.try(async () => {
                 const updateResponse = await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
                 expect(updateResponse.statusCode).to.eql(200);
               });
 
-              await ensureAlertIsRunning();
-
               // update alert as user with privileges - so it is no longer a legacy alert
               await retry.try(async () => {
                 const updatedKeyResponse = await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
                 expect(updatedKeyResponse.statusCode).to.eql(204);
               });
-
+              await rescheduleTask(migratedAlertId);
               await ensureAlertIsRunning();
               break;
             case 'global_read at space1':
