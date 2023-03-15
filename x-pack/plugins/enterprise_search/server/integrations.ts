@@ -47,7 +47,13 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your organizational content on Confluence Cloud with Workplace Search.',
       }
     ),
-    categories: ['enterprise_search', 'custom', 'workplace_search', 'content_source', 'connector_package'],
+    categories: [
+      'enterprise_search',
+      'custom',
+      'workplace_search',
+      'content_source',
+      'connector_package',
+    ],
   },
   {
     id: 'confluence_server',
@@ -174,7 +180,15 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your files and folders stored on network drives with Workplace Search.',
       }
     ),
-    categories: ['enterprise_search', 'elastic_stack', 'custom', 'workplace_search', 'connector', 'connector_client', 'connector_package'],
+    categories: [
+      'enterprise_search',
+      'elastic_stack',
+      'custom',
+      'workplace_search',
+      'connector',
+      'connector_client',
+      'connector_package',
+    ],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/network_drive/custom',
   },
   {
@@ -247,7 +261,14 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
         defaultMessage: 'Search over your files stored on SharePoint Online with Workplace Search.',
       }
     ),
-    categories: ['enterprise_search', 'azure', 'custom', 'workplace_search', 'content_source', 'connector_package'],
+    categories: [
+      'enterprise_search',
+      'azure',
+      'custom',
+      'workplace_search',
+      'content_source',
+      'connector_package',
+    ],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/share_point',
   },
   {
@@ -265,7 +286,14 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
           'Search over your files stored on Microsoft SharePoint Server with Workplace Search.',
       }
     ),
-    categories: ['enterprise_search', 'azure', 'custom', 'workplace_search', 'content_source', 'connector_package'],
+    categories: [
+      'enterprise_search',
+      'azure',
+      'custom',
+      'workplace_search',
+      'content_source',
+      'connector_package',
+    ],
     uiInternalPath: '/app/enterprise_search/workplace_search/sources/add/share_point_server/custom',
   },
   {
@@ -435,7 +463,14 @@ export const registerEnterpriseSearchIntegrations = (
         defaultMessage: 'Search over your MongoDB content with Enterprise Search.',
       }
     ),
-    categories: ['enterprise_search', 'datastore', 'elastic_stack', 'native_search', 'connector', 'connector_client'],
+    categories: [
+      'enterprise_search',
+      'datastore',
+      'elastic_stack',
+      'native_search',
+      'connector',
+      'connector_client',
+    ],
     uiInternalPath:
       '/app/enterprise_search/content/search_indices/new_index?method=native_connector',
     icons: [
@@ -459,7 +494,14 @@ export const registerEnterpriseSearchIntegrations = (
         defaultMessage: 'Search over your MySQL content with Enterprise Search.',
       }
     ),
-    categories: ['enterprise_search', 'datastore', 'elastic_stack', 'native_search', 'connector', 'connector_client'],
+    categories: [
+      'enterprise_search',
+      'datastore',
+      'elastic_stack',
+      'native_search',
+      'connector',
+      'connector_client',
+    ],
     uiInternalPath:
       '/app/enterprise_search/content/search_indices/new_index?method=native_connector',
     icons: [
@@ -554,7 +596,15 @@ export const registerEnterpriseSearchIntegrations = (
         defaultMessage: 'Search over your Network Drive content with Enterprise Search.',
       }
     ),
-    categories: ['enterprise_search', 'custom', 'elastic_stack', 'workplace_search', 'connector', 'connector_client', 'connector_package'],
+    categories: [
+      'enterprise_search',
+      'custom',
+      'elastic_stack',
+      'workplace_search',
+      'connector',
+      'connector_client',
+      'connector_package',
+    ],
     uiInternalPath: '/app/enterprise_search/content/search_indices/new_index?method=connector',
     icons: [
       {
