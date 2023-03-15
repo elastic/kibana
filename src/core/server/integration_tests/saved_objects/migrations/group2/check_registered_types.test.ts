@@ -148,7 +148,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "upgrade-assistant-reindex-operation": "09ac8ed9c9acf7e8ece8eafe47d7019ea1472144",
         "uptime-dynamic-settings": "9a63ce80904a04be114749e426882dc3ff011137",
         "uptime-synthetics-api-key": "599319bedbfa287e8761e1ba49d536417a33fa13",
-        "url": "2422b3cbe0af71f7a9c2e228e19a972e759c56d4",
+        "url": "d557b4df602ccca27795e49b681652d8ed07cea4",
         "usage-counters": "f478b2668be350f5bdc08d9e1cf6fbce0e079f61",
         "visualization": "3aff13fbc2223de74167be6a78537812c8b9d236",
         "workplace_search_telemetry": "10e278fe9ae1396bfc36ae574bc387d7e696d43f",
