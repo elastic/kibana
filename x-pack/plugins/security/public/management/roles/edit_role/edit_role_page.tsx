@@ -648,7 +648,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
             <EuiCallOut
               title={getExtendedRoleDeprecationNotice(role)}
               color="warning"
-              iconType="alert"
+              iconType="warning"
             />
           </Fragment>
         )}

@@ -1595,6 +1595,26 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.getSLODiagnosisParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getSLODiagnosisParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>"
+        ],
+        "path": "packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.getSLOParamsSchema",
         "type": "Object",
         "tags": [],

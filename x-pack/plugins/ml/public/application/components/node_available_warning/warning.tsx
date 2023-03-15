@@ -33,7 +33,7 @@ export const Warning: FC<Props> = ({ size, isCloud, isCloudTrial, deploymentId }
           />
         }
         color="warning"
-        iconType="alert"
+        iconType="warning"
       >
         <div>
           <FormattedMessage
