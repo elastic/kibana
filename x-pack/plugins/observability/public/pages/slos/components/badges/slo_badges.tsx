@@ -16,6 +16,7 @@ import { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
 import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloIndicatorTypeBadge } from './slo_indicator_type_badge';
 import { SloTimeWindowBadge } from './slo_time_window_badge';
+import { toAlertsPageQueryFilter } from '../../helpers/alerts_page_query_filter';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -31,7 +32,9 @@ export function SloBadges({ slo, activeAlerts }: Props) {
   const handleClick = () => {
     if (activeAlerts) {
       navigateToUrl(
-        `${basePath.prepend(paths.observability.alerts)}?_a=${toAlertsPageQuery(activeAlerts)}`
+        `${basePath.prepend(paths.observability.alerts)}?_a=${toAlertsPageQueryFilter(
+          activeAlerts
+        )}`
       );
     }
   };
@@ -66,13 +69,4 @@ export function SloBadges({ slo, activeAlerts }: Props) {
       )}
     </EuiFlexGroup>
   );
-}
-
-function toAlertsPageQuery(activeAlerts: ActiveAlerts): string {
-  const kuery = activeAlerts.ruleIds
-    .map((ruleId) => `kibana.alert.rule.uuid:"${ruleId}"`)
-    .join(' or ');
-
-  const query = `(kuery:'${kuery}',rangeFrom:now-15m,rangeTo:now,status:all)`;
-  return query;
 }
