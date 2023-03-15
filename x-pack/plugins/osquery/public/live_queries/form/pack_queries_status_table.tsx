@@ -276,9 +276,10 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           render: renderLensResultsAction,
         },
         {
-          render: (item: { action_id: string }) => (
-            <AddToTimelineButton field="action_id" value={item.action_id} isIcon={true} />
-          ),
+          render: (item: { action_id: string }) =>
+            item.action_id && (
+              <AddToTimelineButton field="action_id" value={item.action_id} isIcon={true} />
+            ),
         },
         {
           render: (item: { action_id: string }) =>
@@ -345,7 +346,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         name: i18n.translate('xpack.osquery.pack.queriesTable.viewResultsColumnTitle', {
           defaultMessage: 'View results',
         }),
-        width: '90px',
+        width: '120px',
         render: renderResultActions,
       },
       {

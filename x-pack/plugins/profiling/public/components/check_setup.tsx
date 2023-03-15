@@ -179,7 +179,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                 >
                   {!postSetupLoading
                     ? i18n.translate('xpack.profiling.noDataConfig.action.buttonLabel', {
-                        defaultMessage: 'Setup Universal Profiling',
+                        defaultMessage: 'Set up Universal Profiling',
                       })
                     : i18n.translate('xpack.profiling.noDataConfig.action.buttonLoadingLabel', {
                         defaultMessage: 'Setting up Universal Profiling...',

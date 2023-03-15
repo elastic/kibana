@@ -44,6 +44,7 @@ describe('getRuleRoute', () => {
         params: {
           foo: true,
         },
+        uuid: '123-456',
       },
     ],
     consumer: 'bar',
@@ -61,6 +62,7 @@ describe('getRuleRoute', () => {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
+    revision: 0,
   };
 
   const getResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
@@ -75,6 +77,7 @@ describe('getRuleRoute', () => {
     created_at: mockedAlert.createdAt,
     updated_at: mockedAlert.updatedAt,
     id: mockedAlert.id,
+    revision: mockedAlert.revision,
     execution_status: {
       status: mockedAlert.executionStatus.status,
       last_execution_date: mockedAlert.executionStatus.lastExecutionDate,
@@ -85,6 +88,7 @@ describe('getRuleRoute', () => {
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
         connector_type_id: mockedAlert.actions[0].actionTypeId,
+        uuid: mockedAlert.actions[0].uuid,
       },
     ],
   };

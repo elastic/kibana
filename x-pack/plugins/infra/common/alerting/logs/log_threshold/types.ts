@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
-import { logViewReferenceRT } from '../../../log_views';
+import { persistedLogViewReferenceRT } from '../../../log_views';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 
 export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
@@ -181,7 +181,7 @@ const RequiredRuleParamsRT = rt.type({
   count: ThresholdRT,
   timeUnit: timeUnitRT,
   timeSize: timeSizeRT,
-  logView: logViewReferenceRT, // In future, this should be a union of logViewReferenceRT and inlineLogViewRT
+  logView: persistedLogViewReferenceRT, // Alerts are only compatible with persisted Log Views
 });
 
 const partialRequiredRuleParamsRT = rt.partial(RequiredRuleParamsRT.props);

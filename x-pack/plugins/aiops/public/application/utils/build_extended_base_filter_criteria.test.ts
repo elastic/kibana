@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
 import type { GroupTableItem } from '../../components/spike_analysis_table/types';
 
 import { buildExtendedBaseFilterCriteria } from './build_extended_base_filter_criteria';
 
-const selectedChangePointMock: ChangePoint = {
+const selectedSignificantTermMock: SignificantTerm = {
   doc_count: 53408,
   bg_count: 1154,
   fieldName: 'meta.cloud.instance_id.keyword',
@@ -80,13 +80,13 @@ describe('query_utils', () => {
       ]);
     });
 
-    it('includes a term filter when including a selectedChangePoint', () => {
+    it('includes a term filter when including a selectedSignificantTerm', () => {
       const baseFilterCriteria = buildExtendedBaseFilterCriteria(
         '@timestamp',
         1640082000012,
         1640103600906,
         { match_all: {} },
-        selectedChangePointMock
+        selectedSignificantTermMock
       );
 
       expect(baseFilterCriteria).toEqual([
@@ -104,13 +104,13 @@ describe('query_utils', () => {
       ]);
     });
 
-    it('includes a term filter with must_not when excluding a selectedChangePoint', () => {
+    it('includes a term filter with must_not when excluding a selectedSignificantTerm', () => {
       const baseFilterCriteria = buildExtendedBaseFilterCriteria(
         '@timestamp',
         1640082000012,
         1640103600906,
         { match_all: {} },
-        selectedChangePointMock,
+        selectedSignificantTermMock,
         false
       );
 

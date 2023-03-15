@@ -129,7 +129,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         ((Array.isArray(remainingFieldCandidates) && remainingFieldCandidates.length > 0) ||
           groupsMissing)
       ) {
-        setOverrides({ loaded, remainingFieldCandidates, changePoints: data.changePoints });
+        setOverrides({ loaded, remainingFieldCandidates, significantTerms: data.significantTerms });
       } else {
         setOverrides(undefined);
       }
@@ -140,7 +140,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const errors = useMemo(() => [...streamErrors, ...data.errors], [streamErrors, data.errors]);
 
   // Start handler clears possibly hovered or pinned
-  // change points on analysis refresh.
+  // significant terms on analysis refresh.
   function startHandler(continueAnalysis = false) {
     if (!continueAnalysis) {
       setOverrides(undefined);
@@ -172,8 +172,8 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   }, []);
 
   const groupTableItems = useMemo(
-    () => getGroupTableItems(data.changePointsGroups),
-    [data.changePointsGroups]
+    () => getGroupTableItems(data.significantTermsGroups),
+    [data.significantTermsGroups]
   );
 
   const shouldRerunAnalysis = useMemo(
@@ -183,7 +183,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     [currentAnalysisWindowParameters, windowParameters]
   );
 
-  const showSpikeAnalysisTable = data?.changePoints.length > 0;
+  const showSpikeAnalysisTable = data?.significantTerms.length > 0;
   const groupItemCount = groupTableItems.reduce((p, c) => {
     return p + c.group.length;
   }, 0);
@@ -288,7 +288,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       )}
       {showSpikeAnalysisTable && groupResults && foundGroups ? (
         <SpikeAnalysisGroupsTable
-          changePoints={data.changePoints}
+          significantTerms={data.significantTerms}
           groupTableItems={groupTableItems}
           loading={isRunning}
           dataViewId={dataView.id}
@@ -296,7 +296,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       ) : null}
       {showSpikeAnalysisTable && (!groupResults || !foundGroups) ? (
         <SpikeAnalysisTable
-          changePoints={data.changePoints}
+          significantTerms={data.significantTerms}
           loading={isRunning}
           dataViewId={dataView.id}
         />

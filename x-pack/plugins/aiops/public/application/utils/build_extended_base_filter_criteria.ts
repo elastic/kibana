@@ -11,7 +11,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Query } from '@kbn/es-query';
-import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
+import type { SignificantTerm, FieldValuePair } from '@kbn/ml-agg-utils';
 
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 
@@ -28,8 +28,8 @@ export function buildExtendedBaseFilterCriteria(
   earliestMs?: number,
   latestMs?: number,
   query?: Query['query'],
-  selectedChangePoint?: ChangePoint,
-  includeSelectedChangePoint = true,
+  selectedSignificantTerm?: SignificantTerm,
+  includeSelectedSignificantTerm = true,
   selectedGroup?: GroupTableItem | null
 ): estypes.QueryDslQueryContainer[] {
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
@@ -43,25 +43,25 @@ export function buildExtendedBaseFilterCriteria(
     }
   }
 
-  if (includeSelectedChangePoint) {
-    if (selectedChangePoint) {
+  if (includeSelectedSignificantTerm) {
+    if (selectedSignificantTerm) {
       filterCriteria.push({
-        term: { [selectedChangePoint.fieldName]: selectedChangePoint.fieldValue },
+        term: { [selectedSignificantTerm.fieldName]: selectedSignificantTerm.fieldValue },
       });
     } else if (selectedGroup) {
       filterCriteria.push(...groupFilter);
     }
-  } else if (selectedChangePoint && !includeSelectedChangePoint) {
+  } else if (selectedSignificantTerm && !includeSelectedSignificantTerm) {
     filterCriteria.push({
       bool: {
         must_not: [
           {
-            term: { [selectedChangePoint.fieldName]: selectedChangePoint.fieldValue },
+            term: { [selectedSignificantTerm.fieldName]: selectedSignificantTerm.fieldValue },
           },
         ],
       },
     });
-  } else if (selectedGroup && !includeSelectedChangePoint) {
+  } else if (selectedGroup && !includeSelectedSignificantTerm) {
     filterCriteria.push({
       bool: {
         must_not: [

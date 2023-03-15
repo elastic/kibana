@@ -19,4 +19,4 @@ export type {
   SearchIn,
 } from './rpc';
 
-export { procedureNames, schemas as rpcSchemas } from './rpc';
+export type { Version } from './types';

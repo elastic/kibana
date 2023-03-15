@@ -35,14 +35,17 @@ export const StepNav = ({ stepIndex, totalSteps, handleStepHref }: Props) => {
     setPopover(false);
   };
 
+  const hasMoreThanOneStep = totalSteps > 1;
+
   const button = (
     <EuiButtonEmpty
       size="s"
       flush="left"
-      iconType="arrowDown"
+      iconType={hasMoreThanOneStep ? 'arrowDown' : undefined}
       iconSide="right"
       onClick={onButtonClick}
       style={{ height: 20 }}
+      disabled={!hasMoreThanOneStep}
     >
       <FormattedMessage
         id="xpack.synthetics.synthetics.stepDetail.totalSteps"
@@ -56,7 +59,7 @@ export const StepNav = ({ stepIndex, totalSteps, handleStepHref }: Props) => {
   );
 
   const items = times(totalSteps).map((num) => (
-    <EuiContextMenuItem key={num} href={handleStepHref(num + 1)}>
+    <EuiContextMenuItem key={num} href={handleStepHref(num + 1)} onClick={closePopover}>
       <FormattedMessage
         id="xpack.synthetics.synthetics.stepDetail.stepNumber"
         defaultMessage="Step {stepIndex}"

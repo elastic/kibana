@@ -268,7 +268,7 @@ export const ResultsLinks: FC<Props> = ({
       </EuiFlexItem>
       {Array.isArray(asyncHrefCards) &&
         asyncHrefCards.map((link) => (
-          <EuiFlexItem>
+          <EuiFlexItem key={link.title}>
             <EuiCard
               icon={<EuiIcon size="xxl" type={link.icon} />}
               data-test-subj="fileDataVisLink"
