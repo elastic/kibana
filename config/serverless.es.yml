@@ -5,6 +5,12 @@ xpack.uptime.enabled: false
 xpack.watcher.enabled: false
 
 enterpriseSearch.enabled: true
+enterpriseSearch.canDeployEntSearch: false
+enterpriseSearch.hasConnectors: false
+enterpriseSearch.hasDefaultIngestPipeline: false
+enterpriseSearch.hasNativeConnectors: false
+enterpriseSearch.hasWebCrawler: false
+
 xpack.serverless.search.enabled: true
 
 uiSettings.overrides.defaultRoute: /app/enterprise_search/content/search_indices
