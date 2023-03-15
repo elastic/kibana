@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
+import styled from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -35,22 +35,6 @@ const StyledFlyout = styled(EuiFlyout)`
   ${({ theme }) => `
       z-index: ${theme.eui.euiZModal};
     `}
-`;
-
-const maskOverlayClassName = 'create-case-flyout-mask-overlay';
-
-/**
- * We need to target the mask overlay which is a parent element
- * of the flyout.
- * A global style is needed to target a parent element.
- */
-
-const GlobalStyle = createGlobalStyle<{ theme: { eui: { euiZLevel5: number } } }>`
-  .${maskOverlayClassName} {
-    ${({ theme }) => `
-    z-index: ${theme.eui.euiZLevel5} !important;
-  `}
-  }
 `;
 
 // Adding bottom padding because timeline's
@@ -82,13 +66,12 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
     return (
       <QueryClientProvider client={casesQueryClient}>
         <ReactQueryDevtools initialIsOpen={false} />
-        <GlobalStyle />
         <StyledFlyout
           onClose={onClose}
           tour-step="create-case-flyout"
           data-test-subj="create-case-flyout"
           // maskProps is needed in order to apply the z-index to the parent overlay element, not to the flyout only
-          maskProps={{ className: maskOverlayClassName }}
+          maskProps={{ headerZindexLocation: 'above' }}
         >
           <EuiFlyoutHeader data-test-subj="create-case-flyout-header" hasBorder>
             <EuiTitle size="m">
