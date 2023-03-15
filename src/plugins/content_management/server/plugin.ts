@@ -21,7 +21,7 @@ import {
   ContentManagementServerStart,
   SetupDependencies,
 } from './types';
-import { procedureNames } from '../common';
+import { procedureNames } from '../common/rpc';
 
 type CreateRouterFn = CoreSetup['http']['createRouter'];
 

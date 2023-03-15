@@ -48,7 +48,7 @@ export function SloBadges({ slo, activeAlerts }: Props) {
       {!!activeAlerts && (
         <EuiFlexItem grow={false}>
           <EuiBadge
-            iconType="alert"
+            iconType="warning"
             color="danger"
             onClick={handleClick}
             onClickAriaLabel={i18n.translate(

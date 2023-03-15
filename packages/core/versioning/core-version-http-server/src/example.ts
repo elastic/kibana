@@ -28,13 +28,18 @@ const versionedRoute = versionedRouter
     {
       version: '1',
       validate: {
-        query: schema.object({
-          name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
-        }),
-        params: schema.object({
-          id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
-        }),
-        body: schema.object({ foo: schema.string() }),
+        request: {
+          query: schema.object({
+            name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+          }),
+          params: schema.object({
+            id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
+          }),
+          body: schema.object({ foo: schema.string() }),
+        },
+        response: {
+          body: schema.object({ foo: schema.string() }),
+        },
       },
     },
     async (ctx, req, res) => {
@@ -47,13 +52,18 @@ const versionedRoute = versionedRouter
     {
       version: '2',
       validate: {
-        query: schema.object({
-          name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
-        }),
-        params: schema.object({
-          id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
-        }),
-        body: schema.object({ fooString: schema.string() }),
+        request: {
+          query: schema.object({
+            name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+          }),
+          params: schema.object({
+            id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
+          }),
+          body: schema.object({ fooString: schema.string() }),
+        },
+        response: {
+          body: schema.object({ fooName: schema.string() }),
+        },
       },
     },
     async (ctx, req, res) => {
@@ -66,13 +76,18 @@ const versionedRoute = versionedRouter
     {
       version: '3',
       validate: {
-        query: schema.object({
-          name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
-        }),
-        params: schema.object({
-          id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
-        }),
-        body: schema.object({ fooString: schema.string({ minLength: 0, maxLength: 1000 }) }),
+        request: {
+          query: schema.object({
+            name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
+          }),
+          params: schema.object({
+            id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
+          }),
+          body: schema.object({ fooString: schema.string({ minLength: 0, maxLength: 1000 }) }),
+        },
+        response: {
+          body: schema.object({ fooName: schema.string() }),
+        },
       },
     },
     async (ctx, req, res) => {
