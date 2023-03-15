@@ -338,7 +338,7 @@ export function TransactionsTable({
               }
             )}
             color="warning"
-            iconType="alert"
+            iconType="warning"
           >
             <p>
               <FormattedMessage

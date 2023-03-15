@@ -44,7 +44,7 @@ export const ThrottlingDisabledCallout = () => {
         />
       }
       color="warning"
-      iconType="alert"
+      iconType="warning"
     >
       <FormattedMessage
         id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.automatic_node_cap.message"
@@ -64,7 +64,7 @@ export const ThrottlingExceededCallout = () => {
         />
       }
       color="warning"
-      iconType="alert"
+      iconType="warning"
     >
       <FormattedMessage
         id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.exceeded_throttling.message"

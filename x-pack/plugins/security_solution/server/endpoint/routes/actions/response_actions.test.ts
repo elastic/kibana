@@ -777,6 +777,8 @@ describe('Response actions', () => {
           {} as KibanaRequest
         )) as CasesClientMock;
 
+        casesClient.attachments.add.mockClear();
+
         let counter = 1;
         casesClient.cases.getCasesByAlertID.mockImplementation(async () => {
           return [
