@@ -10,9 +10,9 @@ import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { TestProviders } from '../../common/mock';
 import { DashboardsLandingPage } from './dashboards';
-import type { NavLinkItem } from '../../common/components/navigation/types';
 import { useCapabilities } from '../../common/lib/kibana';
 import * as telemetry from '../../common/lib/telemetry';
+import type { NavigationLink } from '../../common/links';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
@@ -28,7 +28,7 @@ const spyTrack = jest.spyOn(telemetry, 'track');
 const OVERVIEW_ITEM_LABEL = 'Overview';
 const DETECTION_RESPONSE_ITEM_LABEL = 'Detection & Response';
 
-const APP_DASHBOARD_LINKS: NavLinkItem = {
+const APP_DASHBOARD_LINKS: NavigationLink = {
   id: SecurityPageName.dashboardsLanding,
   title: 'Dashboards',
   links: [
@@ -49,8 +49,8 @@ const APP_DASHBOARD_LINKS: NavLinkItem = {
 const URL = '/path/to/dashboards';
 
 const mockAppManageLink = jest.fn(() => APP_DASHBOARD_LINKS);
-jest.mock('../../common/components/navigation/nav_links', () => ({
-  useAppRootNavLink: () => mockAppManageLink(),
+jest.mock('../../common/links/nav_links', () => ({
+  useRootNavLink: () => mockAppManageLink(),
 }));
 
 const CREATE_DASHBOARD_LINK = { isLoading: false, url: URL };

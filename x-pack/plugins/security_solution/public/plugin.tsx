@@ -45,6 +45,7 @@ import {
 import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
 import type { LinksPermissions } from './common/links';
 import { updateAppLinks } from './common/links';
+import { navLinks$ } from './common/links/nav_links';
 import { licenseService } from './common/hooks/use_license';
 import type { SecuritySolutionUiConfigType } from './common/types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
@@ -249,7 +250,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
   }
 
-  public start(core: CoreStart, plugins: StartPlugins) {
+  public start(core: CoreStart, plugins: StartPlugins): PluginStart {
     KibanaServices.init({
       ...core,
       ...plugins,
@@ -310,7 +311,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Not using await to prevent blocking start execution
     this.registerAppLinks(core, plugins);
 
-    return {};
+    return {
+      navLinks$,
+    };
   }
 
   public stop() {

@@ -1,0 +1,141 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { matchPath, useLocation } from 'react-router-dom';
+import { partition } from 'lodash/fp';
+import { SecurityPageName } from '@kbn/security-solution-plugin/common';
+import type { SideNavItem } from '@kbn/shared-ux-side-navigation';
+import { useKibana } from '../services';
+import { useGetLinkProps } from './use_link_props';
+
+const isFooterNavItem = (id: string) =>
+  id === SecurityPageName.landing || id === SecurityPageName.administration;
+
+const isGetStartedNavItem = (id: string) => id === SecurityPageName.landing;
+
+// DFS for the sideNavItem matching the current `pathname`, returns all item hierarchy when found
+const findItemsByPath = (sideNavItems: SideNavItem[], pathname: string): SideNavItem[] => {
+  for (const sideNavItem of sideNavItems) {
+    if (sideNavItem.items?.length) {
+      const found = findItemsByPath(sideNavItem.items, pathname);
+      if (found.length) {
+        found.unshift(sideNavItem);
+        return found;
+      }
+    }
+    if (matchPath(pathname, { path: sideNavItem.href })) {
+      return [sideNavItem];
+    }
+  }
+  return [];
+};
+
+/**
+ * Returns all the formatted SideNavItems, including external links
+ */
+export const useSideNavItems = (): SideNavItem[] => {
+  const { securitySolution } = useKibana().services;
+  const navLinks = useObservable(securitySolution.navLinks$, []);
+  const getLinkProps = useGetLinkProps();
+
+  const securitySideNavItems = useMemo(
+    () =>
+      navLinks.reduce<SideNavItem[]>((items, navLink) => {
+        if (navLink.disabled) {
+          return items;
+        }
+        if (isGetStartedNavItem(navLink.id)) {
+          items.push({
+            id: navLink.id,
+            label: navLink.title.toUpperCase(),
+            ...getLinkProps({ deepLinkId: navLink.id }),
+            labelSize: 'xs',
+            iconType: 'launch',
+            appendSeparator: true,
+          });
+        } else {
+          // default sideNavItem formatting
+          items.push({
+            id: navLink.id,
+            label: navLink.title,
+            ...getLinkProps({ deepLinkId: navLink.id }),
+            ...(navLink.categories?.length && { categories: navLink.categories }),
+            ...(navLink.links?.length && {
+              items: navLink.links.reduce<SideNavItem[]>((acc, current) => {
+                if (!current.disabled) {
+                  acc.push({
+                    id: current.id,
+                    label: current.title,
+                    description: current.description,
+                    isBeta: current.isBeta,
+                    betaOptions: current.betaOptions,
+                    ...getLinkProps({ deepLinkId: current.id }),
+                  });
+                }
+                return acc;
+              }, []),
+            }),
+          });
+        }
+        return items;
+      }, []),
+    [getLinkProps, navLinks]
+  );
+
+  const sideNavItems = useAddExternalSideNavItems(securitySideNavItems);
+
+  return sideNavItems;
+};
+
+/**
+ * @param securitySideNavItems the sideNavItems for Security pages
+ * @returns sideNavItems with Security and external links
+ */
+const useAddExternalSideNavItems = (securitySideNavItems: SideNavItem[]) => {
+  const getLinkProps = useGetLinkProps();
+
+  const sideNavItemsWithExternals = useMemo(
+    () => [
+      ...securitySideNavItems,
+      {
+        id: 'discover',
+        label: 'Discover',
+        ...getLinkProps({ appId: 'discover' }),
+      },
+    ],
+    [securitySideNavItems, getLinkProps]
+  );
+
+  return sideNavItemsWithExternals;
+};
+
+/**
+ * Partitions the sideNavItems into main and footer SideNavItems
+ * @param sideNavItems array for all SideNavItems
+ * @returns `[items, footerItems]` to be used in the side navigation component
+ */
+export const usePartitionFooterNavItems = (
+  sideNavItems: SideNavItem[]
+): [SideNavItem[], SideNavItem[]] =>
+  useMemo(() => partition((item) => !isFooterNavItem(item.id), sideNavItems), [sideNavItems]);
+
+/**
+ * Returns the selected item id, which is the root item in the links hierarchy
+ */
+export const useSideNavSelectedId = (sideNavItems: SideNavItem[]): string => {
+  const { http } = useKibana().services;
+  const { pathname } = useLocation();
+
+  const selectedId: string = useMemo(() => {
+    const [rootNavItem] = findItemsByPath(sideNavItems, http.basePath.prepend(pathname));
+    return rootNavItem?.id ?? '';
+  }, [sideNavItems, pathname, http]);
+
+  return selectedId;
+};

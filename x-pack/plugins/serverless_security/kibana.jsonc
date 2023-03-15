@@ -15,7 +15,8 @@
     "requiredPlugins": [
       "serverless",
       "security",
-      "securitySolution"
+      "securitySolution",
+      "kibanaReact"
     ],
     "optionalPlugins": [],
     "requiredBundles": []

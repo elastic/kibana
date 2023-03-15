@@ -1,3 +1,4 @@
+enterpriseSearch.enabled: false
 xpack.apm.enabled: false
 xpack.canvas.enabled: false
 xpack.observability.enabled: false
