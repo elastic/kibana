@@ -73,6 +73,7 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/core-application-browser",
     "@kbn/files-plugin",
+    "@kbn/core-elasticsearch-server",
   ],
   "exclude": [
     "target/**/*",

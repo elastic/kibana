@@ -46,7 +46,12 @@ export const AccessDeniedPage: React.FC<ComponentProps> = () => {
   }
   return (
     <EuiPanel paddingSize="m">
-      <EuiCallOut title={title} color="danger" iconType="alert" data-test-subj="accessDeniedTitle">
+      <EuiCallOut
+        title={title}
+        color="danger"
+        iconType="warning"
+        data-test-subj="accessDeniedTitle"
+      >
         <p>
           <FormattedMessage
             id="xpack.monitoring.accessDenied.notAuthorizedDescription"
