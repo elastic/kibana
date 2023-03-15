@@ -160,6 +160,7 @@ export interface ProcessEventAlertRule {
   severity?: string;
   uuid?: string;
   parameters?: ProcessEventAlertRuleParameters;
+  query?: string;
 }
 
 export interface ProcessEventAlert {

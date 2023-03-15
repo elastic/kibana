@@ -673,7 +673,7 @@ export const mockAlerts: ProcessEvent[] = [
         reason: 'process event created low alert cmd test alert.',
         original_time: '2021-11-23T15:25:04.218Z',
         original_event: {
-          action: 'exec',
+          action: EventAction.exec,
         },
         uuid: '6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38',
       },
@@ -859,7 +859,7 @@ export const mockAlerts: ProcessEvent[] = [
         reason: 'process event created low alert cmd test alert.',
         original_time: '2021-11-23T15:25:05.202Z',
         original_event: {
-          action: 'exit',
+          action: EventAction.end,
         },
         uuid: '2873463965b70d37ab9b2b3a90ac5a03b88e76e94ad33568285cadcefc38ed75',
       },
@@ -1048,7 +1048,7 @@ export const mockFileAlert = {
       reason: 'process event created low alert File telemetry.',
       original_time: '2021-11-23T15:25:05.202Z',
       original_event: {
-        action: 'exit',
+        action: EventAction.end,
       },
       uuid: '2873463965b70d37ab9b2b3a90ac5a03b88e76e94ad33568285cadcefc38ed75',
     },
@@ -1241,7 +1241,7 @@ export const mockNetworkAlert = {
       reason: 'process event created low alert File telemetry.',
       original_time: '2021-11-23T15:25:05.202Z',
       original_event: {
-        action: 'exit',
+        action: EventAction.end,
       },
       uuid: '2873463965b70d37ab9b2b3a90ac5a03b88e76e94ad33568285cadcefc38ed75',
     },
