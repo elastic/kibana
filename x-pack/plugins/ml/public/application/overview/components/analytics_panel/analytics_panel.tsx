@@ -65,7 +65,7 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
         defaultMessage: 'An error occurred getting the data frame analytics list.',
       })}
       color="danger"
-      iconType="alert"
+      iconType="warning"
     >
       <pre>
         {errorMessage && errorMessage.message !== undefined
