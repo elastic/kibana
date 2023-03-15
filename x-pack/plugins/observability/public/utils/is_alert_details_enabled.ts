@@ -15,7 +15,6 @@ export const isAlertDetailsEnabledPerApp = (
   alert: TopAlert | null,
   config: ConfigSchema | null
 ): boolean => {
-  console.log(alert, config);
   if (!alert || !config) return false;
 
   const ruleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
