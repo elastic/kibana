@@ -8,6 +8,7 @@
 import { deepFreeze } from '@kbn/std';
 
 export const SpacesSavedObjectMappings = deepFreeze({
+  dynamic: true,
   properties: {
     name: {
       type: 'text',
