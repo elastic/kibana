@@ -29,7 +29,7 @@ export const EditTransformApiErrorCallout: FC = () => {
               }
             )}
             color="danger"
-            iconType="alert"
+            iconType="warning"
           >
             <p>{apiErrorMessage}</p>
           </EuiCallOut>

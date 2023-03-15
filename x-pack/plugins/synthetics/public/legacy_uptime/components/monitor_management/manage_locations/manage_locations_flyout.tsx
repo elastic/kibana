@@ -27,7 +27,7 @@ import { AddLocationFlyout } from './add_location_flyout';
 import { ClientPluginsStart } from '../../../../plugin';
 import { getServiceLocations } from '../../../state/actions';
 import { PrivateLocationsList } from './locations_list';
-import { useLocationsAPI } from './hooks/use_locations_api';
+import { usePrivateLocationsAPI } from './hooks/use_locations_api';
 import {
   getAgentPoliciesAction,
   selectAddingNewPrivateLocation,
@@ -49,7 +49,7 @@ export const ManageLocationsFlyout = () => {
 
   const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
 
-  const { onSubmit, loading, privateLocations, onDelete } = useLocationsAPI({
+  const { onSubmit, loading, privateLocations, onDelete } = usePrivateLocationsAPI({
     isOpen,
   });
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getSelectedGroupBadgeMetrics } from '.';
+import { getBadgeMetrics } from '.';
 
-describe('getSelectedGroupBadgeMetrics', () => {
+describe('getBadgeMetrics', () => {
   it('returns array of badges which roccespondes to the field name', () => {
-    const badgesRuleName = getSelectedGroupBadgeMetrics('kibana.alert.rule.name', {
+    const badgesRuleName = getBadgeMetrics('kibana.alert.rule.name', {
       key: ['Rule name test', 'Some description'],
       usersCountAggregation: {
         value: 10,
@@ -24,7 +24,7 @@ describe('getSelectedGroupBadgeMetrics', () => {
       badgesRuleName.find((badge) => badge.title === 'Alerts:' && badge.value === 10)
     ).toBeTruthy();
 
-    const badgesHostName = getSelectedGroupBadgeMetrics('host.name', {
+    const badgesHostName = getBadgeMetrics('host.name', {
       key: 'Host',
       rulesCountAggregation: {
         value: 3,
@@ -36,7 +36,7 @@ describe('getSelectedGroupBadgeMetrics', () => {
       badgesHostName.find((badge) => badge.title === 'Rules:' && badge.value === 3)
     ).toBeTruthy();
 
-    const badgesUserName = getSelectedGroupBadgeMetrics('user.name', {
+    const badgesUserName = getBadgeMetrics('user.name', {
       key: 'User test',
       hostsCountAggregation: {
         value: 1,
@@ -49,7 +49,7 @@ describe('getSelectedGroupBadgeMetrics', () => {
   });
 
   it('returns default badges if the field specific does not exist', () => {
-    const badges = getSelectedGroupBadgeMetrics('process.name', {
+    const badges = getBadgeMetrics('process.name', {
       key: 'process',
       rulesCountAggregation: {
         value: 3,

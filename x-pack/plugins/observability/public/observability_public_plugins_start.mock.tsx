@@ -26,15 +26,13 @@ const embeddableStartMock = {
 const triggersActionsUiStartMock = {
   createStart() {
     return {
-      getAddAlertFlyout: jest.fn(() => (
-        <div data-test-subj="add-alerts-flyout">mocked component</div>
-      )),
       getAlertsSearchBar: jest.fn(() => (
         <div data-test-subj="alerts-search-bar">mocked component</div>
       )),
       getAlertsStateTable: jest.fn(() => (
         <div data-test-subj="alerts-state-table">mocked component</div>
       )),
+      getAddRuleFlyout: jest.fn(() => <div data-test-subj="add-rule-flyout">mocked component</div>),
       getEditAlertFlyout: jest.fn(() => (
         <div data-test-subj="edit-alert-flyout">mocked component</div>
       )),
