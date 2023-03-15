@@ -38,4 +38,6 @@ export interface MigratorContext {
   readonly typeRegistry: ISavedObjectTypeRegistry;
   /** List of types that are no longer registered */
   readonly deletedTypes: string[];
+  /** The number of documents to process at a time */
+  batchSize: number;
 }
