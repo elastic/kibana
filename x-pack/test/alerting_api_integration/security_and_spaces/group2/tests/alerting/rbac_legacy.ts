@@ -286,8 +286,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
               reference,
               overwrites: {
                 name: 'Updated Alert',
-                schedule: { interval: '5s' },
-                throttle: '5s',
+                schedule: { interval: '2s' },
+                throttle: '2s',
               },
             });
           }
