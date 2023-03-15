@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { changePointGroups } from '../../../common/__mocks__/farequote/change_point_groups';
+import { significantTermGroups } from '../../../common/__mocks__/farequote/significant_term_groups';
 import { fields } from '../../../common/__mocks__/artificial_logs/fields';
 import { filteredFrequentItemSets } from '../../../common/__mocks__/artificial_logs/filtered_frequent_item_sets';
 
@@ -15,9 +15,9 @@ import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 import { getSimpleHierarchicalTreeLeaves } from './get_simple_hierarchical_tree_leaves';
 
 describe('markDuplicates', () => {
-  it('marks duplicates based on change point groups for farequote', () => {
-    const fieldValuePairCounts = getFieldValuePairCounts(changePointGroups);
-    const markedDuplicates = getMarkedDuplicates(changePointGroups, fieldValuePairCounts);
+  it('marks duplicates based on significant terms groups for farequote', () => {
+    const fieldValuePairCounts = getFieldValuePairCounts(significantTermGroups);
+    const markedDuplicates = getMarkedDuplicates(significantTermGroups, fieldValuePairCounts);
 
     expect(markedDuplicates).toEqual([
       {
@@ -57,7 +57,7 @@ describe('markDuplicates', () => {
     ]);
   });
 
-  it('marks duplicates based on change point groups for artificial logs', () => {
+  it('marks duplicates based on significant terms groups for artificial logs', () => {
     const simpleHierarchicalTree = getSimpleHierarchicalTree(
       filteredFrequentItemSets,
       true,

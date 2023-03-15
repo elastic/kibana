@@ -168,7 +168,7 @@ export const AddConnectorInline = ({
             {!isEmptyActionId && (
               <EuiFlexItem grow={false}>
                 <EuiIconTip
-                  type="alert"
+                  type="warning"
                   size="m"
                   color="danger"
                   data-test-subj={`alertActionAccordionErrorTooltip`}
