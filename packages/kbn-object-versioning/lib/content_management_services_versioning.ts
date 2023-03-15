@@ -60,71 +60,139 @@ const validateServiceDefinitions = (definitions: ServiceDefinitionVersioned) => 
   });
 };
 
+/**
+ * Convert a versionned service definition to a flattened service definition
+ * where _each object_ is versioned (at the leaf).
+ *
+ * @example
+ *
+ * ```ts
+ * From this
+ * {
+ *   1: {
+ *     get: {
+ *       in: {
+ *         options: { up: () => {} } // 1
+ *       }
+ *     },
+ *     ...
+ *   },
+ *   2: {
+ *     get: {
+ *       in: {
+ *         options: { up: () => {} } // 2
+ *       }
+ *     },
+ *   }
+ * }
+ *
+ * To this
+ *
+ * {
+ *   'get.in.options': { // Flattend path
+ *      1: { up: () => {} }, // 1
+ *      2: { up: () => {} }  // 2
+ *    }
+ * }
+ * ```
+ */
+const compile = (
+  definitions: ServiceDefinitionVersioned
+): { [path: string]: ObjectMigrationDefinition } => {
+  const flattened: { [path: string]: ObjectMigrationDefinition } = {};
+
+  Object.entries(definitions).forEach(([version, definition]: [string, ServicesDefinition]) => {
+    serviceObjectPaths.forEach((path) => {
+      const versionableObject: VersionableObject = get(definition, path) ?? {};
+
+      const objectMigrationDefinition: ObjectMigrationDefinition = {
+        ...(get(flattened, path) ?? {}),
+        [version]: versionableObject,
+      };
+
+      flattened[path] = objectMigrationDefinition;
+    });
+  });
+
+  return flattened;
+};
+
+const getDefaultTransforms = () => ({
+  up: (input: any) => input,
+  down: (input: any) => input,
+  validate: () => null,
+});
+
+const getDefaultServiceTransforms = (): ServiceTransforms => ({
+  get: {
+    in: {
+      options: getDefaultTransforms(),
+    },
+    out: {
+      result: getDefaultTransforms(),
+    },
+  },
+  bulkGet: {
+    in: {
+      options: getDefaultTransforms(),
+    },
+    out: {
+      result: getDefaultTransforms(),
+    },
+  },
+  create: {
+    in: {
+      options: getDefaultTransforms(),
+      data: getDefaultTransforms(),
+    },
+    out: {
+      result: getDefaultTransforms(),
+    },
+  },
+  update: {
+    in: {
+      options: getDefaultTransforms(),
+      data: getDefaultTransforms(),
+    },
+    out: {
+      result: getDefaultTransforms(),
+    },
+  },
+  delete: {
+    in: {
+      options: getDefaultTransforms(),
+    },
+    out: {
+      result: getDefaultTransforms(),
+    },
+  },
+  search: {
+    in: {
+      options: getDefaultTransforms(),
+      query: getDefaultTransforms(),
+    },
+    out: {
+      result: getDefaultTransforms(),
+    },
+  },
+});
+
 export const getTransforms = (
   definitions: ServiceDefinitionVersioned,
   requestVersion: Version
 ): ServiceTransforms => {
   validateServiceDefinitions(definitions);
 
-  const serviceDefinitionWithVersionableObjects = {};
-
-  /**
-   * Convert a versionned service definition to a single service definition
-   * where _each object_ is versioned (at the leaf).
-   *
-   * @example
-   *
-   * ```ts
-   * From this
-   * {
-   *   1: {
-   *     get: {
-   *       in: {
-   *         options: { up: () => {} }
-   *       }
-   *     }
-   *   },
-   *   2: { ... }
-   * }
-   *
-   * To this
-   *
-   * {
-   *   get: {
-   *     in: {
-   *       options: {
-   *         1: { up: () => {} },
-   *         2: { up: () => {} }
-   *       }
-   *     }
-   *   }
-   * }
-   * ```
-   */
-  Object.entries(definitions).forEach(([version, definition]: [string, ServicesDefinition]) => {
-    serviceObjectPaths.forEach((path) => {
-      const versionableObject: VersionableObject = get(definition, path) ?? {};
-
-      const objectMigrationDefinition: ObjectMigrationDefinition = {
-        ...(get(serviceDefinitionWithVersionableObjects, path) ?? {}),
-        [version]: versionableObject,
-      };
-
-      set(serviceDefinitionWithVersionableObjects, path, objectMigrationDefinition);
-    });
-  });
+  // Compile the definition into a flattened object with ObjectMigrationDefinition
+  const compiled = compile(definitions);
 
   // Initiate transform for specific request version
-  const transformForCurrentRequest = {};
+  const transformsForRequest = getDefaultServiceTransforms();
 
-  serviceObjectPaths.forEach((path) => {
-    const versionableObject: ObjectMigrationDefinition = get(
-      serviceDefinitionWithVersionableObjects,
-      path
-    );
-    const objectTransforms = initTransform(requestVersion)(versionableObject);
-    set(transformForCurrentRequest, path, objectTransforms);
+  Object.entries(compiled).forEach(([path, objectMigrationDefinition]) => {
+    const objectTransforms = initTransform(requestVersion)(objectMigrationDefinition);
+    set(transformsForRequest, path, objectTransforms);
   });
 
-  return transformForCurrentRequest as ServiceTransforms;
+  return transformsForRequest;
 };

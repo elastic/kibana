@@ -31,7 +31,7 @@ export type TransformReturn<T = object> =
       error: ValidationError | Error;
     };
 
-export interface ObjectTransforms<Current = object, Previous = object, Next = object> {
+export interface ObjectTransforms<Current = any, Previous = any, Next = any> {
   up: (
     obj: Current,
     version?: Version | 'latest',

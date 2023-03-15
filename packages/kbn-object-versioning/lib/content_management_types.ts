@@ -107,7 +107,7 @@ export interface ServiceTransforms {
   };
   search: {
     in: {
-      data: ObjectTransforms;
+      query: ObjectTransforms;
       options: ObjectTransforms;
     };
     out: {
