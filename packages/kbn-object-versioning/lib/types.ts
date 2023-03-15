@@ -48,5 +48,5 @@ export interface ObjectTransforms<Current = any, Previous = any, Next = any> {
       validate?: boolean;
     }
   ) => TransformReturn<Previous>;
-  validate: (obj: unknown, version?: Version) => ValidationError | null;
+  validate: (obj: any, version?: Version) => ValidationError | null;
 }

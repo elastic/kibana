@@ -8,10 +8,14 @@
 
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import type { ServicesDefinition, ServiceTransforms } from './content_management_types';
-import { serviceDefinitionSchema } from './content_management_services_schemas';
 
 import { ObjectMigrationDefinition, Version, VersionableObject } from './types';
+import type {
+  ServiceDefinitionVersioned,
+  ServicesDefinition,
+  ServiceTransforms,
+} from './content_management_types';
+import { serviceDefinitionSchema } from './content_management_services_schemas';
 import { validateObj, validateVersion } from './utils';
 import { initTransform } from './object_transform';
 
@@ -32,10 +36,6 @@ const serviceObjectPaths = [
   'search.in.options',
   'search.out.result',
 ];
-
-export interface ServiceDefinitionVersioned {
-  [version: Version]: ServicesDefinition;
-}
 
 const validateServiceDefinitions = (definitions: ServiceDefinitionVersioned) => {
   if (definitions === null || Array.isArray(definitions) || typeof definitions !== 'object') {
@@ -96,9 +96,11 @@ const validateServiceDefinitions = (definitions: ServiceDefinitionVersioned) => 
  * }
  * ```
  */
-const compile = (
+export const compile = (
   definitions: ServiceDefinitionVersioned
 ): { [path: string]: ObjectMigrationDefinition } => {
+  validateServiceDefinitions(definitions);
+
   const flattened: { [path: string]: ObjectMigrationDefinition } = {};
 
   Object.entries(definitions).forEach(([version, definition]: [string, ServicesDefinition]) => {
@@ -179,12 +181,11 @@ const getDefaultServiceTransforms = (): ServiceTransforms => ({
 
 export const getTransforms = (
   definitions: ServiceDefinitionVersioned,
-  requestVersion: Version
+  requestVersion: Version,
+  _compiled?: { [path: string]: ObjectMigrationDefinition }
 ): ServiceTransforms => {
-  validateServiceDefinitions(definitions);
-
   // Compile the definition into a flattened object with ObjectMigrationDefinition
-  const compiled = compile(definitions);
+  const compiled = _compiled ?? compile(definitions);
 
   // Initiate transform for specific request version
   const transformsForRequest = getDefaultServiceTransforms();
@@ -196,3 +197,5 @@ export const getTransforms = (
 
   return transformsForRequest;
 };
+
+export type GetTransformsFn = typeof getTransforms;

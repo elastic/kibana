@@ -9,10 +9,8 @@
 import { schema } from '@kbn/config-schema';
 import { set } from '@kbn/safer-lodash-set';
 import { get } from 'lodash';
-import {
-  getTransforms,
-  ServiceDefinitionVersioned,
-} from './content_management_services_versioning';
+import { getTransforms } from './content_management_services_versioning';
+import type { ServiceDefinitionVersioned } from './content_management_types';
 
 /**
  * Wrap the key with [] if it is a key from an Array
@@ -273,7 +271,7 @@ describe('CM services getTransforms()', () => {
                 schema: schema.object({
                   version1: schema.string(),
                 }),
-                up: (pre) => ({ ...pre, version2: 'added' }),
+                up: (pre: object) => ({ ...pre, version2: 'added' }),
               },
             },
             out: {
@@ -293,7 +291,7 @@ describe('CM services getTransforms()', () => {
                   version1: schema.string(),
                   version2: schema.string(),
                 }),
-                up: (pre) => ({ ...pre, version3: 'added' }),
+                up: (pre: object) => ({ ...pre, version3: 'added' }),
               },
             },
             out: {
@@ -302,7 +300,7 @@ describe('CM services getTransforms()', () => {
                   version1: schema.string(),
                   version2: schema.string(),
                 }),
-                down: (pre) => {
+                down: (pre: any) => {
                   const { version1 } = pre;
                   return { version1 };
                 },
@@ -319,7 +317,7 @@ describe('CM services getTransforms()', () => {
                   version2: schema.string(),
                   version3: schema.string(),
                 }),
-                down: (pre) => {
+                down: (pre: any) => {
                   const { version1, version2 } = pre;
                   return { version1, version2 };
                 },

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { initTransform } from './lib';
+export { initTransform, getContentManagmentServicesTransforms } from './lib';
 
 export type {
   Version,
@@ -15,4 +15,8 @@ export type {
   ObjectTransform,
   ObjectTransforms,
   TransformReturn,
+  ContentManagementServiceDefinitionVersioned,
+  ContentManagementServiceTransforms,
+  ContentManagementServicesDefinition,
+  ContentManagementGetTransformsFn,
 } from './lib';

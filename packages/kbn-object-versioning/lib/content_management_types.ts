@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ObjectTransforms, VersionableObject } from './types';
+import type { ObjectTransforms, Version, VersionableObject } from './types';
 
 export interface ServicesDefinition {
   get?: {
@@ -114,4 +114,8 @@ export interface ServiceTransforms {
       result: ObjectTransforms;
     };
   };
+}
+
+export interface ServiceDefinitionVersioned {
+  [version: Version]: ServicesDefinition;
 }
