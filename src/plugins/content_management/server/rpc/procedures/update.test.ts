@@ -13,6 +13,9 @@ import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
 import { update } from './update';
+import { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
+import { schema } from '@kbn/config-schema';
+import { getServiceObjectTransformFactory } from '../services_transforms_factory';
 
 const { fn, schemas } = update;
 
@@ -139,7 +142,11 @@ describe('RPC -> update()', () => {
       });
 
       const requestHandlerContext = 'mockedRequestHandlerContext';
-      const ctx: any = { contentRegistry, requestHandlerContext };
+      const ctx: any = {
+        contentRegistry,
+        requestHandlerContext,
+        getTransformsFactory: getServiceObjectTransformFactory,
+      };
 
       return { ctx, storage };
     };
@@ -169,6 +176,9 @@ describe('RPC -> update()', () => {
             request: 'v1',
             latest: 'v2', // from the registry
           },
+          utils: {
+            getTransforms: expect.any(Function),
+          },
         },
         '123',
         { title: 'Hello' },
@@ -194,6 +204,59 @@ describe('RPC -> update()', () => {
             version: 'v7',
           })
         ).rejects.toEqual(new Error('Invalid version. Latest version is [v2].'));
+      });
+    });
+
+    describe('object versioning', () => {
+      test('should expose a  utility to transform and validate services objects', () => {
+        const { ctx, storage } = setup();
+        fn(ctx, {
+          contentTypeId: FOO_CONTENT_ID,
+          id: '123',
+          version: 'v1',
+          data: { title: 'Hello' },
+        });
+        const [[storageContext]] = storage.update.mock.calls;
+
+        // getTransforms() utils should be available from context
+        const { getTransforms } = storageContext.utils ?? {};
+        expect(getTransforms).not.toBeUndefined();
+
+        const definitions: ContentManagementServiceDefinitionVersioned = {
+          1: {
+            update: {
+              in: {
+                options: {
+                  schema: schema.object({
+                    version1: schema.string(),
+                  }),
+                  up: (pre: object) => ({ ...pre, version2: 'added' }),
+                },
+              },
+            },
+          },
+          2: {},
+        };
+
+        const transforms = getTransforms(definitions, 1);
+
+        // Some smoke tests for the getTransforms() utils. Complete test suite is inside
+        // the package @kbn/object-versioning
+        expect(transforms.update.in.options.up({ version1: 'foo' }).value).toEqual({
+          version1: 'foo',
+          version2: 'added',
+        });
+
+        const optionsUpTransform = transforms.update.in.options.up({ version1: 123 });
+
+        expect(optionsUpTransform.value).toBe(null);
+        expect(optionsUpTransform.error?.message).toBe(
+          '[version1]: expected value of type [string] but got [number]'
+        );
+
+        expect(transforms.update.in.options.validate({ version1: 123 })?.message).toBe(
+          '[version1]: expected value of type [string] but got [number]'
+        );
       });
     });
   });
