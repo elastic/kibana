@@ -9,6 +9,7 @@
 import type { Rule } from 'eslint';
 import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
 
+import { checkNodeForExistingDataTestSubjProp } from '../helpers/check_node_for_existing_data_test_subj_prop';
 import { getIntentFromNode } from '../helpers/get_intent_from_node';
 import { getAppName } from '../helpers/get_app_name';
 import { getFunctionName } from '../helpers/get_function_name';
@@ -50,12 +51,10 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
           return;
         }
 
-        const hasDataTestSubj = parent.attributes.find(
-          (attr) => attr.type === AST_NODE_TYPES.JSXAttribute && attr.name.name === 'data-test-subj'
-        );
+        const hasDataTestSubjProp = checkNodeForExistingDataTestSubjProp(parent, getScope);
 
-        if (hasDataTestSubj) {
-          // JSXOpeningElement already has a value for data-test-subj. Bail.
+        if (hasDataTestSubjProp) {
+          // JSXOpeningElement already has a prop for data-test-subj. Bail.
           return;
         }
 
