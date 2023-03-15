@@ -57,7 +57,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
       Object {
         "action": "6cfc277ed3211639e37546ac625f4a68f2494215",
         "action_task_params": "5f419caba96dd8c77d0f94013e71d43890e3d5d6",
-        "alert": "785240e3137f5eb1a0f8986e5b8eff99780fc04f",
+        "alert": "7a1d74064e4720f4c974b3bb0ba5b9064ed205e7",
         "api_key_pending_invalidation": "16e7bcf8e78764102d7f525542d5b616809a21ee",
         "apm-indices": "d19dd7fb51f2d2cbc1f8769481721e0953f9a6d2",
         "apm-server-schema": "1d42f17eff9ec6c16d3a9324d9539e2d123d0a9a",
@@ -123,7 +123,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "osquery-pack-asset": "18e08979d46ee7e5538f54c080aec4d8c58516ca",
         "osquery-saved-query": "f5e4e303f65c7607248ea8b2672f1ee30e4fb15e",
         "query": "f94de164936da788e9215c0e9b824f8b948ea859",
-        "rules-settings": "9854495c3b54b16a6625fb250c35e5504da72266",
+        "rules-settings": "2b8b610c10eccd3d5577a1bd817f3e1103abc366",
         "sample-data-telemetry": "c38daf1a49ed24f2a4fb091e6e1e833fccf19935",
         "search": "01bc42d635e9ea0588741c4c7a2bbd3feb3ac5dc",
         "search-session": "58a44d14ec991739166b2ec28d718001ab0f4b28",
