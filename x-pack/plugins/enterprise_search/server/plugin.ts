@@ -89,7 +89,7 @@ interface PluginsSetup {
 }
 
 interface PluginsStart {
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   security: SecurityPluginStart;
   data: DataPluginStart;
 }

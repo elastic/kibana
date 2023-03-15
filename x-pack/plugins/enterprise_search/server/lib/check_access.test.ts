@@ -118,6 +118,16 @@ describe('checkAccess', () => {
         expect(expectedError).toEqual('Error');
       });
     });
+
+    describe('when spaces plugin is not available', () => {
+      it('should not throw', async () => {
+        await expect(checkAccess({ ...mockDependencies, spaces: undefined })).resolves.toEqual({
+          hasAppSearchAccess: false,
+          hasSearchEnginesAccess: false,
+          hasWorkplaceSearchAccess: false,
+        });
+      });
+    });
   });
 
   describe('when the space is enabled', () => {
