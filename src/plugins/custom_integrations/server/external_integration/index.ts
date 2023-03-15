@@ -33,7 +33,7 @@ export const integrations: ExternalIntegration[] = [
         'Collect logs using AWS Lambda application available in AWS Serverless Application Repository.',
     }),
     docUrlTemplate: `https://serverlessrepo.aws.amazon.com/applications/eu-central-1/267093732750/elastic-serverless-forwarder`,
-    categories: ['aws', 'custom'],
+    categories: ['aws', 'observability'],
   },
 ];
 

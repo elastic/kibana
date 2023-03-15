@@ -87,7 +87,7 @@ It allows you to monitor the performance of thousands of applications in real ti
         }
       ),
       euiIconType: 'apmApp',
-      integrationBrowserCategories: ['web'],
+      integrationBrowserCategories: ['observability', 'apm'],
       artifacts,
       customStatusCheckName: 'apm_fleet_server_status_check',
       onPrem: onPremInstructions({ apmConfig, isFleetPluginEnabled }),

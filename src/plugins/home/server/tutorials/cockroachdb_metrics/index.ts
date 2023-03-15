@@ -61,6 +61,6 @@ export function cockroachdbMetricsSpecProvider(context: TutorialContext): Tutori
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['security', 'network', 'web'],
+    integrationBrowserCategories: ['observability', 'datastore'],
   };
 }

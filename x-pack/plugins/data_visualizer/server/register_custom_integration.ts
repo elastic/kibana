@@ -25,7 +25,7 @@ export function registerWithCustomIntegrations(customIntegrations: CustomIntegra
         src: 'addDataApp',
       },
     ],
-    categories: ['upload_file'],
+    categories: ['observability', 'custom'],
     shipper: 'other',
   });
 }

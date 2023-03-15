@@ -56,6 +56,6 @@ export function rabbitmqLogsSpecProvider(context: TutorialContext): TutorialSche
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['message_queue'],
+    integrationBrowserCategories: ['message_queue', 'observability'],
   };
 }

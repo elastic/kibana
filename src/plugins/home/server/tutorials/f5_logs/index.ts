@@ -57,6 +57,6 @@ export function f5LogsSpecProvider(context: TutorialContext): TutorialSchema {
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['network', 'security'],
+    integrationBrowserCategories: ['observability', 'load_balancer'],
   };
 }

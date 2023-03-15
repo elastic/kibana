@@ -58,6 +58,6 @@ export function postgresqlMetricsSpecProvider(context: TutorialContext): Tutoria
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['datastore'],
+    integrationBrowserCategories: ['datastore', 'observability'],
   };
 }

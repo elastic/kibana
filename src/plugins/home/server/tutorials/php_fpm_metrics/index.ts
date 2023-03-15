@@ -56,6 +56,6 @@ export function phpfpmMetricsSpecProvider(context: TutorialContext): TutorialSch
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['security'],
+    integrationBrowserCategories: ['observability', 'process_manager'],
   };
 }

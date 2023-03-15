@@ -13,7 +13,6 @@ export const PLUGIN_NAME = 'customIntegrations';
  */
 // TODO: consider i18n
 export const INTEGRATION_CATEGORY_DISPLAY = {
-
   analytics_engine: 'Analytics Engine',
   application_observability: 'Application',
   app_search: 'Application Search',
@@ -81,11 +80,7 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   workplace_search: 'Workplace Search',
 
   // Kibana added
-  communications: 'Communications',
-  file_storage: 'File storage',
-  upload_file: 'Upload a file',
-  website_search: 'Website search',
-  geo: 'Geo',
+  apm: 'APM',
 };
 
 // featured integrations will be brought to the top of the search results for

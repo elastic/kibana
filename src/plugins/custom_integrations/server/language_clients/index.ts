@@ -45,7 +45,7 @@ export function registerLanguageClients(
           integration.docUrlTemplate.replace('{branch}', branch === 'main' ? 'master' : branch),
       isBeta: false,
       icons,
-      categories: ['elastic_stack', 'custom', 'language_client'],
+      categories: ['elastic_stack', 'elasticsearch_sdk'],
     });
   });
 }

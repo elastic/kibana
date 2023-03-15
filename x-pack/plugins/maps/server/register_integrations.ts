@@ -31,7 +31,7 @@ export function registerIntegrations(
         src: core.http.basePath.prepend(`/plugins/${APP_ID}/assets/gdal_logo.svg`),
       },
     ],
-    categories: ['upload_file', 'geo'],
+    categories: ['enterprise_search'],
     shipper: 'other',
     isBeta: false,
   });
@@ -50,7 +50,7 @@ export function registerIntegrations(
         src: 'logoMaps',
       },
     ],
-    categories: ['upload_file', 'geo'],
+    categories: ['enterprise_search'],
     shipper: 'other',
     isBeta: false,
   });
@@ -72,7 +72,7 @@ export function registerIntegrations(
         src: 'logoMaps',
       },
     ],
-    categories: ['upload_file', 'geo'],
+    categories: ['custom'],
     shipper: 'other',
     isBeta: false,
   });
