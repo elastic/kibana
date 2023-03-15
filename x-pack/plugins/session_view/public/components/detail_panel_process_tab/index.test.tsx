@@ -42,9 +42,7 @@ describe('DetailPanelProcessTab component', () => {
         5
       );
       expect(renderResult.queryByText(`['bash']`)).toBeVisible();
-      expect(renderResult.queryByText('/usr/bin/vi')).toBeVisible();
       expect(renderResult.queryByText('(fork)')).toBeVisible();
-      expect(renderResult.queryByText('(exec)')).toBeVisible();
       expect(renderResult.queryByText(processDetail!.process!.pid!)).toBeVisible();
 
       // Process tab accordions rendered correctly

@@ -128,9 +128,9 @@ export const getDetailPanelProcess = (process: Process | null): DetailPanelProce
   // we grab the executable from each process lifecycle event to give an indication
   // of the processes journey. Processes can sometimes exec multiple times, so it's good
   // information to have.
-  const executables = details.process?.previous?.map((exe) => exe.executable) || [];
+  const executables = details.process?.previous?.map((exe) => exe?.executable || '') || [];
   if (details.process?.executable) {
-    executables.push(details.process?.executable);
+    executables.push(details.process.executable);
   }
 
   processData.executable = executables.map((exe, i) => {

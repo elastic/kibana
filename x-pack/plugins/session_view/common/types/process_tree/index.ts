@@ -123,7 +123,7 @@ export interface ProcessSelf extends ProcessFields {
   entry_leader?: ProcessFields;
   group_leader?: ProcessFields;
   io?: IOFields;
-  previous?: [{ args: string; args_count: number; executable: string }];
+  previous?: [{ args?: string[]; args_count?: number; executable?: string }];
 }
 
 export interface ProcessEventHost {

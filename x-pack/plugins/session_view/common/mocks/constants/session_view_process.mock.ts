@@ -211,6 +211,7 @@ export const mockEvents: ProcessEvent[] = [
           minor: 1,
         },
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       parent: {
         pid: 2442,
         user: {
@@ -354,6 +355,7 @@ export const mockEvents: ProcessEvent[] = [
           minor: 1,
         },
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       parent: {
         pid: 2442,
         user: {
@@ -513,6 +515,7 @@ export const mockEvents: ProcessEvent[] = [
           minor: 1,
         },
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       parent: {
         pid: 2442,
         user: {
@@ -1795,6 +1798,7 @@ export const processMock: Process = {
         id: '1000',
         name: 'vagrant',
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       process: {
         args: ['bash'],
         args_count: 1,
@@ -1839,7 +1843,7 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
         session_leader: {
           pid: 2442,
           user: {
@@ -1865,7 +1869,7 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
         entry_leader: {
           pid: 2442,
           user: {
@@ -1891,7 +1895,7 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
         group_leader: {
           pid: 2442,
           user: {
@@ -1917,7 +1921,7 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
       },
     } as ProcessEvent),
   isUserEntered: () => false,
