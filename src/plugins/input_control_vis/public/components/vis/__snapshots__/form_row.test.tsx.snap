@@ -17,7 +17,7 @@ exports[`renders control with warning 1`] = `
         position="top"
       >
         <EuiIcon
-          type="alert"
+          type="warning"
         />
       </EuiToolTip>
       test control
