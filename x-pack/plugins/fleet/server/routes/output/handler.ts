@@ -77,8 +77,18 @@ export const putOuputHandler: RequestHandler<
   try {
     await outputService.update(soClient, request.params.outputId, request.body);
     const output = await outputService.get(soClient, request.params.outputId);
+
     if (output.is_default || output.is_default_monitoring) {
-      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+      // is it the only case?
+      if (request.body.type === 'logstash') {
+        const policiesWithFleetServer = await agentPolicyService.policiesWithFleetServer(soClient);
+        await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, {
+          policiesToExclude: policiesWithFleetServer,
+          outputId: output.id,
+        });
+      } else {
+        await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, { outputId: output.id });
+      }
     } else {
       await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id);
     }

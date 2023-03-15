@@ -45,6 +45,7 @@ import {
   UUID_V5_NAMESPACE,
   FLEET_APM_PACKAGE,
   FLEET_ELASTIC_AGENT_PACKAGE,
+  FLEET_SERVER_PACKAGE,
 } from '../../common/constants';
 import type {
   DeleteAgentPolicyResponse,
@@ -189,6 +190,13 @@ class AgentPolicyService {
     return (
       agentPolicy.package_policies &&
       agentPolicy.package_policies.some((p) => p.package?.name === FLEET_APM_PACKAGE)
+    );
+  }
+
+  public hasFleetServerIntegration(agentPolicy: AgentPolicy) {
+    return (
+      agentPolicy.package_policies &&
+      agentPolicy.package_policies.some((p) => p.package?.name === FLEET_SERVER_PACKAGE)
     );
   }
 
@@ -623,26 +631,36 @@ class AgentPolicyService {
   public async bumpAllAgentPolicies(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    options?: { user?: AuthenticatedUser }
+    options?: { user?: AuthenticatedUser; policiesToExclude?: string[]; outputId?: string }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
       fields: ['revision'],
       perPage: SO_SEARCH_LIMIT,
     });
-    const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {
+    let policiesToUpdate;
+    if (options && options.policiesToExclude !== undefined) {
+      policiesToUpdate = currentPolicies.saved_objects.filter(
+        (policy) => !options.policiesToExclude.includes(policy.id)
+      );
+    } else {
+      policiesToUpdate = currentPolicies.saved_objects;
+    }
+
+    const bumpedPolicies = policiesToUpdate.map((policy) => {
       policy.attributes = {
         ...policy.attributes,
         revision: policy.attributes.revision + 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user ? options.user.username : 'system',
+        data_output_id: options?.outputId,
       };
       return policy;
     });
     const res = await soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
 
     await pMap(
-      currentPolicies.saved_objects,
+      policiesToUpdate,
       (policy) => this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', policy.id),
       { concurrency: 50 }
     );
@@ -1050,10 +1068,28 @@ class AgentPolicyService {
       policyIds: policies.map((policy) => policy.id),
     }));
   }
+
+  public async policiesWithFleetServer(soClient: SavedObjectsClientContract) {
+    const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
+      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      fields: ['revision'],
+      perPage: SO_SEARCH_LIMIT,
+    });
+    // Don't allow updating policies with fleet server to logstash outputs
+    const agentPolicyIds = currentPolicies.saved_objects.map((policy) => policy.id);
+    const fullAgentPolicies = await agentPolicyService.getByIDs(soClient, agentPolicyIds, {
+      withPackagePolicies: true,
+    });
+    const policiesWithFleetServer = fullAgentPolicies.filter((policy) =>
+      this.hasFleetServerIntegration(policy)
+    );
+    return policiesWithFleetServer.map((p) => p.id);
+  }
 }
 
 export const agentPolicyService = new AgentPolicyService();
 
+// TODO: remove unused parameters
 export async function addPackageToAgentPolicy(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
