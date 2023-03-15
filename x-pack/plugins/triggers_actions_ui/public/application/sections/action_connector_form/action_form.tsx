@@ -48,6 +48,7 @@ export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
 
 export interface ActionAccordionFormProps {
   actions: RuleAction[];
+  clearActionParams: (index: number) => void;
   defaultActionGroupId: string;
   actionGroups?: ActionGroupWithMessageVariables[];
   defaultActionMessage?: string;
@@ -77,6 +78,7 @@ interface ActiveActionConnectorState {
 
 export const ActionForm = ({
   actions,
+  clearActionParams,
   defaultActionGroupId,
   setActionIdByIndex,
   setActionGroupIdByIndex,
@@ -387,6 +389,7 @@ export const ActionForm = ({
                 setAddModalVisibility(true);
               }}
               onConnectorSelected={(id: string) => {
+                clearActionParams(index);
                 setActionIdByIndex(id, index);
               }}
               actionTypeRegistry={actionTypeRegistry}

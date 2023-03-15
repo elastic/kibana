@@ -282,6 +282,11 @@ export const RuleForm = ({
     [dispatch]
   );
 
+  const clearActionParams = useCallback(
+    (index: number) => dispatch({ command: { type: 'clearRuleActionParams' }, payload: { index } }),
+    [dispatch]
+  );
+
   const setActionFrequencyProperty = useCallback(
     (key: string, value: RuleActionParam, index: number) => {
       dispatch({ command: { type: 'setRuleActionFrequency' }, payload: { key, value, index } });
@@ -643,6 +648,7 @@ export const RuleForm = ({
           <EuiSpacer size="m" />
           <ActionForm
             actions={rule.actions}
+            clearActionParams={clearActionParams}
             setHasActionsDisabled={setHasActionsDisabled}
             setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
             messageVariables={selectedRuleType.actionVariables}
