@@ -60,6 +60,16 @@ export const interceptAgentPolicyId = (cb: (policyId: string) => void) => {
   });
 };
 
+export const interceptCaseId = (cb: (caseId: string) => void) => {
+  cy.intercept('POST', '**/api/cases', (req) => {
+    req.continue((res) => {
+      cb(res.body.id);
+
+      return res.send(res.body);
+    });
+  });
+};
+
 export const interceptPackId = (cb: (packId: string) => void) => {
   cy.intercept('POST', '**/api/osquery/packs', (req) => {
     req.continue((res) => {
