@@ -102,10 +102,17 @@ export const initTransform =
 
     const getVersion = (v: Version | 'latest'): Version => (v === 'latest' ? latestVersion : v);
 
-    const validateFn = (obj: object, version: number) => {
-      const { schema } = migrationDefinition[version] ?? {};
+    const validateFn = (value: unknown, version: number = requestVersion) => {
+      const def = migrationDefinition[version];
+
+      if (!def) {
+        throw new Error(`Invalid version number [${version}].`);
+      }
+
+      const { schema } = def;
+
       if (schema) {
-        return validateObj(obj, schema);
+        return validateObj(value, schema);
       }
       return null;
     };
@@ -183,5 +190,6 @@ export const initTransform =
           };
         }
       },
+      validate: validateFn,
     };
   };

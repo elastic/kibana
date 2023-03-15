@@ -178,4 +178,43 @@ describe('object transform', () => {
       });
     });
   });
+
+  describe('validate()', () => {
+    test('it should validate the object at the specific version', () => {
+      const def: ObjectMigrationDefinition = {
+        1: {
+          schema: schema.string(),
+        },
+        2: {
+          schema: schema.number(),
+        },
+      };
+
+      // Init transforms for version 1
+      let transformsFactory = initTransform(1);
+      expect(transformsFactory(def).validate(123)?.message).toBe(
+        'expected value of type [string] but got [number]'
+      );
+      expect(transformsFactory(def).validate('foo')).toBe(null);
+
+      // Can validate another version than the requested one
+      expect(transformsFactory(def).validate('foo', 2)?.message).toBe(
+        'expected value of type [number] but got [string]'
+      );
+      expect(transformsFactory(def).validate(123, 2)).toBe(null);
+
+      // Init transform for version 2
+      transformsFactory = initTransform(2);
+      expect(transformsFactory(def).validate('foo')?.message).toBe(
+        'expected value of type [number] but got [string]'
+      );
+      expect(transformsFactory(def).validate(123)).toBe(null);
+
+      // Init transform for version 7 (invalid)
+      transformsFactory = initTransform(7);
+      expect(() => {
+        transformsFactory(def).validate(123);
+      }).toThrowError('Invalid version number [7].');
+    });
+  });
 });

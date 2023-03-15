@@ -264,7 +264,7 @@ describe('CM services getTransforms()', () => {
       });
     });
 
-    describe('up/down transform + validation', () => {
+    describe('up/down transform & validation', () => {
       const definitions: ServiceDefinitionVersioned = {
         1: {
           get: {
@@ -381,6 +381,23 @@ describe('CM services getTransforms()', () => {
         const downTransform = transforms.get.out.result.down({ version1: 123 }, downTransformFrom);
         expect(downTransform.error?.message).toBe(
           '[version1]: expected value of type [string] but got [number]'
+        );
+      });
+
+      test('should expose a method to validate at the specific version', () => {
+        const requestVersion = 1;
+        const transforms = getTransforms(definitions, requestVersion);
+
+        // Validate request version (1)
+        expect(transforms.get.in.options.validate({ version1: 123 })?.message).toBe(
+          '[version1]: expected value of type [string] but got [number]'
+        );
+
+        expect(transforms.get.in.options.validate({ version1: 'foo' })).toBe(null);
+
+        // Validate version 2 schema
+        expect(transforms.get.in.options.validate({ version1: 'foo' }, 2)?.message).toBe(
+          '[version2]: expected value of type [string] but got [undefined]'
         );
       });
     });

@@ -44,8 +44,9 @@ export interface ObjectTransforms<Current = object, Previous = object, Next = ob
     obj: Current,
     version?: Version | 'latest',
     options?: {
-      /** Validate the object _after_ down transform */
+      /** Validate the object _before_ down transform */
       validate?: boolean;
     }
   ) => TransformReturn<Previous>;
+  validate: (obj: unknown, version?: Version) => ValidationError | null;
 }
