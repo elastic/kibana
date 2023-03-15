@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,13 +16,7 @@ import {
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_VULN_MGMT_AWS,
 } from '../../../common/constants';
-import {
-  getPosturePolicy,
-  getEnabledPostureInput,
-  getPostureInputHiddenVars,
-  POSTURE_NAMESPACE,
-  NewPackagePolicyPostureInput,
-} from './utils';
+import { getPosturePolicy, getEnabledPostureInput, getPostureInputHiddenVars } from './utils';
 import {
   PolicyTemplateInfo,
   PolicyTemplateInputSelector,
@@ -73,6 +67,15 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
   ({ newPolicy, onChange, validationResults, isEditPage }) => {
     const { integration } = useParams<{ integration: CloudSecurityPolicyTemplate }>();
+
+    const isFirstRender = useRef(true);
+    // search for non null fields of the validation?.vars object
+    const validationResultsNonNullFields = Object.keys(validationResults?.vars || {}).filter(
+      (key) => (validationResults?.vars || {})[key] !== null
+    );
+
+    const hasValidationError = useRef(validationResultsNonNullFields);
+
     const input = getEnabledPostureInput(newPolicy);
 
     const updatePolicy = useCallback(
@@ -84,11 +87,14 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
      * - Updates policy inputs by user selection
      * - Updates hidden policy vars
      */
-    const setEnabledPolicyInput = (inputType: PostureInput) => {
-      const inputVars = getPostureInputHiddenVars(inputType);
-      const policy = getPosturePolicy(newPolicy, inputType, inputVars);
-      updatePolicy(policy);
-    };
+    const setEnabledPolicyInput = useCallback(
+      (inputType: PostureInput) => {
+        const inputVars = getPostureInputHiddenVars(inputType);
+        const policy = getPosturePolicy(newPolicy, inputType, inputVars);
+        updatePolicy(policy);
+      },
+      [newPolicy, updatePolicy]
+    );
 
     const integrationFields = [
       {
@@ -117,16 +123,30 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
     useEffect(() => {
       if (isEditPage) return;
+      if (isFirstRender.current) {
+        //   // Pick default input type for policy template.
+        //   // Only 1 enabled input is supported when all inputs are initially enabled.
+        //   // Required for mount only to ensure a single input type is selected
+        setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+        isFirstRender.current = false;
+      }
+    });
 
-      // Pick default input type for policy template.
-      // Only 1 enabled input is supported when all inputs are initially enabled.
-      setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+    useEffect(() => {
+      if (isEditPage) return;
+      // Something from outside this component
+      // is resetting the validation error state to the value before
+      // running the setEnabledPolicyInput function. This is a workaround to
+      // ensure the validation error state is reset if there are errors.
+      const intervalId = setInterval(() => {
+        if (hasValidationError.current.length > 0) {
+          setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+          hasValidationError.current = [];
+        }
+      }, 300);
 
-      // Required for mount only to ensure a single input type is selected
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isEditPage]);
-
-    useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
+      return () => clearInterval(intervalId);
+    });
 
     return (
       <div>
@@ -174,20 +194,3 @@ CspPolicyTemplateForm.displayName = 'CspPolicyTemplateForm';
 
 // eslint-disable-next-line import/no-default-export
 export { CspPolicyTemplateForm as default };
-
-const useEnsureDefaultNamespace = ({
-  newPolicy,
-  input,
-  updatePolicy,
-}: {
-  newPolicy: NewPackagePolicy;
-  input: NewPackagePolicyPostureInput;
-  updatePolicy: (policy: NewPackagePolicy) => void;
-}) => {
-  useEffect(() => {
-    if (newPolicy.namespace === POSTURE_NAMESPACE) return;
-
-    const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
-    updatePolicy(policy);
-  }, [newPolicy, input, updatePolicy]);
-};
