@@ -73,7 +73,7 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
   ({ newPolicy, onChange, validationResults, isEditPage }) => {
     const { integration } = useParams<{ integration: CloudSecurityPolicyTemplate }>();
-    const input = getEnabledPostureInput(newPolicy);
+    const input = getEnabledPostureInput(newPolicy, integration);
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy) => onChange({ isValid: true, updatedPolicy }),

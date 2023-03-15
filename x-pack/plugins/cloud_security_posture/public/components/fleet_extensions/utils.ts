@@ -143,9 +143,12 @@ export const getPolicyTemplateInputOptions = (policyTemplate: CloudSecurityPolic
     disabled: o.disabled,
   }));
 
-export const getEnabledPostureInput = (policy: NewPackagePolicy) => {
+export const getEnabledPostureInput = (policy: NewPackagePolicy, policyTemplate: string) => {
   // Take first enabled input
-  const input = policy.inputs.find((i) => i.enabled);
+  const input =
+    policy.inputs.find((i) => i.enabled) ||
+    policy.inputs.find((i) => i.policy_template === policyTemplate) ||
+    policy.inputs[0];
 
   assert(input, 'Missing enabled input'); // We can't provide a default input without knowing the policy template
   assert(isPostureInput(input), 'Invalid enabled input');
