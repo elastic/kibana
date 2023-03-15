@@ -23,7 +23,7 @@ export const DataSearchErrorCallout: React.FC<{
   const calloutColor = errors.some((error) => error.type !== 'aborted') ? 'danger' : 'warning';
 
   return (
-    <EuiCallOut color={calloutColor} iconType="alert" title={title}>
+    <EuiCallOut color={calloutColor} iconType="warning" title={title}>
       {errors?.map((error, errorIndex) => (
         <DataSearchErrorMessage key={errorIndex} error={error} />
       ))}

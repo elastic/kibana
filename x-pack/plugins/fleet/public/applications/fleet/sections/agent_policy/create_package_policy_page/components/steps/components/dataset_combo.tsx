@@ -99,7 +99,7 @@ export const DatasetComboBox: React.FC<{
         <>
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="warning">
-            <EuiIcon type="alert" />
+            <EuiIcon type="warning" />
             &nbsp;
             <FormattedMessage
               id="xpack.fleet.datasetCombo.warning"

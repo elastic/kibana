@@ -139,7 +139,7 @@ export const SourceStatusWrapper: React.FC = ({ children }) => {
             defaultMessage: 'Sorry, there was a problem loading field information',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           <EuiButton
             data-test-subj="infraSourceStatusWrapperTryAgainButton"

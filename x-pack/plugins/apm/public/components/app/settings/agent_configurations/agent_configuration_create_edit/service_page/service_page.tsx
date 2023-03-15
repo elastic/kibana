@@ -142,7 +142,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       {isAllOptionSelected && (
         <EuiCallOut
           color="warning"
-          iconType="alert"
+          iconType="warning"
           title={i18n.translate(
             'xpack.apm.settings.agentConfiguration.all.option.calloutTitle',
             {

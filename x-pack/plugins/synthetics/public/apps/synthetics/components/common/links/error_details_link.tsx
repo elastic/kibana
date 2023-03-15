@@ -48,7 +48,7 @@ export const ErrorDetailsButton = ({
     <EuiButtonEmpty
       data-test-subj="syntheticsErrorDetailsButtonButton"
       flush="left"
-      iconType="alert"
+      iconType="warning"
       color="danger"
       href={link}
     >

@@ -17,7 +17,7 @@ export function InvalidLicenseNotification() {
 
   return (
     <EuiEmptyPrompt
-      iconType="alert"
+      iconType="warning"
       iconColor="warning"
       title={
         <h1>

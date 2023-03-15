@@ -162,7 +162,7 @@ const NoDetectorsWarning: FC<{ show: boolean }> = ({ show }) => {
         title={i18n.translate('xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.title', {
           defaultMessage: 'No detectors',
         })}
-        iconType="alert"
+        iconType="warning"
         data-test-subj="mlAdvancedNoDetectorsMessage"
       >
         <FormattedMessage

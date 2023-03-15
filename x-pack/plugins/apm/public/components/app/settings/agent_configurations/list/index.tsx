@@ -98,7 +98,7 @@ export function AgentConfigurationList({
 
   const failurePrompt = (
     <EuiEmptyPrompt
-      iconType="alert"
+      iconType="warning"
       body={
         <>
           <p>

@@ -28,7 +28,7 @@ export const MonitorAsyncError = () => {
           />
         }
         color="warning"
-        iconType="alert"
+        iconType="warning"
       >
         <p>
           <FormattedMessage

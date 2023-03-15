@@ -120,7 +120,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             <Fragment>
               <EuiCallOut
                 color="warning"
-                iconType="alert"
+                iconType="warning"
                 data-test-subj="spaceFormGlobalPermissionsSupersedeWarning"
                 title={
                   <FormattedMessage
@@ -271,7 +271,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             <EuiSpacer size="l" />
             <EuiCallOut
               color="warning"
-              iconType="alert"
+              iconType="warning"
               data-test-subj="globalPrivilegeWarning"
               title={
                 <FormattedMessage
