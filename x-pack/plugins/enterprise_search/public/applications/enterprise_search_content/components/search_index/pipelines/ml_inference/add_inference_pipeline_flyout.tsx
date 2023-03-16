@@ -37,6 +37,7 @@ import {
 import { IndexNameLogic } from '../../index_name_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
+import { ConfigureFields } from './configure_fields';
 import { ConfigurePipeline } from './configure_pipeline';
 import { MLInferenceLogic } from './ml_inference_logic';
 import { NoModelsPanel } from './no_models';
@@ -127,6 +128,7 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
         )}
         <AddInferencePipelineHorizontalSteps />
         {step === AddInferencePipelineSteps.Configuration && <ConfigurePipeline />}
+        {step === AddInferencePipelineSteps.Fields && <ConfigureFields />}
         {step === AddInferencePipelineSteps.Test && <TestPipeline />}
         {step === AddInferencePipelineSteps.Review && <ReviewPipeline />}
       </EuiFlyoutBody>
@@ -268,7 +270,7 @@ export const AddInferencePipelineFooter: React.FC<
             iconType="arrowRight"
             iconSide="right"
             onClick={() => setAddInferencePipelineStep(nextStep as AddInferencePipelineSteps)}
-            disabled={!isPipelineDataValid}
+            disabled={!isContinueButtonEnabled}
             fill
           >
             {CONTINUE_BUTTON_LABEL}
@@ -277,7 +279,7 @@ export const AddInferencePipelineFooter: React.FC<
           <EuiButton
             color="primary"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-attach`}
-            disabled={!isPipelineDataValid}
+            disabled={!isContinueButtonEnabled}
             fill
             onClick={attachPipeline}
           >
@@ -292,7 +294,7 @@ export const AddInferencePipelineFooter: React.FC<
           <EuiButton
             color="success"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-create`}
-            disabled={!isPipelineDataValid}
+            disabled={!isContinueButtonEnabled}
             fill
             onClick={createPipeline}
           >
