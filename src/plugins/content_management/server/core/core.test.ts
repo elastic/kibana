@@ -43,6 +43,9 @@ const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) 
       latest: 'v1',
       request: 'v1',
     },
+    utils: {
+      getTransforms: jest.fn(),
+    },
   };
 
   const core = new Core({ logger });
