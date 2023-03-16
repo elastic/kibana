@@ -41,7 +41,7 @@ export const ErrorDetailsButton = ({
   const link = useErrorDetailsLink({ configId, stateId, locationId: selectedLocation?.id });
 
   return (
-    <EuiButtonEmpty flush="left" iconType="alert" color="danger" href={link}>
+    <EuiButtonEmpty flush="left" iconType="warning" color="danger" href={link}>
       {label ?? VIEW_DETAILS}
     </EuiButtonEmpty>
   );

@@ -204,7 +204,7 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
   return (
     <div className="lnsEmbeddedError">
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         iconColor="danger"
         data-test-subj="embeddable-lens-failure"
         body={
