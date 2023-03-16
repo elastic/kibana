@@ -32,7 +32,7 @@ import {
   transformSloResponseToCreateSloInput,
   transformValuesToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
-import { paths } from '../../../config';
+import { paths } from '../../../config/paths';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse;

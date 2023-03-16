@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-import { paths } from '../../../config';
+import { paths } from '../../../config/paths';
 import { useKibana } from '../../../utils/kibana_react';
 import { ObservabilityAppServices } from '../../../application/types';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';

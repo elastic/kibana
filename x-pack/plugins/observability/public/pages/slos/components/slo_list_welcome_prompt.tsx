@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../utils/kibana_react';
 import { useLicense } from '../../../hooks/use_license';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { paths } from '../../../config';
+import { paths } from '../../../config/paths';
 import illustration from './assets/illustration.svg';
 
 export function SloListWelcomePrompt() {
