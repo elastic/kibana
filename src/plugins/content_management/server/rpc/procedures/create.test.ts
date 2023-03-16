@@ -34,7 +34,7 @@ const FOO_CONTENT_ID = 'foo';
 
 describe('RPC -> create()', () => {
   describe('Input/Output validation', () => {
-    const validInput = { contentTypeId: 'foo', version: 'v1', data: { title: 'hello' } };
+    const validInput = { contentTypeId: 'foo', version: 1, data: { title: 'hello' } };
 
     test('should validate the input', () => {
       [
@@ -45,11 +45,10 @@ describe('RPC -> create()', () => {
         },
         {
           input: omit(validInput, 'version'),
-          expectedError: '[version]: expected value of type [string] but got [undefined]',
+          expectedError: '[version]: expected value of type [number] but got [undefined]',
         },
         {
-          input: { ...validInput, version: '1' }, // invalid version format
-          expectedError: '[version]: must follow the pattern [v${number}]',
+          input: { ...validInput, version: '1' }, // string number is OK
         },
         {
           input: omit(validInput, 'data'),
@@ -83,7 +82,7 @@ describe('RPC -> create()', () => {
         {
           contentTypeId: 'foo',
           data: { title: 'hello' },
-          version: 'v1',
+          version: 1,
           options: { any: 'object' },
         },
         inputSchema
@@ -95,7 +94,7 @@ describe('RPC -> create()', () => {
         {
           contentTypeId: 'foo',
           data: { title: 'hello' },
-          version: 'v1',
+          version: 1,
           options: 123, // Not an object
         },
         inputSchema
@@ -130,7 +129,7 @@ describe('RPC -> create()', () => {
         id: FOO_CONTENT_ID,
         storage,
         version: {
-          latest: 'v2',
+          latest: 2,
         },
       });
 
@@ -152,7 +151,7 @@ describe('RPC -> create()', () => {
 
       const result = await fn(ctx, {
         contentTypeId: FOO_CONTENT_ID,
-        version: 'v1',
+        version: 1,
         data: { title: 'Hello' },
       });
 
@@ -165,8 +164,8 @@ describe('RPC -> create()', () => {
         {
           requestHandlerContext: ctx.requestHandlerContext,
           version: {
-            request: 'v1',
-            latest: 'v2', // from the registry
+            request: 1,
+            latest: 2, // from the registry
           },
           utils: {
             getTransforms: expect.any(Function),
@@ -191,16 +190,16 @@ describe('RPC -> create()', () => {
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
             data: { title: 'Hello' },
-            version: 'v7',
+            version: 7,
           })
-        ).rejects.toEqual(new Error('Invalid version. Latest version is [v2].'));
+        ).rejects.toEqual(new Error('Invalid version. Latest version is [2].'));
       });
     });
 
     describe('object versioning', () => {
       test('should expose a  utility to transform and validate services objects', () => {
         const { ctx, storage } = setup();
-        fn(ctx, { contentTypeId: FOO_CONTENT_ID, data: { title: 'Hello' }, version: 'v1' });
+        fn(ctx, { contentTypeId: FOO_CONTENT_ID, data: { title: 'Hello' }, version: 1 });
         const [[storageContext]] = storage.create.mock.calls;
 
         // getTransforms() utils should be available from context
