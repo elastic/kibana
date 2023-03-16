@@ -54,7 +54,7 @@ export function ContextAppRoute() {
   if (error) {
     return (
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         iconColor="danger"
         title={
           <FormattedMessage

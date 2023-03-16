@@ -75,6 +75,9 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
             if (setting === 'dateFormat') {
               return 'MMM D, YYYY @ HH:mm:ss.SSS';
             }
+            if (setting === 'format:percent:defaultPattern') {
+              return '0,0.[000]%';
+            }
           },
         },
         unifiedSearch: {},
