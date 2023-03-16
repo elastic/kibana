@@ -152,7 +152,18 @@ export interface ActionStatus {
   nbAgentsFailed: number;
   version?: string;
   startTime?: string;
-  type?: string;
+  type:
+    | 'POLICY_REASSIGN'
+    | 'UPGRADE'
+    | 'UNENROLL'
+    | 'FORCE_UNENROLL'
+    | 'UPDATE_TAGS'
+    | 'CANCEL'
+    | 'REQUEST_DIAGNOSTICS'
+    | 'SETTINGS'
+    | 'POLICY_CHANGE'
+    | 'INPUT_ACTION'
+    | string;
   // how many agents were actioned by the user
   nbAgentsActioned: number;
   status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS' | 'ROLLOUT_PASSED';
