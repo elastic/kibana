@@ -74,6 +74,7 @@
         ],
         "alertTypeId" : "siem.queryRule",
         "consumer" : "siem",
+        "revision": 0,
         "params" : {
           "author" : [ ],
           "description" : "a",
@@ -168,6 +169,7 @@
         ],
         "alertTypeId" : "siem.queryRule",
         "consumer" : "siem",
+        "revision": 0,
         "params" : {
           "author" : [ ],
           "description" : "a",
@@ -281,6 +283,7 @@
         ],
         "alertTypeId" : "siem.queryRule",
         "consumer" : "siem",
+        "revision": 0,
         "params" : {
           "author" : [ ],
           "description" : "a",
@@ -375,6 +378,7 @@
         ],
         "alertTypeId" : "siem.queryRule",
         "consumer" : "siem",
+        "revision": 0,
         "params" : {
           "author" : [ ],
           "description" : "a",
@@ -469,6 +473,7 @@
         ],
         "alertTypeId" : "siem.queryRule",
         "consumer" : "siem",
+        "revision": 0,
         "params" : {
           "author" : [ ],
           "description" : "a",
@@ -561,6 +566,7 @@
         ],
         "alertTypeId" : "siem.notifications",
         "consumer" : "siem",
+        "revision": 0,
         "params" : {
           "ruleAlertId" : "61ec7a40-b076-11ec-bb3f-1f063f8e06cf"
         },
@@ -641,6 +647,7 @@
       ],
       "alertTypeId" : "siem.notifications",
       "consumer" : "siem",
+      "revision": 0,
       "params" : {
         "ruleAlertId" : "064e3160-b076-11ec-bb3f-1f063f8e06cf"
       },
@@ -733,6 +740,7 @@
         ],
         "alertTypeId" : "siem.notifications",
         "consumer" : "siem",
+        "revision": 0,
         "params" : {
           "ruleAlertId" : "27639570-b076-11ec-bb3f-1f063f8e06cf"
         },
