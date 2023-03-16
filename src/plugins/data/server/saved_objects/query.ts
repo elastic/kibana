@@ -36,7 +36,6 @@ export const querySavedObjectType: SavedObjectsType = {
         dynamic: false,
         properties: {
           language: { type: 'keyword' },
-          // query: { type: 'keyword', index: false },
         },
       },
       filters: {
