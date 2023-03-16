@@ -144,7 +144,7 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
   } = useValues(MLInferenceLogic);
   const { setAddInferencePipelineStep } = useActions(MLInferenceLogic);
   const navSteps: EuiStepsHorizontalProps['steps'] = [
-    {
+    { // Configure
       onClick: () => setAddInferencePipelineStep(AddInferencePipelineSteps.Configuration),
       status: isPipelineDataValid ? 'complete' : 'disabled',
       title: i18n.translate(
@@ -154,7 +154,17 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
         }
       ),
     },
-    {
+    { // Fields
+      onClick: () => setAddInferencePipelineStep(AddInferencePipelineSteps.Configuration),
+      status: isPipelineDataValid ? 'complete' : 'disabled',
+      title: i18n.translate(
+        'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.fields.title',
+        {
+          defaultMessage: 'Fields',
+        }
+      ),
+    },
+    { // Test
       onClick: () => {
         if (!isPipelineDataValid) return;
         setAddInferencePipelineStep(AddInferencePipelineSteps.Test);
@@ -167,7 +177,7 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
         }
       ),
     },
-    {
+    { // Review
       onClick: () => {
         if (!isPipelineDataValid) return;
         setAddInferencePipelineStep(AddInferencePipelineSteps.Review);
@@ -185,11 +195,14 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
     case AddInferencePipelineSteps.Configuration:
       navSteps[0].status = isPipelineDataValid ? 'complete' : 'current';
       break;
-    case AddInferencePipelineSteps.Test:
+    case AddInferencePipelineSteps.Fields:
       navSteps[1].status = 'current';
       break;
-    case AddInferencePipelineSteps.Review:
+    case AddInferencePipelineSteps.Test:
       navSteps[2].status = 'current';
+      break;
+    case AddInferencePipelineSteps.Review:
+      navSteps[3].status = 'current';
       break;
   }
   return <EuiStepsHorizontal steps={navSteps} />;
@@ -205,16 +218,25 @@ export const AddInferencePipelineFooter: React.FC<
   const attachExistingPipeline = Boolean(modal.configuration.existingPipeline);
   let nextStep: AddInferencePipelineSteps | undefined;
   let previousStep: AddInferencePipelineSteps | undefined;
+  let isContinueButtonEnabled = false;
   switch (modal.step) {
+    case AddInferencePipelineSteps.Configuration:
+      nextStep = AddInferencePipelineSteps.Fields;
+      isContinueButtonEnabled = isPipelineDataValid;
+      break;
+    case AddInferencePipelineSteps.Fields:
+      nextStep = AddInferencePipelineSteps.Test;
+      previousStep = AddInferencePipelineSteps.Configuration;
+      isContinueButtonEnabled = isPipelineDataValid;
+      break;
     case AddInferencePipelineSteps.Test:
       nextStep = AddInferencePipelineSteps.Review;
-      previousStep = AddInferencePipelineSteps.Configuration;
+      previousStep = AddInferencePipelineSteps.Fields;
+      isContinueButtonEnabled = true;
       break;
     case AddInferencePipelineSteps.Review:
       previousStep = AddInferencePipelineSteps.Test;
-      break;
-    case AddInferencePipelineSteps.Configuration:
-      nextStep = AddInferencePipelineSteps.Test;
+      isContinueButtonEnabled = true;
       break;
   }
   return (
