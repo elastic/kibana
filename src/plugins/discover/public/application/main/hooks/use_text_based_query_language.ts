@@ -14,7 +14,6 @@ import {
 } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DiscoverStateContainer } from '../services/discover_state';
 import { FetchStatus } from '../../types';
 
@@ -27,16 +26,15 @@ const MAX_NUM_OF_COLUMNS = 50;
 export function useTextBasedQueryLanguage({
   dataViews,
   stateContainer,
-  savedSearch,
 }: {
   stateContainer: DiscoverStateContainer;
   dataViews: DataViewsContract;
-  savedSearch: SavedSearch;
 }) {
   const prev = useRef<{ query: AggregateQuery | Query | undefined; columns: string[] }>({
     columns: [],
     query: undefined,
   });
+  const savedSearch = stateContainer.savedSearchState.getInitial$().getValue();
 
   const cleanup = useCallback(() => {
     if (prev.current.query) {

@@ -39,7 +39,6 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
     updateQuery: jest.fn(),
     onOpenInspector: jest.fn(),
     onFieldEdited: jest.fn(),
-    onChangeDataView: jest.fn(),
     isPlainRecord: false,
     persistDataView: jest.fn(),
     onDataViewCreated: jest.fn(),

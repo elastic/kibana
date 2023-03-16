@@ -42,7 +42,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   /**
    * State related logic
    */
-  const { onChangeDataView, persistDataView } = useDiscoverState({
+  const { persistDataView } = useDiscoverState({
     services,
     stateContainer,
   });
@@ -79,7 +79,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
 
   return (
     <DiscoverLayoutMemoized
-      onChangeDataView={onChangeDataView}
       navigateTo={navigateTo}
       stateContainer={stateContainer}
       persistDataView={persistDataView}

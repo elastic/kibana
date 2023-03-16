@@ -8,33 +8,32 @@
 
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { DiscoverInternalStateContainer } from '../../services/discover_internal_state_container';
+import { DiscoverAppStateContainer } from '../../services/discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverServices } from '../../../../build_services';
-import { DiscoverStateContainer } from '../../services/discover_state';
 import { getDataViewAppState } from '../../utils/get_switch_data_view_app_state';
 import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../../common';
 
 /**
  * Function executed when switching data view in the UI
- * @param id
- * @param services
- * @param discoverState
- * @param setUrlTracking
  */
 export async function changeDataView(
   id: string,
   {
     services,
-    discoverState,
+    internalState,
+    appState,
   }: {
     services: DiscoverServices;
-    discoverState: DiscoverStateContainer;
+    internalState: DiscoverInternalStateContainer;
+    appState: DiscoverAppStateContainer;
   }
 ) {
   addLog('[ui] changeDataView', { id });
   const { dataViews, uiSettings } = services;
-  const dataView = discoverState.internalState.getState().dataView;
-  const state = discoverState.appState.getState();
+  const dataView = internalState.getState().dataView;
+  const state = appState.getState();
   let nextDataView: DataView | null = null;
 
   try {
@@ -54,6 +53,9 @@ export async function changeDataView(
       state.query
     );
 
-    discoverState.appState.update(nextAppState);
+    appState.update(nextAppState);
+    if (internalState.getState().expandedDoc) {
+      internalState.transitions.setExpandedDoc(undefined);
+    }
   }
 }

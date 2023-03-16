@@ -27,7 +27,6 @@ export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'navigateTo'> & {
     isUpdate?: boolean
   ) => void;
   stateContainer: DiscoverStateContainer;
-  onChangeDataView: (dataView: string) => void;
   onDataViewCreated: (dataView: DataView) => void;
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
@@ -42,7 +41,6 @@ export const DiscoverTopNav = ({
   stateContainer,
   updateQuery,
   navigateTo,
-  onChangeDataView,
   onDataViewCreated,
   isPlainRecord,
   textBasedLanguageModeErrors,
@@ -122,9 +120,9 @@ export const DiscoverTopNav = ({
       }
 
       stateContainer.actions.appendAdHocDataViews(newDataView);
-      onChangeDataView(newDataView.id!);
+      await stateContainer.actions.onChangeDataView(newDataView.id!);
     },
-    [dataViews, onChangeDataView, stateContainer.actions]
+    [dataViews, stateContainer.actions]
   );
 
   const topNavMenu = useMemo(
@@ -195,7 +193,7 @@ export const DiscoverTopNav = ({
     onAddField: addField,
     onDataViewCreated: createNewDataView,
     onCreateDefaultAdHocDataView,
-    onChangeDataView,
+    onChangeDataView: stateContainer.actions.onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
     adHocDataViews,
     savedDataViews,

@@ -146,10 +146,11 @@ export function getSavedSearchContainer({
     });
     nextSavedSearch.searchSource.setField('index', dataView);
     const newAppState = getDefaultAppState(nextSavedSearch, services);
+    const actualDataView = dataView ? dataView : nextSavedSearch.searchSource.getField('index')!;
     const nextSavedSearchToSet = updateSavedSearch(
       {
         savedSearch: { ...nextSavedSearch },
-        dataView: dataView ? dataView : get().searchSource.getField('index')!,
+        dataView: actualDataView,
         state: newAppState,
         services,
       },
@@ -158,7 +159,7 @@ export function getSavedSearchContainer({
     set(nextSavedSearchToSet);
     if (appState) {
       await update({
-        nextDataView: nextSavedSearch.searchSource.getField('index'),
+        nextDataView: actualDataView,
         nextState: appState,
       });
     }

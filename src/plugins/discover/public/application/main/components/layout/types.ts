@@ -10,7 +10,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverStateContainer } from '../../services/discover_state';
 export interface DiscoverLayoutProps {
   navigateTo: (url: string) => void;
-  onChangeDataView: (id: string) => void;
   stateContainer: DiscoverStateContainer;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 }

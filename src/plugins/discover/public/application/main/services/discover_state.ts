@@ -24,6 +24,8 @@ import { getEmptySavedSearch, SavedSearch } from '@kbn/saved-search-plugin/publi
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import { FetchStatus } from '../../types';
+import { changeDataView } from '../hooks/utils/change_data_view';
 import { loadSavedSearch as loadNextSavedSearch } from './load_saved_search';
 import { buildStateSubscribe } from '../hooks/utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
@@ -99,6 +101,8 @@ export interface DiscoverStateContainer {
       payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
       isUpdate?: boolean
     ) => void;
+    onChangeDataView: (id: string) => Promise<void>;
+    fetchData: (initial?: boolean) => void;
     /**
      * Set the currently selected data view
      */
@@ -229,6 +233,7 @@ export function getDiscoverStateContainer({
   const setDataView = (dataView: DataView) => {
     internalStateContainer.transitions.setDataView(dataView);
     pauseAutoRefreshInterval(dataView);
+    savedSearchContainer.get().searchSource.setField('index', dataView);
   };
   const setAdHocDataViews = (dataViews: DataView[]) =>
     internalStateContainer.transitions.setAdHocDataViews(dataViews);
@@ -338,7 +343,7 @@ export function getDiscoverStateContainer({
         resetSavedSearch: false,
         filterAndQuery: true,
       });
-      dataStateContainer.fetch();
+      fetchData();
     });
 
     return () => {
@@ -359,12 +364,28 @@ export function getDiscoverStateContainer({
     }
   };
 
+  /**
+   * Function triggered when user changes data view in the sidebar
+   */
+  const onChangeDataView = async (id: string) => {
+    await changeDataView(id, {
+      services,
+      internalState: internalStateContainer,
+      appState: appStateContainer,
+    });
+  };
+
   const undoChanges = async () => {
     const nextSavedSearch = savedSearchContainer.getInitial$().getValue();
     await savedSearchContainer.set(nextSavedSearch);
     const newAppState = getDefaultAppState(nextSavedSearch, services);
     await appStateContainer.replaceUrlState(newAppState);
     return nextSavedSearch;
+  };
+  const fetchData = (initial: boolean = false) => {
+    if (!initial || dataStateContainer.getInitialFetchStatus() === FetchStatus.LOADING) {
+      dataStateContainer.fetch();
+    }
   };
 
   return {
@@ -377,9 +398,11 @@ export function getDiscoverStateContainer({
     actions: {
       appendAdHocDataViews,
       initializeAndSync,
+      fetchData,
       loadAndResolveDataView,
       loadDataViewList,
       loadSavedSearch,
+      onChangeDataView,
       onOpenSavedSearch,
       onUpdateQuery,
       removeAdHocDataViewById,

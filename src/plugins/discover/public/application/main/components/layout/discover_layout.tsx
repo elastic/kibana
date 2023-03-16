@@ -55,7 +55,6 @@ const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export function DiscoverLayout({
   navigateTo,
-  onChangeDataView,
   stateContainer,
   persistDataView,
 }: DiscoverLayoutProps) {
@@ -178,10 +177,10 @@ export function DiscoverLayout({
         await stateContainer.actions.loadDataViewList();
       }
       if (nextDataView.id) {
-        onChangeDataView(nextDataView.id);
+        await stateContainer.actions.onChangeDataView(nextDataView.id);
       }
     },
-    [onChangeDataView, stateContainer]
+    [stateContainer]
   );
 
   const savedSearchTitle = useRef<HTMLHeadingElement>(null);
@@ -276,7 +275,6 @@ export function DiscoverLayout({
         savedQuery={savedQuery}
         stateContainer={stateContainer}
         updateQuery={stateContainer.actions.onUpdateQuery}
-        onChangeDataView={onChangeDataView}
         onDataViewCreated={onDataViewCreated}
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
@@ -297,7 +295,7 @@ export function DiscoverLayout({
               columns={currentColumns}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               onRemoveField={onRemoveColumn}
-              onChangeDataView={onChangeDataView}
+              onChangeDataView={stateContainer.actions.onChangeDataView}
               selectedDataView={dataView}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
