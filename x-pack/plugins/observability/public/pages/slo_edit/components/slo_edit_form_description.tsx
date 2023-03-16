@@ -15,14 +15,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Control, Controller } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
-export interface Props {
-  control: Control<CreateSLOInput>;
-}
-
-export function SloEditFormDescription({ control }: Props) {
+export function SloEditFormDescription() {
+  const { control } = useFormContext<CreateSLOInput>();
   const sloNameId = useGeneratedHtmlId({ prefix: 'sloName' });
   const descriptionId = useGeneratedHtmlId({ prefix: 'sloDescription' });
 
@@ -30,7 +27,7 @@ export function SloEditFormDescription({ control }: Props) {
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
         <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.description.sloName', {
+          {i18n.translate('xpack.observability.slo.sloEdit.description.sloName', {
             defaultMessage: 'SLO Name',
           })}
         </EuiFormLabel>
@@ -45,7 +42,7 @@ export function SloEditFormDescription({ control }: Props) {
               id={sloNameId}
               data-test-subj="sloFormNameInput"
               placeholder={i18n.translate(
-                'xpack.observability.slos.sloEdit.description.sloNamePlaceholder',
+                'xpack.observability.slo.sloEdit.description.sloNamePlaceholder',
                 {
                   defaultMessage: 'Name for the SLO',
                 }
@@ -58,7 +55,7 @@ export function SloEditFormDescription({ control }: Props) {
 
       <EuiFlexItem grow>
         <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.description.sloDescription', {
+          {i18n.translate('xpack.observability.slo.sloEdit.description.sloDescription', {
             defaultMessage: 'Description',
           })}
         </EuiFormLabel>
@@ -73,7 +70,7 @@ export function SloEditFormDescription({ control }: Props) {
               id={descriptionId}
               data-test-subj="sloFormDescriptionTextArea"
               placeholder={i18n.translate(
-                'xpack.observability.slos.sloEdit.description.sloDescriptionPlaceholder',
+                'xpack.observability.slo.sloEdit.description.sloDescriptionPlaceholder',
                 {
                   defaultMessage: 'A short description of the SLO',
                 }

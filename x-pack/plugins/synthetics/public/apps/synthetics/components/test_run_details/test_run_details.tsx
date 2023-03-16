@@ -11,7 +11,7 @@ import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
 import { TestRunErrorInfo } from './components/test_run_error_info';
-import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel';
+import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel_container';
 import { useSelectedLocation } from '../monitor_details/hooks/use_selected_location';
 import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
 import { StepNumberNav } from './components/step_number_nav';
@@ -89,7 +89,7 @@ export const TestRunDetails = () => {
           <EuiFlexItem grow={1}>
             <StepDurationPanel legendPosition="bottom" />
             <EuiSpacer size="m" />
-            <MonitorDetailsPanelContainer />
+            <MonitorDetailsPanelContainer hideEnabled hideLocations />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

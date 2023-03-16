@@ -60,6 +60,8 @@ import {
   RULES_MONITORING_TAB,
   ENABLED_RULES_BTN,
   DISABLED_RULES_BTN,
+  REFRESH_RULES_TABLE_BUTTON,
+  RULE_LAST_RUN,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -162,8 +164,10 @@ export const disableSelectedRules = () => {
   cy.get(DISABLE_RULE_BULK_BTN).click();
 };
 
-export const exportFirstRule = () => {
-  cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
+export const exportRule = (name: string) => {
+  cy.log(`Export rule "${name}"`);
+
+  cy.contains(RULE_NAME, name).parents(RULES_ROW).find(COLLAPSED_ACTION_BTN).click();
   cy.get(EXPORT_ACTION_BTN).click();
   cy.get(EXPORT_ACTION_BTN).should('not.exist');
 };
@@ -181,6 +185,19 @@ export const filterByTags = (tags: string[]) => {
   for (const tag of tags) {
     cy.get(RULES_TAGS_FILTER_POPOVER).contains(tag).click();
   }
+};
+
+export const waitForRuleExecution = (name: string) => {
+  cy.log(`Wait for rule "${name}" to be executed`);
+  cy.waitUntil(() => {
+    cy.get(REFRESH_RULES_TABLE_BUTTON).click();
+
+    return cy
+      .contains(RULE_NAME, name)
+      .parents(RULES_ROW)
+      .find(RULE_LAST_RUN)
+      .then(($el) => $el.text().endsWith('ago'));
+  });
 };
 
 export const filterByElasticRules = () => {
@@ -358,7 +375,7 @@ export const checkAutoRefresh = (ms: number, condition: string) => {
 export const importRules = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).should('exist');
-  cy.get(INPUT_FILE).trigger('click', { force: true }).attachFile(rulesFile).trigger('change');
+  cy.get(INPUT_FILE).trigger('click', { force: true }).selectFile(rulesFile).trigger('change');
   cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
   cy.get(INPUT_FILE).should('not.exist');
 };
@@ -455,6 +472,14 @@ const selectOverwriteRulesImport = () => {
     .should('be.checked');
 };
 
+export const expectManagementTableRules = (ruleNames: string[]): void => {
+  expectNumberOfRules(RULES_MANAGEMENT_TABLE, ruleNames.length);
+
+  for (const ruleName of ruleNames) {
+    expectToContainRule(RULES_MANAGEMENT_TABLE, ruleName);
+  }
+};
+
 const selectOverwriteExceptionsRulesImport = () => {
   cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX)
     .pipe(($el) => $el.trigger('click'))
@@ -468,7 +493,7 @@ const selectOverwriteConnectorsRulesImport = () => {
 export const importRulesWithOverwriteAll = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
   cy.get(INPUT_FILE).should('exist');
-  cy.get(INPUT_FILE).trigger('click', { force: true }).attachFile(rulesFile).trigger('change');
+  cy.get(INPUT_FILE).trigger('click', { force: true }).selectFile(rulesFile).trigger('change');
   selectOverwriteRulesImport();
   selectOverwriteExceptionsRulesImport();
   selectOverwriteConnectorsRulesImport();

@@ -23,6 +23,7 @@ import {
 import { APMTransactionErrorRateIndicator, SLO } from '../../../domain/models';
 import { DEFAULT_APM_INDEX } from './constants';
 import { Query } from './types';
+import { parseIndex } from './common';
 
 const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];
 const DEFAULT_GOOD_STATUS_CODES = ['2xx', '3xx', '4xx'];
@@ -96,7 +97,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     }
 
     return {
-      index: indicator.params.index ?? DEFAULT_APM_INDEX,
+      index: parseIndex(indicator.params.index ?? DEFAULT_APM_INDEX),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {

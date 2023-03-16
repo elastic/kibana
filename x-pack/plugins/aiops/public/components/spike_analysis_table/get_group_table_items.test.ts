@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { finalChangePointGroups } from '../../../common/__mocks__/artificial_logs/final_change_point_groups';
+import { finalSignificantTermGroups } from '../../../common/__mocks__/artificial_logs/final_significant_term_groups';
 
 import { getGroupTableItems } from './get_group_table_items';
 
 describe('getGroupTableItems', () => {
-  it('transforms change point groups into table items', () => {
-    const groupTableItems = getGroupTableItems(finalChangePointGroups);
+  it('transforms groups into table items', () => {
+    const groupTableItems = getGroupTableItems(finalSignificantTermGroups);
 
     expect(groupTableItems).toEqual([
       {

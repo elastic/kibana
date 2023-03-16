@@ -119,7 +119,13 @@
             "label": "fileJSON",
             "description": [],
             "signature": [
-              "FileJSON",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
               "<Meta>"
             ],
             "path": "packages/shared-ux/file/file_upload/impl/src/upload_state.ts",

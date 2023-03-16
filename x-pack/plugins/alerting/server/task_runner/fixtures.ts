@@ -101,6 +101,7 @@ export const generateSavedObjectParams = ({
         last_run: {
           timestamp: '1970-01-01T00:00:00.000Z',
           metrics: {
+            duration: 0,
             gap_duration_s: null,
             total_alerts_created: null,
             total_alerts_detected: null,
@@ -209,6 +210,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
   monitoring: getDefaultMonitoring('2020-08-20T19:23:38Z'),
+  revision: 0,
 };
 
 export const mockTaskInstance = () => ({
@@ -281,6 +283,7 @@ export const generateRunnerResult = ({
         history: history.map((success) => ({ success, timestamp: 0 })),
         last_run: {
           metrics: {
+            duration: 0,
             gap_duration_s: null,
             total_alerts_created: null,
             total_alerts_detected: null,

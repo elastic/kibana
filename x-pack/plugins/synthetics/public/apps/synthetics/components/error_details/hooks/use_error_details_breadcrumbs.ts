@@ -6,6 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { useTestRunDetailsBreadcrumbs } from '../../test_run_details/hooks/use_test_run_details_breadcrumbs';
 import { useSelectedMonitor } from '../../monitor_details/hooks/use_selected_monitor';
 import { ConfigKey } from '../../../../../../common/runtime_types';
@@ -19,10 +20,14 @@ export const useErrorDetailsBreadcrumbs = (
 
   const { monitor } = useSelectedMonitor();
 
+  const selectedLocation = useSelectedLocation();
+
   const errorsBreadcrumbs = [
     {
       text: ERRORS_CRUMB,
-      href: `${appPath}/monitor/${monitor?.[ConfigKey.CONFIG_ID]}/errors`,
+      href: `${appPath}/monitor/${monitor?.[ConfigKey.CONFIG_ID]}/errors?locationId=${
+        selectedLocation?.id
+      }`,
     },
     ...(extraCrumbs ?? []),
   ];

@@ -282,8 +282,8 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
         id: tableId,
         title: i18n.SESSIONS_TITLE,
         defaultColumns: finalColumns.map((c) => ({
-          ...c,
           initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+          ...c,
         })),
       })
     );

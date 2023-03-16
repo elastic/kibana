@@ -33,6 +33,7 @@ import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { CloudDefendPluginStart } from '@kbn/cloud-defend-plugin/public';
 import type { CspClientPluginStart } from '@kbn/cloud-security-posture-plugin/public';
 import type { ApmBase } from '@elastic/apm-rum';
 import type {
@@ -55,10 +56,11 @@ import type { Timelines } from './timelines';
 import type { Management } from './management';
 import type { LandingPages } from './landing_pages';
 import type { CloudSecurityPosture } from './cloud_security_posture';
+import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
-
+import type { TelemetryClientStart } from './common/lib/telemetry';
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
@@ -91,6 +93,7 @@ export interface StartPlugins {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   osquery?: OsqueryPluginStart;
   security: SecurityPluginStart;
+  cloudDefend: CloudDefendPluginStart;
   cloudSecurityPosture: CspClientPluginStart;
   threatIntelligence: ThreatIntelligencePluginStart;
   cloudExperiments?: CloudExperimentsPluginStart;
@@ -116,6 +119,7 @@ export type StartServices = CoreStart &
     securityLayout: {
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
+    telemetry: TelemetryClientStart;
   };
 
 export interface PluginSetup {
@@ -142,6 +146,7 @@ export interface SubPlugins {
   timelines: Timelines;
   management: Management;
   landingPages: LandingPages;
+  cloudDefend: CloudDefend;
   cloudSecurityPosture: CloudSecurityPosture;
   threatIntelligence: ThreatIntelligence;
 }
@@ -158,6 +163,7 @@ export interface StartedSubPlugins {
   timelines: ReturnType<Timelines['start']>;
   management: ReturnType<Management['start']>;
   landingPages: ReturnType<LandingPages['start']>;
+  cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
 }
