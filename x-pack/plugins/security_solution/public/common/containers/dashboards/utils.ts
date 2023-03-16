@@ -9,7 +9,7 @@ import type { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting
 import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/public';
 import type { Tag, TagAttributes } from '@kbn/saved-objects-tagging-plugin/common';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { SECURITY_TAG_NAME } from '../../../../common/constants';
+import { SECURITY_TAG_NAME, SECURITY_INTEGRATIONS_TAG_NAME } from '../../../../common/constants';
 
 export const SECURITY_TAG_DESCRIPTION = 'Security Solution auto-generated tag' as const;
 
@@ -23,13 +23,13 @@ const getRandomColor = (): string => {
 /**
  * Request the security tag saved object and returns the id if exists
  */
-export const getSecurityTagId = async (
+export const getSecuritySolutionTagId = async (
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<string | undefined> => {
   const tagResponse = await savedObjectsClient.find<TagAttributes>({
     type: 'tag',
     searchFields: ['name'],
-    search: SECURITY_TAG_NAME,
+    search: `"${SECURITY_TAG_NAME}"`,
   });
   // The search query returns partial matches, we need to find the exact tag name
   return tagResponse.savedObjects.find(({ attributes }) => attributes.name === SECURITY_TAG_NAME)
@@ -39,7 +39,7 @@ export const getSecurityTagId = async (
 /**
  * Creates the security tag saved object and returns its id
  */
-export const createSecurityTag = async (
+export const createSecuritySolutionTag = async (
   tagsClient: SavedObjectsTaggingApi['client']
 ): Promise<Tag> => {
   // We need to use the TaggingApi client to make sure the Dashboards app tags cache is refreshed
@@ -57,13 +57,31 @@ export const createSecurityTag = async (
 export const getSecurityDashboards = async (
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<Array<SavedObject<SavedObjectAttributes>>> => {
-  const tagId = await getSecurityTagId(savedObjectsClient);
-  if (!tagId) {
+  const tags = await getSecurityTags(savedObjectsClient);
+  if (!tags?.length) {
     return [];
   }
   const dashboardsResponse = await savedObjectsClient.find<SavedObjectAttributes>({
     type: 'dashboard',
-    hasReference: { id: tagId, type: 'tag' },
+    hasReference: tags.map((tag) => ({ id: tag.id, type: 'tag' })),
   });
   return dashboardsResponse.savedObjects;
+};
+
+/**
+ * Request the security tag saved object and returns the id if exists
+ */
+const getSecurityTags = async (
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<Array<SavedObject<TagAttributes>>> => {
+  const tagsResponse = await savedObjectsClient.find<TagAttributes>({
+    type: 'tag',
+    searchFields: ['name'],
+    search: `"${SECURITY_TAG_NAME}" | "${SECURITY_INTEGRATIONS_TAG_NAME}"`,
+  });
+  // The search query returns partial matches, we need to filter by the exact tag names
+  return tagsResponse.savedObjects.filter(
+    ({ attributes }) =>
+      attributes.name === SECURITY_TAG_NAME || attributes.name === SECURITY_INTEGRATIONS_TAG_NAME
+  );
 };

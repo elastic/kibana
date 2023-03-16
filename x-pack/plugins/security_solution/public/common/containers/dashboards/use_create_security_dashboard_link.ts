@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../lib/kibana';
-import { getSecurityTagId, createSecurityTag } from './utils';
+import { getSecuritySolutionTagId, createSecuritySolutionTag } from './utils';
 
 type UseCreateDashboard = () => { isLoading: boolean; url: string };
 
@@ -24,9 +24,9 @@ export const useCreateSecurityDashboardLink: UseCreateDashboard = () => {
     let ignore = false;
     const getOrCreateSecurityTag = async () => {
       if (savedObjectsClient && savedObjectsTagging) {
-        let tagId = await getSecurityTagId(savedObjectsClient);
+        let tagId = await getSecuritySolutionTagId(savedObjectsClient);
         if (!tagId) {
-          const newTag = await createSecurityTag(savedObjectsTagging.client);
+          const newTag = await createSecuritySolutionTag(savedObjectsTagging.client);
           tagId = newTag.id;
         }
         if (!ignore) {
