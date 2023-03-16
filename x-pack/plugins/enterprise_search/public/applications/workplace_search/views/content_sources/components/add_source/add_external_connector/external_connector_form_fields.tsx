@@ -33,7 +33,7 @@ export const ExternalConnectorFormFields: React.FC = () => {
         <>
           <EuiCallOut
             color="danger"
-            iconType="alert"
+            iconType="warning"
             title={i18n.translate(
               'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.externalConnectorConfig.insecureTitle',
               {
