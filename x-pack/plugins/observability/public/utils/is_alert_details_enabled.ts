@@ -6,7 +6,7 @@
  */
 
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { ConfigSchema } from '../plugin';
+import type { ConfigSchema } from '../plugin';
 import type { TopAlert } from '../typings/alerts';
 
 // We are mapping the ruleTypeId from the feature flag with the ruleTypeId from the alert
