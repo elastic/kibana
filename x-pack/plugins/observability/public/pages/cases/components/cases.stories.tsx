@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ComponentStory } from '@storybook/react';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { Cases as Component } from './cases';
 
@@ -15,10 +16,23 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-export function AllPermissions() {
-  return (
-    <Component
-      permissions={{ read: true, all: true, create: true, delete: true, push: true, update: true }}
-    />
-  );
-}
+const Template: ComponentStory<typeof Component> = (props) => <Component {...props} />;
+
+const defaultProps = {
+  permissions: { read: true, all: true, create: true, delete: true, push: true, update: true },
+};
+
+export const CasesPageWithAllPermissions = Template.bind({});
+CasesPageWithAllPermissions.args = defaultProps;
+
+export const CasesPageWithNoPermissions = Template.bind({});
+CasesPageWithNoPermissions.args = {
+  permissions: {
+    read: false,
+    all: false,
+    create: false,
+    delete: false,
+    push: false,
+    update: false,
+  },
+};
