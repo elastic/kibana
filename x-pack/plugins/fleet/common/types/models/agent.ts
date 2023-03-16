@@ -163,6 +163,8 @@ export interface ActionStatus {
   creationTime: string;
   hasRolloutPeriod?: boolean;
   latestErrors?: ActionErrorResult[];
+  revision?: number;
+  policyId?: string;
 }
 
 export interface AgentDiagnostics {
