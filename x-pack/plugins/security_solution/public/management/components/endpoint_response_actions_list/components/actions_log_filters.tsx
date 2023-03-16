@@ -16,7 +16,6 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { useGetEndpointActionList } from '../../../hooks';
 import {
   type DateRangePickerValues,
@@ -91,11 +90,12 @@ export const ActionsLogFilters = memo(
             }}
             data-test-subj={getTestId('automated-responses-filter')}
           >
-            <FormattedMessage
-              // TODO:
-              id="xpack.fleet.agentList.showUpgradeableFilterLabel"
-              defaultMessage="Automated"
-            />
+            {'Automated'}
+            {/*  // TODO:*/}
+            {/* <FormattedMessage*/}
+            {/*  id=""*/}
+            {/*  defaultMessage="Automated"*/}
+            {/* />*/}
           </EuiFilterButton>
         </>
       );
