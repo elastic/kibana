@@ -65,6 +65,15 @@ function isGaugeChart(
   return attributes.visualizationType === 'lnsGauge';
 }
 
+function isSupportedChart(attributes: TypedLensByValueInput['attributes']) {
+  return (
+    isXYChart(attributes) ||
+    isPieChart(attributes) ||
+    isHeatmapChart(attributes) ||
+    isGaugeChart(attributes)
+  );
+}
+
 function mergeOverrides(
   currentOverrides: AllOverrides | undefined,
   newOverrides: AllOverrides | undefined,
@@ -193,6 +202,7 @@ export function AttributesMenu({
           iconType="arrowDown"
           iconSide="right"
           color="primary"
+          isDisabled={!isSupportedChart(currentAttributes)}
         >
           Lens Attributes
         </EuiButton>
@@ -314,7 +324,7 @@ export function OverridesMenu({
           onClick={() => setOverridesPopoverOpen(!overridesPopoverOpen)}
           iconType="arrowDown"
           iconSide="right"
-          isDisabled={isDatatable(currentAttributes)}
+          isDisabled={!isSupportedChart(currentAttributes)}
         >
           Overrides{' '}
           <EuiNotificationBadge color={hasOverridesEnabled ? 'accent' : 'subdued'}>
