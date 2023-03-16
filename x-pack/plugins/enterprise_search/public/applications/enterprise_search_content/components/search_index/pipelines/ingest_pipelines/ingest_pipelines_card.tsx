@@ -24,14 +24,8 @@ import { IngestPipelineFlyout } from './ingest_pipeline_flyout';
 export const IngestPipelinesCard: React.FC = () => {
   const { indexName, ingestionMethod } = useValues(IndexViewLogic);
 
-  const {
-    canSetPipeline,
-    hasIndexIngestionPipeline,
-    index,
-    pipelineName,
-    pipelineState,
-    showPipelineSettings,
-  } = useValues(PipelinesLogic);
+  const { canSetPipeline, index, pipelineName, pipelineState, showPipelineSettings } =
+    useValues(PipelinesLogic);
   const { closePipelineSettings, openPipelineSettings, setPipelineState, savePipeline } =
     useActions(PipelinesLogic);
   const { makeRequest: fetchCustomPipeline } = useActions(FetchCustomPipelineApiLogic);
@@ -45,7 +39,7 @@ export const IngestPipelinesCard: React.FC = () => {
 
   return (
     <>
-      {!hasIndexIngestionPipeline && <CustomizeIngestPipelineItem />}
+      <CustomizeIngestPipelineItem />
       <EuiFlexGroup direction="column" gutterSize="s">
         {showPipelineSettings && (
           <IngestPipelineFlyout

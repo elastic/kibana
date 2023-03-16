@@ -1,6 +1,7 @@
 get:
-  summary: Get K8s Full Agent Manifest
-  tags: []
+  summary: Get full K8s agent manifest
+  tags:
+    - Kubernetes
   responses:
     '200':
       description: OK
@@ -11,20 +12,22 @@ get:
             properties:
               item:
                 type: string
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-full-k8s-manifest
   parameters:
-  - schema:
-      type: boolean
-    name: download
-    in: query
-    required: false
-  - schema:
-      type: string
-    name: fleetServer
-    in: query
-    required: false
-  - schema:
-      type: string
-    name: enrolToken
-    in: query
-    required: false
+    - schema:
+        type: boolean
+      name: download
+      in: query
+      required: false
+    - schema:
+        type: string
+      name: fleetServer
+      in: query
+      required: false
+    - schema:
+        type: string
+      name: enrolToken
+      in: query
+      required: false

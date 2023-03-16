@@ -70,7 +70,7 @@ export const NEW_TERMS_FIELDS_DETAILS = 'Fields';
 export const NEW_TERMS_HISTORY_WINDOW_DETAILS = 'History Window Size';
 
 export const FIELDS_BROWSER_BTN =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="show-field-browser"]';
+  '[data-test-subj="alertsTable"] [data-test-subj="show-field-browser"]';
 
 export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
 
@@ -111,6 +111,10 @@ export const THRESHOLD_DETAILS = 'Threshold';
 export const TIMELINE_TEMPLATE_DETAILS = 'Timeline template';
 
 export const TIMESTAMP_OVERRIDE_DETAILS = 'Timestamp override';
+
+export const SUPPRESS_BY_DETAILS = 'Suppress alerts by';
+
+export const SUPPRESS_FOR_DETAILS = 'Suppress alerts for';
 
 export const TIMELINE_FIELD = (field: string) => {
   return `[data-test-subj="formatted-field-${field}"]`;

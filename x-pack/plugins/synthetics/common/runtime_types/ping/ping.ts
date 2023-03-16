@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { ObserverCodec } from './observer';
 import { ErrorStateCodec } from './error_state';
 import { DateRangeType } from '../common';
 import { SyntheticsDataType } from './synthetics';
@@ -120,23 +121,6 @@ export const PingHeadersType = t.record(t.string, t.union([t.string, t.array(t.s
 
 export type PingHeaders = t.TypeOf<typeof PingHeadersType>;
 
-export const ObserverType = t.partial({
-  hostname: t.string,
-  ip: t.array(t.string),
-  mac: t.array(t.string),
-  geo: t.partial({
-    name: t.string,
-    continent_name: t.string,
-    city_name: t.string,
-    country_iso_code: t.string,
-    location: t.union([
-      t.string,
-      t.partial({ lat: t.number, lon: t.number }),
-      t.partial({ lat: t.string, lon: t.string }),
-    ]),
-  }),
-});
-
 export const AgentType = t.intersection([
   t.type({
     ephemeral_id: t.string,
@@ -213,7 +197,7 @@ export const PingType = t.intersection([
         uid: t.string,
       }),
     }),
-    observer: ObserverType,
+    observer: ObserverCodec,
     resolve: t.partial({
       ip: t.string,
       rtt: t.partial({

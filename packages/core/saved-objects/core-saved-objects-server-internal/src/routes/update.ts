@@ -9,19 +9,26 @@
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsUpdateOptions } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
+import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors, throwIfTypeNotVisibleByAPI } from './utils';
+import {
+  catchAndReturnBoomErrors,
+  logWarnOnExternalRequest,
+  throwIfTypeNotVisibleByAPI,
+} from './utils';
 
 interface RouteDependencies {
+  config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
 }
 
 export const registerUpdateRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger }: RouteDependencies
 ) => {
+  const { allowHttpApiAccess } = config;
   router.put(
     {
       path: '/{type}/{id}',
@@ -47,7 +54,12 @@ export const registerUpdateRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
-      logger.warn("The update saved object API '/api/saved_objects/{type}/{id}' is deprecated.");
+      logWarnOnExternalRequest({
+        method: 'get',
+        path: '/api/saved_objects/{type}/{id}',
+        req,
+        logger,
+      });
       const { type, id } = req.params;
       const { attributes, version, references, upsert } = req.body;
       const options: SavedObjectsUpdateOptions = { version, references, upsert };
@@ -55,9 +67,9 @@ export const registerUpdateRoute = (
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsUpdate({ request: req }).catch(() => {});
       const { savedObjects } = await context.core;
-
-      throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
-
+      if (!allowHttpApiAccess) {
+        throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
+      }
       const result = await savedObjects.client.update(type, id, attributes, options);
       return res.ok({ body: result });
     })

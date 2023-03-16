@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { AggregateQuery, BoolQuery, DataViewBase, Query, Filter } from '@kbn/es-query';
+import { RefreshInterval } from '@kbn/data-plugin/public';
+import { AggregateQuery, BoolQuery, DataViewBase, Query, Filter, TimeRange } from '@kbn/es-query';
+import { PageEndBufferReachedEvent } from '../../log_stream_position_state/src/notifications';
 
 export type AnyQuery = Query | AggregateQuery;
 
@@ -36,37 +38,77 @@ export interface LogStreamQueryContextWithValidationError {
   validationError: Error;
 }
 
+export type ExtendedTimeRange = TimeRange & { lastChangedCompletely: number };
+export interface LogStreamQueryContextWithTimeRange {
+  timeRange: ExtendedTimeRange;
+}
+
+export interface LogStreamQueryContextWithRefreshInterval {
+  refreshInterval: RefreshInterval;
+}
+
+export interface Timestamps {
+  startTimestamp: number;
+  endTimestamp: number;
+  lastChangedTimestamp: number;
+}
+
+export interface LogStreamQueryContextWithTimestamps {
+  timestamps: Timestamps;
+}
+
+export type LogStreamQueryContextWithTime = LogStreamQueryContextWithTimeRange &
+  LogStreamQueryContextWithRefreshInterval &
+  LogStreamQueryContextWithTimestamps;
+
 export type LogStreamQueryTypestate =
   | {
       value: 'uninitialized';
-      context: LogStreamQueryContextWithDataViews;
+      context: LogStreamQueryContextWithDataViews & LogStreamQueryContextWithTime;
     }
   | {
-      value: 'hasQuery' | { hasQuery: 'validating' };
-      context: LogStreamQueryContextWithDataViews &
-        LogStreamQueryContextWithParsedQuery &
-        LogStreamQueryContextWithQuery &
-        LogStreamQueryContextWithFilters;
-    }
-  | {
-      value: { hasQuery: 'valid' };
-      context: LogStreamQueryContextWithDataViews &
-        LogStreamQueryContextWithParsedQuery &
-        LogStreamQueryContextWithQuery &
-        LogStreamQueryContextWithFilters;
-    }
-  | {
-      value: { hasQuery: 'invalid' };
+      value: 'query' | { query: 'validating' };
       context: LogStreamQueryContextWithDataViews &
         LogStreamQueryContextWithParsedQuery &
         LogStreamQueryContextWithQuery &
         LogStreamQueryContextWithFilters &
+        LogStreamQueryContextWithTime;
+    }
+  | {
+      value: { query: 'valid' };
+      context: LogStreamQueryContextWithDataViews &
+        LogStreamQueryContextWithParsedQuery &
+        LogStreamQueryContextWithQuery &
+        LogStreamQueryContextWithFilters &
+        LogStreamQueryContextWithTime;
+    }
+  | {
+      value: { query: 'invalid' };
+      context: LogStreamQueryContextWithDataViews &
+        LogStreamQueryContextWithParsedQuery &
+        LogStreamQueryContextWithQuery &
+        LogStreamQueryContextWithFilters &
+        LogStreamQueryContextWithTime &
         LogStreamQueryContextWithValidationError;
+    }
+  | {
+      value: 'time' | { time: 'initialized' } | { time: 'streaming' } | { time: 'static' };
+      context: LogStreamQueryContextWithDataViews & LogStreamQueryContextWithTime;
     };
 
 export type LogStreamQueryContext = LogStreamQueryTypestate['context'];
 
 export type LogStreamQueryStateValue = LogStreamQueryTypestate['value'];
+
+export interface UpdateTimeRangeEvent {
+  type: 'UPDATE_TIME_RANGE';
+  timeRange: Partial<TimeRange>;
+}
+
+export interface UpdateRefreshIntervalEvent {
+  type: 'UPDATE_REFRESH_INTERVAL';
+  refreshInterval: Partial<RefreshInterval>;
+}
 
 export type LogStreamQueryEvent =
   | {
@@ -93,4 +135,19 @@ export type LogStreamQueryEvent =
       type: 'INITIALIZED_FROM_URL';
       query: AnyQuery;
       filters: Filter[];
-    };
+      timeRange: TimeRange | null;
+      refreshInterval: RefreshInterval | null;
+    }
+  | {
+      type: 'INITIALIZED_FROM_TIME_FILTER_SERVICE';
+      timeRange: TimeRange;
+      refreshInterval: RefreshInterval;
+    }
+  | {
+      type: 'TIME_FROM_TIME_FILTER_SERVICE_CHANGED';
+      timeRange: TimeRange;
+      refreshInterval: RefreshInterval;
+    }
+  | UpdateTimeRangeEvent
+  | UpdateRefreshIntervalEvent
+  | PageEndBufferReachedEvent;

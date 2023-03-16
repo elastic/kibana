@@ -18,7 +18,7 @@ import {
   waitForInstallRiskScoreModule,
 } from '../../tasks/api_calls/risk_scores';
 import { findSavedObjects } from '../../tasks/api_calls/risk_scores/saved_objects';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 import { clickEnableRiskScore } from '../../tasks/risk_scores';
@@ -36,7 +36,7 @@ describe('Enable risk scores', () => {
   before(() => {
     cleanKibana();
     login();
-    createCustomRuleEnabled(getNewRule(), 'rule1');
+    createRule({ ...getNewRule(), rule_id: 'rule1' });
   });
 
   beforeEach(() => {

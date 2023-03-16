@@ -15,24 +15,7 @@ import { pluginServices } from '../../../../services/plugin_services';
 import { DashboardContainerByValueInput } from '../../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../../dashboard_constants';
 import { DashboardCreationOptions } from '../../dashboard_container_factory';
-import { getUnsavedChanges } from '../diff_state/dashboard_diffing_integration';
-
-/**
- * input keys that will cause a new session to be created.
- */
-const refetchKeys: Array<keyof DashboardContainerByValueInput> = [
-  'query',
-  'filters',
-  'timeRange',
-  'timeslice',
-  'timeRestore',
-  'lastReloadRequestTime',
-
-  // also refetch when chart settings change
-  'syncColors',
-  'syncCursor',
-  'syncTooltips',
-];
+import { getShouldRefresh } from '../diff_state/dashboard_diffing_integration';
 
 /**
  * Enables dashboard search sessions.
@@ -96,8 +79,7 @@ export function startDashboardSearchSessionIntegration(
       .pipe(pairwise(), debounceTime(CHANGE_CHECK_DEBOUNCE))
       .subscribe(async (states) => {
         const [previous, current] = states as DashboardContainerByValueInput[];
-        const changes = await getUnsavedChanges.bind(this)(previous, current, refetchKeys);
-        const shouldRefetch = Object.keys(changes).length > 0;
+        const shouldRefetch = await getShouldRefresh.bind(this)(previous, current);
         if (!shouldRefetch) return;
 
         const {

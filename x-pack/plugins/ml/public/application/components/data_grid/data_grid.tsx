@@ -17,6 +17,7 @@ import {
   EuiCodeBlock,
   EuiCopy,
   EuiDataGrid,
+  EuiDataGridProps,
   EuiDataGridCellPopoverElementProps,
   EuiFlexGroup,
   EuiFlexItem,
@@ -64,6 +65,7 @@ interface PropsWithoutHeader extends UseIndexDataReturnType {
   resultsField?: string;
   dataTestSubj: string;
   toastNotifications: CoreSetup['notifications']['toasts'];
+  trailingControlColumns?: EuiDataGridProps['trailingControlColumns'];
 }
 
 interface PropsWithHeader extends PropsWithoutHeader {
@@ -106,6 +108,7 @@ export const DataGrid: FC<Props> = memo(
       predictionFieldName,
       resultsField,
       analysisType,
+      trailingControlColumns,
     } = props;
     // TODO Fix row hovering + bar highlighting
     // const getRowProps = (item: any) => {
@@ -342,6 +345,7 @@ export const DataGrid: FC<Props> = memo(
                   return c;
                 })}
                 columnVisibility={{ visibleColumns, setVisibleColumns }}
+                trailingControlColumns={trailingControlColumns}
                 gridStyle={euiDataGridStyle}
                 rowCount={rowCount}
                 renderCellValue={renderCellValue}

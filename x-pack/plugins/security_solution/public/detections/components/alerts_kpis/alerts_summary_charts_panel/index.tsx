@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
 import styled from 'styled-components';
@@ -18,6 +18,7 @@ import { AlertsProgressBarPanel } from '../alerts_progress_bar_panel';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { GroupBySelection } from '../alerts_progress_bar_panel/types';
+import type { AddFilterProps } from '../common/types';
 
 const StyledFlexGroup = styled(EuiFlexGroup)`
   @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.l});
@@ -32,7 +33,7 @@ const DETECTIONS_ALERTS_CHARTS_ID = 'detections-alerts-charts';
 interface Props {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   filters?: Filter[];
-  addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
+  addFilter?: ({ field, value, negate }: AddFilterProps) => void;
   panelHeight?: number;
   query?: Query;
   signalIndexName: string | null;
@@ -61,17 +62,6 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
   const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
 
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_ALERTS_CHARTS_ID);
-  const [querySkip, setQuerySkip] = useState(
-    isAlertsPageChartsEnabled ? !isExpanded : !toggleStatus
-  );
-  useEffect(() => {
-    if (isAlertsPageChartsEnabled) {
-      setQuerySkip(!isExpanded);
-    } else {
-      setQuerySkip(!toggleStatus);
-    }
-  }, [toggleStatus, isAlertsPageChartsEnabled, isExpanded]);
-
   const toggleQuery = useCallback(
     (status: boolean) => {
       if (isAlertsPageChartsEnabled && setIsExpanded) {
@@ -79,10 +69,13 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
       } else {
         setToggleStatus(status);
       }
-      // toggle on = skipQuery false
-      setQuerySkip(!status);
     },
-    [setQuerySkip, setToggleStatus, setIsExpanded, isAlertsPageChartsEnabled]
+    [setToggleStatus, setIsExpanded, isAlertsPageChartsEnabled]
+  );
+
+  const querySkip = useMemo(
+    () => (isAlertsPageChartsEnabled ? !isExpanded : !toggleStatus),
+    [isAlertsPageChartsEnabled, isExpanded, toggleStatus]
   );
 
   const status: boolean = useMemo(() => {
@@ -149,6 +142,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
               skip={querySkip}
               groupBySelection={groupBySelection}
               setGroupBySelection={setGroupBySelection}
+              addFilter={addFilter}
             />
           </StyledFlexItem>
         </StyledFlexGroup>

@@ -10,7 +10,7 @@ import { EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { CompareFieldsTable } from '../../../compare_fields_table';
-import { getCommonTableColumns } from '../../../compare_fields_table/helpers';
+import { getCommonTableColumns } from '../../../compare_fields_table/get_common_table_columns';
 import { EmptyPromptBody } from '../../index_properties/empty_prompt_body';
 import { EmptyPromptTitle } from '../../index_properties/empty_prompt_title';
 import * as i18n from '../../index_properties/translations';

@@ -60,6 +60,7 @@ import { HttpStart } from '@kbn/core/public';
 import { getEmptyValue } from '../../../common/empty_value';
 
 import * as i18n from './translations';
+import { EntryFieldError } from './reducer';
 
 const FieldFlexItem = styled(EuiFlexItem)`
   overflow: hidden;
@@ -81,7 +82,7 @@ export interface EntryItemProps {
   ) => DataViewBase;
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
-  setErrorsExist: (arg: boolean) => void;
+  setErrorsExist: (arg: EntryFieldError) => void;
   setWarningsExist: (arg: boolean) => void;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
@@ -110,9 +111,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
   const handleError = useCallback(
     (err: boolean): void => {
-      setErrorsExist(err);
+      setErrorsExist({ [entry.id]: err });
     },
-    [setErrorsExist]
+    [setErrorsExist, entry.id]
   );
   const handleWarning = useCallback(
     (warn: boolean): void => {
@@ -204,7 +205,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           isLoading={false}
           isDisabled={isDisabled || indexPattern == null}
           onChange={handleFieldChange}
-          acceptsCustomOptions={entry.nested == null}
+          acceptsCustomOptions={entry.nested == null && allowCustomOptions}
           data-test-subj="exceptionBuilderEntryField"
           showMappingConflicts={true}
         />
@@ -223,29 +224,40 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
               id={'1'}
               buttonContent={
                 <>
-                  <EuiIcon tabIndex={0} type="alert" size="s" css={warningIconCss} />
+                  <EuiIcon
+                    data-test-subj="mappingConflictsAccordionIcon"
+                    tabIndex={0}
+                    type="warning"
+                    size="s"
+                    css={warningIconCss}
+                  />
                   {i18n.FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION}
                 </>
               }
               arrowDisplay="none"
             >
-              {conflictsInfo.map((info) => {
-                const groupDetails = info.groupedIndices.map(
-                  ({ name, count }) =>
-                    `${count > 1 ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(name, count) : name}`
-                );
-                return (
-                  <>
-                    <EuiSpacer size="s" />
-                    {`${
-                      info.totalIndexCount > 1
-                        ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(info.type, info.totalIndexCount)
-                        : info.type
-                    }: ${groupDetails.join(', ')}`}
-                  </>
-                );
-              })}
-              <EuiSpacer size="s" />
+              <div data-test-subj="mappingConflictsDescription">
+                {conflictsInfo.map((info) => {
+                  const groupDetails = info.groupedIndices.map(
+                    ({ name, count }) =>
+                      `${count > 1 ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(name, count) : name}`
+                  );
+                  return (
+                    <>
+                      <EuiSpacer size="s" />
+                      {`${
+                        info.totalIndexCount > 1
+                          ? i18n.CONFLICT_MULTIPLE_INDEX_DESCRIPTION(
+                              info.type,
+                              info.totalIndexCount
+                            )
+                          : info.type
+                      }: ${groupDetails.join(', ')}`}
+                    </>
+                  );
+                })}
+                <EuiSpacer size="s" />
+              </div>
             </EuiAccordion>
           </>
         );
@@ -403,7 +415,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       case OperatorTypeEnum.WILDCARD:
         const wildcardValue = typeof entry.value === 'string' ? entry.value : undefined;
         let actualWarning: React.ReactNode | string | undefined;
-        if (listType !== 'detection') {
+        if (listType !== 'detection' && listType !== 'rule_default') {
           let os: OperatingSystem = OperatingSystem.WINDOWS;
           if (osTypes) {
             [os] = osTypes as OperatingSystem[];
