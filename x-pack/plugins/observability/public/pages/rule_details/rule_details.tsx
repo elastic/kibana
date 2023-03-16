@@ -307,7 +307,7 @@ export function RuleDetailsPage() {
     return (
       <EuiPanel>
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           color="danger"
           title={
             <h2>

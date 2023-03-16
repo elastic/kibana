@@ -28,7 +28,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
-import { DEFAULT_DATE_FORMAT } from '../constants';
 import type { TopAlert } from '../../../typings/alerts';
 
 export interface AlertSummaryField {
@@ -39,6 +38,8 @@ export interface AlertSummaryProps {
   alert: TopAlert | null;
   alertSummaryFields?: AlertSummaryField[];
 }
+
+const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 const getAndFormatAlertSummaryBasicFields = (alert: TopAlert | null): React.ReactElement => {
   const tags = alert?.fields[ALERT_RULE_TAGS];

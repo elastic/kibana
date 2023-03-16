@@ -22,9 +22,6 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
 
   const config: ConfigSchema = {
     unsafe: {
-      slo: {
-        enabled: false,
-      },
       alertDetails: {
         apm: { enabled: false },
         logs: { enabled: false },
@@ -77,6 +74,9 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
           get: (setting: string) => {
             if (setting === 'dateFormat') {
               return 'MMM D, YYYY @ HH:mm:ss.SSS';
+            }
+            if (setting === 'format:percent:defaultPattern') {
+              return '0,0.[000]%';
             }
           },
         },
