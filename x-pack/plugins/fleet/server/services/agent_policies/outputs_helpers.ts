@@ -59,7 +59,9 @@ export async function validateOutputForPolicy(
   if (isOutputTypeRestricted) {
     const dataOutput = await getDataOutputForAgentPolicy(soClient, data);
     if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
-      throw new OutputInvalidError(`${dataOutput.type} output is not usable with that policy.`);
+      throw new OutputInvalidError(
+        `Output of type "${dataOutput.type}" is not usable with policy "${data.name}"`
+      );
     }
   }
 

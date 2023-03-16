@@ -631,7 +631,12 @@ class AgentPolicyService {
   public async bumpAllAgentPolicies(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    options?: { user?: AuthenticatedUser; policiesToExclude?: string[]; outputId?: string }
+    options?: {
+      user?: AuthenticatedUser;
+      policiesToExclude?: string[];
+      outputId?: string;
+      monitoringOutputId?: string;
+    }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
@@ -647,10 +652,10 @@ class AgentPolicyService {
       policiesToUpdate = currentPolicies.saved_objects;
     }
     let additionalOptions = {};
-    if (options?.outputId) {
+    if (options?.outputId || options?.monitoringOutputId) {
       additionalOptions = {
         data_output_id: options?.outputId,
-        monitoring_output_id: options?.outputId,
+        monitoring_output_id: options?.monitoringOutputId,
       };
     }
 
