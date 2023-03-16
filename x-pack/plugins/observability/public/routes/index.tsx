@@ -20,7 +20,7 @@ import { RuleDetailsPage } from '../pages/rule_details';
 import { AlertingPages } from '../config';
 import { AlertDetails } from '../pages/alert_details/alert_details';
 import { DatePickerContextProvider } from '../context/date_picker_context';
-import { SlosPage } from '../pages/slos';
+import { SlosPage } from '../pages/slos/slos';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';
 import { SloEditPage } from '../pages/slo_edit/slo_edit';
 
