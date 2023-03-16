@@ -66,6 +66,7 @@ describe('useGetEndpointActionList hook', () => {
         pageSize: 20,
         startDate: 'now-5d',
         userIds: ['*elastic*', '*citsale*'],
+        withRuleActions: true,
       },
     });
   });

@@ -89,7 +89,7 @@ export const ActionsLogFilters = memo(
             onClick={() => {
               toggleDisplayAutomatedResponses(!displayAutomatedResponses);
             }}
-            data-test-subj={dataTestSubj}
+            data-test-subj={getTestId('automated-responses-filter')}
           >
             <FormattedMessage
               // TODO:
@@ -102,6 +102,7 @@ export const ActionsLogFilters = memo(
     }, [
       dataTestSubj,
       displayAutomatedResponses,
+      getTestId,
       isFlyout,
       onChangeCommandsFilter,
       onChangeHostsFilter,
