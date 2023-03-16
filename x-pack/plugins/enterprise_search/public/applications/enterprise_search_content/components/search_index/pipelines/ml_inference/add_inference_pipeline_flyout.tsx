@@ -157,7 +157,7 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
       ),
     },
     { // Fields
-      onClick: () => setAddInferencePipelineStep(AddInferencePipelineSteps.Configuration),
+      onClick: () => setAddInferencePipelineStep(AddInferencePipelineSteps.Fields),
       status: isPipelineDataValid ? 'complete' : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.fields.title',
