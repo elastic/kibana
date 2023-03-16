@@ -26,6 +26,9 @@ export const deleteProc: ProcedureDefinition<Context, DeleteIn<string>> = {
         request: version,
         latest: contentDefinition.version.latest,
       },
+      utils: {
+        getTransforms: ctx.getTransformsFactory(contentTypeId),
+      },
     };
     const result = await crudInstance.delete(storageContext, id, options);
 
