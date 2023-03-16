@@ -15,11 +15,11 @@ import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
 import { LazyAlertsFlyout } from '../../..';
 import { paths } from '../../../config/paths';
 
-interface Props {
+export interface CasesProps {
   permissions: CasesPermissions;
 }
 
-export const Cases = React.memo<Props>(({ permissions }) => {
+export function Cases({ permissions }: CasesProps) {
   const {
     application: { navigateToUrl },
     cases: {
@@ -44,15 +44,6 @@ export const Cases = React.memo<Props>(({ permissions }) => {
 
   return (
     <>
-      {alertLoading === false && alert && selectedAlertId !== '' && (
-        <Suspense fallback={null}>
-          <LazyAlertsFlyout
-            alert={alert}
-            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-            onClose={handleFlyoutClose}
-          />
-        </Suspense>
-      )}
       <CasesList
         basePath={casesPath}
         features={{ alerts: { sync: false, isExperimental: false } }}
@@ -73,8 +64,16 @@ export const Cases = React.memo<Props>(({ permissions }) => {
         showAlertDetails={handleShowAlertDetails}
         useFetchAlertData={useFetchAlertData}
       />
+
+      {alert && selectedAlertId !== '' && alertLoading === false ? (
+        <Suspense fallback={null}>
+          <LazyAlertsFlyout
+            alert={alert}
+            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+            onClose={handleFlyoutClose}
+          />
+        </Suspense>
+      ) : null}
     </>
   );
-});
-
-Cases.displayName = 'Cases';
+}

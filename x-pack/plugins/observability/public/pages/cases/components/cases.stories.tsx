@@ -8,7 +8,7 @@
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { Cases as Component } from './cases';
+import { Cases as Component, CasesProps } from './cases';
 
 export default {
   title: 'app/Cases',
@@ -16,9 +16,9 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props) => <Component {...props} />;
+const Template: ComponentStory<typeof Component> = (props: CasesProps) => <Component {...props} />;
 
-const defaultProps = {
+const defaultProps: CasesProps = {
   permissions: { read: true, all: true, create: true, delete: true, push: true, update: true },
 };
 
