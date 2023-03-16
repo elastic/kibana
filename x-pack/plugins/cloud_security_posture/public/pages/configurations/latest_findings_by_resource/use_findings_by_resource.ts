@@ -186,13 +186,13 @@ export const useFindingsByResource = (options: UseFindingsByResourceOptions) => 
         })
       );
 
-      if (!aggregations) throw new Error('expected aggregations to be defined');
+      if (!aggregations) throw new Error('Failed to aggregate by, missing resource id');
 
       if (
         !Array.isArray(aggregations.resources.buckets) ||
         !Array.isArray(aggregations.count.buckets)
       )
-        throw new Error('expected buckets to be an array');
+        throw new Error('Failed to group by, missing resource id');
 
       const page = aggregations.resources.buckets.map(createFindingsByResource);
 
