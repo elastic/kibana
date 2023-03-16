@@ -232,6 +232,7 @@ describe('alert_form', () => {
             <KibanaReactContext.Provider>
               <ActionForm
                 actions={initialAlert.actions}
+                clearActionParams={() => {}}
                 defaultActionGroupId={'default'}
                 setActionIdByIndex={(id: string, index: number) => {
                   initialAlert.actions[index].id = id;
