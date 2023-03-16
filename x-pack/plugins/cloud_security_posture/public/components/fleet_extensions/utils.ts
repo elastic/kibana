@@ -19,6 +19,7 @@ import {
   CLOUDBEAT_VULN_MGMT_AWS,
   SUPPORTED_POLICY_TEMPLATES,
   SUPPORTED_CLOUDBEAT_INPUTS,
+  CSPM_POLICY_TEMPLATE,
 } from '../../../common/constants';
 import { DEFAULT_AWS_VARS_GROUP } from './aws_credentials_form';
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
@@ -143,8 +144,13 @@ export const getPolicyTemplateInputOptions = (policyTemplate: CloudSecurityPolic
     disabled: o.disabled,
   }));
 
-export const getEnabledPostureInput = (policy: NewPackagePolicy, policyTemplate: string) => {
-  // Take first enabled input
+export const getEnabledPostureInput = (
+  policy: NewPackagePolicy,
+  policyTemplate: string = CSPM_POLICY_TEMPLATE
+) => {
+  // Looks for the enabled deployment (aka input). By default, all inputs are disabled.
+  // Initial state when all inputs are disabled is to choose the first available of the relevant policyTemplate
+  // Default selected policy template is CSPM
   const input =
     policy.inputs.find((i) => i.enabled) ||
     policy.inputs.find((i) => i.policy_template === policyTemplate) ||
