@@ -19,6 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
@@ -50,7 +51,7 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
     ({ hostName, severity }: { hostName: string; severity?: string }) =>
       openAlertsPageWithFilters([
         {
-          title: 'Host name',
+          title: i18n.OPEN_IN_ALERTS_TITLE_HOSTNAME,
           selectedOptions: [hostName],
           fieldName: 'host.name',
         },
@@ -58,9 +59,9 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
         ...(severity
           ? [
               {
-                title: 'Severity',
+                title: i18n.OPEN_IN_ALERTS_TITLE_SEVERITY,
                 selectedOptions: [severity],
-                fieldName: 'kibana.alert.severity',
+                fieldName: ALERT_SEVERITY,
               },
             ]
           : []),

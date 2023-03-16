@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { HeaderSection } from '../../../../common/components/header_section';
 
@@ -48,8 +49,6 @@ export type GetTableColumns = (params: {
 
 const DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID =
   'detection-response-rule-alerts-severity-table' as const;
-
-const KIBANA_ALERT_RULE_NAME = 'kibana.alert.rule.name';
 
 export const getTableColumns: GetTableColumns = ({
   getAppUrl,
@@ -129,9 +128,9 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
   const openRuleInAlertsPage = useCallback(
     (ruleName: string) =>
       openAlertsPageWithFilter({
-        title: 'Rule name',
+        title: i18n.OPEN_IN_ALERTS_TITLE_RULENAME,
         selectedOptions: [ruleName],
-        fieldName: KIBANA_ALERT_RULE_NAME,
+        fieldName: ALERT_RULE_NAME,
       }),
     [openAlertsPageWithFilter]
   );

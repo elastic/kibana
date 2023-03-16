@@ -19,6 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
@@ -49,7 +50,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
     ({ userName, severity }: { userName: string; severity?: string }) =>
       openAlertsPageWithFilters([
         {
-          title: 'Username',
+          title: i18n.OPEN_IN_ALERTS_TITLE_USERNAME,
           selectedOptions: [userName],
           fieldName: 'user.name',
         },
@@ -57,9 +58,9 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
         ...(severity
           ? [
               {
-                title: 'Severity',
+                title: i18n.OPEN_IN_ALERTS_TITLE_SEVERITY,
                 selectedOptions: [severity],
-                fieldName: 'kibana.alert.severity',
+                fieldName: ALERT_SEVERITY,
               },
             ]
           : []),

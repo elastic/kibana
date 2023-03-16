@@ -86,7 +86,7 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
             label={TOTAL_COUNT_OF_ALERTS}
             title={<ChartLabel count={count} />}
             totalCount={count}
-            onDonutPartitionClicked={onDonutPartitionClicked}
+            onPartitionClick={onDonutPartitionClicked}
           />
         )}
       </EuiFlexItem>

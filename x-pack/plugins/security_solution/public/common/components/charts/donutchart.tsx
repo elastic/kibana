@@ -53,8 +53,7 @@ export interface DonutChartProps {
   /**
    * provides the section name of a clicked donut ring partition
    */
-  onDonutPartitionClicked?: (level: string) => void;
-  onLabelClicked?: (label: string) => void;
+  onPartitionClick?: (level: string) => void;
   title: React.ReactElement | string | number | null;
   totalCount: number | null | undefined;
 }
@@ -159,7 +158,7 @@ export const DonutChart = ({
   height = 90,
   label,
   legendItems,
-  onDonutPartitionClicked,
+  onPartitionClick,
   title,
   totalCount,
 }: DonutChartProps) => {
@@ -167,21 +166,21 @@ export const DonutChart = ({
 
   const onElementClicked: ElementClickListener = useCallback(
     (event) => {
-      if (onDonutPartitionClicked) {
+      if (onPartitionClick) {
         const flattened = event.flat(2);
         const level =
           flattened.length > 0 &&
           'groupByRollup' in flattened[0] &&
-          flattened[0].groupByRollup != null
+          flattened[0]?.groupByRollup != null
             ? `${flattened[0].groupByRollup}`
             : '';
 
         if (!isEmpty(level.trim())) {
-          onDonutPartitionClicked(level.toLowerCase());
+          onPartitionClick(level.toLowerCase());
         }
       }
     },
-    [onDonutPartitionClicked]
+    [onPartitionClick]
   );
 
   return (

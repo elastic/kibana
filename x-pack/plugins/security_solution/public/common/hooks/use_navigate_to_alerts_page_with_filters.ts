@@ -17,13 +17,13 @@ export const useNavigateToAlertsPageWithFilters = () => {
   const { navigateTo } = useNavigation();
 
   return (filterItems: FilterItemObj | FilterItemObj[]) => {
-    const url = encode(
+    const urlFilterParams = encode(
       formatPageFilterSearchParam(Array.isArray(filterItems) ? filterItems : [filterItems])
     );
 
     navigateTo({
       deepLinkId: SecurityPageName.alerts,
-      path: `?${URL_PARAM_KEY.pageFilter}=${url}`,
+      path: `?${URL_PARAM_KEY.pageFilter}=${urlFilterParams}`,
     });
   };
 };
