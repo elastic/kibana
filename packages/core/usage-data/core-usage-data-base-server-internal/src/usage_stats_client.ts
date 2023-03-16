@@ -24,6 +24,7 @@ export type IncrementSavedObjectsImportOptions = BaseIncrementOptions & {
 /** @internal */
 export type IncrementSavedObjectsResolveImportErrorsOptions = BaseIncrementOptions & {
   createNewCopies: boolean;
+  compatibilityMode?: boolean;
 };
 
 /** @internal */

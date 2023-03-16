@@ -135,7 +135,7 @@ export const createSavedObjects = async <T>({
 
     // Indicates that the object has changed ID at some point with the original ID retained as the origin ID, so that
     // legacy URL alias is required to retrieve the object using its original ID.
-    const objectRequiresLegacyUrlAlias = result.originId && result.originId !== result.id;
+    const objectRequiresLegacyUrlAlias = !!result.originId && result.originId !== result.id;
     if (compatibilityMode && objectRequiresLegacyUrlAlias && objectSuccessfullyImported) {
       const legacyUrlAliasId = `${legacyUrlTargetNamespace}:${result.type}:${result.originId}`;
       legacyUrlAliases.set(legacyUrlAliasId, {

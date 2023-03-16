@@ -75,12 +75,14 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
   public resolveImportErrors({
     readStream,
     createNewCopies,
+    compatibilityMode,
     namespace,
     retries,
   }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
     return resolveSavedObjectsImportErrors({
       readStream,
       createNewCopies,
+      compatibilityMode,
       namespace,
       retries,
       objectLimit: this.#importSizeLimit,

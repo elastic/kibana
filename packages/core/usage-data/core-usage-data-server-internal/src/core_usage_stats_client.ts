@@ -157,8 +157,11 @@ export class CoreUsageStatsClient implements ICoreUsageStatsClient {
   public async incrementSavedObjectsResolveImportErrors(
     options: IncrementSavedObjectsResolveImportErrorsOptions
   ) {
-    const { createNewCopies } = options;
-    const counterFieldNames = [`createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`];
+    const { createNewCopies, compatibilityMode } = options;
+    const counterFieldNames = [
+      `createNewCopiesEnabled.${createNewCopies ? 'yes' : 'no'}`,
+      ...(!createNewCopies ? [`compatibilityModeEnabled.${compatibilityMode ? 'yes' : 'no'}`] : []), // the compatibilityMode option is ignored when createNewCopies is true
+    ];
     await this.updateUsageStats(counterFieldNames, RESOLVE_IMPORT_STATS_PREFIX, options);
   }
 

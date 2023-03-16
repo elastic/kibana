@@ -569,7 +569,7 @@ describe(`POST ${URL}`, () => {
   });
 
   describe('compatibilityMode enabled', () => {
-    it('imports objects and create legacy URL aliases for objects that changed IDs', async () => {
+    it('imports objects and creates legacy URL aliases for objects that changed IDs', async () => {
       const mockUuid = jest.requireMock('uuid');
       mockUuid.v4 = jest
         .fn()
@@ -692,7 +692,8 @@ describe(`POST ${URL}`, () => {
         warnings: [],
       });
       expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(2);
-      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      expect(savedObjectsClient.bulkCreate).toHaveBeenNthCalledWith(
+        1,
         [
           expect.objectContaining({
             type: 'visualization',
@@ -714,13 +715,14 @@ describe(`POST ${URL}`, () => {
         ],
         expect.any(Object) // options
       );
-      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+      expect(savedObjectsClient.bulkCreate).toHaveBeenNthCalledWith(
+        2,
         [expect.objectContaining(legacyUrlAliasObj2), expect.objectContaining(legacyUrlAliasObj3)],
         expect.any(Object) // options
       );
     });
 
-    it('imports objects and create legacy URL aliases only if object is created', async () => {
+    it('imports objects and creates legacy URL aliases only if object is created', async () => {
       const mockUuid = jest.requireMock('uuid');
       mockUuid.v4 = jest
         .fn()

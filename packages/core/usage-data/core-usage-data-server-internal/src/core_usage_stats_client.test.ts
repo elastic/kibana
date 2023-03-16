@@ -1041,6 +1041,7 @@ describe('CoreUsageStatsClient', () => {
           `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.total`,
           `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
           `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`,
         ],
         incrementOptions
       );
@@ -1053,9 +1054,16 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsResolveImportErrors({
         request,
         createNewCopies: true,
+        compatibilityMode: true,
       } as IncrementSavedObjectsResolveImportErrorsOptions);
-      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
-      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+      await usageStatsClient.incrementSavedObjectsResolveImportErrors({
+        request,
+        createNewCopies: false,
+        compatibilityMode: true,
+      } as IncrementSavedObjectsResolveImportErrorsOptions);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(2);
+      expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
+        1,
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
@@ -1063,6 +1071,20 @@ describe('CoreUsageStatsClient', () => {
           `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.total`,
           `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
           `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
+          // 'compatibilityModeEnabled.yes` and `compatibilityModeEnabled.no` when createNewCopies is true
+        ],
+        incrementOptions
+      );
+      expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
+        2,
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          `${RESOLVE_IMPORT_STATS_PREFIX}.total`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.total`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.compatibilityModeEnabled.yes`,
         ],
         incrementOptions
       );
@@ -1084,6 +1106,7 @@ describe('CoreUsageStatsClient', () => {
           `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.custom.total`,
           `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
           `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`,
         ],
         incrementOptions
       );
