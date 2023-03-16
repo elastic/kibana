@@ -68,6 +68,170 @@ describe('SlackParamsFields renders', () => {
     expect(screen.getByTestId('messageTextArea')).toHaveValue('some message');
   });
 
+  test('when useDefaultMessage is set to true and the default message changes, the underlying message is replaced with the default message, Webhook', () => {
+    const editAction = jest.fn();
+    const { rerender } = render(
+      <IntlProvider locale="en">
+        <SlackParamsFields
+          actionConnector={{ config: { type: 'webhook' } } as any}
+          actionParams={{ message: 'some text' }}
+          errors={{ message: [] }}
+          editAction={editAction}
+          index={0}
+          defaultMessage="default message"
+          messageVariables={[]}
+          useDefaultMessage={true}
+        />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('messageTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('messageTextArea')).toHaveValue('some text');
+
+    rerender(
+      <IntlProvider locale="en">
+        <SlackParamsFields
+          actionConnector={{ config: { type: 'webhook' } } as any}
+          actionParams={{ message: 'some text' }}
+          errors={{ message: [] }}
+          editAction={editAction}
+          index={0}
+          defaultMessage="some different default message"
+          messageVariables={[]}
+          useDefaultMessage={true}
+        />
+      </IntlProvider>
+    );
+    expect(editAction).toHaveBeenCalledWith('message', 'some different default message', 0);
+  });
+
+  test('when useDefaultMessage is set to true and the default message changes, the underlying message is replaced with the default message, Web API', () => {
+    const editAction = jest.fn();
+    const { rerender } = render(
+      <IntlProvider locale="en">
+        <SlackParamsFields
+          actionConnector={{ config: { type: 'web_api' } } as any}
+          actionParams={{
+            subAction: 'postMessage',
+            subActionParams: { channels: ['general'], text: 'some text' },
+          }}
+          errors={{ message: [] }}
+          editAction={editAction}
+          index={0}
+          defaultMessage="default message"
+          messageVariables={[]}
+          useDefaultMessage={true}
+        />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('webApiTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('webApiTextArea')).toHaveValue('some text');
+
+    rerender(
+      <IntlProvider locale="en">
+        <SlackParamsFields
+          actionConnector={{ config: { type: 'web_api' } } as any}
+          actionParams={{
+            subAction: 'postMessage',
+            subActionParams: { channels: ['general'], text: 'some text' },
+          }}
+          errors={{ message: [] }}
+          editAction={editAction}
+          index={0}
+          defaultMessage="some different default message"
+          messageVariables={[]}
+          useDefaultMessage={true}
+        />
+      </IntlProvider>
+    );
+    expect(editAction).toHaveBeenCalledWith(
+      'subActionParams',
+      { channels: ['general'], text: 'some different default message' },
+      0
+    );
+  });
+
+  test('when useDefaultMessage is set to false and the default message changes, the underlying message is not changed, Webhook', () => {
+    const editAction = jest.fn();
+    const { rerender } = render(
+      <IntlProvider locale="en">
+        <SlackParamsFields
+          actionConnector={{ config: { type: 'webhook' } } as any}
+          actionParams={{ message: 'some text' }}
+          errors={{ message: [] }}
+          editAction={editAction}
+          index={0}
+          defaultMessage="default message"
+          messageVariables={[]}
+          useDefaultMessage={false}
+        />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('messageTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('messageTextArea')).toHaveValue('some text');
+
+    rerender(
+      <IntlProvider locale="en">
+        <SlackParamsFields
+          actionConnector={{ config: { type: 'webhook' } } as any}
+          actionParams={{ message: 'some text' }}
+          errors={{ message: [] }}
+          editAction={editAction}
+          index={0}
+          defaultMessage="some different default message"
+          messageVariables={[]}
+          useDefaultMessage={false}
+        />
+      </IntlProvider>
+    );
+    expect(editAction).not.toHaveBeenCalled();
+  });
+
+  test('when useDefaultMessage is set to false and the default message changes, the underlying message is not changed, Web API', () => {
+    const editAction = jest.fn();
+    const { rerender } = render(
+      <IntlProvider locale="en">
+        <SlackParamsFields
+          actionConnector={{ config: { type: 'web_api' } } as any}
+          actionParams={{
+            subAction: 'postMessage',
+            subActionParams: { channels: ['general'], text: 'some text' },
+          }}
+          errors={{ message: [] }}
+          editAction={editAction}
+          index={0}
+          defaultMessage="default message"
+          messageVariables={[]}
+          useDefaultMessage={false}
+        />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId('webApiTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('webApiTextArea')).toHaveValue('some text');
+
+    rerender(
+      <IntlProvider locale="en">
+        <SlackParamsFields
+          actionConnector={{ config: { type: 'web_api' } } as any}
+          actionParams={{
+            subAction: 'postMessage',
+            subActionParams: { channels: ['general'], text: 'some text' },
+          }}
+          errors={{ message: [] }}
+          editAction={editAction}
+          index={0}
+          defaultMessage="some different default message"
+          messageVariables={[]}
+          useDefaultMessage={false}
+        />
+      </IntlProvider>
+    );
+    expect(editAction).not.toHaveBeenCalled();
+  });
+
   test('all params fields is rendered, Web API, postMessage', async () => {
     render(
       <IntlProvider locale="en">

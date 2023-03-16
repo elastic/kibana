@@ -38,17 +38,18 @@ export const SlackWebApiParamsFields: React.FunctionComponent<
   errors,
   messageVariables,
   defaultMessage,
+  useDefaultMessage,
 }) => {
   const { subAction, subActionParams } = actionParams;
   const { channels, text } = subActionParams ?? {};
   const { toasts } = useKibana().notifications;
 
   useEffect(() => {
-    if (!text && defaultMessage) {
+    if (useDefaultMessage || !text) {
       editAction('subActionParams', { channels, text: defaultMessage }, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [defaultMessage, useDefaultMessage]);
 
   if (!subAction) {
     editAction('subAction', 'postMessage', index);

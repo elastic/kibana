@@ -11,18 +11,25 @@ import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { WebhookParams } from '../../../common/slack/types';
 
-export const SlackWebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookParams>> = (
-  props
-) => {
-  const { actionParams, editAction, index, errors, messageVariables, defaultMessage } = props;
+export const SlackWebhookParamsFields: React.FunctionComponent<
+  ActionParamsProps<WebhookParams>
+> = ({
+  actionParams,
+  editAction,
+  index,
+  errors,
+  messageVariables,
+  defaultMessage,
+  useDefaultMessage,
+}) => {
   const { message } = actionParams;
 
   useEffect(() => {
-    if (!message && defaultMessage) {
+    if (useDefaultMessage || !message) {
       editAction('message', defaultMessage, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [defaultMessage, useDefaultMessage]);
 
   return (
     <TextAreaWithMessageVariables
