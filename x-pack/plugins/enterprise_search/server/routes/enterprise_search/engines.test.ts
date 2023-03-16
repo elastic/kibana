@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockDependencies, mockRequestHandler, MockRouter } from '../../__mocks__';
+import { mockDependencies, MockRouter } from '../../__mocks__';
 
 jest.mock('../../utils/fetch_enterprise_search', () => ({
   ...jest.requireActual('../../utils/fetch_enterprise_search'),
@@ -26,22 +26,42 @@ describe('engines routes', () => {
   describe('GET /internal/enterprise_search/engines', () => {
     let mockRouter: MockRouter;
 
+    const mockClient = {
+      asCurrentUser: {
+        transport: {
+          request: jest.fn(),
+        },
+      },
+    };
     beforeEach(() => {
       jest.clearAllMocks();
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: mockClient } }),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
       mockRouter = new MockRouter({
+        context,
         method: 'get',
         path: '/internal/enterprise_search/engines',
       });
-
       registerEnginesRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
     });
 
-    it('creates a request to the ent-search module', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+    it('List all engines creates a request to the ent-search-module', async () => {
+      mockClient.asCurrentUser.transport.request.mockImplementation(() => ({}));
+
+      await mockRouter.callRoute({});
+      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'GET',
         path: '/_application/search_application',
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          engines: {},
+        },
       });
     });
 
@@ -66,10 +86,21 @@ describe('engines routes', () => {
 
   describe('GET /internal/enterprise_search/engines/{engine_name}', () => {
     let mockRouter: MockRouter;
-
+    const mockClient = {
+      asCurrentUser: {
+        transport: {
+          request: jest.fn(),
+        },
+      },
+    };
     beforeEach(() => {
       jest.clearAllMocks();
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: mockClient } }),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
       mockRouter = new MockRouter({
+        context,
         method: 'get',
         path: '/internal/enterprise_search/engines/{engine_name}',
       });
@@ -80,9 +111,20 @@ describe('engines routes', () => {
       });
     });
 
-    it('creates a request to the ent-search module', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/_application/search_application/:engine_name',
+    it('List engine creates a request to the ent-search-module', async () => {
+      mockClient.asCurrentUser.transport.request.mockImplementation(() => ({}));
+      await mockRouter.callRoute({
+        params: { engine_name: 'engine-name' },
+      });
+
+      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/_application/search_application/engine-name',
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          engines: {},
+        },
       });
     });
 
@@ -101,10 +143,21 @@ describe('engines routes', () => {
 
   describe('PUT /internal/enterprise_search/engines/{engine_name}', () => {
     let mockRouter: MockRouter;
-
+    const mockClient = {
+      asCurrentUser: {
+        transport: {
+          request: jest.fn(),
+        },
+      },
+    };
     beforeEach(() => {
       jest.clearAllMocks();
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: mockClient } }),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
       mockRouter = new MockRouter({
+        context,
         method: 'put',
         path: '/internal/enterprise_search/engines/{engine_name}',
       });
@@ -115,9 +168,27 @@ describe('engines routes', () => {
       });
     });
 
-    it('creates a request to the ent-search module', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/_application/search_application/:engine_name',
+    it('Upsert engine creates a request to the ent-search module', async () => {
+      mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
+        acknowledged: true,
+      }));
+
+      await mockRouter.callRoute({
+        params: {
+          engine_name: 'engine-name',
+        },
+      });
+      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'PUT',
+        path: '/_application/search_application/engine-name',
+        body: {},
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          engines: {
+            acknowledged: true,
+          },
+        },
       });
     });
 
@@ -152,10 +223,21 @@ describe('engines routes', () => {
 
   describe('DELETE /internal/enterprise_search/engines/{engine_name}', () => {
     let mockRouter: MockRouter;
-
+    const mockClient = {
+      asCurrentUser: {
+        transport: {
+          request: jest.fn(),
+        },
+      },
+    };
     beforeEach(() => {
       jest.clearAllMocks();
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: mockClient } }),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
       mockRouter = new MockRouter({
+        context,
         method: 'delete',
         path: '/internal/enterprise_search/engines/{engine_name}',
       });
@@ -166,9 +248,26 @@ describe('engines routes', () => {
       });
     });
 
-    it('creates a request to the ent-search module', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/_application/search_application/:engine_name',
+    it('Delete creates a request to the ent-search module', async () => {
+      mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
+        acknowledged: true,
+      }));
+
+      await mockRouter.callRoute({
+        params: {
+          engine_name: 'engine-name',
+        },
+      });
+      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'DELETE',
+        path: '/engine-name',
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          engines: {
+            acknowledged: true,
+          },
+        },
       });
     });
 
@@ -185,12 +284,23 @@ describe('engines routes', () => {
     });
   });
 
-  describe('GET /internal/enterprise_search/engines/{engine_name}/search', () => {
+  describe('POST /internal/enterprise_search/engines/{engine_name}/search', () => {
     let mockRouter: MockRouter;
-
+    const mockClient = {
+      asCurrentUser: {
+        transport: {
+          request: jest.fn(),
+        },
+      },
+    };
     beforeEach(() => {
       jest.clearAllMocks();
+      const context = {
+        core: Promise.resolve({ elasticsearch: { client: mockClient } }),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
       mockRouter = new MockRouter({
+        context,
         method: 'post',
         path: '/internal/enterprise_search/engines/{engine_name}/search',
       });
@@ -200,9 +310,27 @@ describe('engines routes', () => {
         router: mockRouter.router,
       });
     });
-    it('creates a request to enterprise search', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/:engine_name/_search',
+    it('Search preview creates a request to ent-search-module', async () => {
+      mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
+        acknowledged: true,
+      }));
+
+      await mockRouter.callRoute({
+        params: {
+          engine_name: 'engine-name',
+        },
+      });
+      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/engine-name/_search/',
+        body: {},
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          engines: {
+            acknowledged: true,
+          },
+        },
       });
     });
 

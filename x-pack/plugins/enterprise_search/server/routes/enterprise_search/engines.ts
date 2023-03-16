@@ -40,11 +40,10 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
       const engines = await client.asCurrentUser.transport.request<EnterpriseSearchEnginesResponse>(
         {
           method: 'GET',
-          path: `/_application/search_application/`,
-          body: {},
+          path: `/_application/search_application`,
         }
       );
-      return response.ok({ body: engines });
+      return response.ok({ body: { engines } });
     })
   );
 
@@ -62,9 +61,8 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
       const engines = await client.asCurrentUser.transport.request<EnterpriseSearchEngineDetails>({
         method: 'GET',
         path: `/_application/search_application/${request.params.engine_name}`,
-        body: {},
       });
-      return response.ok({ body: engines });
+      return response.ok({ body: { engines } });
     })
   );
 
@@ -89,7 +87,7 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
           path: `/_application/search_application/${request.params.engine_name}`,
           body: {},
         });
-      return response.ok({ body: engines });
+      return response.ok({ body: { engines } });
     })
   );
 
@@ -106,10 +104,9 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
       const { client } = (await context.core).elasticsearch;
       const engines = await client.asCurrentUser.transport.request<AcknowledgeResponse>({
         method: 'DELETE',
-        path: `/_application/search_application/${request.params.engine_name}`,
-        body: {},
+        path: `/${request.params.engine_name}`,
       });
-      return response.ok({ body: engines });
+      return response.ok({ body: { engines } });
     })
   );
 
@@ -132,7 +129,7 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
         path: `/${request.params.engine_name}/_search/`,
         body: {},
       });
-      return response.ok({ body: engines });
+      return response.ok({ body: { engines } });
     })
   );
 
