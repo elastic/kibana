@@ -64,14 +64,59 @@ const executeTimeoutValidator = (argData: ParsedArgData): true | string => {
   }
 };
 
-const commandToCapabilitiesMap = new Map<ConsoleResponseActionCommands, EndpointCapabilities>([
-  ['isolate', 'isolation'],
-  ['release', 'isolation'],
-  ['kill-process', 'kill_process'],
-  ['suspend-process', 'suspend_process'],
-  ['processes', 'running_processes'],
-  ['get-file', 'get_file'],
-  ['execute', 'execute'],
+const commandToCapabilitiesPrivilegesMap = new Map<
+  ConsoleResponseActionCommands,
+  { capability: EndpointCapabilities; privilege: (privileges: EndpointPrivileges) => boolean }
+>([
+  [
+    'isolate',
+    {
+      capability: 'isolation',
+      privilege: (privileges: EndpointPrivileges) => privileges.canIsolateHost,
+    },
+  ],
+  [
+    'release',
+    {
+      capability: 'isolation',
+      privilege: (privileges: EndpointPrivileges) => privileges.canUnIsolateHost,
+    },
+  ],
+  [
+    'kill-process',
+    {
+      capability: 'kill_process',
+      privilege: (privileges: EndpointPrivileges) => privileges.canKillProcess,
+    },
+  ],
+  [
+    'suspend-process',
+    {
+      capability: 'suspend_process',
+      privilege: (privileges: EndpointPrivileges) => privileges.canSuspendProcess,
+    },
+  ],
+  [
+    'processes',
+    {
+      capability: 'running_processes',
+      privilege: (privileges: EndpointPrivileges) => privileges.canGetRunningProcesses,
+    },
+  ],
+  [
+    'get-file',
+    {
+      capability: 'get_file',
+      privilege: (privileges: EndpointPrivileges) => privileges.canWriteFileOperations,
+    },
+  ],
+  [
+    'execute',
+    {
+      capability: 'execute',
+      privilege: (privileges: EndpointPrivileges) => privileges.canWriteExecuteOperations,
+    },
+  ],
 ]);
 
 const getRbacControl = ({
@@ -81,23 +126,14 @@ const getRbacControl = ({
   commandName: ConsoleResponseActionCommands;
   privileges: EndpointPrivileges;
 }): boolean => {
-  const commandToPrivilegeMap = new Map<ConsoleResponseActionCommands, boolean>([
-    ['isolate', privileges.canIsolateHost],
-    ['release', privileges.canUnIsolateHost],
-    ['kill-process', privileges.canKillProcess],
-    ['suspend-process', privileges.canSuspendProcess],
-    ['processes', privileges.canGetRunningProcesses],
-    ['get-file', privileges.canWriteFileOperations],
-    ['execute', privileges.canWriteExecuteOperations],
-  ]);
-  return commandToPrivilegeMap.get(commandName as ConsoleResponseActionCommands) ?? false;
+  return Boolean(commandToCapabilitiesPrivilegesMap.get(commandName)?.privilege(privileges));
 };
 
 const capabilitiesAndPrivilegesValidator = (command: Command): true | string => {
   const privileges = command.commandDefinition.meta.privileges;
   const endpointCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
   const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
-  const responderCapability = commandToCapabilitiesMap.get(commandName);
+  const responderCapability = commandToCapabilitiesPrivilegesMap.get(commandName)?.capability;
   let errorMessage = '';
   if (!responderCapability) {
     errorMessage = errorMessage.concat(UPGRADE_ENDPOINT_FOR_RESPONDER);
@@ -155,7 +191,7 @@ export const getEndpointConsoleCommands = ({
   const isExecuteEnabled = ExperimentalFeaturesService.get().responseActionExecuteEnabled;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
-    const responderCapability = commandToCapabilitiesMap.get(commandName);
+    const responderCapability = commandToCapabilitiesPrivilegesMap.get(commandName)?.capability;
     if (responderCapability) {
       return endpointCapabilities.includes(responderCapability);
     }

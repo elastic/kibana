@@ -6,14 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { Type } from '@kbn/config-schema';
+import type { WithRequiredProperty } from '@kbn/utility-types';
 import type {
   IRouter,
   RouteConfig,
   RouteMethod,
   RequestHandler,
+  IKibanaResponse,
+  RouteConfigOptions,
   RouteValidatorFullConfig,
   RequestHandlerContextBase,
-  RouteConfigOptions,
+  RouteValidationFunction,
 } from '@kbn/core-http-server';
 
 type RqCtx = RequestHandlerContextBase;
@@ -39,53 +43,8 @@ export interface CreateVersionedRouterArgs<Ctx extends RqCtx = RqCtx> {
 /**
  * This interface is the starting point for creating versioned routers and routes
  *
- * @example
- * const versionedRouter = vtk.createVersionedRouter({ router });
+ * @example see ./example.ts
  *
- * ```ts
- * const versionedRoute = versionedRouter
- *   .post({
- *     path: '/api/my-app/foo/{id?}',
- *     options: { timeout: { payload: 60000 }, access: 'public' },
- *   })
- *   .addVersion(
- *     {
- *       version: '1',
- *       validate: {
- *         query: schema.object({
- *           name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
- *         }),
- *         params: schema.object({
- *           id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
- *         }),
- *         body: schema.object({ foo: schema.string() }),
- *       },
- *     },
- *     async (ctx, req, res) => {
- *       await ctx.fooService.create(req.body.foo, req.params.id, req.query.name);
- *       return res.ok({ body: { foo: req.body.foo } });
- *     }
- *   )
- *   // BREAKING CHANGE: { foo: string } => { fooString: string } in body
- *   .addVersion(
- *     {
- *       version: '2',
- *       validate: {
- *         query: schema.object({
- *           name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
- *         }),
- *         params: schema.object({
- *           id: schema.maybe(schema.string({ minLength: 10, maxLength: 13 })),
- *         }),
- *         body: schema.object({ fooString: schema.string() }),
- *       },
- *     },
- *     async (ctx, req, res) => {
- *       await ctx.fooService.create(req.body.fooString, req.params.id, req.query.name);
- *       return res.ok({ body: { fooName: req.body.fooString } });
- *     }
- *   )
- * ```
  * @experimental
  */
 export interface VersionHTTPToolkit {
@@ -99,13 +58,6 @@ export interface VersionHTTPToolkit {
     args: CreateVersionedRouterArgs<Ctx>
   ): VersionedRouter<Ctx>;
 }
-
-/**
- * Converts an input property from optional to required. Needed for making RouteConfigOptions['access'] required.
- */
-type WithRequiredProperty<Type, Key extends keyof Type> = Type & {
-  [Property in Key]-?: Type[Property];
-};
 
 /**
  * Versioned route access flag, required
@@ -154,12 +106,39 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
   options: VersionedRouteRegistrar<'options', Ctx>;
 }
 
+/** @experimental */
+export type RequestValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
+
+/** @experimental */
+export interface ResponseValidation<R> {
+  body: RouteValidationFunction<R> | Type<R>;
+}
+
+/**
+ * Versioned route validation
+ * @experimental
+ */
+interface FullValidationConfig<P, Q, B, R> {
+  /**
+   * Validation to run against route inputs: params, query and body
+   * @experimental
+   */
+  request?: RequestValidation<P, Q, B>;
+  /**
+   * Validation to run against route output
+   * @note This validation is only intended to run in development. Do not use this
+   *       for setting default values!
+   * @experimental
+   */
+  response?: ResponseValidation<R>;
+}
+
 /**
  * Options for a versioned route. Probably needs a lot more options like sunsetting
  * of an endpoint etc.
  * @experimental
  */
-export interface AddVersionOpts<P, Q, B, Method extends RouteMethod = RouteMethod> {
+export interface AddVersionOpts<P, Q, B, R> {
   /**
    * Version to assign to this route
    * @experimental
@@ -169,7 +148,7 @@ export interface AddVersionOpts<P, Q, B, Method extends RouteMethod = RouteMetho
    * Validation for this version of a route
    * @experimental
    */
-  validate: false | RouteValidatorFullConfig<P, Q, B>;
+  validate: false | FullValidationConfig<P, Q, B, R>;
 }
 
 /**
@@ -187,8 +166,8 @@ export interface VersionedRoute<
    * @returns A versioned route, allows for fluent chaining of version declarations
    * @experimental
    */
-  addVersion<P, Q, B>(
-    opts: AddVersionOpts<P, Q, B>,
-    handler: RequestHandler<P, Q, B, Ctx>
+  addVersion<P, Q, B, R>(
+    options: AddVersionOpts<P, Q, B, R>,
+    handler: (...params: Parameters<RequestHandler<P, Q, B, Ctx>>) => Promise<IKibanaResponse<R>>
   ): VersionedRoute<Method, Ctx>;
 }

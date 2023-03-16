@@ -6,14 +6,15 @@
  */
 
 import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import React from 'react';
-import { DEFAULT_DATE_FORMAT } from '../constants';
-import { toHighPrecisionPercentage } from '../helpers/number';
 
+import { toBudgetingMethodLabel, toIndicatorTypeLabel } from '../../../utils/slo/labels';
+import { toDurationLabel } from '../../../utils/slo/labels';
+import { useKibana } from '../../../utils/kibana_react';
 import { OverviewItem } from './overview_item';
 
 export interface Props {
@@ -21,9 +22,13 @@ export interface Props {
 }
 
 export function Overview({ slo }: Props) {
+  const { uiSettings } = useKibana().services;
+  const dateFormat = uiSettings.get('dateFormat');
+  const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const hasNoData = slo.summary.status === 'NO_DATA';
+
   return (
-    <EuiPanel paddingSize="none" color="transparent">
+    <EuiPanel paddingSize="none" color="transparent" data-test-subj="overview">
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexGroup direction="row" alignItems="flexStart">
           <OverviewItem
@@ -38,8 +43,8 @@ export function Overview({ slo }: Props) {
               {
                 defaultMessage: '{value} (objective is {objective})',
                 values: {
-                  value: hasNoData ? '-' : `${toHighPrecisionPercentage(slo.summary.sliValue)}%`,
-                  objective: `${toHighPrecisionPercentage(slo.objective.target)}%`,
+                  value: hasNoData ? '-' : numeral(slo.summary.sliValue).format(percentFormat),
+                  objective: numeral(slo.objective.target).format(percentFormat),
                 },
               }
             )}
@@ -66,7 +71,7 @@ export function Overview({ slo }: Props) {
                 defaultMessage: 'Budgeting method',
               }
             )}
-            subtitle={toBudgetingMethod(slo.budgetingMethod)}
+            subtitle={toBudgetingMethodLabel(slo.budgetingMethod)}
           />
         </EuiFlexGroup>
 
@@ -81,13 +86,13 @@ export function Overview({ slo }: Props) {
             title={i18n.translate('xpack.observability.slo.sloDetails.overview.createdAtTitle', {
               defaultMessage: 'Created at',
             })}
-            subtitle={moment(slo.createdAt).format(DEFAULT_DATE_FORMAT)}
+            subtitle={moment(slo.createdAt).format(dateFormat)}
           />
           <OverviewItem
             title={i18n.translate('xpack.observability.slo.sloDetails.overview.updatedAtTitle', {
               defaultMessage: 'Last update at',
             })}
-            subtitle={moment(slo.updatedAt).format(DEFAULT_DATE_FORMAT)}
+            subtitle={moment(slo.updatedAt).format(dateFormat)}
           />
           <OverviewItem
             title={i18n.translate('xpack.observability.slo.sloDetails.overview.tagsTitle', {
@@ -106,7 +111,7 @@ function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): st
     return i18n.translate('xpack.observability.slo.sloDetails.overview.rollingTimeWindow', {
       defaultMessage: '{duration} rolling',
       values: {
-        duration: timeWindow.duration,
+        duration: toDurationLabel(timeWindow.duration),
       },
     });
   }
@@ -116,42 +121,5 @@ function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): st
     values: {
       duration: timeWindow.duration,
     },
-  });
-}
-
-function toIndicatorTypeLabel(indicatorType: SLOWithSummaryResponse['indicator']['type']): string {
-  switch (indicatorType) {
-    case 'sli.kql.custom':
-      return i18n.translate('xpack.observability.slo.sloDetails.overview.customKqlIndicator', {
-        defaultMessage: 'Custom KQL',
-      });
-
-    case 'sli.apm.transactionDuration':
-      return i18n.translate('xpack.observability.slo.sloDetails.overview.apmLatencyIndicator', {
-        defaultMessage: 'APM latency',
-      });
-
-    case 'sli.apm.transactionErrorRate':
-      return i18n.translate(
-        'xpack.observability.slo.sloDetails.overview.apmAvailabilityIndicator',
-        {
-          defaultMessage: 'APM availability',
-        }
-      );
-    default:
-      assertNever(indicatorType);
-  }
-}
-
-function toBudgetingMethod(budgetingMethod: SLOWithSummaryResponse['budgetingMethod']): string {
-  if (budgetingMethod === 'occurrences') {
-    return i18n.translate(
-      'xpack.observability.slo.sloDetails.overview.occurrencesBudgetingMethod',
-      { defaultMessage: 'Occurrences' }
-    );
-  }
-
-  return i18n.translate('xpack.observability.slo.sloDetails.overview.timeslicesBudgetingMethod', {
-    defaultMessage: 'Timeslices',
   });
 }
