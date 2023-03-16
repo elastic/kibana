@@ -11,33 +11,38 @@ import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { ALERT_RULE_TYPE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { getTimeZone } from '../../../utils/get_time_zone';
-import { useFetchRule } from '../../../hooks/use_fetch_rule';
-import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
-import { useKibana } from '../../../utils/kibana_react';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
-import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 
-import { AlertSummary, HeaderActions, PageTitle } from '.';
-import { CenterJustifiedSpinner } from '../../rule_details/components/center_justified_spinner';
-import PageNotFound from '../../404';
+import { useKibana } from '../../utils/kibana_react';
+import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
+import { PageTitle } from './components/page_title';
+import { HeaderActions } from './components/header_actions';
+import { AlertSummary, AlertSummaryField } from './components/alert_summary';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
+import PageNotFound from '../404';
+import { getTimeZone } from '../../utils/get_time_zone';
+import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
+import { observabilityFeatureId } from '../../../common';
+import { paths } from '../../config/paths';
+import type { ObservabilityAppServices } from '../../application/types';
 
-import { ObservabilityAppServices } from '../../../application/types';
-import { AlertDetailsPathParams } from '../types';
-import { observabilityFeatureId } from '../../../../common';
-import { paths } from '../../../config/paths';
-import type { AlertSummaryField } from './alert_summary';
+interface AlertDetailsPathParams {
+  alertId: string;
+}
+
+export const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';
 
 export function AlertDetails() {
   const {
-    uiSettings,
-    http,
     cases: {
       helpers: { canUseCases },
       ui: { getCasesContext },
     },
+    http,
     triggersActionsUi: { ruleTypeRegistry },
+    uiSettings,
   } = useKibana<ObservabilityAppServices>().services;
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
@@ -79,7 +84,7 @@ export function AlertDetails() {
     return (
       <EuiPanel data-test-subj="alertDetailsError">
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           color="danger"
           title={
             <h2>

@@ -19,7 +19,7 @@ import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
 import { useLicense } from '../../hooks/use_license';
-import { SlosPage } from '.';
+import { SlosPage } from './slos';
 import { emptySloList, sloList } from '../../data/slo/slo';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
@@ -75,6 +75,13 @@ const mockKibana = () => {
         toasts: {
           addSuccess: mockAddSuccess,
           addError: mockAddError,
+        },
+      },
+      uiSettings: {
+        get: (settings: string) => {
+          if (settings === 'dateFormat') return 'YYYY-MM-DD';
+          if (settings === 'format:percent:defaultPattern') return '0.0%';
+          return '';
         },
       },
     },
