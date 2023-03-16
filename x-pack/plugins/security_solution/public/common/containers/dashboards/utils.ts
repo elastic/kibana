@@ -37,7 +37,7 @@ export const getSecuritySolutionTagId = async (
 };
 
 /**
- * Creates the security tag saved object and returns its id
+ * Creates the security tag saved object
  */
 export const createSecuritySolutionTag = async (
   tagsClient: SavedObjectsTaggingApi['client']
@@ -69,7 +69,7 @@ export const getSecurityDashboards = async (
 };
 
 /**
- * Request the security tag saved object and returns the id if exists
+ * Returns all the security tags saved objects
  */
 const getSecurityTags = async (
   savedObjectsClient: SavedObjectsClientContract
