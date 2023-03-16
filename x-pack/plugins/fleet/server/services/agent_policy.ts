@@ -641,10 +641,17 @@ class AgentPolicyService {
     let policiesToUpdate;
     if (options && options.policiesToExclude !== undefined) {
       policiesToUpdate = currentPolicies.saved_objects.filter(
-        (policy) => !options.policiesToExclude.includes(policy.id)
+        (policy) => !options?.policiesToExclude?.includes(policy.id)
       );
     } else {
       policiesToUpdate = currentPolicies.saved_objects;
+    }
+    let additionalOptions = {};
+    if (options?.outputId) {
+      additionalOptions = {
+        data_output_id: options?.outputId,
+        monitoring_output_id: options?.outputId,
+      };
     }
 
     const bumpedPolicies = policiesToUpdate.map((policy) => {
@@ -653,7 +660,7 @@ class AgentPolicyService {
         revision: policy.attributes.revision + 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user ? options.user.username : 'system',
-        data_output_id: options?.outputId,
+        ...additionalOptions,
       };
       return policy;
     });
