@@ -84,7 +84,7 @@ export function AlertDetails() {
     return (
       <EuiPanel data-test-subj="alertDetailsError">
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           color="danger"
           title={
             <h2>

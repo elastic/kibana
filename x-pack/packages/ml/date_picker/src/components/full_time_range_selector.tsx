@@ -110,7 +110,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE,
         apiPath
       );
-      if (typeof callback === 'function') {
+      if (typeof callback === 'function' && fullTimeRange !== undefined) {
         callback(fullTimeRange);
       }
     } catch (e) {

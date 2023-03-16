@@ -17,6 +17,8 @@ export interface PatchRulesOptions {
   nextParams: PatchRuleRequestBody;
   existingRule: RuleAlertType | null | undefined;
   allowMissingConnectorSecrets?: boolean;
+
+  shouldIncrementRevision?: boolean;
 }
 
 export const patchRules = async ({
@@ -24,6 +26,7 @@ export const patchRules = async ({
   existingRule,
   nextParams,
   allowMissingConnectorSecrets,
+  shouldIncrementRevision = true,
 }: PatchRulesOptions): Promise<PartialRule<RuleParams> | null> => {
   if (existingRule == null) {
     return null;
@@ -35,6 +38,7 @@ export const patchRules = async ({
     id: existingRule.id,
     data: patchedRule,
     allowMissingConnectorSecrets,
+    shouldIncrementRevision: () => shouldIncrementRevision,
   });
 
   if (nextParams.throttle !== undefined) {

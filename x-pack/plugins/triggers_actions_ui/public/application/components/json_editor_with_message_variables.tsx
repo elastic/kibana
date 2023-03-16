@@ -140,7 +140,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
     return (
       <>
         <EuiSpacer size="s" />
-        <EuiCallOut size="s" color="danger" iconType="alert" title={NO_EDITOR_ERROR_TITLE}>
+        <EuiCallOut size="s" color="danger" iconType="warning" title={NO_EDITOR_ERROR_TITLE}>
           <p>{NO_EDITOR_ERROR_MESSAGE}</p>
         </EuiCallOut>
         <EuiSpacer size="s" />

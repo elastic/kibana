@@ -7,14 +7,13 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiText } from '@elastic/eui';
-import { OVERVIEW_TAB_CONTENT_TEST_ID } from './test_ids';
+import { MitreAttack } from '../components/mitre_attack';
 
 /**
  * Overview view displayed in the document details expandable flyout right section
  */
 export const OverviewTab: FC = memo(() => {
-  return <EuiText data-test-subj={OVERVIEW_TAB_CONTENT_TEST_ID}>{'Overview tab'}</EuiText>;
+  return <MitreAttack />;
 });
 
 OverviewTab.displayName = 'OverviewTab';
