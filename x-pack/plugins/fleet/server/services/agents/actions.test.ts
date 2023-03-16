@@ -10,7 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../app_context';
 
-import { cancelAgentAction } from './actions';
+import { cancelAgentAction, getAgentsByActionsIds } from './actions';
 import { bulkUpdateAgents } from './crud';
 
 jest.mock('./crud');
@@ -112,6 +112,61 @@ describe('Agent actions', () => {
         ],
         {}
       );
+    });
+  });
+  describe('getAgentsByActionsIds', () => {
+    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+
+    it('should find agents by passing actions Ids', async () => {
+      esClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                action_id: 'action2',
+                agents: ['agent3', 'agent4'],
+                expiration: '2022-05-12T18:16:18.019Z',
+                type: 'UPGRADE',
+              },
+            },
+          ],
+        },
+      } as any);
+      const actionsIds = ['action2'];
+      expect(await getAgentsByActionsIds(esClientMock, actionsIds)).toEqual(['agent3', 'agent4']);
+    });
+
+    it('should find agents by passing multiple actions Ids', async () => {
+      esClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                action_id: 'action2',
+                agents: ['agent3', 'agent4'],
+                expiration: '2022-05-12T18:16:18.019Z',
+                type: 'UPGRADE',
+              },
+            },
+            {
+              _source: {
+                action_id: 'action3',
+                agents: ['agent5', 'agent6', 'agent7'],
+                expiration: '2022-05-12T18:16:18.019Z',
+                type: 'UNENROLL',
+              },
+            },
+          ],
+        },
+      } as any);
+      const actionsIds = ['action2', 'actions3'];
+      expect(await getAgentsByActionsIds(esClientMock, actionsIds)).toEqual([
+        'agent3',
+        'agent4',
+        'agent5',
+        'agent6',
+        'agent7',
+      ]);
     });
   });
 });

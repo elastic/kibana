@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
+import type { Version } from '../types';
+import { versionSchema } from './constants';
 
 import type { ProcedureSchemas } from './types';
 
@@ -14,6 +16,7 @@ export const deleteSchemas: ProcedureSchemas = {
     {
       contentTypeId: schema.string(),
       id: schema.string({ minLength: 1 }),
+      version: versionSchema,
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }
@@ -24,5 +27,6 @@ export const deleteSchemas: ProcedureSchemas = {
 export interface DeleteIn<T extends string = string, Options extends object = object> {
   contentTypeId: T;
   id: string;
+  version?: Version;
   options?: Options;
 }

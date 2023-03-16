@@ -24,9 +24,10 @@ import { CenterJustifiedSpinner } from '../../rule_details/components/center_jus
 import PageNotFound from '../../404';
 
 import { ObservabilityAppServices } from '../../../application/types';
-import { AlertDetailsPathParams, AlertSummaryField } from '../types';
+import { AlertDetailsPathParams } from '../types';
 import { observabilityFeatureId } from '../../../../common';
 import { paths } from '../../../config/paths';
+import type { AlertSummaryField } from './alert_summary';
 
 export function AlertDetails() {
   const {
@@ -78,7 +79,7 @@ export function AlertDetails() {
     return (
       <EuiPanel data-test-subj="alertDetailsError">
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           color="danger"
           title={
             <h2>
