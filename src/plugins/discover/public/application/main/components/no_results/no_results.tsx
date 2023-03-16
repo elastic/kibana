@@ -54,7 +54,7 @@ export function DiscoverNoResults({
           />
         }
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="discoverNoResultsError"
       >
         <EuiButton

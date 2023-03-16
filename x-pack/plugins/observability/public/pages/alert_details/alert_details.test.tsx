@@ -12,15 +12,15 @@ import { Chance } from 'chance';
 import { waitFor } from '@testing-library/react';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 
-import { Subset } from '../../../typings';
-import { render } from '../../../utils/test_helper';
-import { useKibana } from '../../../utils/kibana_react';
-import { kibanaStartMock } from '../../../utils/kibana_react.mock';
-import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
-import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+import { Subset } from '../../typings';
+import { render } from '../../utils/test_helper';
+import { useKibana } from '../../utils/kibana_react';
+import { kibanaStartMock } from '../../utils/kibana_react.mock';
+import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { AlertDetails } from './alert_details';
-import { ConfigSchema } from '../../../plugin';
-import { alert, alertWithNoData } from '../mock/alert';
+import { ConfigSchema } from '../../plugin';
+import { alert, alertWithNoData } from './mock/alert';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
 import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 
@@ -29,7 +29,7 @@ jest.mock('react-router-dom', () => ({
   useParams: jest.fn(),
 }));
 
-jest.mock('../../../utils/kibana_react');
+jest.mock('../../utils/kibana_react');
 const validationMethod = (): ValidationResult => ({ errors: {} });
 const ruleType: RuleTypeModel = {
   id: 'logs.alert.document.count',
@@ -61,8 +61,8 @@ const mockKibana = () => {
   });
 };
 
-jest.mock('../../../hooks/use_fetch_alert_detail');
-jest.mock('../../../hooks/use_fetch_rule', () => {
+jest.mock('../../hooks/use_fetch_alert_detail');
+jest.mock('../../hooks/use_fetch_rule', () => {
   return {
     useFetchRule: () => ({
       reloadRule: jest.fn(),
@@ -73,8 +73,8 @@ jest.mock('../../../hooks/use_fetch_rule', () => {
     }),
   };
 });
-jest.mock('../../../hooks/use_breadcrumbs');
-jest.mock('../../../hooks/use_get_user_cases_permissions', () => ({
+jest.mock('../../hooks/use_breadcrumbs');
+jest.mock('../../hooks/use_get_user_cases_permissions', () => ({
   useGetUserCasesPermissions: () => ({
     all: true,
     create: true,

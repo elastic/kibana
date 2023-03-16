@@ -18,7 +18,7 @@ import { ObservabilityExploratoryView } from '../components/shared/exploratory_v
 import { RulesPage } from '../pages/rules';
 import { RuleDetailsPage } from '../pages/rule_details';
 import { AlertingPages } from '../config';
-import { AlertDetails } from '../pages/alert_details';
+import { AlertDetails } from '../pages/alert_details/alert_details';
 import { DatePickerContextProvider } from '../context/date_picker_context';
 import { SlosPage } from '../pages/slos';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';

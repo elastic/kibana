@@ -8,10 +8,10 @@
 import React from 'react';
 import { ConnectorProvider } from '../application/context/connector_context';
 import { RuleAdd } from '../application/sections/rule_form';
-import type { ConnectorServices, RuleAddProps as AlertAddProps } from '../types';
+import type { ConnectorServices, RuleAddProps } from '../types';
 
-export const getAddAlertFlyoutLazy = (
-  props: AlertAddProps & { connectorServices: ConnectorServices }
+export const getAddRuleFlyoutLazy = (
+  props: RuleAddProps & { connectorServices: ConnectorServices }
 ) => {
   return (
     <ConnectorProvider value={{ services: props.connectorServices }}>
