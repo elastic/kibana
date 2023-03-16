@@ -10,7 +10,6 @@ export {
   initTransform,
   getContentManagmentServicesTransforms,
   compileServiceDefinitions,
-  validateVersion,
 } from './lib';
 
 export type {

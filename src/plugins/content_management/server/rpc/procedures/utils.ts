@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { validateVersion } from '@kbn/object-versioning';
+import { validateVersion } from '@kbn/object-versioning/lib/utils';
 import type { Version } from '@kbn/object-versioning';
 
 export const validateRequestVersion = (

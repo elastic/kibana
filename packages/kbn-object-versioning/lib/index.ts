@@ -13,8 +13,6 @@ export {
   compile as compileServiceDefinitions,
 } from './content_management_services_versioning';
 
-export { validateVersion } from './utils';
-
 export type { GetTransformsFn as ContentManagementGetTransformsFn } from './content_management_services_versioning';
 
 export type {

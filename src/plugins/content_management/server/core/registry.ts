@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { validateVersion } from '@kbn/object-versioning';
+import { validateVersion } from '@kbn/object-versioning/lib/utils';
 import { ContentType } from './content_type';
 import { EventBus } from './event_bus';
 import type { ContentStorage, ContentTypeDefinition } from './types';
