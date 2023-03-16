@@ -11,7 +11,7 @@ import { useHistory } from 'react-router-dom';
 import { DatePickerContextProvider } from '../context/date_picker_context';
 import { jsonRt } from './json_rt';
 import { AlertsPage } from '../pages/alerts/alerts';
-import { AlertDetails } from '../pages/alert_details';
+import { AlertDetails } from '../pages/alert_details/alert_details';
 import { CasesPage } from '../pages/cases/cases';
 import { OverviewPage } from '../pages/overview/overview';
 import { RulesPage } from '../pages/rules';
