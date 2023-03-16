@@ -7,10 +7,13 @@
  */
 
 export { initTransform } from './object_transform';
+
 export {
   getTransforms as getContentManagmentServicesTransforms,
   compile as compileServiceDefinitions,
 } from './content_management_services_versioning';
+
+export { validateVersion } from './utils';
 
 export type { GetTransformsFn as ContentManagementGetTransformsFn } from './content_management_services_versioning';
 
