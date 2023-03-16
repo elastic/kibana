@@ -31,7 +31,6 @@ export const JourneyStepScreenshotContainer = ({
   timestamp,
   checkGroup,
   stepStatus,
-  allStepsLoaded,
   initialStepNumber = 1,
   retryFetchOnRevisit = false,
   testNowMode,
@@ -68,7 +67,8 @@ export const JourneyStepScreenshotContainer = ({
   const isLoading =
     // failed steps oftentimes do not have an associated image; therefore we don't wait for the image loading to resolve
     // if status is `failed`
-    (!!imageResultLoading && stepStatus !== 'failed') || imageBackoffLoading;
+    (!!imageResultLoading && ![undefined, 'failed'].some((s) => s === stepStatus)) ||
+    imageBackoffLoading;
 
   return (
     <div ref={intersectionRef}>

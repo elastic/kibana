@@ -38,6 +38,7 @@ const testImageDataResult = {
 };
 
 describe('JourneyStepScreenshotContainer', () => {
+  afterEach(() => jest.clearAllMocks());
   let checkGroup: string;
   const { FETCH_STATUS } = observabilityPublic;
 
@@ -55,7 +56,13 @@ describe('JourneyStepScreenshotContainer', () => {
       jest
         .spyOn(observabilityPublic, 'useFetcher')
         .mockReturnValue({ status: fetchStatus, data: null, refetch: () => null, loading: true });
-      const { getByTestId } = render(<JourneyStepScreenshotContainer checkGroup={checkGroup} />);
+      jest.spyOn(retrieveHooks, 'useRetrieveStepImage').mockReturnValue({
+        imageResult: undefined,
+        isLoading: true,
+      });
+      const { getByTestId } = render(
+        <JourneyStepScreenshotContainer checkGroup={checkGroup} stepStatus="success" />
+      );
       expect(getByTestId('stepScreenshotPlaceholderLoading')).toBeInTheDocument();
     }
   );
@@ -64,6 +71,9 @@ describe('JourneyStepScreenshotContainer', () => {
     jest
       .spyOn(observabilityPublic, 'useFetcher')
       .mockReturnValue({ status: FETCH_STATUS.SUCCESS, data: null, refetch: () => null });
+    jest
+      .spyOn(retrieveHooks, 'useRetrieveStepImage')
+      .mockReturnValue({ imageResult: undefined, isLoading: false });
     const { getByTestId } = render(
       <JourneyStepScreenshotContainer checkGroup={checkGroup} allStepsLoaded={true} />
     );

@@ -76,6 +76,7 @@ export const EmptyThumbnail = ({
       ) : // when we're loading and `animateLoading` is false we simply render an un-animated div to fill the space
       isLoading ? (
         <div
+          data-test-subj="stepScreenshotPlaceholderLoading"
           style={{
             width: '100%',
           }}
