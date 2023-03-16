@@ -26,7 +26,7 @@ import { getSettings } from '../../settings';
 
 import { getPackageInfo, getPackages, getPackageUsageStats } from './get';
 
-const MockRegistry = Registry as jest.Mocked<typeof Registry>;
+const MockRegistry = jest.mocked(Registry);
 
 jest.mock('../../settings');
 
@@ -200,6 +200,7 @@ describe('When using EPM `get` services', () => {
       ]);
       MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
       MockRegistry.fetchInfo.mockResolvedValue({} as any);
+      MockRegistry.pkgToPkgKey.mockImplementation(({ name, version }) => `${name}-${version}`);
     });
 
     it('should return installed package that is not in registry with package info', async () => {
@@ -246,9 +247,27 @@ description: Elasticsearch description`,
         }
       });
       soClient.bulkGet.mockResolvedValue({
-        saved_objects: [],
+        saved_objects: [
+          {
+            id: 'test',
+            references: [],
+            type: 'epm-package-assets',
+            attributes: {
+              asset_path: 'elasticsearch-0.0.1/manifest.yml',
+              data_utf8: `
+name: elasticsearch
+version: 0.0.1
+title: Elastic
+description: Elasticsearch description
+format_version: 0.0.1
+owner: elastic`,
+            },
+          },
+        ],
       });
-
+      await getPackages({
+        savedObjectsClient: soClient,
+      });
       await expect(
         getPackages({
           savedObjectsClient: soClient,

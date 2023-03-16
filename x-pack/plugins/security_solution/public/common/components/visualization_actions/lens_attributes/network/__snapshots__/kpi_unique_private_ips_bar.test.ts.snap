@@ -40,7 +40,7 @@ Object {
                     Object {
                       "input": Object {
                         "language": "kuery",
-                        "query": "",
+                        "query": "destination.ip: *",
                       },
                       "label": "Dest.",
                     },
@@ -91,7 +91,7 @@ Object {
                     Object {
                       "input": Object {
                         "language": "kuery",
-                        "query": "",
+                        "query": "source.ip: *",
                       },
                       "label": "Src.",
                     },
@@ -106,23 +106,6 @@ Object {
       },
     },
     "filters": Array [
-      Object {
-        "meta": Object {
-          "alias": null,
-          "disabled": false,
-          "key": "host.id",
-          "negate": false,
-          "params": Object {
-            "query": "123",
-          },
-          "type": "phrase",
-        },
-        "query": Object {
-          "match_phrase": Object {
-            "host.id": "123",
-          },
-        },
-      },
       Object {
         "meta": Object {
           "alias": null,
@@ -200,6 +183,23 @@ Object {
                 },
               },
             ],
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
           },
         },
       },

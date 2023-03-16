@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
 import { SanitizedRule } from '../../common';
 
 /**
@@ -17,4 +16,4 @@ import { SanitizedRule } from '../../common';
  * originally registered to {@link PluginSetupContract.registerNavigation}.
  *
  */
-export type AlertNavigationHandler = (rule: SanitizedRule) => JsonObject | string;
+export type AlertNavigationHandler = (rule: SanitizedRule) => string;

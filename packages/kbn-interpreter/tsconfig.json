@@ -13,6 +13,7 @@
     "**/*.js"
   ],
   "kbn_references": [
+    "@kbn/safer-lodash-set",
   ],
   "exclude": [
     "target/**/*",

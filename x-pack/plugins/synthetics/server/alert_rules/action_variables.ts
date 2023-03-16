@@ -58,6 +58,7 @@ export const ACTION_VARIABLES = {
         defaultMessage: 'Link to a view showing further details and context on this alert',
       }
     ),
+    usesPublicBaseUrl: true,
   },
   [VIEW_IN_APP_URL]: {
     name: VIEW_IN_APP_URL,
@@ -67,6 +68,7 @@ export const ACTION_VARIABLES = {
         defaultMessage: 'Open alert details and context in Synthetics app.',
       }
     ),
+    usesPublicBaseUrl: true,
   },
   [RECOVERY_REASON]: {
     name: RECOVERY_REASON,

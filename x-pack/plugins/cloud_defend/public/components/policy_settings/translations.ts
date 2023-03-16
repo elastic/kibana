@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const enableControl = i18n.translate('xpack.cloudDefend.enableControl', {
-  defaultMessage: 'Enable BPF/LSM controls',
+  defaultMessage: 'Enable drift prevention',
 });
 
 export const enableControlHelp = i18n.translate('xpack.cloudDefend.enableControlHelp', {
   defaultMessage:
-    'Enables BPF/LSM control mechanism, for use with FIM and container drift prevention.',
+    'Toggles enablement of drift prevention policy to alert and/or block file operations.',
 });

@@ -26,6 +26,7 @@ disabled:
   - x-pack/test/functional_enterprise_search/cypress.config.ts
   - x-pack/test/defend_workflows_cypress/cli_config.ts
   - x-pack/test/defend_workflows_cypress/config.ts
+  - x-pack/test/defend_workflows_cypress/endpoint_config.ts
   - x-pack/test/defend_workflows_cypress/visual_config.ts
   - x-pack/test/osquery_cypress/cli_config.ts
   - x-pack/test/osquery_cypress/config.ts
@@ -358,3 +359,5 @@ enabled:
   - x-pack/performance/journeys/ecommerce_dashboard_saved_search_only.ts
   - x-pack/performance/journeys/ecommerce_dashboard_tsvb_gauge_only.ts
   - x-pack/performance/journeys/dashboard_listing_page.ts
+  - x-pack/performance/journeys/cloud_security_dashboard.ts
+  - x-pack/test/custom_branding/config.ts

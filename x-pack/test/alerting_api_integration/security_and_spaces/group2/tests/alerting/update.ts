@@ -127,12 +127,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                     connector_type_id: 'test.noop',
                     group: 'default',
                     params: {},
+                    uuid: response.body.actions[0].uuid,
                   },
                 ],
                 scheduled_task_id: createdAlert.scheduled_task_id,
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
+                revision: 1,
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
@@ -223,6 +225,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
+                revision: 1,
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
@@ -324,6 +327,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
+                revision: 1,
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
@@ -425,6 +429,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
+                revision: 1,
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
@@ -524,6 +529,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
+                revision: 1,
                 ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
                 ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });

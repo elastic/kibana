@@ -125,6 +125,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Unavailable',
       description: 'Displayed button text when a card option is unavailable.',
     }),
+    'euiCodeBlockAnnotations.ariaLabel': ({ lineNumber }: EuiValues) =>
+      i18n.translate('core.euiCodeBlockAnnotations.ariaLabel', {
+        defaultMessage: 'Click to view a code annotation for line {lineNumber}',
+        values: { lineNumber },
+        description:
+          'ARIA label for a button icon that toggles a popover annotation for a specific code line',
+      }),
     'euiCodeBlockCopy.copy': i18n.translate('core.euiCodeBlockCopy.copy', {
       defaultMessage: 'Copy',
       description: 'ARIA label for a button that copies source code text to the clipboard',

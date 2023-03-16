@@ -8,6 +8,7 @@
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,17 +25,27 @@ import {
   EuiEmptyPrompt,
   EuiButtonEmpty,
   EuiFlyoutFooter,
+  EuiSpacer,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
 import type { ActionStatus } from '../../../../types';
 import { useActionStatus } from '../hooks';
-import { useGetAgentPolicies, useStartServices } from '../../../../hooks';
+import {
+  useGetAgentPolicies,
+  useStartServices,
+  sendPostRetrieveAgentsByActions,
+} from '../../../../hooks';
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 
 import { Loading } from '../../components';
 
+import { getKuery } from '../utils/get_kuery';
+
+import { AGENT_STATUSES } from '../../services/agent_status';
+
 import { getTodayActions, getOtherDaysActions } from './agent_activity_helper';
+import { ViewErrors } from './view_errors';
 
 const FullHeightFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {
@@ -50,7 +61,10 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   onClose: () => void;
   onAbortSuccess: () => void;
   refreshAgentActivity: boolean;
-}> = ({ onClose, onAbortSuccess, refreshAgentActivity }) => {
+  setSearch: (search: string) => void;
+  setSelectedStatus: (status: string[]) => void;
+}> = ({ onClose, onAbortSuccess, refreshAgentActivity, setSearch, setSelectedStatus }) => {
+  const { notifications } = useStartServices();
   const { data: agentPoliciesData } = useGetAgentPolicies({
     perPage: SO_SEARCH_LIMIT,
   });
@@ -65,7 +79,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
     return policy?.name ?? policyId;
   };
 
-  const currentActionsEnriched = currentActions.map((a) => ({
+  const currentActionsEnriched: ActionStatus[] = currentActions.map((a) => ({
     ...a,
     newPolicyId: getAgentPolicyName(a.newPolicyId ?? ''),
   }));
@@ -76,6 +90,27 @@ export const AgentActivityFlyout: React.FunctionComponent<{
 
   const todayActions = getTodayActions(completedActions);
   const otherDays = getOtherDaysActions(completedActions);
+
+  const onClickViewAgents = async (action: ActionStatus) => {
+    try {
+      const { data } = await sendPostRetrieveAgentsByActions({ actionIds: [action.actionId] });
+      if (data?.items?.length) {
+        const kuery = getKuery({
+          selectedAgentIds: data.items,
+        });
+        setSearch(kuery);
+      }
+      setSelectedStatus(AGENT_STATUSES);
+
+      onClose();
+    } catch (err) {
+      notifications.toasts.addError(err, {
+        title: i18n.translate('xpack.fleet.agentActivityFlyout.error', {
+          defaultMessage: 'Error viewing selected agents',
+        }),
+      });
+    }
+  };
 
   return (
     <>
@@ -160,6 +195,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
               }
               actions={inProgressActions}
               abortUpgrade={abortUpgrade}
+              onClickViewAgents={onClickViewAgents}
             />
           ) : null}
           {todayActions.length > 0 ? (
@@ -172,6 +208,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
               }
               actions={todayActions}
               abortUpgrade={abortUpgrade}
+              onClickViewAgents={onClickViewAgents}
             />
           ) : null}
           {Object.keys(otherDays).map((day) => (
@@ -180,6 +217,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
               title={<FormattedDate value={day} year="numeric" month="short" day="2-digit" />}
               actions={otherDays[day]}
               abortUpgrade={abortUpgrade}
+              onClickViewAgents={onClickViewAgents}
             />
           ))}
         </FullHeightFlyoutBody>
@@ -206,7 +244,8 @@ const ActivitySection: React.FunctionComponent<{
   title: ReactNode;
   actions: ActionStatus[];
   abortUpgrade: (action: ActionStatus) => Promise<void>;
-}> = ({ title, actions, abortUpgrade }) => {
+  onClickViewAgents: (action: ActionStatus) => void;
+}> = ({ title, actions, abortUpgrade, onClickViewAgents }) => {
   return (
     <>
       <EuiPanel color="subdued" hasBorder={true} borderRadius="none">
@@ -220,9 +259,14 @@ const ActivitySection: React.FunctionComponent<{
             action={currentAction}
             abortUpgrade={abortUpgrade}
             key={currentAction.actionId}
+            onClickViewAgents={onClickViewAgents}
           />
         ) : (
-          <ActivityItem action={currentAction} key={currentAction.actionId} />
+          <ActivityItem
+            action={currentAction}
+            key={currentAction.actionId}
+            onClickViewAgents={onClickViewAgents}
+          />
         )
       )}
     </>
@@ -322,7 +366,10 @@ const inProgressDescription = (time?: string) => (
   />
 );
 
-const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ action }) => {
+const ActivityItem: React.FunctionComponent<{
+  action: ActionStatus;
+  onClickViewAgents: (action: ActionStatus) => void;
+}> = ({ action, onClickViewAgents }) => {
   const completeTitle = (
     <EuiText>
       <FormattedMessage
@@ -386,7 +433,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
     ROLLOUT_PASSED: {
       icon:
         action.nbAgentsFailed > 0 ? (
-          <EuiIcon size="m" type="alert" color="red" />
+          <EuiIcon size="m" type="warning" color="red" />
         ) : (
           <EuiIcon size="m" type="checkInCircleFilled" color="green" />
         ),
@@ -422,13 +469,13 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
         ),
     },
     FAILED: {
-      icon: <EuiIcon size="m" type="alert" color="red" />,
+      icon: <EuiIcon size="m" type="warning" color="red" />,
       title: completeTitle,
       titleColor: 'red',
       description: failedDescription,
     },
     CANCELLED: {
-      icon: <EuiIcon size="m" type="alert" color="grey" />,
+      icon: <EuiIcon size="m" type="warning" color="grey" />,
       titleColor: 'grey',
       title: (
         <EuiText>
@@ -454,7 +501,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
       ),
     },
     EXPIRED: {
-      icon: <EuiIcon size="m" type="alert" color="grey" />,
+      icon: <EuiIcon size="m" type="warning" color="grey" />,
       titleColor: 'grey',
       title: (
         <EuiText>
@@ -502,7 +549,14 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
             {displayByStatus[action.status].description}
           </EuiText>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {action.status === 'FAILED' && action.latestErrors && action.latestErrors.length > 0 ? (
+            <ViewErrors action={action} />
+          ) : null}
+        </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
     </EuiPanel>
   );
 };
@@ -510,7 +564,8 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
 export const UpgradeInProgressActivityItem: React.FunctionComponent<{
   action: ActionStatus;
   abortUpgrade: (action: ActionStatus) => Promise<void>;
-}> = ({ action, abortUpgrade }) => {
+  onClickViewAgents: (action: ActionStatus) => void;
+}> = ({ action, abortUpgrade, onClickViewAgents }) => {
   const { docLinks } = useStartServices();
   const [isAborting, setIsAborting] = useState(false);
   const onClickAbortUpgrade = useCallback(async () => {
@@ -596,6 +651,9 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               {showCancelButton ? (
                 <EuiButton
                   size="s"
@@ -615,4 +673,23 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
       </EuiFlexGroup>
     </EuiPanel>
   );
+};
+
+const ViewAgentsButton: React.FunctionComponent<{
+  action: ActionStatus;
+  onClickViewAgents: (action: ActionStatus) => void;
+}> = ({ action, onClickViewAgents }) => {
+  return action.type !== 'UPDATE_TAGS' ? (
+    <EuiButtonEmpty
+      size="m"
+      onClick={() => onClickViewAgents(action)}
+      flush="left"
+      data-test-subj="agentActivityFlyout.viewAgentsButton"
+    >
+      <FormattedMessage
+        id="xpack.fleet.agentActivityFlyout.viewAgentsButton"
+        defaultMessage="View Agents"
+      />
+    </EuiButtonEmpty>
+  ) : null;
 };

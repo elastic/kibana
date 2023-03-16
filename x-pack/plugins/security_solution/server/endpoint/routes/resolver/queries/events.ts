@@ -86,6 +86,7 @@ export class EventsQuery extends BaseResolverQuery {
     return {
       body: this.query(filters),
       index: this.indexPatterns,
+      allow_partial_search_results: true,
     };
   }
 

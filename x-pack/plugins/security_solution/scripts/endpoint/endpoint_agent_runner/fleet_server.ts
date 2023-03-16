@@ -36,6 +36,7 @@ import type {
   PostFleetServerHostsResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import chalk from 'chalk';
+import { dump } from './utils';
 import { isLocalhost } from '../common/localhost_services';
 import {
   fetchFleetAgents,
@@ -44,7 +45,12 @@ import {
 } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
-export const runFleetServerIfNeeded = async () => {
+export const runFleetServerIfNeeded = async (): Promise<
+  { fleetServerContainerId: string; fleetServerAgentPolicyId: string } | undefined
+> => {
+  let fleetServerContainerId;
+  let fleetServerAgentPolicyId;
+
   const {
     log,
     kibana: { isLocalhost: isKibanaOnLocalhost },
@@ -62,24 +68,26 @@ export const runFleetServerIfNeeded = async () => {
   }
 
   try {
-    const fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();
+    fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();
     const serviceToken = await generateFleetServiceToken();
 
     if (isKibanaOnLocalhost) {
       await configureFleetIfNeeded();
     }
 
-    await startFleetServerWithDocker({
+    fleetServerContainerId = await startFleetServerWithDocker({
       policyId: fleetServerAgentPolicyId,
       serviceToken,
     });
   } catch (error) {
-    log.error(error);
+    log.error(dump(error));
     log.indent(-4);
     throw error;
   }
 
   log.indent(-4);
+
+  return { fleetServerContainerId, fleetServerAgentPolicyId };
 };
 
 const isFleetServerEnrolled = async () => {
@@ -178,13 +186,14 @@ const generateFleetServiceToken = async (): Promise<string> => {
   return serviceToken;
 };
 
-const startFleetServerWithDocker = async ({
+export const startFleetServerWithDocker = async ({
   policyId,
   serviceToken,
 }: {
   policyId: string;
   serviceToken: string;
 }) => {
+  let containerId;
   const {
     log,
     localhostRealIp,
@@ -256,15 +265,15 @@ const startFleetServerWithDocker = async ({
 (This is ok if one was not running already)`);
       });
 
+    await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:8220`);
+
     log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
 
-    const containerId = (await execa('docker', dockerArgs)).stdout;
+    containerId = (await execa('docker', dockerArgs)).stdout;
 
     const fleetServerAgent = await waitForHostToEnroll(kbnClient, containerName);
 
     log.verbose(`Fleet server enrolled agent:\n${JSON.stringify(fleetServerAgent, null, 2)}`);
-
-    await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:8220`);
 
     log.info(`Done. Fleet Server is running and connected to Fleet.
   Container Name: ${containerName}
@@ -272,14 +281,17 @@ const startFleetServerWithDocker = async ({
 
   View running output:  ${chalk.bold(`docker attach ---sig-proxy=false ${containerName}`)}
   Shell access:         ${chalk.bold(`docker exec -it ${containerName} /bin/bash`)}
+  Kill container:       ${chalk.bold(`docker kill ${containerId}`)}
 `);
   } catch (error) {
-    log.error(error);
+    log.error(dump(error));
     log.indent(-4);
     throw error;
   }
 
   log.indent(-4);
+
+  return containerId;
 };
 
 const configureFleetIfNeeded = async () => {
@@ -339,7 +351,7 @@ const configureFleetIfNeeded = async () => {
       }
     }
   } catch (error) {
-    log.error(error);
+    log.error(dump(error));
     log.indent(-4);
     throw error;
   }
@@ -377,7 +389,7 @@ const addFleetServerHostToFleetSettings = async (
 
     return item;
   } catch (error) {
-    log.error(error);
+    log.error(dump(error));
     log.indent(-4);
     throw error;
   }

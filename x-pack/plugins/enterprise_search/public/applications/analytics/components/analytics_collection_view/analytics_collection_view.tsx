@@ -26,8 +26,8 @@ import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
-import { EuiButtonTo } from '../../../shared/react_router_helpers';
-import { COLLECTION_CREATION_PATH, COLLECTION_VIEW_PATH } from '../../routes';
+import { COLLECTION_VIEW_PATH } from '../../routes';
+import { AddAnalyticsCollection } from '../add_analytics_collections/add_analytics_collection';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../layout/page_template';
 
@@ -157,14 +157,7 @@ export const AnalyticsCollectionView: React.FC = () => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonTo fill iconType="plusInCircle" to={COLLECTION_CREATION_PATH}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.analytics.collections.collectionsView.create.buttonTitle',
-                {
-                  defaultMessage: 'Create new collection',
-                }
-              )}
-            </EuiButtonTo>
+            <AddAnalyticsCollection />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
@@ -204,16 +197,7 @@ export const AnalyticsCollectionView: React.FC = () => {
               )}
             </p>
           }
-          actions={[
-            <EuiButtonTo fill iconType="plusInCircle" to={COLLECTION_CREATION_PATH}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.analytics.collections.collectionsView.create.buttonTitle',
-                {
-                  defaultMessage: 'Create new collection',
-                }
-              )}
-            </EuiButtonTo>,
-          ]}
+          actions={[<AddAnalyticsCollection />]}
         />
       )}
     </EnterpriseSearchAnalyticsPageTemplate>

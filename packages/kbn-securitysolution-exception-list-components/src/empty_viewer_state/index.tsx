@@ -31,7 +31,7 @@ interface EmptyViewerStateProps {
   listType?: ListTypeText;
   isReadOnly: boolean;
   viewerStatus: ViewerStatus;
-  onCreateExceptionListItem?: () => void | null;
+  onEmptyButtonStateClick?: () => void | null;
 }
 
 const panelCss = css`
@@ -45,7 +45,7 @@ const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
   listType,
   isReadOnly,
   viewerStatus,
-  onCreateExceptionListItem,
+  onEmptyButtonStateClick,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -54,7 +54,7 @@ const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
       case ViewerStatus.ERROR: {
         return {
           color: 'danger' as ExpressionColor,
-          iconType: 'alert',
+          iconType: 'error',
           title: (
             <h2 data-test-subj="errorTitle">{title || i18n.EMPTY_VIEWER_STATE_ERROR_TITLE}</h2>
           ),
@@ -75,7 +75,7 @@ const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
           actions: [
             <EuiButton
               data-test-subj="emptyStateButton"
-              onClick={onCreateExceptionListItem}
+              onClick={onEmptyButtonStateClick}
               iconType="plusInCircle"
               color="primary"
               isDisabled={isReadOnly}
@@ -110,7 +110,7 @@ const EmptyViewerStateComponent: FC<EmptyViewerStateProps> = ({
     euiTheme.colors.darkestShade,
     title,
     body,
-    onCreateExceptionListItem,
+    onEmptyButtonStateClick,
     isReadOnly,
     buttonText,
     listType,

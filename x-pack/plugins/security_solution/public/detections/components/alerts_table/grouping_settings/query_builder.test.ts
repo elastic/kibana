@@ -43,20 +43,19 @@ describe('getAlertsGroupingQuery', () => {
     expect(groupingQuery).toStrictEqual({
       _source: false,
       aggs: {
-        alertsCount: {
-          terms: {
-            exclude: ['alerts'],
-            field: 'kibana.alert.rule.producer',
+        unitsCount: {
+          value_count: {
+            field: 'kibana.alert.rule.name',
           },
         },
-        groupsNumber: {
+        groupsCount: {
           cardinality: {
             field: 'kibana.alert.rule.name',
           },
         },
-        stackByMultipleFields0: {
+        groupByFields: {
           aggs: {
-            alertsCount: {
+            unitsCount: {
               cardinality: {
                 field: 'kibana.alert.uuid',
               },
@@ -95,6 +94,7 @@ describe('getAlertsGroupingQuery', () => {
             },
           },
           multi_terms: {
+            size: 10000,
             terms: [
               {
                 field: 'kibana.alert.rule.name',
@@ -180,20 +180,19 @@ describe('getAlertsGroupingQuery', () => {
     expect(groupingQuery).toStrictEqual({
       _source: false,
       aggs: {
-        alertsCount: {
-          terms: {
-            exclude: ['alerts'],
-            field: 'kibana.alert.rule.producer',
+        unitsCount: {
+          value_count: {
+            field: 'process.name',
           },
         },
-        groupsNumber: {
+        groupsCount: {
           cardinality: {
             field: 'process.name',
           },
         },
-        stackByMultipleFields0: {
+        groupByFields: {
           aggs: {
-            alertsCount: {
+            unitsCount: {
               cardinality: {
                 field: 'kibana.alert.uuid',
               },

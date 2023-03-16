@@ -9,7 +9,7 @@ import { ProvidedType } from '@kbn/test';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export type MlFieldStatsFlyout = ProvidedType<typeof MachineLearningFieldStatsFlyoutProvider>;
+export type MlCommonFieldStatsFlyout = ProvidedType<typeof MachineLearningFieldStatsFlyoutProvider>;
 
 export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');

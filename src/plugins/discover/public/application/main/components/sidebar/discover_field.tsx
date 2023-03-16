@@ -49,7 +49,7 @@ const FieldInfoIcon: React.FC = memo(() => (
   >
     <EuiIcon
       tabIndex={0}
-      type="alert"
+      type="warning"
       title={i18n.translate('discover.field.mappingConflict.title', {
         defaultMessage: 'Mapping Conflict',
       })}
@@ -232,7 +232,7 @@ export interface DiscoverFieldProps {
    */
   onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
   /**
-   * Callback to remove/deselect a the field
+   * Callback to remove a field column from the table
    * @param fieldName
    */
   onRemoveField: (fieldName: string) => void;

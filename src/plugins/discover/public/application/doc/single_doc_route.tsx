@@ -55,7 +55,7 @@ export const SingleDocRoute = () => {
   if (error) {
     return (
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         iconColor="danger"
         title={
           <FormattedMessage

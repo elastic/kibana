@@ -145,6 +145,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                     connector_type_id: response.body.actions[0].connector_type_id,
                     group: 'default',
                     params: {},
+                    uuid: response.body.actions[0].uuid,
                   },
                 ],
                 enabled: true,
@@ -164,6 +165,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
+                revision: 0,
                 last_run: {
                   alerts_count: {
                     active: 0,

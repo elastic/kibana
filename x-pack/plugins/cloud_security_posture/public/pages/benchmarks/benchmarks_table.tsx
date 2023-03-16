@@ -159,7 +159,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
   {
     field: 'package_policy.created_at',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.createdAtColumnTitle', {
-      defaultMessage: 'Created at',
+      defaultMessage: 'Created',
     }),
     dataType: 'date',
     truncateText: true,

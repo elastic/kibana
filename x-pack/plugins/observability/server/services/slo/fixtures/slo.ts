@@ -48,7 +48,7 @@ export const createAPMTransactionDurationIndicator = (
     service: 'irrelevant',
     transactionName: 'irrelevant',
     transactionType: 'irrelevant',
-    'threshold.us': 500000,
+    threshold: 500,
     ...params,
   },
 });

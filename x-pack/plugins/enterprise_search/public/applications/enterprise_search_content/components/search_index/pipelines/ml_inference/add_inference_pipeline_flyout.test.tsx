@@ -101,7 +101,7 @@ describe('AddInferencePipelineFlyout', () => {
       expect(wrapper.find(EuiCallOut)).toHaveLength(1);
       const errorCallout = wrapper.find(EuiCallOut);
       expect(errorCallout.prop('color')).toBe('danger');
-      expect(errorCallout.prop('iconType')).toBe('alert');
+      expect(errorCallout.prop('iconType')).toBe('error');
       expect(errorCallout.find('p')).toHaveLength(1);
       expect(errorCallout.find('p').text()).toBe(errorMsg);
     });

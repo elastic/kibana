@@ -12,7 +12,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should patch a single rule property of name using a rule_id', async () => {
@@ -54,6 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -70,6 +71,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         const outputRule = getSimpleMlRuleOutput();
         outputRule.version = 2;
+        // TODO: Followup to #147398
+        // NOTE: Once we remove `version` increment, revision will not be updated as `machine_learning_job_id` value doesn't actually change
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -87,6 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleMlRuleOutput();
         outputRule.name = 'some other name';
         outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -106,6 +111,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
         outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -123,6 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
         outputRule.version = 2;
+        outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -158,6 +165,7 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.enabled = false;
         outputRule.severity = 'low';
         outputRule.version = 2;
+        outputRule.revision = 1;
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
@@ -185,6 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.timeline_title = 'some title';
         outputRule.timeline_id = 'some id';
         outputRule.version = 3;
+        outputRule.revision = 2;
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(outputRule);
@@ -359,6 +368,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({ id: rule.id, enabled: false })
           .expect(200);
 
+        const bodyToCompare = removeServerGeneratedProperties(patchResponse.body);
         const outputRule = getSimpleRuleOutput();
         outputRule.actions = [
           {
@@ -369,10 +379,11 @@ export default ({ getService }: FtrProviderContext) => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
+            uuid: bodyToCompare.actions[0].uuid,
           },
         ];
         outputRule.throttle = '1h';
-        const bodyToCompare = removeServerGeneratedProperties(patchResponse.body);
+        outputRule.revision = 2; // Expected revision is 2 as call to `createLegacyRuleAction()` does two separate rules updates for `notifyWhen` & `actions` field
         expect(bodyToCompare).to.eql(outputRule);
       });
 

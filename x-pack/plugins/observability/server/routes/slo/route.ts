@@ -11,6 +11,7 @@ import {
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
   findSLOParamsSchema,
+  getSLODiagnosisParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
   updateSLOParamsSchema,
@@ -38,6 +39,7 @@ import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summ
 import type { IndicatorTypes } from '../../domain/models';
 import type { ObservabilityRequestHandlerContext } from '../../types';
 import { ManageSLO } from '../../services/slo/manage_slo';
+import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
@@ -52,7 +54,7 @@ const isLicenseAtLeastPlatinum = async (context: ObservabilityRequestHandlerCont
 const createSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos',
   options: {
-    tags: [],
+    tags: ['access:slo_write'],
   },
   params: createSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -77,7 +79,7 @@ const createSLORoute = createObservabilityServerRoute({
 const updateSLORoute = createObservabilityServerRoute({
   endpoint: 'PUT /api/observability/slos/{id}',
   options: {
-    tags: [],
+    tags: ['access:slo_write'],
   },
   params: updateSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -101,7 +103,7 @@ const updateSLORoute = createObservabilityServerRoute({
 const deleteSLORoute = createObservabilityServerRoute({
   endpoint: 'DELETE /api/observability/slos/{id}',
   options: {
-    tags: [],
+    tags: ['access:slo_write'],
   },
   params: deleteSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -124,7 +126,7 @@ const deleteSLORoute = createObservabilityServerRoute({
 const getSLORoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/slos/{id}',
   options: {
-    tags: [],
+    tags: ['access:slo_read'],
   },
   params: getSLOParamsSchema,
   handler: async ({ context, params }) => {
@@ -147,7 +149,7 @@ const getSLORoute = createObservabilityServerRoute({
 const enableSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/enable',
   options: {
-    tags: [],
+    tags: ['access:slo_write'],
   },
   params: manageSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -171,7 +173,7 @@ const enableSLORoute = createObservabilityServerRoute({
 const disableSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/disable',
   options: {
-    tags: [],
+    tags: ['access:slo_write'],
   },
   params: manageSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -195,7 +197,7 @@ const disableSLORoute = createObservabilityServerRoute({
 const findSLORoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/slos',
   options: {
-    tags: [],
+    tags: ['access:slo_read'],
   },
   params: findSLOParamsSchema,
   handler: async ({ context, params }) => {
@@ -218,7 +220,7 @@ const findSLORoute = createObservabilityServerRoute({
 const fetchHistoricalSummary = createObservabilityServerRoute({
   endpoint: 'POST /internal/observability/slos/_historical_summary',
   options: {
-    tags: [],
+    tags: ['access:slo_read'],
   },
   params: fetchHistoricalSummaryParamsSchema,
   handler: async ({ context, params }) => {
@@ -238,6 +240,34 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
   },
 });
 
+const getDiagnosisRoute = createObservabilityServerRoute({
+  endpoint: 'GET /internal/observability/slos/_diagnosis',
+  options: {
+    tags: [],
+  },
+  params: undefined,
+  handler: async ({ context }) => {
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const licensing = await context.licensing;
+
+    return getGlobalDiagnosis(esClient, licensing);
+  },
+});
+
+const getSloDiagnosisRoute = createObservabilityServerRoute({
+  endpoint: 'GET /internal/observability/slos/{id}/_diagnosis',
+  options: {
+    tags: [],
+  },
+  params: getSLODiagnosisParamsSchema,
+  handler: async ({ context, params }) => {
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const soClient = (await context.core).savedObjects.client;
+
+    return getSloDiagnosis(params.path.id, { esClient, soClient });
+  },
+});
+
 export const slosRouteRepository = {
   ...createSLORoute,
   ...deleteSLORoute,
@@ -247,4 +277,6 @@ export const slosRouteRepository = {
   ...findSLORoute,
   ...getSLORoute,
   ...updateSLORoute,
+  ...getDiagnosisRoute,
+  ...getSloDiagnosisRoute,
 };

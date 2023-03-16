@@ -7,7 +7,10 @@
 
 import stringify from 'json-stable-stringify';
 import React, { useMemo } from 'react';
-import { LogStreamPageActorRef } from '../../../observability_logs/log_stream_page/state';
+import {
+  LogStreamPageActorRef,
+  LogStreamPageCallbacks,
+} from '../../../observability_logs/log_stream_page/state';
 import { LogEntryFlyoutProvider } from '../../../containers/logs/log_flyout';
 import { LogHighlightsStateProvider } from '../../../containers/logs/log_highlights/log_highlights';
 import {
@@ -90,11 +93,15 @@ const LogHighlightsState: React.FC<{
 
 export const LogStreamPageContentProviders: React.FC<{
   logStreamPageState: InitializedLogStreamPageState;
-}> = ({ children, logStreamPageState }) => {
+  logStreamPageCallbacks: LogStreamPageCallbacks;
+}> = ({ children, logStreamPageState, logStreamPageCallbacks }) => {
   return (
     <LogViewConfigurationProvider>
       <LogEntryFlyoutProvider>
-        <LogPositionStateProvider>
+        <LogPositionStateProvider
+          logStreamPageState={logStreamPageState}
+          logStreamPageCallbacks={logStreamPageCallbacks}
+        >
           <ViewLogInContext>
             <LogEntriesStateProvider logStreamPageState={logStreamPageState}>
               <LogHighlightsState logStreamPageState={logStreamPageState}>
