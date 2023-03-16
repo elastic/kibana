@@ -478,13 +478,13 @@ const ActivityItem: React.FunctionComponent<{
             <p>
               <b>{action.policyId}</b>{' '}
               <FormattedMessage
-                id="xpack.fleet.agentActivityFlyout.policyChangeCompletedDescription"
-                defaultMessage="updated to revision {rev}."
+                id="xpack.fleet.agentActivityFlyout.policyChangedDescription"
+                defaultMessage="changed to revision {rev} at {date}."
                 values={{
                   rev: action.revision,
+                  date: formattedTime(action.creationTime),
                 }}
-              />{' '}
-              {completedDescription}
+              />
             </p>
           </EuiText>
         ) : (
