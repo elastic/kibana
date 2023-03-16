@@ -126,57 +126,57 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await ensureAlertIsRunning();
               break;
             case 'global_read at space1':
-              // await resetTaskStatus(migratedAlertId);
-              // await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
-              //
-              // await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
-              // await rescheduleTask(migratedAlertId);
-              //
-              // await ensureAlertIsRunning();
-              //
-              // await retry.try(async () => {
-              //   const updateResponse = await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
-              //   expect(updateResponse.statusCode).to.eql(200);
-              // });
-              //
-              // // attempt to update alert as user with no Alerts privileges - as it is no longer a legacy alert
-              // // this should fail, as the user doesn't have the `updateApiKey` privilege for Alerts
-              // const failedUpdateKeyDueToAlertsPrivilegesResponse =
-              //   await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
-              //
-              // expect(failedUpdateKeyDueToAlertsPrivilegesResponse.statusCode).to.eql(403);
-              // expect(failedUpdateKeyDueToAlertsPrivilegesResponse.body).to.eql({
-              //   error: 'Forbidden',
-              //   message:
-              //     'Unauthorized to updateApiKey a "test.always-firing" rule for "alertsFixture"',
-              //   statusCode: 403,
-              // });
+              await resetTaskStatus(migratedAlertId);
+              await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
+
+              await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
+              await rescheduleTask(migratedAlertId);
+
+              await ensureAlertIsRunning();
+
+              await retry.try(async () => {
+                const updateResponse = await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
+                expect(updateResponse.statusCode).to.eql(200);
+              });
+
+              // attempt to update alert as user with no Alerts privileges - as it is no longer a legacy alert
+              // this should fail, as the user doesn't have the `updateApiKey` privilege for Alerts
+              const failedUpdateKeyDueToAlertsPrivilegesResponse =
+                await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
+
+              expect(failedUpdateKeyDueToAlertsPrivilegesResponse.statusCode).to.eql(403);
+              expect(failedUpdateKeyDueToAlertsPrivilegesResponse.body).to.eql({
+                error: 'Forbidden',
+                message:
+                  'Unauthorized to updateApiKey a "test.always-firing" rule for "alertsFixture"',
+                statusCode: 403,
+              });
               break;
             case 'space_1_all_alerts_none_actions at space1':
-              // await resetTaskStatus(migratedAlertId);
-              // await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
-              //
-              // await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
-              // await rescheduleTask(migratedAlertId);
-              //
-              // await ensureAlertIsRunning();
-              //
-              // await retry.try(async () => {
-              //   const updateResponse = await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
-              //   expect(updateResponse.statusCode).to.eql(200);
-              // });
-              //
-              // // attempt to update alert as user with no Actions privileges - as it is no longer a legacy alert
-              // // this should fail, as the user doesn't have the `execute` privilege for Actions
-              // const failedUpdateKeyDueToActionsPrivilegesResponse =
-              //   await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
-              //
-              // expect(failedUpdateKeyDueToActionsPrivilegesResponse.statusCode).to.eql(403);
-              // expect(failedUpdateKeyDueToActionsPrivilegesResponse.body).to.eql({
-              //   error: 'Forbidden',
-              //   message: 'Unauthorized to execute actions',
-              //   statusCode: 403,
-              // });
+              await resetTaskStatus(migratedAlertId);
+              await ensureLegacyAlertHasBeenMigrated(migratedAlertId);
+
+              await updateMigratedAlertToUseApiKeyOfCurrentUser(migratedAlertId);
+              await rescheduleTask(migratedAlertId);
+
+              await ensureAlertIsRunning();
+
+              await retry.try(async () => {
+                const updateResponse = await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
+                expect(updateResponse.statusCode).to.eql(200);
+              });
+
+              // attempt to update alert as user with no Actions privileges - as it is no longer a legacy alert
+              // this should fail, as the user doesn't have the `execute` privilege for Actions
+              const failedUpdateKeyDueToActionsPrivilegesResponse =
+                await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
+
+              expect(failedUpdateKeyDueToActionsPrivilegesResponse.statusCode).to.eql(403);
+              expect(failedUpdateKeyDueToActionsPrivilegesResponse.body).to.eql({
+                error: 'Forbidden',
+                message: 'Unauthorized to execute actions',
+                statusCode: 403,
+              });
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
