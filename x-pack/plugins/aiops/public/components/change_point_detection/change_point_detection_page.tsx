@@ -100,7 +100,7 @@ export const ChangePointDetectionPage: FC = () => {
           values: { dataViewTitle: dataView.getName() },
         })}
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         <p>
           {i18n.translate('xpack.aiops.index.dataViewWithoutMetricNotificationDescription', {
@@ -162,7 +162,7 @@ export const ChangePointDetectionPage: FC = () => {
               defaultMessage: 'Analysis has been limited',
             })}
             color="warning"
-            iconType="alert"
+            iconType="warning"
           >
             <p>
               {i18n.translate('xpack.aiops.changePointDetection.cardinalityWarningMessage', {
@@ -247,7 +247,7 @@ export const ChangePointDetectionPage: FC = () => {
                         <EuiIcon
                           tabIndex={0}
                           color={'warning'}
-                          type="alert"
+                          type="warning"
                           title={i18n.translate(
                             'xpack.aiops.changePointDetection.notResultsWarning',
                             {

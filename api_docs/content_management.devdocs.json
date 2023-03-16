@@ -1695,6 +1695,44 @@
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.StorageContext.utils",
+            "type": "Object",
+            "tags": [],
+            "label": "utils",
+            "description": [],
+            "signature": [
+              "{ getTransforms: (definitions: ",
+              {
+                "pluginId": "@kbn/object-versioning",
+                "scope": "common",
+                "docId": "kibKbnObjectVersioningPluginApi",
+                "section": "def-common.ServiceDefinitionVersioned",
+                "text": "ServiceDefinitionVersioned"
+              },
+              ", requestVersion: number, _compiled?: { [path: string]: ",
+              {
+                "pluginId": "@kbn/object-versioning",
+                "scope": "common",
+                "docId": "kibKbnObjectVersioningPluginApi",
+                "section": "def-common.ObjectMigrationDefinition",
+                "text": "ObjectMigrationDefinition"
+              },
+              "; } | undefined) => ",
+              {
+                "pluginId": "@kbn/object-versioning",
+                "scope": "common",
+                "docId": "kibKbnObjectVersioningPluginApi",
+                "section": "def-common.ServiceTransforms",
+                "text": "ServiceTransforms"
+              },
+              "; }"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2110,7 +2148,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<any>"
+              "<any> | undefined"
             ],
             "path": "src/plugins/content_management/common/rpc/types.ts",
             "deprecated": false,

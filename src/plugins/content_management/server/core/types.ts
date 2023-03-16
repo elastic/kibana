@@ -7,15 +7,18 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-
-import type { Version } from '../../common';
+import type { ContentManagementGetTransformsFn } from '@kbn/object-versioning';
+import type { Version as LegacyVersion } from '../../common';
 
 /** Context that is sent to all storage instance methods */
 export interface StorageContext {
   requestHandlerContext: RequestHandlerContext;
   version: {
-    request: Version;
-    latest: Version;
+    request: LegacyVersion;
+    latest: LegacyVersion;
+  };
+  utils: {
+    getTransforms: ContentManagementGetTransformsFn;
   };
 }
 
@@ -45,6 +48,6 @@ export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage
   /** The storage layer for the content. It must implment the ContentStorage interface. */
   storage: S;
   version: {
-    latest: Version;
+    latest: LegacyVersion;
   };
 }

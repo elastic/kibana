@@ -17,7 +17,7 @@ exports[`Header should render normally 1`] = `
         <br />
         <span
           color="warning"
-          data-euiicon-type="alert"
+          data-euiicon-type="warning"
           style="margin-right: 4px;"
         />
         <span>
