@@ -16,7 +16,7 @@ import { CasesPage } from '../pages/cases/cases';
 import { OverviewPage } from '../pages/overview/overview';
 import { RulesPage } from '../pages/rules';
 import { RuleDetailsPage } from '../pages/rule_details';
-import { SlosPage } from '../pages/slos';
+import { SlosPage } from '../pages/slos/slos';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';
 import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
