@@ -29,13 +29,13 @@ import {
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import moment from 'moment-timezone';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { useKibana } from '../utils/kibana_react';
-import { asDuration } from '../../common/utils/formatters';
-import { paths } from '../config/paths';
-import { translations } from '../config/translations';
-import { formatAlertEvaluationValue } from '../utils/format_alert_evaluation_value';
-import { RULE_DETAILS_PAGE_ID } from '../pages/rule_details/rule_details';
-import type { TopAlert } from '../typings/alerts';
+import { useKibana } from '../../utils/kibana_react';
+import { asDuration } from '../../../common/utils/formatters';
+import { paths } from '../../config/paths';
+import { translations } from '../../config/translations';
+import { formatAlertEvaluationValue } from '../../utils/format_alert_evaluation_value';
+import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/rule_details';
+import type { TopAlert } from '../../typings/alerts';
 
 interface FlyoutProps {
   alert: TopAlert;

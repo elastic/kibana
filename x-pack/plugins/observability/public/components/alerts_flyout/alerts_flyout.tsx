@@ -12,9 +12,9 @@ import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { AlertsFlyoutHeader } from './alerts_flyout_header';
 import { AlertsFlyoutBody } from './alerts_flyout_body';
 import { AlertsFlyoutFooter } from './alerts_flyout_footer';
-import { parseAlert } from '../pages/alerts/helpers/parse_alert';
-import type { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
-import type { TopAlert } from '../typings/alerts';
+import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
+import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
+import type { TopAlert } from '../../typings/alerts';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;
@@ -24,7 +24,7 @@ type AlertsFlyoutProps = {
   selectedAlertId?: string;
 } & EuiFlyoutProps;
 
-export function AlertsFlyout({
+function AlertsFlyout({
   alert,
   alerts,
   isInApp = false,
