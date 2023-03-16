@@ -93,7 +93,7 @@ export class ConfirmDelete extends Component<Props> {
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
             data-test-subj="deleteManagedPolicyCallOut"
           >
             <p>

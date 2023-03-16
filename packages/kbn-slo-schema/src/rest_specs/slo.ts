@@ -118,6 +118,10 @@ const findSLOResponseSchema = t.type({
 const fetchHistoricalSummaryParamsSchema = t.type({ body: t.type({ sloIds: t.array(t.string) }) });
 const fetchHistoricalSummaryResponseSchema = t.record(t.string, t.array(historicalSummarySchema));
 
+const getSLODiagnosisParamsSchema = t.type({
+  path: t.type({ id: t.string }),
+});
+
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
@@ -147,6 +151,7 @@ export {
   deleteSLOParamsSchema,
   findSLOParamsSchema,
   findSLOResponseSchema,
+  getSLODiagnosisParamsSchema,
   getSLOParamsSchema,
   getSLOResponseSchema,
   fetchHistoricalSummaryParamsSchema,
