@@ -14,7 +14,7 @@ import {
 } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
-import { CustomPaletteState } from '@kbn/charts-plugin/common';
+import { AllowedSettingsOverriddes, CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/public';
 import type { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
 import {
@@ -96,7 +96,7 @@ export interface HeatmapExpressionProps {
   syncTooltips: boolean;
   syncCursor: boolean;
   canNavigateToLens?: boolean;
-  overrides?: AllowedHeatmapOverrides;
+  overrides?: AllowedSettingsOverriddes & AllowedHeatmapOverrides;
 }
 
 export interface HeatmapRender {

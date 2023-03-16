@@ -22,6 +22,7 @@ import {
   ESFixedIntervalUnit,
   ESCalendarIntervalUnit,
   PartialTheme,
+  SettingsProps,
 } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
@@ -36,6 +37,7 @@ import {
 } from '@kbn/visualizations-plugin/common/constants';
 import { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { IconChartHeatmap } from '@kbn/chart-icons';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
@@ -148,6 +150,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     syncTooltips,
     syncCursor,
     renderComplete,
+    overrides,
   }) => {
     const chartRef = useRef<Chart>(null);
     const chartTheme = chartsThemeService.useChartsTheme();
@@ -498,7 +501,18 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       };
     });
 
+    const rawSettingsOverrides = getOverridesFor(overrides, 'settings') as Partial<SettingsProps>;
+    const settingsOverrides = Object.fromEntries(
+      Object.entries(rawSettingsOverrides).map(([key, value]) => {
+        if (key !== 'theme') {
+          return [key, value];
+        }
+        return [];
+      }, {})
+    );
+
     const themeOverrides: PartialTheme = {
+      ...(rawSettingsOverrides?.theme || {}),
       legend: {
         labelOptions: {
           maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0,
@@ -552,6 +566,9 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         brushArea: {
           stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
         },
+        ...(Array.isArray(rawSettingsOverrides?.theme)
+          ? rawSettingsOverrides?.theme[0].heatmap
+          : rawSettingsOverrides?.theme?.heatmap || {}),
       },
     };
 
@@ -606,6 +623,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               onBrushEnd={interactive ? (onBrushEnd as BrushEndListener) : undefined}
               ariaLabel={args.ariaLabel}
               ariaUseDefaultSummary={!args.ariaLabel}
+              {...settingsOverrides}
             />
             <Heatmap
               id="heatmap"
@@ -648,6 +666,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                         : ''
                   : undefined
               }
+              {...getOverridesFor(overrides, 'heatmap')}
             />
           </Chart>
         </LegendColorPickerWrapperContext.Provider>
