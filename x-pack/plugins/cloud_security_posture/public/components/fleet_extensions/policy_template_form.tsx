@@ -19,6 +19,7 @@ import {
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_VULN_MGMT_AWS,
   CSPM_POLICY_TEMPLATE,
+  SUPPORTED_POLICY_TEMPLATES,
 } from '../../../common/constants';
 import {
   getPosturePolicy,
@@ -77,7 +78,10 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
 
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
   ({ newPolicy, onChange, validationResults, isEditPage }) => {
-    const { integration } = useParams<{ integration: CloudSecurityPolicyTemplate }>();
+    const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
+    const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
+      ? integrationParam
+      : undefined;
     const input = getSelectedOption(newPolicy.inputs, integration);
 
     const updatePolicy = useCallback(
