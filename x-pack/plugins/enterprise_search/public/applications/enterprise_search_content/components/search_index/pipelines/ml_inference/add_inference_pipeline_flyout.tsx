@@ -211,7 +211,7 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
 export const AddInferencePipelineFooter: React.FC<
   AddInferencePipelineFlyoutProps & { ingestionMethod: string }
 > = ({ ingestionMethod, onClose }) => {
-  const { addInferencePipelineModal: modal, isPipelineDataValid } = useValues(MLInferenceLogic);
+  const { addInferencePipelineModal: modal, isPipelineDataValid, isConfigureStepValid } = useValues(MLInferenceLogic);
   const { attachPipeline, createPipeline, setAddInferencePipelineStep } =
     useActions(MLInferenceLogic);
 
@@ -222,7 +222,7 @@ export const AddInferencePipelineFooter: React.FC<
   switch (modal.step) {
     case AddInferencePipelineSteps.Configuration:
       nextStep = AddInferencePipelineSteps.Fields;
-      isContinueButtonEnabled = isPipelineDataValid;
+      isContinueButtonEnabled = isConfigureStepValid;
       break;
     case AddInferencePipelineSteps.Fields:
       nextStep = AddInferencePipelineSteps.Test;
