@@ -746,6 +746,39 @@ describe('instrumentQueryAndDeprecationLogger', () => {
         `);
       });
 
+      it('redacts for an API that is contained by the declared path (path only)', () => {
+        instrumentEsQueryAndDeprecationLogger({
+          logger,
+          client,
+          type: 'test type',
+          apisToRedactInLogs: [{ path: '/foo' }],
+        });
+
+        const response = createApiResponse({
+          body: {},
+          statusCode: 200,
+          headers: {},
+          params: {
+            method: 'GET',
+            path: '/foo/something/something-else',
+            querystring: { hello: 'dolly' },
+            body: {
+              seq_no_primary_term: true,
+              query: {
+                term: { user: 'kimchy' },
+              },
+            },
+          },
+        });
+
+        client.diagnostic.emit('response', null, response);
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+          "200
+          GET /foo/something/something-else?hello=dolly
+          [redacted]"
+        `);
+      });
+
       it('redacts for an API in the extended list (method and path)', () => {
         instrumentEsQueryAndDeprecationLogger({
           logger,
@@ -808,6 +841,39 @@ describe('instrumentQueryAndDeprecationLogger', () => {
         expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
           "200
           GET /foo?hello=dolly
+          {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}"
+        `);
+      });
+
+      it('does not redact for an API in the extended list when path does not match', () => {
+        instrumentEsQueryAndDeprecationLogger({
+          logger,
+          client,
+          type: 'test type',
+          apisToRedactInLogs: [{ path: '/foo' }],
+        });
+
+        const response = createApiResponse({
+          body: {},
+          statusCode: 200,
+          headers: {},
+          params: {
+            method: 'GET',
+            path: '/bar',
+            querystring: { hello: 'dolly' },
+            body: {
+              seq_no_primary_term: true,
+              query: {
+                term: { user: 'kimchy' },
+              },
+            },
+          },
+        });
+
+        client.diagnostic.emit('response', null, response);
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toMatchInlineSnapshot(`
+          "200
+          GET /bar?hello=dolly
           {\\"seq_no_primary_term\\":true,\\"query\\":{\\"term\\":{\\"user\\":\\"kimchy\\"}}}"
         `);
       });
