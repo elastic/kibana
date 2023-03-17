@@ -96,12 +96,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       [newPolicy, updatePolicy]
     );
 
-    const [loading, setLoading] = useState(true);
-
     // search for non null fields of the validation?.vars object
     const validationResultsNonNullFields = Object.keys(validationResults?.vars || {}).filter(
       (key) => (validationResults?.vars || {})[key] !== null
     );
+
+    const [loading, setLoading] = useState(validationResultsNonNullFields.length > 0);
 
     // delaying component rendering due to a race condition issue from Fleet
     // TODO: remove this workaround when the following issue is resolved:
