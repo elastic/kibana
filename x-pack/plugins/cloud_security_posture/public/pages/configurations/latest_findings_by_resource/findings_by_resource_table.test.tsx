@@ -88,12 +88,12 @@ describe('<FindingsByResourceTable />', () => {
       </TestProvider>
     );
 
-    data.forEach((item, i) => {
+    data.forEach((item) => {
       const row = screen.getByTestId(
         TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(item))
       );
       expect(row).toBeInTheDocument();
-      expect(within(row).getByText(item.resource_id)).toBeInTheDocument();
+      expect(within(row).getByText(item.resource_id || '')).toBeInTheDocument();
       if (item['resource.name'])
         expect(within(row).getByText(item['resource.name'])).toBeInTheDocument();
       if (item['resource.sub_type'])
