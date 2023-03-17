@@ -53,7 +53,7 @@ import type { TimeRange } from '../../../../store/inputs/model';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/constants';
 import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
-import { filtersToInsightProviders } from './provider';
+import { containsEmptyFilterField, filtersToInsightProviders } from './provider';
 import * as i18n from './translations';
 
 interface InsightComponentProps {
@@ -350,7 +350,7 @@ const InsightEditorComponent = ({
   );
   const disableSubmit = useMemo(() => {
     const labelOrEmpty = labelController.field.value ? labelController.field.value : '';
-    return labelOrEmpty.trim() === '' || providers.length === 0;
+    return labelOrEmpty.trim() === '' || containsEmptyFilterField(providers);
   }, [labelController.field.value, providers]);
   const filtersStub = useMemo(() => {
     const index = indexPattern && indexPattern.getName ? indexPattern.getName() : '*';

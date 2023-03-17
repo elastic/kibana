@@ -6,7 +6,7 @@
  */
 import type { CombinedFilter } from '@kbn/es-query';
 import { FILTERS, BooleanRelation, FilterStateStore } from '@kbn/es-query';
-import { filtersToInsightProviders } from './provider';
+import { containsEmptyFilterField, filtersToInsightProviders } from './provider';
 
 const flatValueFilters = [
   {
@@ -135,6 +135,48 @@ const combined = [
   },
 ];
 
+const providersWithEmptyFields = [
+  [
+    {
+      field: '@timestamp',
+      excluded: false,
+      queryType: 'phrase',
+      value: 'someValue',
+      valueType: 'string',
+    },
+  ],
+  [
+    {
+      field: '',
+      excluded: false,
+      queryType: 'phrase',
+      value: '',
+    },
+  ],
+];
+
+const providersWithoutEmptyFields = [
+  [
+    {
+      field: '@timestamp',
+      excluded: false,
+      queryType: 'phrase',
+      value: '2022-03-16T09:45:32.606Z',
+      valueType: 'date',
+    },
+  ],
+  [
+    {
+      field: '@timestamp',
+      excluded: true,
+      queryType: 'phrase',
+      value: 'anotherValue',
+    },
+  ],
+];
+
+const emptyProvider = [[]];
+
 describe('filter to provider conversion', () => {
   it('should return a single array for ANDed top level values', () => {
     const result = filtersToInsightProviders(flatValueFilters);
@@ -152,5 +194,22 @@ describe('filter to provider conversion', () => {
     expect(result.length).toBe(2);
     expect(first.length).toBe(1);
     expect(second.length).toBe(2);
+  });
+});
+
+describe('containsEmptyFilterField', () => {
+  it('should return true if any provider has an empty filter field', () => {
+    const result = containsEmptyFilterField(providersWithEmptyFields);
+    expect(result).toBe(true);
+  });
+
+  it('should return true if providers array is empty', () => {
+    const result = containsEmptyFilterField(emptyProvider);
+    expect(result).toBe(true);
+  });
+
+  it('should return false when all filters have non-empty field and non-empty value', () => {
+    const result = containsEmptyFilterField(providersWithoutEmptyFields);
+    expect(result).toBe(false);
   });
 });

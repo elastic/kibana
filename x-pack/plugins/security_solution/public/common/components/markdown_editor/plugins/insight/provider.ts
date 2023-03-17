@@ -114,3 +114,17 @@ export const filtersToInsightProviders = (filters: Filter[]): Provider[][] => {
     return combinedFilterToProviders;
   }
 };
+
+export const containsEmptyFilterField = (providers: Provider[][]): boolean =>
+  providers.some((provider: Provider[]) => {
+    if (provider.length === 0) {
+      return true;
+    }
+    return provider.some((filter: Provider) => {
+      if (filter.queryType === 'exists') {
+        return filter.field === '';
+      } else {
+        return filter.field === '' || filter.value === '' || filter.value === '{}';
+      }
+    });
+  });
