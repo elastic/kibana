@@ -178,6 +178,7 @@ describe('TelemetryEventsSender', () => {
             executable: null, // null fields are never allowlisted
             working_directory: '/some/usr/dir',
             entity_id: 'some_entity_id',
+            env_vars: [{ name: 'foo', value: 'bar' }],
             Ext: {
               protection: 'PsProtectedSignerAntimalware-Light',
               relative_file_creation_time: 48628704.4029488,
@@ -355,6 +356,7 @@ describe('TelemetryEventsSender', () => {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',
             entity_id: 'some_entity_id',
+            env_vars: [{ name: 'foo', value: 'bar' }],
             Ext: {
               protection: 'PsProtectedSignerAntimalware-Light',
               relative_file_creation_time: 48628704.4029488,

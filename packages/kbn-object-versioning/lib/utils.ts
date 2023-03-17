@@ -29,7 +29,9 @@ export const validateObj = (obj: unknown, objSchema?: Type<any>): ValidationErro
   }
 };
 
-export const validateVersion = (version: unknown): { result: boolean; value: Version | null } => {
+export const validateVersion = (
+  version: unknown
+): { result: true; value: Version } | { result: false; value: null } => {
   if (typeof version === 'string') {
     const isValid = /^\d+$/.test(version);
     if (isValid) {
@@ -42,9 +44,15 @@ export const validateVersion = (version: unknown): { result: boolean; value: Ver
     return { result: false, value: null };
   } else {
     const isValid = Number.isInteger(version);
+    if (isValid) {
+      return {
+        result: true,
+        value: version as Version,
+      };
+    }
     return {
-      result: isValid,
-      value: isValid ? (version as Version) : null,
+      result: false,
+      value: null,
     };
   }
 };
