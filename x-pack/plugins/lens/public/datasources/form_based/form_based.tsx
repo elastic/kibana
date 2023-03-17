@@ -879,44 +879,42 @@ export function getFormBasedDatasource({
       return [...layerErrorMessages, ...dimensionErrorMessages, ...warningMessages];
     },
 
-    getNotifiableFeatures: (state) => {
+    getNotifiableFeatures: (state, { frame: frameDatasourceAPI, visualizationInfo }) => {
       if (!state) {
         return [];
       }
-      const samplingValues = Object.values(state.layers)
-        .map((layer) => getSamplingValue(layer))
-        .filter((v) => v !== 1);
-      if (!samplingValues.length) {
+      const layersWithCustomSamplingValues = Object.entries(state.layers).filter(
+        ([, layer]) => getSamplingValue(layer) !== 1
+      );
+      if (!layersWithCustomSamplingValues.length) {
         return [];
-      }
-      const samplingValuePerLayer: Record<number, number> = {};
-      for (const value of samplingValues) {
-        if (samplingValuePerLayer[value] == null) {
-          samplingValuePerLayer[value] = 0;
-        }
-        samplingValuePerLayer[value]++;
       }
       return [
         {
           icon: (
             <RandomSamplingIcon
               css={css`
-                margin-left: 4px;
+                color: inherit;
               `}
             />
           ),
-          tooltipMessage: Object.entries(samplingValuePerLayer)
-            .map(([samplingValue, layerCount]) =>
-              i18n.translate('xpack.lens.indexPattern.samplingPerLayer', {
-                defaultMessage:
-                  '{samplingValue}% sampling - {layerCount} {layerCount, plural, one {layer} other {layers}}',
-                values: {
-                  samplingValue: Number(samplingValue) * 100,
-                  layerCount,
-                },
-              })
-            )
-            .join('\n'),
+          title: i18n.translate('xpack.lens.indexPattern.samplingPerLayer', {
+            defaultMessage: 'Layers with reduced sampling',
+          }),
+          meta: layersWithCustomSamplingValues.map(([id, layer]) => {
+            const dataView = frameDatasourceAPI.dataViews.indexPatterns[layer.indexPatternId];
+            const layerTitle =
+              visualizationInfo?.layers.find(({ layerId, label }) => layerId === id)?.label ||
+              i18n.translate('xpack.lens.indexPattern.samplingPerLayer.fallbackLayerName', {
+                defaultMessage: 'Data layer',
+              });
+            return {
+              dataView: dataView.name ?? dataView.title,
+              layerTitle,
+              value: `${Number(getSamplingValue(layer)) * 100}%`,
+            };
+          }),
+          content: null,
         },
       ];
     },

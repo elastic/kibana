@@ -75,7 +75,7 @@ import {
 } from '@kbn/charts-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt, EuiToolTip } from '@elastic/eui';
+import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -121,6 +121,7 @@ import {
 } from '../app_plugin/get_application_user_messages';
 import { MessageList } from '../editor_frame_service/editor_frame/workspace_panel/message_list';
 import { getApplicationFeatureBadges } from '../app_plugin/get_app_feature_badges';
+import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -325,19 +326,6 @@ function getViewUnderlyingDataArgs({
     columns: meta.columns,
   };
 }
-
-const EmbeddableFeatureBadge = ({ badges }: { badges: FeatureBadge[] }) => {
-  if (!badges.length) {
-    return null;
-  }
-  return (
-    <div>
-      {badges.map(({ icon, tooltipMessage }) => {
-        return <EuiToolTip content={tooltipMessage}>{icon}</EuiToolTip>;
-      })}
-    </div>
-  );
-};
 
 const EmbeddableMessagesPopover = ({ messages }: { messages: UserMessage[] }) => {
   const { euiTheme } = useEuiTheme();
@@ -580,6 +568,12 @@ export class Embeddable
       visualizationMap: this.deps.visualizationMap,
       activeDatasource: this.activeDatasource,
       activeDatasourceState: { state: this.activeDatasourceState },
+      framePublicAPI: {
+        dataViews: {
+          indexPatterns: this.indexPatterns,
+          indexPatternRefs: this.indexPatternRefs,
+        },
+      },
     });
   }
 

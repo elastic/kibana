@@ -15,6 +15,7 @@ import {
   EuiSelectableProps,
   EuiTextColor,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
 import { type IndexPatternRef } from '../../types';
@@ -40,6 +41,7 @@ function TriggerButton({
     togglePopover: () => void;
     isMissingCurrent?: boolean;
   }) {
+  const { euiTheme } = useEuiTheme();
   // be careful to only add color with a value, otherwise it will fallbacks to "primary"
   const colorProp = isMissingCurrent
     ? {
@@ -49,7 +51,7 @@ function TriggerButton({
   const content =
     samplingValue != null && samplingValue !== 1 ? (
       <EuiFlexGroup justifyContent={'spaceBetween'} style={{ lineHeight: '16px' }}>
-        <EuiFlexItem grow>{label}</EuiFlexItem>
+        <EuiFlexItem>{label}</EuiFlexItem>
 
         <EuiFlexItem grow={1}>
           <EuiToolTip
@@ -64,10 +66,12 @@ function TriggerButton({
           >
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <RandomSamplingIcon />
+                <RandomSamplingIcon color={euiTheme.colors.mediumShade} fill="currentColor" />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiTextColor color="subdued">{samplingValue * 100}%</EuiTextColor>
+                <EuiTextColor color={euiTheme.colors.mediumShade}>
+                  {samplingValue * 100}%
+                </EuiTextColor>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiToolTip>

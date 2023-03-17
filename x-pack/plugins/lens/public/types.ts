@@ -295,7 +295,13 @@ export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 
 export interface FeatureBadge {
   icon: React.ReactElement;
-  tooltipMessage: string;
+  title: React.ReactElement;
+  meta?: Array<{
+    layerTitle: string;
+    dataView: string;
+    value?: string;
+  }>;
+  content: React.ReactNode;
 }
 
 export interface UserMessage {
@@ -499,7 +505,13 @@ export interface Datasource<T = unknown, P = unknown> {
   /**
    * Features to be displayed at dashboard level
    */
-  getNotifiableFeatures?: (state: T) => FeatureBadge[];
+  getNotifiableFeatures?: (
+    state: T,
+    deps: {
+      frame: Pick<FrameDatasourceAPI, 'dataViews'>;
+      visualizationInfo?: VisualizationInfo;
+    }
+  ) => FeatureBadge[];
 
   /**
    * The embeddable calls this function to display warnings about visualization on the dashboard
@@ -1283,7 +1295,10 @@ export interface Visualization<T = unknown, P = T> {
   /**
    * Features to be displayed at dashboard level
    */
-  getNotifiableFeatures?: (state: T) => FeatureBadge[];
+  getNotifiableFeatures?: (
+    state: T,
+    deps: { frame: Pick<FramePublicAPI, 'dataViews'> }
+  ) => FeatureBadge[];
 
   /**
    * On Edit events the frame will call this to know what's going to be the next visualization state
