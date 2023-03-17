@@ -32,13 +32,9 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
 } from '../common/constants';
-import { InitialAppData } from '../common/types';
+import { ClientConfigType, InitialAppData } from '../common/types';
 
 import { docLinks } from './applications/shared/doc_links';
-
-export interface ClientConfigType {
-  host?: string;
-}
 
 export interface ClientData extends InitialAppData {
   publicUrl?: string;
@@ -71,6 +67,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
     const { cloud } = plugins;
+    const { config } = this;
 
     core.application.register({
       id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
@@ -162,50 +159,52 @@ export class EnterpriseSearchPlugin implements Plugin {
       },
     });
 
-    core.application.register({
-      id: APP_SEARCH_PLUGIN.ID,
-      title: APP_SEARCH_PLUGIN.NAME,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
-      appRoute: APP_SEARCH_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
+    if (config.canDeployEntSearch) {
+      core.application.register({
+        id: APP_SEARCH_PLUGIN.ID,
+        title: APP_SEARCH_PLUGIN.NAME,
+        euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+        appRoute: APP_SEARCH_PLUGIN.URL,
+        category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+        mount: async (params: AppMountParameters) => {
+          const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+          const { chrome, http } = kibanaDeps.core;
+          chrome.docTitle.change(APP_SEARCH_PLUGIN.NAME);
 
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
+          await this.getInitialData(http);
+          const pluginData = this.getPluginData();
 
-        const { renderApp } = await import('./applications');
-        const { AppSearch } = await import('./applications/app_search');
+          const { renderApp } = await import('./applications');
+          const { AppSearch } = await import('./applications/app_search');
 
-        return renderApp(AppSearch, kibanaDeps, pluginData);
-      },
-    });
+          return renderApp(AppSearch, kibanaDeps, pluginData);
+        },
+      });
 
-    core.application.register({
-      id: WORKPLACE_SEARCH_PLUGIN.ID,
-      title: WORKPLACE_SEARCH_PLUGIN.NAME,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
-      appRoute: WORKPLACE_SEARCH_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
+      core.application.register({
+        id: WORKPLACE_SEARCH_PLUGIN.ID,
+        title: WORKPLACE_SEARCH_PLUGIN.NAME,
+        euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+        appRoute: WORKPLACE_SEARCH_PLUGIN.URL,
+        category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+        mount: async (params: AppMountParameters) => {
+          const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+          const { chrome, http } = kibanaDeps.core;
+          chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
 
-        // The Workplace Search Personal dashboard needs the chrome hidden. We hide it globally
-        // here first to prevent a flash of chrome on the Personal dashboard and unhide it for admin routes.
-        if (this.config.host) chrome.setIsVisible(false);
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
+          // The Workplace Search Personal dashboard needs the chrome hidden. We hide it globally
+          // here first to prevent a flash of chrome on the Personal dashboard and unhide it for admin routes.
+          if (this.config.host) chrome.setIsVisible(false);
+          await this.getInitialData(http);
+          const pluginData = this.getPluginData();
 
-        const { renderApp } = await import('./applications');
-        const { WorkplaceSearch } = await import('./applications/workplace_search');
+          const { renderApp } = await import('./applications');
+          const { WorkplaceSearch } = await import('./applications/workplace_search');
 
-        return renderApp(WorkplaceSearch, kibanaDeps, pluginData);
-      },
-    });
+          return renderApp(WorkplaceSearch, kibanaDeps, pluginData);
+        },
+      });
+    }
 
     core.application.register({
       id: SEARCH_EXPERIENCES_PLUGIN.ID,
@@ -248,15 +247,27 @@ export class EnterpriseSearchPlugin implements Plugin {
         showOnHomePage: false,
       });
 
-      plugins.home.featureCatalogue.register({
-        id: APP_SEARCH_PLUGIN.ID,
-        title: APP_SEARCH_PLUGIN.NAME,
-        icon: 'appSearchApp',
-        description: APP_SEARCH_PLUGIN.DESCRIPTION,
-        path: APP_SEARCH_PLUGIN.URL,
-        category: 'data',
-        showOnHomePage: false,
-      });
+      if (config.canDeployEntSearch) {
+        plugins.home.featureCatalogue.register({
+          id: APP_SEARCH_PLUGIN.ID,
+          title: APP_SEARCH_PLUGIN.NAME,
+          icon: 'appSearchApp',
+          description: APP_SEARCH_PLUGIN.DESCRIPTION,
+          path: APP_SEARCH_PLUGIN.URL,
+          category: 'data',
+          showOnHomePage: false,
+        });
+
+        plugins.home.featureCatalogue.register({
+          id: WORKPLACE_SEARCH_PLUGIN.ID,
+          title: WORKPLACE_SEARCH_PLUGIN.NAME,
+          icon: 'workplaceSearchApp',
+          description: WORKPLACE_SEARCH_PLUGIN.DESCRIPTION,
+          path: WORKPLACE_SEARCH_PLUGIN.URL,
+          category: 'data',
+          showOnHomePage: false,
+        });
+      }
 
       plugins.home.featureCatalogue.register({
         id: ELASTICSEARCH_PLUGIN.ID,
@@ -264,16 +275,6 @@ export class EnterpriseSearchPlugin implements Plugin {
         icon: 'appElasticsearch',
         description: ELASTICSEARCH_PLUGIN.DESCRIPTION,
         path: ELASTICSEARCH_PLUGIN.URL,
-        category: 'data',
-        showOnHomePage: false,
-      });
-
-      plugins.home.featureCatalogue.register({
-        id: WORKPLACE_SEARCH_PLUGIN.ID,
-        title: WORKPLACE_SEARCH_PLUGIN.NAME,
-        icon: 'workplaceSearchApp',
-        description: WORKPLACE_SEARCH_PLUGIN.DESCRIPTION,
-        path: WORKPLACE_SEARCH_PLUGIN.URL,
         category: 'data',
         showOnHomePage: false,
       });
@@ -321,7 +322,7 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   private async getInitialData(http: HttpSetup) {
-    if (!this.config.host) return; // No API to call
+    if (!this.config.host && this.config.canDeployEntSearch) return; // No API to call
     if (this.hasInitialized) return; // We've already made an initial call
 
     try {
