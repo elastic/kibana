@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiLink } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 
@@ -19,9 +19,11 @@ const PlaceHolder = styled.div`
 `;
 
 const ChartLabelComponent: React.FC<ChartLabelProps> = ({ count, onClick }) => {
+  const onLabelClick = useCallback(() => onClick && onClick(), [onClick]);
+
   if (count) {
     return onClick ? (
-      <EuiLink onClick={onClick}>
+      <EuiLink onClick={onLabelClick}>
         <b>
           <FormattedCount count={count} />
         </b>

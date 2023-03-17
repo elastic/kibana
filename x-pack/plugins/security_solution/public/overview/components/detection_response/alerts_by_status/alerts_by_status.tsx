@@ -158,42 +158,23 @@ export const AlertsByStatus = ({
     []
   );
 
-  const onDonutPartitionClick = useCallback(
-    (level: string) => (status: Status) => {
-      if (level && status) {
-        navigateToAlerts([
-          {
-            title: OPEN_IN_ALERTS_TITLE_SEVERITY,
-            selectedOptions: [level],
-            fieldName: ALERT_SEVERITY,
-          },
-          {
-            title: OPEN_IN_ALERTS_TITLE_STATUS,
-            selectedOptions: [status],
-            fieldName: ALERT_WORKFLOW_STATUS,
-          },
-          ...(entityFilter
-            ? [
-                {
-                  selectedOptions: [entityFilter.value],
-                  fieldName: entityFilter.field,
-                },
-              ]
-            : []),
-        ]);
-      }
-    },
-    [entityFilter, navigateToAlerts]
-  );
-
   const navigateToAlertsWithStatus = useCallback(
-    (status: Status) =>
+    (status: Status, level?: string) =>
       navigateToAlerts([
         {
           title: OPEN_IN_ALERTS_TITLE_STATUS,
           selectedOptions: [status],
           fieldName: ALERT_WORKFLOW_STATUS,
         },
+        ...(level
+          ? [
+              {
+                title: OPEN_IN_ALERTS_TITLE_SEVERITY,
+                selectedOptions: [level],
+                fieldName: ALERT_SEVERITY,
+              },
+            ]
+          : []),
         ...(entityFilter
           ? [
               {
@@ -207,17 +188,17 @@ export const AlertsByStatus = ({
   );
 
   const navigateToAlertsWithStatusOpen = useCallback(
-    () => navigateToAlertsWithStatus(FILTER_OPEN),
+    (level?: string) => navigateToAlertsWithStatus(FILTER_OPEN, level),
     [navigateToAlertsWithStatus]
   );
 
   const navigateToAlertsWithStatusAcknowledged = useCallback(
-    () => navigateToAlertsWithStatus(FILTER_ACKNOWLEDGED),
+    (level?: string) => navigateToAlertsWithStatus(FILTER_ACKNOWLEDGED, level),
     [navigateToAlertsWithStatus]
   );
 
   const navigateToAlertsWithStatusClosed = useCallback(
-    () => navigateToAlertsWithStatus(FILTER_CLOSED),
+    (level?: string) => navigateToAlertsWithStatus(FILTER_CLOSED, level),
     [navigateToAlertsWithStatus]
   );
 
@@ -306,7 +287,7 @@ export const AlertsByStatus = ({
                         />
                       ) : (
                         <DonutChart
-                          onPartitionClick={onDonutPartitionClick}
+                          onPartitionClick={navigateToAlertsWithStatusOpen}
                           data={donutData?.open?.severities}
                           fillColor={fillColor}
                           height={donutHeight}
@@ -345,7 +326,7 @@ export const AlertsByStatus = ({
                           fillColor={fillColor}
                           height={donutHeight}
                           label={STATUS_ACKNOWLEDGED}
-                          onPartitionClick={onDonutPartitionClick}
+                          onPartitionClick={navigateToAlertsWithStatusAcknowledged}
                           title={
                             <ChartLabel
                               onClick={navigateToAlertsWithStatusAcknowledged}
@@ -380,7 +361,7 @@ export const AlertsByStatus = ({
                           fillColor={fillColor}
                           height={donutHeight}
                           label={STATUS_CLOSED}
-                          onPartitionClick={onDonutPartitionClick}
+                          onPartitionClick={navigateToAlertsWithStatusClosed}
                           title={
                             <ChartLabel
                               onClick={navigateToAlertsWithStatusClosed}
