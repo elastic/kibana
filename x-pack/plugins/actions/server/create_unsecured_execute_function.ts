@@ -111,6 +111,7 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
           params: actionToExecute.params,
           apiKey: null,
           relatedSavedObjects: relatedSavedObjectWithRefs,
+          ...(actionToExecute.source ? { source: actionToExecute.source.type } : {}),
         },
         references: taskReferences,
       };

@@ -58,7 +58,7 @@ interface AlertsCountPanelProps {
   isExpanded?: boolean;
   setIsExpanded?: (status: boolean) => void;
 }
-const CHART_HEIGHT = '180px';
+const CHART_HEIGHT = '100%';
 
 export const AlertsCountPanel = memo<AlertsCountPanelProps>(
   ({

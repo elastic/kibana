@@ -140,7 +140,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
                 defaultMessage: 'An error occurred getting the transform configuration.',
               })}
               color="danger"
-              iconType="alert"
+              iconType="warning"
             >
               <pre>{JSON.stringify(errorMessage)}</pre>
             </EuiCallOut>
