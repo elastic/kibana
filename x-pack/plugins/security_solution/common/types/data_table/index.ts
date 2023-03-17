@@ -43,7 +43,6 @@ export enum TableEntityType {
 
 export const tableEntity: Record<TableId, TableEntityType> = {
   [TableId.alertsOnAlertsPage]: TableEntityType.alert,
-  [TableId.alertsOnCasePage]: TableEntityType.alert,
   [TableId.alertsOnRuleDetailsPage]: TableEntityType.alert,
   [TableId.hostsPageEvents]: TableEntityType.event,
   [TableId.networkPageEvents]: TableEntityType.event,
