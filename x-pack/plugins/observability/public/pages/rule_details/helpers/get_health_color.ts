@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleExecutionStatuses } from '@kbn/alerting-plugin/common';
+import type { RuleExecutionStatuses } from '@kbn/alerting-plugin/common';
 
 export function getHealthColor(status: RuleExecutionStatuses) {
   switch (status) {

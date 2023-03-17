@@ -24,7 +24,7 @@ type AlertsFlyoutProps = {
   selectedAlertId?: string;
 } & EuiFlyoutProps;
 
-function AlertsFlyout({
+export function AlertsFlyout({
   alert,
   alerts,
   isInApp = false,

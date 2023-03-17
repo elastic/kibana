@@ -7,8 +7,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { HttpSetup } from '@kbn/core-http-browser';
 import { loadRule, Rule, RuleType } from '@kbn/triggers-actions-ui-plugin/public';
+import type { HttpSetup } from '@kbn/core-http-browser';
 
 export interface FetchRuleProps {
   ruleId?: string;
