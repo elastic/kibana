@@ -45,9 +45,9 @@ export const EngineAnalytics: React.FC = () => {
   const {
     setNoResultsCardVisible,
     setQueriesCardVisible,
-    setSearchSessionId,
+    // setSearchSessionId,
     getDefaultDataView,
-    getFormula,
+    fetchFormula,
     setTimeRange,
   } = useActions(EngineAnalyticsLogic);
 
@@ -55,11 +55,7 @@ export const EngineAnalytics: React.FC = () => {
   // Change to engine specific data view when ready
   useEffect(() => {
     getDefaultDataView(data); // set default data view from kibana logic
-    getFormula(lens);
-  }, []);
-
-  useEffect(() => {
-    setSearchSessionId(data?.search?.session.start());
+    fetchFormula(lens);
   }, []);
 
   const xyAttributes = useMemo(

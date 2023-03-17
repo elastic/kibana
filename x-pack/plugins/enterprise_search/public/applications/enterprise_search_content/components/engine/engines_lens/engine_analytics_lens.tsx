@@ -50,14 +50,15 @@ const getReferences = (dataViewId: string, lensType: string): SavedObjectReferen
   ];
 };
 
-export enum filterBy {
+enum filterBy {
   queries = 'Queries',
   noResults = 'No Results',
 }
+const euiColorPalette = euiPaletteColorBlind();
 
 const chartAttributes = {
   [filterBy.queries]: {
-    chartColor: euiPaletteColorBlind()[0],
+    chartColor: euiColorPalette[0],
     label: i18n.translate(
       'xpack.enterpriseSearch.content.engine.overview.analytics.lens.queries.chart.title',
       {
@@ -66,7 +67,7 @@ const chartAttributes = {
     ),
   },
   [filterBy.noResults]: {
-    chartColor: euiPaletteColorBlind()[1],
+    chartColor: euiColorPalette[1],
     label: i18n.translate(
       'xpack.enterpriseSearch.content.engine.overview.analytics.lens.withNoResults.chart.title',
       {

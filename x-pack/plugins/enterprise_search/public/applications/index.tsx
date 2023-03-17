@@ -110,7 +110,6 @@ export const renderApp = (
     unmountLicensingLogic();
     unmountHttpLogic();
     unmountFlashMessagesLogic();
-    plugins.data.search.session.clear();
   };
 };
 
