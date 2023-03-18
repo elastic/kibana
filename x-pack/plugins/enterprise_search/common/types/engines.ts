@@ -47,3 +47,7 @@ export interface EnterpriseSearchSchemaField {
   field_name: string;
   field_type: string[];
 }
+
+export interface EnterpriseSearchEngineUpsertResponse {
+  result: string;
+}
