@@ -4933,6 +4933,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/serverless-observability@link:x-pack/plugins/serverless_observability":
+  version "0.0.0"
+  uid ""
+
 "@kbn/serverless@link:x-pack/plugins/serverless":
   version "0.0.0"
   uid ""

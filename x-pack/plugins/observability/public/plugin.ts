@@ -335,6 +335,7 @@ export class Plugin
       navigationSections$: this.navigationRegistry.sections$,
       guidedOnboardingApi: pluginsStart.guidedOnboarding.guidedOnboardingApi,
       getPageTemplateServices: () => ({ coreStart }),
+      getChromeStyle$: coreStart.chrome.getChromeStyle$,
     });
 
     const getAsyncO11yAlertsTableConfiguration = async () => {

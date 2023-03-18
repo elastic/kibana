@@ -1,0 +1,7 @@
+enterpriseSearch.enabled: false
+xpack.cloudSecurityPosture.enabled: false
+xpack.securitySolution.enabled: false
+
+xpack.serverless.observability.enabled: true
+
+uiSettings.overrides.defaultRoute: /app/observability/overview
