@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export interface ConfigType {
-  loginAssistanceMessage: string;
-  showInsecureClusterWarning: boolean;
-  sameSiteCookies: 'Strict' | 'Lax' | 'None' | undefined;
-  showNavLinks: boolean;
-}
+export { Switcher } from './switcher';

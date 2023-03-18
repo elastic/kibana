@@ -60,6 +60,7 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
+        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "loginAssistanceMessage": "",
         "public": Object {},
@@ -70,6 +71,7 @@ describe('config schema', () => {
           "lifespan": "P30D",
         },
         "showInsecureClusterWarning": true,
+        "showNavLinks": true,
       }
     `);
 
@@ -113,6 +115,7 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
+        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "loginAssistanceMessage": "",
         "public": Object {},
@@ -123,6 +126,7 @@ describe('config schema', () => {
           "lifespan": "P30D",
         },
         "showInsecureClusterWarning": true,
+        "showNavLinks": true,
       }
     `);
 
@@ -166,6 +170,7 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
+        "enabled": true,
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
@@ -175,6 +180,7 @@ describe('config schema', () => {
           "lifespan": "P30D",
         },
         "showInsecureClusterWarning": true,
+        "showNavLinks": true,
       }
     `);
   });

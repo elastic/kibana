@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-export interface ConfigType {
-  loginAssistanceMessage: string;
-  showInsecureClusterWarning: boolean;
-  sameSiteCookies: 'Strict' | 'Lax' | 'None' | undefined;
-  showNavLinks: boolean;
+import { ServerlessPlugin } from './plugin';
+
+export function plugin() {
+  return new ServerlessPlugin();
 }
+
+export type { ServerlessPluginSetup, ServerlessPluginStart } from './types';

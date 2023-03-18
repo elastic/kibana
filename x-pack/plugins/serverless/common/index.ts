@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-export interface ConfigType {
-  loginAssistanceMessage: string;
-  showInsecureClusterWarning: boolean;
-  sameSiteCookies: 'Strict' | 'Lax' | 'None' | undefined;
-  showNavLinks: boolean;
-}
+export const PLUGIN_ID = 'serverless';
+export const PLUGIN_NAME = 'serverless';
+
+export const API_SWITCH_PROJECT = '/api/serverless/switch_project';
