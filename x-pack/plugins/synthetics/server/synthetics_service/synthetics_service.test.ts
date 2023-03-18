@@ -100,7 +100,7 @@ describe('SyntheticsService', () => {
         status: LocationStatus.GA,
       };
     });
-    serverMock.config = { service: { devUrl: 'http://localhost' } };
+    serverMock.config = { service: { devUrl: 'http://localhost' }, enabled: true };
     if (serverMock.savedObjectsClient) {
       serverMock.savedObjectsClient.find = jest.fn().mockResolvedValue({
         saved_objects: [
@@ -163,6 +163,7 @@ describe('SyntheticsService', () => {
         username: 'dev',
         password: '12345',
       },
+      enabled: true,
     };
     const service = new SyntheticsService(serverMock);
 
