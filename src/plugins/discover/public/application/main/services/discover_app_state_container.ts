@@ -298,13 +298,14 @@ function getInitialState(
   savedSearch: SavedSearch,
   services: DiscoverServices
 ) {
-  const appStateFromUrl = cleanupUrlState(stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl);
+  const stateStorageURL = stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl;
+  const appStateFromUrl = cleanupUrlState(stateStorageURL);
   const defaultAppState = getStateDefaults({
     savedSearch,
     services,
   });
   return handleSourceColumnState(
-    savedSearch.id
+    stateStorageURL === null
       ? defaultAppState
       : {
           ...defaultAppState,

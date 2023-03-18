@@ -29,15 +29,9 @@ export interface LoadParams {
 
 export interface UpdateParams {
   nextDataView: DataView | undefined;
-  nextState: DiscoverAppState;
+  nextState: DiscoverAppState | undefined;
   resetSavedSearch?: boolean;
   filterAndQuery?: boolean;
-}
-
-export interface PersistParams {
-  appState: DiscoverAppState;
-  dataView?: DataView;
-  saveOptions: SavedObjectSaveOpts;
 }
 
 /**
@@ -118,11 +112,7 @@ export function getSavedSearchContainer({
     addLog('[savedSearch] set', newSavedSearch);
     hasChanged$.next(false);
     savedSearchCurrent$.next(newSavedSearch);
-    const persistedSavedSearch = {
-      ...newSavedSearch,
-      ...{ searchSource: newSavedSearch.searchSource.createCopy() },
-    };
-    savedSearchInitial$.next(persistedSavedSearch);
+    savedSearchInitial$.next(newSavedSearch);
     return newSavedSearch;
   };
   const get = () => savedSearchCurrent$.getValue();
@@ -158,12 +148,13 @@ export function getSavedSearchContainer({
     );
     set(nextSavedSearchToSet);
     if (appState) {
-      await update({
+      return update({
         nextDataView: actualDataView,
         nextState: appState,
       });
+    } else {
+      return nextSavedSearchToSet;
     }
-    return nextSavedSearchToSet;
   };
 
   const persist = async (nextSavedSearch: SavedSearch, saveOptions?: SavedObjectSaveOpts) => {
@@ -190,21 +181,23 @@ export function getSavedSearchContainer({
       {
         savedSearch: { ...previousSavedSearch },
         dataView,
-        state: nextState,
+        state: nextState || {},
         services,
       },
       !filterAndQuery
     );
 
-    nextSavedSearch.searchSource
-      .setField('index', dataView)
-      .setField('query', nextState.query)
-      .setField('filter', nextState.filters);
+    nextSavedSearch.searchSource.setField('index', dataView);
+    if (nextState) {
+      nextSavedSearch.searchSource
+        .setField('query', nextState.query)
+        .setField('filter', nextState.filters);
+    }
 
     if (resetSavedSearch) {
       set(nextSavedSearch);
     } else {
-      const hasChanged = isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
+      const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
 
       hasChanged$.next(hasChanged);
       savedSearchCurrent$.next(nextSavedSearch);

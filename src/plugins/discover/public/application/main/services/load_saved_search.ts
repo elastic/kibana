@@ -31,15 +31,13 @@ export const loadSavedSearch = async (
   if (isEmptyURL && isPersistedSearch) {
     appStateContainer.set({});
   }
+  const appState = !isEmptyURL ? appStateContainer.getState() : undefined;
   const nextSavedSearch = isPersistedSearch
     ? await savedSearchContainer.load(id, {
         dataViewList: internalStateContainer.getState().savedDataViews,
-        appState: !isEmptyURL ? appStateContainer.getState() : undefined,
+        appState,
       })
-    : await savedSearchContainer.new(
-        dataView,
-        !isEmptyURL ? appStateContainer.getState() : undefined
-      );
+    : await savedSearchContainer.new(dataView, appState);
   if (
     !isEmptyURL &&
     dataView?.id &&
@@ -47,7 +45,7 @@ export const loadSavedSearch = async (
   ) {
     savedSearchContainer.update({
       nextDataView: dataView,
-      nextState: appStateContainer.getState(),
+      nextState: appState,
     });
   }
 
