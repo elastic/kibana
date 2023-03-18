@@ -19,6 +19,7 @@ export const configSchema = schema.object({
   accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
   canDeployEntSearch: schema.boolean({ defaultValue: true }),
   customHeaders: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  enabled: schema.boolean({ defaultValue: true }),
   hasConnectors: schema.boolean({ defaultValue: true }),
   hasDefaultIngestPipeline: schema.boolean({ defaultValue: true }),
   hasNativeConnectors: schema.boolean({ defaultValue: true }),
