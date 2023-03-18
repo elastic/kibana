@@ -12,6 +12,11 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 // even for minor releases.
 // -------------------------------
 const configSchema = schema.object({
+  /**
+   * Disables the plugin.
+   */
+  enabled: schema.boolean({ defaultValue: true }),
+
   featureSet: schema.object({
     /**
      * Ml Snapshot should only be enabled for major version upgrades. Currently this
@@ -39,6 +44,9 @@ const configSchema = schema.object({
      */
     reindexCorrectiveActions: schema.boolean({ defaultValue: false }),
   }),
+  /**
+   * This config allows to hide the UI without disabling the plugin.
+   */
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),

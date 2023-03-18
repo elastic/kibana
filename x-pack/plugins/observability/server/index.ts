@@ -44,6 +44,7 @@ const configSchema = schema.object({
       }),
     }),
   }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 export const config: PluginConfigDescriptor = {

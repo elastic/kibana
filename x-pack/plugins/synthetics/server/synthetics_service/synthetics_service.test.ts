@@ -42,7 +42,7 @@ describe('SyntheticsService', () => {
   } as unknown as UptimeServerSetup;
 
   const getMockedService = (locationsNum: number = 1) => {
-    serverMock.config = { service: { devUrl: 'http://localhost' } };
+    serverMock.config = { service: { devUrl: 'http://localhost' }, enabled: true };
     const service = new SyntheticsService(serverMock);
 
     const locations = times(locationsNum).map((n) => {
@@ -116,6 +116,7 @@ describe('SyntheticsService', () => {
         username: 'dev',
         password: '12345',
       },
+      enabled: true,
     };
     const service = new SyntheticsService(serverMock);
 
