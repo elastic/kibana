@@ -74,7 +74,8 @@
     "@kbn/core-application-browser",
     "@kbn/files-plugin",
     "@kbn/core-theme-browser",
-    "@kbn/core-elasticsearch-server"
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-chrome-browser"
   ],
   "exclude": ["target/**/*"]
 }
