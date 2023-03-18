@@ -12,7 +12,7 @@ import React, { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import type { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart, ChromeStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   KibanaPageTemplate,
@@ -85,6 +85,7 @@ export interface ObservabilityPageTemplateDependencies {
   navigationSections$: Observable<NavigationSection[]>;
   getPageTemplateServices: () => KibanaPageTemplateKibanaDependencies;
   guidedOnboardingApi: GuidedOnboardingPluginStart['guidedOnboardingApi'];
+  getChromeStyle$: ChromeStart['getChromeStyle$'];
 }
 
 export type ObservabilityPageTemplateProps = ObservabilityPageTemplateDependencies &

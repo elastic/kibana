@@ -30,7 +30,7 @@ export class ObservabilitySharedPlugin implements Plugin {
   }
 
   public start(core: CoreStart, plugins: ObservabilitySharedStart) {
-    const { application } = core;
+    const { application, chrome } = core;
 
     const PageTemplate = createLazyObservabilityPageTemplate({
       currentAppId$: application.currentAppId$,
@@ -39,6 +39,7 @@ export class ObservabilitySharedPlugin implements Plugin {
       navigationSections$: this.navigationRegistry.sections$,
       guidedOnboardingApi: plugins.guidedOnboarding.guidedOnboardingApi,
       getPageTemplateServices: () => ({ coreStart: core }),
+      getChromeStyle$: chrome.getChromeStyle$,
     });
 
     return {
