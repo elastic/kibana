@@ -111,13 +111,13 @@ export function getSavedSearchContainer({
   const set = (newSavedSearch: SavedSearch) => {
     addLog('[savedSearch] set', newSavedSearch);
     hasChanged$.next(false);
+    savedSearchCurrent$.next(newSavedSearch);
     // due to the stateful nature of searchSource it has to be copied to allow independent state transitions
     const persistedSavedSearch = {
       ...newSavedSearch,
       ...{ searchSource: newSavedSearch.searchSource.createCopy() },
     };
     savedSearchInitial$.next(persistedSavedSearch);
-    savedSearchInitial$.next(newSavedSearch);
     return newSavedSearch;
   };
   const get = () => savedSearchCurrent$.getValue();

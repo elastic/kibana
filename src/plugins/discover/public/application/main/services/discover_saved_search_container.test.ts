@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getSavedSearchContainer } from './discover_saved_search_container';
+import { getSavedSearchContainer, isEqualSavedSearch } from './discover_saved_search_container';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
@@ -24,7 +24,10 @@ describe('DiscoverSavedSearchContainer', () => {
 
       expect(result).toBe(newSavedSearch);
       expect(container.get()).toBe(newSavedSearch);
-      expect(container.getInitial$().getValue()).toBe(newSavedSearch);
+      const initialSavedSearch = container.getInitial$().getValue();
+      const currentSavedSearch = container.getCurrent$().getValue();
+
+      expect(isEqualSavedSearch(initialSavedSearch, currentSavedSearch)).toBeTruthy();
     });
 
     it('should reset hasChanged$ to false', () => {
