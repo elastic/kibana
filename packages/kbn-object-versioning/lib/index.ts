@@ -7,6 +7,7 @@
  */
 
 export { initTransform } from './object_transform';
+
 export {
   getTransforms as getContentManagmentServicesTransforms,
   compile as compileServiceDefinitions,
