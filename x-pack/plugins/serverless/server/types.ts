@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export interface ConfigType {
-  loginAssistanceMessage: string;
-  showInsecureClusterWarning: boolean;
-  sameSiteCookies: 'Strict' | 'Lax' | 'None' | undefined;
-  showNavLinks: boolean;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ServerlessPluginSetup {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ServerlessPluginStart {}

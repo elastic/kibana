@@ -8,7 +8,7 @@
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
-import { statSync } from 'fs';
+import { statSync, copyFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
@@ -29,7 +29,7 @@ function getServerlessProjectMode(opts) {
     return null;
   }
 
-  if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless)) {
+  if (VALID_SERVERLESS_PROJECT_MODE.includes(opts.serverless) || opts.serverless === true) {
     return opts.serverless;
   }
 
@@ -88,6 +88,33 @@ function maybeAddConfig(name, configs, method) {
     if (statSync(path).isFile()) {
       configs[method](path);
     }
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return;
+    }
+
+    throw err;
+  }
+}
+
+/**
+ * @param {string} file
+ * @param {'es' | 'security' | 'oblt' | true} mode
+ * @param {string[]} configs
+ * @param {'push' | 'unshift'} method
+ */
+function maybeSetRecentConfig(file, mode, configs, method) {
+  const path = resolve(getConfigDirectory(), file);
+
+  try {
+    if (mode === true && !existsSync(path)) {
+      const esPath = path.replace('recent', 'es');
+      copyFileSync(esPath, path);
+    } else if (mode !== true) {
+      copyFileSync(path.replace('recent', mode), path);
+    }
+
+    configs[method](path);
   } catch (err) {
     if (err.code === 'ENOENT') {
       return;
@@ -234,7 +261,14 @@ export default function (program) {
         '--run-examples',
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
       )
-      .option('--serverless <oblt|security|es>', 'Start Kibana in a serverless project mode');
+      .option(
+        '--serverless',
+        'Start Kibana in the most recent serverless project mode, (default is es)'
+      )
+      .option(
+        '--serverless <oblt|security|es>',
+        'Start Kibana in a specific serverless project mode'
+      );
   }
 
   if (DEV_MODE_SUPPORTED) {
@@ -264,7 +298,7 @@ export default function (program) {
     // we "unshift" .serverless. config so that it only overrides defaults
     if (serverlessMode) {
       maybeAddConfig(`serverless.yml`, configs, 'push');
-      maybeAddConfig(`serverless.${serverlessMode}.yml`, configs, 'unshift');
+      maybeSetRecentConfig('serverless.recent.yml', serverlessMode, configs, 'unshift');
     }
 
     // .dev. configs are "pushed" so that they override all other config files
@@ -272,7 +306,7 @@ export default function (program) {
       maybeAddConfig('kibana.dev.yml', configs, 'push');
       if (serverlessMode) {
         maybeAddConfig(`serverless.dev.yml`, configs, 'push');
-        maybeAddConfig(`serverless.${serverlessMode}.dev.yml`, configs, 'push');
+        maybeSetRecentConfig('serverless.recent.dev.yml', serverlessMode, configs, 'unshift');
       }
     }
 
