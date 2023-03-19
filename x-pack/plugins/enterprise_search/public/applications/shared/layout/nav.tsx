@@ -30,8 +30,9 @@ import { KibanaLogic } from '../kibana';
 import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
-  const { productAccess, productFeatures } = useValues(KibanaLogic);
+  const { isSidebarEnabled, productAccess, productFeatures } = useValues(KibanaLogic);
 
+  if (!isSidebarEnabled) return undefined;
   const enginesSectionEnabled = productAccess.hasSearchEnginesAccess;
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
@@ -247,6 +248,7 @@ export const useEnterpriseSearchNav = () => {
 
 export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?: boolean) => {
   const navItems = useEnterpriseSearchNav();
+  if (!navItems) return undefined;
   if (!engineName) return navItems;
   const searchItem = navItems.find((item) => item.id === 'enginesSearch');
   if (!searchItem || !searchItem.items) return navItems;

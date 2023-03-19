@@ -37,7 +37,17 @@ import { mountLicensingLogic } from './shared/licensing';
 
 export const renderApp = (
   App: React.FC<InitialAppData>,
-  { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
+  {
+    params,
+    core,
+    plugins,
+    isSidebarEnabled,
+  }: {
+    params: AppMountParameters;
+    core: CoreStart;
+    plugins: PluginsStart;
+    isSidebarEnabled: boolean;
+  },
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
   const { publicUrl, errorConnectingMessage, ...initialData } = data;
@@ -67,6 +77,7 @@ export const renderApp = (
     charts: plugins.charts,
     cloud: plugins.cloud,
     uiSettings: core.uiSettings,
+    isSidebarEnabled,
     guidedOnboarding: plugins.guidedOnboarding,
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,

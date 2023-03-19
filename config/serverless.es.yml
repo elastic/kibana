@@ -1,0 +1,7 @@
+xpack.apm.enabled: false
+xpack.uptime.enabled: false
+
+enterpriseSearch.enabled: true
+xpack.serverless.search.enabled: true
+
+uiSettings.overrides.defaultRoute: /app/enterprise_search/content/search_indices
