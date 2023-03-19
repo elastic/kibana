@@ -24,7 +24,7 @@ export function RulesPage() {
     http,
     docLinks,
     triggersActionsUi: {
-      getAddAlertFlyout: AddRuleFlyout,
+      getAddRuleFlyout: AddRuleFlyout,
       getRulesList: RuleList,
       getRulesSettingsLink: RulesSettingsLink,
     },
