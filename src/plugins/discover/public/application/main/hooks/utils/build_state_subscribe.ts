@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { isEqual } from 'lodash';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { DiscoverSavedSearchContainer } from '../../services/discover_saved_search_container';
 import { DiscoverDataStateContainer } from '../../services/discover_data_state_container';
 import { DiscoverStateContainer } from '../../services/discover_state';
@@ -33,7 +34,10 @@ export const buildStateSubscribe =
     appState: DiscoverAppStateContainer;
     savedSearchState: DiscoverSavedSearchContainer;
     dataState: DiscoverDataStateContainer;
-    loadAndResolveDataView: DiscoverStateContainer['actions']['loadAndResolveDataView'];
+    loadAndResolveDataView: (
+      id?: string,
+      dataViewSpec?: DataViewSpec
+    ) => Promise<{ fallback: boolean; dataView: DataView }>;
     setDataView: DiscoverStateContainer['actions']['setDataView'];
   }) =>
   async (nextState: DiscoverAppState) => {

@@ -8,11 +8,10 @@
 
 import { getSavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { differenceWith, isEqual, toPairs } from 'lodash';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { loadSavedSearch } from '../utils/load_saved_search';
+import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { updateSavedSearch } from '../utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
@@ -20,12 +19,6 @@ import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { persistSavedSearch } from '../utils/persist_saved_search';
 import { getStateDefaults } from '../utils/get_state_defaults';
-
-export interface LoadParams {
-  dataViewSpec?: DataViewSpec;
-  dataViewList: DataViewListItem[];
-  appState?: DiscoverAppState;
-}
 
 export interface UpdateParams {
   nextDataView: DataView | undefined;
@@ -69,14 +62,14 @@ export interface DiscoverSavedSearchContainer {
    * @param id
    * @param params
    */
-  load: (id: string, params: LoadParams) => Promise<SavedSearch>;
+  load: (id: string) => Promise<SavedSearch>;
   /**
    * Initialize a new saved search
    * Resets the initial and current state of the saved search
    * @param dataView
    * @param appState
    */
-  new: (dataView?: DataView, appState?: DiscoverAppState) => Promise<SavedSearch>;
+  new: (dataView?: DataView) => Promise<SavedSearch>;
   /**
    * Persist the given saved search
    * Resets the initial and current state of the saved search
@@ -127,11 +120,8 @@ export function getSavedSearchContainer({
   const getTitle = () => savedSearchCurrent$.getValue().title ?? '';
   const getId = () => savedSearchCurrent$.getValue().id;
 
-  const newSavedSearch = async (
-    nextDataView: DataView | undefined,
-    appState?: DiscoverAppState
-  ) => {
-    addLog('[savedSearch] new', { nextDataView, appState });
+  const newSavedSearch = async (nextDataView: DataView | undefined) => {
+    addLog('[savedSearch] new', { nextDataView });
     const dataView = nextDataView ?? get().searchSource.getField('index');
     const nextSavedSearch = await getSavedSearch('', {
       search: services.data.search,
@@ -151,15 +141,7 @@ export function getSavedSearchContainer({
       },
       true
     );
-    set(nextSavedSearchToSet);
-    if (appState) {
-      return update({
-        nextDataView: actualDataView,
-        nextState: appState,
-      });
-    } else {
-      return nextSavedSearchToSet;
-    }
+    return set(nextSavedSearchToSet);
   };
 
   const persist = async (nextSavedSearch: SavedSearch, saveOptions?: SavedObjectSaveOpts) => {
@@ -211,20 +193,18 @@ export function getSavedSearchContainer({
     return nextSavedSearch;
   };
 
-  const load = async (id: string, params: LoadParams): Promise<SavedSearch> => {
-    const loadedSavedSearch = await loadSavedSearch(id, params.appState?.index, {
-      services,
-      dataViewList: params.dataViewList,
-      dataViewSpec: params.dataViewSpec,
+  const load = async (id: string): Promise<SavedSearch> => {
+    const loadedSavedSearch = await getSavedSearch(id, {
+      search: services.data.search,
+      savedObjectsClient: services.core.savedObjects.client,
+      spaces: services.spaces,
+      savedObjectsTagging: services.savedObjectsTagging,
     });
-    set(loadedSavedSearch);
-    if (params.appState) {
-      await update({
-        nextDataView: get().searchSource.getField('index'),
-        nextState: params.appState,
-      });
-    }
-    return loadedSavedSearch;
+    restoreStateFromSavedSearch({
+      savedSearch: loadedSavedSearch,
+      timefilter: services.timefilter,
+    });
+    return set(loadedSavedSearch);
   };
 
   return {

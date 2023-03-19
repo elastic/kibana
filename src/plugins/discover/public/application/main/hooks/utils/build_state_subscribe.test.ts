@@ -17,7 +17,7 @@ describe('buildStateSubscribe', () => {
   stateContainer.dataState.refetch$.next = jest.fn();
   stateContainer.dataState.reset = jest.fn();
   stateContainer.actions.setDataView = jest.fn();
-  stateContainer.actions.loadAndResolveDataView = jest.fn(() =>
+  const loadAndResolveDataView = jest.fn(() =>
     Promise.resolve({ fallback: false, dataView: dataViewComplexMock })
   );
 
@@ -26,7 +26,7 @@ describe('buildStateSubscribe', () => {
       appState: stateContainer.appState,
       savedSearchState: stateContainer.savedSearchState,
       dataState: stateContainer.dataState,
-      loadAndResolveDataView: stateContainer.actions.loadAndResolveDataView,
+      loadAndResolveDataView,
       setDataView: stateContainer.actions.setDataView,
     });
   };

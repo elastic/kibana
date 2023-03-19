@@ -8,7 +8,6 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DiscoverAppStateContainer } from './discover_app_state_container';
-import { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { addLog } from '../../../utils/add_log';
 
@@ -17,11 +16,9 @@ export const loadSavedSearch = async (
   dataView: DataView | undefined,
   {
     appStateContainer,
-    internalStateContainer,
     savedSearchContainer,
   }: {
     appStateContainer: DiscoverAppStateContainer;
-    internalStateContainer: DiscoverInternalStateContainer;
     savedSearchContainer: DiscoverSavedSearchContainer;
   }
 ): Promise<SavedSearch> => {
@@ -32,19 +29,17 @@ export const loadSavedSearch = async (
     appStateContainer.set({});
   }
   const appState = !isEmptyURL ? appStateContainer.getState() : undefined;
-  const nextSavedSearch = isPersistedSearch
-    ? await savedSearchContainer.load(id, {
-        dataViewList: internalStateContainer.getState().savedDataViews,
-        appState,
-      })
-    : await savedSearchContainer.new(dataView, appState);
-  if (
-    !isEmptyURL &&
-    dataView?.id &&
-    dataView?.id !== nextSavedSearch.searchSource.getField('index')?.id
-  ) {
-    savedSearchContainer.update({
-      nextDataView: dataView,
+  let nextSavedSearch = isPersistedSearch
+    ? await savedSearchContainer.load(id)
+    : await savedSearchContainer.new(dataView);
+
+  const updateDataView =
+    dataView?.id && dataView?.id !== nextSavedSearch.searchSource.getField('index')?.id;
+  const updateAppState = Boolean(appState);
+
+  if (updateDataView || updateAppState) {
+    nextSavedSearch = savedSearchContainer.update({
+      nextDataView: updateDataView ? dataView : nextSavedSearch.searchSource.getField('index'),
       nextState: appState,
     });
   }

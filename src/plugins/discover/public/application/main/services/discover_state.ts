@@ -108,17 +108,6 @@ export interface DiscoverStateContainer {
      */
     setDataView: (dataView: DataView) => void;
     /**
-     * Load the data view of the given id
-     * A fallback data view is returned, given there's no match
-     * This is usually the default data view
-     * @param dataViewId
-     * @param savedSearch
-     */
-    loadAndResolveDataView: (
-      dataViewId: string,
-      dataViewSpec?: DataViewSpec
-    ) => Promise<{ fallback: boolean; dataView: DataView }>;
-    /**
      * Load current list of data views, add them to internal state
      */
     loadDataViewList: () => Promise<void>;
@@ -248,14 +237,18 @@ export function getDiscoverStateContainer({
     const dataViewList = await services.dataViews.getIdsWithTitle(true);
     internalStateContainer.transitions.setSavedDataViews(dataViewList);
   };
-
+  /**
+   * Load the data view of the given id
+   * A fallback data view is returned, given there's no match
+   * This is usually the default data view
+   */
   const loadAndResolveDataView = async (id?: string, dataViewSpec?: DataViewSpec) => {
-    const nextDataViewData = await loadDataView(
-      services.dataViews,
-      services.uiSettings,
+    const nextDataViewData = await loadDataView({
+      services,
       id,
-      dataViewSpec
-    );
+      dataViewSpec,
+      dataViewList: internalStateContainer.getState().savedDataViews,
+    });
     const nextDataView = resolveDataView(nextDataViewData, services.toastNotifications);
     return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
   };
@@ -302,7 +295,6 @@ export function getDiscoverStateContainer({
 
     const nextSavedSearch = await loadNextSavedSearch(id, dataView, {
       appStateContainer,
-      internalStateContainer,
       savedSearchContainer,
     });
 
@@ -399,7 +391,6 @@ export function getDiscoverStateContainer({
       appendAdHocDataViews,
       initializeAndSync,
       fetchData,
-      loadAndResolveDataView,
       loadDataViewList,
       loadSavedSearch,
       onChangeDataView,

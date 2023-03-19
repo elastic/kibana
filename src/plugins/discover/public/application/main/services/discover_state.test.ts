@@ -406,6 +406,33 @@ describe('actions', () => {
     unsubscribe();
   });
 
+  it('loads a new saved search, updated by ad-hoc data view', async () => {
+    const { state } = getState('/');
+    await state.actions.loadDataViewList();
+    const dataViewSpecMock = {
+      id: 'mock-id',
+      title: 'mock-title',
+      timeFieldName: 'mock-time-field-name',
+    };
+    const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
+    dataViewsCreateMock.mockImplementation(() => ({
+      ...dataViewMock,
+      ...dataViewSpecMock,
+      isPersisted: () => false,
+    }));
+    await state.actions.loadSavedSearch(undefined, undefined, dataViewSpecMock);
+    expect(state.savedSearchState.getInitial$().getValue().id).toEqual(undefined);
+    expect(state.savedSearchState.getCurrent$().getValue().id).toEqual(undefined);
+    expect(
+      state.savedSearchState.getInitial$().getValue().searchSource?.getField('index')?.id
+    ).toEqual(dataViewSpecMock.id);
+    expect(
+      state.savedSearchState.getCurrent$().getValue().searchSource?.getField('index')?.id
+    ).toEqual(dataViewSpecMock.id);
+    expect(state.savedSearchState.getHasChanged$().getValue()).toEqual(false);
+    expect(state.internalState.getState().adHocDataViews.length).toBe(1);
+  });
+
   test('onChangeDataView', async () => {
     const { state, getCurrentUrl } = getState('/');
     await state.actions.loadDataViewList();

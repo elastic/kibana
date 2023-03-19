@@ -9,7 +9,7 @@
 import { getSavedSearchContainer, isEqualSavedSearch } from './discover_saved_search_container';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { savedSearchMock } from '../../../__mocks__/saved_search';
+import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { dataViewMock } from '../../../__mocks__/data_view';
 
 describe('DiscoverSavedSearchContainer', () => {
@@ -59,14 +59,50 @@ describe('DiscoverSavedSearchContainer', () => {
       expect(result.title).toBeUndefined();
       expect(result.id).toBeUndefined();
       expect(result.searchSource.getField('index')).toBe(dataViewMock);
+      expect(container.getHasChanged$().getValue()).toBe(false);
+    });
+  });
+
+  describe('load', () => {
+    discoverServiceMock.data.search.searchSource.create = jest
+      .fn()
+      .mockReturnValue(savedSearchMock.searchSource);
+    discoverServiceMock.core.savedObjects.client.resolve = jest.fn().mockReturnValue({
+      saved_object: {
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON:
+              '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          },
+          title: 'The saved search that will save the world',
+          sort: [],
+          columns: ['test123'],
+          description: 'description',
+          hideChart: false,
+        },
+        id: 'the-saved-search-id',
+        type: 'search',
+        references: [
+          {
+            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+            id: 'the-data-view-id',
+            type: 'index-pattern',
+          },
+        ],
+        namespaces: ['default'],
+      },
+      outcome: 'exactMatch',
     });
 
-    it('should create a new saved search with provided AppState', async () => {
-      const container = getSavedSearchContainer({ savedSearch, services });
-      const appState = { columns: ['test'] };
-      const result = await container.new(undefined, appState);
-      expect(result.columns).toEqual(['test']);
-      expect(container.getHasChanged$().getValue()).toEqual(true);
+    it('loads a saved search', async () => {
+      const savedSearchContainer = getSavedSearchContainer({
+        savedSearch: savedSearchMockWithTimeField,
+        services: discoverServiceMock,
+      });
+      await savedSearchContainer.load('the-saved-search-id');
+      expect(savedSearchContainer.getInitial$().getValue().id).toEqual('the-saved-search-id');
+      expect(savedSearchContainer.getCurrent$().getValue().id).toEqual('the-saved-search-id');
+      expect(savedSearchContainer.getHasChanged$().getValue()).toEqual(false);
     });
   });
 });
