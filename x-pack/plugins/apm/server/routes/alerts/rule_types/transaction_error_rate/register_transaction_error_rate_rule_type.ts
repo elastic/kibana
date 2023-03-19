@@ -51,7 +51,10 @@ import { getDocumentTypeFilterForTransactions } from '../../../../lib/helpers/tr
 import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
-import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import {
+  ApmRuleTypeAlertDefinition,
+  RegisterRuleDependencies,
+} from '../../register_apm_rule_types';
 import {
   getServiceGroupFields,
   getServiceGroupFieldsAgg,
@@ -295,6 +298,7 @@ export function registerTransactionErrorRateRuleType({
 
         return { state: {} };
       },
+      alerts: ApmRuleTypeAlertDefinition,
     })
   );
 }

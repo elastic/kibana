@@ -27,15 +27,18 @@ export const StepScreenshotDetails = ({
     <EuiPanel hasShadow={false} hasBorder={false} color="subdued">
       <EuiFlexGroup>
         <EuiFlexItem css={{ alignItems: 'flex-start' }} grow={false}>
-          <JourneyStepScreenshotContainer
-            key={stepIndex}
-            checkGroup={step?.monitor.check_group ?? checkGroupId}
-            initialStepNumber={stepIndex}
-            stepStatus={step?.synthetics.payload?.status}
-            allStepsLoaded={true}
-            retryFetchOnRevisit={false}
-            size={[180, 112]}
-          />
+          {step ? (
+            <JourneyStepScreenshotContainer
+              key={stepIndex}
+              checkGroup={step?.monitor.check_group ?? checkGroupId}
+              initialStepNumber={stepIndex}
+              stepStatus={step?.synthetics.payload?.status}
+              allStepsLoaded={true}
+              retryFetchOnRevisit={false}
+              size={[180, 112]}
+              timestamp={step?.['@timestamp']}
+            />
+          ) : null}
         </EuiFlexItem>
         <StepMetaInfo step={step} stepIndex={stepIndex} stateId={stateId} />
       </EuiFlexGroup>

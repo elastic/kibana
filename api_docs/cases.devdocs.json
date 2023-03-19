@@ -1170,10 +1170,10 @@
     "interfaces": [
       {
         "parentPluginId": "cases",
-        "id": "def-server.PluginSetupContract",
+        "id": "def-server.CasesSetup",
         "type": "Interface",
         "tags": [],
-        "label": "PluginSetupContract",
+        "label": "CasesSetup",
         "description": [],
         "path": "x-pack/plugins/cases/server/types.ts",
         "deprecated": false,
@@ -1181,7 +1181,7 @@
         "children": [
           {
             "parentPluginId": "cases",
-            "id": "def-server.PluginSetupContract.attachmentFramework",
+            "id": "def-server.CasesSetup.attachmentFramework",
             "type": "Object",
             "tags": [],
             "label": "attachmentFramework",
@@ -1198,10 +1198,10 @@
       },
       {
         "parentPluginId": "cases",
-        "id": "def-server.PluginStartContract",
+        "id": "def-server.CasesStart",
         "type": "Interface",
         "tags": [],
-        "label": "PluginStartContract",
+        "label": "CasesStart",
         "description": [
           "\nCases server exposed contract for interacting with cases entities."
         ],
@@ -1211,7 +1211,7 @@
         "children": [
           {
             "parentPluginId": "cases",
-            "id": "def-server.PluginStartContract.getCasesClientWithRequest",
+            "id": "def-server.CasesStart.getCasesClientWithRequest",
             "type": "Function",
             "tags": [],
             "label": "getCasesClientWithRequest",
@@ -1243,7 +1243,7 @@
             "children": [
               {
                 "parentPluginId": "cases",
-                "id": "def-server.PluginStartContract.getCasesClientWithRequest.$1",
+                "id": "def-server.CasesStart.getCasesClientWithRequest.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "request",
@@ -1269,6 +1269,40 @@
             "returnComment": [
               "a {@link CasesClient }"
             ]
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesStart.getExternalReferenceAttachmentTypeRegistry",
+            "type": "Function",
+            "tags": [],
+            "label": "getExternalReferenceAttachmentTypeRegistry",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ExternalReferenceAttachmentTypeRegistry"
+            ],
+            "path": "x-pack/plugins/cases/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-server.CasesStart.getPersistableStateAttachmentTypeRegistry",
+            "type": "Function",
+            "tags": [],
+            "label": "getPersistableStateAttachmentTypeRegistry",
+            "description": [],
+            "signature": [
+              "() => ",
+              "PersistableStateAttachmentTypeRegistry"
+            ],
+            "path": "x-pack/plugins/cases/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1616,7 +1650,7 @@
         "tags": [],
         "label": "CommentType",
         "description": [],
-        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
+        "path": "x-pack/plugins/cases/common/api/cases/comment/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1628,7 +1662,7 @@
         "tags": [],
         "label": "ExternalReferenceStorageType",
         "description": [],
-        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
+        "path": "x-pack/plugins/cases/common/api/cases/comment/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
