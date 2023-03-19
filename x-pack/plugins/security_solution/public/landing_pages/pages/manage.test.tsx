@@ -10,14 +10,14 @@ import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { TestProviders } from '../../common/mock';
 import { ManagementCategories } from './manage';
-import type { NavLinkItem } from '../../common/components/navigation/types';
+import type { NavigationLink } from '../../common/links';
 
 const RULES_ITEM_LABEL = 'elastic rules!';
 const EXCEPTIONS_ITEM_LABEL = 'exceptional!';
 const CATEGORY_1_LABEL = 'first tests category';
 const CATEGORY_2_LABEL = 'second tests category';
 
-const defaultAppManageLink: NavLinkItem = {
+const defaultAppManageLink: NavigationLink = {
   id: SecurityPageName.administration,
   title: 'admin',
   categories: [
@@ -47,8 +47,8 @@ const defaultAppManageLink: NavLinkItem = {
 };
 
 const mockAppManageLink = jest.fn(() => defaultAppManageLink);
-jest.mock('../../common/components/navigation/nav_links', () => ({
-  useAppRootNavLink: () => mockAppManageLink(),
+jest.mock('../../common/links/nav_links', () => ({
+  useRootNavLink: () => mockAppManageLink(),
 }));
 
 describe('ManagementCategories', () => {

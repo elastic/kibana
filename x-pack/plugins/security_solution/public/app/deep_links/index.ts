@@ -78,7 +78,7 @@ import {
   USERS_PATH,
 } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { hasCapabilities, subscribeAppLinks } from '../../common/links';
+import { appLinks$, hasCapabilities } from '../../common/links';
 import type { AppLinkItems } from '../../common/links/types';
 
 export const FEATURE = {
@@ -630,7 +630,7 @@ const formatDeepLinks = (appLinks: AppLinkItems): AppDeepLink[] =>
  * Registers any change in appLinks to be updated in app deepLinks
  */
 export const registerDeepLinksUpdater = (appUpdater$: Subject<AppUpdater>): Subscription => {
-  return subscribeAppLinks((appLinks) => {
+  return appLinks$.subscribe((appLinks) => {
     appUpdater$.next(() => ({
       navLinkStatus: AppNavLinkStatus.hidden, // needed to prevent main security link to switch to visible after update
       deepLinks: formatDeepLinks(appLinks),
