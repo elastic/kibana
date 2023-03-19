@@ -6,11 +6,13 @@
  */
 
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RuleStatus, useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -18,7 +20,6 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 
 export function RulesPage() {
-  const { ObservabilityPageTemplate } = usePluginContext();
   const {
     http,
     docLinks,
@@ -28,6 +29,8 @@ export function RulesPage() {
       getRulesSettingsLink: RulesSettingsLink,
     },
   } = useKibana().services;
+  const { ObservabilityPageTemplate } = usePluginContext();
+  const history = useHistory();
 
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const { ruleTypes } = useLoadRuleTypes({
@@ -39,9 +42,20 @@ export function RulesPage() {
     (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
 
-  const [status, setStatus] = useState<RuleStatus[]>([]);
-  const [lastResponse, setLastResponse] = useState<string[]>([]);
-  const [refresh, setRefresh] = useState(new Date());
+  const urlStateStorage = createKbnUrlStateStorage({
+    history,
+    useHash: false,
+    useHashQuery: false,
+  });
+
+  const { status, lastResponse } = urlStateStorage.get<{
+    status: RuleStatus[];
+    lastResponse: string[];
+  }>('_a') || { status: [], lastResponse: [] };
+
+  const [stateStatus, setStatus] = useState<RuleStatus[]>(status);
+  const [stateLastResponse, setLastResponse] = useState<string[]>(lastResponse);
+  const [stateRefresh, setRefresh] = useState(new Date());
 
   const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
 
@@ -59,14 +73,17 @@ export function RulesPage() {
     },
   ]);
 
-  const handleLastResponseFilterChange = (newLastResponse: string[]) => {
-    setLastResponse(newLastResponse);
-    return { lastResponse: newLastResponse, status };
-  };
-
   const handleStatusFilterChange = (newStatus: RuleStatus[]) => {
     setStatus(newStatus);
-    return { lastResponse, status: newStatus };
+    urlStateStorage.set('_a', { status: newStatus, lastResponse });
+    return { lastResponse: stateLastResponse || [], status: newStatus };
+  };
+
+  const handleLastRunOutcomeFilterChange = (newLastResponse: string[]) => {
+    setRefresh(new Date());
+    setLastResponse(newLastResponse);
+    urlStateStorage.set('_a', { status, lastResponse: newLastResponse });
+    return { lastResponse: newLastResponse, status: stateStatus || [] };
   };
 
   return (
@@ -109,12 +126,12 @@ export function RulesPage() {
         <EuiFlexItem>
           <RuleList
             filteredRuleTypes={filteredRuleTypes}
-            lastResponseFilter={lastResponse}
-            refresh={refresh}
+            lastRunOutcomeFilter={stateLastResponse}
+            refresh={stateRefresh}
             ruleDetailsRoute="alerts/rules/:ruleId"
             rulesListKey="observability_rulesListColumns"
             showActionFilter={false}
-            statusFilter={status}
+            statusFilter={stateStatus}
             visibleColumns={[
               'ruleName',
               'ruleExecutionStatusLastDate',
@@ -122,7 +139,7 @@ export function RulesPage() {
               'ruleExecutionStatus',
               'ruleExecutionState',
             ]}
-            onLastResponseFilterChange={handleLastResponseFilterChange}
+            onLastRunOutcomeFilterChange={handleLastRunOutcomeFilterChange}
             onStatusFilterChange={handleStatusFilterChange}
           />
         </EuiFlexItem>
