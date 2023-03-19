@@ -9,10 +9,12 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
+import useObservable from 'react-use/lib/useObservable';
 import type { PrimaryNavigationProps } from './types';
 import { usePrimaryNavigationItems } from './use_navigation_items';
 import { useIsGroupedNavigationEnabled } from '../helpers';
 import { SecuritySideNav } from '../security_side_nav';
+import { useKibana } from '../../../lib/kibana';
 
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
   defaultMessage: 'Security',
@@ -44,6 +46,14 @@ export const usePrimaryNavigation = ({
     navTabs,
     selectedTabId,
   });
+
+  const { isSidebarEnabled$ } = useKibana().services;
+
+  const isSidebarEnabled = useObservable(isSidebarEnabled$);
+
+  if (!isSidebarEnabled) {
+    return undefined;
+  }
 
   return {
     canBeCollapsed: true,

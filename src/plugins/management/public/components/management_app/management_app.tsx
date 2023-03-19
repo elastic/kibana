@@ -34,6 +34,7 @@ export interface ManagementAppDependencies {
   sections: SectionsServiceStart;
   kibanaVersion: string;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
+  getIsSidebarEnabled: () => boolean;
 }
 
 export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppProps) => {
@@ -75,18 +76,21 @@ export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppPr
     return null;
   }
 
-  const solution: KibanaPageTemplateProps['solutionNav'] = {
-    name: i18n.translate('management.nav.label', {
-      defaultMessage: 'Management',
-    }),
-    icon: 'managementApp',
-    'data-test-subj': 'mgtSideBarNav',
-    items: managementSidebarNav({
-      selectedId,
-      sections,
-      history,
-    }),
-  };
+  const solution: KibanaPageTemplateProps['solutionNav'] | undefined =
+    dependencies.getIsSidebarEnabled()
+      ? {
+          name: i18n.translate('management.nav.label', {
+            defaultMessage: 'Management',
+          }),
+          icon: 'managementApp',
+          'data-test-subj': 'mgtSideBarNav',
+          items: managementSidebarNav({
+            selectedId,
+            sections,
+            history,
+          }),
+        }
+      : undefined;
 
   return (
     <I18nProvider>
