@@ -51,9 +51,11 @@ interface KibanaLogicProps {
   guidedOnboarding: GuidedOnboardingPluginStart;
   security: SecurityPluginStart;
   uiSettings: IUiSettingsClient;
+  isSidebarEnabled: boolean;
   // Optional plugins
   cloud?: CloudSetup;
 }
+
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
   cloud: Partial<CloudSetup>;
   data: DataPublicPluginStart;
@@ -67,12 +69,13 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
   reducers: ({ props }) => ({
     application: [props.application || {}, {}],
     capabilities: [props.capabilities || {}, {}],
-    config: [props.config || {}, {}],
     charts: [props.charts, {}],
     cloud: [props.cloud || {}, {}],
+    config: [props.config || {}, {}],
     data: [props.data, {}],
     guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],
+    isSidebarEnabled: [props.isSidebarEnabled, {}],
     lens: [props.lens, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {

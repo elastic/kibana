@@ -42,6 +42,9 @@ export interface ClientData extends InitialAppData {
   errorConnectingMessage?: string;
 }
 
+export type EnterpriseSearchPublicSetup = ReturnType<EnterpriseSearchPlugin['setup']>;
+export type EnterpriseSearchPublicStart = ReturnType<EnterpriseSearchPlugin['start']>;
+
 interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
@@ -62,6 +65,7 @@ export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
   private hasInitialized: boolean = false;
   private data: ClientData = {} as ClientData;
+  private isSidebarEnabled = true;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
@@ -315,7 +319,11 @@ export class EnterpriseSearchPlugin implements Plugin {
         : undefined;
     const plugins = { ...pluginsStart, cloud } as PluginsStart;
 
-    return { params, core: coreStart, plugins };
+    coreStart.chrome
+      .getChromeStyle$()
+      .subscribe((style) => (this.isSidebarEnabled = style !== 'project'));
+
+    return { params, core: coreStart, plugins, isSidebarEnabled: this.isSidebarEnabled };
   }
 
   private getPluginData() {
