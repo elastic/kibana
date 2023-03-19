@@ -85,34 +85,26 @@ export function createTransactionMetricsAggregator(
           value_count: 0,
         },
         'transaction.aggregation.overflow_count': 0,
+        _overflow_count: [0, 0], // [service, transaction]
+        _aggregator_overflow_count: 0, // transaction
       };
     },
-    group: (set, key, serviceListMap) => {
-      const { transactions = {} } = options || {};
-      const maxTransactionOverflowCount = transactions?.max_groups ?? 10_000;
-      const maxTransactionGroupsPerService = transactions?.max_services ?? 10_000;
-      let service = serviceListMap.get(set['service.name']);
-      const hasServiceCountOverflowed = serviceListMap.size >= maxTransactionGroupsPerService;
-
-      if (!service) {
-        service = {
-          transactionCount: 0,
-          overflowKey: null,
-        };
-        if (hasServiceCountOverflowed) {
-          set['service.name'] = '_other';
-        }
-        serviceListMap.set(set['service.name'], service);
-      }
-
-      const isTransactionCountOverflown = service.transactionCount >= maxTransactionOverflowCount;
-      if (isTransactionCountOverflown) {
-        service.overflowKey = key;
-        set['transaction.name'] = '_other';
-        set['transaction.aggregation.overflow_count'] += 1;
-      }
-      service.transactionCount += 1;
+    aggregatorLimit: {
+      field: 'transaction.name',
+      value: options?.overflowSettings?.maxGroups ?? Number.POSITIVE_INFINITY,
     },
+    group: [
+      {
+        field: 'service.name',
+        limit: options?.overflowSettings?.transactions?.maxServices ?? Number.POSITIVE_INFINITY,
+      },
+      {
+        field: 'transaction.name',
+        limit:
+          options?.overflowSettings?.transactions?.maxTransactionGroupsPerService ??
+          Number.POSITIVE_INFINITY,
+      },
+    ],
     reduce: (metric, event) => {
       const duration = event['transaction.duration.us']!;
       metric['transaction.duration.histogram'].record(duration);
@@ -137,6 +129,14 @@ export function createTransactionMetricsAggregator(
         counts: serialized.counts,
       };
       metric._doc_count = serialized.total;
+
+      if (metric['transaction.name'] === '_other') {
+        metric['transaction.aggregation.overflow_count'] =
+          metric._aggregator_overflow_count || metric._overflow_count[1];
+      }
+
+      delete metric._overflow_count;
+      delete metric._aggregator_overflow_count;
 
       return metric;
     },

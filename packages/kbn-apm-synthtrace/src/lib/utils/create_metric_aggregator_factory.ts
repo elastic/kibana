@@ -6,37 +6,44 @@
  * Side Public License, v 1.
  */
 
-import { appendHash, Fields, parseInterval } from '@kbn/apm-synthtrace-client';
+import { ApmFields, appendHash, Fields, parseInterval } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
 import { Duplex, PassThrough } from 'stream';
 
-export interface ServiceMapValue {
-  transactionCount: number;
-  overflowKey: string | null;
+export interface TrackingMetricGroupMap {
+  tracked?: Map<keyof ApmFields, TrackingMetricGroupMap>;
+  untracked?: Map<keyof ApmFields, TrackingMetricGroupMap>;
+}
+
+export interface GroupFields {
+  field: keyof ApmFields;
+  limit: number;
 }
 
 export function createMetricAggregatorFactory<TFields extends Fields>() {
   return function <TMetric extends Record<string, any>, TOutput extends Record<string, any>>({
     filter,
     getAggregateKey,
-    init,
     flushInterval,
+    init,
+    aggregatorLimit,
     group,
     reduce,
     serialize,
   }: {
     filter: (event: TFields) => boolean;
     getAggregateKey: (event: TFields) => string;
-    init: (event: TFields) => TMetric;
     flushInterval: string;
-    group: (set: TMetric, key: string, serviceMap: Map<string, ServiceMapValue>) => void;
+    init: (event: TFields) => TMetric;
+    aggregatorLimit?: { field: keyof ApmFields; value: number };
+    group?: GroupFields[];
     reduce: (metric: TMetric, event: TFields) => void;
     serialize: (metric: TMetric) => TOutput;
   }) {
     let cb: (() => void) | undefined;
 
     const metrics: Map<string, TMetric & { '@timestamp'?: number }> = new Map();
-    const serviceListMap: Map<string, ServiceMapValue> = new Map();
+    const groupedMetricsMap: TrackingMetricGroupMap = {};
 
     const OVERFLOW_BUCKET_NAME = '_other';
 
@@ -95,36 +102,119 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
         const timestamp = event['@timestamp']!;
 
-        function setMetric() {
+        function computeKeyWrapper(truncatedTimestamp: number) {
+          return (_event: TFields) =>
+            appendHash(getAggregateKey(_event), truncatedTimestamp.toString());
+        }
+
+        function getMetricByKeyWrapper(truncatedTimestamp: number) {
+          return (key: string) => {
+            let set = metrics.get(key);
+            if (!set) {
+              set = init({ ...event });
+              set['@timestamp'] = truncatedTimestamp;
+            }
+            return set;
+          };
+        }
+
+        function writeMetric() {
           const truncatedTimestamp = Math.floor(timestamp / flushEveryMs) * flushEveryMs;
-          // @ts-ignore
-          const existingService = serviceListMap.get(event['service.name']);
-          const overflowService = serviceListMap.get(OVERFLOW_BUCKET_NAME);
-          // Check for overflowKey 1st in ServiceMap
-          const key =
-            overflowService?.overflowKey ||
-            existingService?.overflowKey ||
-            appendHash(getAggregateKey(event), truncatedTimestamp.toString());
+          const computeKey = computeKeyWrapper(truncatedTimestamp);
+          const getMetricByKey = getMetricByKeyWrapper(truncatedTimestamp);
 
-          let set = metrics.get(key);
+          let key = computeKey(event);
+          let set = getMetricByKey(key);
 
-          if (!set) {
-            set = init({ ...event });
-            set['@timestamp'] = truncatedTimestamp;
-            metrics.set(key, set);
+          // Always check for Global aggregator Limit 1st
+          if (
+            aggregatorLimit?.field &&
+            aggregatorLimit?.value &&
+            metrics.size >= aggregatorLimit.value
+          ) {
+            // @ts-ignore
+            event[aggregatorLimit.field] = OVERFLOW_BUCKET_NAME;
+            key = computeKey(event);
+
+            // We need to make sure we get back the same set which was previously set with overflow count
+            set = getMetricByKey(key);
+            // @ts-ignore
+            set._aggregator_overflow_count += 1;
+          } else {
+            // is grouping required
+            if (group?.length) {
+              let currentNode = groupedMetricsMap;
+
+              for (let level = 0; level < group.length; level++) {
+                const field = group[level].field;
+                const limit = group[level].limit;
+
+                // Check if current level is being untracked
+                if (!currentNode.untracked) {
+                  currentNode.untracked = new Map();
+                }
+
+                // Check if current level is being tracked
+                if (!currentNode.tracked) {
+                  currentNode.tracked = new Map();
+                }
+
+                // Check if the current field value exists in the tracked or untracked property
+                // @ts-ignore
+                const fieldValue = event[field];
+                const trackedField = currentNode.tracked.get(fieldValue);
+                const untrackedField = currentNode.untracked.get(fieldValue);
+
+                // If current field value does not exist in the datastructure, add it to tracked based on size
+                if (!trackedField && !untrackedField) {
+                  // check for size of tracked
+                  if (currentNode.tracked.size < limit) {
+                    // Add to tracked
+                    currentNode.tracked.set(fieldValue, {});
+                    currentNode = currentNode.tracked.get(fieldValue) as TrackingMetricGroupMap;
+                  } else {
+                    // Reached limit for current level, add document to untracked
+                    currentNode.untracked.set(fieldValue, {});
+                    currentNode = currentNode.untracked.get(fieldValue) as TrackingMetricGroupMap;
+                    // Once a parent has reached the limit, we must make all the subsequent children overflow
+
+                    const remainingGroups = group.slice(level);
+                    const remainingFields = remainingGroups.map((rGroup) => rGroup.field);
+                    remainingFields.forEach((rField) => {
+                      // @ts-ignore
+                      event[rField] = OVERFLOW_BUCKET_NAME;
+                    });
+                    key = computeKey(event);
+                    set = getMetricByKey(key);
+                    // @ts-ignore
+                    set._overflow_count[level] += 1;
+                  }
+                }
+
+                // If current field value exists in the tracked property, go down a level
+                if (trackedField) {
+                  currentNode = trackedField;
+                }
+
+                // If current field value exists in the tracked property, go down a level
+                if (untrackedField) {
+                  currentNode = untrackedField;
+                }
+              }
+            }
           }
 
-          group(set, key, serviceListMap);
           reduce(set, event);
+          metrics.set(key, set);
 
           callback();
         }
 
         if (timestamp > nextFlush) {
           nextFlush = getNextFlush(timestamp);
-          flush(this, true, setMetric);
+          flush(this, true, writeMetric);
         } else {
-          setMetric();
+          writeMetric();
         }
       },
     });

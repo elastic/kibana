@@ -17,14 +17,15 @@ type Generate<TFields> = (options: {
 }) => SynthtraceGenerator<TFields> | Array<SynthtraceGenerator<TFields>> | Readable;
 
 export interface ScenarioOptions {
-  // Equivalent of APM Server Setting - Transactions.MaxTransactionGroups
-  transactions?: {
-    max_groups?: number;
-    max_services?: number;
-  };
-  // Equivalent of APM Server Setting - ServiceTransactions.MaxGroups
-  service_transactions?: {
-    max_groups?: number;
+  overflowSettings: {
+    // Equivalent of APM Server Setting - MaxGroups (Identical for Services Txs Metrics and Transaction Metrics )
+    maxGroups?: number;
+    transactions?: {
+      // Equivalent of APM Server Setting - Transactions.MaxServices
+      maxServices?: number;
+      // Equivalent of APM Server Setting - Transactions.MaxTransactionGroupsPerService
+      maxTransactionGroupsPerService?: number;
+    };
   };
 }
 export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Promise<{

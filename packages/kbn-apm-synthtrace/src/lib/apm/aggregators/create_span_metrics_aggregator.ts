@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { identity, pick } from 'lodash';
+import { pick } from 'lodash';
 import { ApmFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
 
@@ -43,7 +43,6 @@ export function createSpanMetricsAggregator(flushInterval: string) {
         'span.destination.service.response_time.sum.us': 0,
       };
     },
-    group: identity,
     reduce: (metric, event) => {
       metric['span.destination.service.response_time.count'] += 1;
       metric['span.destination.service.response_time.sum.us'] += event['span.duration.us']!;

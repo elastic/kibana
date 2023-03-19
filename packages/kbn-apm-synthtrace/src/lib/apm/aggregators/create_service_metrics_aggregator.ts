@@ -46,30 +46,20 @@ export function createServiceMetricsAggregator(flushInterval: string, options?: 
           value_count: 0,
         },
         'service_transaction.aggregation.overflow_count': 0,
+        _overflow_count: [0], // [service]
+        _aggregator_overflow_count: 0, // transaction
       };
     },
-    group: (set, key, serviceListMap) => {
-      const { service_transactions: serviceTransaction = {} } = options || {};
-      const maxServiceOverflowCount = serviceTransaction?.max_groups ?? 10_000;
-      let service = serviceListMap.get(set['service.name']);
-      if (!service) {
-        service = {
-          transactionCount: 0,
-          overflowKey: null,
-        };
-        const hasServiceBucketOverflown = serviceListMap.size >= maxServiceOverflowCount;
-
-        if (hasServiceBucketOverflown) {
-          set['service.name'] = '_other';
-          service.overflowKey = key;
-        }
-        serviceListMap.set(set['service.name'], service);
-      }
-
-      if (set['service.name'] === '_other') {
-        set['service_transaction.aggregation.overflow_count'] += 1;
-      }
+    aggregatorLimit: {
+      field: 'service.name',
+      value: options?.overflowSettings?.maxGroups ?? Number.POSITIVE_INFINITY,
     },
+    group: [
+      {
+        field: 'service.name',
+        limit: options?.overflowSettings?.transactions?.maxServices ?? Number.POSITIVE_INFINITY,
+      },
+    ],
     reduce: (metric, event) => {
       const duration = event['transaction.duration.us']!;
 
@@ -95,6 +85,14 @@ export function createServiceMetricsAggregator(flushInterval: string, options?: 
         counts: serialized.counts,
       };
       metric._doc_count = serialized.total;
+
+      if (metric['service.name'] === '_other') {
+        metric['service_transaction.aggregation.overflow_count'] =
+          metric._aggregator_overflow_count || metric._overflow_count[0];
+      }
+
+      delete metric._overflow_count;
+      delete metric._aggregator_overflow_count;
 
       return metric;
     },

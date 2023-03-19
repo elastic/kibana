@@ -7,7 +7,6 @@
  */
 import { ApmFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
 import { identity, noop, pick } from 'lodash';
-import { ScenarioOptions } from '../../../cli/scenario';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
 
 const KEY_FIELDS: Array<keyof ApmFields> = [
@@ -17,10 +16,7 @@ const KEY_FIELDS: Array<keyof ApmFields> = [
   'service.language.name',
 ];
 
-export function createServiceSummaryMetricsAggregator(
-  flushInterval: string,
-  options?: ScenarioOptions
-) {
+export function createServiceSummaryMetricsAggregator(flushInterval: string) {
   return createApmMetricAggregator({
     filter: () => true,
     getAggregateKey: (event) => {
@@ -38,23 +34,6 @@ export function createServiceSummaryMetricsAggregator(
         'processor.event': 'metric',
         'processor.name': 'metric',
       };
-    },
-    group: (set, key, serviceListMap) => {
-      const { service_transactions: serviceTransaction = {} } = options || {};
-      const maxServiceOverflowCount = serviceTransaction?.max_groups ?? 10_000;
-      let service = serviceListMap.get(set['service.name']);
-      if (!service) {
-        service = {
-          transactionCount: 0,
-          overflowKey: null,
-        };
-        const hasServiceBucketOverflown = serviceListMap.size >= maxServiceOverflowCount;
-        if (hasServiceBucketOverflown) {
-          set['service.name'] = '_other';
-          service.overflowKey = key;
-        }
-        serviceListMap.set(set['service.name'], service);
-      }
     },
     reduce: noop,
     serialize: identity,

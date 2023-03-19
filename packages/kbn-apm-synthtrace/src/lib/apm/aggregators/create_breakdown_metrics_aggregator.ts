@@ -30,7 +30,6 @@ export function createBreakdownMetricsAggregator(flushInterval: string) {
         'span.self_time.sum.us': 0,
       };
     },
-    group: identity,
     reduce: (metric, event) => {
       metric['span.self_time.count'] += event['span.self_time.count']!;
       metric['span.self_time.sum.us'] += event['span.self_time.sum.us']!;
