@@ -210,6 +210,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
   monitoring: getDefaultMonitoring('2020-08-20T19:23:38Z'),
+  revision: 0,
 };
 
 export const mockTaskInstance = () => ({

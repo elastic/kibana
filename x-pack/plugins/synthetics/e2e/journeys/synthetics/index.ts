@@ -20,7 +20,8 @@ export * from './detail_flyout';
 export * from './alert_rules/default_status_alert.journey';
 export * from './test_now_mode.journey';
 export * from './data_retention.journey';
-export * from './monitor_details_page/monitor_summary.journey';
+// Additional flake skip along with https://github.com/elastic/kibana/pull/151936
+// export * from './monitor_details_page/monitor_summary.journey';
 export * from './test_run_details.journey';
 export * from './step_details.journey';
 export * from './project_monitor_read_only.journey';

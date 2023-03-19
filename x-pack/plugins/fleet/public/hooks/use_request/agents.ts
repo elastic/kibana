@@ -44,6 +44,8 @@ import type {
   PostNewAgentActionResponse,
   GetCurrentUpgradesResponse,
   GetAvailableVersionsResponse,
+  PostRetrieveAgentsByActionsRequest,
+  PostRetrieveAgentsByActionsResponse,
 } from '../../types';
 
 import { useRequest, sendRequest } from './use_request';
@@ -261,6 +263,14 @@ export function sendPostCancelAction(actionId: string) {
   return sendRequest<GetCurrentUpgradesResponse>({
     path: agentRouteService.getCancelActionPath(actionId),
     method: 'post',
+  });
+}
+
+export function sendPostRetrieveAgentsByActions(body: PostRetrieveAgentsByActionsRequest['body']) {
+  return sendRequest<PostRetrieveAgentsByActionsResponse>({
+    path: agentRouteService.getAgentsByActionsPath(),
+    method: 'post',
+    body,
   });
 }
 

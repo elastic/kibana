@@ -57,7 +57,12 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
   }
 
   const button = (
-    <EuiButtonIcon display={'empty'} color={'warning'} iconType={'alert'} onClick={togglePopover} />
+    <EuiButtonIcon
+      display={'empty'}
+      color={'warning'}
+      iconType={'warning'}
+      onClick={togglePopover}
+    />
   );
   const popoverTitle = getCapitalizedStatusText(RuleExecutionStatus['partial failure']);
 

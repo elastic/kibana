@@ -368,7 +368,7 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
                                 aria-label={i18n.translate('xpack.lens.chartSwitch.dataLossLabel', {
                                   defaultMessage: 'Warning',
                                 })}
-                                type="alert"
+                                type="warning"
                                 color="warning"
                                 content={i18n.translate(
                                   'xpack.lens.chartSwitch.dataLossDescription',

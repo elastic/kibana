@@ -13,39 +13,38 @@ import type { IntegrationCardItem } from '../../../../../../../common/types/mode
 import type { CategoryFacet } from './category_facets';
 
 export function mergeCategoriesAndCount(
-  eprCategoryList: Array<{ id: string; title: string; count: number }>, // EPR-categories from backend call to EPR
+  eprCategoryList: CategoryFacet[], // EPR-categories from backend call to EPR
   cards: IntegrationCardItem[]
 ): CategoryFacet[] {
   const facets: CategoryFacet[] = [];
 
-  const addIfMissing = (category: string, count: number, title: string) => {
+  const addIfMissing = (category: CategoryFacet) => {
     const match = facets.find((c) => {
-      return c.id === category;
+      return c.id === category.id;
     });
 
     if (match) {
-      match.count += count;
+      match.count += category.count;
     } else {
-      facets.push({
-        id: category,
-        count,
-        title,
-      });
+      facets.push(category);
     }
   };
 
-  // Seed the list with the dynamic categories
+  // Seed the list with the dynamic categories from EPR and hardcoded ones from custom integrations
   eprCategoryList.forEach((facet) => {
-    addIfMissing(facet.id, 0, facet.title);
+    addIfMissing({ ...facet, count: 0 });
   });
+  for (const [catId, facet] of Object.entries(INTEGRATION_CATEGORY_DISPLAY)) {
+    addIfMissing({ ...facet, id: catId, count: 0 });
+  }
 
   // Count all the categories
   cards.forEach((integration) => {
-    integration.categories.forEach((cat: string) => {
-      const title = INTEGRATION_CATEGORY_DISPLAY[cat as IntegrationCategory]
-        ? INTEGRATION_CATEGORY_DISPLAY[cat as IntegrationCategory]
-        : cat;
-      addIfMissing(cat, 1, title);
+    integration.categories.forEach((catId: string) => {
+      const category = INTEGRATION_CATEGORY_DISPLAY[catId as IntegrationCategory]
+        ? INTEGRATION_CATEGORY_DISPLAY[catId as IntegrationCategory]
+        : { title: catId };
+      addIfMissing({ ...category, id: catId, count: 1 });
     });
   });
 
