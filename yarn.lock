@@ -4937,6 +4937,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/serverless-search@link:x-pack/plugins/serverless_search":
+  version "0.0.0"
+  uid ""
+
 "@kbn/serverless@link:x-pack/plugins/serverless":
   version "0.0.0"
   uid ""
