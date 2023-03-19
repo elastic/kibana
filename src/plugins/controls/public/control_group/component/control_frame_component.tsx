@@ -41,7 +41,7 @@ const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
     <EuiButtonEmpty
       color="danger"
       iconSize="m"
-      iconType={'alert'}
+      iconType="error"
       onClick={() => setPopoverOpen((open) => !open)}
       className={'errorEmbeddableCompact__button'}
       textProps={{ className: 'errorEmbeddableCompact__text' }}
@@ -214,28 +214,25 @@ export const ControlFrame = ({
   );
 
   return (
-    <>
-      <FloatingActions
-        className={classNames('controlFrameFloatingActions', {
-          'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
-          'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
-        })}
-        usingTwoLineLayout={usingTwoLineLayout}
-        actions={floatingActions}
-        isEnabled={embeddable && enableActions}
+    <FloatingActions
+      className={classNames({
+        'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
+        'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
+      })}
+      actions={floatingActions}
+      isEnabled={embeddable && enableActions}
+    >
+      <EuiFormRow
+        data-test-subj="control-frame-title"
+        fullWidth
+        label={
+          usingTwoLineLayout
+            ? title || ControlGroupStrings.emptyState.getTwoLineLoadingTitle()
+            : undefined
+        }
       >
-        <EuiFormRow
-          data-test-subj="control-frame-title"
-          fullWidth
-          label={
-            usingTwoLineLayout
-              ? title || ControlGroupStrings.emptyState.getTwoLineLoadingTitle()
-              : undefined
-          }
-        >
-          {form}
-        </EuiFormRow>
-      </FloatingActions>
-    </>
+        {form}
+      </EuiFormRow>
+    </FloatingActions>
   );
 };

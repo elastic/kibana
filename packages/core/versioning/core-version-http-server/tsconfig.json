@@ -13,6 +13,7 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core-http-server",
+    "@kbn/utility-types",
   ],
   "exclude": [
     "target/**/*",
