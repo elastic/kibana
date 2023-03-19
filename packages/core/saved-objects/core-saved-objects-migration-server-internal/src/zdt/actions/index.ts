@@ -10,11 +10,22 @@ import type {
   IncompatibleClusterRoutingAllocation,
   RetryableEsClientError,
   WaitForTaskCompletionTimeout,
+  IndexNotYellowTimeout,
+  IndexNotGreenTimeout,
+  ClusterShardLimitExceeded,
   IndexNotFound,
+  AliasNotFound,
+  IncompatibleMappingException,
 } from '../../actions';
 
 export {
   initAction as init,
+  waitForIndexStatus,
+  createIndex,
+  updateAliases,
+  updateMappings,
+  updateAndPickupMappings,
+  waitForPickupUpdatedMappingsTask,
   type InitActionParams,
   type IncompatibleClusterRoutingAllocation,
   type RetryableEsClientError,
@@ -27,6 +38,11 @@ export interface ActionErrorTypeMap {
   incompatible_cluster_routing_allocation: IncompatibleClusterRoutingAllocation;
   retryable_es_client_error: RetryableEsClientError;
   index_not_found_exception: IndexNotFound;
+  index_not_green_timeout: IndexNotGreenTimeout;
+  index_not_yellow_timeout: IndexNotYellowTimeout;
+  cluster_shard_limit_exceeded: ClusterShardLimitExceeded;
+  alias_not_found_exception: AliasNotFound;
+  incompatible_mapping_exception: IncompatibleMappingException;
 }
 
 /** Type guard for narrowing the type of a left */

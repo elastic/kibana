@@ -16,3 +16,4 @@ export { scheduleTask } from './schedule_task';
 export { createNewAPIKeySet } from './create_new_api_key_set';
 export { recoverRuleAlerts } from './recover_rule_alerts';
 export { addUuid } from './add_uuid';
+export { incrementRevision } from './increment_revision';

@@ -6,13 +6,14 @@
  */
 
 import React, { useMemo } from 'react';
-import type { RiskScoreEntity } from '../../../../../common/search_strategy';
+import type { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
 import { EMPTY_SEVERITY_COUNT } from '../../../../../common/search_strategy';
 import { getRiskScoreDonutAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_donut';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import type { SeverityCount } from '../../../../explore/components/risk_score/severity/types';
+import { generateSeverityFilter } from '../../../../explore/hosts/store/helpers';
 import { RiskScoreDonutChart } from '../common/risk_score_donut_chart';
 import { TOTAL_LABEL } from '../common/translations';
 
@@ -22,6 +23,7 @@ const ChartContentComponent = ({
   riskEntity,
   severityCount,
   timerange,
+  selectedSeverity,
 }: {
   dataExists?: boolean;
   kpiQueryId: string;
@@ -31,14 +33,20 @@ const ChartContentComponent = ({
     from: string;
     to: string;
   };
+  selectedSeverity: RiskSeverity[];
 }) => {
-  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+  const isDonutChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled(
+    'donutChartEmbeddablesEnabled'
+  );
   const spaceId = useSpaceId();
-  const extraOptions = useMemo(() => ({ spaceId }), [spaceId]);
+  const extraOptions = useMemo(
+    () => ({ spaceId, filters: generateSeverityFilter(selectedSeverity, riskEntity) }),
+    [spaceId, selectedSeverity, riskEntity]
+  );
 
   return (
     <>
-      {isChartEmbeddablesEnabled && spaceId && dataExists && (
+      {isDonutChartEmbeddablesEnabled && spaceId && dataExists && (
         <VisualizationEmbeddable
           applyGlobalQueriesAndFilters={false}
           donutTextWrapperClassName="risk-score"
@@ -53,7 +61,7 @@ const ChartContentComponent = ({
           width="270px"
         />
       )}
-      {!isChartEmbeddablesEnabled && (
+      {!isDonutChartEmbeddablesEnabled && (
         <RiskScoreDonutChart severityCount={severityCount ?? EMPTY_SEVERITY_COUNT} />
       )}
     </>
