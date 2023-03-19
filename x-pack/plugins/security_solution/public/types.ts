@@ -44,6 +44,7 @@ import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plu
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { BehaviorSubject, Observable } from 'rxjs';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -60,6 +61,8 @@ import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
+import type { NavigationLink } from './common/links';
+
 import type { TelemetryClientStart } from './common/lib/telemetry';
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -119,14 +122,17 @@ export type StartServices = CoreStart &
     securityLayout: {
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
+    isSidebarEnabled$: BehaviorSubject<boolean>;
     telemetry: TelemetryClientStart;
   };
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginStart {}
+
+export interface PluginStart {
+  navLinks$: Observable<NavigationLink[]>;
+}
 
 export interface AppObservableLibs {
   kibana: CoreStart;

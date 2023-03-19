@@ -18,7 +18,7 @@ import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { SecurityPageName } from '../../app/types';
 import { DashboardsTable } from '../../common/components/dashboards/dashboards_table';
 import { Title } from '../../common/components/header_page/title';
-import { useAppRootNavLink } from '../../common/components/navigation/nav_links';
+import { useRootNavLink } from '../../common/links/nav_links';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useCreateSecurityDashboardLink } from '../../common/containers/dashboards/use_create_security_dashboard_link';
 import { useCapabilities, useNavigateTo } from '../../common/lib/kibana';
@@ -60,7 +60,7 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
 };
 
 export const DashboardsLandingPage = () => {
-  const dashboardLinks = useAppRootNavLink(SecurityPageName.dashboardsLanding)?.links ?? [];
+  const dashboardLinks = useRootNavLink(SecurityPageName.dashboardsLanding)?.links ?? [];
   const { show: canReadDashboard, createNew: canCreateDashboard } =
     useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
 
