@@ -28,7 +28,9 @@ import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } fr
 import { getTelemetryEvent } from '../telemetry/const';
 
 export interface GroupingProps<T> {
+  // list of settings for the metrics aggregation will be rendered as badge
   badgeMetricStats?: (fieldBucket: RawBucket<T>) => BadgeMetric[];
+  // list of custom UI components which correspond to your custom rendered metrics aggregations
   customMetricStats?: (fieldBucket: RawBucket<T>) => CustomMetric[];
   data?: GroupingAggregation<T> & GroupingFieldTotalAggregation;
   groupingId: string;

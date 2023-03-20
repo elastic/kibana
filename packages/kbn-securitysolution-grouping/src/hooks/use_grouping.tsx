@@ -31,9 +31,17 @@ interface Grouping<T> {
 }
 
 interface GroupingArgs {
+  // provide default groups with the metrics settings
+  // available without customization
   defaultGroupingOptions: GroupOption[];
+  // FieldSpec array serialized version of DataViewField
+  // fields, which will be available in the customization options.
   fields: FieldSpec[];
+  // unique identifier of the grouping component.
+  // Will be stored in the local storage using this Id.
   groupingId: string;
+
+  // for tracking
   onGroupChangeCallback?: (param: { groupByField: string; tableId: string }) => void;
   tracker: (
     type: UiCounterMetricType,
