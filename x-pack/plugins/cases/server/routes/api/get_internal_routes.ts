@@ -14,7 +14,7 @@ import { suggestUserProfilesRoute } from './internal/suggest_user_profiles';
 import type { CaseRoute } from './types';
 import { bulkGetAttachmentsRoute } from './internal/bulk_get_attachments';
 import { getCaseUsersRoute } from './internal/get_case_users';
-import { getAttachmentsStats } from './internal/get_attachments_stats';
+import { getAttachmentStats } from './internal/get_attachment_stats';
 
 export const getInternalRoutes = (userProfileService: UserProfileService) =>
   [
@@ -25,5 +25,5 @@ export const getInternalRoutes = (userProfileService: UserProfileService) =>
     getCaseUserActionStatsRoute,
     bulkGetAttachmentsRoute,
     getCaseUsersRoute,
-    getAttachmentsStats,
+    getAttachmentStats,
   ] as CaseRoute[];

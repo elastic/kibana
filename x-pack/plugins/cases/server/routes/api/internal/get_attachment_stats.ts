@@ -6,13 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { INTERNAL_GET_CASE_ATTACHMENTS_STATS_URL } from '../../../../common/constants';
+import { INTERNAL_GET_CASE_ATTACHMENT_STATS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 
-export const getAttachmentsStats = createCasesRoute({
+export const getAttachmentStats = createCasesRoute({
   method: 'get',
-  path: INTERNAL_GET_CASE_ATTACHMENTS_STATS_URL,
+  path: INTERNAL_GET_CASE_ATTACHMENT_STATS_URL,
   params: {
     params: schema.object({
       case_id: schema.string(),

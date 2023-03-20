@@ -261,7 +261,7 @@ export const updateComment = async ({
   return res;
 };
 
-export const getAttachmentsStats = async ({
+export const getAttachmentStats = async ({
   supertest,
   caseId,
   expectedHttpCode = 200,

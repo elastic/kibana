@@ -23,7 +23,7 @@ import {
   bulkCreateAttachments,
   createCase,
   deleteAllCaseItems,
-  getAttachmentsStats,
+  getAttachmentStats,
 } from '../../../../common/lib/api';
 import {
   getFilesAttachmentReq,
@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('get_attachments_stats', () => {
+  describe('get_attachment_stats', () => {
     describe('delete all cases entities after each', () => {
       afterEach(async () => {
         await deleteAllCaseItems(es);
@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('response structure', () => {
         it('should return the correctly formatted response', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
-          const stats = await getAttachmentsStats({ supertest, caseId: postedCase.id });
+          const stats = await getAttachmentStats({ supertest, caseId: postedCase.id });
 
           expect(stats).to.eql({
             files: {
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should return 0 for files when there are none', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
 
-          const stats = await getAttachmentsStats({ supertest, caseId: postedCase.id });
+          const stats = await getAttachmentStats({ supertest, caseId: postedCase.id });
 
           expect(stats.files).to.eql({ total: 0 });
         });
@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
             params: [getFilesAttachmentReq(), getFilesAttachmentReq()],
           });
 
-          const stats = await getAttachmentsStats({ supertest, caseId: postedCase.id });
+          const stats = await getAttachmentStats({ supertest, caseId: postedCase.id });
 
           expect(stats.files).to.eql({ total: 2 });
         });
@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext): void => {
             params: [getFilesAttachmentReq(), getFilesAttachmentReq(), postExternalReferenceSOReq],
           });
 
-          const stats = await getAttachmentsStats({ supertest, caseId: postedCase.id });
+          const stats = await getAttachmentStats({ supertest, caseId: postedCase.id });
 
           expect(stats.files).to.eql({ total: 2 });
         });
@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       for (const user of [globalRead, superUser, secOnly, secOnlyRead, obsSec, obsSecRead]) {
         it(`should retrieve the stats when requesting the stats as the user: ${user.username}`, async () => {
-          const stats = await getAttachmentsStats({
+          const stats = await getAttachmentStats({
             supertest: supertestWithoutAuth,
             caseId: theCase.id,
             auth: { user, space: 'space1' },
@@ -139,7 +139,7 @@ export default ({ getService }: FtrProviderContext): void => {
         { user: obsOnlyRead, space: 'space1' },
       ]) {
         it(`should return a 403 when requesting the stats as the user: ${scenario.user.username}`, async () => {
-          await getAttachmentsStats({
+          await getAttachmentStats({
             supertest: supertestWithoutAuth,
             caseId: theCase.id,
             auth: { user: scenario.user, space: scenario.space },

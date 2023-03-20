@@ -20,7 +20,7 @@ import {
   INTERNAL_BULK_GET_ATTACHMENTS_URL,
   INTERNAL_CONNECTORS_URL,
   INTERNAL_CASE_USERS_URL,
-  INTERNAL_GET_CASE_ATTACHMENTS_STATS_URL,
+  INTERNAL_GET_CASE_ATTACHMENT_STATS_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -80,5 +80,5 @@ export const getCaseUsersUrl = (id: string): string => {
 };
 
 export const getCaseAttachmentStatsUrl = (id: string): string => {
-  return INTERNAL_GET_CASE_ATTACHMENTS_STATS_URL.replace('{case_id}', id);
+  return INTERNAL_GET_CASE_ATTACHMENT_STATS_URL.replace('{case_id}', id);
 };

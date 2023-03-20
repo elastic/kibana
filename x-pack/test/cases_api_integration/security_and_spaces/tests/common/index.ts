@@ -50,7 +50,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/get_connectors'));
     loadTestFile(require.resolve('./internal/user_actions_get_users'));
     loadTestFile(require.resolve('./internal/get_user_action_stats'));
-    loadTestFile(require.resolve('./internal/get_attachments_stats'));
+    loadTestFile(require.resolve('./internal/get_attachment_stats'));
 
     /**
      * Attachments framework
