@@ -7,7 +7,6 @@
 
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiLink, EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { first } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -51,7 +50,7 @@ export const Table = (props: Props) => {
           return (
             <>
               {!Array.isArray(item.value) && item.value}
-              {Array.isArray(item.value) && <ArrayValue values={item.value} />}
+              {Array.isArray(item.value) && <ExpandableContent values={item.value} />}
             </>
           );
         },
@@ -63,10 +62,10 @@ export const Table = (props: Props) => {
   return <EuiBasicTable tableLayout={'fixed'} responsive={false} columns={columns} items={rows} />;
 };
 
-interface MoreProps {
+interface ExpandableContentProps {
   values: string[];
 }
-const ArrayValue = (props: MoreProps) => {
+const ExpandableContent = (props: ExpandableContentProps) => {
   const { values } = props;
   const [isExpanded, setIsExpanded] = useState(false);
   const expand = useCallback(() => {
@@ -77,39 +76,47 @@ const ArrayValue = (props: MoreProps) => {
     setIsExpanded(false);
   }, []);
 
-  return (
-    <>
-      {!isExpanded && (
-        <EuiFlexGroup gutterSize={'xs'} responsive={false} alignItems={'baseline'} wrap={true}>
-          <EuiFlexItem grow={false}>
-            {first(values)}
-            {' ... '}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiLink data-test-subj="infraArrayValueCountMoreLink" onClick={expand}>
-              <FormattedMessage
-                id="xpack.infra.nodeDetails.tabs.metadata.seeMore"
-                defaultMessage="+{count} more"
-                values={{
-                  count: values.length,
-                }}
-              />
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-      {isExpanded && (
-        <div>
-          {values.map((v) => (
-            <div key={v}>{v}</div>
-          ))}
-          <EuiLink data-test-subj="infraArrayValueShowLessLink" onClick={collapse}>
-            {i18n.translate('xpack.infra.nodeDetails.tabs.metadata.seeLess', {
-              defaultMessage: 'Show less',
-            })}
+  const list = Array.isArray(values) ? values : [values]
+  const [first, ...others] = list;
+  const hasOthers = others.length > 0;
+  const shouldShowMore = hasOthers && !isExpanded;
+
+
+return (
+  <EuiFlexGroup
+    gutterSize={'xs'}
+    responsive={false}
+    alignItems={'baseline'}
+    wrap={true}
+    direction="column"
+  >
+    <div>
+      {first}
+      {shouldShowMore && (
+        <>
+          {' ... '}
+          <EuiLink onClick={expand}>
+            <FormattedMessage
+              id="xpack.infra.nodeDetails.tabs.metadata.seeMore"
+              defaultMessage="+{count} more"
+              values={{
+                count: others.length,
+              }}
+            />
           </EuiLink>
-        </div>
+        </>
       )}
-    </>
-  );
+    </div>
+    {isExpanded && others.map((item) => <EuiFlexItem key={item}>{item}</EuiFlexItem>)}
+    {hasOthers && isExpanded && (
+      <EuiFlexItem>
+        <EuiLink onClick={collapse}>
+          {i18n.translate('xpack.infra.nodeDetails.tabs.metadata.seeLess', {
+            defaultMessage: 'Show less',
+          })}
+        </EuiLink>
+      </EuiFlexItem>
+    )}
+  </EuiFlexGroup>
+)
 };
