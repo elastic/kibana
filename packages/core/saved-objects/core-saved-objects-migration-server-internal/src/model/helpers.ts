@@ -244,7 +244,6 @@ export const createBulkDeleteOperationBody = (_id: string): BulkOperationContain
   delete: { _id },
 });
 
-
 /** @internal */
 export enum MigrationType {
   Compatible = 'compatible',

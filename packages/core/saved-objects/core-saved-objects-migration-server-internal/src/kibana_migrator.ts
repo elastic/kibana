@@ -206,7 +206,9 @@ export class KibanaMigrator implements IKibanaMigrator {
       doneReindexingDefers = createMultiPromiseDefer(indicesWithMovingTypes);
     } catch (error) {
       if (error.body?.status === 404) {
-        this.log.debug(`The ${MAIN_SAVED_OBJECT_INDEX} index does NOT exist. Assuming this is a fresh deployment`);
+        this.log.debug(
+          `The ${MAIN_SAVED_OBJECT_INDEX} index does NOT exist. Assuming this is a fresh deployment`
+        );
       } else {
         this.log.fatal('Cannot query the meta information of the main saved object index');
         throw error;
