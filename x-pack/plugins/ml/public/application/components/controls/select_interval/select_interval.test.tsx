@@ -6,57 +6,43 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router-dom';
-import { mount } from 'enzyme';
-
-import { EuiSelect } from '@elastic/eui';
-
-import { UrlStateProvider } from '@kbn/ml-url-state';
+import { render, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { SelectInterval } from './select_interval';
 
+const mockUpdateCallback = jest.fn();
+const mockUsePageUrlState = [{ display: 'Auto', val: 'auto' }, mockUpdateCallback];
+
+jest.mock('@kbn/ml-url-state', () => ({
+  usePageUrlState: () => mockUsePageUrlState,
+}));
+
 describe('SelectInterval', () => {
   test('creates correct initial selected value', () => {
-    const wrapper = mount(
+    const { getByText } = render(
       <MemoryRouter>
-        <UrlStateProvider>
-          <SelectInterval />
-        </UrlStateProvider>
+        <SelectInterval />
       </MemoryRouter>
     );
-    const select = wrapper.find(EuiSelect);
 
-    const defaultSelectedValue = select.props().value;
-    expect(defaultSelectedValue).toBe('auto');
+    expect((getByText('Auto') as HTMLOptionElement).selected).toBeTruthy();
   });
 
-  test('currently selected value is updated correctly on click', (done) => {
-    const wrapper = mount(
+  test('currently selected value is updated correctly on click', () => {
+    const { getByText, getByTestId } = render(
       <MemoryRouter>
-        <UrlStateProvider>
-          <SelectInterval />
-        </UrlStateProvider>
+        <SelectInterval />
       </MemoryRouter>
     );
-    const select = wrapper.find(EuiSelect).first();
-    const defaultSelectedValue = select.props().value;
-    expect(defaultSelectedValue).toBe('auto');
 
-    const onChange = select.props().onChange;
+    expect((getByText('Auto') as HTMLOptionElement).selected).toBeTruthy();
 
     act(() => {
-      if (onChange !== undefined) {
-        onChange({ target: { value: 'day' } } as React.ChangeEvent<HTMLSelectElement>);
-      }
+      userEvent.selectOptions(getByTestId('mlSelectInterval'), getByText('1 hour'));
     });
 
-    setImmediate(() => {
-      wrapper.update();
-      const updatedSelect = wrapper.find(EuiSelect).first();
-      const updatedSelectedValue = updatedSelect.props().value;
-      expect(updatedSelectedValue).toBe('day');
-      done();
-    });
+    expect(mockUpdateCallback).toBeCalledWith({ display: '1 hour', val: 'hour' });
   });
 });
