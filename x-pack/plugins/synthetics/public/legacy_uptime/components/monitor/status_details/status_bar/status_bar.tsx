@@ -97,6 +97,7 @@ export const MonitorStatusBar: React.FC = () => {
         <MonListDescription data-test-subj="monitor-page-url">
           {full ? (
             <EuiLink
+              data-test-subj="syntheticsMonitorStatusBarLink"
               aria-label={labels.monitorUrlLinkAriaLabel}
               href={full}
               target="_blank"
