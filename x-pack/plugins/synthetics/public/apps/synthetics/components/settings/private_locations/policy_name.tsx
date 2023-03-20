@@ -31,7 +31,10 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
       {canReadAgentPolicies ? (
         <EuiTextColor color="subdued">
           {policy ? (
-            <EuiLink href={`${basePath}/app/fleet/policies/${agentPolicyId}`}>
+            <EuiLink
+              data-test-subj="syntheticsPolicyNameLink"
+              href={`${basePath}/app/fleet/policies/${agentPolicyId}`}
+            >
               {policy?.name}
             </EuiLink>
           ) : (
@@ -43,11 +46,15 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
       ) : (
         agentPolicyId
       )}
-      &nbsp; &nbsp;
-      <EuiBadge color={policy?.agents === 0 ? 'warning' : 'hollow'}>
-        {AGENTS_LABEL}
-        {policy?.agents}
-      </EuiBadge>
+      {canReadAgentPolicies && (
+        <>
+          &nbsp; &nbsp;
+          <EuiBadge color={policy?.agents === 0 ? 'warning' : 'hollow'}>
+            {AGENTS_LABEL}
+            {policy?.agents}
+          </EuiBadge>
+        </>
+      )}
     </EuiText>
   );
 };

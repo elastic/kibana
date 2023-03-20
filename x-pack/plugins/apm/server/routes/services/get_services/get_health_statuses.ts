@@ -20,14 +20,17 @@ interface AggregationParams {
   end: number;
 }
 
-export const getHealthStatuses = async ({
+export type ServiceHealthStatusesResponse = Array<{
+  serviceName: string;
+  healthStatus: ServiceHealthStatus;
+}>;
+
+export async function getHealthStatuses({
   environment,
   mlClient,
   start,
   end,
-}: AggregationParams): Promise<
-  Array<{ serviceName: string; healthStatus: ServiceHealthStatus }>
-> => {
+}: AggregationParams): Promise<ServiceHealthStatusesResponse> {
   if (!mlClient) {
     return [];
   }
@@ -47,4 +50,4 @@ export const getHealthStatuses = async ({
       healthStatus,
     };
   });
-};
+}
