@@ -117,6 +117,7 @@ export async function clone<Params extends RuleTypeParams = never>(
     mutedInstanceIds: [],
     executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
     monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()),
+    revision: 0,
     scheduledTaskId: null,
     running: false,
   };

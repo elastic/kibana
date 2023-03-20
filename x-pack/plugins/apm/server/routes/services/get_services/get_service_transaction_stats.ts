@@ -45,6 +45,19 @@ interface AggregationParams {
   rollupInterval: RollupInterval;
 }
 
+export interface ServiceTransactionStatsResponse {
+  serviceStats: Array<{
+    serviceName: string;
+    transactionType: string;
+    environments: string[];
+    agentName: AgentName;
+    latency: number | null;
+    transactionErrorRate: number;
+    throughput: number;
+  }>;
+  serviceOverflowCount: number;
+}
+
 export async function getServiceTransactionStats({
   environment,
   kuery,
@@ -56,7 +69,7 @@ export async function getServiceTransactionStats({
   randomSampler,
   documentType,
   rollupInterval,
-}: AggregationParams) {
+}: AggregationParams): Promise<ServiceTransactionStatsResponse> {
   const outcomes = getOutcomeAggregation(documentType);
 
   const metrics = {
