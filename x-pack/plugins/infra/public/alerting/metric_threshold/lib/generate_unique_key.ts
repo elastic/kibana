@@ -8,5 +8,7 @@
 import { MetricExpression } from '../types';
 
 export const generateUniqueKey = (criterion: MetricExpression) => {
-  return criterion.aggType + criterion.comparator + criterion.threshold.join(',');
+  const metric = criterion.metric ? `(${criterion.metric})` : '';
+
+  return criterion.aggType + metric + criterion.comparator + criterion.threshold.join(',');
 };

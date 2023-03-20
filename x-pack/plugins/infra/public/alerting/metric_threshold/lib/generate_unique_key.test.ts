@@ -9,17 +9,43 @@ import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
 import { MetricExpression } from '../types';
 import { generateUniqueKey } from './generate_unique_key';
 
-const mockedCriterion: MetricExpression = {
-  aggType: Aggregators.COUNT,
-  comparator: Comparator.LT,
-  threshold: [2000, 5000],
-  timeSize: 15,
-  timeUnit: 'm',
-};
-
 describe('generateUniqueKey', () => {
-  it('should generate unique key correctly', () => {
-    const uniqueKey = generateUniqueKey(mockedCriterion);
-    expect(uniqueKey).toBe('count<2000,5000');
+  const mockedCriteria: Array<[MetricExpression, string]> = [
+    [
+      {
+        aggType: Aggregators.COUNT,
+        comparator: Comparator.LT,
+        threshold: [2000, 5000],
+        timeSize: 15,
+        timeUnit: 'm',
+      },
+      'count<2000,5000',
+    ],
+    [
+      {
+        aggType: Aggregators.CUSTOM,
+        comparator: Comparator.GT_OR_EQ,
+        threshold: [30],
+        timeSize: 15,
+        timeUnit: 'm',
+      },
+      'custom>=30',
+    ],
+    [
+      {
+        aggType: Aggregators.AVERAGE,
+        comparator: Comparator.LT_OR_EQ,
+        threshold: [500],
+        timeSize: 15,
+        timeUnit: 'm',
+        metric: 'metric',
+      },
+      'avg(metric)<=500',
+    ],
+  ];
+  it.each(mockedCriteria)('unique key of %p is %s', (input, output) => {
+    const uniqueKey = generateUniqueKey(input);
+
+    expect(uniqueKey).toBe(output);
   });
 });
