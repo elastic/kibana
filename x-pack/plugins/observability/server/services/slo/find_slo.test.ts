@@ -54,6 +54,7 @@ describe('FindSLO', () => {
                 transactionName: 'irrelevant',
                 transactionType: 'irrelevant',
                 threshold: 500,
+                index: 'metrics-apm*',
               },
               type: 'sli.apm.transactionDuration',
             },
