@@ -10,7 +10,7 @@ import { getSavedSearch, SavedSearch, saveSavedSearch } from '@kbn/saved-search-
 import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
-import { differenceWith, isEqual, toPairs } from 'lodash';
+import { isEqual } from 'lodash';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { updateSavedSearch } from '../utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
@@ -20,9 +20,8 @@ import { DiscoverServices } from '../../../build_services';
 import { getStateDefaults } from '../utils/get_state_defaults';
 
 export interface UpdateParams {
-  nextDataView: DataView | undefined;
-  nextState: DiscoverAppState | undefined;
-  resetSavedSearch?: boolean;
+  nextDataView?: DataView | undefined;
+  nextState?: DiscoverAppState | undefined;
   filterAndQuery?: boolean;
 }
 
@@ -157,8 +156,8 @@ export function getSavedSearchContainer({
     }
     return { id };
   };
-  const update = ({ nextDataView, nextState, resetSavedSearch, filterAndQuery }: UpdateParams) => {
-    addLog('[savedSearch] update', { nextDataView, nextState, resetSavedSearch });
+  const update = ({ nextDataView, nextState, filterAndQuery }: UpdateParams) => {
+    addLog('[savedSearch] update', { nextDataView, nextState });
 
     const previousSavedSearch = get();
     const dataView = nextDataView
@@ -182,13 +181,10 @@ export function getSavedSearchContainer({
         .setField('filter', nextState.filters);
     }
 
-    if (resetSavedSearch) {
-      set(nextSavedSearch);
-    } else {
-      const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
-      hasChanged$.next(hasChanged);
-      savedSearchCurrent$.next(nextSavedSearch);
-    }
+    const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
+    hasChanged$.next(hasChanged);
+    savedSearchCurrent$.next(nextSavedSearch);
+
     addLog('[savedSearch] update done', nextSavedSearch);
     return nextSavedSearch;
   };
@@ -239,11 +235,14 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
   const { searchSource: prevSearchSource, ...prevSavedSearch } = savedSearchPrev;
   const { searchSource: nextSearchSource, ...nextSavedSearchWithoutSearchSource } = savedSearchNext;
 
-  const savedSearchDiff = differenceWith(
-    toPairs(prevSavedSearch),
-    toPairs(nextSavedSearchWithoutSearchSource),
-    isEqual
-  );
+  const keys = new Set([
+    ...Object.keys(prevSavedSearch),
+    ...Object.keys(nextSavedSearchWithoutSearchSource),
+  ]);
+  const savedSearchDiff = [...keys].filter((key: string) => {
+    // @ts-expect-error
+    return !isEqual(prevSavedSearch[key], nextSavedSearchWithoutSearchSource[key]);
+  });
 
   const searchSourceDiff =
     !isEqual(prevSearchSource.getField('filter'), nextSearchSource.getField('filter')) ||

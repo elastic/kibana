@@ -22,6 +22,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 
 describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;
@@ -152,15 +153,69 @@ describe('DiscoverSavedSearchContainer', () => {
     });
 
     it('emits false to the hasChanged$ BehaviorSubject', async () => {
-      jest.mock('@kbn/saved-search-plugin/public', () => ({
-        saveSavedSearch: jest.fn().mockResolvedValue({ id: '123' }),
-      }));
       const savedSearchContainer = getSavedSearchContainer({
         savedSearch: savedSearchMockWithTimeField,
         services: discoverServiceMock,
       });
+      const savedSearchToPersist = {
+        ...savedSearchMockWithTimeField,
+        title: 'My updated saved search',
+      };
 
-      await savedSearchContainer.persist(savedSearch, saveOptions);
+      await savedSearchContainer.persist(savedSearchToPersist, saveOptions);
+      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
+    });
+
+    it('Error thrown on persistence layer bubbling up, no changes to the initial saved search ', async () => {
+      mockSaveSavedSearch.mockImplementation(() => {
+        throw new Error('oh-noes');
+      });
+
+      const savedSearchContainer = getSavedSearchContainer({
+        savedSearch: savedSearchMockWithTimeField,
+        services: discoverServiceMock,
+      });
+      savedSearchContainer.update({ nextState: { hideChart: true } });
+      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
+      try {
+        await savedSearchContainer.persist(savedSearch, saveOptions);
+      } catch (e) {
+        // intentional error
+      }
+      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
+      expect(savedSearchContainer.getInitial$().getValue().title).not.toBe(
+        'My updated saved search'
+      );
+    });
+  });
+
+  describe('update', () => {
+    it('updates a saved search by app state providing hideChart', async () => {
+      const savedSearchContainer = getSavedSearchContainer({
+        savedSearch: savedSearchMockWithTimeField,
+        services: discoverServiceMock,
+      });
+      const updated = await savedSearchContainer.update({ nextState: { hideChart: true } });
+      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
+      savedSearchContainer.set(updated);
+      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
+      await savedSearchContainer.update({ nextState: { hideChart: false } });
+      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
+      await savedSearchContainer.update({ nextState: { hideChart: true } });
+      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
+    });
+    it('updates a saved search by data view', async () => {
+      const savedSearchContainer = getSavedSearchContainer({
+        savedSearch: savedSearchMockWithTimeField,
+        services: discoverServiceMock,
+      });
+      const updated = await savedSearchContainer.update({ nextDataView: dataViewMock });
+      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
+      savedSearchContainer.set(updated);
+      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
+      await savedSearchContainer.update({ nextDataView: dataViewComplexMock });
+      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
+      await savedSearchContainer.update({ nextDataView: dataViewMock });
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
     });
   });

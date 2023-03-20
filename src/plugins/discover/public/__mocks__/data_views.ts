@@ -11,7 +11,7 @@ import { dataViewMock } from './data_view';
 import { dataViewComplexMock } from './data_view_complex';
 import { dataViewWithTimefieldMock } from './data_view_with_timefield';
 
-const dataViewList = [dataViewMock, dataViewComplexMock, dataViewWithTimefieldMock];
+export const dataViewMockList = [dataViewMock, dataViewComplexMock, dataViewWithTimefieldMock];
 
 export function createDiscoverDataViewsMock() {
   return {
@@ -19,12 +19,10 @@ export function createDiscoverDataViewsMock() {
       return [dataViewMock];
     },
     get: async (id: string) => {
-      if (id === 'the-data-view-id') {
-        return Promise.resolve(dataViewMock);
-      } else if (id === 'invalid-data-view-id') {
+      if (id === 'invalid-data-view-id') {
         return Promise.reject('Invalid');
       }
-      const dataView = dataViewList.find((dv) => dv.id === id);
+      const dataView = dataViewMockList.find((dv) => dv.id === id);
       if (dataView) {
         return Promise.resolve(dataView);
       } else {
@@ -34,7 +32,7 @@ export function createDiscoverDataViewsMock() {
     getDefaultDataView: jest.fn(() => dataViewMock),
     updateSavedObject: jest.fn(),
     getIdsWithTitle: jest.fn(() => {
-      return Promise.resolve(dataViewList);
+      return Promise.resolve(dataViewMockList);
     }),
     createFilter: jest.fn(),
     create: jest.fn(),

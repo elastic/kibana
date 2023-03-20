@@ -497,4 +497,25 @@ describe('actions', () => {
     );
     unsubscribe();
   });
+  test('undoChanges', async () => {
+    const { state, getCurrentUrl } = getState('/');
+    await state.actions.loadDataViewList();
+    await state.actions.loadSavedSearch('the-saved-search-id');
+    const unsubscribe = state.actions.initializeAndSync();
+    state.kbnUrlStateStorage.kbnUrlControls.flush();
+    expect(getCurrentUrl()).toMatchInlineSnapshot(
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(test123),hideChart:!f,index:the-data-view-id,interval:auto,sort:!())"`
+    );
+    await state.actions.onChangeDataView(dataViewComplexMock.id!);
+    state.kbnUrlStateStorage.kbnUrlControls.flush();
+    expect(getCurrentUrl()).toMatchInlineSnapshot(
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(test123),hideChart:!f,index:data-view-with-various-field-types-id,interval:auto,sort:!(!(data,desc)))"`
+    );
+    await state.actions.undoChanges();
+    state.kbnUrlStateStorage.kbnUrlControls.flush();
+    expect(getCurrentUrl()).toMatchInlineSnapshot(
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(test123),hideChart:!f,index:the-data-view-id,interval:auto,sort:!())"`
+    );
+    unsubscribe();
+  });
 });
