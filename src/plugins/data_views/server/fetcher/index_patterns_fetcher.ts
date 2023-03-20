@@ -8,7 +8,6 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { keyBy } from 'lodash';
-import { DataViewMissingIndices } from '../../common';
 import type { QueryDslQueryContainer } from '../../common/types';
 
 import {
