@@ -19,6 +19,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON,
 } from '../screens/document_expandable_flyout';
 import { EXPAND_ALERT_BTN } from '../screens/alerts';
+import { getClassSelector } from '../helpers/common';
 
 /**
  * Find the first alert row in the alerts table then click on the expand icon button to open the flyout
@@ -38,6 +39,13 @@ export const expandDocumentDetailsExpandableFlyoutLeftSection = () =>
  */
 export const collapseDocumentDetailsExpandableFlyoutLeftSection = () =>
   cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON).should('be.visible').click();
+
+/**
+ * Scroll to x-y positions within the right section of the document details expandable flyout
+ * // TODO revisit this as it seems very fragile: the first element found is the timeline flyout, which isn't visible but still exist in the DOM
+ */
+export const scrollWithinDocumentDetailsExpandableFlyoutRightSection = (x: number, y: number) =>
+  cy.get(getClassSelector('euiFlyout')).last().scrollTo(x, y);
 
 /**
  * Open the Overview tab in the document details expandable flyout right section
