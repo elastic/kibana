@@ -51,7 +51,9 @@ describe('UXSection', () => {
       status: fetcherHook.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
-    const { getByText, getByTestId, getAllByTestId } = render(<UXSection bucketSize={bucketSize} />);
+    const { getByText, getByTestId, getAllByTestId } = render(
+      <UXSection bucketSize={bucketSize} />
+    );
 
     expect(getByText('User Experience')).toBeInTheDocument();
     expect(getByText('Show dashboard')).toBeInTheDocument();
