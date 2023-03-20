@@ -18,13 +18,8 @@ import {
   ServiceStatusLevels,
 } from '@kbn/core/server';
 import { CollectorSet } from '../../collector';
+import { Stats } from '../../../common/types';
 const SNAPSHOT_REGEX = /-snapshot/i;
-
-interface UsageObject {
-  kibana?: UsageObject;
-  xpack?: UsageObject;
-  [key: string]: unknown | UsageObject;
-}
 
 export function registerStatsRoute({
   router,
@@ -73,28 +68,22 @@ export function registerStatsRoute({
       },
     },
     async (context, req, res) => {
-      const isExtended = req.query.extended === '' || req.query.extended;
-      const isLegacy = req.query.legacy === '' || req.query.legacy;
+      const requestQuery: Stats.v1.StatsHTTPQuery = req.query;
+      const isExtended = requestQuery.extended === '' || requestQuery.extended;
+      const isLegacy = requestQuery.legacy === '' || requestQuery.legacy;
 
       let extended;
       if (isExtended) {
         const core = await context.core;
         const { asCurrentUser } = core.elasticsearch.client;
+        // as of https://github.com/elastic/kibana/pull/151082, usage will always be an empty object.
 
-        const usage = {} as UsageObject;
         const clusterUuid = await getClusterUuid(asCurrentUser);
-
-        // In an effort to make telemetry more easily augmented, we need to ensure
-        // we can passthrough the data without every part of the process needing
-        // to know about the change; however, to support legacy use cases where this
-        // wasn't true, we need to be backwards compatible with how the legacy data
-        // looked and support those use cases here.
-        extended = isLegacy
-          ? { usage, clusterUuid }
-          : collectorSet.toApiFieldNames({
-              usage,
-              clusterUuid,
-            });
+        const extendedClusterUuid = isLegacy ? { clusterUuid } : { cluster_uuid: clusterUuid };
+        extended = {
+          usage: {},
+          ...extendedClusterUuid,
+        };
       }
 
       // Guaranteed to resolve immediately due to replay effect on getOpsMetrics$
@@ -120,17 +109,19 @@ export function registerStatsRoute({
         collection_interval_in_millis: metrics.collectionInterval,
       });
 
+      const body: Stats.v1.StatsHTTPBodyTyped = {
+        ...kibanaStats,
+        ...extended,
+      };
+
       return res.ok({
-        body: {
-          ...kibanaStats,
-          ...extended,
-        },
+        body,
       });
     }
   );
 }
 
-const ServiceStatusToLegacyState: Record<string, string> = {
+const ServiceStatusToLegacyState: Stats.v1.KibanaServiceStatus = {
   [ServiceStatusLevels.critical.toString()]: 'red',
   [ServiceStatusLevels.unavailable.toString()]: 'red',
   [ServiceStatusLevels.degraded.toString()]: 'yellow',

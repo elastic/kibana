@@ -200,6 +200,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
                 riskEntity={riskEntity}
                 severityCount={severityCount}
                 timerange={timerange}
+                selectedSeverity={selectedSeverity}
               />
             </EuiFlexItem>
             <EuiFlexItem>
