@@ -19,26 +19,15 @@ import { Flyout } from './host_details_flyout/flyout';
 
 export const HostsTable = () => {
   const { hostNodes, loading } = useHostsViewContext();
-  const { onSubmit, searchCriteria, getDateRangeAsTimestamp } = useUnifiedSearchContext();
+  const { onSubmit, searchCriteria } = useUnifiedSearchContext();
   const [properties, setProperties] = useTableProperties();
 
-  const { columns, items, isFlyoutOpen, setIsFlyoutOpen, clickedItemIndex } = useHostsTable(
+  const { columns, items, isFlyoutOpen, onFlyoutClose, clickedItemIndex } = useHostsTable(
     hostNodes,
     {
       time: searchCriteria.dateRange,
     }
   );
-
-  // Used to get the metadata
-  const { to, from } = getDateRangeAsTimestamp();
-
-  const currentTimeRange = {
-    from,
-    interval: '1m',
-    to,
-  };
-
-  const onClose = () => setIsFlyoutOpen(!isFlyoutOpen);
 
   const noData = items.length === 0;
 
@@ -110,8 +99,8 @@ export const HostsTable = () => {
       {isFlyoutOpen && (
         <Flyout
           node={items[clickedItemIndex]}
-          currentTimeRange={currentTimeRange}
-          onClose={onClose}
+          isFlyoutOpen={isFlyoutOpen}
+          onFlyoutClose={onFlyoutClose}
         />
       )}
     </>

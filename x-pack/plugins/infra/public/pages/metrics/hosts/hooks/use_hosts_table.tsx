@@ -36,8 +36,6 @@ export interface HostNodeRow extends HostMetrics {
   index: number;
 }
 
-// type MappedMetrics = Record<keyof HostNodeRow, SnapshotNodeMetric>;
-
 interface HostTableParams {
   time: TimeRange;
 }
@@ -126,6 +124,8 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [clickedItemIndex, setClickedItemIndex] = useState(0);
+
+  const onFlyoutClose = () => setIsFlyoutOpen(false);
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
@@ -227,5 +227,5 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
     [clickedItemIndex, isFlyoutOpen, reportHostEntryClick, time]
   );
 
-  return { columns, items, isFlyoutOpen, setIsFlyoutOpen, clickedItemIndex };
+  return { columns, items, isFlyoutOpen, onFlyoutClose, clickedItemIndex };
 };

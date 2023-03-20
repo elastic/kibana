@@ -9,16 +9,26 @@ import React, { useMemo, useState } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 import { MetadataTab } from './metadata/metadata';
-import type { HostNodeRow } from '../../hooks/use_hosts_table';
-import type { MetricsTimeInput } from '../../../metric_detail/hooks/use_metrics_time';
+import { HostNodeRow } from '../../hooks/use_hosts_table';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
 interface Props {
-  onClose(): void;
-  currentTimeRange: MetricsTimeInput;
   node: HostNodeRow;
+  isFlyoutOpen: boolean;
+  onFlyoutClose: () => void;
 }
 
-export const Flyout = ({ node, currentTimeRange, onClose }: Props) => {
+export const Flyout = ({ node, isFlyoutOpen, onFlyoutClose }: Props) => {
+  const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
+
+  const { to, from, } = getDateRangeAsTimestamp();
+
+  const currentTimeRange = {
+    from,
+    interval: '1m',
+    to,
+  };
+
   const tabs = useMemo(() => {
     const tabConfigs = [MetadataTab];
     return tabConfigs.map((m) => {
@@ -32,8 +42,10 @@ export const Flyout = ({ node, currentTimeRange, onClose }: Props) => {
 
   const [selectedTab, setSelectedTab] = useState(0);
 
+  console.log('isFlyoutOpen', isFlyoutOpen)
+
   return (
-    <EuiFlyout onClose={onClose} ownFocus={false}>
+    <EuiFlyout onClose={onFlyoutClose} ownFocus={false}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="xs">
           <h2>{node.name}</h2>
