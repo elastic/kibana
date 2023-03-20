@@ -41,7 +41,10 @@ export function OverwrittenSessionPage({ authc, basePath }: Props) {
         />
       }
     >
-      <EuiButton href={parseNext(window.location.href, basePath.serverBasePath)}>
+      <EuiButton
+        data-test-subj="securityOverwrittenSessionPageContinueAsUsernameButton"
+        href={parseNext(window.location.href, basePath.serverBasePath)}
+      >
         <FormattedMessage
           id="xpack.security.overwrittenSession.continueAsUserText"
           defaultMessage="Continue as {username}"

@@ -107,7 +107,11 @@ export class VisualRuleEditor extends Component<Props, {}> {
             />
           </p>
 
-          <EuiButton onClick={this.props.onSwitchEditorMode} size="s">
+          <EuiButton
+            data-test-subj="securityUseJsonEditorButton"
+            onClick={this.props.onSwitchEditorMode}
+            size="s"
+          >
             <FormattedMessage
               id="xpack.security.management.editRoleMapping.visualRuleEditor.switchToJSONEditorButton"
               defaultMessage="Use JSON editor"
