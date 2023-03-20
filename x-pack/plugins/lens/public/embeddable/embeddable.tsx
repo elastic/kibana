@@ -108,7 +108,6 @@ import {
   type AllowedPartitionOverrides,
   type AllowedSettingsOverriddes,
   type AllowedGaugeOverrides,
-  type AllowedHeatmapOverrides,
   type AllowedXYOverrides,
 } from '../../common';
 import { LensAttributeService } from '../lens_attribute_service';
@@ -169,7 +168,6 @@ export type LensByValueInput = {
     | AllowedSettingsOverriddes
     | AllowedXYOverrides
     | AllowedPartitionOverrides
-    | AllowedHeatmapOverrides
     | AllowedGaugeOverrides;
 } & LensBaseEmbeddableInput;
 

@@ -37,7 +37,7 @@ import {
 } from '@kbn/visualizations-plugin/common/constants';
 import { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { IconChartHeatmap } from '@kbn/chart-icons';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { getOverridesFor, mergeThemeWithOverrides } from '@kbn/chart-expressions-common';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
@@ -501,76 +501,71 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       };
     });
 
-    const rawSettingsOverrides = getOverridesFor(overrides, 'settings') as Partial<SettingsProps>;
-    const settingsOverrides = Object.fromEntries(
-      Object.entries(rawSettingsOverrides).map(([key, value]) => {
-        if (key !== 'theme') {
-          return [key, value];
-        }
-        return [];
-      }, {})
-    );
+    const { theme: settingsThemeOverrides, ...settingsOverrides } = getOverridesFor(
+      overrides,
+      'settings'
+    ) as Partial<SettingsProps>;
 
-    const themeOverrides: PartialTheme = {
-      ...(rawSettingsOverrides?.theme || {}),
-      legend: {
-        labelOptions: {
-          maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0,
+    const themeOverrides: PartialTheme = mergeThemeWithOverrides(
+      {
+        legend: {
+          labelOptions: {
+            maxLines: args.legend.shouldTruncate ? args.legend?.maxLines ?? 1 : 0,
+          },
+        },
+        heatmap: {
+          grid: {
+            stroke: {
+              width:
+                args.gridConfig.strokeWidth ??
+                chartTheme.axes?.gridLine?.horizontal?.strokeWidth ??
+                1,
+              color:
+                args.gridConfig.strokeColor ??
+                chartTheme.axes?.gridLine?.horizontal?.stroke ??
+                '#D3DAE6',
+            },
+            cellHeight: {
+              max: 'fill',
+              min: 1,
+            },
+          },
+          cell: {
+            maxWidth: 'fill',
+            maxHeight: 'fill',
+            label: {
+              visible: args.gridConfig.isCellLabelVisible ?? false,
+              minFontSize: 8,
+              maxFontSize: 18,
+              useGlobalMinFontSize: true, // override the min if there's a different directive upstream
+            },
+            border: {
+              strokeWidth: 0,
+            },
+          },
+          yAxisLabel: {
+            visible: !!yAxisColumn && args.gridConfig.isYAxisLabelVisible,
+            // eui color subdued
+            textColor: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
+            padding: yAxisColumn?.name ? 8 : 0,
+          },
+          xAxisLabel: {
+            visible: Boolean(args.gridConfig.isXAxisLabelVisible && xAxisColumn),
+            // eui color subdued
+            textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
+            padding: xAxisColumn?.name ? 8 : 0,
+          },
+          brushMask: {
+            fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
+          },
+          brushArea: {
+            stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
+          },
         },
       },
-      heatmap: {
-        grid: {
-          stroke: {
-            width:
-              args.gridConfig.strokeWidth ??
-              chartTheme.axes?.gridLine?.horizontal?.strokeWidth ??
-              1,
-            color:
-              args.gridConfig.strokeColor ??
-              chartTheme.axes?.gridLine?.horizontal?.stroke ??
-              '#D3DAE6',
-          },
-          cellHeight: {
-            max: 'fill',
-            min: 1,
-          },
-        },
-        cell: {
-          maxWidth: 'fill',
-          maxHeight: 'fill',
-          label: {
-            visible: args.gridConfig.isCellLabelVisible ?? false,
-            minFontSize: 8,
-            maxFontSize: 18,
-            useGlobalMinFontSize: true, // override the min if there's a different directive upstream
-          },
-          border: {
-            strokeWidth: 0,
-          },
-        },
-        yAxisLabel: {
-          visible: !!yAxisColumn && args.gridConfig.isYAxisLabelVisible,
-          // eui color subdued
-          textColor: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
-          padding: yAxisColumn?.name ? 8 : 0,
-        },
-        xAxisLabel: {
-          visible: Boolean(args.gridConfig.isXAxisLabelVisible && xAxisColumn),
-          // eui color subdued
-          textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
-          padding: xAxisColumn?.name ? 8 : 0,
-        },
-        brushMask: {
-          fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
-        },
-        brushArea: {
-          stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
-        },
-        ...(Array.isArray(rawSettingsOverrides?.theme)
-          ? rawSettingsOverrides?.theme[0].heatmap
-          : rawSettingsOverrides?.theme?.heatmap || {}),
-      },
-    };
+      settingsThemeOverrides,
+      ['heatmap']
+    );
 
     const xAxisTitle = args.gridConfig.xTitle ?? xAxisColumn?.name;
     const yAxisTitle = args.gridConfig.yTitle ?? yAxisColumn?.name;
@@ -666,7 +661,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                         : ''
                   : undefined
               }
-              {...getOverridesFor(overrides, 'heatmap')}
             />
           </Chart>
         </LegendColorPickerWrapperContext.Provider>

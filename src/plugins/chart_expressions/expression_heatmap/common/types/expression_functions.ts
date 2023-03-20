@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { type HeatmapProps, Position } from '@elastic/charts';
+import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   Datatable,
@@ -16,7 +16,6 @@ import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
 import { AllowedSettingsOverriddes, CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/public';
-import type { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
 import {
   EXPRESSION_HEATMAP_NAME,
   EXPRESSION_HEATMAP_LEGEND_NAME,
@@ -96,7 +95,7 @@ export interface HeatmapExpressionProps {
   syncTooltips: boolean;
   syncCursor: boolean;
   canNavigateToLens?: boolean;
-  overrides?: AllowedSettingsOverriddes & AllowedHeatmapOverrides;
+  overrides?: AllowedSettingsOverriddes;
 }
 
 export interface HeatmapRender {
@@ -124,9 +123,4 @@ export type HeatmapGridExpressionFunctionDefinition = ExpressionFunctionDefiniti
   null,
   HeatmapGridConfig,
   HeatmapGridConfigResult
->;
-
-export type AllowedHeatmapOverrides = Record<
-  'heatmap',
-  Simplify<MakeOverridesSerializable<HeatmapProps>>
 >;

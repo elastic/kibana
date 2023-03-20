@@ -10,7 +10,6 @@ export const PLUGIN_ID = 'expressionHeatmap';
 export const PLUGIN_NAME = 'expressionHeatmap';
 
 export type {
-  AllowedHeatmapOverrides,
   HeatmapExpressionProps,
   FilterEvent,
   BrushEvent,
