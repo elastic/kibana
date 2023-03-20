@@ -904,6 +904,7 @@ module.exports = {
         'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/synthetics/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/infra/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/security/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
