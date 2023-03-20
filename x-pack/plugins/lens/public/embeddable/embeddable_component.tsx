@@ -33,7 +33,7 @@ import type {
   AllowedXYOverrides,
 } from '../../common';
 import type { DatatableVisualizationState } from '../visualizations/datatable/visualization';
-import type { MetricVisualizationState } from '../visualizations/metric/visualization';
+import type { MetricVisualizationState } from '../visualizations/metric/types';
 import type { HeatmapVisualizationState } from '../visualizations/heatmap/types';
 import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
 
