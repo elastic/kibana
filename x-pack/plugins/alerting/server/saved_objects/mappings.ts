@@ -94,19 +94,18 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     scheduledTaskId: {
       type: 'keyword',
     },
-    // NO NEED TO BE INDEXED
-    // createdBy: {
-    //   type: 'keyword',
-    // },
-    // updatedBy: {
-    //   type: 'keyword',
-    // },
-    // createdAt: {
-    //   type: 'date',
-    // },
-    // updatedAt: {
-    //   type: 'date',
-    // },
+    createdBy: {
+      type: 'keyword',
+    },
+    updatedBy: {
+      type: 'keyword',
+    },
+    createdAt: {
+      type: 'date',
+    },
+    updatedAt: {
+      type: 'date',
+    },
     // NEED TO CHECK WITH KIBANA SECURITY
     // apiKey: {
     //   type: 'binary',
