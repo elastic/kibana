@@ -245,8 +245,8 @@ export function injectReferences(
       if (isPersistedByValueAnnotationsLayer(persistedLayer)) {
         injectedLayer = {
           ...persistedLayer,
-          hide: persistedLayer.hide,
-          simpleView: persistedLayer.simpleView,
+          hide: Boolean(persistedLayer.hide),
+          simpleView: Boolean(persistedLayer.simpleView),
           indexPatternId:
             // getIndexPatternIdFromInitialContext(persistedLayer, initialContext) || TODO - was this doing anything?
             indexPatternIdFromReferences,
@@ -276,7 +276,7 @@ export function injectReferences(
         };
 
         if (isPersistedByReferenceAnnotationsLayer(persistedLayer)) {
-          // a clean by-reference layer inherits from the library annotation group
+          // a clean by-reference layer inherits everything from the library annotation group
           injectedLayer = {
             ...commonProps,
             ignoreGlobalFilters: annotationGroup.ignoreGlobalFilters,

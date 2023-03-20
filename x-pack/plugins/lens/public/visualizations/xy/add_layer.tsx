@@ -19,14 +19,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { LayerType, Visualization } from '../..';
-import { FramePublicAPI } from '../../types';
+import { Visualization } from '../..';
+import { AddLayerFunction, FramePublicAPI } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
+import type { ExtraAppendLayerArg } from './visualization';
 
 interface AddLayerButtonProps {
   visualization: Visualization;
   visualizationState: unknown;
-  onAddLayerClick: (layerType: LayerType) => void;
+  addLayer: AddLayerFunction<ExtraAppendLayerArg>;
   layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
   eventAnnotationService: EventAnnotationServiceType;
 }
@@ -35,7 +36,7 @@ interface AddLayerButtonProps {
 export function AddLayerButton({
   visualization,
   visualizationState,
-  onAddLayerClick,
+  addLayer,
   layersMeta,
   eventAnnotationService,
 }: AddLayerButtonProps) {
@@ -107,7 +108,7 @@ export function AddLayerButton({
           })}
           fill
           color="text"
-          onClick={() => onAddLayerClick(supportedLayers[0].type)}
+          onClick={() => addLayer(supportedLayers[0].type)}
           iconType="layers"
         >
           {i18n.translate('xpack.lens.configPanel.addLayerButton', {
@@ -165,7 +166,7 @@ export function AddLayerButton({
                   icon: icon && <EuiIcon size="m" type={icon} />,
                   ['data-test-subj']: `lnsLayerAddButton-${type}`,
                   onClick: () => {
-                    onAddLayerClick(type);
+                    addLayer(type);
                     toggleLayersChoice(false);
                   },
                 };
@@ -184,7 +185,7 @@ export function AddLayerButton({
                   }),
                   icon: 'plusInCircleFilled',
                   onClick: () => {
-                    onAddLayerClick(LayerTypes.ANNOTATIONS);
+                    addLayer(LayerTypes.ANNOTATIONS);
                     toggleLayersChoice(false);
                   },
                   'data-test-subj': 'lnsAnnotationLayer_new',
@@ -210,9 +211,8 @@ export function AddLayerButton({
           isLoadLibraryVisible={isLoadLibraryVisible}
           setLoadLibraryFlyoutVisible={setLoadLibraryFlyoutVisible}
           eventAnnotationService={eventAnnotationService}
-          addLayer={() => {
-            // todo: expand to be able to initiate adding a layer from the library with data (not empty)
-            onAddLayerClick(LayerTypes.ANNOTATIONS);
+          addLayer={(loadedGroupInfo) => {
+            addLayer(LayerTypes.ANNOTATIONS, loadedGroupInfo);
           }}
         />
       )}

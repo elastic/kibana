@@ -13,9 +13,8 @@ import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
-import { LayerType } from '../../../../common';
 import { changeIndexPattern, removeDimension } from '../../../state_management/lens_slice';
-import { Visualization } from '../../../types';
+import { AddLayerFunction, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { generateId } from '../../../id_generator';
 import { ConfigPanelWrapperProps } from './types';
@@ -230,9 +229,9 @@ export function LayerPanels(
     [dispatchLens, props.framePublicAPI.dataViews.indexPatterns, props.indexPatternService]
   );
 
-  const addLayer = (layerType: LayerType) => {
+  const addLayer: AddLayerFunction = (layerType, extraArg) => {
     const layerId = generateId();
-    dispatchLens(addLayerAction({ layerId, layerType }));
+    dispatchLens(addLayerAction({ layerId, layerType, extraArg }));
     setNextFocusedLayerId(layerId);
   };
 
@@ -319,7 +318,7 @@ export function LayerPanels(
           visualization: activeVisualization,
           visualizationState: visualization.state,
           layersMeta: props.framePublicAPI,
-          onAddLayerClick: addLayer,
+          addLayer,
         })}
     </EuiForm>
   );

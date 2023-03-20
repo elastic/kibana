@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { uniq } from 'lodash';
+import { cloneDeep, uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
 import { DatasourceLayers, OperationMetadata, VisualizationType } from '../../types';
@@ -25,9 +25,11 @@ import {
   XYPersistedLinkedByValueAnnotationLayerConfig,
   XYPersistedLayerConfig,
   XYPersistedByValueAnnotationLayerConfig,
+  XYByValueAnnotationLayerConfig,
 } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
+import type { ExtraAppendLayerArg } from './visualization';
 
 export function getAxisName(
   axis: 'x' | 'y' | 'yLeft' | 'yRight',
@@ -306,18 +308,44 @@ const newLayerFn = {
   [layerTypes.ANNOTATIONS]: ({
     layerId,
     indexPatternId,
+    extraArg,
   }: {
     layerId: string;
     indexPatternId: string;
-  }): XYAnnotationLayerConfig => ({
-    layerId,
-    layerType: layerTypes.ANNOTATIONS,
-    annotations: [],
-    indexPatternId,
-    ignoreGlobalFilters: true,
-    hide: undefined,
-    simpleView: undefined,
-  }),
+    extraArg: ExtraAppendLayerArg | undefined;
+  }): XYAnnotationLayerConfig => {
+    if (extraArg) {
+      const { annotationGroupId, ...libraryGroupConfig } = extraArg;
+
+      const newLayer: XYByReferenceAnnotationLayerConfig = {
+        layerId,
+        layerType: layerTypes.ANNOTATIONS,
+        annotationGroupId,
+        // TODO - persist these?
+        hide: false,
+        simpleView: false,
+
+        annotations: cloneDeep(libraryGroupConfig.annotations),
+        indexPatternId: libraryGroupConfig.indexPatternId,
+        ignoreGlobalFilters: libraryGroupConfig.ignoreGlobalFilters,
+        __lastSaved: libraryGroupConfig,
+      };
+
+      return newLayer;
+    }
+
+    const newLayer: XYByValueAnnotationLayerConfig = {
+      layerId,
+      layerType: layerTypes.ANNOTATIONS,
+      annotations: [],
+      indexPatternId,
+      ignoreGlobalFilters: true,
+      hide: undefined,
+      simpleView: undefined,
+    };
+
+    return newLayer;
+  },
 };
 
 export function newLayerState({
@@ -325,13 +353,15 @@ export function newLayerState({
   layerType = layerTypes.DATA,
   seriesType,
   indexPatternId,
+  extraArg,
 }: {
   layerId: string;
   layerType?: XYLayerType;
   seriesType: SeriesType;
   indexPatternId: string;
+  extraArg?: ExtraAppendLayerArg;
 }) {
-  return newLayerFn[layerType]({ layerId, seriesType, indexPatternId });
+  return newLayerFn[layerType]({ layerId, seriesType, indexPatternId, extraArg });
 }
 
 export function getLayersByType(state: State, byType?: string) {

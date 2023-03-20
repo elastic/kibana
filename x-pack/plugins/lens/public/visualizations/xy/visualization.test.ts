@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getXyVisualization } from './visualization';
+import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
 import {
   Operation,
@@ -14,7 +14,7 @@ import {
   FramePublicAPI,
   UserMessage,
 } from '../../types';
-import type {
+import {
   State,
   XYState,
   XYLayerConfig,
@@ -262,7 +262,7 @@ describe('xy_visualization', () => {
             },
           ]
         )
-      ).toEqual({
+      ).toEqual<XYState>({
         ...baseState,
         layers: [
           ...baseState.layers,
@@ -272,6 +272,8 @@ describe('xy_visualization', () => {
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2],
             ignoreGlobalFilters: true,
+            hide: false,
+            simpleView: false,
           },
         ],
       });
@@ -306,7 +308,7 @@ describe('xy_visualization', () => {
             },
           ]
         )
-      ).toEqual({
+      ).toEqual<XYState>({
         ...baseState,
         layers: [
           ...baseState.layers,
@@ -316,6 +318,8 @@ describe('xy_visualization', () => {
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2],
             ignoreGlobalFilters: true,
+            hide: false,
+            simpleView: false,
           },
         ],
       });
@@ -429,8 +433,8 @@ describe('xy_visualization', () => {
           annotationGroupRef: refName1,
           ignoreGlobalFilters: false, // different from the persisted group
           annotations: [], // different from the persisted group
-          hide: undefined,
-          simpleView: undefined,
+          hide: false,
+          simpleView: false,
         },
         {
           layerId: 'annotation',
@@ -439,8 +443,8 @@ describe('xy_visualization', () => {
           annotationGroupRef: refName2,
           ignoreGlobalFilters: false, // different from the persisted group
           annotations: [], // different from the persisted group
-          hide: undefined,
-          simpleView: undefined,
+          hide: false,
+          simpleView: false,
         },
       ];
 
@@ -470,8 +474,8 @@ describe('xy_visualization', () => {
           annotationGroupId: annotationGroupId1,
           ignoreGlobalFilters: persistedAnnotationLayers[0].ignoreGlobalFilters,
           annotations: persistedAnnotationLayers[0].annotations,
-          hide: Boolean(persistedAnnotationLayers[0].hide),
-          simpleView: Boolean(persistedAnnotationLayers[0].simpleView),
+          hide: persistedAnnotationLayers[0].hide,
+          simpleView: persistedAnnotationLayers[0].simpleView,
           indexPatternId: dataViewId,
           __lastSaved: libraryAnnotationGroups[annotationGroupId1],
         },
@@ -481,8 +485,8 @@ describe('xy_visualization', () => {
           annotationGroupId: annotationGroupId2,
           ignoreGlobalFilters: persistedAnnotationLayers[1].ignoreGlobalFilters,
           annotations: persistedAnnotationLayers[1].annotations,
-          hide: Boolean(persistedAnnotationLayers[1].hide),
-          simpleView: Boolean(persistedAnnotationLayers[1].simpleView),
+          hide: persistedAnnotationLayers[1].hide,
+          simpleView: persistedAnnotationLayers[1].simpleView,
           indexPatternId: dataViewId,
           __lastSaved: libraryAnnotationGroups[annotationGroupId2],
         },
@@ -533,11 +537,13 @@ describe('xy_visualization', () => {
         exampleState(),
         'foo',
         layerTypes.DATA,
-        'indexPattern1'
+        'indexPattern1',
+        undefined
       ).layers;
       expect(layers.length).toEqual(exampleState().layers.length + 1);
       expect(layers[layers.length - 1]).toMatchObject({ layerId: 'foo' });
     });
+    // TODO test adding annotation layers
   });
 
   describe('#clearLayer', () => {
@@ -774,7 +780,7 @@ describe('xy_visualization', () => {
             groupId: 'xAnnotation',
             columnId: 'newCol',
           }).layers[0]
-        ).toEqual({
+        ).toEqual<XYAnnotationLayerConfig>({
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
           indexPatternId: 'indexPattern1',
@@ -792,6 +798,8 @@ describe('xy_visualization', () => {
               label: 'Event',
             },
           ],
+          hide: false,
+          simpleView: false,
         });
       });
 
@@ -1041,7 +1049,7 @@ describe('xy_visualization', () => {
                 indexPatternId: 'indexPattern1',
               },
             }).layers[0]
-          ).toEqual({
+          ).toEqual<XYAnnotationLayerConfig>({
             layerId: 'annotation',
             layerType: layerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
@@ -1063,6 +1071,8 @@ describe('xy_visualization', () => {
               },
             ],
             ignoreGlobalFilters: true,
+            hide: false,
+            simpleView: false,
           });
         });
         it('dragging field: should replace an existing dimension when dragged to a dimension', () => {
@@ -1103,7 +1113,7 @@ describe('xy_visualization', () => {
                 indexPatternId: 'indexPattern1',
               },
             }).layers[0]
-          ).toEqual({
+          ).toEqual<XYAnnotationLayerConfig>({
             layerId: 'annotation',
             layerType: layerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
@@ -1125,6 +1135,8 @@ describe('xy_visualization', () => {
               },
             ],
             ignoreGlobalFilters: true,
+            hide: false,
+            simpleView: false,
           });
         });
         it('dragging operation: should copy previous column if passed and assign a new id', () => {
@@ -1162,12 +1174,14 @@ describe('xy_visualization', () => {
                 indexPatternId: 'indexPattern1',
               },
             }).layers[0]
-          ).toEqual({
+          ).toEqual<XYAnnotationLayerConfig>({
             layerId: 'annotation',
             layerType: layerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2, { ...exampleAnnotation2, id: 'newColId' }],
             ignoreGlobalFilters: true,
+            hide: false,
+            simpleView: false,
           });
         });
         it('dragging operation: should reorder a dimension to a annotation layer', () => {
@@ -1206,12 +1220,14 @@ describe('xy_visualization', () => {
               },
               dropType: 'reorder',
             }).layers[0]
-          ).toEqual({
+          ).toEqual<XYAnnotationLayerConfig>({
             layerId: 'annotation',
             layerType: layerTypes.ANNOTATIONS,
             indexPatternId: 'indexPattern1',
             annotations: [exampleAnnotation2, exampleAnnotation],
             ignoreGlobalFilters: true,
+            hide: false,
+            simpleView: false,
           });
         });
 
@@ -1260,13 +1276,15 @@ describe('xy_visualization', () => {
               },
               dropType: 'replace_duplicate_compatible',
             }).layers
-          ).toEqual([
+          ).toEqual<XYAnnotationLayerConfig[]>([
             {
               layerId: 'first',
               layerType: layerTypes.ANNOTATIONS,
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
               ignoreGlobalFilters: true,
+              hide: false,
+              simpleView: false,
             },
             {
               layerId: 'second',
@@ -1274,6 +1292,8 @@ describe('xy_visualization', () => {
               indexPatternId: 'indexPattern1',
               annotations: [{ ...exampleAnnotation, id: 'an2' }],
               ignoreGlobalFilters: true,
+              hide: false,
+              simpleView: false,
             },
           ]);
         });
@@ -1322,13 +1342,15 @@ describe('xy_visualization', () => {
               },
               dropType: 'swap_compatible',
             }).layers
-          ).toEqual([
+          ).toEqual<XYAnnotationLayerConfig[]>([
             {
               layerId: 'first',
               layerType: layerTypes.ANNOTATIONS,
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation2],
               ignoreGlobalFilters: true,
+              hide: false,
+              simpleView: false,
             },
             {
               layerId: 'second',
@@ -1336,6 +1358,8 @@ describe('xy_visualization', () => {
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
               ignoreGlobalFilters: true,
+              hide: false,
+              simpleView: false,
             },
           ]);
         });
@@ -1383,13 +1407,15 @@ describe('xy_visualization', () => {
               },
               dropType: 'replace_compatible',
             }).layers
-          ).toEqual([
+          ).toEqual<XYByValueAnnotationLayerConfig[]>([
             {
               layerId: 'first',
               layerType: layerTypes.ANNOTATIONS,
               indexPatternId: 'indexPattern1',
               annotations: [],
               ignoreGlobalFilters: true,
+              hide: false,
+              simpleView: false,
             },
             {
               layerId: 'second',
@@ -1397,6 +1423,8 @@ describe('xy_visualization', () => {
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
               ignoreGlobalFilters: true,
+              hide: false,
+              simpleView: false,
             },
           ]);
         });
@@ -1446,13 +1474,15 @@ describe('xy_visualization', () => {
               },
               dropType: 'move_compatible',
             }).layers
-          ).toEqual([
+          ).toEqual<XYAnnotationLayerConfig[]>([
             {
               layerId: 'first',
               layerType: layerTypes.ANNOTATIONS,
               indexPatternId: 'indexPattern1',
               annotations: [],
               ignoreGlobalFilters: true,
+              hide: false,
+              simpleView: false,
             },
             {
               layerId: 'second',
@@ -1460,6 +1490,8 @@ describe('xy_visualization', () => {
               indexPatternId: 'indexPattern1',
               annotations: [exampleAnnotation],
               ignoreGlobalFilters: true,
+              hide: false,
+              simpleView: false,
             },
           ]);
         });
@@ -1550,7 +1582,7 @@ describe('xy_visualization', () => {
           layerId: 'ann',
           columnId: 'an2',
         }).layers
-      ).toEqual([
+      ).toEqual<XYLayerConfig[]>([
         {
           layerId: 'first',
           layerType: layerTypes.DATA,
@@ -1564,6 +1596,8 @@ describe('xy_visualization', () => {
           indexPatternId: 'indexPattern1',
           annotations: [exampleAnnotation],
           ignoreGlobalFilters: true,
+          hide: false,
+          simpleView: false,
         },
       ]);
     });
@@ -2501,7 +2535,7 @@ describe('xy_visualization', () => {
       });
 
       const getErrorMessages = (
-        vis: Visualization<XYState, XYPersistedState>,
+        vis: Visualization<XYState, XYPersistedState, ExtraAppendLayerArg>,
         state: XYState,
         frameMock = { datasourceLayers: {} } as Partial<FramePublicAPI>
       ) =>
@@ -3252,12 +3286,12 @@ describe('xy_visualization', () => {
                 "type": "manual",
               },
             ],
-            "hide": undefined,
+            "hide": false,
             "ignoreGlobalFilters": false,
             "layerId": "layer-id",
             "layerType": "annotations",
             "persistanceType": "byValue",
-            "simpleView": undefined,
+            "simpleView": false,
           },
         ]
       `);
@@ -3513,13 +3547,15 @@ describe('xy_visualization', () => {
 
       expect(setState).toHaveBeenCalledWith(
         expect.objectContaining({
-          layers: expect.arrayContaining([
+          layers: expect.arrayContaining<XYByValueAnnotationLayerConfig>([
             {
               layerId: 'annotation',
               layerType: layerTypes.ANNOTATIONS,
               annotations: [exampleAnnotation2],
               ignoreGlobalFilters: false,
               indexPatternId: 'myIndexPattern',
+              hide: false,
+              simpleView: false,
             },
           ]),
         })

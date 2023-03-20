@@ -1016,7 +1016,9 @@ interface VisualizationStateFromContextChangeProps {
   context: VisualizeEditorContext;
 }
 
-export interface Visualization<T = unknown, P = T> {
+export type AddLayerFunction<T> = (layerType: LayerType, extraArg?: T) => void;
+
+export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
 
@@ -1080,7 +1082,13 @@ export interface Visualization<T = unknown, P = T> {
   /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
   /** Track added layers in internal state */
-  appendLayer?: (state: T, layerId: string, type: LayerType, indexPatternId: string) => T;
+  appendLayer?: (
+    state: T,
+    layerId: string,
+    type: LayerType,
+    indexPatternId: string,
+    extraArg?: ExtraAppendLayerArg
+  ) => T;
 
   /** Retrieve a list of supported layer types with initialization data */
   getSupportedLayers: (
@@ -1235,7 +1243,7 @@ export interface Visualization<T = unknown, P = T> {
   getAddLayerButtonComponent?: (props: {
     visualization: Visualization;
     visualizationState: T;
-    onAddLayerClick: (layerType: LayerType) => void;
+    addLayer: (layerType: LayerType) => void;
     layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
   }) => JSX.Element | null;
   /**

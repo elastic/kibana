@@ -119,9 +119,9 @@ export interface XYByValueAnnotationLayerConfig {
   layerId: string;
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];
-  hide: boolean | undefined;
+  hide: boolean;
   indexPatternId: string;
-  simpleView: boolean | undefined;
+  simpleView: boolean;
   ignoreGlobalFilters: boolean;
 }
 
@@ -136,7 +136,7 @@ export type XYByReferenceAnnotationLayerConfig = XYByValueAnnotationLayerConfig 
 };
 
 export type XYPersistedByReferenceAnnotationLayerConfig = Pick<
-  XYPersistedByValueAnnotationLayerConfig,
+  XYByValueAnnotationLayerConfig,
   'layerId' | 'layerType' | 'hide' | 'simpleView'
 > & {
   persistanceType: 'byReference';

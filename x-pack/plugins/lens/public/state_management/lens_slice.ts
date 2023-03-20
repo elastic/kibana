@@ -213,6 +213,7 @@ export const cloneLayer = createAction(
 export const addLayer = createAction<{
   layerId: string;
   layerType: LayerType;
+  extraArg: unknown;
 }>('lens/addLayer');
 
 export const setLayerDefaultDimension = createAction<{
@@ -1033,11 +1034,12 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
     [addLayer.type]: (
       state,
       {
-        payload: { layerId, layerType },
+        payload: { layerId, layerType, extraArg },
       }: {
         payload: {
           layerId: string;
           layerType: LayerType;
+          extraArg: unknown;
         };
       }
     ) => {
@@ -1055,7 +1057,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         state.visualization.state,
         layerId,
         layerType,
-        currentDataViewsId
+        currentDataViewsId,
+        extraArg
       );
 
       const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);

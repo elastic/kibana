@@ -6,17 +6,12 @@
  */
 
 import React, { useRef } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutFooter,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { SavedObjectCommon } from '@kbn/saved-objects-plugin/common';
 import { FlyoutContainer } from '../../shared_components/flyout_container';
+import type { ExtraAppendLayerArg } from './visualization';
 
 export function LoadAnnotationLibraryFlyout({
   eventAnnotationService,
@@ -27,7 +22,7 @@ export function LoadAnnotationLibraryFlyout({
   isLoadLibraryVisible: boolean;
   setLoadLibraryFlyoutVisible: (visible: boolean) => void;
   eventAnnotationService: EventAnnotationServiceType;
-  addLayer: () => void;
+  addLayer: (argument: ExtraAppendLayerArg) => void;
 }) {
   const containerPanelRef = useRef<HTMLDivElement | null>(null);
   const otherElementsHeight = 250;
@@ -87,26 +82,6 @@ export function LoadAnnotationLibraryFlyout({
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={() => {
-                  setLoadLibraryFlyoutVisible(false);
-                  if (selectedItem) {
-                    loadAnnotationGroup(selectedItem?.id).then((loadedGroup) => {
-                      console.log('loadedGroup:', loadedGroup);
-                      addLayer();
-                    });
-                  }
-                }}
-                iconType="folderOpen"
-                fill
-                disabled={!selectedItem}
-              >
-                {i18n.translate('xpack.lens.loadAnnotationsLibrary.loadSelected', {
-                  defaultMessage: 'Load selected',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       }
@@ -122,9 +97,11 @@ export function LoadAnnotationLibraryFlyout({
     >
       <div className="lnsIndexPatternDimensionEditor--padded">
         <EventAnnotationGroupSavedObjectFinder
-          onChoose={({ id, type, fullName, savedObject }) => {
-            hasBeenClicked.current = true;
-            setSelectedItem({ id, type, fullName, savedObject });
+          onChoose={({ id }) => {
+            loadAnnotationGroup(id).then((loadedGroup) => {
+              addLayer({ ...loadedGroup, annotationGroupId: id });
+              setLoadLibraryFlyoutVisible(false);
+            });
           }}
           fixedPageSize={numberOfElements}
         />

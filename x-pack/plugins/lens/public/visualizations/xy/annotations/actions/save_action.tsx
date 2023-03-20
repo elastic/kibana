@@ -216,16 +216,10 @@ export const getSaveLayerAction = ({
 }): LayerAction => {
   const neverSaved = !isByReferenceAnnotationsLayer(layer);
 
-  const displayName = neverSaved
-    ? i18n.translate('xpack.lens.xyChart.annotations.addAnnotationGroupToLibrary', {
-        defaultMessage: 'Add to library',
-      })
-    : i18n.translate('xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary', {
-        defaultMessage: 'Save to library',
-      });
-
   return {
-    displayName,
+    displayName: i18n.translate('xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary', {
+      defaultMessage: 'Save to library',
+    }),
     description: i18n.translate(
       'xpack.lens.xyChart.annotations.addAnnotationGroupToLibraryDescription',
       { defaultMessage: 'Saves annotation group as separate saved object' }

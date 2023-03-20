@@ -22,6 +22,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -107,6 +108,9 @@ import { createAnnotationActions } from './annotations/actions';
 import { AddLayerButton } from './add_layer';
 
 const XY_ID = 'lnsXY';
+
+export type ExtraAppendLayerArg = EventAnnotationGroupConfig & { annotationGroupId: string };
+
 export const getXyVisualization = ({
   core,
   storage,
@@ -129,7 +133,7 @@ export const getXyVisualization = ({
   kibanaTheme: ThemeServiceStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-}): Visualization<State, PersistedState> => ({
+}): Visualization<State, PersistedState, ExtraAppendLayerArg> => ({
   id: XY_ID,
   visualizationTypes,
   getVisualizationTypeId(state) {
@@ -171,7 +175,7 @@ export const getXyVisualization = ({
     return state;
   },
 
-  appendLayer(state, layerId, layerType, indexPatternId) {
+  appendLayer(state, layerId, layerType, indexPatternId, extraArg) {
     if (layerType === 'metricTrendline') {
       return state;
     }
@@ -186,6 +190,7 @@ export const getXyVisualization = ({
           layerId,
           layerType,
           indexPatternId,
+          extraArg,
         }),
       ],
     };
