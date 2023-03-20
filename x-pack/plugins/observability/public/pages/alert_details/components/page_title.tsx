@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_DURATION, TIMESTAMP } from '@kbn/rule-data-utils';
@@ -21,7 +29,10 @@ export interface PageTitleProps {
 
 export function PageTitle({ alert }: PageTitleProps) {
   const { euiTheme } = useEuiTheme();
-  const label = Boolean(alert?.active)
+
+  if (!alert) return <EuiLoadingSpinner />;
+
+  const label = Boolean(alert.active)
     ? i18n.translate('xpack.observability.alertDetails.alertActiveState', {
         defaultMessage: 'Active',
       })
@@ -31,11 +42,11 @@ export function PageTitle({ alert }: PageTitleProps) {
 
   return (
     <div data-test-subj="page-title-container">
-      {alert?.reason}
+      {alert.reason}
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
         <EuiFlexItem grow={false}>
-          {typeof Boolean(alert?.active) === 'boolean' ? (
+          {typeof Boolean(alert.active) === 'boolean' ? (
             <EuiBadge color="#BD271E" data-test-subj="page-title-active-badge">
               {label}
             </EuiBadge>
@@ -56,7 +67,7 @@ export function PageTitle({ alert }: PageTitleProps) {
               `}
               size="s"
             >
-              {moment(Number(alert?.start)).fromNow()}
+              {moment(Number(alert.start)).fromNow()}
             </EuiText>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -75,7 +86,7 @@ export function PageTitle({ alert }: PageTitleProps) {
               `}
               size="s"
             >
-              {asDuration(Number(alert?.fields[ALERT_DURATION]))}
+              {asDuration(Number(alert.fields[ALERT_DURATION]))}
             </EuiText>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -94,7 +105,7 @@ export function PageTitle({ alert }: PageTitleProps) {
               `}
               size="s"
             >
-              {moment(alert?.fields[TIMESTAMP]?.toString()).fromNow()}
+              {moment(alert.fields[TIMESTAMP]?.toString()).fromNow()}
             </EuiText>
           </EuiFlexGroup>
         </EuiFlexItem>
