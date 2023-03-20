@@ -183,7 +183,7 @@ export const ComplianceDashboard = () => {
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
 
   const getCspmDashboardData = useCspmStatsApi({
-    enabled: hasFindingsCspm ,
+    enabled: hasFindingsCspm,
   });
   const getKspmDashboardData = useKspmStatsApi({
     enabled: hasFindingsKspm,
@@ -239,7 +239,7 @@ export const ComplianceDashboard = () => {
         onClick: () => setSelectedTab(CSPM_POLICY_TEMPLATE),
         content: (
           <>
-            {hasFindingsCspm ? 
+            {hasFindingsCspm ? (
               <CloudPosturePage query={getCspmDashboardData}>
                 <div data-test-subj={CLOUD_DASHBOARD_CONTAINER}>
                   <IntegrationPostureDashboard
@@ -256,9 +256,9 @@ export const ComplianceDashboard = () => {
                   />
                 </div>
               </CloudPosturePage>
-             : 
+            ) : (
               <NoFindingsStates posturetype={'cspm'} />
-            }
+            )}
           </>
         ),
       },
@@ -270,7 +270,7 @@ export const ComplianceDashboard = () => {
         onClick: () => setSelectedTab(KSPM_POLICY_TEMPLATE),
         content: (
           <>
-            {hasFindingsKspm ? 
+            {hasFindingsKspm ? (
               <CloudPosturePage query={getKspmDashboardData}>
                 <div data-test-subj={KUBERNETES_DASHBOARD_CONTAINER}>
                   <IntegrationPostureDashboard
@@ -287,9 +287,9 @@ export const ComplianceDashboard = () => {
                   />
                 </div>
               </CloudPosturePage>
-             : 
+            ) : (
               <NoFindingsStates posturetype={'kspm'} />
-            }
+            )}
           </>
         ),
       },
