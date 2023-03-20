@@ -30,7 +30,6 @@ import {
 } from '../../public/flyout/right/test_ids';
 import {
   JSON_TAB_CONTENT_TEST_ID,
-  OVERVIEW_TAB_CONTENT_TEST_ID,
   TABLE_TAB_CONTENT_TEST_ID,
 } from '../../public/flyout/right/tabs/test_ids';
 import {
@@ -41,6 +40,8 @@ import {
   MITRE_ATTACK_TITLE_TEST_ID,
 } from '../../public/flyout/right/components/test_ids';
 import { getDataTestSubjectSelector } from '../helpers/common';
+
+/* Right section */
 
 export const DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE = getDataTestSubjectSelector(
   FLYOUT_HEADER_TITLE_TEST_ID
@@ -55,13 +56,12 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB =
   getDataTestSubjectSelector(OVERVIEW_TAB_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB = getDataTestSubjectSelector(TABLE_TAB_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_JSON_TAB = getDataTestSubjectSelector(JSON_TAB_TEST_ID);
-export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_CONTENT = getDataTestSubjectSelector(
-  OVERVIEW_TAB_CONTENT_TEST_ID
-);
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT =
   getDataTestSubjectSelector(TABLE_TAB_CONTENT_TEST_ID);
 export const DOCUMENT_DETAILS_FLYOUT_JSON_TAB_CONTENT =
   getDataTestSubjectSelector(JSON_TAB_CONTENT_TEST_ID);
+
+/* Left section */
 
 export const DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB =
   getDataTestSubjectSelector(VISUALIZE_TAB_TEST_ID);
