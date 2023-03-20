@@ -340,7 +340,7 @@
           "DisambiguateSet",
           "<LabelAsString, LabelAsNode> & ",
           "DisambiguateSet",
-          "<{ tooltipContent: React.ReactNode; title?: string | undefined; }, { title: string; tooltipContent?: React.ReactNode; }> & { title: string; tooltipContent?: React.ReactNode; } & { label: React.ReactNode; }) | undefined; display?: \"warning\" | \"success\" | \"plain\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"transparent\" | undefined; selectable?: (",
+          "<{ tooltipContent: React.ReactNode; title?: string | undefined; }, { title: string; tooltipContent?: React.ReactNode; }> & { title: string; tooltipContent?: React.ReactNode; } & { label: React.ReactNode; }) | undefined; display?: \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"transparent\" | \"plain\" | undefined; selectable?: (",
           "DisambiguateSet",
           "<",
           "EuiButtonPropsForAnchor",

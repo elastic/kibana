@@ -15,6 +15,11 @@ import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
+export type MobileTermsByFieldResponse = Array<{
+  label: string;
+  count: number;
+}>;
+
 export async function getMobileTermsByField({
   kuery,
   apmEventClient,
@@ -33,7 +38,7 @@ export async function getMobileTermsByField({
   end: number;
   size: number;
   fieldName: string;
-}): Promise<Array<{ label: string; count: number }>> {
+}): Promise<MobileTermsByFieldResponse> {
   const response = await apmEventClient.search(
     `get_mobile_terms_by_${fieldName}`,
     {
