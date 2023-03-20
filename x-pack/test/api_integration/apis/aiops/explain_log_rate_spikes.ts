@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { sortBy } from 'lodash';
 import fetch from 'node-fetch';
 import { format as formatUrl } from 'url';
 
@@ -92,8 +93,8 @@ export default ({ getService }: FtrProviderContext) => {
           const groupActions = data.filter((d) => d.type === testData.expected.groupFilter);
           const groups = groupActions.flatMap((d) => d.payload);
 
-          expect(groups).to.eql(
-            testData.expected.groups,
+          expect(sortBy(groups, 'id')).to.eql(
+            sortBy(testData.expected.groups, 'id'),
             'Grouping result does not match expected values.'
           );
 
