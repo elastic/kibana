@@ -23,7 +23,6 @@ import type {
   HasPrivilegesResponse,
   HasPrivilegesResponseApplication,
 } from './types';
-import { validateEsPrivilegeResponse } from './validate_es_response';
 
 interface CheckPrivilegesActions {
   login: string;
