@@ -8,6 +8,7 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
 import { isTypeof } from '../actions';
 import type { AliasAction } from '../actions';
@@ -33,6 +34,7 @@ import {
   addMustClausesToBoolQuery,
   addMustNotClausesToBoolQuery,
   getAliases,
+  getMigrationType,
   indexBelongsToLaterVersion,
   indexVersion,
   mergeMigrationMappingPropertyHashes,
@@ -40,10 +42,10 @@ import {
   throwBadResponse,
   versionMigrationCompleted,
   buildRemoveAliasActions,
+  MigrationType,
 } from './helpers';
 import { createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
-import { diffMappings } from '../core/build_active_mappings';
 import { CLUSTER_SHARD_LIMIT_EXCEEDED_REASON } from '../common/constants';
 
 export const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
@@ -99,39 +101,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
       const aliases = aliasesRes.right;
 
-      // The source index .kibana is pointing to. E.g: ".kibana_8.7.0_001"
-      const source = aliases[stateP.currentAlias];
-
       if (
-        // This version's migration has already been completed.
-        versionMigrationCompleted(stateP.currentAlias, stateP.versionAlias, aliases)
-      ) {
-        return {
-          ...stateP,
-          // Skip to 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT' so that if a new plugin was
-          // installed / enabled we can transform any old documents and update
-          // the mappings for this plugin's types.
-          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
-          // Source is a none because we didn't do any migration from a source
-          // index
-          sourceIndex: Option.none,
-          targetIndex: source!,
-          sourceIndexMappings: indices[source!].mappings,
-          // in this scenario, a .kibana_X.Y.Z_001 index exists that matches the current kibana version
-          // aka we are NOT upgrading to a newer version
-          // we inject the target index's current mappings in the state, to check them later
-          targetIndexRawMappings: indices[source!].mappings,
-          targetIndexMappings: mergeMigrationMappingPropertyHashes(
-            stateP.targetIndexMappings,
-            indices[source!].mappings
-          ),
-          versionIndexReadyActions: Option.none,
-        };
-      } else if (
         // `.kibana` is pointing to an index that belongs to a later
         // version of Kibana .e.g. a 7.11.0 instance found the `.kibana` alias
         // pointing to `.kibana_7.12.0_001`
-        indexBelongsToLaterVersion(aliases[stateP.currentAlias]!, stateP.kibanaVersion)
+        indexBelongsToLaterVersion(stateP.kibanaVersion, aliases[stateP.currentAlias])
       ) {
         return {
           ...stateP,
@@ -142,12 +116,29 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             aliases[stateP.currentAlias]
           )}`,
         };
-      } else if (
+      }
+
+      // The source index .kibana is pointing to. E.g: ".kibana_8.7.0_001"
+      const source = aliases[stateP.currentAlias];
+      // The target index .kibana WILL be pointing to if we reindex. E.g: ".kibana_8.8.0_001"
+      const newVersionTarget = stateP.versionIndex;
+
+      const postInitState = {
+        aliases,
+        sourceIndex: Option.fromNullable(source),
+        sourceIndexMappings: Option.fromNullable(source ? indices[source]?.mappings : undefined),
+        versionIndexReadyActions: Option.none,
+      };
+
+      if (
         // Don't actively participate in this migration but wait for another instance to complete it
         stateP.waitForMigrationCompletion === true
       ) {
         return {
           ...stateP,
+          ...postInitState,
+          sourceIndex: Option.none,
+          targetIndex: newVersionTarget,
           controlState: 'WAIT_FOR_MIGRATION_COMPLETION',
           // Wait for 2s before checking again if the migration has completed
           retryDelay: 2000,
@@ -161,15 +152,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       } else if (
         // If the `.kibana` alias exists
-        source != null
+        Option.isSome(postInitState.sourceIndex)
       ) {
         // CHECKPOINT here we decide to go for yellow source
         return {
           ...stateP,
-          aliases,
+          ...postInitState,
           controlState: 'WAIT_FOR_YELLOW_SOURCE',
-          sourceIndex: Option.some(source!) as Option.Some<string>,
-          sourceIndexMappings: indices[source!].mappings,
+          sourceIndex: postInitState.sourceIndex,
+          sourceIndexMappings: postInitState.sourceIndexMappings as Option.Some<IndexMapping>,
+          targetIndex: postInitState.sourceIndex.value, // We preserve the same index, source == target (E.g: ".xx8.7.0_001")
         };
       } else if (indices[stateP.legacyIndex] != null) {
         // Migrate from a legacy index
@@ -191,13 +183,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
         const legacyReindexTarget = `${stateP.indexPrefix}_${legacyVersion}_001`;
 
-        const target = stateP.versionIndex;
         return {
           ...stateP,
+          ...postInitState,
           controlState: 'LEGACY_SET_WRITE_BLOCK',
           sourceIndex: Option.some(legacyReindexTarget) as Option.Some<string>,
-          targetIndex: target,
-          legacyReindexTargetMappings: indices[stateP.legacyIndex].mappings,
+          sourceIndexMappings: Option.some(
+            indices[stateP.legacyIndex].mappings
+          ) as Option.Some<IndexMapping>,
+          targetIndex: newVersionTarget,
           legacyPreMigrationDoneActions: [
             { remove_index: { index: stateP.legacyIndex } },
             {
@@ -215,42 +209,42 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
                 must_exist: true,
               },
             },
-            { add: { index: target, alias: stateP.currentAlias } },
-            { add: { index: target, alias: stateP.versionAlias } },
+            { add: { index: newVersionTarget, alias: stateP.currentAlias } },
+            { add: { index: newVersionTarget, alias: stateP.versionAlias } },
+            { remove_index: { index: stateP.tempIndex } },
+          ]),
+        };
+      } else if (
+        // if we must relocate documents to this migrator's index, but the index does NOT yet exist:
+        // this migrator must create a temporary index and synchronise with other migrators
+        // this is a similar flow to the reindex one, but this migrator will not reindexing anything
+        stateP.mustRelocateDocuments
+      ) {
+        return {
+          ...stateP,
+          ...postInitState,
+          controlState: 'CREATE_REINDEX_TEMP',
+          sourceIndex: Option.none as Option.None,
+          targetIndex: newVersionTarget,
+          versionIndexReadyActions: Option.some([
+            { add: { index: newVersionTarget, alias: stateP.currentAlias } },
+            { add: { index: newVersionTarget, alias: stateP.versionAlias } },
             { remove_index: { index: stateP.tempIndex } },
           ]),
         };
       } else {
-        const target = stateP.versionIndex;
-
-        // This migrator's index does not exist yet
-        if (stateP.mustRedistributeDocuments) {
-          // other migrators want to redistribute documents to this migrator's index
-          return {
-            ...stateP,
-            controlState: 'CREATE_REINDEX_TEMP',
-            sourceIndex: Option.none as Option.None,
-            targetIndex: target,
-            versionIndexReadyActions: Option.some([
-              { add: { index: target, alias: stateP.currentAlias } },
-              { add: { index: target, alias: stateP.versionAlias } },
-              { remove_index: { index: stateP.tempIndex } },
-            ]),
-          };
-        } else {
-          // no need to copy anything over from other indices, we can start with a clean, empty index
-          const target = stateP.versionIndex;
-          return {
-            ...stateP,
-            controlState: 'CREATE_NEW_TARGET',
-            sourceIndex: Option.none as Option.None,
-            targetIndex: target,
-            versionIndexReadyActions: Option.some([
-              { add: { index: target, alias: stateP.currentAlias } },
-              { add: { index: target, alias: stateP.versionAlias } },
-            ]) as Option.Some<AliasAction[]>,
-          };
-        }
+        // no need to copy anything over from other indices, we can start with a clean, empty index
+        return {
+          ...stateP,
+          ...postInitState,
+          controlState: 'CREATE_NEW_TARGET',
+          sourceIndex: Option.none as Option.None,
+          targetIndex: newVersionTarget,
+          versionIndexReadyActions: Option.some([
+            { add: { index: newVersionTarget, alias: stateP.currentAlias } },
+            { add: { index: newVersionTarget, alias: stateP.versionAlias } },
+          ]) as Option.Some<AliasAction[]>,
+        };
       }
     } else {
       return throwBadResponse(stateP, res);
@@ -262,6 +256,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (
       // If this version's migration has already been completed we can proceed
       Either.isRight(aliasesRes) &&
+      // TODO check that this behaves correctly when skipping reindexing
       versionMigrationCompleted(stateP.currentAlias, stateP.versionAlias, aliasesRes.right)
     ) {
       return {
@@ -273,11 +268,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // migration. So we won't need to transform any old documents or update
         // the mappings.
         controlState: 'DONE',
-        // Source is a none because we didn't do any migration from a source
-        // index
-        sourceIndex: Option.none,
-        targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
-        versionIndexReadyActions: Option.none,
       };
     } else {
       // When getAliases returns a left 'multiple_indices_per_alias' error or
@@ -441,27 +431,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (
-        // source exists
-        Boolean(stateP.sourceIndexMappings._meta?.migrationMappingPropertyHashes) &&
-        // ...and mappings are unchanged
-        !diffMappings(
-          /* actual */
-          stateP.sourceIndexMappings,
-          /* expected */
-          stateP.targetIndexMappings
-        ) &&
-        // if we must redistribute documents, we are forced to reindex
-        !stateP.mustRedistributeDocuments
-      ) {
-        // the existing mappings match, we can avoid reindexing
+      if (stateP.mustRelocateDocuments) {
+        // if this migrator's index must dispatch documents to other indices,
+        // or it must receive documents from other indices
+        // we must reindex and synchronise with other migrators
         return {
           ...stateP,
-          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
-          targetIndex: stateP.sourceIndex.value!, // We preserve the same index, source == target (E.g: ".xx8.7.0_001")
-          versionIndexReadyActions: Option.none,
+          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
         };
       } else {
+        // we
         return {
           ...stateP,
           controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
@@ -485,25 +464,50 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'UPDATE_SOURCE_MAPPINGS_PROPERTIES') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
-        targetIndex: stateP.sourceIndex.value!, // We preserve the same index, source == target (E.g: ".xx8.7.0_001")
-        versionIndexReadyActions: Option.none,
-      };
-    } else if (Either.isLeft(res)) {
-      const left = res.left;
-      if (isTypeof(left, 'incompatible_mapping_exception')) {
+    const migrationType = getMigrationType({
+      isMappingsCompatible: Either.isRight(res),
+      isVersionMigrationCompleted: versionMigrationCompleted(
+        stateP.currentAlias,
+        stateP.versionAlias,
+        stateP.aliases
+      ),
+    });
+
+    switch (migrationType) {
+      case MigrationType.Compatible:
+        return {
+          ...stateP,
+          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+        };
+      case MigrationType.Incompatible:
         return {
           ...stateP,
           controlState: 'CHECK_UNKNOWN_DOCUMENTS',
         };
-      } else {
-        return throwBadResponse(stateP, left as never);
-      }
-    } else {
-      return throwBadResponse(stateP, res);
+      case MigrationType.Unnecessary:
+        return {
+          ...stateP,
+          // Skip to 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT' so that if a new plugin was
+          // installed / enabled we can transform any old documents and update
+          // the mappings for this plugin's types.
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+          // Source is a none because we didn't do any migration from a source index
+          sourceIndex: Option.none,
+          targetIndex: stateP.sourceIndex.value,
+          // in this scenario, a .kibana_X.Y.Z_001 index exists that matches the current kibana version
+          // aka we are NOT upgrading to a newer version
+          // we inject the source index's current mappings in the state, to check them later
+          targetIndexMappings: mergeMigrationMappingPropertyHashes(
+            stateP.targetIndexMappings,
+            stateP.sourceIndexMappings.value
+          ),
+        };
+      case MigrationType.Invalid:
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: 'Incompatible mappings change on already migrated Kibana instance.',
+        };
     }
   } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -549,10 +553,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         controlState: 'PREPARE_COMPATIBLE_MIGRATION',
         mustRefresh:
           stateP.mustRefresh || typeof res.right.deleted === 'undefined' || res.right.deleted > 0,
-        targetIndexRawMappings: stateP.sourceIndexMappings,
         targetIndexMappings: mergeMigrationMappingPropertyHashes(
           stateP.targetIndexMappings,
-          stateP.sourceIndexMappings
+          stateP.sourceIndexMappings.value
         ),
         preTransformDocsActions: [
           // Point the version alias to the source index. This let's other Kibana
@@ -736,7 +739,18 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CREATE_REINDEX_TEMP') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      return { ...stateP, controlState: 'READY_TO_REINDEX_SYNC' };
+      if (stateP.mustRelocateDocuments) {
+        // we are reindexing, and this migrator's index is involved in document relocations
+        return { ...stateP, controlState: 'READY_TO_REINDEX_SYNC' };
+      } else {
+        // we are reindexing but this migrator's index is not involved in any document relocation
+        return {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT',
+          sourceIndex: stateP.sourceIndex as Option.Some<string>,
+          sourceIndexMappings: stateP.sourceIndexMappings as Option.Some<IndexMapping>,
+        };
+      }
     } else if (Either.isLeft(res)) {
       const left = res.left;
       if (isTypeof(left, 'index_not_green_timeout')) {
@@ -766,22 +780,24 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'READY_TO_REINDEX_SYNC') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (Option.isSome(stateP.sourceIndex)) {
+      if (Option.isSome(stateP.sourceIndex) && Option.isSome(stateP.sourceIndexMappings)) {
         // this migrator's source index exist, reindex its entries
         return {
           ...stateP,
           controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT',
           sourceIndex: stateP.sourceIndex as Option.Some<string>,
+          sourceIndexMappings: stateP.sourceIndexMappings as Option.Some<IndexMapping>,
         };
       } else {
-        // this migrator's source index did NOT exist, this migrator does not need to reindex anything (other might need to)
+        // this migrator's source index did NOT exist
+        // this migrator does not need to reindex anything (others might need to)
         return { ...stateP, controlState: 'DONE_REINDEXING_SYNC' };
       }
     } else if (Either.isLeft(res)) {
       return {
         ...stateP,
         controlState: 'FATAL',
-        reason: 'An error occurred whilst waiting for all migrators to get to this step.',
+        reason: 'An error occurred whilst waiting for other migrators to get to this step.',
       };
     } else {
       return throwBadResponse(stateP, res as never);
@@ -864,22 +880,37 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       const { sourceIndexPitId, ...state } = stateP;
-      return {
-        ...state,
-        controlState: 'DONE_REINDEXING_SYNC',
-      };
+
+      if (stateP.mustRelocateDocuments) {
+        return {
+          ...state,
+          controlState: 'DONE_REINDEXING_SYNC',
+        };
+      } else {
+        return {
+          ...stateP,
+          controlState: 'SET_TEMP_WRITE_BLOCK',
+          sourceIndex: stateP.sourceIndex as Option.Some<string>,
+          sourceIndexMappings: Option.none,
+        };
+      }
     } else {
       throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'DONE_REINDEXING_SYNC') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      return { ...stateP, controlState: 'SET_TEMP_WRITE_BLOCK' };
+      return {
+        ...stateP,
+        controlState: 'SET_TEMP_WRITE_BLOCK',
+        sourceIndex: stateP.sourceIndex as Option.Some<string>,
+        sourceIndexMappings: Option.none,
+      };
     } else if (Either.isLeft(res)) {
       return {
         ...stateP,
         controlState: 'FATAL',
-        reason: 'An error occurred whilst waiting for all migrators to get to this step.',
+        reason: 'An error occurred whilst waiting for other migrators to get to this step.',
       };
     } else {
       return throwBadResponse(stateP, res as never);

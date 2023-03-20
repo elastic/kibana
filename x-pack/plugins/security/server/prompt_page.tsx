@@ -13,7 +13,7 @@ import {
   EuiProvider,
 } from '@elastic/eui';
 // @ts-expect-error no definitions in component folder
-import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/alert';
+import { icon as EuiIconWarning } from '@elastic/eui/lib/components/icon/assets/warning';
 // @ts-expect-error no definitions in component folder
 import { appendIconComponentCache } from '@elastic/eui/lib/components/icon/icon';
 import createCache from '@emotion/cache';
@@ -30,11 +30,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 
-// Preload the alert icon used by `EuiEmptyPrompt` to ensure that it's loaded
+// Preload the warning icon used by `EuiEmptyPrompt` to ensure that it's loaded
 // in advance the first time this page is rendered server-side. If not, the
 // icon svg wouldn't contain any paths the first time the page was rendered.
 appendIconComponentCache({
-  alert: EuiIconAlert,
+  warning: EuiIconWarning,
 });
 
 const emotionCache = createCache({ key: 'eui' });
@@ -65,7 +65,7 @@ export function PromptPage({
           <EuiPageBody>
             <EuiPageContent verticalPosition="center" horizontalPosition="center">
               <EuiEmptyPrompt
-                iconType="alert"
+                iconType="warning"
                 iconColor="danger"
                 title={<h2>{title}</h2>}
                 body={body}

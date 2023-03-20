@@ -42,7 +42,7 @@ import {
   createMultiPromiseDefer,
   indexMapToTypeIndexMap,
 } from './kibana_migrator_utils';
-import { TypeStatus } from './kibana_migrator_constants';
+import { MAIN_SAVED_OBJECT_INDEX, TypeStatus } from './kibana_migrator_constants';
 
 // ensure plugins don't try to convert SO namespaceTypes after 8.0.0
 // see https://github.com/elastic/kibana/issues/147344
@@ -205,8 +205,12 @@ export class KibanaMigrator implements IKibanaMigrator {
       readyToReindexDefers = createMultiPromiseDefer(indicesWithMovingTypes);
       doneReindexingDefers = createMultiPromiseDefer(indicesWithMovingTypes);
     } catch (error) {
-      this.log.fatal('Cannot query the meta information of the main saved object index');
-      throw error;
+      if (error.body?.status === 404) {
+        this.log.debug(`The ${MAIN_SAVED_OBJECT_INDEX} index does NOT exist. Assuming this is a fresh deployment`);
+      } else {
+        this.log.fatal('Cannot query the meta information of the main saved object index');
+        throw error;
+      }
     }
 
     const migrators = Array.from(migratorIndices).map((indexName, i) => {
@@ -215,12 +219,12 @@ export class KibanaMigrator implements IKibanaMigrator {
           const readyToReindex = readyToReindexDefers[indexName];
           const doneReindexing = doneReindexingDefers[indexName];
           // check if this migrator's index is involved in some document redistribution
-          const mustRedistributeDocuments = !!readyToReindex;
+          const mustRelocateDocuments = !!readyToReindex;
 
           return runResilientMigrator({
             client: this.client,
             kibanaVersion: this.kibanaVersion,
-            mustRedistributeDocuments,
+            mustRelocateDocuments,
             typeIndexMap,
             waitForMigrationCompletion: this.waitForMigrationCompletion,
             targetMappings: buildActiveMappings(indexMap[indexName].typeMappings),

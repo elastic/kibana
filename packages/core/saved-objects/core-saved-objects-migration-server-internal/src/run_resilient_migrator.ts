@@ -49,7 +49,7 @@ export async function runResilientMigrator({
   client,
   kibanaVersion,
   waitForMigrationCompletion,
-  mustRedistributeDocuments,
+  mustRelocateDocuments,
   typeIndexMap,
   targetMappings,
   logger,
@@ -66,7 +66,7 @@ export async function runResilientMigrator({
   client: ElasticsearchClient;
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
-  mustRedistributeDocuments: boolean;
+  mustRelocateDocuments: boolean;
   typeIndexMap: TypeIndexMap;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
@@ -83,7 +83,7 @@ export async function runResilientMigrator({
   const initialState = createInitialState({
     kibanaVersion,
     waitForMigrationCompletion,
-    mustRedistributeDocuments,
+    mustRelocateDocuments,
     typeIndexMap,
     targetMappings,
     preMigrationScript,

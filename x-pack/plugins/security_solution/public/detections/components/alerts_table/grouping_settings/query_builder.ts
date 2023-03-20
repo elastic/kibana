@@ -8,7 +8,7 @@
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { BoolQuery } from '@kbn/es-query';
 import type { NamedAggregation } from '@kbn/securitysolution-grouping';
-import { getGroupingQuery } from '@kbn/securitysolution-grouping';
+import { isNoneGroup, getGroupingQuery } from '@kbn/securitysolution-grouping';
 
 const getGroupFields = (groupValue: string) => {
   if (groupValue === 'kibana.alert.rule.name') {
@@ -19,60 +19,51 @@ const getGroupFields = (groupValue: string) => {
 };
 
 interface AlertsGroupingQueryParams {
-  from: string;
-  to: string;
   additionalFilters: Array<{
     bool: BoolQuery;
   }>;
-  selectedGroup: string;
-  runtimeMappings: MappingRuntimeFields;
-  pageSize: number;
+  from: string;
   pageIndex: number;
+  pageSize: number;
+  runtimeMappings: MappingRuntimeFields;
+  selectedGroup: string;
+  to: string;
 }
 
 export const getAlertsGroupingQuery = ({
-  from,
-  to,
   additionalFilters,
-  selectedGroup,
-  runtimeMappings,
-  pageSize,
+  from,
   pageIndex,
+  pageSize,
+  runtimeMappings,
+  selectedGroup,
+  to,
 }: AlertsGroupingQueryParams) =>
   getGroupingQuery({
     additionalFilters,
-    additionalAggregationsRoot: [
+    from,
+    groupByFields: !isNoneGroup(selectedGroup) ? getGroupFields(selectedGroup) : [],
+    metricsAggregations: !isNoneGroup(selectedGroup)
+      ? getAggregationsByGroupField(selectedGroup)
+      : [],
+    pageNumber: pageIndex * pageSize,
+    rootAggregations: [
       {
-        unitCount0: { value_count: { field: selectedGroup } },
+        unitsCount: { value_count: { field: selectedGroup } },
       },
-      ...(selectedGroup !== 'none'
-        ? [
-            {
-              groupCount0: {
-                cardinality: {
-                  field: selectedGroup,
-                },
-              },
-            },
-          ]
+      ...(!isNoneGroup(selectedGroup)
+        ? [{ groupsCount: { cardinality: { field: selectedGroup } } }]
         : []),
     ],
-    from,
     runtimeMappings,
-    stackByMultipleFields0: selectedGroup !== 'none' ? getGroupFields(selectedGroup) : [],
+    size: pageSize,
     to,
-    additionalStatsAggregationsFields0:
-      selectedGroup !== 'none' ? getAggregationsByGroupField(selectedGroup) : [],
-    stackByMultipleFields0Size: pageSize,
-    stackByMultipleFields0From: pageIndex * pageSize,
-    additionalStatsAggregationsFields1: [],
-    stackByMultipleFields1: [],
   });
 
 const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   const aggMetrics: NamedAggregation[] = [
     {
-      unitCount0: {
+      unitsCount: {
         cardinality: {
           field: 'kibana.alert.uuid',
         },

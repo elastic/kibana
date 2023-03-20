@@ -14,6 +14,7 @@ import {
   throwOnGloballyHiddenTypes,
   throwIfTypeNotVisibleByAPI,
   throwIfAnyTypeNotVisibleByAPI,
+  logWarnOnExternalRequest,
 } from './utils';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
@@ -27,6 +28,8 @@ import type {
 } from '@kbn/core-http-server';
 import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 import { typeRegistryInstanceMock } from '../saved_objects_service.test.mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);
@@ -339,5 +342,62 @@ describe('throwIfAnyTypeNotVisibleByAPI', () => {
 
   it('does not throw on visible types', () => {
     expect(() => throwIfAnyTypeNotVisibleByAPI(['config'], registry)).not.toThrowError();
+  });
+});
+
+describe('logWarnOnExternalRequest', () => {
+  let logger: MockedLogger;
+  const firstPartyRequestHeaders = { 'kbn-version': 'a', referer: 'b' };
+  const kibRequest = httpServerMock.createKibanaRequest({ headers: firstPartyRequestHeaders });
+  const extRequest = httpServerMock.createKibanaRequest();
+
+  beforeEach(() => {
+    logger = loggerMock.create();
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('logs on external requests to non-bulk apis', () => {
+    logWarnOnExternalRequest({
+      method: 'get',
+      path: '/resolve/{type}/{id}',
+      req: extRequest,
+      logger,
+    });
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'The get saved object API /resolve/{type}/{id} is deprecated.'
+    );
+  });
+
+  it('logs on external requests to bulk apis', () => {
+    logWarnOnExternalRequest({
+      method: 'post',
+      path: '/_bulk_resolve',
+      req: extRequest,
+      logger,
+    });
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'The post saved object API /_bulk_resolve is deprecated.'
+    );
+  });
+
+  it('does not log a warning on internal requests', () => {
+    logWarnOnExternalRequest({
+      method: 'get',
+      path: '/resolve/{type}/{id}',
+      req: kibRequest,
+      logger,
+    });
+    expect(logger.warn).toHaveBeenCalledTimes(0);
+    logWarnOnExternalRequest({
+      method: 'post',
+      path: '/_bulk_resolve',
+      req: kibRequest,
+      logger,
+    });
+    expect(logger.warn).toHaveBeenCalledTimes(0);
   });
 });

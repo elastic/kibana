@@ -26,7 +26,7 @@ import type { TypeIndexMap } from './kibana_migrator_constants';
 export const createInitialState = ({
   kibanaVersion,
   waitForMigrationCompletion,
-  mustRedistributeDocuments,
+  mustRelocateDocuments,
   typeIndexMap,
   targetMappings,
   preMigrationScript,
@@ -39,7 +39,7 @@ export const createInitialState = ({
 }: {
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
-  mustRedistributeDocuments: boolean;
+  mustRelocateDocuments: boolean;
   typeIndexMap: TypeIndexMap;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
@@ -104,7 +104,7 @@ export const createInitialState = ({
   return {
     controlState: 'INIT',
     waitForMigrationCompletion,
-    mustRedistributeDocuments,
+    mustRelocateDocuments,
     typeIndexMap,
     indexPrefix,
     legacyIndex: indexPrefix,
