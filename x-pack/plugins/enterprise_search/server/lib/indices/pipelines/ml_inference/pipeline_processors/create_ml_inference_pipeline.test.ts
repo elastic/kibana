@@ -161,6 +161,7 @@ describe('createMlInferencePipeline lib function', () => {
 
     const actualResult = createMlInferencePipeline(
       pipelineName,
+      undefined,
       modelId,
       sourceField,
       destinationField,
