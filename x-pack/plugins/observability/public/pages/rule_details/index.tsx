@@ -76,7 +76,7 @@ export function RuleDetailsPage() {
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
       ruleTypeRegistry,
-      getEditAlertFlyout: EditAlertFlyout,
+      getEditRuleFlyout: EditRuleFlyout,
       getRuleEventLogList,
       getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
@@ -424,7 +424,7 @@ export function RuleDetailsPage() {
         }}
       />
       {editFlyoutVisible && (
-        <EditAlertFlyout
+        <EditRuleFlyout
           initialRule={rule}
           onClose={() => {
             setEditFlyoutVisible(false);
