@@ -253,3 +253,10 @@ export type JobParamsCsvFromSavedObject = CsvFromSavedObjectBase &
   Omit<BaseParamsV2, 'title'> & { title?: string };
 
 export type TaskPayloadCsvFromSavedObject = CsvFromSavedObjectBase & BasePayloadV2;
+
+export interface JobParamsDownloadCSV {
+  browserTimezone: string;
+  title: string;
+  searchSource: SerializedSearchSourceFields;
+  columns?: string[];
+}

@@ -487,7 +487,7 @@ export class CsvGenerator {
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
       max_size_reached: this.maxSizeReached,
       metrics: {
-        rows: this.csvRowCount,
+        csv: { rows: this.csvRowCount },
       },
       warnings,
       error_code: reportingError?.code,

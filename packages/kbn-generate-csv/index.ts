@@ -15,4 +15,6 @@ export type {
   BaseParams,
   BaseParamsV2,
   BasePayloadV2,
+  TaskRunResult,
+  JobParamsDownloadCSV,
 } from './types';
