@@ -6,8 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
+
+const mockSaveSavedSearch = jest.fn().mockResolvedValue('123');
+jest.mock('@kbn/saved-search-plugin/public', () => {
+  const actualPlugin = jest.requireActual('@kbn/saved-search-plugin/public');
+  return {
+    ...actualPlugin,
+    saveSavedSearch: (val: SavedSearch, opts?: SavedObjectSaveOpts) =>
+      mockSaveSavedSearch(val, opts),
+  };
+});
 import { getSavedSearchContainer, isEqualSavedSearch } from './discover_saved_search_container';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { dataViewMock } from '../../../__mocks__/data_view';
@@ -103,6 +114,54 @@ describe('DiscoverSavedSearchContainer', () => {
       expect(savedSearchContainer.getInitial$().getValue().id).toEqual('the-saved-search-id');
       expect(savedSearchContainer.getCurrent$().getValue().id).toEqual('the-saved-search-id');
       expect(savedSearchContainer.getHasChanged$().getValue()).toEqual(false);
+    });
+  });
+
+  describe('persist', () => {
+    const saveOptions = { confirmOverwrite: false };
+
+    it('calls saveSavedSearch with the given saved search and save options', async () => {
+      const savedSearchContainer = getSavedSearchContainer({
+        savedSearch: savedSearchMockWithTimeField,
+        services: discoverServiceMock,
+      });
+      const savedSearchToPersist = {
+        ...savedSearchMockWithTimeField,
+        title: 'My updated saved search',
+      };
+
+      await savedSearchContainer.persist(savedSearchToPersist, saveOptions);
+      expect(mockSaveSavedSearch).toHaveBeenCalledWith(savedSearchToPersist, saveOptions);
+    });
+
+    it('sets the initial and current saved search to the persisted saved search', async () => {
+      const title = 'My updated saved search';
+      const persistedSavedSearch = {
+        ...savedSearch,
+        title,
+      };
+      const savedSearchContainer = getSavedSearchContainer({
+        savedSearch: savedSearchMockWithTimeField,
+        services: discoverServiceMock,
+      });
+
+      const result = await savedSearchContainer.persist(persistedSavedSearch, saveOptions);
+      expect(savedSearchContainer.getInitial$().getValue().title).toBe(title);
+      expect(savedSearchContainer.getCurrent$().getValue().title).toBe(title);
+      expect(result).toEqual({ id: '123' });
+    });
+
+    it('emits false to the hasChanged$ BehaviorSubject', async () => {
+      jest.mock('@kbn/saved-search-plugin/public', () => ({
+        saveSavedSearch: jest.fn().mockResolvedValue({ id: '123' }),
+      }));
+      const savedSearchContainer = getSavedSearchContainer({
+        savedSearch: savedSearchMockWithTimeField,
+        services: discoverServiceMock,
+      });
+
+      await savedSearchContainer.persist(savedSearch, saveOptions);
+      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
     });
   });
 });

@@ -71,7 +71,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     } as unknown as SearchSourceDependencies;
     const searchSource = new SearchSource({}, deps);
     searchSource.fetch$ = jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }));
-    const createChild = jest.fn((options = {}) => {
+    searchSource.createChild = jest.fn((options = {}) => {
       const childSearchSource = new SearchSource({}, deps);
       childSearchSource.setParent(searchSource, options);
       childSearchSource.fetch$ = <T>() =>
@@ -80,7 +80,6 @@ export function createDiscoverServicesMock(): DiscoverServices {
         >);
       return childSearchSource;
     });
-    searchSource.createChild = createChild;
     return searchSource;
   });
 
@@ -177,7 +176,12 @@ export function createDiscoverServicesMock(): DiscoverServices {
       addSuccess: jest.fn(),
     },
     expressions: expressionsPlugin,
-    savedObjectsTagging: { ui: { getTagIdsFromReferences: jest.fn().mockResolvedValue([]) } },
+    savedObjectsTagging: {
+      ui: {
+        getTagIdsFromReferences: jest.fn().mockResolvedValue([]),
+        updateTagsReferences: jest.fn(),
+      },
+    },
     dataViews: dataPlugin.dataViews,
     timefilter: dataPlugin.query.timefilter.timefilter,
     lens: { EmbeddableComponent: jest.fn(() => null) },

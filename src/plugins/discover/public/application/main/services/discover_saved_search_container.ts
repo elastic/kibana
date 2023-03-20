@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getSavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
+import { getSavedSearch, SavedSearch, saveSavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
@@ -17,7 +17,6 @@ import { addLog } from '../../../utils/add_log';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
-import { persistSavedSearch } from '../utils/persist_saved_search';
 import { getStateDefaults } from '../utils/get_state_defaults';
 
 export interface UpdateParams {
@@ -144,14 +143,17 @@ export function getSavedSearchContainer({
   };
 
   const persist = async (nextSavedSearch: SavedSearch, saveOptions?: SavedObjectSaveOpts) => {
-    addLog('[savedSearch] persist', nextSavedSearch);
+    addLog('[savedSearch] persist', { nextSavedSearch, saveOptions });
 
-    const id = await persistSavedSearch(nextSavedSearch, {
-      services,
-      saveOptions,
-    });
+    const id = await saveSavedSearch(
+      nextSavedSearch,
+      saveOptions || {},
+      services.core.savedObjects.client,
+      services.savedObjectsTagging
+    );
+
     if (id) {
-      savedSearchInitial$.next(nextSavedSearch);
+      set(nextSavedSearch);
     }
     return { id };
   };
