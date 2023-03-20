@@ -10,7 +10,7 @@ import { ConnectorProvider } from '../application/context/connector_context';
 import { RuleEdit } from '../application/sections/rule_form';
 import type { ConnectorServices, RuleEditProps as AlertEditProps } from '../types';
 
-export const getEditAlertFlyoutLazy = (
+export const getEditRuleFlyoutLazy = (
   props: AlertEditProps & { connectorServices: ConnectorServices }
 ) => {
   return (

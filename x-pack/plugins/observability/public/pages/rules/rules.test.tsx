@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { CoreStart } from '@kbn/core/public';
 import { ObservabilityPublicPluginsStart } from '../../plugin';
-import { RulesPage } from '.';
+import { RulesPage } from './rules';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import * as pluginContext from '../../hooks/use_plugin_context';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
