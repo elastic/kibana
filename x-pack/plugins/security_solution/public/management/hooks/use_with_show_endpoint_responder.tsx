@@ -16,6 +16,7 @@ import {
 } from '../components/endpoint_responder';
 import { useConsoleManager } from '../components/console';
 import type { HostMetadata } from '../../../common/endpoint/types';
+import { MissingEncryptionKeyCallout } from '../components/missing_encryption_key_callout';
 
 type ShowEndpointResponseActionsConsole = (endpointMetadata: HostMetadata) => void;
 
@@ -58,7 +59,12 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
               TitleComponent: () => <HeaderEndpointInfo endpointId={endpointAgentId} />,
             },
             PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
-            PageBodyComponent: () => <OfflineCallout endpointId={endpointAgentId} />,
+            PageBodyComponent: () => (
+              <>
+                <OfflineCallout endpointId={endpointAgentId} />
+                <MissingEncryptionKeyCallout />
+              </>
+            ),
             ActionComponents: endpointPrivileges.canReadActionsLogManagement
               ? [ActionLogButton]
               : undefined,
