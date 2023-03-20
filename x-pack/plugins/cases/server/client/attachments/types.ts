@@ -118,3 +118,10 @@ export interface UpdateArgs {
    */
   updateRequest: CommentPatchRequest;
 }
+
+/**
+ * Parameters for retrieving stats for attachments of a case.
+ */
+export interface GetStatsArgs {
+  caseId: string;
+}

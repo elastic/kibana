@@ -285,6 +285,25 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
+        it('400s when attempting to add more than 100 files to a case in a single attachment', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+
+          const filesMetadata = [...Array(101).keys()].map(() => fileMetadata());
+
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [
+              getFilesAttachmentReq({
+                externalReferenceMetadata: {
+                  files: filesMetadata,
+                },
+              }),
+            ],
+            expectedHttpCode: 400,
+          });
+        });
+
         it('400s when attempting to add a file to a case that already has 100 files', async () => {
           const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
 

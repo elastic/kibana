@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { buildFilter } from '../../../client/utils';
-import { CommentType, FILE_ATTACHMENT_TYPE } from '../../../../common/api';
+import { CommentType } from '../../../../common/api';
 import type { CommentRequest } from '../../../../common/api';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../../../common/constants';
 import { isFileAttachmentRequest } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
 import { MAX_FILES_PER_CASE } from '../../../files';
+import { createSavedObjectFileFilter } from '../../../files/utils';
 
 export class FileLimiter extends BaseLimiter {
   constructor() {
     super({
       limit: MAX_FILES_PER_CASE,
       attachmentType: CommentType.externalReference,
-      field: 'externalReferenceAttachmentTypeId',
-      filter: createFileFilter(),
+      field: 'externalReferenceMetadata.files.name.keyword',
+      filter: createSavedObjectFileFilter(),
       attachmentNoun: 'files',
     });
   }
@@ -36,11 +35,3 @@ export class FileLimiter extends BaseLimiter {
     return fileRequests;
   }
 }
-
-const createFileFilter = () =>
-  buildFilter({
-    filters: FILE_ATTACHMENT_TYPE,
-    field: 'externalReferenceAttachmentTypeId',
-    operator: 'or',
-    type: CASE_COMMENT_SAVED_OBJECT,
-  });

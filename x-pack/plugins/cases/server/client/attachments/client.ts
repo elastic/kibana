@@ -8,6 +8,7 @@
 import type {
   AlertResponse,
   AllCommentsResponse,
+  AttachmentStats,
   BulkGetAttachmentsResponse,
   CaseResponse,
   CommentResponse,
@@ -29,12 +30,14 @@ import type {
   GetArgs,
   UpdateArgs,
   BulkGetArgs,
+  GetStatsArgs,
 } from './types';
 import { bulkCreate } from './bulk_create';
 import { deleteAll, deleteComment } from './delete';
 import { find, get, getAll, getAllAlertsAttachToCase } from './get';
 import { bulkGet } from './bulk_get';
 import { update } from './update';
+import { getStats } from './stats';
 
 /**
  * API for interacting with the attachments to a case.
@@ -70,6 +73,7 @@ export interface AttachmentsSubClient {
    * Retrieves a single attachment for a case.
    */
   get(getArgs: GetArgs): Promise<CommentResponse>;
+  getStats(params: GetStatsArgs): Promise<AttachmentStats>;
   /**
    * Updates a specific attachment.
    *
@@ -99,6 +103,7 @@ export const createAttachmentsSubClient = (
       getAllAlertsAttachToCase(params, clientArgs, casesClient),
     getAll: (getAllArgs: GetAllArgs) => getAll(getAllArgs, clientArgs),
     get: (getArgs: GetArgs) => get(getArgs, clientArgs),
+    getStats: (params) => getStats(params, clientArgs, casesClient),
     update: (updateArgs: UpdateArgs) => update(updateArgs, clientArgs),
   };
 

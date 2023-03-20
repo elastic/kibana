@@ -91,15 +91,28 @@ export const createCaseCommentSavedObjectType = ({
           },
         },
       },
-      externalReferenceMetadata: {
-        dynamic: false,
-        properties: {},
-      },
       persistableStateAttachmentState: {
         dynamic: false,
         properties: {},
       },
-       */
+      */
+      externalReferenceMetadata: {
+        dynamic: false,
+        properties: {
+          files: {
+            properties: {
+              name: {
+                type: 'text',
+                fields: {
+                  keyword: {
+                    type: 'keyword',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       externalReferenceAttachmentTypeId: {
         type: 'keyword',
       },

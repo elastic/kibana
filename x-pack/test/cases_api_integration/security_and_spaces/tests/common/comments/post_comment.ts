@@ -272,6 +272,24 @@ export default ({ getService }: FtrProviderContext): void => {
             expectedHttpCode: 400,
           });
         });
+
+        it('400s when attempting to add more than 100 files to a case in a single attachment', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+
+          const filesMetadata = [...Array(101).keys()].map(() => fileMetadata());
+
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq({
+              externalReferenceMetadata: {
+                files: filesMetadata,
+              },
+            }),
+
+            expectedHttpCode: 400,
+          });
+        });
       });
 
       it('400s when attempting to create a comment with a different owner than the case', async () => {

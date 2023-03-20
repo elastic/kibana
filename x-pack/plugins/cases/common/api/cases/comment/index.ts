@@ -12,6 +12,7 @@ import { SavedObjectFindOptionsRt } from '../../saved_object';
 import { UserRt } from '../../user';
 
 export * from './files';
+export * from './stats';
 
 export const CommentAttributesBasicRt = rt.type({
   created_at: rt.string,

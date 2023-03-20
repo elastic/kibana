@@ -9,6 +9,7 @@ import type SuperTest from 'supertest';
 import { CASES_INTERNAL_URL, CASES_URL } from '@kbn/cases-plugin/common/constants';
 import {
   AllCommentsResponse,
+  AttachmentStats,
   BulkCreateCommentRequest,
   BulkGetAttachmentsResponse,
   CaseResponse,
@@ -16,6 +17,7 @@ import {
   CommentRequest,
   CommentResponse,
   CommentType,
+  getCaseAttachmentStatsUrl,
 } from '@kbn/cases-plugin/common/api';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
@@ -257,4 +259,23 @@ export const updateComment = async ({
     .expect(expectedHttpCode);
 
   return res;
+};
+
+export const getAttachmentsStats = async ({
+  supertest,
+  caseId,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<AttachmentStats> => {
+  const { body: stats } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseAttachmentStatsUrl(caseId)}`)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return stats;
 };
