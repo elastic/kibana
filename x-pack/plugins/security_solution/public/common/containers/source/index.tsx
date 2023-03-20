@@ -9,11 +9,10 @@ import { isEmpty, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-import { Subscription } from 'rxjs';
 
 import type { BrowserField, BrowserFields, IndexField } from '@kbn/timelines-plugin/common';
+import type { IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
 import { useKibana } from '../../lib/kibana';
-import { useAppToasts } from '../../hooks/use_app_toasts';
 import { getDataViewStateFromIndexFields } from './use_data_view';
 
 export type { BrowserField, BrowserFields };
@@ -34,7 +33,11 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[], _includeUnmapped: boolean = false): DataViewBase =>
+  (
+    title: string,
+    fields: IIndexPatternFieldList,
+    _includeUnmapped: boolean = false
+  ): DataViewBase =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
@@ -110,7 +113,6 @@ export const useFetchIndex = (
   // console.log('indexNames', indexNames);
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
-  const searchSubscription$ = useRef(new Subscription());
   const previousIndexesName = useRef<string[]>([]);
   const [isLoading, setLoading] = useState(false);
 
@@ -120,7 +122,7 @@ export const useFetchIndex = (
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
   });
-  const { addError, addWarning } = useAppToasts();
+  // const { addError, addWarning } = useAppToasts();
 
   const indexFieldsSearch = useCallback(
     (iNames) => {

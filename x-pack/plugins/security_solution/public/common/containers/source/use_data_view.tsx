@@ -12,13 +12,14 @@ import memoizeOne from 'memoize-one';
 import { omit, pick } from 'lodash/fp';
 import type {
   BrowserField,
-  IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
 import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '@kbn/timelines-plugin/common';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import type { IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
+
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { sourcererActions } from '../../store/sourcerer';
@@ -50,7 +51,11 @@ interface DataViewInfo {
  * VERY mutatious on purpose to improve the performance of the transform.
  */
 export const getDataViewStateFromIndexFields = memoizeOne(
-  (_title: string, fields: IndexField[], _includeUnmapped: boolean = false): DataViewInfo => {
+  (
+    _title: string,
+    fields: IIndexPatternFieldList,
+    _includeUnmapped: boolean = false
+  ): DataViewInfo => {
     // Adds two dangerous casts to allow for mutations within this function
     type DangerCastForMutation = Record<string, {}>;
 
