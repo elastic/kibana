@@ -39,6 +39,7 @@ import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import { DataTableRecord } from '../../../../types';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
+import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -200,6 +201,7 @@ function DiscoverDocumentsComponent({
             onSort={!isPlainRecord ? onSort : undefined}
             useNewFieldsApi={useNewFieldsApi}
             dataTestSubj="discoverDocTable"
+            DocViewer={DocViewer}
           />
         </>
       )}

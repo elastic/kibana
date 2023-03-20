@@ -181,7 +181,7 @@ const defaultErrorRenderer = (error: unknown) => (
   <FullSizeCenteredPage>
     <EuiEmptyPrompt
       color="danger"
-      iconType="alert"
+      iconType="warning"
       data-test-subj={ERROR_STATE_TEST_SUBJECT}
       title={
         <h2>

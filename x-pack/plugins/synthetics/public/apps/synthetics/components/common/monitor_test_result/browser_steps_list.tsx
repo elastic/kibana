@@ -214,6 +214,7 @@ export const BrowserStepsList = ({
           checkGroup={item.monitor.check_group}
           stepIndex={item.synthetics?.step?.index}
           configId={item.config_id!}
+          target="_blank"
         />
       ),
     },
