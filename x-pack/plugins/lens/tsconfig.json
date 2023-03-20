@@ -65,7 +65,6 @@
     "@kbn/core-saved-objects-server",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
-    "@kbn/lens-plugin",
   ],
   "exclude": [
     "target/**/*",
