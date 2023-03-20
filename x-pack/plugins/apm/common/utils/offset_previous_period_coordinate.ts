@@ -14,7 +14,7 @@ export function offsetPreviousPeriodCoordinates({
 }: {
   currentPeriodTimeseries?: Coordinate[];
   previousPeriodTimeseries?: Coordinate[];
-}) {
+}): Coordinate[] {
   if (!previousPeriodTimeseries?.length) {
     return [];
   }

@@ -17,12 +17,11 @@ import {
 } from '@elastic/charts';
 import React from 'react';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
-
+import numeral from '@elastic/numeral';
 import moment from 'moment';
+
 import { ChartData } from '../../../typings';
 import { useKibana } from '../../../utils/kibana_react';
-import { toHighPrecisionPercentage } from '../helpers/number';
-import { DEFAULT_DATE_FORMAT } from '../constants';
 
 type ChartType = 'area' | 'line';
 type State = 'success' | 'error';
@@ -36,16 +35,18 @@ export interface Props {
 }
 
 export function WideChart({ chart, data, id, isLoading, state }: Props) {
-  const charts = useKibana().services.charts;
+  const { charts, uiSettings } = useKibana().services;
   const theme = charts.theme.useChartsTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
   const { euiTheme } = useEuiTheme();
+  const dateFormat = uiSettings.get('dateFormat');
+  const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
   const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
 
   if (isLoading) {
-    return <EuiLoadingChart size="m" mono />;
+    return <EuiLoadingChart size="m" mono data-test-subj="wideChartLoading" />;
   }
 
   return (
@@ -61,13 +62,13 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
         id="bottom"
         position={Position.Bottom}
         showOverlappingTicks
-        tickFormat={(d) => moment(d).format(DEFAULT_DATE_FORMAT)}
+        tickFormat={(d) => moment(d).format(dateFormat)}
       />
       <Axis
         id="left"
         ticks={4}
         position={Position.Left}
-        tickFormat={(d) => `${toHighPrecisionPercentage(d)}%`}
+        tickFormat={(d) => numeral(d).format(percentFormat)}
       />
       <ChartComponent
         color={color}

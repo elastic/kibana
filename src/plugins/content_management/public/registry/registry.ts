@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { validateVersion } from '@kbn/object-versioning/lib/utils';
+
 import type { ContentTypeDefinition } from './content_type_definition';
 import { ContentType } from './content_type';
 
@@ -16,7 +18,20 @@ export class ContentTypeRegistry {
     if (this.types.has(definition.id)) {
       throw new Error(`Content type with id "${definition.id}" already registered.`);
     }
-    const type = new ContentType(definition);
+
+    const { result, value } = validateVersion(definition.version?.latest);
+    if (!result) {
+      throw new Error(`Invalid version [${definition.version?.latest}]. Must be an integer.`);
+    }
+
+    if (value < 1) {
+      throw new Error(`Version must be >= 1`);
+    }
+
+    const type = new ContentType({
+      ...definition,
+      version: { ...definition.version, latest: value },
+    });
     this.types.set(type.id, type);
 
     return type;
