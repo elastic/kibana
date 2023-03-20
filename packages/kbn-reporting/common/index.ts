@@ -9,7 +9,7 @@
 export { CancellationToken } from './cancellation_token';
 export { AuthenticationExpiredError, ReportingError } from './errors';
 export { byteSizeValueToNumber } from './schema_utils';
-export type { TaskRunMetrics } from './metrics';
+export type { TaskRunMetrics, CsvMetrics } from './metrics';
 
 export const UI_SETTINGS_SEARCH_INCLUDE_FROZEN = 'search:includeFrozen';
 export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';

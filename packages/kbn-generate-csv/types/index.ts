@@ -9,6 +9,8 @@
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import { jobTypes, reportTypes, TaskRunMetrics } from '@kbn/reporting-common';
+import { LayoutParams } from '@kbn/screenshotting-plugin/common';
+import { Ensure, SerializableRecord } from '@kbn/utility-types';
 
 export const PLUGIN_ID = 'reporting';
 
@@ -181,16 +183,12 @@ export interface CsvConfig {
   };
 }
 
-export interface CsvMetrics {
-  rows: number;
-}
-
 export interface TaskRunResult {
   content_type: string | null;
   csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
   warnings?: string[];
-  metrics?: CsvMetrics | TaskRunMetrics;
+  metrics?: TaskRunMetrics;
   /**
    * When running a report task we may finish with warnings that were triggered
    * by an error. We can pass the error code via the task run result to the
@@ -201,3 +199,57 @@ export interface TaskRunResult {
    */
   error_code?: string;
 }
+
+interface CsvFromSavedObjectBase {
+  objectType: 'search';
+}
+
+export interface LocatorParams<P extends SerializableRecord = SerializableRecord> {
+  id: string;
+
+  /**
+   * Kibana version used to create the params
+   */
+  version: string;
+
+  /**
+   * Data to recreate the user's state in the application
+   */
+  params: P;
+}
+
+export type BaseParams = Ensure<
+  {
+    layout?: LayoutParams;
+    objectType: string;
+    title: string;
+    browserTimezone: string; // to format dates in the user's time zone
+    version: string; // to handle any state migrations
+  },
+  SerializableRecord
+>;
+
+/**
+ * Report job parameters that an application must return from its
+ * getSharingData function.
+ */
+export type BaseParamsV2 = BaseParams & {
+  locatorParams: LocatorParams[];
+};
+
+/**
+ * Report job parameters, after they are processed in the request handler.
+ */
+export interface BasePayloadV2 extends BaseParamsV2 {
+  headers: string;
+  spaceId?: string;
+  isDeprecated?: boolean;
+}
+
+/**
+ * Makes title optional, as it can be derived from the saved search object
+ */
+export type JobParamsCsvFromSavedObject = CsvFromSavedObjectBase &
+  Omit<BaseParamsV2, 'title'> & { title?: string };
+
+export type TaskPayloadCsvFromSavedObject = CsvFromSavedObjectBase & BasePayloadV2;

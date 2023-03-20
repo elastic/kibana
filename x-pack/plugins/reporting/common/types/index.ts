@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { CsvMetrics } from '@kbn/reporting-common';
 import type { PdfScreenshotResult, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
+import type { BaseParams, BaseParamsV2, BasePayloadV2 } from '@kbn/generate-csv';
+import { JobId, BasePayload } from './base';
 
 export type {
   JobParamsCsvFromSavedObject,
@@ -36,10 +38,6 @@ export interface ReportDocumentHead {
 export interface ReportOutput extends TaskRunResult {
   content: string | null;
   size: number;
-}
-
-export interface CsvMetrics {
-  rows: number;
 }
 
 export type PngMetrics = PngScreenshotResult['metrics'];

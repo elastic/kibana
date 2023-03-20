@@ -7,4 +7,12 @@
  */
 
 export { CsvGenerator } from './src/generate_csv';
-export type { JobParams as JobParamsCsv, TaskPayloadCSV } from './types';
+export type {
+  JobParams as JobParamsCsv,
+  TaskPayloadCSV,
+  TaskPayloadCsvFromSavedObject,
+  JobParamsCsvFromSavedObject,
+  BaseParams,
+  BaseParamsV2,
+  BasePayloadV2,
+} from './types';
