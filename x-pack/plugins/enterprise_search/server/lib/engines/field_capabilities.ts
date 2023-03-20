@@ -97,12 +97,14 @@ export const parseFieldCapability = (
   } else {
     type = 'conflict';
   }
-  const fieldIndices: SchemaFieldIndex[] = [];
-  for (const fieldCapability of Object.values<FieldCapsFieldCapability>(value)) {
-    if (fieldCapability.indices) {
-      fieldIndices.push(...indicesWithMatchingType(fieldCapability.type, fieldCapability.indices));
+  const fieldIndices: SchemaFieldIndex[] = Object.values<FieldCapsFieldCapability>(value).flatMap(
+    (fieldCapability) => {
+      if (fieldCapability.indices) {
+        return indicesWithMatchingType(fieldCapability.type, fieldCapability.indices);
+      }
+      return [];
     }
-  }
+  );
   return {
     fields,
     indices: fieldIndices,
