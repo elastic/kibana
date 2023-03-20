@@ -401,13 +401,13 @@ export const Expressions: React.FC<Props> = (props) => {
             value={ruleParams.filterQueryText}
           />
         )) || (
-            <EuiFieldSearch
-              data-test-subj="infraExpressionsFieldSearch"
-              onChange={handleFieldSearchChange}
-              value={ruleParams.filterQueryText}
-              fullWidth
-            />
-          )}
+          <EuiFieldSearch
+            data-test-subj="infraExpressionsFieldSearch"
+            onChange={handleFieldSearchChange}
+            value={ruleParams.filterQueryText}
+            fullWidth
+          />
+        )}
       </EuiFormRow>
 
       <EuiSpacer size={'m'} />

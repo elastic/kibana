@@ -135,10 +135,14 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
 
 export const [SourceProvider, useSourceContext] = createContainer(useSource);
 
-export const withSourceProvider = <ComponentProps,>(Component: React.FunctionComponent<ComponentProps>) => (sourceId = 'default') => {
-  return function ComponentWithSourceProvider(props: ComponentProps) {
-    return <SourceProvider sourceId={sourceId}>
-      <Component {...props} />
-    </SourceProvider>
-  }
-}
+export const withSourceProvider =
+  <ComponentProps,>(Component: React.FunctionComponent<ComponentProps>) =>
+  (sourceId = 'default') => {
+    return function ComponentWithSourceProvider(props: ComponentProps) {
+      return (
+        <SourceProvider sourceId={sourceId}>
+          <Component {...props} />
+        </SourceProvider>
+      );
+    };
+  };
