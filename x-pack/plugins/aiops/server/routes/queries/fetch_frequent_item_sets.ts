@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniq, uniqWith, pick, isEqual } from 'lodash';
+import { uniq, pick, isEqual } from 'lodash';
 import { group } from 'd3-array';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -29,10 +29,6 @@ interface RandomSamplerAggregation {
 
 function isRandomSamplerAggregation(arg: unknown): arg is RandomSamplerAggregation {
   return isPopulatedObject(arg, ['sample']);
-}
-
-export function dropDuplicates(cps: SignificantTerm[], uniqueFields: Array<keyof SignificantTerm>) {
-  return uniqWith(cps, (a, b) => isEqual(pick(a, uniqueFields), pick(b, uniqueFields)));
 }
 
 export function groupDuplicates(
