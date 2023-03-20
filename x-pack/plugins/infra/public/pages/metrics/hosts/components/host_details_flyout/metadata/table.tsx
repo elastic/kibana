@@ -76,47 +76,46 @@ const ExpandableContent = (props: ExpandableContentProps) => {
     setIsExpanded(false);
   }, []);
 
-  const list = Array.isArray(values) ? values : [values]
+  const list = Array.isArray(values) ? values : [values];
   const [first, ...others] = list;
   const hasOthers = others.length > 0;
   const shouldShowMore = hasOthers && !isExpanded;
 
-
-return (
-  <EuiFlexGroup
-    gutterSize={'xs'}
-    responsive={false}
-    alignItems={'baseline'}
-    wrap={true}
-    direction="column"
-  >
-    <div>
-      {first}
-      {shouldShowMore && (
-        <>
-          {' ... '}
-          <EuiLink onClick={expand}>
-            <FormattedMessage
-              id="xpack.infra.nodeDetails.tabs.metadata.seeMore"
-              defaultMessage="+{count} more"
-              values={{
-                count: others.length,
-              }}
-            />
+  return (
+    <EuiFlexGroup
+      gutterSize={'xs'}
+      responsive={false}
+      alignItems={'baseline'}
+      wrap={true}
+      direction="column"
+    >
+      <div>
+        {first}
+        {shouldShowMore && (
+          <>
+            {' ... '}
+            <EuiLink data-test-subj="infraExpandableContentCountMoreLink" onClick={expand}>
+              <FormattedMessage
+                id="xpack.infra.nodeDetails.tabs.metadata.seeMore"
+                defaultMessage="+{count} more"
+                values={{
+                  count: others.length,
+                }}
+              />
+            </EuiLink>
+          </>
+        )}
+      </div>
+      {isExpanded && others.map((item) => <EuiFlexItem key={item}>{item}</EuiFlexItem>)}
+      {hasOthers && isExpanded && (
+        <EuiFlexItem>
+          <EuiLink data-test-subj="infraExpandableContentShowLessLink" onClick={collapse}>
+            {i18n.translate('xpack.infra.nodeDetails.tabs.metadata.seeLess', {
+              defaultMessage: 'Show less',
+            })}
           </EuiLink>
-        </>
+        </EuiFlexItem>
       )}
-    </div>
-    {isExpanded && others.map((item) => <EuiFlexItem key={item}>{item}</EuiFlexItem>)}
-    {hasOthers && isExpanded && (
-      <EuiFlexItem>
-        <EuiLink onClick={collapse}>
-          {i18n.translate('xpack.infra.nodeDetails.tabs.metadata.seeLess', {
-            defaultMessage: 'Show less',
-          })}
-        </EuiLink>
-      </EuiFlexItem>
-    )}
-  </EuiFlexGroup>
-)
+    </EuiFlexGroup>
+  );
 };
