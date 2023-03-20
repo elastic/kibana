@@ -56,21 +56,29 @@ function SimpleRedirect({ to }: { to: string }) {
 }
 
 export const OBSERVABILITY_BASE_PATH = '/app/observability';
+export const OVERVIEW_URL = '/overview';
 export const ALERTS_URL = '/alerts';
+export const ALERT_DETAIL_URL = '/alerts/:alertId';
+export const EXPLORATORY_VIEW_URL = '/exploratory-view/';
 export const RULES_URL = `${ALERTS_URL}/rules`;
-export const SLOS_URL = `${OBSERVABILITY_BASE_PATH}/slos`;
+export const RULE_DETAIL_URL = `${RULES_URL}/:ruleId'`;
+export const SLOS_URL = '/slos';
+export const SLOS_DETAIL_URL = '/slos/:sloId';
+export const SLOS_CREATE_URL = '/slos/create';
+export const SLOS_EDIT_URL = '/slos/edit/:sloId';
 
 export const paths = {
   observability: {
+    overview: `${OBSERVABILITY_BASE_PATH}${OVERVIEW_URL}`,
     alerts: `${OBSERVABILITY_BASE_PATH}${ALERTS_URL}`,
     alertDetails: (alertId: string) => `${ALERTS_URL}/${encodeURI(alertId)}`,
-    rules: RULES_URL,
+    rules: `${OBSERVABILITY_BASE_PATH}${RULES_URL}`,
     ruleDetails: (ruleId?: string | null) =>
-      ruleId ? `${RULES_URL}/${encodeURI(ruleId)}` : RULES_URL,
-    slos: SLOS_URL,
-    sloCreate: `${SLOS_URL}/create`,
-    sloEdit: (sloId: string) => `${SLOS_URL}/edit/${encodeURI(sloId)}`,
-    sloDetails: (sloId: string) => `${SLOS_URL}/${encodeURI(sloId)}`,
+      ruleId ? `${OBSERVABILITY_BASE_PATH}${RULES_URL}/${encodeURI(ruleId)}` : RULES_URL,
+    slos: `${OBSERVABILITY_BASE_PATH}${SLOS_URL}`,
+    sloCreate: `${OBSERVABILITY_BASE_PATH}/${SLOS_URL}/create`,
+    sloEdit: (sloId: string) => `${OBSERVABILITY_BASE_PATH}/${SLOS_URL}/edit/${encodeURI(sloId)}`,
+    sloDetails: (sloId: string) => `${OBSERVABILITY_BASE_PATH}/${SLOS_URL}/${encodeURI(sloId)}`,
   },
   management: {
     rules: '/app/management/insightsAndAlerting/triggersActions/rules',
@@ -89,14 +97,7 @@ export const routes = {
     params: {},
     exact: true,
   },
-  '/landing': {
-    handler: () => {
-      return <SimpleRedirect to="/overview" />;
-    },
-    params: {},
-    exact: true,
-  },
-  '/overview': {
+  [OVERVIEW_URL]: {
     handler: () => {
       return (
         <DatePickerContextProvider>
@@ -123,7 +124,7 @@ export const routes = {
     },
     exact: true,
   },
-  '/exploratory-view/': {
+  [EXPLORATORY_VIEW_URL]: {
     handler: () => {
       return <ObservabilityExploratoryView />;
     },
@@ -144,42 +145,42 @@ export const routes = {
     params: {},
     exact: true,
   },
-  '/alerts/rules/:ruleId': {
+  [RULE_DETAIL_URL]: {
     handler: () => {
       return <RuleDetailsPage />;
     },
     params: {},
     exact: true,
   },
-  '/alerts/:alertId': {
+  [ALERT_DETAIL_URL]: {
     handler: () => {
       return <AlertDetails />;
     },
     params: {},
     exact: true,
   },
-  '/slos': {
+  [SLOS_URL]: {
     handler: () => {
       return <SlosPage />;
     },
     params: {},
     exact: true,
   },
-  '/slos/create': {
+  [SLOS_CREATE_URL]: {
     handler: () => {
       return <SloEditPage />;
     },
     params: {},
     exact: true,
   },
-  '/slos/edit/:sloId': {
+  [SLOS_EDIT_URL]: {
     handler: () => {
       return <SloEditPage />;
     },
     params: {},
     exact: true,
   },
-  '/slos/:sloId': {
+  [SLOS_DETAIL_URL]: {
     handler: () => {
       return <SloDetailsPage />;
     },
