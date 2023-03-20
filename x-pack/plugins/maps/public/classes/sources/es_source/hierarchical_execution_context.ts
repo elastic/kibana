@@ -9,7 +9,10 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { getExecutionContext } from '../../../kibana_services';
 import { makeExecutionContext } from '../../../../common/execution_context';
 
-export function makeHierarchicalExecutionContext(description: string, savedObjectId?: string): KibanaExecutionContext {
+export function makeHierarchicalExecutionContext(
+  description: string,
+  savedObjectId?: string
+): KibanaExecutionContext {
   const topLevelContext = getExecutionContext().get();
   const context = makeExecutionContext({
     url: window.location.pathname,

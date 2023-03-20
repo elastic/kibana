@@ -159,7 +159,10 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
         },
       }),
       searchSessionId: searchFilters.searchSessionId,
-      executionContext: makeHierarchicalExecutionContext('es_term_source:terms', searchFilters.savedObjectId),
+      executionContext: makeHierarchicalExecutionContext(
+        'es_term_source:terms',
+        searchFilters.savedObjectId
+      ),
       requestsAdapter: inspectorAdapters.requests,
     });
 

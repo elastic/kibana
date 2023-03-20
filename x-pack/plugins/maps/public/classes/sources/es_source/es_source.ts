@@ -312,7 +312,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         searchSource.fetch$({
           abortSignal: abortController.signal,
           legacyHitsTotal: false,
-          executionContext: makeHierarchicalExecutionContext('es_source:bounds', boundsFilters.savedObjectId),
+          executionContext: makeHierarchicalExecutionContext(
+            'es_source:bounds',
+            boundsFilters.savedObjectId
+          ),
         })
       );
 

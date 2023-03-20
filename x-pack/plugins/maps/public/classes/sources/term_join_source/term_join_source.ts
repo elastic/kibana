@@ -34,6 +34,9 @@ export interface ITermJoinSource extends ISource {
 
   getId(): string;
   getRightFields(): IField[];
-  getTooltipProperties(properties: GeoJsonProperties, savedObjectId?: string): Promise<ITooltipProperty[]>;
+  getTooltipProperties(
+    properties: GeoJsonProperties,
+    savedObjectId?: string
+  ): Promise<ITooltipProperty[]>;
   getFieldByName(fieldName: string): IField | null;
 }

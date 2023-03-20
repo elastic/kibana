@@ -218,7 +218,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
         defaultMessage: 'Elasticsearch terms request to fetch entities within map buffer.',
       }),
       searchSessionId: searchFilters.searchSessionId,
-      executionContext: makeHierarchicalExecutionContext('es_geo_line:entities', searchFilters.savedObjectId),
+      executionContext: makeHierarchicalExecutionContext(
+        'es_geo_line:entities',
+        searchFilters.savedObjectId
+      ),
       requestsAdapter: inspectorAdapters.requests,
     });
     const entityBuckets: Array<{ key: string; doc_count: number }> = _.get(
@@ -291,7 +294,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
           'Elasticsearch geo_line request to fetch tracks for entities. Tracks are not filtered by map buffer.',
       }),
       searchSessionId: searchFilters.searchSessionId,
-      executionContext: makeHierarchicalExecutionContext('es_geo_line:tracks', searchFilters.savedObjectId),
+      executionContext: makeHierarchicalExecutionContext(
+        'es_geo_line:tracks',
+        searchFilters.savedObjectId
+      ),
       requestsAdapter: inspectorAdapters.requests,
     });
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(

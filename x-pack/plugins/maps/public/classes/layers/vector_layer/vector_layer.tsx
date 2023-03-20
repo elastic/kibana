@@ -94,7 +94,10 @@ export interface IVectorLayer extends ILayer {
   getSource(): IVectorSource;
   getFeatureId(feature: Feature): string | number | undefined;
   getFeatureById(id: string | number): Feature | null;
-  getPropertiesForTooltip(properties: GeoJsonProperties, savedObjectId?: string): Promise<ITooltipProperty[]>;
+  getPropertiesForTooltip(
+    properties: GeoJsonProperties,
+    savedObjectId?: string
+  ): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
   showJoinEditor(): boolean;
   canShowTooltip(): boolean;
@@ -938,7 +941,10 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     this._addJoinsToSourceTooltips(allProperties);
 
     for (let i = 0; i < this.getJoins().length; i++) {
-      const propsFromJoin = await this.getJoins()[i].getTooltipProperties(properties, savedObjectId);
+      const propsFromJoin = await this.getJoins()[i].getTooltipProperties(
+        properties,
+        savedObjectId
+      );
       allProperties = [...allProperties, ...propsFromJoin];
     }
     return allProperties;
