@@ -249,7 +249,7 @@ export function ChangeDataView({
                       )}
                     >
                       <EuiIcon
-                        type="alert"
+                        type="warning"
                         color="warning"
                         data-test-subj="textBasedLang-warning"
                       />

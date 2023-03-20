@@ -133,6 +133,7 @@ export function MobileFilters() {
             style={isLarge ? {} : { width: '225px' }}
           >
             <EuiSelect
+              data-test-subj="apmMobileFiltersSelect"
               fullWidth={isSmall}
               isLoading={status === FETCH_STATUS.LOADING}
               prepend={label}

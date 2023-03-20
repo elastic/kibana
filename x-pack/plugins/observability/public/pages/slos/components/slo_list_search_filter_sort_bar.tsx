@@ -19,6 +19,11 @@ import {
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
+import {
+  INDICATOR_APM_AVAILABILITY,
+  INDICATOR_APM_LATENCY,
+  INDICATOR_CUSTOM_KQL,
+} from '../../../utils/slo/labels';
 
 export interface SloListSearchFilterSortBarProps {
   loading: boolean;
@@ -57,21 +62,15 @@ const SORT_OPTIONS: Array<Item<SortType>> = [
 
 const INDICATOR_TYPE_OPTIONS: Array<Item<FilterType>> = [
   {
-    label: i18n.translate('xpack.observability.slo.list.indicatorTypeFilter.apmLatency', {
-      defaultMessage: 'APM latency',
-    }),
+    label: INDICATOR_APM_LATENCY,
     type: 'sli.apm.transactionDuration',
   },
   {
-    label: i18n.translate('xpack.observability.slo.list.indicatorTypeFilter.apmAvailability', {
-      defaultMessage: 'APM availability',
-    }),
+    label: INDICATOR_APM_AVAILABILITY,
     type: 'sli.apm.transactionErrorRate',
   },
   {
-    label: i18n.translate('xpack.observability.slo.list.indicatorTypeFilter.customKql', {
-      defaultMessage: 'Custom KQL',
-    }),
+    label: INDICATOR_CUSTOM_KQL,
     type: 'sli.kql.custom',
   },
 ];
@@ -118,6 +117,7 @@ export function SloListSearchFilterSortBar({
     <EuiFlexGroup direction="row" gutterSize="s">
       <EuiFlexItem grow>
         <EuiFieldSearch
+          data-test-subj="o11ySloListSearchFilterSortBarFieldSearch"
           fullWidth
           isLoading={loading}
           onChange={onChangeQuery}

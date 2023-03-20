@@ -112,7 +112,7 @@ export const SearchSourceExpression = ({
   if (paramsError) {
     return (
       <>
-        <EuiCallOut color="danger" iconType="alert">
+        <EuiCallOut color="danger" iconType="warning">
           <p>{paramsError.message}</p>
         </EuiCallOut>
         <EuiSpacer size="s" />
