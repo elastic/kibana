@@ -750,19 +750,35 @@ async function handleTransformInstall({
 
   // start transform by default if not set in yml file
   // else, respect the setting
-  if (isUnauthorizedAPIKey === false && (startTransform === undefined || startTransform === true)) {
-    await retryTransientEsErrors(
-      () =>
-        esClient.transform.startTransform(
-          { transform_id: transform.installationName },
-          { ...(secondaryAuth ? secondaryAuth : {}), ignore: [409] }
-        ),
-      { logger, additionalResponseStatuses: [400] }
-    );
-    logger.debug(`Started transform: ${transform.installationName}`);
+  if (startTransform === undefined || startTransform === true) {
+    try {
+      await retryTransientEsErrors(
+        () =>
+          esClient.transform.startTransform(
+            { transform_id: transform.installationName },
+            { ...(secondaryAuth ? secondaryAuth : {}), ignore: [409] }
+          ),
+        { logger, additionalResponseStatuses: [400] }
+      );
+      logger.debug(`Started transform: ${transform.installationName}`);
+    } catch (err) {
+      const isResponseError = err instanceof errors.ResponseError;
+      isUnauthorizedAPIKey =
+        isResponseError &&
+        err?.body?.error?.type === 'security_exception' &&
+        err?.body?.error?.reason?.includes('unauthorized for API key');
+
+      // swallow the error if the transform already exists or if API key has insufficient permissions
+      if (!isUnauthorizedAPIKey) {
+        throw err;
+      }
+    }
   }
 
-  return { id: transform.installationName, type: ElasticsearchAssetType.transform };
+  return {
+    id: transform.installationName,
+    type: ElasticsearchAssetType.transform,
+  };
 }
 
 const getLegacyTransformNameForInstallation = (

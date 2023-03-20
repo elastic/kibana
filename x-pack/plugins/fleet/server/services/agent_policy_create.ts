@@ -72,12 +72,11 @@ async function createPackagePolicy(
   newPackagePolicy.namespace = agentPolicy.namespace;
   newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
 
-  console.log('--@@createPackagePolicy', options.apiKeyWithCurrentUserPermission);
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
     spaceId: options.spaceId,
     user: options.user,
     bumpRevision: false,
-    apiKeyWithCurrentUserPermission: options.apiKeyWithCurrentUserPermission,
+    // @TODO remove apiKeyWithCurrentUserPermission: options.apiKeyWithCurrentUserPermission,
   });
 }
 
@@ -101,8 +100,8 @@ export async function createAgentPolicyWithPackages({
   monitoringEnabled,
   spaceId,
   user,
-  apiKeyWithCurrentUserPermission,
-}: CreateAgentPolicyParams) {
+}: // @TODO remove apiKeyWithCurrentUserPermission,
+CreateAgentPolicyParams) {
   let agentPolicyId = newPolicy.id;
   const packagesToInstall = [];
   if (hasFleetServer) {
@@ -127,7 +126,7 @@ export async function createAgentPolicyWithPackages({
       esClient,
       packagesToInstall,
       spaceId,
-      apiKeyWithCurrentUserPermission,
+      // @TODO remove apiKeyWithCurrentUserPermission,
     });
   }
 
@@ -143,7 +142,7 @@ export async function createAgentPolicyWithPackages({
     await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SERVER_PACKAGE, {
       spaceId,
       user,
-      apiKeyWithCurrentUserPermission,
+      // @TODO remove apiKeyWithCurrentUserPermission,
     });
   }
 
@@ -152,7 +151,7 @@ export async function createAgentPolicyWithPackages({
     await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SYSTEM_PACKAGE, {
       spaceId,
       user,
-      apiKeyWithCurrentUserPermission,
+      // @TODO remove apiKeyWithCurrentUserPermission,
     });
   }
 

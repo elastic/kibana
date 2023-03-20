@@ -257,6 +257,7 @@ interface InstallRegistryPackageParams {
   neverIgnoreVerificationError?: boolean;
   ignoreConstraints?: boolean;
   prerelease?: boolean;
+  apiKeyWithCurrentUserPermission?: APIKey;
 }
 interface InstallUploadedArchiveParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -265,6 +266,7 @@ interface InstallUploadedArchiveParams {
   contentType: string;
   spaceId: string;
   version?: string;
+  apiKeyWithCurrentUserPermission?: APIKey;
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
@@ -292,11 +294,11 @@ async function installPackageFromRegistry({
   pkgkey,
   esClient,
   spaceId,
+  apiKeyWithCurrentUserPermission,
   force = false,
   ignoreConstraints = false,
   neverIgnoreVerificationError = false,
   prerelease = false,
-  apiKeyWithCurrentUserPermission,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -398,7 +400,7 @@ async function installPackageCommon(options: {
   paths: string[];
   verificationResult?: PackageVerificationResult;
   telemetryEvent?: PackageUpdateEvent;
-  apiKeyWithCurrentUserPermission;
+  apiKeyWithCurrentUserPermission?: APIKey;
 }): Promise<InstallResult> {
   const {
     pkgName,

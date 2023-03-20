@@ -54,7 +54,7 @@ import {
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
-import { appContextService, checkAllowedPackages, licenseService } from '../../services';
+import { checkAllowedPackages, licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
@@ -284,14 +284,13 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { pkgName, pkgVersion } = request.params;
 
-  const apiKeyWithCurrentUserPermission = await appContextService
-    .getSecurity()
-    .authc.apiKeys.grantAsInternalUser(request, {
-      name: `auto-generated-transform-api-key`,
-      role_descriptors: {},
-    });
+  // const apiKeyWithCurrentUserPermission = await appContextService
+  //   .getSecurity()
+  //   .authc.apiKeys.grantAsInternalUser(request, {
+  //     name: `auto-generated-transform-api-key`,
+  //     role_descriptors: {},
+  //   });
 
-  console.log('installPackageFromRegistryHandler', apiKeyWithCurrentUserPermission);
   const spaceId = fleetContext.spaceId;
   const res = await installPackage({
     installSource: 'registry',
@@ -302,7 +301,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     force: request.body?.force,
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
-    apiKeyWithCurrentUserPermission,
+    // @TODO remove apiKeyWithCurrentUserPermission,
   });
 
   if (!res.error) {
@@ -372,12 +371,12 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     });
   }
 
-  const apiKeyWithCurrentUserPermission = await appContextService
-    .getSecurity()
-    .authc.apiKeys.grantAsInternalUser(request, {
-      name: `auto-generated-transform-api-key`,
-      role_descriptors: {},
-    });
+  // const apiKeyWithCurrentUserPermission = await appContextService
+  //   .getSecurity()
+  //   .authc.apiKeys.grantAsInternalUser(request, {
+  //     name: `auto-generated-transform-api-key`,
+  //     role_descriptors: {},
+  //   });
 
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
@@ -393,7 +392,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     archiveBuffer,
     spaceId,
     contentType,
-    apiKeyWithCurrentUserPermission,
+    // @TODO remove apiKeyWithCurrentUserPermission,
   });
   if (!res.error) {
     const body: InstallPackageResponse = {
