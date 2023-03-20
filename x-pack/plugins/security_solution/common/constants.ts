@@ -97,6 +97,7 @@ export enum SecurityPageName {
    */
   cloudDefendPolicies = 'cloud_defend-policies',
   dashboardsLanding = 'dashboards',
+  dashboardView = 'dashboard_view',
   dataQuality = 'data_quality',
   detections = 'detections',
   detectionAndResponse = 'detection_response',

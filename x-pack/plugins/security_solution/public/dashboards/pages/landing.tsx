@@ -4,30 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
-import { SecurityPageName } from '../../app/types';
-import { DashboardsTable } from '../../common/components/dashboards/dashboards_table';
-import { Title } from '../../common/components/header_page/title';
-import { useAppRootNavLink } from '../../common/components/navigation/nav_links';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { useCreateSecurityDashboardLink } from '../../common/containers/dashboards/use_create_security_dashboard_link';
-import { useCapabilities, useNavigateTo } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { LandingImageCards } from '../components/landing_links_images';
+import { DashboardsTable } from '../../common/components/dashboards/dashboards_table';
+import { LandingImageCards } from '../../landing_pages/components/landing_links_images';
+import { SecurityPageName } from '../../../common/constants';
+import { useCapabilities, useNavigateTo } from '../../common/lib/kibana';
+import { useAppRootNavLink } from '../../common/components/navigation/nav_links';
+import { useCreateSecurityDashboardLink } from '../../common/containers/dashboards/use_create_security_dashboard_link';
+import { Title } from '../../common/components/header_page/title';
+import { LinkButton } from '../../common/components/links/helpers';
 import * as i18n from './translations';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 
-/* eslint-disable @elastic/eui/href-or-on-click */
 const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard }) => {
   const { isLoading, url } = useCreateSecurityDashboardLink();
   const { navigateTo } = useNavigateTo();
@@ -38,13 +31,13 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
       </EuiFlexItem>
       {canCreateDashboard && (
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <LinkButton
             isDisabled={isLoading}
             color="primary"
             fill
             iconType="plusInCircle"
             href={url}
-            onClick={(ev) => {
+            onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
               ev.preventDefault();
               track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.CREATE_DASHBOARD}`);
               navigateTo({ url });
@@ -52,7 +45,7 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
             data-test-subj="createDashboardButton"
           >
             {i18n.DASHBOARDS_PAGE_CREATE_BUTTON}
-          </EuiButton>
+          </LinkButton>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

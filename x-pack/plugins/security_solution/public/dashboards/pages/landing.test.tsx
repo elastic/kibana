@@ -9,7 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../app/types';
 import { TestProviders } from '../../common/mock';
-import { DashboardsLandingPage } from './dashboards';
+import { DashboardsLandingPage } from './landing';
 import type { NavLinkItem } from '../../common/components/navigation/types';
 import { useCapabilities } from '../../common/lib/kibana';
 import * as telemetry from '../../common/lib/telemetry';

@@ -16,6 +16,7 @@ import type { AdministrationSubTab as AdministrationType } from '../../../manage
 import type { FlowTarget } from '../../../../common/search_strategy';
 import type { UsersTableType } from '../../../explore/users/store/model';
 import type { SecurityPageName } from '../../../app/types';
+import type { DashboardsRouteType } from '../../../dashboards/types';
 
 interface GenericRouteSpyState<Page = string, Tabs = string> {
   pageName: Page;
@@ -35,6 +36,7 @@ export type RouteSpyState =
   | GenericRouteSpyState<SecurityPageName.alerts, AlertDetailRouteType>
   | GenericRouteSpyState<SecurityPageName.administration, AdministrationType>
   | GenericRouteSpyState<SecurityPageName.rules, AllRulesTabs>
+  | GenericRouteSpyState<SecurityPageName.dashboardsLanding, DashboardsRouteType>
   | GenericRouteSpyState<
       Exclude<
         SecurityPageName,
@@ -58,6 +60,10 @@ export type AlertDetailRouteSpyState = GenericRouteSpyState<
 export type AdministrationRouteSpyState = GenericRouteSpyState<
   SecurityPageName.administration,
   AdministrationType
+>;
+export type DashboardsRouteSpyState = GenericRouteSpyState<
+  SecurityPageName.dashboardsLanding,
+  DashboardsRouteType
 >;
 
 export type RouteSpyAction =

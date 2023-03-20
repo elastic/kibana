@@ -140,6 +140,7 @@ export const LandingImageCards: React.FC<LandingImagesProps> = React.memo(({ ite
               />
             )
           }
+          titleElement="h2" // to avoid client side error: <div> <h2> cannot appear as a descendant of <p>
           title={
             <PrimaryEuiTitle size="xs">
               <FlexTitle>
