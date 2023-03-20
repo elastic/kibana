@@ -23,6 +23,11 @@ import {
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
+export type TraceSamplesResponse = Array<{
+  traceId: string;
+  transactionId: string;
+}>;
+
 export async function getTraceSamplesByQuery({
   apmEventClient,
   start,
@@ -37,7 +42,7 @@ export async function getTraceSamplesByQuery({
   environment: Environment;
   query: string;
   type: TraceSearchType;
-}) {
+}): Promise<TraceSamplesResponse> {
   const size = 500;
 
   let traceIds: string[] = [];

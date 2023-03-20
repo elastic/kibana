@@ -6,19 +6,17 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
-
-import { validateVersion } from '../utils';
+import { validateVersion } from '@kbn/object-versioning/lib/utils';
 
 export const procedureNames = ['get', 'bulkGet', 'create', 'update', 'delete', 'search'] as const;
 
 export type ProcedureName = typeof procedureNames[number];
 
-export const versionSchema = schema.string({
+export const versionSchema = schema.number({
   validate: (value) => {
-    try {
-      validateVersion(value);
-    } catch (e) {
-      return 'must follow the pattern [v${number}]';
+    const { result } = validateVersion(value);
+    if (!result) {
+      return 'must be an integer';
     }
   },
 });
