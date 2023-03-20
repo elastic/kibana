@@ -38,9 +38,12 @@ export function filterOldShardActivity(startMs: number) {
       return false;
     }
 
-    const stopTime =
-      (activity as ElasticsearchMetricbeatIndexRecoveryShard).stop_time.ms ||
-      (activity as ElasticsearchIndexRecoveryShard).stop_time_in_millis;
+    let stopTime = null;
+    if ((activity as ElasticsearchMetricbeatIndexRecoveryShard).stop_time) {
+      stopTime = (activity as ElasticsearchMetricbeatIndexRecoveryShard).stop_time?.ms;
+    } else {
+      stopTime = (activity as ElasticsearchIndexRecoveryShard).stop_time_in_millis;
+    }
 
     // either it's still going and there is no stop time, or the stop time happened after we started looking for one
     return !_.isNumber(stopTime) || stopTime >= startMs;
@@ -86,7 +89,16 @@ export function handleMbLastRecoveries(resp: ElasticsearchResponse, start: numbe
     (hit) => hit._source.elasticsearch?.index?.recovery
   );
   const filtered = mapped.filter(filterOldShardActivity(moment.utc(start).valueOf()));
-  filtered.sort((a, b) => (a && b ? (b.start_time.ms ?? 0) - (a.start_time.ms ?? 0) : 0));
+  filtered.sort((a, b) => {
+    if (!a || !b) {
+      return 0;
+    }
+
+    const startTimeA = a.start_time?.ms || 0;
+    const startTimeB = b.start_time?.ms || 0;
+
+    return startTimeB - startTimeA;
+  });
   return filtered;
 }
 

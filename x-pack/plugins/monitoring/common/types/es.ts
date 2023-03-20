@@ -414,13 +414,13 @@ export interface ElasticsearchIndexRecoveryShard {
 }
 
 export interface ElasticsearchMetricbeatIndexRecoveryShard {
-  start_time: {
+  start_time?: {
     ms: number;
   };
-  stop_time: {
+  stop_time?: {
     ms: number;
   };
-  total_time: {
+  total_time?: {
     ms: number;
   };
 }
