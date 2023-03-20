@@ -134,6 +134,15 @@ const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<Experimen
  * @throws SecuritySolutionInvalidExperimentalValue
  */
 export const parseExperimentalConfigValue = (configValue: string[]): ExperimentalFeatures => {
+  const enabledFeatures: Mutable<Partial<ExperimentalFeatures>> = getEnabledFeatures(configValue);
+
+  return {
+    ...allowedExperimentalValues,
+    ...enabledFeatures,
+  };
+};
+
+export const getEnabledFeatures = (configValue: string[]): Partial<ExperimentalFeatures> => {
   const enabledFeatures: Mutable<Partial<ExperimentalFeatures>> = {};
 
   for (const value of configValue) {
@@ -144,10 +153,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
     enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 
-  return {
-    ...allowedExperimentalValues,
-    ...enabledFeatures,
-  };
+  return enabledFeatures;
 };
 
 export const isValidExperimentalValue = (value: string): value is keyof ExperimentalFeatures => {

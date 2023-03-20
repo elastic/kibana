@@ -56,7 +56,7 @@ import { getLazyEndpointPackageCustomExtension } from './management/pages/policy
 import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
 import { getLazyEndpointGenericErrorsListExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_generic_errors_list';
 import type { ExperimentalFeatures } from '../common/experimental_features';
-import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { getEnabledFeatures, parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 
 import type { SecurityAppStore } from './common/store/types';
@@ -125,7 +125,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       APP_UI_ID
     );
     const telemetryContext = {
-      prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion,
+      prebuilt_rules_package_version: this.prebuiltRulesPackageVersion,
+      enabled_features: getEnabledFeatures(this.config.enableExperimental),
     };
     this.telemetry.setup({ analytics: core.analytics }, telemetryContext);
 

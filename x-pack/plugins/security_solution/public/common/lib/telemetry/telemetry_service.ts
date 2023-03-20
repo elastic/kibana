@@ -7,6 +7,7 @@
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { of } from 'rxjs';
 
+import type { SchemaValue } from '@kbn/analytics-client';
 import type {
   TelemetryServiceSetupParams,
   TelemetryClientStart,
@@ -14,6 +15,7 @@ import type {
 } from './types';
 import { telemetryEvents } from './telemetry_events';
 import { TelemetryClient } from './telemetry_client';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 /**
  * Service that interacts with the Core's analytics module
@@ -37,6 +39,9 @@ export class TelemetryService {
             type: 'keyword',
             _meta: { description: 'The version of prebuilt rules', optional: true },
           },
+          enabledFeatures: {
+            properties: this.getEnabledFeaturesMapping(),
+          },
         },
       });
     }
@@ -53,5 +58,15 @@ export class TelemetryService {
     }
 
     return new TelemetryClient(this.analytics);
+  }
+
+  private getEnabledFeaturesMapping() {
+    return Object.keys(allowedExperimentalValues).reduce((mappings, key) => {
+      mappings[key] = {
+        type: 'boolean',
+        _meta: { description: 'Allowed Experimental Values', optional: true },
+      };
+      return mappings;
+    }, {} as Record<string, SchemaValue<unknown>>);
   }
 }
