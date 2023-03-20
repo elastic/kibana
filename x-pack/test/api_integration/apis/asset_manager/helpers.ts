@@ -8,11 +8,11 @@
 import type { AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/types_api';
 import type { WriteSamplesPostBody } from '@kbn/assetManager-plugin/server';
 import expect from '@kbn/expect';
-import supertest from 'supertest';
+import { SuperTest, Test } from 'supertest';
 
 const SAMPLE_ASSETS_ENDPOINT = '/api/asset-manager/assets/sample';
 
-type KibanaSupertest = supertest.SuperTest<supertest.Test>;
+export type KibanaSupertest = SuperTest<Test>;
 
 // NOTE: In almost every case in tests, you want { refresh: true }
 // in the options of this function, so it is defaulted to that value.
