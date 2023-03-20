@@ -13,7 +13,7 @@ import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { formatFieldValue } from '../../../utils/format_value';
-import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
+import { DocViewRenderProps } from '../../../services/doc_views/doc_views_types';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
 import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
@@ -38,6 +38,7 @@ export interface TableRowProps {
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   onAddColumn?: (column: string) => void;
   onRemoveColumn?: (column: string) => void;
+  DocViewer: React.ComponentType<DocViewRenderProps>;
 }
 
 export const TableRow = ({
@@ -51,6 +52,7 @@ export const TableRow = ({
   shouldShowFieldHandler,
   onAddColumn,
   onRemoveColumn,
+  DocViewer,
 }: TableRowProps) => {
   const { uiSettings, fieldFormats } = useDiscoverServices();
   const [maxEntries, hideTimeColumn] = useMemo(

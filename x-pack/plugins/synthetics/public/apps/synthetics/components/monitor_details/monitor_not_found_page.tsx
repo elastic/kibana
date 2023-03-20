@@ -33,6 +33,7 @@ export const MonitorNotFoundPage: React.FC = () => {
       actions={[
         <CreateMonitorButton />,
         <EuiButtonEmpty
+          data-test-subj="syntheticsMonitorNotFoundPageGoToHomeButton"
           iconType="arrowLeft"
           flush="both"
           onClick={() => {
