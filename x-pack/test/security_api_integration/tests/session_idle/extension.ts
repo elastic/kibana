@@ -7,6 +7,7 @@
 
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import expect from '@kbn/expect';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -98,6 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should extend the session', async () => {
         // browsers will follow the redirect and return the new session info, but this testing framework does not
         // we simulate that behavior in this test by sending another GET request
+        await setTimeoutAsync(1000); // wait a bit
         const { body } = await getSessionInfo();
 
         // Make sure that all sessions have populated `createdAt` field.
