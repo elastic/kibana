@@ -20,7 +20,7 @@ export const SUCCESSFUL_UPLOAD = i18n.translate('xpack.cases.caseView.successful
 });
 
 export const SUCCESSFUL_UPLOAD_FILE_NAME = (fileName: string) =>
-  i18n.translate('xpack.cases.caseView.successfulUpload', {
-    values: { fileName },
+  i18n.translate('xpack.cases.caseView.successfulUploadFileName', {
     defaultMessage: 'File {fileName} uploaded successfully',
+    values: { fileName },
   });
