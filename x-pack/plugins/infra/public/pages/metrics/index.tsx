@@ -42,6 +42,7 @@ import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabi
 import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { CreateDerivedIndexPattern } from '../../containers/metrics_source';
+import { NotFoundPage } from '../404';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -77,7 +78,6 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                     defaultMessage: 'Metrics',
                   })}
                 />
-
                 {setHeaderActionMenu && theme$ && (
                   <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
                     <EuiHeaderLinks gutterSize="xs">
@@ -121,6 +121,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                   <Route path="/detail/:type/:node" component={MetricDetail} />
                   <Route path={'/hosts'} component={HostsLandingPage} />
                   <Route path={'/settings'} component={MetricsSettingsPage} />
+                  <Route render={() => <NotFoundPage title="Infrastructure" />} />
                 </Switch>
               </InfraMLCapabilitiesProvider>
             </WaffleFiltersProvider>

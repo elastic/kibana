@@ -51,7 +51,7 @@ export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
     return { changedProp: 'dynamic' };
   }
 
-  if (!actual._meta || !actual._meta.migrationMappingPropertyHashes) {
+  if (!actual._meta?.migrationMappingPropertyHashes) {
     return { changedProp: '_meta' };
   }
 

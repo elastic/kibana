@@ -12,12 +12,14 @@
     "server/**/*.json",
     "scripts/**/*.json",
     "public/**/*.json",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
+    "./public/management/cypress/cypress.d.ts"
   ],
   "exclude": [
     "target/**/*",
     "**/cypress/**",
     "public/management/cypress_endpoint.config.ts",
+    "public/management/cypress.config.ts",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -132,7 +134,6 @@
     "@kbn/core-status-common-internal",
     "@kbn/repo-info",
     "@kbn/storybook",
-    "@kbn/cypress-config",
     "@kbn/controls-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/core-saved-objects-common",
@@ -146,5 +147,8 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/expandable-flyout",
     "@kbn/securitysolution-grouping",
+    "@kbn/core-analytics-server",
+    "@kbn/analytics-client",
+    "@kbn/security-solution-side-nav",
   ]
 }

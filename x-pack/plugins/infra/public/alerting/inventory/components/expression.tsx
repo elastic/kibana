@@ -322,6 +322,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
       <div>
         <EuiButtonEmpty
+          data-test-subj="infraExpressionsAddConditionButton"
           color={'primary'}
           iconSide={'left'}
           flush={'left'}
@@ -378,6 +379,7 @@ export const Expressions: React.FC<Props> = (props) => {
           />
         )) || (
           <EuiFieldSearch
+            data-test-subj="infraExpressionsFieldSearch"
             onChange={handleFieldSearchChange}
             value={ruleParams.filterQueryText}
             fullWidth
@@ -631,7 +633,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   )}
                   iconSize="s"
                   color="text"
-                  iconType={'crossInACircleFilled'}
+                  iconType={'minusInCircleFilled'}
                   onClick={toggleWarningThreshold}
                 />
               </StyledExpressionRow>
@@ -643,6 +645,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
               <EuiSpacer size={'xs'} />
               <StyledExpressionRow>
                 <EuiButtonEmpty
+                  data-test-subj="infraExpressionRowAddWarningThresholdButton"
                   color={'primary'}
                   flush={'left'}
                   size="xs"
