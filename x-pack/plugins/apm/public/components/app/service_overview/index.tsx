@@ -174,7 +174,10 @@ export function ServiceOverview() {
                       fixedHeight={true}
                       showPerPageOptions={false}
                       link={
-                        <EuiLink href={dependenciesLink}>
+                        <EuiLink
+                          data-test-subj="apmServiceOverviewViewDependenciesLink"
+                          href={dependenciesLink}
+                        >
                           {i18n.translate(
                             'xpack.apm.serviceOverview.dependenciesTableTabLink',
                             { defaultMessage: 'View dependencies' }

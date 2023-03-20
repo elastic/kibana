@@ -11,55 +11,27 @@ import type { SearchIn } from '../../../common';
 import type { StorageContext, ContentCrud } from '../../core';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
-import { validate } from '../../utils';
+import { validateRequestVersion } from './utils';
 
 export const search: ProcedureDefinition<Context, SearchIn<string>> = {
   schemas: rpcSchemas.search,
-  fn: async (ctx, { contentTypeId, query, options }) => {
+  fn: async (ctx, { contentTypeId, version: _version, query, options }) => {
     const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
-    const { search: schemas } = contentDefinition.schemas.content;
-
-    // Validate query to execute
-    if (schemas?.in?.query) {
-      const error = validate(query, schemas.in.query);
-      if (error) {
-        // TODO: Improve error handling
-        throw error;
-      }
-    } else {
-      // TODO: Improve error handling
-      throw new Error('Schema missing for rpc procedure [search.in.query].');
-    }
-
-    // Validate the possible options
-    if (options) {
-      if (!schemas.in?.options) {
-        // TODO: Improve error handling
-        throw new Error('Schema missing for rpc procedure [search.in.options].');
-      }
-      const error = validate(options, schemas.in.options);
-      if (error) {
-        // TODO: Improve error handling
-        throw error;
-      }
-    }
+    const version = validateRequestVersion(_version, contentDefinition.version.latest);
 
     // Execute CRUD
     const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(contentTypeId);
     const storageContext: StorageContext = {
       requestHandlerContext: ctx.requestHandlerContext,
+      version: {
+        request: version,
+        latest: contentDefinition.version.latest,
+      },
+      utils: {
+        getTransforms: ctx.getTransformsFactory(contentTypeId),
+      },
     };
     const result = await crudInstance.search(storageContext, query, options);
-
-    // Validate result
-    const resultSchema = schemas.out?.result;
-    if (resultSchema) {
-      const error = validate(result.result, resultSchema);
-      if (error) {
-        // TODO: Improve error handling
-        throw error;
-      }
-    }
 
     return result;
   },

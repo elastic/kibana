@@ -204,6 +204,10 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
+    // There is need to query for a rule by a specific revision
+    revision: {
+      type: 'long',
+    },
     // NO NEED TO BE INDEXED
     // snoozeSchedule: {
     //   type: 'nested',

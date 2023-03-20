@@ -61,6 +61,9 @@ export const actionTaskParamsMappings: SavedObjectsTypeMappingDefinition = {
     //   enabled: false,
     //   type: 'object',
     // },
+    // source: {
+    //   type: 'keyword'
+    // }
   },
 };
 
