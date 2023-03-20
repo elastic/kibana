@@ -96,6 +96,33 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     [field, actions]
   );
 
+  const clearActionParams = useCallback(
+    (index: number) => {
+      // validation is not triggered correctly when actions params updated (more details in https://github.com/elastic/kibana/issues/142217)
+      // wrapping field.setValue in setTimeout fixes the issue above
+      // and triggers validation after params have been updated, however it introduced a new issue where any additional input
+      // would result in the cursor jumping to the end of the text area (https://github.com/elastic/kibana/issues/149885)
+      const updateValue = () => {
+        field.setValue((prevValue: RuleAction[]) => {
+          const updatedActions = [...prevValue];
+          updatedActions[index] = {
+            ...updatedActions[index],
+            params: {},
+          };
+          return updatedActions;
+        });
+      };
+
+      if (isInitializingAction) {
+        setTimeout(updateValue, 0);
+        setIsInitializingAction(false);
+      } else {
+        updateValue();
+      }
+    },
+    [field, isInitializingAction]
+  );
+
   const setAlertActionsProperty = useCallback(
     (updatedActions: RuleAction[]) => field.setValue(updatedActions),
     [field]
@@ -135,6 +162,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
     () =>
       getActionForm({
         actions,
+        clearActionParams,
         messageVariables,
         defaultActionGroupId: DEFAULT_ACTION_GROUP_ID,
         setActionIdByIndex,
@@ -148,6 +176,7 @@ export const RuleActionsField: React.FC<Props> = ({ field, messageVariables }) =
       }),
     [
       actions,
+      clearActionParams,
       getActionForm,
       messageVariables,
       setActionIdByIndex,
