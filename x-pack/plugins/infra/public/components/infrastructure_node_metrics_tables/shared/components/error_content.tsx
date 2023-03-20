@@ -17,7 +17,7 @@ export const MetricsTableErrorContent = ({ error }: { error: Error }) => (
     }
     color="danger"
     data-test-subj="metricsTableErrorContent"
-    iconType="alert"
+    iconType="warning"
     title={<h2>{error.message}</h2>}
     titleSize="s"
   />

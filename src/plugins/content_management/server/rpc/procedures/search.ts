@@ -27,6 +27,9 @@ export const search: ProcedureDefinition<Context, SearchIn<string>> = {
         request: version,
         latest: contentDefinition.version.latest,
       },
+      utils: {
+        getTransforms: ctx.getTransformsFactory(contentTypeId),
+      },
     };
     const result = await crudInstance.search(storageContext, query, options);
 

@@ -6,19 +6,44 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { groupBy } from 'lodash';
+import { compact, groupBy } from 'lodash';
 import { ValuesType } from 'utility-types';
 import { SPAN_TYPE, SPAN_SUBTYPE } from '../../../common/es_fields/apm';
 import {
+  ConnectionEdge,
   ConnectionElement,
+  ConnectionNode,
   isSpanGroupingSupported,
 } from '../../../common/service_map';
 
 const MINIMUM_GROUP_SIZE = 4;
 
+type GroupedConnection = ConnectionNode | ConnectionEdge;
+
+interface GroupedNode {
+  data: {
+    id: string;
+    'span.type': string;
+    label: string;
+    groupedConnections: GroupedConnection[];
+  };
+}
+
+interface GroupedEdge {
+  data: {
+    id: string;
+    source: string;
+    target: string;
+  };
+}
+
+export interface GroupResourceNodesResponse {
+  elements: Array<GroupedNode | GroupedEdge | ConnectionElement>;
+}
+
 export function groupResourceNodes(responseData: {
   elements: ConnectionElement[];
-}) {
+}): GroupResourceNodesResponse {
   type ElementDefinition = ValuesType<typeof responseData['elements']>;
   const isEdge = (el: ElementDefinition) =>
     Boolean(el.data.source && el.data.target);
@@ -84,28 +109,30 @@ export function groupResourceNodes(responseData: {
   });
 
   // add in a composite node for each new group
-  const groupedNodes = nodeGroups.map(({ id, targets }) => ({
-    data: {
-      id,
-      'span.type': 'external',
-      label: i18n.translate('xpack.apm.serviceMap.resourceCountLabel', {
-        defaultMessage: '{count} resources',
-        values: { count: targets.length },
-      }),
-      groupedConnections: targets
-        .map((targetId) => {
-          const targetElement = nodes.find(
-            (element) => element.data.id === targetId
-          );
-          if (!targetElement) {
-            return;
-          }
-          const { data } = targetElement;
-          return { label: data.label || data.id, ...data };
-        })
-        .filter((node) => !!node),
-    },
-  }));
+  const groupedNodes = nodeGroups.map(
+    ({ id, targets }): GroupedNode => ({
+      data: {
+        id,
+        'span.type': 'external',
+        label: i18n.translate('xpack.apm.serviceMap.resourceCountLabel', {
+          defaultMessage: '{count} resources',
+          values: { count: targets.length },
+        }),
+        groupedConnections: compact(
+          targets.map((targetId) => {
+            const targetElement = nodes.find(
+              (element) => element.data.id === targetId
+            );
+            if (!targetElement) {
+              return undefined;
+            }
+            const { data } = targetElement;
+            return { label: data.label || data.id, ...data };
+          })
+        ),
+      },
+    })
+  );
 
   // add new edges from source to new groups
   const groupedEdges: Array<{
