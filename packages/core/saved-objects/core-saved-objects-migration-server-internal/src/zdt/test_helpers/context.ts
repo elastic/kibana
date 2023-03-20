@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ByteSizeValue } from '@kbn/config-schema';
 import {
   ElasticsearchClientMock,
   elasticsearchClientMock,
@@ -14,7 +15,7 @@ import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-int
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { MigratorContext } from '../context';
-import { ByteSizeValue } from '@kbn/config-schema';
+import { createDocumentMigrator } from './document_migrator';
 
 export type MockedMigratorContext = Omit<MigratorContext, 'elasticsearchClient'> & {
   elasticsearchClient: ElasticsearchClientMock;
@@ -34,6 +35,7 @@ export const createContextMock = (
       foo: 1,
       bar: 2,
     },
+    documentMigrator: createDocumentMigrator(),
     migrationConfig: {
       algorithm: 'zdt',
       batchSize: 1000,

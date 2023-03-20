@@ -10,7 +10,7 @@ import * as Either from 'fp-ts/lib/Either';
 import { throwBadResponse } from '../../../model/helpers';
 import { excludeUnusedTypesQuery } from '../../../core';
 import type { ModelStage } from '../types';
-import { getOutdatedDocumentsQuery } from '../../utils';
+import { getOutdatedDocumentsQuery, createDocumentTransformFn } from '../../utils';
 
 export const documentsUpdateInit: ModelStage<
   'DOCUMENTS_UPDATE_INIT',
@@ -37,12 +37,18 @@ export const documentsUpdateInit: ModelStage<
   const types = context.types.map((type) => context.typeRegistry.getType(type)!);
   const outdatedDocumentsQuery = getOutdatedDocumentsQuery({ types });
 
+  const transformRawDocs = createDocumentTransformFn({
+    serializer: context.serializer,
+    documentMigrator: context.documentMigrator,
+  });
+
   return {
     ...state,
     currentIndexMeta: newIndexMeta,
     excludeOnUpgradeQuery: excludeUnusedTypesQuery,
     excludeFromUpgradeFilterHooks: excludeFilterHooks,
     outdatedDocumentsQuery,
+    transformRawDocs,
     controlState: 'SET_DOC_MIGRATION_STARTED',
   };
 };

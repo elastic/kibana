@@ -13,7 +13,7 @@ import type {
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from '@kbn/core-saved-objects-server';
 import type { IndexMapping, IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
-import type { MigrationLog, Progress } from '../../types';
+import type { MigrationLog, Progress, TransformRawDocs } from '../../types';
 import type { ControlState } from '../../state_action_machine';
 import type { BulkOperationBatch } from '../../model/create_batches';
 import type { AliasAction } from '../../actions';
@@ -68,6 +68,7 @@ export interface PostDocInitState extends PostInitState {
     SavedObjectTypeExcludeFromUpgradeFilterHook
   >;
   readonly outdatedDocumentsQuery: QueryDslQueryContainer;
+  readonly transformRawDocs: TransformRawDocs;
 }
 
 export interface OutdatedDocumentsSearchState extends PostDocInitState {

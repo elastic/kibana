@@ -21,6 +21,7 @@ export const createContext = ({
   types,
   docLinks,
   migrationConfig,
+  documentMigrator,
   elasticsearchClient,
   indexPrefix,
   typeRegistry,
@@ -28,6 +29,7 @@ export const createContext = ({
 }: CreateContextOps): MigratorContext => {
   return {
     migrationConfig,
+    documentMigrator,
     kibanaVersion,
     indexPrefix,
     types,

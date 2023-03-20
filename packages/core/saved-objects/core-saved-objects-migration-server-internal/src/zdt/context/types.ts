@@ -16,6 +16,7 @@ import type {
   SavedObjectsMigrationConfigType,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { DocLinks } from '@kbn/doc-links';
+import { VersionedTransformer } from '../../document_migrator';
 
 /**
  * The set of static, precomputed values and services used by the ZDT migration
@@ -39,6 +40,8 @@ export interface MigratorContext {
   readonly migrationDocLinks: DocLinks['kibanaUpgradeSavedObjects'];
   /** SO serializer to use for migration */
   readonly serializer: ISavedObjectsSerializer;
+  /** The doc migrator to use */
+  readonly documentMigrator: VersionedTransformer;
   /** The SO type registry to use for the migration */
   readonly typeRegistry: ISavedObjectTypeRegistry;
   /** List of types that are no longer registered */

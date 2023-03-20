@@ -139,7 +139,7 @@ export const nextActionMap = (context: MigratorContext) => {
     OUTDATED_DOCUMENTS_SEARCH_TRANSFORM: (state: OutdatedDocumentsSearchTransformState) =>
       Actions.transformDocs({
         outdatedDocuments: state.outdatedDocuments,
-        transformRawDocs: null, // TODO: do the wiring
+        transformRawDocs: state.transformRawDocs,
       }),
     OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX: (state: OutdatedDocumentsSearchBulkIndexState) =>
       Actions.bulkOverwriteTransformedDocuments({
