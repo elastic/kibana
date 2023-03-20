@@ -63,6 +63,14 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         expect(taskRecord.task.enabled).to.eql(false);
       });
 
+      const { body: disabledRule } = await supertestWithoutAuth
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdRule.id}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(200);
+
+      // Ensure revision was not updated
+      expect(disabledRule.revision).to.eql(0);
+
       // Ensure AAD isn't broken
       await checkAAD({
         supertest: supertestWithoutAuth,
@@ -173,6 +181,14 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
       await ruleUtils.disable(createdRule.id);
 
+      const { body: disabledRule } = await supertestWithoutAuth
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdRule.id}`)
+        .set('kbn-xsrf', 'foo')
+        .expect(200);
+
+      // Ensure revision was not updated
+      expect(disabledRule.revision).to.eql(0);
+
       // Ensure AAD isn't broken
       await checkAAD({
         supertest: supertestWithoutAuth,
@@ -208,6 +224,14 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
           });
           expect(taskRecord.task.enabled).to.eql(false);
         });
+
+        const { body: disabledRule } = await supertestWithoutAuth
+          .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdRule.id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        // Ensure revision was not updated
+        expect(disabledRule.revision).to.eql(0);
 
         // Ensure AAD isn't broken
         await checkAAD({

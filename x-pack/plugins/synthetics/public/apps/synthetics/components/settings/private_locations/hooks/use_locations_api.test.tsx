@@ -9,11 +9,11 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { WrappedHelper } from '../../../../utils/testing';
 import { getServiceLocations } from '../../../../state/service_locations';
 import { setAddingNewPrivateLocation } from '../../../../state/private_locations';
-import { useLocationsAPI } from './use_locations_api';
+import { usePrivateLocationsAPI } from './use_locations_api';
 import * as locationAPI from '../../../../state/private_locations/api';
 import * as reduxHooks from 'react-redux';
 
-describe('useLocationsAPI', () => {
+describe('usePrivateLocationsAPI', () => {
   const dispatch = jest.fn();
   const addAPI = jest.spyOn(locationAPI, 'addSyntheticsPrivateLocations').mockResolvedValue({
     locations: [],
@@ -25,7 +25,7 @@ describe('useLocationsAPI', () => {
   jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(dispatch);
 
   it('returns expected results', () => {
-    const { result } = renderHook(() => useLocationsAPI(), {
+    const { result } = renderHook(() => usePrivateLocationsAPI(), {
       wrapper: WrappedHelper,
     });
 
@@ -46,7 +46,7 @@ describe('useLocationsAPI', () => {
     ],
   });
   it('returns expected results after data', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI(), {
+    const { result, waitForNextUpdate } = renderHook(() => usePrivateLocationsAPI(), {
       wrapper: WrappedHelper,
     });
 
@@ -73,7 +73,7 @@ describe('useLocationsAPI', () => {
   });
 
   it('adds location on submit', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI(), {
+    const { result, waitForNextUpdate } = renderHook(() => usePrivateLocationsAPI(), {
       wrapper: WrappedHelper,
     });
 
@@ -109,7 +109,7 @@ describe('useLocationsAPI', () => {
   });
 
   it('deletes location on delete', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI(), {
+    const { result, waitForNextUpdate } = renderHook(() => usePrivateLocationsAPI(), {
       wrapper: WrappedHelper,
     });
 
