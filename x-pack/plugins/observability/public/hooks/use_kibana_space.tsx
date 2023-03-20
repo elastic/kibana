@@ -15,7 +15,7 @@ export const useKibanaSpace = () => {
     data: space,
     loading,
     error,
-  } = useFetcher<Promise<Space>>(() => {
+  } = useFetcher<Promise<Space> | undefined>(() => {
     return services.spaces?.getActiveSpace();
   }, [services.spaces]);
 

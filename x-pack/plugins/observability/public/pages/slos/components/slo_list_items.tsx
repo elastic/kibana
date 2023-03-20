@@ -41,7 +41,7 @@ export function SloListItems({ sloList, loading, error }: Props) {
         <EuiFlexItem key={slo.id}>
           <SloListItem
             slo={slo}
-            historicalSummary={sloHistoricalSummaryResponse[slo.id]}
+            historicalSummary={sloHistoricalSummaryResponse?.[slo.id]}
             historicalSummaryLoading={historicalSummaryLoading}
             activeAlerts={activeAlertsBySlo[slo.id]}
           />

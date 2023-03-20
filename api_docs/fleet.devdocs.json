@@ -4427,7 +4427,7 @@
             "section": "def-server.Artifact",
             "text": "Artifact"
           },
-          ", \"decodedSha256\" | \"identifier\">>({ identifier, decodedSha256, }: T) => string"
+          ", \"identifier\" | \"decodedSha256\">>({ identifier, decodedSha256, }: T) => string"
         ],
         "path": "x-pack/plugins/fleet/server/services/artifacts/mappings.ts",
         "deprecated": false,
@@ -5625,7 +5625,8 @@
                 "docId": "kibSpacesPluginApi",
                 "section": "def-server.SpacesPluginStart",
                 "text": "SpacesPluginStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/fleet/server/plugin.ts",
             "deprecated": false,
@@ -6025,6 +6026,86 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.PackageClient.getPackages",
+            "type": "Function",
+            "tags": [],
+            "label": "getPackages",
+            "description": [],
+            "signature": [
+              "(params?: { excludeInstallStatus?: false | undefined; category?: string | undefined; prerelease?: false | undefined; } | undefined) => Promise<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.PackageList",
+                "text": "PackageList"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.getPackages.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.getPackages.$1.excludeInstallStatus",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "excludeInstallStatus",
+                    "description": [],
+                    "signature": [
+                      "false | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.getPackages.$1.category",
+                    "type": "string",
+                    "tags": [],
+                    "label": "category",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.getPackages.$1.prerelease",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "prerelease",
+                    "description": [],
+                    "signature": [
+                      "false | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -21719,7 +21800,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"integer\" | \"textarea\" | \"bool\" | \"password\" | \"yaml\""
+              "\"string\" | \"text\" | \"integer\" | \"select\" | \"textarea\" | \"bool\" | \"password\" | \"yaml\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -21762,6 +21843,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.options",
+            "type": "Array",
+            "tags": [],
+            "label": "[RegistryVarsEntryKeys.options]",
+            "description": [],
+            "signature": [
+              "{ value: string; text: string; }[] | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -24950,6 +25045,22 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.getAgentsByActionsPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getAgentsByActionsPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],

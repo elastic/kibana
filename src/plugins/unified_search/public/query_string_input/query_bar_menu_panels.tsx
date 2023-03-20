@@ -371,7 +371,7 @@ export function QueryBarMenuPanels({
       {
         name: strings.getClearllFiltersButtonLabel(),
         disabled: !hasFiltersOrQuery && !Boolean(savedQuery),
-        icon: 'crossInACircleFilled',
+        icon: 'cross',
         'data-test-subj': 'filter-sets-removeAllFilters',
         onClick: () => {
           closePopover();

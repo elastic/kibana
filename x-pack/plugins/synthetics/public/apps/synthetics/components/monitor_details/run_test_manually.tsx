@@ -38,6 +38,7 @@ export const RunTestManually = () => {
   return (
     <EuiToolTip content={content} key={content}>
       <EuiButton
+        data-test-subj="syntheticsRunTestManuallyButton"
         color="success"
         iconType="beaker"
         isDisabled={!hasPublicLocation}
