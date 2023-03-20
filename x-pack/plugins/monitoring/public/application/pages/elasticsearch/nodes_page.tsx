@@ -186,7 +186,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
   );
 };
 
-function sortNodeRoles(roles: string[]): string[] | undefined {
+function sortNodeRoles(roles: string[] | undefined): string[] | undefined {
   if (!roles) {
     return undefined;
   }
