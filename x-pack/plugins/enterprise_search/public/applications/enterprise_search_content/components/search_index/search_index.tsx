@@ -38,6 +38,7 @@ import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/aut
 import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
 import { CrawlerConfiguration } from './crawler/crawler_configuration/crawler_configuration';
 import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
+import { NoConnectorRecord } from './crawler/no_connector_record';
 import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
@@ -74,7 +75,11 @@ export const SearchIndex: React.FC = () => {
    * This needs to be checked for any of the 3 registered search guideIds
    * Putting it here guarantees that if a user is viewing an index with data, it'll be marked as complete
    */
-  const { guidedOnboarding } = useValues(KibanaLogic);
+  const {
+    guidedOnboarding,
+    productAccess: { hasAppSearchAccess },
+    productFeatures: { hasDefaultIngestPipeline },
+  } = useValues(KibanaLogic);
   const isAppGuideActive = useObservable(
     guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('appSearch', 'add_data')
   );
@@ -198,7 +203,7 @@ export const SearchIndex: React.FC = () => {
     ...ALL_INDICES_TABS,
     ...(isConnectorIndex(index) ? CONNECTOR_TABS : []),
     ...(isCrawlerIndex(index) ? CRAWLER_TABS : []),
-    PIPELINES_TAB,
+    ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
   ];
 
   const selectedTab = tabs.find((tab) => tab.id === tabId);
@@ -221,15 +226,19 @@ export const SearchIndex: React.FC = () => {
       isLoading={isInitialLoading}
       pageHeader={{
         pageTitle: indexName,
-        rightSideItems: getHeaderActions(index),
+        rightSideItems: getHeaderActions(index, hasAppSearchAccess),
       }}
     >
-      <>
-        {indexName === index?.name && (
-          <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
-        )}
-        {isCrawlerIndex(index) && <CrawlCustomSettingsFlyout />}
-      </>
+      {isCrawlerIndex(index) && !index.connector ? (
+        <NoConnectorRecord />
+      ) : (
+        <>
+          {indexName === index?.name && (
+            <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+          )}
+          {isCrawlerIndex(index) && <CrawlCustomSettingsFlyout />}
+        </>
+      )}
     </EnterpriseSearchContentPageTemplate>
   );
 };

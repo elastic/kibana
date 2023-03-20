@@ -12,6 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
+import { toMomentUnitOfTime } from '../../../../utils/slo/duration';
+import { toDurationLabel } from '../../../../utils/slo/labels';
+
 export interface Props {
   slo: SLOWithSummaryResponse;
 }
@@ -20,7 +23,6 @@ export function SloTimeWindowBadge({ slo }: Props) {
   const duration = Number(slo.timeWindow.duration.slice(0, -1));
   const unit = slo.timeWindow.duration.slice(-1);
   if ('isRolling' in slo.timeWindow) {
-    const label = toDurationLabel(duration, unit);
     return (
       <div>
         <EuiBadge
@@ -28,7 +30,7 @@ export function SloTimeWindowBadge({ slo }: Props) {
           iconType="editorItemAlignRight"
           iconSide="left"
         >
-          {label}
+          {toDurationLabel(slo.timeWindow.duration)}
         </EuiBadge>
       </div>
     );
@@ -50,7 +52,7 @@ export function SloTimeWindowBadge({ slo }: Props) {
   return (
     <div>
       <EuiBadge color={euiLightVars.euiColorDisabled} iconType="calendar" iconSide="left">
-        {i18n.translate('xpack.observability.slos.slo.timeWindow.calendar', {
+        {i18n.translate('xpack.observability.slo.slo.timeWindow.calendar', {
           defaultMessage: '{elapsed}/{total} days',
           values: {
             elapsed: Math.min(elapsedDurationInDays, totalDurationInDays),
@@ -61,48 +63,3 @@ export function SloTimeWindowBadge({ slo }: Props) {
     </div>
   );
 }
-
-function toDurationLabel(duration: number, durationUnit: string) {
-  switch (durationUnit) {
-    case 'd':
-      return i18n.translate('xpack.observability.slos.slo.timeWindow.days', {
-        defaultMessage: '{duration} days',
-        values: { duration },
-      });
-    case 'w':
-      return i18n.translate('xpack.observability.slos.slo.timeWindow.weeks', {
-        defaultMessage: '{duration} weeks',
-        values: { duration },
-      });
-    case 'M':
-      return i18n.translate('xpack.observability.slos.slo.timeWindow.months', {
-        defaultMessage: '{duration} months',
-        values: { duration },
-      });
-    case 'Q':
-      return i18n.translate('xpack.observability.slos.slo.timeWindow.quarterss', {
-        defaultMessage: '{duration} quarters',
-        values: { duration },
-      });
-    case 'Y':
-      return i18n.translate('xpack.observability.slos.slo.timeWindow.years', {
-        defaultMessage: '{duration} years',
-        values: { duration },
-      });
-  }
-}
-
-const toMomentUnitOfTime = (unit: string): moment.unitOfTime.Diff | undefined => {
-  switch (unit) {
-    case 'd':
-      return 'days';
-    case 'w':
-      return 'weeks';
-    case 'M':
-      return 'months';
-    case 'Q':
-      return 'quarters';
-    case 'Y':
-      return 'years';
-  }
-};

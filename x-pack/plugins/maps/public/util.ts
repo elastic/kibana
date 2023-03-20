@@ -7,9 +7,7 @@
 
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { FONTS_API_PATH } from '../common/constants';
 import {
-  getHttp,
   getTilemap,
   getEMSSettings,
   getMapsEmsStart,
@@ -58,15 +56,6 @@ async function getEMSClient(): Promise<EMSClient> {
     emsClient.addQueryParams({ license: licenseId ? licenseId : '' });
   }
   return emsClient;
-}
-
-export function getGlyphUrl(): string {
-  const emsSettings = getEMSSettings();
-  if (!emsSettings!.isEMSEnabled()) {
-    return getHttp().basePath.prepend(`/${FONTS_API_PATH}/{fontstack}/{range}`);
-  }
-
-  return emsSettings!.getEMSFontLibraryUrl();
 }
 
 export function isRetina(): boolean {
