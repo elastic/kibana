@@ -92,7 +92,7 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
       fields: request.query.fields,
     });
 
-    if (indices.length === 0) {
+    if (indices.length === 0 && allowNoIndex !== true) {
       throw new DataViewMissingIndices(pattern);
     }
 
