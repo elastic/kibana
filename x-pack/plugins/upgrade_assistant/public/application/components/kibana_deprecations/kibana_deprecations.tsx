@@ -272,7 +272,7 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
           <EuiCallOut
             title={i18nTexts.kibanaDeprecationErrorTitle}
             color="warning"
-            iconType="alert"
+            iconType="warning"
             data-test-subj="kibanaDeprecationErrors"
           >
             <p>{i18nTexts.getKibanaDeprecationErrorDescription(kibanaDeprecationErrors)}</p>

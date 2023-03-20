@@ -118,7 +118,7 @@ const PreviewRenderer = ({
       <EuiIconTip
         size="xl"
         color="danger"
-        type="alert"
+        type="warning"
         aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
           defaultMessage: 'Preview rendering failed',
         })}
