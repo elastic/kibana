@@ -340,20 +340,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       usageCounter: this.usageCounter,
     });
 
-    plugins.taskManager.registerTaskDefinitions({
-      foo: {
-        title: 'Foo',
-        maxAttempts: 1,
-        createTaskRunner: (context: RunContext) => {
-          return {
-            run: async () => {
-              throw new Error('NO!');
-            },
-          };
-        },
-      },
-    });
-
     return {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
@@ -537,16 +523,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         logger: this.logger,
       });
     }
-
-    (async () => {
-      await plugins.taskManager.removeIfExists('foo-run');
-      await plugins.taskManager.ensureScheduled({
-        id: 'foo-run',
-        taskType: 'foo',
-        state: {},
-        params: {},
-      });
-    })();
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
