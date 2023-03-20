@@ -22,12 +22,12 @@ import { IndexConfig, IndexTemplateParams } from './types';
 
 // TODO: Add integration tests
 export const initializeCspIndices = async (esClient: ElasticsearchClient, logger: Logger) => {
-  await Promise.all([
+  await Promise.allSettled([
     createPipelineIfNotExists(esClient, scorePipelineIngestConfig, logger),
     createPipelineIfNotExists(esClient, latestFindingsPipelineIngestConfig, logger),
   ]);
 
-  return Promise.all([
+  return Promise.allSettled([
     ...createLatestIndices(esClient, logger),
     createBenchmarkScoreIndex(esClient, logger),
   ]);
