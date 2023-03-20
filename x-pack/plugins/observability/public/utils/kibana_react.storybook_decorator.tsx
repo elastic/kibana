@@ -13,7 +13,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { CoreTheme } from '@kbn/core-theme-browser';
 import { casesFeatureId, sloFeatureId } from '../../common';
 import { PluginContext } from '../context/plugin_context';
-import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
+import { createObservabilityRuleTypeRegistryMock } from '../plugin/rule_registry/create_observability_rule_type_registry';
 import { ConfigSchema } from '../plugin';
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {

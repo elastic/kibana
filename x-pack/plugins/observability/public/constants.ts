@@ -5,5 +5,12 @@
  * 2.0.
  */
 
+export const ALERT_APP = 'alert';
+export const UX_APP = 'ux';
+export const SYNTHETICS_APP = 'synthetics';
+export const APM_APP = 'apm';
+export const INFRA_LOGS_APP = 'infra_logs';
+export const INFRA_METRICS_APP = 'infra_metrics';
+
 export const DEFAULT_INTERVAL = '60s';
 export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';

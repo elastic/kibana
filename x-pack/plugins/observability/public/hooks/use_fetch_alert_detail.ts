@@ -13,7 +13,7 @@ import { usePluginContext } from './use_plugin_context';
 
 import { ObservabilityRuleTypeRegistry } from '..';
 import { useDataFetcher } from './use_data_fetcher';
-import { parseAlert } from '../pages/alerts/helpers/parse_alert';
+import { parseAlert } from '../routes/pages/alerts/helpers/parse_alert';
 import type { TopAlert } from '../typings/alerts';
 
 interface AlertDetailParams {

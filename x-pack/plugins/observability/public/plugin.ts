@@ -43,22 +43,24 @@ import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/publi
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { RuleDetailsLocatorDefinition } from './locators/rule_details';
+import { RuleDetailsLocatorDefinition } from './routes/locators/rule_details';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
-import { registerDataHandler } from './data_handler';
+import { registerDataHandler } from './routes/pages/overview/helpers/data_handler';
 import {
   createObservabilityRuleTypeRegistry,
   ObservabilityRuleTypeRegistry,
-} from './rules/create_observability_rule_type_registry';
-import { createCallObservabilityApi } from './services/call_observability_api';
-import { createNavigationRegistry, NavigationEntry } from './services/navigation_registry';
-import { updateGlobalNavigation } from './update_global_navigation';
+} from './plugin/rule_registry/create_observability_rule_type_registry';
+import {
+  createNavigationRegistry,
+  NavigationEntry,
+} from './plugin/navigation_registry/navigation_registry';
+import { updateGlobalNavigation } from './plugin/navigation_registry/update_global_navigation';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
-import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import { registerObservabilityRuleTypes } from './plugin/rule_registry/register_observability_rule_types';
 
 export interface ConfigSchema {
   unsafe: {
@@ -78,8 +80,6 @@ export interface ConfigSchema {
     };
   };
 }
-export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
-
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   share: SharePluginSetup;
@@ -99,6 +99,7 @@ export interface ObservabilityPublicPluginsStart {
   guidedOnboarding: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
+  kibanaVersion: string;
   ruleTypeRegistry: RuleTypeRegistryContract;
   security: SecurityPluginStart;
   share: SharePluginStart;
@@ -107,8 +108,10 @@ export interface ObservabilityPublicPluginsStart {
   usageCollection: UsageCollectionSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
+  isDev?: boolean;
 }
 
+export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
 export class Plugin
@@ -186,8 +189,6 @@ export class Plugin
     const config = this.initContext.config.get();
     const kibanaVersion = this.initContext.env.packageInfo.version;
 
-    createCallObservabilityApi(coreSetup.http);
-
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
@@ -195,7 +196,7 @@ export class Plugin
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
-      const { renderApp } = await import('./application');
+      const { renderApp } = await import('./plugin/application');
       // Get start services
       const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
 

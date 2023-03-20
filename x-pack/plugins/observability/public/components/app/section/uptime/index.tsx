@@ -25,16 +25,15 @@ import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
 import { useTimeZone } from '../../../../hooks/use_time_zone';
 import { SectionContainer } from '..';
-import { getDataHandler } from '../../../../data_handler';
+import { getDataHandler, Series } from '../../../../routes/pages/overview/helpers/data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
-import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
-import type { BucketSize } from '../../../../pages/overview/helpers/calculate_bucket_size';
+import type { BucketSize } from '../../../../routes/pages/overview/helpers/calculate_bucket_size';
 
 interface Props {
   bucketSize: BucketSize;

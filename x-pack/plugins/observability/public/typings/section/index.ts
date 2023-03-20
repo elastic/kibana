@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ObservabilityFetchDataPlugins } from '../fetch_overview_data';
+import { ObservabilityFetchDataPlugins } from '../../routes/pages/overview/helpers/data_handler';
 
-export interface ISection {
+export interface Section {
   id: ObservabilityFetchDataPlugins | 'alert';
   title: string;
   icon: string;

@@ -10,7 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHasData } from '../../../hooks/use_has_data';
 import { ObservabilityStatusBoxes } from './observability_status_boxes';
 import { getContent } from './content';
-import { ObservabilityAppServices } from '../../../application/types';
+import { ObservabilityAppServices } from '../../../plugin/types';
 
 export function ObservabilityStatus() {
   const { http, docLinks } = useKibana<ObservabilityAppServices>().services;

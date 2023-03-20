@@ -25,7 +25,7 @@ import {
   FieldFormatParams,
 } from '../../components/shared/exploratory_view/types';
 import { apmFieldFormats } from '../../components/shared/exploratory_view/configurations/apm/field_formats';
-import { getDataHandler } from '../../data_handler';
+import { getDataHandler } from '../../routes/pages/overview/helpers/data_handler';
 import { infraMetricsFieldFormats } from '../../components/shared/exploratory_view/configurations/infra_metrics/field_formats';
 
 const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {

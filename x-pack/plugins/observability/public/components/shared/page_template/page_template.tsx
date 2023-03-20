@@ -13,7 +13,6 @@ import { matchPath, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import type { ApplicationStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   KibanaPageTemplate,
   KibanaPageTemplateKibanaProvider,
@@ -23,8 +22,8 @@ import type {
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { ObservabilityAppServices } from '../../../application/types';
-import type { NavigationSection } from '../../../services/navigation_registry';
+import { useKibana } from '../../../utils/kibana_react';
+import type { NavigationSection } from '../../../plugin/navigation_registry/navigation_registry';
 import { ObservabilityTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
@@ -77,7 +76,7 @@ export function ObservabilityPageTemplate({
   const currentAppId = useObservable(currentAppId$, undefined);
   const { pathname: currentPath } = useLocation();
 
-  const { services } = useKibana<ObservabilityAppServices>();
+  const { services } = useKibana();
 
   const sideNavItems = useMemo<Array<EuiSideNavItemType<unknown>>>(
     () =>

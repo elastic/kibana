@@ -7,8 +7,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { loadRule } from '@kbn/triggers-actions-ui-plugin/public';
-import { FetchRuleProps, FetchRule } from '../pages/rule_details/types';
-import { RULE_LOAD_ERROR } from '../pages/rule_details/translations';
+import { FetchRuleProps, FetchRule } from '../routes/pages/rule_details/types';
+import { RULE_LOAD_ERROR } from '../routes/pages/rule_details/translations';
 
 export function useFetchRule({ ruleId, http }: FetchRuleProps) {
   const [ruleSummary, setRuleSummary] = useState<FetchRule>({

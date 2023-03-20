@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useGetUserCasesPermissions } from './use_get_user_cases_permissions';
-import type { ObservabilityAppServices } from '../application/types';
+import type { ObservabilityAppServices } from '../plugin/types';
 
 export interface UseAddToCaseActions {
   onClose?: () => void;

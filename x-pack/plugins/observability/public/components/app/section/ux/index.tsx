@@ -9,10 +9,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { UX_APP } from '../../../../context/constants';
+import { UX_APP } from '../../../../constants';
 import { ObservabilityPublicPluginsStart } from '../../../..';
 import { SectionContainer } from '..';
-import { getDataHandler } from '../../../../data_handler';
+import { getDataHandler } from '../../../../routes/pages/overview/helpers/data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
@@ -23,7 +23,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
 } from '../../../shared/exploratory_view/configurations/constants/elasticsearch_fieldnames';
-import type { BucketSize } from '../../../../pages/overview/helpers/calculate_bucket_size';
+import type { BucketSize } from '../../../../routes/pages/overview/helpers/calculate_bucket_size';
 interface Props {
   bucketSize: BucketSize;
 }

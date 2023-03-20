@@ -7,7 +7,7 @@
 
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import type { CellValueElementProps } from '@kbn/timelines-plugin/common';
-import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
+import { createObservabilityRuleTypeRegistryMock } from '../../plugin/rule_registry/create_observability_rule_type_registry';
 import { render } from '../../utils/test_helper';
 import { getRenderCellValue } from './render_cell_value';
 

@@ -21,16 +21,16 @@ import {
   MetricsFetchDataSeries,
   NumberOrNull,
   StringOrNull,
-} from '../../../..';
+} from '../../../../routes/pages/overview/helpers/data_handler';
 import { SectionContainer } from '..';
-import { getDataHandler } from '../../../../data_handler';
+import { getDataHandler } from '../../../../routes/pages/overview/helpers/data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { HostLink } from './host_link';
 import { formatDuration } from './lib/format_duration';
 import { MetricWithSparkline } from './metric_with_sparkline';
-import type { BucketSize } from '../../../../pages/overview/helpers/calculate_bucket_size';
+import type { BucketSize } from '../../../../routes/pages/overview/helpers/calculate_bucket_size';
 
 const COLOR_ORANGE = 7;
 const COLOR_BLUE = 1;

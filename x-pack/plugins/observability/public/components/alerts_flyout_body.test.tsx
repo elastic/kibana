@@ -7,11 +7,11 @@
 import React from 'react';
 import { render } from '../utils/test_helper';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
-import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
+import { createObservabilityRuleTypeRegistryMock } from '../plugin/rule_registry/create_observability_rule_type_registry';
 import { AlertsFlyoutBody } from './alerts_flyout_body';
-import { inventoryThresholdAlert } from '../rules/fixtures/example_alerts';
-import { parseAlert } from '../pages/alerts/helpers/parse_alert';
-import { RULE_DETAILS_PAGE_ID } from '../pages/rule_details/constants';
+import { inventoryThresholdAlert } from '../data/alerts/example_alerts';
+import { parseAlert } from '../routes/pages/alerts/helpers/parse_alert';
+import { RULE_DETAILS_PAGE_ID } from '../routes/pages/rule_details/constants';
 
 describe('AlertsFlyoutBody', () => {
   jest

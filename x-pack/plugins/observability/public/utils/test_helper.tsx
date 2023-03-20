@@ -19,9 +19,9 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { PluginContext } from '../context/plugin_context';
-import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
+import { createObservabilityRuleTypeRegistryMock } from '../plugin/rule_registry/create_observability_rule_type_registry';
 import { ConfigSchema } from '../plugin';
-import { Subset } from '../typings';
+import { Subset } from '../typings/utils';
 
 const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
 const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();

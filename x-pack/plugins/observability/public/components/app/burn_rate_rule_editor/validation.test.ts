@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BurnRateRuleParams } from '../../../typings';
+import { BurnRateRuleParams } from '../../../typings/slos';
 import { validateBurnRateRule } from './validation';
 
 const VALID_PARAMS: BurnRateRuleParams = {

@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import { useLocation, useParams } from 'react-router-dom';
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { Params, RouteParams, routes } from '../routes';
+import { Params, RouteParams, routes } from '../routes/routes';
 
 function getQueryParams(location: ReturnType<typeof useLocation>) {
   const urlSearchParms = new URLSearchParams(location.search);

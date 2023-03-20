@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
-import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
   CasesDeepLinkId,
   generateCaseViewPath,
@@ -16,7 +16,7 @@ import {
 } from '@kbn/cases-plugin/public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
-import { ObservabilityAppServices } from '../../../../application/types';
+import { useKibana } from '../../../../utils/kibana_react';
 import { useAddToCase } from '../hooks/use_add_to_case';
 import { observabilityFeatureId, observabilityAppId } from '../../../../../common';
 import { parseRelativeDate } from '../components/date_range_picker';
@@ -38,7 +38,7 @@ export function AddToCaseAction({
   setAutoOpen,
   timeRange,
 }: AddToCaseProps) {
-  const kServices = useKibana<ObservabilityAppServices>().services;
+  const kServices = useKibana().services;
   const userCasesPermissions = useGetUserCasesPermissions();
 
   const {

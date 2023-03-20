@@ -19,6 +19,6 @@ export type ObservabilityApp =
   | 'ux'
   | 'fleet';
 
-export type { Coordinates } from '../public/typings/fetch_overview_data';
+export type { Coordinates } from '../public/routes/pages/overview/helpers/data_handler';
 
 export type InspectResponse = Request[];

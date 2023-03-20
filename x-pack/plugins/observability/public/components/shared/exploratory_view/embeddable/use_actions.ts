@@ -7,13 +7,12 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { useKibana } from '../../../../utils/kibana_react';
 import { createExploratoryViewRoutePath } from '../configurations/utils';
 import { createExploratoryViewUrl } from '../configurations/exploratory_view_url';
 import { ReportViewType } from '../types';
 import { AllSeries } from '../hooks/use_series_storage';
-import { ObservabilityAppServices } from '../../../../application/types';
 
 export type ActionTypes = 'explore' | 'save' | 'addToCase' | 'openInLens';
 
@@ -36,7 +35,7 @@ export function useActions({
   timeRange: { from: string; to: string };
   lensAttributes: any;
 }) {
-  const kServices = useKibana<ObservabilityAppServices>().services;
+  const kServices = useKibana().services;
 
   const { lens } = kServices;
 

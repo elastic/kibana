@@ -8,11 +8,11 @@
 import React, { useCallback, useMemo } from 'react';
 import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
 
-import type { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
+import type { ObservabilityRuleTypeRegistry } from '../plugin/rule_registry/create_observability_rule_type_registry';
 import { AlertsFlyoutHeader } from './alerts_flyout_header';
 import { AlertsFlyoutBody } from './alerts_flyout_body';
 import { AlertsFlyoutFooter } from './alerts_flyout_footer';
-import { parseAlert } from '../pages/alerts/helpers/parse_alert';
+import { parseAlert } from '../routes/pages/alerts/helpers/parse_alert';
 
 export { AlertsFlyout } from './alerts_flyout';
 
