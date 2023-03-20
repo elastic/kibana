@@ -7,10 +7,11 @@
  */
 
 import { QueryClient } from '@tanstack/react-query';
+import { validateVersion } from '@kbn/object-versioning/lib/utils';
+import type { Version } from '@kbn/object-versioning';
 import { createQueryObservable } from './query_observable';
 import type { CrudClient } from '../crud_client';
-import type { CreateIn, GetIn, UpdateIn, DeleteIn, SearchIn, Version } from '../../common';
-import { validateVersion } from '../../common/utils';
+import type { CreateIn, GetIn, UpdateIn, DeleteIn, SearchIn } from '../../common';
 import type { ContentTypeRegistry } from '../registry';
 
 export const queryKeyBuilder = {
@@ -35,9 +36,13 @@ const addVersion = <I extends { contentTypeId: string; version?: Version }>(
 
   const version = input.version ?? contentType.version.latest;
 
-  const versionNumber = validateVersion(version);
+  const { result, value } = validateVersion(version);
 
-  if (versionNumber > parseInt(contentType.version.latest.substring(1), 10)) {
+  if (!result) {
+    throw new Error(`Invalid version [${version}]. Must be an integer.`);
+  }
+
+  if (value > contentType.version.latest) {
     throw new Error(
       `Invalid version [${version}]. Latest version is [${contentType.version.latest}]`
     );

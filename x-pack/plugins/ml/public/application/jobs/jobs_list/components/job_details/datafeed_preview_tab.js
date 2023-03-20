@@ -40,7 +40,7 @@ export class DatafeedPreviewPane extends Component {
             />
           }
           color="warning"
-          iconType="alert"
+          iconType="warning"
         >
           <p>
             <FormattedMessage

@@ -36,7 +36,7 @@ export const NoConnectorRecord: React.FC = () => {
       <DeleteIndexModal />
 
       <EuiPageTemplate.EmptyPrompt
-        iconType="alert"
+        iconType="warning"
         color="danger"
         title={
           <h2>

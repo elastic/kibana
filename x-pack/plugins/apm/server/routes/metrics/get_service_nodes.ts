@@ -20,7 +20,16 @@ import { SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
-const getServiceNodes = async ({
+export type ServiceNodesResponse = Array<{
+  name: string;
+  cpu: number | null;
+  heapMemory: number | null;
+  hostName: string | null | undefined;
+  nonHeapMemory: number | null;
+  threadCount: number | null;
+}>;
+
+async function getServiceNodes({
   kuery,
   apmEventClient,
   serviceName,
@@ -34,7 +43,7 @@ const getServiceNodes = async ({
   environment: string;
   start: number;
   end: number;
-}) => {
+}): Promise<ServiceNodesResponse> {
   const params = {
     apm: {
       events: [ProcessorEvent.metric],
@@ -119,6 +128,6 @@ const getServiceNodes = async ({
         item.nonHeapMemory !== null ||
         item.threadCount != null
     );
-};
+}
 
 export { getServiceNodes };
