@@ -34,7 +34,7 @@ const FOO_CONTENT_ID = 'foo';
 
 describe('RPC -> get()', () => {
   describe('Input/Output validation', () => {
-    const validInput = { contentTypeId: 'foo', id: '123', version: 'v1' };
+    const validInput = { contentTypeId: 'foo', id: '123', version: 1 };
 
     test('should validate that a contentTypeId and an id is passed', () => {
       [
@@ -53,11 +53,10 @@ describe('RPC -> get()', () => {
         },
         {
           input: omit(validInput, 'version'),
-          expectedError: '[version]: expected value of type [string] but got [undefined]',
+          expectedError: '[version]: expected value of type [number] but got [undefined]',
         },
         {
-          input: { ...validInput, version: '1' }, // invalid version format
-          expectedError: '[version]: must follow the pattern [v${number}]',
+          input: { ...validInput, version: '1' }, // string number is OK
         },
       ].forEach(({ input, expectedError }) => {
         const error = validate(input, inputSchema);
@@ -79,7 +78,7 @@ describe('RPC -> get()', () => {
         {
           contentTypeId: 'foo',
           id: '123',
-          version: 'v1',
+          version: 1,
           options: { any: 'object' },
         },
         inputSchema
@@ -91,7 +90,7 @@ describe('RPC -> get()', () => {
         {
           contentTypeId: 'foo',
           id: '123',
-          version: 'v1',
+          version: 1,
           options: 123, // Not an object
         },
         inputSchema
@@ -126,7 +125,7 @@ describe('RPC -> get()', () => {
         id: FOO_CONTENT_ID,
         storage,
         version: {
-          latest: 'v2',
+          latest: 2,
         },
       });
 
@@ -146,7 +145,7 @@ describe('RPC -> get()', () => {
       const expected = 'GetResult';
       storage.get.mockResolvedValueOnce(expected);
 
-      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', version: 'v1' });
+      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', version: 1 });
 
       expect(result).toEqual({
         contentTypeId: FOO_CONTENT_ID,
@@ -157,8 +156,8 @@ describe('RPC -> get()', () => {
         {
           requestHandlerContext: ctx.requestHandlerContext,
           version: {
-            request: 'v1',
-            latest: 'v2', // from the registry
+            request: 1,
+            latest: 2, // from the registry
           },
           utils: {
             getTransforms: expect.any(Function),
@@ -183,16 +182,16 @@ describe('RPC -> get()', () => {
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
             id: '1234',
-            version: 'v7',
+            version: 7,
           })
-        ).rejects.toEqual(new Error('Invalid version. Latest version is [v2].'));
+        ).rejects.toEqual(new Error('Invalid version. Latest version is [2].'));
       });
     });
 
     describe('object versioning', () => {
       test('should expose a  utility to transform and validate services objects', () => {
         const { ctx, storage } = setup();
-        fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', version: 'v1' });
+        fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', version: 1 });
         const [[storageContext]] = storage.get.mock.calls;
 
         // getTransforms() utils should be available from context
