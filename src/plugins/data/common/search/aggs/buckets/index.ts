@@ -17,8 +17,6 @@ export * from './filter_fn';
 export * from './filter';
 export * from './filters_fn';
 export * from './filters';
-export * from './geo_hash_fn';
-export * from './geo_hash';
 export * from './geo_tile_fn';
 export * from './geo_tile';
 export * from './histogram_fn';
