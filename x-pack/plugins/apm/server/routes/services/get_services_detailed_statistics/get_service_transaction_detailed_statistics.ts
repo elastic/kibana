@@ -26,6 +26,13 @@ import {
 } from '../../../lib/helpers/transaction_error_rate';
 import { withApmSpan } from '../../../utils/with_apm_span';
 
+interface ServiceTransactionDetailedStat {
+  serviceName: string;
+  latency: Array<{ x: number; y: number | null }>;
+  transactionErrorRate: Array<{ x: number; y: number }>;
+  throughput: Array<{ x: number; y: number }>;
+}
+
 export async function getServiceTransactionDetailedStats({
   serviceNames,
   environment,
@@ -167,7 +174,12 @@ export async function getServiceTransactionDetailedStats({
   );
 }
 
-export async function getServiceDetailedStatsPeriods({
+export interface ServiceTransactionDetailedStatPeriodsResponse {
+  currentPeriod: Record<string, ServiceTransactionDetailedStat>;
+  previousPeriod: Record<string, ServiceTransactionDetailedStat>;
+}
+
+export async function getServiceTransactionDetailedStatsPeriods({
   serviceNames,
   environment,
   kuery,
@@ -191,7 +203,7 @@ export async function getServiceDetailedStatsPeriods({
   start: number;
   end: number;
   randomSampler: RandomSampler;
-}) {
+}): Promise<ServiceTransactionDetailedStatPeriodsResponse> {
   return withApmSpan('get_service_detailed_statistics', async () => {
     const commonProps = {
       serviceNames,
