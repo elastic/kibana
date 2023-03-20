@@ -99,7 +99,6 @@ export const HostsTable = () => {
       {isFlyoutOpen && (
         <Flyout
           node={items[clickedItemIndex]}
-          isFlyoutOpen={isFlyoutOpen}
           onFlyoutClose={onFlyoutClose}
         />
       )}

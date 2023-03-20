@@ -14,14 +14,15 @@ import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
 interface Props {
   node: HostNodeRow;
-  isFlyoutOpen: boolean;
   onFlyoutClose: () => void;
 }
 
-export const Flyout = ({ node, isFlyoutOpen, onFlyoutClose }: Props) => {
+const flyoutTabs = [MetadataTab]
+
+export const Flyout = ({ node, onFlyoutClose }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
 
-  const { to, from, } = getDateRangeAsTimestamp();
+  const { to, from } = getDateRangeAsTimestamp();
 
   const currentTimeRange = {
     from,
@@ -30,8 +31,7 @@ export const Flyout = ({ node, isFlyoutOpen, onFlyoutClose }: Props) => {
   };
 
   const tabs = useMemo(() => {
-    const tabConfigs = [MetadataTab];
-    return tabConfigs.map((m) => {
+    return flyoutTabs.map((m) => {
       const TabContent = m.content;
       return {
         ...m,
@@ -41,8 +41,6 @@ export const Flyout = ({ node, isFlyoutOpen, onFlyoutClose }: Props) => {
   }, [node, currentTimeRange]);
 
   const [selectedTab, setSelectedTab] = useState(0);
-
-  console.log('isFlyoutOpen', isFlyoutOpen)
 
   return (
     <EuiFlyout onClose={onFlyoutClose} ownFocus={false}>
