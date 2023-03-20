@@ -15,7 +15,7 @@ import {
   RuleTypeParamsExpressionProps,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { useSourceContext } from '../../../containers/metrics_source';
+import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
 import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 import { findInventoryModel } from '../../../../common/inventory_models';
@@ -241,7 +241,7 @@ export const Expression: React.FC<Props> = (props) => {
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
-export default Expression;
+export default withSourceProvider<Props>(Expression)('default');
 
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`
   display: flex;

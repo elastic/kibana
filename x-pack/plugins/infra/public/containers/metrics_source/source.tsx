@@ -6,7 +6,7 @@
  */
 
 import createContainer from 'constate';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
@@ -134,3 +134,11 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
 };
 
 export const [SourceProvider, useSourceContext] = createContainer(useSource);
+
+export const withSourceProvider = <ComponentProps,>(Component: React.FunctionComponent<ComponentProps>) => (sourceId = 'default') => {
+  return function ComponentWithSourceProvider(props: ComponentProps) {
+    return <SourceProvider sourceId={sourceId}>
+      <Component {...props} />
+    </SourceProvider>
+  }
+}

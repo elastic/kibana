@@ -28,7 +28,7 @@ import {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
-import { useSourceContext } from '../../../containers/metrics_source';
+import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
@@ -401,13 +401,13 @@ export const Expressions: React.FC<Props> = (props) => {
             value={ruleParams.filterQueryText}
           />
         )) || (
-          <EuiFieldSearch
-            data-test-subj="infraExpressionsFieldSearch"
-            onChange={handleFieldSearchChange}
-            value={ruleParams.filterQueryText}
-            fullWidth
-          />
-        )}
+            <EuiFieldSearch
+              data-test-subj="infraExpressionsFieldSearch"
+              onChange={handleFieldSearchChange}
+              value={ruleParams.filterQueryText}
+              fullWidth
+            />
+          )}
       </EuiFormRow>
 
       <EuiSpacer size={'m'} />
@@ -497,4 +497,4 @@ const docCountNoDataDisabledHelpText = i18n.translate(
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
-export default Expressions;
+export default withSourceProvider<Props>(Expressions)('default');

@@ -54,7 +54,7 @@ import {
   SnapshotMetricTypeRT,
 } from '../../../../common/inventory_models/types';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
-import { DerivedIndexPattern, useSourceContext } from '../../../containers/metrics_source';
+import { DerivedIndexPattern, useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
@@ -394,7 +394,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
-export default Expressions;
+export default withSourceProvider<Props>(Expressions)('default');
 
 interface ExpressionRowProps {
   nodeType: InventoryItemType;
