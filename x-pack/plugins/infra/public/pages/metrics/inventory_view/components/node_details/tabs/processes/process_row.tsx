@@ -39,6 +39,7 @@ export const ProcessRow = ({ cells, item }: Props) => {
       <EuiTableRow>
         <EuiTableRowCell isExpander textOnly={false}>
           <EuiButtonEmpty
+            data-test-subj="infraProcessRowButton"
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
             aria-expanded={isExpanded}
             onClick={() => setIsExpanded(!isExpanded)}
@@ -71,7 +72,7 @@ export const ProcessRow = ({ cells, item }: Props) => {
                     </EuiFlexItem>
                     {item.apmTrace && (
                       <EuiFlexItem grow={false}>
-                        <EuiButton>
+                        <EuiButton data-test-subj="infraProcessRowViewTraceInApmButton">
                           {i18n.translate(
                             'xpack.infra.metrics.nodeDetails.processes.viewTraceInAPM',
                             {

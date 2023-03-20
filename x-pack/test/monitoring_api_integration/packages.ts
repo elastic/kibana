@@ -12,6 +12,7 @@ const PACKAGES = [
   { name: 'elasticsearch', version: '1.4.1' },
   { name: 'enterprisesearch', version: '1.0.0' },
   { name: 'logstash', version: '2.2.2-preview1' },
+  { name: 'kibana', version: '2.3.0-preview1' },
 ];
 
 export const getPackagesArgs = (): string[] => {

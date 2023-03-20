@@ -32,7 +32,7 @@ import {
   transformSloResponseToCreateSloInput,
   transformValuesToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
-import { paths } from '../../../config';
+import { paths } from '../../../config/paths';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse;
@@ -108,7 +108,9 @@ export function SloListItem({
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexItem>
                   <EuiText size="s">
-                    <EuiLink onClick={handleViewDetails}>{slo.name}</EuiLink>
+                    <EuiLink data-test-subj="o11ySloListItemLink" onClick={handleViewDetails}>
+                      {slo.name}
+                    </EuiLink>
                   </EuiText>
                 </EuiFlexItem>
                 <SloBadges slo={slo} activeAlerts={activeAlerts} />
