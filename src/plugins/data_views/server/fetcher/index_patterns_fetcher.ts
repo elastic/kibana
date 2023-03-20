@@ -74,7 +74,7 @@ export class IndexPatternsFetcher {
     if (patternList.length > 1 && !allowNoIndices) {
       patternListActive = await this.validatePatternListActive(patternList);
       if (patternListActive.length === 0) {
-        throw new DataViewMissingIndices(patternList.join(','));
+        return { fields: [], indices: [] };
       }
     }
     const fieldCapsResponse = await getFieldCapabilities({
