@@ -96,7 +96,7 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
             defaultMessage: 'Review field conflicts',
           })}
           color="warning"
-          iconType="alert"
+          iconType="warning"
         >
           <FormattedMessage
             id="xpack.fleet.upgradePackagePolicy.statusCallout.errorContent"

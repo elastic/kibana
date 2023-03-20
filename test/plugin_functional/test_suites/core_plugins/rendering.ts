@@ -103,6 +103,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.management.refreshTimeout (duration)',
         'data.search.sessions.maxUpdateRetries (number)',
         'data.search.sessions.notTouchedTimeout (duration)',
+        'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
         'home.disableWelcomeScreen (boolean)',
         'map.emsFileApiUrl (string)',
