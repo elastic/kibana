@@ -61,6 +61,7 @@
     "@kbn/shared-ux-file-context",
     "@kbn/shared-ux-file-image",
     "@kbn/shared-ux-file-upload",
+    "@kbn/shared-ux-file-mocks",
   ],
   "exclude": [
     "target/**/*",
