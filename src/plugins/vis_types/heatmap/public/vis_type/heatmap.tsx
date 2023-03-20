@@ -101,7 +101,6 @@ export const getHeatmapVisTypeDefinition = ({
         min: 0,
         max: 1,
         aggFilter: [
-          '!geohash_grid',
           '!geotile_grid',
           '!filter',
           '!sampler',
@@ -118,7 +117,6 @@ export const getHeatmapVisTypeDefinition = ({
         min: 0,
         max: 1,
         aggFilter: [
-          '!geohash_grid',
           '!geotile_grid',
           '!filter',
           '!sampler',
@@ -142,7 +140,6 @@ export const getHeatmapVisTypeDefinition = ({
         min: 0,
         max: 1,
         aggFilter: [
-          '!geohash_grid',
           '!geotile_grid',
           '!filter',
           '!sampler',

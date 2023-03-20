@@ -6,31 +6,20 @@
  */
 
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleStatus, useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import type { RulesListVisibleColumns } from '@kbn/triggers-actions-ui-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from './state_container';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
-import { RULES_PAGE_TITLE, RULES_BREADCRUMB_TEXT } from './translations';
 
-const RULES_LIST_COLUMNS_KEY = 'observability_rulesListColumns';
-const RULES_LIST_COLUMNS: RulesListVisibleColumns[] = [
-  'ruleName',
-  'ruleExecutionStatusLastDate',
-  'ruleSnoozeNotify',
-  'ruleExecutionStatus',
-  'ruleExecutionState',
-];
-
-function RulesPage() {
-  const { ObservabilityPageTemplate } = usePluginContext();
+export function RulesPage() {
   const {
     http,
     docLinks,
@@ -40,22 +29,35 @@ function RulesPage() {
       getRulesSettingsLink: RulesSettingsLink,
     },
   } = useKibana().services;
-
-  const { status, setStatus, lastResponse, setLastResponse } = useRulesPageStateContainer();
+  const { ObservabilityPageTemplate } = usePluginContext();
+  const history = useHistory();
 
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
   });
 
-  const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
-  const [refresh, setRefresh] = useState(new Date());
-
   const authorizedRuleTypes = [...ruleTypes.values()];
-
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
     (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
+
+  const urlStateStorage = createKbnUrlStateStorage({
+    history,
+    useHash: false,
+    useHashQuery: false,
+  });
+
+  const { status, lastResponse } = urlStateStorage.get<{
+    status: RuleStatus[];
+    lastResponse: string[];
+  }>('_a') || { status: [], lastResponse: [] };
+
+  const [stateStatus, setStatus] = useState<RuleStatus[]>(status);
+  const [stateLastResponse, setLastResponse] = useState<string[]>(lastResponse);
+  const [stateRefresh, setRefresh] = useState(new Date());
+
+  const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
 
   useBreadcrumbs([
     {
@@ -65,21 +67,38 @@ function RulesPage() {
       href: http.basePath.prepend('/app/observability/alerts'),
     },
     {
-      text: RULES_BREADCRUMB_TEXT,
+      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+        defaultMessage: 'Rules',
+      }),
     },
   ]);
+
+  const handleStatusFilterChange = (newStatus: RuleStatus[]) => {
+    setStatus(newStatus);
+    urlStateStorage.set('_a', { status: newStatus, lastResponse });
+    return { lastResponse: stateLastResponse || [], status: newStatus };
+  };
+
+  const handleLastRunOutcomeFilterChange = (newLastResponse: string[]) => {
+    setRefresh(new Date());
+    setLastResponse(newLastResponse);
+    urlStateStorage.set('_a', { status, lastResponse: newLastResponse });
+    return { lastResponse: newLastResponse, status: stateStatus || [] };
+  };
 
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <>{RULES_PAGE_TITLE}</>,
+        pageTitle: i18n.translate('xpack.observability.rulesTitle', {
+          defaultMessage: 'Rules',
+        }),
         rightSideItems: [
           <EuiButton
-            fill
-            key="create-alert"
-            iconType="plusInCircle"
             data-test-subj="createRuleButton"
             disabled={!authorizedToCreateAnyRules}
+            fill
+            iconType="plusInCircle"
+            key="create-alert"
             onClick={() => setAddRuleFlyoutVisibility(true)}
           >
             <FormattedMessage
@@ -89,10 +108,10 @@ function RulesPage() {
           </EuiButton>,
           <RulesSettingsLink />,
           <EuiButtonEmpty
-            href={docLinks.links.observability.createAlerts}
-            target="_blank"
-            iconType="help"
             data-test-subj="documentationLink"
+            href={docLinks.links.observability.createAlerts}
+            iconType="help"
+            target="_blank"
           >
             <FormattedMessage
               id="xpack.observability.rules.docsLinkText"
@@ -107,15 +126,21 @@ function RulesPage() {
         <EuiFlexItem>
           <RuleList
             filteredRuleTypes={filteredRuleTypes}
-            showActionFilter={false}
+            lastRunOutcomeFilter={stateLastResponse}
+            refresh={stateRefresh}
             ruleDetailsRoute="alerts/rules/:ruleId"
-            statusFilter={status}
-            onStatusFilterChange={setStatus}
-            lastResponseFilter={lastResponse}
-            onLastResponseFilterChange={setLastResponse}
-            refresh={refresh}
-            rulesListKey={RULES_LIST_COLUMNS_KEY}
-            visibleColumns={RULES_LIST_COLUMNS}
+            rulesListKey="observability_rulesListColumns"
+            showActionFilter={false}
+            statusFilter={stateStatus}
+            visibleColumns={[
+              'ruleName',
+              'ruleExecutionStatusLastDate',
+              'ruleSnoozeNotify',
+              'ruleExecutionStatus',
+              'ruleExecutionState',
+            ]}
+            onLastRunOutcomeFilterChange={handleLastRunOutcomeFilterChange}
+            onStatusFilterChange={handleStatusFilterChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -136,13 +161,3 @@ function RulesPage() {
     </ObservabilityPageTemplate>
   );
 }
-
-function WrappedRulesPage() {
-  return (
-    <Provider value={rulesPageStateContainer}>
-      <RulesPage />
-    </Provider>
-  );
-}
-
-export { WrappedRulesPage as RulesPage };
