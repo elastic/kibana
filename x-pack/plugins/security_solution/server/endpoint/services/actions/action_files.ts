@@ -43,6 +43,10 @@ const getFileRetrievalError = (
     }
   }
 
+  if (error instanceof EndpointError) {
+    return error;
+  }
+
   return new EndpointError(`Failed to get file using id [${fileId}]: ${error.message}`, error);
 };
 
