@@ -85,7 +85,12 @@ export function TestNowModeFlyout({
         </EuiErrorBoundary>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+        <EuiButtonEmpty
+          data-test-subj="syntheticsTestNowModeFlyoutButton"
+          iconType="cross"
+          onClick={onClose}
+          flush="left"
+        >
           {CLOSE_LABEL}
         </EuiButtonEmpty>
       </EuiFlyoutFooter>

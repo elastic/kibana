@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
-  describe('Rules and Actions', () => {
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Kibana', () => {
     loadTestFile(require.resolve('./overview'));
-    loadTestFile(require.resolve('./instance'));
+    loadTestFile(require.resolve('./instances'));
   });
 }

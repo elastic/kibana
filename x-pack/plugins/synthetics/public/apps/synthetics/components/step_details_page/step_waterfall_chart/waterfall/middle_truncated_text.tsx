@@ -173,7 +173,12 @@ export const MiddleTruncatedText = ({
         </>
       </WaterfallChartTooltip>
       <span>
-        <EuiLink href={url} external target="_blank">
+        <EuiLink
+          data-test-subj="syntheticsMiddleTruncatedTextLink"
+          href={url}
+          external
+          target="_blank"
+        >
           <EuiScreenReaderOnly>
             <span>
               <FormattedMessage

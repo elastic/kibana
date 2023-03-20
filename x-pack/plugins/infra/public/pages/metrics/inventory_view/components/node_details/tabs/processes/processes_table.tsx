@@ -126,6 +126,7 @@ export const ProcessesTable = ({
               values={{
                 metricbeatDocsLink: (
                   <EuiLink
+                    data-test-subj="infraProcessesTableTopNByCpuOrMemoryLink"
                     href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-module-system.html"
                     target="_blank"
                   >
@@ -140,7 +141,10 @@ export const ProcessesTable = ({
           </EuiText>
         }
         actions={
-          <EuiButton onClick={clearSearchBar}>
+          <EuiButton
+            data-test-subj="infraProcessesTableClearFiltersButton"
+            onClick={clearSearchBar}
+          >
             {i18n.translate('xpack.infra.metrics.nodeDetails.noProcessesClearFilters', {
               defaultMessage: 'Clear filters',
             })}
