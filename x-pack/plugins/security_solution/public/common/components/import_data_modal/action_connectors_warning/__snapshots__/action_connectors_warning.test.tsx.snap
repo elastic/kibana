@@ -138,7 +138,7 @@ Object {
             aria-hidden="true"
             class="emotion-euiCallOut__icon"
             color="inherit"
-            data-euiicon-type="alert"
+            data-euiicon-type="warning"
           />
           <span
             data-test-subj="actionConnectorsWarningsCallOutTitle"
@@ -202,7 +202,7 @@ Object {
           aria-hidden="true"
           class="emotion-euiCallOut__icon"
           color="inherit"
-          data-euiicon-type="alert"
+          data-euiicon-type="warning"
         />
         <span
           data-test-subj="actionConnectorsWarningsCallOutTitle"
@@ -323,7 +323,7 @@ Object {
             aria-hidden="true"
             class="emotion-euiCallOut__icon"
             color="inherit"
-            data-euiicon-type="alert"
+            data-euiicon-type="warning"
           />
           <span
             data-test-subj="actionConnectorsWarningsCallOutTitle"
@@ -387,7 +387,7 @@ Object {
           aria-hidden="true"
           class="emotion-euiCallOut__icon"
           color="inherit"
-          data-euiicon-type="alert"
+          data-euiicon-type="warning"
         />
         <span
           data-test-subj="actionConnectorsWarningsCallOutTitle"
@@ -508,7 +508,7 @@ Object {
             aria-hidden="true"
             class="emotion-euiCallOut__icon"
             color="inherit"
-            data-euiicon-type="alert"
+            data-euiicon-type="warning"
           />
           <span
             data-test-subj="actionConnectorsWarningsCallOutTitle"
@@ -572,7 +572,7 @@ Object {
           aria-hidden="true"
           class="emotion-euiCallOut__icon"
           color="inherit"
-          data-euiicon-type="alert"
+          data-euiicon-type="warning"
         />
         <span
           data-test-subj="actionConnectorsWarningsCallOutTitle"

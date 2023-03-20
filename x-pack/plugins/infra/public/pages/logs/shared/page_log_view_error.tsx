@@ -28,7 +28,7 @@ export const LogViewErrorPage: React.FC<{
   return (
     <LogsPageTemplate isEmptyState={true}>
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         iconColor="danger"
         title={
           <h2>
@@ -153,7 +153,7 @@ const LogSourceErrorMessage: React.FC<{ error: Error }> = ({ error }) => {
 };
 
 const LogSourceErrorCallout: React.FC<{ title: React.ReactNode }> = ({ title, children }) => (
-  <EuiCallOut className="eui-textLeft" color="danger" iconType="alert" title={title}>
+  <EuiCallOut className="eui-textLeft" color="danger" iconType="warning" title={title}>
     <p>{children}</p>
   </EuiCallOut>
 );

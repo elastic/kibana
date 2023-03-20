@@ -4427,7 +4427,7 @@
             "section": "def-server.Artifact",
             "text": "Artifact"
           },
-          ", \"decodedSha256\" | \"identifier\">>({ identifier, decodedSha256, }: T) => string"
+          ", \"identifier\" | \"decodedSha256\">>({ identifier, decodedSha256, }: T) => string"
         ],
         "path": "x-pack/plugins/fleet/server/services/artifacts/mappings.ts",
         "deprecated": false,
@@ -25045,6 +25045,22 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.getAgentsByActionsPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getAgentsByActionsPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],

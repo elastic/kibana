@@ -105,7 +105,7 @@ export function SettingsPage({
           { defaultMessage: 'Sorry, there was an error' }
         )}
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         <p>
           {i18n.translate(

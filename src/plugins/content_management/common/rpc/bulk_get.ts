@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
+import type { Version } from '@kbn/object-versioning';
+import { versionSchema } from './constants';
 
 import type { ProcedureSchemas } from './types';
 
@@ -13,6 +15,7 @@ export const bulkGetSchemas: ProcedureSchemas = {
   in: schema.object(
     {
       contentTypeId: schema.string(),
+      version: versionSchema,
       ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
@@ -27,5 +30,6 @@ export const bulkGetSchemas: ProcedureSchemas = {
 export interface BulkGetIn<T extends string = string, Options extends object = object> {
   contentTypeId: T;
   ids: string[];
+  version?: Version;
   options?: Options;
 }
