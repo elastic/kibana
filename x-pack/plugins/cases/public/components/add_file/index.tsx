@@ -25,19 +25,17 @@ import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
 import { CASES_FILE_KINDS } from '../../files';
 import { useKibana } from '../../common/lib/kibana';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { useCasesContext } from '../cases_context/use_cases_context';
 import * as i18n from './translations';
 
 interface AddFileProps {
   caseId: string;
   onFileAdded: () => void;
+  owner: string;
 }
 
-const AddFileComponent: React.FC<AddFileProps> = ({ caseId, onFileAdded }) => {
+const AddFileComponent: React.FC<AddFileProps> = ({ caseId, onFileAdded, owner }) => {
   const { notifications } = useKibana().services;
   const { client: filesClient } = useFilesContext();
-
-  const { owner } = useCasesContext();
 
   const { isLoading, createAttachments } = useCreateAttachments();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -52,7 +50,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId, onFileAdded }) => {
       try {
         await createAttachments({
           caseId,
-          caseOwner: owner[0],
+          caseOwner: owner,
           data: [
             {
               type: CommentType.externalReference,
@@ -127,7 +125,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId, onFileAdded }) => {
               kind={CASES_FILE_KINDS[APP_ID].id}
               onDone={onUploadDone}
               onError={onError}
-              meta={{ caseId }}
+              meta={{ caseId, owner }}
             />
           </EuiModalBody>
         </EuiModal>

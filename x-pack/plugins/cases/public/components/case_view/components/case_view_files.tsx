@@ -16,12 +16,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { Case } from '../../../../common/ui/types';
 import type { GetCaseFilesParams } from '../../../containers/use_get_case_files';
 
-import { CaseViewTabs } from '../case_view_tabs';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
-import { useGetCaseFiles } from '../../../containers/use_get_case_files';
-import { FilesTable } from '../../files/files_table';
-import { AddFile } from '../../add_file';
 import { casesQueriesKeys } from '../../../containers/constants';
+import { useGetCaseFiles } from '../../../containers/use_get_case_files';
+import { AddFile } from '../../add_file';
+import { useCasesContext } from '../../cases_context/use_cases_context';
+import { FilesTable } from '../../files/files_table';
+import { CaseViewTabs } from '../case_view_tabs';
 
 interface CaseViewFilesProps {
   caseData: Case;
@@ -29,10 +30,12 @@ interface CaseViewFilesProps {
 
 export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
   const queryClient = useQueryClient();
+  const { owner } = useCasesContext();
   const [filteringOptions, setFilteringOptions] = useState<GetCaseFilesParams>({
     page: 0,
     perPage: 10,
     caseId: caseData.id,
+    owner: owner[0],
   });
   const { data: attachmentsData, isLoading } = useGetCaseFiles(filteringOptions);
 
@@ -71,7 +74,7 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
       pageIndex: filteringOptions.page,
       pageSize: filteringOptions.perPage,
       totalItemCount: attachmentsData?.total ?? 0,
-      pageSizeOptions: [5, 10, 0],
+      pageSizeOptions: [10, 25, 50],
       showPerPageOptions: true,
     }),
     [filteringOptions.page, filteringOptions.perPage, attachmentsData]
@@ -100,7 +103,11 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
           <EuiFlexItem style={{ maxHeight: 300 }}>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
-                <AddFile caseId={caseData.id} onFileAdded={refreshAttachmentsTable} />
+                <AddFile
+                  caseId={caseData.id}
+                  onFileAdded={refreshAttachmentsTable}
+                  owner={filteringOptions.owner}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
                 <EuiFieldSearch
@@ -118,7 +125,7 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
                   options={toggleButtonsIcons}
                   idSelected={tableViewSelectedId}
                   onChange={() => {}}
-                  hidden
+                  css={'display:none'}
                   isIconOnly
                 />
               </EuiFlexItem>

@@ -7,34 +7,50 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ACTIONS = i18n.translate('xpack.cases.caseView.files.actions', {
+  defaultMessage: 'Actions',
+});
+
 export const ADD_FILE = i18n.translate('xpack.cases.caseView.files.addFile', {
   defaultMessage: 'Add File',
 });
 
-export const DOWNLOAD_FILE = i18n.translate('xpack.cases.caseView.files.downloadFile', {
-  defaultMessage: 'Download File',
-});
-
-export const DELETE_FILE = i18n.translate('xpack.cases.caseView.files.deleteFile', {
-  defaultMessage: 'Delete File',
-});
-
-export const RESULTS_COUNT = i18n.translate('xpack.cases.caseView.files.resultsCount', {
-  defaultMessage: 'Showing',
-});
-
-export const NAME = i18n.translate('xpack.cases.caseView.files.name', {
-  defaultMessage: 'Name',
-});
-
-export const TYPE = i18n.translate('xpack.cases.caseView.files.type', {
-  defaultMessage: 'Type',
+export const CLOSE_MODAL = i18n.translate('xpack.cases.caseView.files.closeModal', {
+  defaultMessage: 'Close',
 });
 
 export const DATE_ADDED = i18n.translate('xpack.cases.caseView.files.dateAdded', {
   defaultMessage: 'Date Added',
 });
 
-export const ACTIONS = i18n.translate('xpack.cases.caseView.files.actions', {
-  defaultMessage: 'Actions',
+export const DELETE_FILE = i18n.translate('xpack.cases.caseView.files.deleteFile', {
+  defaultMessage: 'Delete File',
+});
+
+export const DOWNLOAD_FILE = i18n.translate('xpack.cases.caseView.files.downloadFile', {
+  defaultMessage: 'Download File',
+});
+
+export const FILES_TABLE = i18n.translate('xpack.cases.caseView.files.filesTable', {
+  defaultMessage: 'Files table',
+});
+
+export const NAME = i18n.translate('xpack.cases.caseView.files.name', {
+  defaultMessage: 'Name',
+});
+
+export const NO_FILES = i18n.translate('xpack.cases.caseView.files.noFilesAvailable', {
+  defaultMessage: 'No files available',
+});
+
+export const NO_PREVIEW = i18n.translate('xpack.cases.caseView.files.noPreviewAvailable', {
+  defaultMessage: 'No preview available',
+});
+
+export const RESULTS_COUNT = i18n.translate('xpack.cases.caseView.files.resultsCount', {
+  defaultMessage: 'Showing',
+});
+
+export const TYPE = i18n.translate('xpack.cases.caseView.files.type', {
+  defaultMessage: 'Type',
 });
