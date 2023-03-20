@@ -417,7 +417,6 @@
     "controls.controlGroup.manageControl.titleInputTitle": "标签",
     "controls.controlGroup.manageControl.widthInputTitle": "最小宽度",
     "controls.controlGroup.management.addControl": "添加控件",
-    "controls.controlGroup.management.buttonTitle": "设置",
     "controls.controlGroup.management.delete": "删除控件",
     "controls.controlGroup.management.delete.cancel": "取消",
     "controls.controlGroup.management.delete.confirm": "删除",
