@@ -36,6 +36,7 @@ import type {
   RangeIndexPatternColumn,
   PieVisualizationState,
   MedianIndexPatternColumn,
+  MetricVisualizationState,
 } from '@kbn/lens-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { CodeEditor, HJsonLang, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -347,6 +348,30 @@ function getLensAttributesPartition(
   };
 }
 
+function getLensAttributesMetric(
+  defaultIndexPattern: DataView,
+  fields: FieldsMap,
+  color: string
+): LensAttributesByType<MetricVisualizationState> {
+  const dataLayer = getDataLayer('string', fields.number, true);
+  const baseAttributes = getBaseAttributes(defaultIndexPattern, fields, 'number', dataLayer);
+  const metricConfig: MetricVisualizationState = {
+    layerId: 'layer1',
+    layerType: 'data',
+    metricAccessor: 'col2',
+    color,
+    breakdownByAccessor: 'col1',
+  };
+  return {
+    ...baseAttributes,
+    visualizationType: 'lnsMetric',
+    state: {
+      ...baseAttributes.state,
+      visualization: metricConfig,
+    },
+  };
+}
+
 function getFieldsByType(dataView: DataView) {
   const aggregatableFields = dataView.fields.filter((f) => f.aggregatable);
   const fields: Partial<FieldsMap> = {
@@ -424,6 +449,10 @@ export const App = (props: {
     { id: 'table', attributes: getLensAttributesDatatable(props.defaultDataView, fields) },
     { id: 'heatmap', attributes: getLensAttributesHeatmap(props.defaultDataView, fields) },
     { id: 'gauge', attributes: getLensAttributesGauge(props.defaultDataView, fields) },
+    {
+      id: 'metric',
+      attributes: getLensAttributesMetric(props.defaultDataView, fields, initialColor),
+    },
   ];
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const charts = useMemo(() => [...defaultCharts, ...loadedCharts], [loadedCharts]);

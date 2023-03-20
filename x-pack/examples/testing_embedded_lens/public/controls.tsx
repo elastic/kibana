@@ -27,6 +27,7 @@ import type {
   HeatmapVisualizationState,
   PieVisualizationState,
   TypedLensByValueInput,
+  MetricVisualizationState,
   XYState,
 } from '@kbn/lens-plugin/public';
 
@@ -65,12 +66,19 @@ function isGaugeChart(
   return attributes.visualizationType === 'lnsGauge';
 }
 
+function isMetricChart(
+  attributes: TypedLensByValueInput['attributes']
+): attributes is LensAttributesByType<MetricVisualizationState> {
+  return attributes.visualizationType === 'lnsMetric';
+}
+
 function isSupportedChart(attributes: TypedLensByValueInput['attributes']) {
   return (
     isXYChart(attributes) ||
     isPieChart(attributes) ||
     isHeatmapChart(attributes) ||
-    isGaugeChart(attributes)
+    isGaugeChart(attributes) ||
+    isMetricChart(attributes)
   );
 }
 
@@ -231,6 +239,23 @@ export function AttributesMenu({
             />
           </EuiFormRow>
         ) : null}
+        {isMetricChart(currentAttributes) ? (
+          <EuiFormRow label="Pick color" display="columnCompressed">
+            <EuiColorPicker
+              onChange={(newColor, output) => {
+                setColor(newColor, output);
+                // for sake of semplicity of this example change it locally and then shallow copy it
+                currentAttributes.state.visualization.color = newColor;
+                // this will make a string copy of it
+                const newAttributes = JSON.stringify(currentAttributes, null, 2);
+                currentSO.current = newAttributes;
+                saveValidSO(newAttributes);
+              }}
+              color={color}
+              isInvalid={!!errors}
+            />
+          </EuiFormRow>
+        ) : null}
         {isPieChart(currentAttributes) ? (
           <EuiFormRow label="Show values" display="columnCompressedSwitch">
             <EuiSwitch
@@ -300,7 +325,16 @@ type GaugeOverride = Record<'gauge', { subtype: 'goal'; angleStart: number; angl
 type SettingsOverride = Record<
   'settings',
   | { onBrushEnd: 'ignore' }
-  | { theme: { heatmap: { xAxisLabel: { visible: boolean }; yAxisLabel: { visible: boolean } } } }
+  | {
+      theme: {
+        heatmap: { xAxisLabel: { visible: boolean }; yAxisLabel: { visible: boolean } };
+      };
+    }
+  | {
+      theme: {
+        metric: { border: string };
+      };
+    }
 >;
 
 export type AllOverrides = Partial<XYOverride & PieOverride & SettingsOverride & GaugeOverride>;
@@ -418,6 +452,23 @@ export function OverridesMenu({
             rowLabel="Shape override"
             controlLabel="Enable Arc shape"
             helpText="Note that this is used only for example purposes, the arc configuration has some conflicts with some Lens attributes."
+          />
+        ) : null}
+        {isMetricChart(currentAttributes) ? (
+          <OverrideSwitch
+            override={{
+              settings: {
+                theme: {
+                  metric: {
+                    border: '#D65757',
+                  },
+                },
+              },
+            }}
+            value={overrides}
+            setOverrideValue={setOverrides}
+            rowLabel="Metric override"
+            controlLabel="Enable border color"
           />
         ) : null}
       </div>
