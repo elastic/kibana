@@ -66,6 +66,7 @@ export const HostsPage = () => {
               ),
               rightSideItems: [
                 <EuiButton
+                  data-test-subj="infraHostsPageTellUsWhatYouThinkButton"
                   href={HOSTS_FEEDBACK_LINK}
                   target="_blank"
                   color="warning"

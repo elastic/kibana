@@ -116,7 +116,7 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
                 { defaultMessage: 'Error creating pipeline' }
               )}
               color="danger"
-              iconType="alert"
+              iconType="error"
             >
               {createErrors.map((message, i) => (
                 <p key={`createError.${i}`}>{message}</p>

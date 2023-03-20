@@ -17,7 +17,7 @@ import {
   BaseCreateProps,
   TypeSpecificCreateProps,
 } from '../../../rule_schema';
-import { created_at, updated_at, created_by, updated_by } from '../../../schemas/common';
+import { created_at, updated_at, created_by, updated_by, revision } from '../../../schemas/common';
 
 /**
  * Differences from this and the createRulesSchema are
@@ -44,6 +44,7 @@ export const RuleToImport = t.intersection([
       created_by,
       related_integrations: RelatedIntegrationArray,
       required_fields: RequiredFieldArray,
+      revision,
       setup: SetupGuide,
     })
   ),

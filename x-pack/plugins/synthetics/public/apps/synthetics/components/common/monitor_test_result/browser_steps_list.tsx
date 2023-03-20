@@ -127,7 +127,7 @@ export const BrowserStepsList = ({
       align: 'left',
       field: 'timestamp',
       name: SCREENSHOT_LABEL,
-      render: (_timestamp: string, step) => (
+      render: (timestamp: string, step) => (
         <JourneyStepScreenshotContainer
           checkGroup={step.monitor.check_group}
           initialStepNumber={step.synthetics?.step?.index}
@@ -135,6 +135,7 @@ export const BrowserStepsList = ({
           allStepsLoaded={!loading}
           retryFetchOnRevisit={true}
           size={screenshotImageSize}
+          timestamp={timestamp}
         />
       ),
       mobileOptions: {
@@ -213,6 +214,7 @@ export const BrowserStepsList = ({
           checkGroup={item.monitor.check_group}
           stepIndex={item.synthetics?.step?.index}
           configId={item.config_id!}
+          target="_blank"
         />
       ),
     },

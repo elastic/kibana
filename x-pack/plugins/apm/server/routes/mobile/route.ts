@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
@@ -14,13 +15,17 @@ import {
   getMobileHttpRequests,
   HttpRequestsTimeseries,
 } from './get_mobile_http_requests';
-import { getMobileFilters } from './get_mobile_filters';
+import { getMobileFilters, MobileFiltersResponse } from './get_mobile_filters';
 import { getMobileSessions, SessionsTimeseries } from './get_mobile_sessions';
 import { getMobileStatsPeriods, MobilePeriodStats } from './get_mobile_stats';
 import {
   getMobileLocationStatsPeriods,
   MobileLocationStats,
 } from './get_mobile_location_stats';
+import {
+  getMobileTermsByField,
+  MobileTermsByFieldResponse,
+} from './get_mobile_terms_by_field';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -41,7 +46,7 @@ const mobileFiltersRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    mobileFilters: Awaited<ReturnType<typeof getMobileFilters>>;
+    mobileFilters: MobileFiltersResponse;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -219,10 +224,53 @@ const httpRequestsChartRoute = createApmServerRoute({
   },
 });
 
+const mobileTermsByFieldRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/terms',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      environmentRt,
+      t.type({
+        size: toNumberRt,
+        fieldName: t.string,
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    terms: MobileTermsByFieldResponse;
+  }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { kuery, environment, start, end, size, fieldName } = params.query;
+
+    const terms = await getMobileTermsByField({
+      kuery,
+      environment,
+      start,
+      end,
+      serviceName,
+      apmEventClient,
+      fieldName,
+      size,
+    });
+
+    return { terms };
+  },
+});
+
 export const mobileRouteRepository = {
   ...mobileFiltersRoute,
   ...sessionsChartRoute,
   ...httpRequestsChartRoute,
   ...mobileStatsRoute,
   ...mobileLocationStatsRoute,
+  ...mobileTermsByFieldRoute,
 };

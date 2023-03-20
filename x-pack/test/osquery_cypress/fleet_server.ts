@@ -6,83 +6,52 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import axios, { AxiosRequestConfig } from 'axios';
 import execa from 'execa';
+import { runFleetServerIfNeeded } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/fleet_server';
+import { KbnClient } from '@kbn/test';
 import { Manager } from './resource_manager';
-import { getLatestVersion } from './artifact_manager';
-import { AgentManagerParams } from './agent';
+import { addIntegrationToAgentPolicy } from './utils';
 
 export class FleetManager extends Manager {
   private fleetContainerId?: string;
-  private config: AgentManagerParams;
   private log: ToolingLog;
-  private requestOptions: AxiosRequestConfig;
-  constructor(config: AgentManagerParams, log: ToolingLog, requestOptions: AxiosRequestConfig) {
+  private kbnClient: KbnClient;
+
+  constructor(kbnClient: KbnClient, log: ToolingLog) {
     super();
-    this.config = config;
     this.log = log;
-    this.requestOptions = requestOptions;
+    this.kbnClient = kbnClient;
   }
+
   public async setup(): Promise<void> {
-    this.log.info('Setting fleet up');
+    const fleetServerConfig = await runFleetServerIfNeeded();
 
-    // default fleet server policy no longer created by default
-    const {
-      data: {
-        item: { id: policyId },
-      },
-    } = await axios.post(
-      `${this.config.kibanaUrl}/api/fleet/agent_policies`,
-      {
-        name: 'Default Fleet Server policy',
-        description: '',
-        namespace: 'default',
-        monitoring_enabled: ['logs', 'metrics'],
-        has_fleet_server: true,
-      },
-      this.requestOptions
+    if (!fleetServerConfig) {
+      throw new Error('Fleet server config not found');
+    }
+
+    await addIntegrationToAgentPolicy(
+      this.kbnClient,
+      'fleet-server-policy',
+      'Default Fleet Server Policy',
+      'osquery_manager'
     );
 
-    const response = await axios.post(
-      `${this.config.kibanaUrl}/api/fleet/service_tokens`,
-      {},
-      this.requestOptions
-    );
-    const serviceToken = response.data.value;
-    const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
-    this.log.info(artifact);
-
-    const host = 'host.docker.internal';
-
-    const dockerArgs = [
-      'run',
-      '--detach',
-      '-p',
-      `8220:8220`,
-      '--add-host',
-      'host.docker.internal:host-gateway',
-      '--env',
-      'FLEET_SERVER_ENABLE=true',
-      '--env',
-      `FLEET_SERVER_ELASTICSEARCH_HOST=http://${host}:${this.config.esPort}`,
-      '--env',
-      `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
-      '--env',
-      `FLEET_SERVER_POLICY=${policyId}`,
-      '--rm',
-      artifact,
-    ];
-
-    this.log.info('docker ' + dockerArgs.join(' '));
-    this.fleetContainerId = (await execa('docker', dockerArgs)).stdout;
+    this.fleetContainerId = fleetServerConfig.fleetServerContainerId;
   }
 
-  protected _cleanup() {
+  public cleanup() {
+    super.cleanup();
+
     this.log.info('Removing old fleet config');
     if (this.fleetContainerId) {
       this.log.info('Closing fleet process');
 
-      execa.sync('docker', ['kill', this.fleetContainerId]);
+      try {
+        execa.sync('docker', ['kill', this.fleetContainerId]);
+      } catch (err) {
+        this.log.error('Error closing fleet server process');
+      }
       this.log.info('Fleet server process closed');
     }
   }

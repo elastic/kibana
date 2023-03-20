@@ -79,7 +79,7 @@ export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) =
               }
             )}
             color="warning"
-            iconType="alert"
+            iconType="warning"
           >
             {i18n.translate(
               'xpack.enterpriseSearch.content.nativeConnector.memoryCallout.content',
