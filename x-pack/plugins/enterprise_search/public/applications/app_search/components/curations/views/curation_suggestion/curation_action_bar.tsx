@@ -39,7 +39,7 @@ export const CurationActionBar: React.FC = () => {
                   <EuiButton
                     size="s"
                     color="danger"
-                    iconType="crossInACircleFilled"
+                    iconType="cross"
                     data-test-subj="rejectButton"
                     onClick={rejectSuggestion}
                   >

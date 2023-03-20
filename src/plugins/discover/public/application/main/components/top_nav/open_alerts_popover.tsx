@@ -82,7 +82,7 @@ export function AlertsPopover({
       stateContainer.actions.setAdHocDataViews(metadata.adHocDataViewList);
     };
 
-    return triggersActionsUi?.getAddAlertFlyout({
+    return triggersActionsUi?.getAddRuleFlyout({
       metadata: discoverMetadata,
       consumer: 'discover',
       onClose: (_, metadata) => {

@@ -160,7 +160,7 @@ const LogsStep = ({
       <EuiCallOut
         title={i18nTexts.loadingError}
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="deprecationLogsErrorCallout"
       >
         <p>

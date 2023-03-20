@@ -75,7 +75,7 @@ export const createKbnUrlStateStorage = (
   }
 ): IKbnUrlStateStorage => {
   const url = createKbnUrlControls(history);
-  const onErrorDebounced = onGetError ? throttle((e) => onGetError(e), 100) : undefined;
+  const onGetErrorThrottled = onGetError ? throttle((e) => onGetError(e), 100) : undefined;
   return {
     set: <State>(
       key: string,
@@ -102,7 +102,7 @@ export const createKbnUrlStateStorage = (
       try {
         return getStateFromKbnUrl(key, url.getPendingUrl(), { getFromHashQuery: useHashQuery });
       } catch (e) {
-        if (onErrorDebounced) onErrorDebounced(e);
+        if (onGetErrorThrottled) onGetErrorThrottled(e);
         return null;
       }
     },
@@ -118,7 +118,7 @@ export const createKbnUrlStateStorage = (
       }).pipe(
         map(() => getStateFromKbnUrl<State>(key, undefined, { getFromHashQuery: useHashQuery })),
         catchError((error) => {
-          if (onGetError) onGetError(error);
+          if (onGetErrorThrottled) onGetErrorThrottled(error);
           return of(null);
         }),
         share()
