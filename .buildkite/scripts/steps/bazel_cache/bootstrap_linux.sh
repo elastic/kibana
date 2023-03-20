@@ -10,11 +10,4 @@ export DISABLE_BOOTSTRAP_VALIDATION=true
 # Clear out bazel cache between runs to make sure that any artifacts that don't exist in the cache are uploaded
 rm -rf ~/.bazel-cache
 
-# Since our Mac agents are currently static,
-# use a temporary HOME directory that gets cleaned out between builds
-TMP_HOME="$WORKSPACE/tmp_home"
-rm -rf "$TMP_HOME"
-mkdir -p "$TMP_HOME"
-export HOME="$TMP_HOME"
-
 .buildkite/scripts/bootstrap.sh
