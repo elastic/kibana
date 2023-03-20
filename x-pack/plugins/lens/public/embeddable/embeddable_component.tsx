@@ -28,7 +28,6 @@ import type {
   PieVisualizationState,
   LegacyMetricState,
   AllowedGaugeOverrides,
-  AllowedHeatmapOverrides,
   AllowedPartitionOverrides,
   AllowedSettingsOverriddes,
   AllowedXYOverrides,
@@ -76,7 +75,6 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes' | 'overr
     | AllowedSettingsOverriddes
     | AllowedXYOverrides
     | AllowedPartitionOverrides
-    | AllowedHeatmapOverrides
     | AllowedGaugeOverrides;
 };
 
