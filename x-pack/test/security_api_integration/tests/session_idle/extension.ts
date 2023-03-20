@@ -14,6 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const config = getService('config');
   const es = getService('es');
+  const log = getService('log');
 
   const kibanaServerConfig = config.get('servers.kibana');
   const validUsername = kibanaServerConfig.username;
@@ -99,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should extend the session', async () => {
         // browsers will follow the redirect and return the new session info, but this testing framework does not
         // we simulate that behavior in this test by sending another GET request
-        await setTimeoutAsync(1000); // wait a bit
+        await setTimeoutAsync(200); // wait a bit
         const { body } = await getSessionInfo();
 
         // Make sure that all sessions have populated `createdAt` field.
