@@ -60,14 +60,13 @@ export interface DiscoverSavedSearchContainer {
    * Load a saved search by the given id
    * Resets the initial and current state of the saved search
    * @param id
-   * @param params
+   * @param dataView
    */
-  load: (id: string) => Promise<SavedSearch>;
+  load: (id: string, dataView?: DataView) => Promise<SavedSearch>;
   /**
    * Initialize a new saved search
    * Resets the initial and current state of the saved search
    * @param dataView
-   * @param appState
    */
   new: (dataView?: DataView) => Promise<SavedSearch>;
   /**
@@ -185,7 +184,6 @@ export function getSavedSearchContainer({
       set(nextSavedSearch);
     } else {
       const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
-
       hasChanged$.next(hasChanged);
       savedSearchCurrent$.next(nextSavedSearch);
     }
@@ -193,13 +191,16 @@ export function getSavedSearchContainer({
     return nextSavedSearch;
   };
 
-  const load = async (id: string): Promise<SavedSearch> => {
+  const load = async (id: string, dataView: DataView | undefined): Promise<SavedSearch> => {
     const loadedSavedSearch = await getSavedSearch(id, {
       search: services.data.search,
       savedObjectsClient: services.core.savedObjects.client,
       spaces: services.spaces,
       savedObjectsTagging: services.savedObjectsTagging,
     });
+    if (!loadedSavedSearch.searchSource.getField('index') && dataView) {
+      loadedSavedSearch.searchSource.setField('index', dataView);
+    }
     restoreStateFromSavedSearch({
       savedSearch: loadedSavedSearch,
       timefilter: services.timefilter,

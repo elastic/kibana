@@ -67,19 +67,13 @@ export const getTopNavLinks = ({
       defaultMessage: 'Alerts',
     }),
     run: async (anchorElement: HTMLElement) => {
-      const updateDataViewList = async (newAdHocDataViews: DataView[]) => {
-        await state.actions.loadDataViewList();
-        state.actions.setAdHocDataViews(newAdHocDataViews);
-      };
       openAlertsPopover({
         I18nContext: services.core.i18n.Context,
         theme$: services.core.theme.theme$,
         anchorElement,
-        searchSource: state.savedSearchState.get().searchSource,
         services,
+        stateContainer: state,
         adHocDataViews,
-        updateDataViewList,
-        savedQueryId: state.appState.getState().savedQuery,
       });
     },
     testId: 'discoverAlertsButton',

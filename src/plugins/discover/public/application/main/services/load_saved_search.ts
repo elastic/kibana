@@ -30,7 +30,7 @@ export const loadSavedSearch = async (
   }
   const appState = !isEmptyURL ? appStateContainer.getState() : undefined;
   let nextSavedSearch = isPersistedSearch
-    ? await savedSearchContainer.load(id)
+    ? await savedSearchContainer.load(id, dataView)
     : await savedSearchContainer.new(dataView);
 
   const updateDataView =

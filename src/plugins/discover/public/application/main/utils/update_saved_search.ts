@@ -10,7 +10,6 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
-import { updatePersistedSearchSource } from './update_search_source';
 
 export function updateSavedSearch(
   {
@@ -27,10 +26,10 @@ export function updateSavedSearch(
   initial: boolean = false
 ) {
   if (!initial) {
-    updatePersistedSearchSource(savedSearch.searchSource, {
-      dataView,
-      services,
-    });
+    savedSearch.searchSource
+      .setField('index', dataView)
+      .setField('query', services.data.query.queryString.getQuery() || null)
+      .setField('filter', services.data.query.filterManager.getFilters());
   } else {
     savedSearch.searchSource
       .setField('index', dataView)
