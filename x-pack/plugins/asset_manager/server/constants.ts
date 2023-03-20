@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export const DEFAULT_APM_INDEX = 'metrics-apm*';
+export const ASSETS_INDEX_PREFIX = 'assets';
+export const ASSET_MANAGER_API_BASE = '/api/asset-manager';
