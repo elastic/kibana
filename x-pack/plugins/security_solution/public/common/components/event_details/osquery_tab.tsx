@@ -16,7 +16,7 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { useKibana } from '../../lib/kibana';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
-import type { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
+import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
 
 const TabContentWrapper = styled.div`
   height: 100%;
@@ -24,7 +24,7 @@ const TabContentWrapper = styled.div`
 `;
 type RuleParameters = Array<{
   response_actions: Array<{
-    action_type_id: RESPONSE_ACTION_TYPES.OSQUERY;
+    action_type_id: RESPONSE_ACTION_TYPES;
     params: Record<string, unknown>;
   }>;
 }>;
@@ -99,7 +99,11 @@ export const useOsqueryTab = ({
   const responseActions =
     expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
-  if (!responseActions?.length) {
+  const osqueryResponseActions = responseActions?.filter(
+    (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
+  );
+
+  if (!osqueryResponseActions?.length) {
     return;
   }
 

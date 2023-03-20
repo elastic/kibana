@@ -153,14 +153,24 @@ export const EndpointActionListRequestSchema = {
     ),
     withRuleActions: schema.boolean({ defaultValue: true }),
     alertIds: schema.maybe(
-      schema.arrayOf(schema.string({ minLength: 1 }), {
-        minSize: 1,
-        validate: (alertIds) => {
-          if (alertIds.map((v) => v.trim()).some((v) => !v.length)) {
-            return 'alertIds cannot contain empty strings';
-          }
-        },
-      })
+      schema.oneOf([
+        schema.arrayOf(schema.string({ minLength: 1 }), {
+          minSize: 1,
+          validate: (alertIds) => {
+            if (alertIds.map((v) => v.trim()).some((v) => !v.length)) {
+              return 'alertIds cannot contain empty strings';
+            }
+          },
+        }),
+        schema.string({
+          minLength: 1,
+          validate: (actionId) => {
+            if (!actionId.trim().length) {
+              return 'alertId cannot be an empty string';
+            }
+          },
+        }),
+      ])
     ),
   }),
 };

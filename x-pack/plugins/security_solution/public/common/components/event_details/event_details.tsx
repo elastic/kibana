@@ -21,6 +21,7 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useEndpointResponseActionsTab } from './endpoint_response_actions_tab';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { getMitreComponentParts } from '../../../detections/mitre/get_mitre_threat_component';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
@@ -74,6 +75,7 @@ export enum EventsViewType {
   summaryView = 'summary-view',
   threatIntelView = 'threat-intel-view',
   osqueryView = 'osquery-results-view',
+  endpointView = 'endpoint-results-view',
 }
 
 interface Props {
@@ -429,11 +431,20 @@ const EventDetailsComponent: React.FC<Props> = ({
     ...(detailsEcsData !== null ? { ecsData: detailsEcsData } : {}),
   });
 
+  const endpointResponseActionsTab = useEndpointResponseActionsTab({
+    rawEventData: rawEventData as AlertRawEventData,
+  });
+
   const tabs = useMemo(() => {
-    return [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab].filter(
-      (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
-    );
-  }, [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab]);
+    return [
+      summaryTab,
+      threatIntelTab,
+      tableTab,
+      jsonTab,
+      osqueryTab,
+      endpointResponseActionsTab,
+    ].filter((tab: EventViewTab | undefined): tab is EventViewTab => !!tab);
+  }, [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab, endpointResponseActionsTab]);
 
   const selectedTab = useMemo(
     () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],

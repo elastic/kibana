@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import type { BrowserField } from '../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
@@ -36,3 +37,35 @@ export interface EventSummaryField {
   fieldType?: string;
   overrideField?: string;
 }
+
+export interface AlertRawEventData {
+  _id: string;
+  fields: {
+    ['agent.id']?: string[];
+    ['kibana.alert.rule.parameters']: RuleParameters;
+    ['kibana.alert.rule.name']: string[];
+  };
+
+  [key: string]: unknown;
+}
+
+export interface ExpandedEventFieldsObject {
+  agent?: {
+    id: string[];
+  };
+  kibana: {
+    alert?: {
+      rule?: {
+        parameters: RuleParameters;
+        name: string[];
+      };
+    };
+  };
+}
+
+type RuleParameters = Array<{
+  response_actions: Array<{
+    action_type_id: RESPONSE_ACTION_TYPES;
+    params: Record<string, unknown>;
+  }>;
+}>;

@@ -76,7 +76,7 @@ export const actionListHandler = (
 
       const requestParams = {
         withOutputs: formatStringIds(withOutputs),
-        alertIds,
+        alertIds: formatStringIds(alertIds),
         withRuleActions,
         commands: formatCommandValues(commands),
         esClient,
