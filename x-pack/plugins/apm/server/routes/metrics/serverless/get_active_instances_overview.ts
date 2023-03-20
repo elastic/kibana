@@ -59,7 +59,7 @@ export async function getServerlessActiveInstancesOverview({
   end: number;
   serverlessId?: string;
   apmEventClient: APMEventClient;
-}) {
+}): Promise<ActiveInstanceOverview[]> {
   const { intervalString } = getBucketSize({
     start,
     end,

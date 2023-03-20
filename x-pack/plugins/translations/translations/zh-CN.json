@@ -10040,7 +10040,6 @@
     "xpack.csp.dashboard.benchmarkSection.manageRulesButton": "管理规则",
     "xpack.csp.dashboard.cspPageTemplate.pageTitle": "云态势",
     "xpack.csp.dashboard.risksTable.cisSectionColumnLabel": "CIS 部分",
-    "xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle": "查看此集群的所有失败结果",
     "xpack.csp.dashboard.risksTable.complianceColumnLabel": "合规性",
     "xpack.csp.dashboard.risksTable.viewAllButtonTitle": "查看所有失败的结果",
     "xpack.csp.dashboard.summarySection.complianceByCisSectionPanelTitle": "合规性（按 CIS 部分）",

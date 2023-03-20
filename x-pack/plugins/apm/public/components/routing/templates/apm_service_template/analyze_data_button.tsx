@@ -85,7 +85,11 @@ export function AnalyzeDataButton() {
             'Explore Data allows you to select and filter result data in any dimension, and look for the cause or impact of performance problems',
         })}
       >
-        <EuiButtonEmpty href={href} iconType="visBarVerticalStacked">
+        <EuiButtonEmpty
+          data-test-subj="apmAnalyzeDataButtonExploreDataButton"
+          href={href}
+          iconType="visBarVerticalStacked"
+        >
           {i18n.translate('xpack.apm.analyzeDataButton.label', {
             defaultMessage: 'Explore data',
           })}
