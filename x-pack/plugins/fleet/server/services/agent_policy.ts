@@ -1087,7 +1087,6 @@ class AgentPolicyService {
       fields: ['revision'],
       perPage: SO_SEARCH_LIMIT,
     });
-    // Don't allow updating policies with fleet server to logstash outputs
     const agentPolicyIds = currentPolicies.saved_objects.map((policy) => policy.id);
     const fullAgentPolicies = await agentPolicyService.getByIDs(soClient, agentPolicyIds, {
       withPackagePolicies: true,
