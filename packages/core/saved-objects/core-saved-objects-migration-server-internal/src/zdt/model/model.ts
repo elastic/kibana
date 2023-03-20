@@ -69,5 +69,5 @@ export const model = (
 
   // couldn't find a way to infer the type of the state depending on the state of the handler
   // even if they are directly coupled, so had to force-cast to this ugly any instead.
-  return stageHandler(current as any, response, context);
+  return stageHandler(current as any, response as any, context);
 };
