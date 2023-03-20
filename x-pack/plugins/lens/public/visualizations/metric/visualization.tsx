@@ -9,12 +9,15 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render } from 'react-dom';
-import { PaletteRegistry } from '@kbn/coloring';
+import { PaletteOutput, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
+import { CollapseFunction } from '../../../common/expressions';
+import type { LayerType } from '../../../common';
 import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
@@ -32,7 +35,6 @@ import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { FormatSelectorOptions } from '../../datasources/form_based/dimension_panel/format_selector';
 import { toExpression } from './to_expression';
-import type { MetricVisualizationState } from './types';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -44,6 +46,31 @@ export const showingBar = (
 export const getDefaultColor = (state: MetricVisualizationState) =>
   showingBar(state) ? euiLightVars.euiColorPrimary : euiThemeVars.euiColorLightestShade;
 
+export interface MetricVisualizationState {
+  layerId: string;
+  layerType: LayerType;
+  metricAccessor?: string;
+  secondaryMetricAccessor?: string;
+  maxAccessor?: string;
+  breakdownByAccessor?: string;
+  // the dimensions can optionally be single numbers
+  // computed by collapsing all rows
+  collapseFn?: CollapseFunction;
+  subtitle?: string;
+  secondaryPrefix?: string;
+  progressDirection?: LayoutDirection;
+  showBar?: boolean;
+  color?: string;
+  palette?: PaletteOutput<CustomPaletteParams>;
+  maxCols?: number;
+
+  trendlineLayerId?: string;
+  trendlineLayerType?: LayerType;
+  trendlineTimeAccessor?: string;
+  trendlineMetricAccessor?: string;
+  trendlineSecondaryMetricAccessor?: string;
+  trendlineBreakdownByAccessor?: string;
+}
 
 export const supportedDataTypes = new Set(['number']);
 
