@@ -297,7 +297,7 @@ describe('chart_switch', () => {
         .find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
         .first()
         .props().type
-    ).toEqual('alert');
+    ).toEqual('warning');
   });
 
   it('should indicate data loss if not all layers will be used', async () => {
@@ -324,7 +324,7 @@ describe('chart_switch', () => {
         .find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
         .first()
         .props().type
-    ).toEqual('alert');
+    ).toEqual('warning');
   });
 
   it('should support multi-layer suggestions without data loss', async () => {
@@ -400,7 +400,7 @@ describe('chart_switch', () => {
         .find('[data-test-subj="lnsChartSwitchPopoverAlert_visB"]')
         .first()
         .props().type
-    ).toEqual('alert');
+    ).toEqual('warning');
   });
 
   it('should not indicate data loss if there is no data', async () => {

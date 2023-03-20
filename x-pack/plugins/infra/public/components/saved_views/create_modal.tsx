@@ -84,7 +84,7 @@ export const SavedViewCreateModal = ({ close, save, isInvalid }: Props) => {
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={close}>
+        <EuiButtonEmpty data-test-subj="infraSavedViewCreateModalCancelButton" onClick={close}>
           <FormattedMessage
             defaultMessage="Cancel"
             id="xpack.infra.waffle.savedViews.cancelButton"
