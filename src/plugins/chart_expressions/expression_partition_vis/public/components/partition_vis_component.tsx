@@ -35,7 +35,7 @@ import {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { getOverridesFor, mergeThemeWithOverrides } from '@kbn/chart-expressions-common';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
@@ -357,19 +357,14 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     return 1;
   }, [visData.rows, metricColumn]);
 
-  const { theme: settingsThemeOverrides, ...settingsOverrides } = getOverridesFor(
+  const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
     overrides,
     'settings'
   ) as Partial<SettingsProps>;
 
   const themeOverrides = useMemo(
-    () =>
-      mergeThemeWithOverrides(
-        getPartitionTheme(visType, visParams, chartTheme, containerDimensions, rescaleFactor),
-        settingsThemeOverrides,
-        ['partition']
-      ),
-    [visType, visParams, chartTheme, containerDimensions, rescaleFactor, settingsThemeOverrides]
+    () => getPartitionTheme(visType, visParams, chartTheme, containerDimensions, rescaleFactor),
+    [visType, visParams, chartTheme, containerDimensions, rescaleFactor]
   );
 
   const fixedViewPort = document.getElementById('app-fixed-viewport');
@@ -502,6 +497,10 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                       },
                     },
                   },
+
+                  ...(Array.isArray(settingsThemeOverrides)
+                    ? settingsThemeOverrides
+                    : [settingsThemeOverrides]),
                 ]}
                 baseTheme={chartBaseTheme}
                 onRenderChange={onRenderChange}

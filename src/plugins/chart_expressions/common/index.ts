@@ -6,10 +6,5 @@
  * Side Public License, v 1.
  */
 
-export {
-  extractContainerType,
-  extractVisualizationType,
-  getOverridesFor,
-  mergeThemeWithOverrides,
-} from './utils';
+export { extractContainerType, extractVisualizationType, getOverridesFor } from './utils';
 export type { Simplify, MakeOverridesSerializable } from './types';

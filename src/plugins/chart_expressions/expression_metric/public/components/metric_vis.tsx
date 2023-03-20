@@ -38,7 +38,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useResizeObserver, useEuiScrollBar } from '@elastic/eui';
 import { AllowedSettingsOverriddes } from '@kbn/charts-plugin/common';
-import { getOverridesFor, mergeThemeWithOverrides } from '@kbn/chart-expressions-common';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
 import {
@@ -356,23 +356,10 @@ export const MetricVis = ({
     );
   }, [grid.length, minHeight, scrollDimensions.height]);
 
-  const { theme: settingsThemeOverrides, ...settingsOverrides } = getOverridesFor(
+  const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
     overrides,
     'settings'
   ) as Partial<SettingsProps>;
-
-  const metricTheme = mergeThemeWithOverrides(
-    {
-      background: { color: 'transparent' },
-      metric: {
-        background: defaultColor,
-        barBackground: euiThemeVars.euiColorLightShade,
-      },
-      ...chartTheme,
-    },
-    settingsThemeOverrides,
-    ['metric']
-  );
 
   return (
     <div
@@ -393,7 +380,19 @@ export const MetricVis = ({
       >
         <Chart>
           <Settings
-            theme={metricTheme}
+            theme={[
+              {
+                background: { color: 'transparent' },
+                metric: {
+                  background: defaultColor,
+                  barBackground: euiThemeVars.euiColorLightShade,
+                },
+                ...chartTheme,
+              },
+              ...(Array.isArray(settingsThemeOverrides)
+                ? settingsThemeOverrides
+                : [settingsThemeOverrides]),
+            ]}
             baseTheme={baseTheme}
             onRenderChange={onRenderChange}
             onElementClick={(events) => {

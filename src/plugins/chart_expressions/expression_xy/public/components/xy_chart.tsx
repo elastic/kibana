@@ -52,7 +52,7 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { getOverridesFor, mergeThemeWithOverrides } from '@kbn/chart-expressions-common';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import type {
   FilterEvent,
   BrushEvent,
@@ -795,40 +795,10 @@ export function XYChart({
   // enable the tooltip actions only if there is at least one splitAccessor to the dataLayer
   const hasTooltipActions = dataLayers.some((dataLayer) => dataLayer.splitAccessors) && interactive;
 
-  const { theme: settingsThemeOverrides, ...settingsOverrides } = getOverridesFor(
+  const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
     overrides,
     'settings'
   ) as Partial<SettingsProps>;
-
-  const chartFinalTheme = mergeThemeWithOverrides(
-    {
-      ...chartTheme,
-      barSeriesStyle: {
-        ...chartTheme.barSeriesStyle,
-        ...valueLabelsStyling,
-      },
-      background: {
-        color: undefined, // removes background for embeddables
-      },
-      legend: {
-        labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
-      },
-      // if not title or labels are shown for axes, add some padding if required by reference line markers
-      chartMargins: {
-        ...chartTheme.chartPaddings,
-        ...computeChartMargins(
-          linesPaddings,
-          { ...tickLabelsVisibilitySettings, x: xAxisConfig?.showLabels },
-          { ...axisTitlesVisibilitySettings, x: xAxisConfig?.showTitle },
-          yAxesMap,
-          shouldRotate
-        ),
-      },
-      markSizeRatio: args.markSizeRatio,
-    },
-    settingsThemeOverrides,
-    ['areaSeriesStyle', 'lineSeriesStyle', 'barSeriesStyle']
-  );
 
   return (
     <div css={chartContainerStyle}>
@@ -924,7 +894,36 @@ export function XYChart({
             showLegend={showLegend}
             legendPosition={legend?.isInside ? legendInsideParams : legend.position}
             legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
-            theme={chartFinalTheme}
+            theme={[
+              {
+                ...chartTheme,
+                barSeriesStyle: {
+                  ...chartTheme.barSeriesStyle,
+                  ...valueLabelsStyling,
+                },
+                background: {
+                  color: undefined, // removes background for embeddables
+                },
+                legend: {
+                  labelOptions: { maxLines: legend.shouldTruncate ? legend?.maxLines ?? 1 : 0 },
+                },
+                // if not title or labels are shown for axes, add some padding if required by reference line markers
+                chartMargins: {
+                  ...chartTheme.chartPaddings,
+                  ...computeChartMargins(
+                    linesPaddings,
+                    { ...tickLabelsVisibilitySettings, x: xAxisConfig?.showLabels },
+                    { ...axisTitlesVisibilitySettings, x: xAxisConfig?.showTitle },
+                    yAxesMap,
+                    shouldRotate
+                  ),
+                },
+                markSizeRatio: args.markSizeRatio,
+              },
+              ...(Array.isArray(settingsThemeOverrides)
+                ? settingsThemeOverrides
+                : [settingsThemeOverrides]),
+            ]}
             baseTheme={chartBaseTheme}
             allowBrushingLastHistogramBin={isTimeViz}
             rotation={shouldRotate ? 90 : 0}
