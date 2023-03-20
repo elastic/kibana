@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-export { paths } from './paths';
-export { translations } from './translations';
-export { observabilityAlertFeatureIds } from './alert_feature_ids';
+import { GenericFtrProviderContext } from '@kbn/test';
 
-export enum AlertingPages {
-  alerts = 'alerts',
-  cases = 'cases',
-  rules = 'rules',
-}
+export type FtrProviderContext = GenericFtrProviderContext<{}, {}>;

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { observabilityFeatureId, casesPath } from '../../../common';
+Cypress.on('uncaught:exception', (err, runnable) => {
+  return false;
+});
 
-export const CASES_OWNER = observabilityFeatureId;
-export const CASES_PATH = casesPath;
+import './commands';
+// import './output_command_timings';

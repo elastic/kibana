@@ -15,7 +15,7 @@ import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
 import { buildSlo } from '../../data/slo/slo';
-import { paths } from '../../config';
+import { paths } from '../../config/paths';
 import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import {
