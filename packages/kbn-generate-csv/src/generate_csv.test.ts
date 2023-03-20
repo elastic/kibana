@@ -877,7 +877,9 @@ it('adds a warning if export was unable to close the PIT', async () => {
       "error_code": undefined,
       "max_size_reached": false,
       "metrics": Object {
-        "rows": 0,
+        "csv": Object {
+          "rows": 0,
+        },
       },
       "warnings": Array [
         "Unable to close the Point-In-Time used for search. Check the Kibana server logs.",
@@ -918,7 +920,9 @@ it('will return partial data if the scroll or search fails', async () => {
       "error_code": undefined,
       "max_size_reached": false,
       "metrics": Object {
-        "rows": 0,
+        "csv": Object {
+          "rows": 0,
+        },
       },
       "warnings": Array [
         "Received a 500 response from Elasticsearch: my error",
@@ -965,7 +969,9 @@ it('handles unknown errors', async () => {
       "error_code": undefined,
       "max_size_reached": false,
       "metrics": Object {
-        "rows": 0,
+        "csv": Object {
+          "rows": 0,
+        },
       },
       "warnings": Array [
         "Encountered an unknown error: An unknown error",
