@@ -23,7 +23,7 @@ export interface UseGetGroupSelectorArgs {
   groupingId: string;
   groupingState: GroupMap;
   onGroupChangeCallback?: (param: { groupByField: string; tableId: string }) => void;
-  tracker: (
+  tracker?: (
     type: UiCounterMetricType,
     event: string | string[],
     count?: number | undefined

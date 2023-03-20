@@ -195,6 +195,9 @@ const GroupingComponent = <T,>({
         </EuiFlexItem>
       </EuiFlexGroup>
       <div css={groupingContainerCss} className="eui-xScroll">
+        {isLoading && (
+          <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
+        )}
         {groupCount > 0 ? (
           <>
             {groupPanels}
@@ -211,12 +214,7 @@ const GroupingComponent = <T,>({
             />
           </>
         ) : (
-          <>
-            {isLoading && (
-              <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
-            )}
-            <EmptyGroupingComponent />
-          </>
+          <EmptyGroupingComponent />
         )}
       </div>
     </>
