@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { FunctionComponent } from 'react';
+import type { FunctionComponent, MouseEvent } from 'react';
 
 import {
   EuiAccordion,
@@ -15,7 +15,6 @@ import {
   EuiSplitPanel,
   EuiSpacer,
   EuiText,
-  EuiLink,
   EuiHorizontalRule,
   EuiNotificationBadge,
   EuiCallOut,
@@ -29,9 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AssetTitleMap } from '../../../constants';
 
-import { getHrefToObjectInKibanaApp, useStartServices } from '../../../../../hooks';
-
-import type { ElasticsearchAssetType } from '../../../../../types';
+import { ElasticsearchAssetType } from '../../../../../types';
 
 import type { AssetSavedObject } from './types';
 
@@ -39,6 +36,24 @@ interface Props {
   type: ElasticsearchAssetType.transform;
   deferredInstallations: AssetSavedObject[];
 }
+
+export const getDeferredAssetDescription = (assetType: string, assetCount: number) => {
+  switch (assetType) {
+    case ElasticsearchAssetType.transform:
+      return i18n.translate(
+        'xpack.fleet.epm.packageDetails.assets.deferredTransformInstallationsCallout',
+        {
+          defaultMessage:
+            '{assetCount, plural, one {# One transform was installed but requires} other {# transforms were installed but require}} additional permissions to run. Re-authorize from a user with `transform_admin` permission to start operations.',
+          values: { assetCount: assetCount ?? 1 },
+        }
+      );
+    default:
+      return i18n.translate('xpack.fleet.epm.packageDetails.assets.deferredInstallationsCallout', {
+        defaultMessage: 'Asset requires additional permissions.',
+      });
+  }
+};
 
 export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
   type,
@@ -48,36 +63,38 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
     id: i.id,
     attributes: {
       title: i.id,
-      description: 'Transform was installed but requires additional permissions to run.',
+      description: i._version,
     },
   }));
-  const { http } = useStartServices();
 
   return (
     <>
-      <EuiCallOut
-        size="s"
-        color="warning"
-        iconType="alert"
-        title={i18n.translate('xpack.fleet.agentReassignPolicy.packageBadgeFleetServerWarning', {
-          defaultMessage:
-            'This package has {numOfDeferredInstallations} deferred installations. They might require additional permissions to install and operate correctly.',
-          values: { numOfDeferredInstallations: deferredInstallations.length },
-        })}
-      />
-      <EuiSpacer size="l" />
-
       <EuiTitle>
         <h2>
           <FormattedMessage
-            id="xpack.fleet.epm.packageDetails.assets.noAssetsFoundLabel"
+            id="xpack.fleet.epm.packageDetails.assets.deferredInstallationsLabel"
             defaultMessage="Deferred installations"
           />
         </h2>
       </EuiTitle>
       <EuiSpacer size="l" />
+      <EuiCallOut
+        size="m"
+        color="warning"
+        iconType="alert"
+        title={i18n.translate(
+          'xpack.fleet.epm.packageDetails.assets.deferredInstallationsCallout',
+          {
+            defaultMessage:
+              'This package has {numOfDeferredInstallations, plural, one {# a deferred installation} other {# deferred installations}} which might require additional permissions to install and operate correctly.',
+            values: { numOfDeferredInstallations: deferredInstallations.length },
+          }
+        )}
+      />
+      <EuiSpacer size="l" />
 
       <EuiAccordion
+        initialIsOpen={true}
         buttonContent={
           <EuiFlexGroup
             justifyContent="center"
@@ -91,7 +108,7 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiNotificationBadge color="subdued" size="m">
+              <EuiNotificationBadge color="accent" size="m">
                 <h3>{savedObjects.length}</h3>
               </EuiNotificationBadge>
             </EuiFlexItem>
@@ -101,48 +118,57 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
       >
         <>
           <EuiSpacer size="m" />
+          <EuiText>
+            <p>{getDeferredAssetDescription(type, deferredInstallations.length)}</p>
+            <EuiButton
+              size={'m'}
+              onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                e.preventDefault();
+              }}
+            >
+              {i18n.translate('xpack.fleet.epm.packageDetails.assets.reauthorizeButton', {
+                defaultMessage: 'Re-authorize all',
+              })}
+            </EuiButton>
+          </EuiText>
+
+          <EuiSpacer size="m" />
+
           <EuiSplitPanel.Outer hasBorder hasShadow={false}>
             {savedObjects.map(({ id, attributes: { title, description } }, idx) => {
-              // Ignore custom asset views
-              if (type === 'view') {
-                return;
-              }
-
-              const pathToObjectInApp = getHrefToObjectInKibanaApp({
-                http,
-                id,
-                type,
-              });
               return (
                 <>
                   <EuiSplitPanel.Inner grow={false} key={idx}>
-                    {/* <EuiFlexGrid>*/}
-                    <EuiText size="m">
-                      <p>
-                        {pathToObjectInApp ? (
-                          <EuiLink href={pathToObjectInApp}>{title}</EuiLink>
-                        ) : (
-                          title
-                        )}
-                      </p>
-                    </EuiText>
-                    {description && (
-                      <>
-                        <EuiSpacer size="s" />
-                        <EuiText size="s" color="subdued">
-                          <p>{description}</p>
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={8}>
+                        <EuiText size="m">
+                          <p>{title}</p>
                         </EuiText>
-                      </>
-                    )}
-                    <EuiButton
-                      size={'m'}
-                      onClick={(e) => {
-                        e.preventDefault();
-                      }}
-                    >
-                      Authorize
-                    </EuiButton>
-                    {/* </EuiFlexGrid>*/}
+                        {description && (
+                          <>
+                            <EuiSpacer size="s" />
+                            <EuiText size="s" color="subdued">
+                              <p>{description}</p>
+                            </EuiText>
+                          </>
+                        )}
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiButton
+                          size={'s'}
+                          onClick={(e: MouseEvent<HTMLButtonElement>) => {
+                            e.preventDefault();
+                          }}
+                        >
+                          {i18n.translate(
+                            'xpack.fleet.epm.packageDetails.assets.reauthorizeButton',
+                            {
+                              defaultMessage: 'Re-authorize',
+                            }
+                          )}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiSplitPanel.Inner>
                   {idx + 1 < savedObjects.length && <EuiHorizontalRule margin="none" />}
                 </>

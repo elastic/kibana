@@ -16,7 +16,7 @@ import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import { Loading, Error, ExtensionWrapper } from '../../../../../components';
 
 import type { PackageInfo } from '../../../../../types';
-import { InstallStatus } from '../../../../../types';
+import { ElasticsearchAssetType, InstallStatus } from '../../../../../types';
 
 import {
   useGetPackageInstallStatus,
@@ -199,7 +199,10 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
     );
   } else if (Array.isArray(deferredInstallations) && deferredInstallations.length > 0) {
     content = (
-      <DeferredAssetsAccordion deferredInstallations={deferredInstallations} type={'transform'} />
+      <DeferredAssetsAccordion
+        deferredInstallations={deferredInstallations}
+        type={ElasticsearchAssetType.transform}
+      />
     );
   } else if (assetSavedObjects === undefined || assetSavedObjects.length === 0) {
     if (customAssetsExtension) {
