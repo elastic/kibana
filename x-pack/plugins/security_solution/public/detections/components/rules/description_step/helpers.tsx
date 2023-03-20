@@ -103,7 +103,11 @@ export const buildQueryBarDescription = ({
               <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
                 <EuiBadgeWrap color="hollow">
                   {indexPatterns != null ? (
-                    <FilterBadgeGroup filters={[filter]} dataViews={[indexPatterns]} />
+                    <FilterBadgeGroup
+                      css={{ maxWidth: '100%' }}
+                      filters={[filter]}
+                      dataViews={[indexPatterns]}
+                    />
                   ) : (
                     <EuiLoadingSpinner size="m" />
                   )}
