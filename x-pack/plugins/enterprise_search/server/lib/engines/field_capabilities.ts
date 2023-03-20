@@ -69,21 +69,22 @@ export const parseFieldCapability = (
       type: 'unknown',
     };
   }
-  let fields: SchemaField[] | undefined;
-  if (subFields.length > 0) {
-    fields = subFields
-      .filter(({ path }) => path.length === 1)
-      .map((subfield) => {
-        return {
-          ...parseFieldCapability(
-            subfield.capability,
-            indices,
-            getSubFields(subfield.path[0], subFields)
-          ),
-          name: subfield.path[0],
-        };
-      });
-  }
+  const fields: SchemaField[] | undefined =
+    subFields.length > 0
+      ? subFields
+          .filter(({ path }) => path.length === 1)
+          .map((subfield) => {
+            return {
+              ...parseFieldCapability(
+                subfield.capability,
+                indices,
+                getSubFields(subfield.path[0], subFields)
+              ),
+              name: subfield.path[0],
+            };
+          })
+      : undefined;
+
   if (typeKeys.length === 1) {
     return {
       fields,
