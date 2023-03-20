@@ -142,13 +142,14 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
 export const AddInferencePipelineHorizontalSteps: React.FC = () => {
   const {
     addInferencePipelineModal: { step },
+    isConfigureStepValid,
     isPipelineDataValid,
   } = useValues(MLInferenceLogic);
   const { setAddInferencePipelineStep } = useActions(MLInferenceLogic);
   const navSteps: EuiStepsHorizontalProps['steps'] = [
     { // Configure
       onClick: () => setAddInferencePipelineStep(AddInferencePipelineSteps.Configuration),
-      status: isPipelineDataValid ? 'complete' : 'disabled',
+      status: isConfigureStepValid ? 'complete' : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.configure.title',
         {
@@ -157,8 +158,11 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
       ),
     },
     { // Fields
-      onClick: () => setAddInferencePipelineStep(AddInferencePipelineSteps.Fields),
-      status: isPipelineDataValid ? 'complete' : 'disabled',
+      onClick: () => {
+        if (!isConfigureStepValid) return;
+        setAddInferencePipelineStep(AddInferencePipelineSteps.Fields);
+      },
+      status: isConfigureStepValid ? (isPipelineDataValid ? 'complete' : 'incomplete') : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.fields.title',
         {
@@ -195,10 +199,10 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
   ];
   switch (step) {
     case AddInferencePipelineSteps.Configuration:
-      navSteps[0].status = isPipelineDataValid ? 'complete' : 'current';
+      navSteps[0].status = isConfigureStepValid ? 'complete' : 'current';
       break;
     case AddInferencePipelineSteps.Fields:
-      navSteps[1].status = 'current';
+      navSteps[1].status = isPipelineDataValid ? 'complete' : 'current';
       break;
     case AddInferencePipelineSteps.Test:
       navSteps[2].status = 'current';
