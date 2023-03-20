@@ -6,6 +6,7 @@
  */
 import { isEqual } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
+import styled from 'styled-components';
 
 import type { Criteria } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
@@ -23,6 +24,11 @@ import { AddFile } from '../../add_file';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { FilesTable } from '../../files/files_table';
 import { CaseViewTabs } from '../case_view_tabs';
+import * as i18n from '../translations';
+
+const HiddenButtonGroup = styled(EuiButtonGroup)`
+  display: none;
+`;
 
 interface CaseViewFilesProps {
   caseData: Case;
@@ -112,7 +118,7 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
               <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
                 <EuiFieldSearch
                   fullWidth
-                  placeholder="Search"
+                  placeholder={i18n.SEARCH_PLACEHOLDER}
                   onSearch={onSearchChange}
                   incremental={false}
                   data-test-subj="case-detail-search-file"
@@ -120,12 +126,11 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
               </EuiFlexItem>
               <EuiFlexItem />
               <EuiFlexItem grow={false}>
-                <EuiButtonGroup
+                <HiddenButtonGroup
                   legend="Text align"
                   options={toggleButtonsIcons}
                   idSelected={tableViewSelectedId}
                   onChange={() => {}}
-                  css={'display:none'}
                   isIconOnly
                 />
               </EuiFlexItem>

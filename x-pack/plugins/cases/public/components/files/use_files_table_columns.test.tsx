@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { createFileClientMock } from '@kbn/files-plugin/server/mocks';
-import type { BaseFilesClient } from '@kbn/shared-ux-file-types';
-
 import type { FilesTableColumnsProps } from './use_files_table_columns';
 import { useFilesTableColumns } from './use_files_table_columns';
 import type { AppMockRenderer } from '../../common/mock';
@@ -19,7 +16,7 @@ describe('useCasesColumns ', () => {
 
   const useCasesColumnsProps: FilesTableColumnsProps = {
     showModal: () => {},
-    filesClient: createFileClientMock() as unknown as BaseFilesClient,
+    getDownloadHref: jest.fn(),
   };
 
   beforeEach(() => {
@@ -54,7 +51,6 @@ describe('useCasesColumns ', () => {
         Object {
           "actions": Array [
             Object {
-              "data-test-subj": "cases-files-table-action-download",
               "description": "Download File",
               "isPrimary": true,
               "name": "Download",

@@ -244,7 +244,7 @@ export const basicCase: Case = {
 export const basicAttachment: FileJSON = {
   id: '7d47d130-bcec-11ed-afa1-0242ac120002',
   name: 'my-super-cool-screenshot',
-  mimeType: 'png',
+  mimeType: 'image/png',
   created: basicCreatedAt,
   updated: basicCreatedAt,
   size: 999,

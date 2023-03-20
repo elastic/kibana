@@ -29,11 +29,7 @@ const EmptyFilesTable = () => (
     data-test-subj="cases-files-table-empty"
     titleSize="xs"
     actions={
-      <EuiButton
-        size="s"
-        iconType="plusInCircle"
-        data-test-subj="case-detail-files-table-upload-file"
-      >
+      <EuiButton size="s" iconType="plusInCircle" data-test-subj="case-files-table-upload-file">
         {i18n.ADD_FILE}
       </EuiButton>
     }
@@ -60,7 +56,7 @@ export const FilesTable = ({ items, pagination, onChange, isLoading }: FilesTabl
     setIsModalVisible(true);
   };
 
-  const columns = useFilesTableColumns({ showModal, filesClient });
+  const columns = useFilesTableColumns({ showModal, getDownloadHref: filesClient.getDownloadHref });
 
   const resultsCount = useMemo(
     () => (

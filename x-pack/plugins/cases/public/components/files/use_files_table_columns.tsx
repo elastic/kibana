@@ -8,7 +8,7 @@
 import React from 'react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { BaseFilesClient, FileJSON } from '@kbn/shared-ux-file-types';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import { EuiLink, EuiButtonIcon } from '@elastic/eui';
 
@@ -19,12 +19,12 @@ import { isImage } from './utils';
 
 export interface FilesTableColumnsProps {
   showModal: (file: FileJSON) => void;
-  filesClient: BaseFilesClient;
+  getDownloadHref: (args: Pick<FileJSON<unknown>, 'id' | 'fileKind'>) => string;
 }
 
 export const useFilesTableColumns = ({
   showModal,
-  filesClient,
+  getDownloadHref,
 }: FilesTableColumnsProps): Array<EuiBasicTableColumn<FileJSON>> => {
   return [
     {
@@ -63,14 +63,14 @@ export const useFilesTableColumns = ({
               <EuiButtonIcon
                 iconType={'download'}
                 aria-label={'download'}
-                href={filesClient.getDownloadHref({
+                href={getDownloadHref({
                   fileKind: CASES_FILE_KINDS[APP_ID].id,
                   id: attachment.id,
                 })}
+                data-test-subj={'cases-files-table-action-download'}
               />
             );
           },
-          'data-test-subj': 'cases-files-table-action-download',
         },
         {
           name: 'Delete',

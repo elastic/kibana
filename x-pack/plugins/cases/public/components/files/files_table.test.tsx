@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 
 import { basicAttachment } from '../../containers/mock';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { FilesTable } from './files_table';
 
 const defaultProps = {
@@ -29,25 +29,38 @@ describe('FilesTable', () => {
   });
 
   it('renders correctly', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} />);
+    appMockRender.render(
+      <TestProviders>
+        <FilesTable {...defaultProps} />
+      </TestProviders>
+    );
 
-    expect(await screen.findByTestId('files-table-results-count')).toBeInTheDocument();
-    expect(await screen.findByTestId('files-table-filename')).toBeInTheDocument();
-    expect(await screen.findByTestId('files-table-filetype')).toBeInTheDocument();
-    expect(await screen.findByTestId('files-table-date-added')).toBeInTheDocument();
-    expect(await screen.findByTestId('files-table-action-download')).toBeInTheDocument();
-    expect(await screen.findByTestId('files-table-action-delete')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-table-results-count')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-table-filename')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-table-filetype')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-table-date-added')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-table-action-download')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-table-action-delete')).toBeInTheDocument();
   });
 
   it('renders loading state', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} isLoading={true} />);
+    appMockRender.render(
+      <TestProviders>
+        <FilesTable {...defaultProps} isLoading={true} />
+      </TestProviders>
+    );
 
-    expect(await screen.findByTestId('files-table-loading')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-table-loading')).toBeInTheDocument();
   });
 
   it('renders empty table', async () => {
-    appMockRender.render(<FilesTable {...defaultProps} items={[]} />);
+    appMockRender.render(
+      <TestProviders>
+        <FilesTable {...defaultProps} items={[]} />
+      </TestProviders>
+    );
 
-    expect(await screen.findByTestId('files-table-empty')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-table-empty')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-table-empty')).toBeInTheDocument();
   });
 });

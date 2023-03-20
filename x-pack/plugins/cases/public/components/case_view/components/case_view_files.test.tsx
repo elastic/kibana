@@ -8,7 +8,7 @@
 import React from 'react';
 import { alertCommentWithIndices, basicAttachment, basicCase } from '../../../containers/mock';
 import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../../common/mock';
 import type { Case } from '../../../../common';
 import { CaseViewFiles } from './case_view_files';
 import { useGetCaseFiles } from '../../../containers/use_get_case_files';
@@ -42,32 +42,23 @@ describe('Case View Page files tab', () => {
   });
 
   it('should render the utility bar for the files table', async () => {
-    const result = appMockRender.render(<CaseViewFiles caseData={caseData} />);
+    const result = appMockRender.render(
+      <TestProviders>
+        <CaseViewFiles caseData={caseData} />
+      </TestProviders>
+    );
 
-    expect(await result.findByTestId('case-detail-upload-file')).toBeInTheDocument();
+    expect(await result.findByTestId('cases-add-file')).toBeInTheDocument();
     expect(await result.findByTestId('case-detail-search-file')).toBeInTheDocument();
-    expect(await result.findByTestId('case-detail-select-file-type')).toBeInTheDocument();
   });
 
   it('should render the files table', async () => {
-    const result = appMockRender.render(<CaseViewFiles caseData={caseData} />);
+    const result = appMockRender.render(
+      <TestProviders>
+        <CaseViewFiles caseData={caseData} />
+      </TestProviders>
+    );
 
-    expect(await result.findByTestId('attachments-table')).toBeInTheDocument();
-  });
-
-  it('should disable search and filter if there are no attachments', async () => {
-    useGetCaseFilesMock.mockReturnValue({
-      data: {
-        pageOfItems: [],
-        availableTypes: [],
-        totalItemCount: 0,
-      },
-      isLoading: false,
-    });
-
-    const result = appMockRender.render(<CaseViewFiles caseData={caseData} />);
-
-    expect(await result.findByTestId('case-detail-search-file')).toHaveAttribute('disabled');
-    expect(await result.findByTestId('case-detail-select-file-type')).toHaveAttribute('disabled');
+    expect(await result.findByTestId('cases-files-table')).toBeInTheDocument();
   });
 });
