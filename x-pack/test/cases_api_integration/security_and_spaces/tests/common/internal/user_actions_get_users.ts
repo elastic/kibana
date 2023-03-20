@@ -8,12 +8,20 @@
 import expect from '@kbn/expect';
 import { Cookie } from 'tough-cookie';
 import { UserProfile } from '@kbn/security-plugin/common';
+import { GetCaseUsersResponseRt } from '@kbn/cases-plugin/common/api';
 import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
-import { createCase, deleteAllCaseItems, getCase, updateCase } from '../../../../common/lib/utils';
+import {
+  createCase,
+  deleteAllCaseItems,
+  getCase,
+  updateCase,
+  getCaseUsers,
+  loginUsers,
+  bulkGetUserProfiles,
+  updateUserProfileAvatar,
+} from '../../../../common/lib/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getCaseUsers } from '../../../../common/lib/user_actions';
-import { loginUsers, bulkGetUserProfiles } from '../../../../common/lib/user_profiles';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
 import {
   obsOnly,
@@ -50,12 +58,15 @@ export default ({ getService }: FtrProviderContext): void => {
           title: 'new title',
         });
 
-        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+        const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
           caseId: postedCase.id,
           supertest,
         });
 
-        expect(participants).to.eql([{ username: 'elastic', full_name: null, email: null }]);
+        expect(participants).to.eql([
+          { user: { username: 'elastic', full_name: null, email: null } },
+        ]);
+        expect(reporter).to.eql({ user: { username: 'elastic', full_name: null, email: null } });
         expect(assignees).to.eql([]);
         expect(unassignedUsers).to.eql([]);
       });
@@ -85,14 +96,19 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: '163d5820-1284-21ed-81af-63a2bdfb2bf9',
         });
 
-        const { participants, assignees, unassignedUsers } = await getCaseUsers({
+        const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
           caseId: theCase.id,
           supertest,
         });
 
-        expect(participants).to.eql([{ username: null, full_name: null, email: null }]);
-        expect(assignees).to.eql([{ profile_uid: 'abc' }]);
-        expect(unassignedUsers).to.eql([{ profile_uid: 'dfg' }]);
+        expect(participants).to.eql([{ user: { username: null, full_name: null, email: null } }]);
+        expect(reporter).to.eql({ user: { username: null, full_name: null, email: null } });
+        expect(assignees).to.eql([
+          { uid: 'abc', user: { username: null, full_name: null, email: null } },
+        ]);
+        expect(unassignedUsers).to.eql([
+          { uid: 'dfg', user: { username: null, full_name: null, email: null } },
+        ]);
       });
     });
 
@@ -135,10 +151,27 @@ export default ({ getService }: FtrProviderContext): void => {
           createCase(supertestWithoutAuth, getPostCaseRequest(), 200, null, secOnlyHeaders),
         ]);
 
+        /**
+         * Update superUser profile avatar.
+         * Need for schema and response verification
+         */
+        await updateUserProfileAvatar({
+          supertest,
+          req: {
+            initials: 'ES',
+            color: '#6092C0',
+            imageUrl: 'my-image',
+          },
+          headers: superUserHeaders,
+        });
+
         const userProfiles = await bulkGetUserProfiles({
           supertest,
-          // @ts-expect-error: profile uids are defined for both users
-          req: { uids: [superUserCase.created_by.profile_uid, secUserCase.created_by.profile_uid] },
+          req: {
+            // @ts-expect-error: profile uids are defined for both users
+            uids: [superUserCase.created_by.profile_uid, secUserCase.created_by.profile_uid],
+            dataPath: 'avatar',
+          },
         });
 
         superUserProfile = userProfiles[0];
@@ -153,156 +186,251 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
-      it('returns only the creator of the case', async () => {
-        const postedCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest(),
-          200,
-          null,
-          superUserHeaders
-        );
+      describe('schema', () => {
+        it('ensures that the schema of security plugin is as expected', async () => {
+          const res = await bulkGetUserProfiles({
+            supertest: supertestWithoutAuth,
+            req: {
+              uids: [superUserProfile.uid],
+              dataPath: 'avatar',
+            },
+          });
 
-        const { participants, assignees, unassignedUsers } = await getCaseUsers({
-          caseId: postedCase.id,
-          supertest,
+          const userProfile = res[0];
+
+          try {
+            const userToValidate = {
+              user: {
+                email: userProfile.user.email ?? null,
+                full_name: userProfile.user.full_name ?? null,
+                username: userProfile.user.username ?? null,
+              },
+              avatar: userProfile.data.avatar,
+              uid: userProfile.uid,
+            };
+
+            GetCaseUsersResponseRt.encode({
+              assignees: [userToValidate],
+              unassignedUsers: [userToValidate],
+              participants: [userToValidate],
+              reporter: userToValidate,
+            });
+          } catch (error) {
+            throw new Error(
+              `Failed encoding GetCaseUsersResponse schema. Schema mismatch between Case users and Security user profiles. Error message: ${error}`
+            );
+          }
         });
-
-        expect(participants).to.eql([
-          {
-            username: superUserProfile.user.username,
-            full_name: superUserProfile.user.full_name,
-            email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
-          },
-        ]);
-
-        expect(assignees).to.eql([]);
-        expect(unassignedUsers).to.eql([]);
       });
 
-      it('returns one participant if it is the only one that participates to the case', async () => {
-        const postedCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest(),
-          200,
-          null,
-          superUserHeaders
-        );
+      describe('case users', () => {
+        it('returns only the creator of the case', async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest(),
+            200,
+            null,
+            superUserHeaders
+          );
 
-        await changeCaseTitle({
-          supertest,
-          caseId: postedCase.id,
-          version: postedCase.version,
-          title: 'new title',
-          headers: superUserHeaders,
+          const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
+            caseId: postedCase.id,
+            supertest,
+          });
+
+          expect(participants).to.eql([
+            {
+              user: {
+                username: superUserProfile.user.username,
+                full_name: superUserProfile.user.full_name,
+                email: superUserProfile.user.email,
+              },
+              avatar: superUserProfile.data.avatar,
+              uid: superUserProfile.uid,
+            },
+          ]);
+
+          expect(reporter).to.eql({
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+            },
+            avatar: superUserProfile.data.avatar,
+            uid: superUserProfile.uid,
+          });
+
+          expect(assignees).to.eql([]);
+          expect(unassignedUsers).to.eql([]);
         });
 
-        const { participants, assignees, unassignedUsers } = await getCaseUsers({
-          caseId: postedCase.id,
-          supertest,
+        it('returns one participant if it is the only one that participates to the case', async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest(),
+            200,
+            null,
+            superUserHeaders
+          );
+
+          await changeCaseTitle({
+            supertest,
+            caseId: postedCase.id,
+            version: postedCase.version,
+            title: 'new title',
+            headers: superUserHeaders,
+          });
+
+          const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
+            caseId: postedCase.id,
+            supertest,
+          });
+
+          expect(participants).to.eql([
+            {
+              user: {
+                username: superUserProfile.user.username,
+                full_name: superUserProfile.user.full_name,
+                email: superUserProfile.user.email,
+              },
+              avatar: superUserProfile.data.avatar,
+              uid: superUserProfile.uid,
+            },
+          ]);
+
+          expect(reporter).to.eql({
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+            },
+            avatar: superUserProfile.data.avatar,
+            uid: superUserProfile.uid,
+          });
+
+          expect(assignees).to.eql([]);
+          expect(unassignedUsers).to.eql([]);
         });
 
-        expect(participants).to.eql([
-          {
-            username: superUserProfile.user.username,
-            full_name: superUserProfile.user.full_name,
-            email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
-          },
-        ]);
+        it('returns all participants of the case', async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest(),
+            200,
+            null,
+            superUserHeaders
+          );
 
-        expect(assignees).to.eql([]);
-        expect(unassignedUsers).to.eql([]);
-      });
+          await changeCaseTitle({
+            supertest,
+            caseId: postedCase.id,
+            version: postedCase.version,
+            title: 'new title',
+            headers: secOnlyHeaders,
+          });
 
-      it('returns all participants of the case', async () => {
-        const postedCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest(),
-          200,
-          null,
-          superUserHeaders
-        );
+          const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
+            caseId: postedCase.id,
+            supertest,
+          });
 
-        await changeCaseTitle({
-          supertest,
-          caseId: postedCase.id,
-          version: postedCase.version,
-          title: 'new title',
-          headers: secOnlyHeaders,
+          expect(participants).to.eql([
+            {
+              user: {
+                username: secUserProfile.user.username,
+                full_name: secUserProfile.user.full_name,
+                email: secUserProfile.user.email,
+              },
+              uid: secUserProfile.uid,
+            },
+            {
+              user: {
+                username: superUserProfile.user.username,
+                full_name: superUserProfile.user.full_name,
+                email: superUserProfile.user.email,
+              },
+              avatar: superUserProfile.data.avatar,
+              uid: superUserProfile.uid,
+            },
+          ]);
+
+          expect(reporter).to.eql({
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+            },
+            avatar: superUserProfile.data.avatar,
+            uid: superUserProfile.uid,
+          });
+
+          expect(assignees).to.eql([]);
+          expect(unassignedUsers).to.eql([]);
         });
 
-        const { participants, assignees, unassignedUsers } = await getCaseUsers({
-          caseId: postedCase.id,
-          supertest,
+        it('does not return duplicate participants', async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest(),
+            200,
+            null,
+            superUserHeaders
+          );
+
+          const updatedCases = await changeCaseTitle({
+            supertest,
+            caseId: postedCase.id,
+            version: postedCase.version,
+            title: 'new title',
+            headers: secOnlyHeaders,
+          });
+
+          await changeCaseDescription({
+            supertest,
+            caseId: updatedCases[0].id,
+            version: updatedCases[0].version,
+            description: 'new desc',
+            headers: secOnlyHeaders,
+          });
+
+          const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
+            caseId: postedCase.id,
+            supertest,
+          });
+
+          expect(participants).to.eql([
+            {
+              user: {
+                username: secUserProfile.user.username,
+                full_name: secUserProfile.user.full_name,
+                email: secUserProfile.user.email,
+              },
+              uid: secUserProfile.uid,
+            },
+            {
+              user: {
+                username: superUserProfile.user.username,
+                full_name: superUserProfile.user.full_name,
+                email: superUserProfile.user.email,
+              },
+              avatar: superUserProfile.data.avatar,
+              uid: superUserProfile.uid,
+            },
+          ]);
+
+          expect(reporter).to.eql({
+            user: {
+              username: superUserProfile.user.username,
+              full_name: superUserProfile.user.full_name,
+              email: superUserProfile.user.email,
+            },
+            avatar: superUserProfile.data.avatar,
+            uid: superUserProfile.uid,
+          });
+
+          expect(assignees).to.eql([]);
+          expect(unassignedUsers).to.eql([]);
         });
-
-        expect(participants).to.eql([
-          {
-            username: secUserProfile.user.username,
-            full_name: secUserProfile.user.full_name,
-            email: secUserProfile.user.email,
-            profile_uid: secUserProfile.uid,
-          },
-          {
-            username: superUserProfile.user.username,
-            full_name: superUserProfile.user.full_name,
-            email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
-          },
-        ]);
-
-        expect(assignees).to.eql([]);
-        expect(unassignedUsers).to.eql([]);
-      });
-
-      it('does not return duplicate participants', async () => {
-        const postedCase = await createCase(
-          supertestWithoutAuth,
-          getPostCaseRequest(),
-          200,
-          null,
-          superUserHeaders
-        );
-
-        const updatedCases = await changeCaseTitle({
-          supertest,
-          caseId: postedCase.id,
-          version: postedCase.version,
-          title: 'new title',
-          headers: secOnlyHeaders,
-        });
-
-        await changeCaseDescription({
-          supertest,
-          caseId: updatedCases[0].id,
-          version: updatedCases[0].version,
-          description: 'new desc',
-          headers: secOnlyHeaders,
-        });
-
-        const { participants, assignees, unassignedUsers } = await getCaseUsers({
-          caseId: postedCase.id,
-          supertest,
-        });
-
-        expect(participants).to.eql([
-          {
-            username: secUserProfile.user.username,
-            full_name: secUserProfile.user.full_name,
-            email: secUserProfile.user.email,
-            profile_uid: secUserProfile.uid,
-          },
-          {
-            username: superUserProfile.user.username,
-            full_name: superUserProfile.user.full_name,
-            email: superUserProfile.user.email,
-            profile_uid: superUserProfile.uid,
-          },
-        ]);
-
-        expect(assignees).to.eql([]);
-        expect(unassignedUsers).to.eql([]);
       });
     });
 

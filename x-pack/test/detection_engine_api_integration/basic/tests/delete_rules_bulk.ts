@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
@@ -35,7 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should delete a single rule with a rule_id', async () => {
@@ -147,7 +147,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should delete a single rule with a rule_id', async () => {

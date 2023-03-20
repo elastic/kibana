@@ -74,7 +74,7 @@ export const LastTestRunComponent = ({
   stepsLoading: boolean;
   latestPing?: Ping;
   loading: boolean;
-  stepsData: SyntheticsJourneyApiResponse;
+  stepsData?: SyntheticsJourneyApiResponse;
   isErrorDetails?: boolean;
 }) => {
   const { monitor } = useSelectedMonitor();
@@ -97,7 +97,7 @@ export const LastTestRunComponent = ({
           title={latestPing?.error.message}
           size="s"
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           {isErrorDetails ? (
             <></>

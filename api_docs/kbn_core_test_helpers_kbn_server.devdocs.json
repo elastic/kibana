@@ -666,7 +666,7 @@
         "label": "HttpMethod",
         "description": [],
         "signature": [
-          "\"get\" | \"post\" | \"put\" | \"delete\" | \"patch\" | \"head\""
+          "\"get\" | \"delete\" | \"head\" | \"post\" | \"put\" | \"patch\""
         ],
         "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
         "deprecated": false,

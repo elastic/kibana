@@ -44,6 +44,7 @@ export default function ({ getPageObjects, getService }) {
       delete searchParams.token;
 
       expect(searchParams).to.eql({
+        buffer: 4,
         geometryFieldName: 'geo.coordinates',
         hasLabels: 'false',
         index: 'logstash-*',

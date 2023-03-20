@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/controls-example-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "plugin": {
+    "id": "controlsExample",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "controls",
+      "data",
+      "developerExamples",
+      "embeddable",
+      "navigation",
+      "presentationUtil"
+    ]
+  }
+}

@@ -7,8 +7,7 @@
  */
 
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
-import type { CreatedObject } from '@kbn/core-saved-objects-server';
+import type { CreatedObject, SavedObject } from '@kbn/core-saved-objects-server';
 
 export function extractErrors(
   // TODO: define saved object type

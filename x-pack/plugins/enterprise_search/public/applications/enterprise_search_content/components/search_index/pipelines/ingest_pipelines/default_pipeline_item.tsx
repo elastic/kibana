@@ -28,10 +28,10 @@ export const DefaultPipelineItem: React.FC<{
   index: ElasticsearchIndexWithIngestion;
   indexName: string;
   ingestionMethod: string;
-  openModal: () => void;
+  openPipelineSettings: () => void;
   pipelineName: string;
   pipelineState: IngestPipelineParams;
-}> = ({ index, indexName, ingestionMethod, openModal, pipelineName, pipelineState }) => {
+}> = ({ index, indexName, ingestionMethod, openPipelineSettings, pipelineName, pipelineState }) => {
   /**
    * If we don't open the accordion on load, the curl code never shows the copy button
    * Because if the accordion is closed, the code block is not present in the DOM
@@ -57,7 +57,7 @@ export const DefaultPipelineItem: React.FC<{
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-settings`}
-              onClick={openModal}
+              onClick={openPipelineSettings}
             >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.settings.label',

@@ -7,9 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { RefreshButton } from '../common/components/refresh_button';
 import { OverviewPage } from './overview/overview_page';
 import { MonitorsPageHeader } from './management/page_header/monitors_page_header';
 import { CreateMonitorButton } from './create_monitor_button';
@@ -19,9 +20,14 @@ import { MONITORS_ROUTE, OVERVIEW_ROUTE } from '../../../../../common/constants'
 
 export const getMonitorsRoute = (
   history: ReturnType<typeof useHistory>,
+  location: ReturnType<typeof useLocation>,
   syntheticsPath: string,
   baseTitle: string
 ): RouteProps[] => {
+  const sharedProps = {
+    pageTitle: <MonitorsPageHeader />,
+    rightSideItems: [<RefreshButton />, <CreateMonitorButton />],
+  };
   return [
     {
       title: i18n.translate('xpack.synthetics.overviewRoute.title', {
@@ -32,9 +38,8 @@ export const getMonitorsRoute = (
       component: OverviewPage,
       dataTestSubj: 'syntheticsOverviewPage',
       pageHeader: {
-        pageTitle: <MonitorsPageHeader />,
-        rightSideItems: [<CreateMonitorButton />],
-        tabs: getMonitorsTabs(syntheticsPath, 'overview'),
+        ...sharedProps,
+        tabs: getMonitorsTabs(syntheticsPath, 'overview', location),
       },
     },
     {
@@ -46,15 +51,18 @@ export const getMonitorsRoute = (
       component: MonitorsPageWithServiceAllowed,
       dataTestSubj: 'syntheticsMonitorManagementPage',
       pageHeader: {
-        pageTitle: <MonitorsPageHeader />,
-        rightSideItems: [<CreateMonitorButton />],
-        tabs: getMonitorsTabs(syntheticsPath, 'management'),
+        ...sharedProps,
+        tabs: getMonitorsTabs(syntheticsPath, 'management', location),
       },
     },
   ];
 };
 
-const getMonitorsTabs = (syntheticsPath: string, selected: 'overview' | 'management') => {
+const getMonitorsTabs = (
+  syntheticsPath: string,
+  selected: 'overview' | 'management',
+  location: ReturnType<typeof useLocation>
+) => {
   return [
     {
       label: (
@@ -63,7 +71,7 @@ const getMonitorsTabs = (syntheticsPath: string, selected: 'overview' | 'managem
           defaultMessage="Overview"
         />
       ),
-      href: `${syntheticsPath}${OVERVIEW_ROUTE}`,
+      href: `${syntheticsPath}${OVERVIEW_ROUTE}${location.search}`,
       isSelected: selected === 'overview',
       'data-test-subj': 'syntheticsMonitorOverviewTab',
     },
@@ -74,7 +82,7 @@ const getMonitorsTabs = (syntheticsPath: string, selected: 'overview' | 'managem
           defaultMessage="Management"
         />
       ),
-      href: `${syntheticsPath}${MONITORS_ROUTE}`,
+      href: `${syntheticsPath}${MONITORS_ROUTE}${location.search}`,
       isSelected: selected === 'management',
       'data-test-subj': 'syntheticsMonitorManagementTab',
     },

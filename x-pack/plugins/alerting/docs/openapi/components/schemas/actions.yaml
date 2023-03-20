@@ -8,6 +8,27 @@ nullable: true
 items:
   type: object
   properties:
+    connector_type_id:
+      type: string
+      description: The type of connector. This property appears in responses but cannot be set in requests.
+      example: .server-log
+      readOnly: true
+    frequency:
+      type: object
+      description: >
+        The parameters that affect how often actions are generated.
+        NOTE: You cannot specify these parameters when `notify_when` or `throttle` are defined at the rule level.
+      required:
+        - notify_when
+        - summary
+      properties:
+        notify_when:
+          $ref: 'notify_when.yaml'
+        summary:
+          type: boolean
+          description: Indicates whether the action is a summary.
+        throttle:
+          $ref: 'throttle.yaml'
     group:
       type: string
       description: The group name for the actions. If you don't need to group actions, set to `default`.

@@ -6,12 +6,12 @@
  */
 import React, { useState, useMemo } from 'react';
 
-import { uniq, xorBy } from 'lodash';
+import { uniq } from 'lodash';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import type { IntegrationPreferenceType } from '../../../components/integration_preference';
-import { usePackages, useCategories } from '../../../../../hooks';
+import { useGetPackagesQuery, useGetCategoriesQuery } from '../../../../../hooks';
 import {
   useGetAppendCustomIntegrations,
   useGetReplacementCustomIntegrations,
@@ -21,7 +21,7 @@ import { useMergeEprPackagesWithReplacements } from '../../../../../hooks/use_me
 import { mapToCard } from '..';
 import type { PackageList, PackageListItem } from '../../../../../types';
 
-import { doesPackageHaveIntegrations } from '../../../../../services';
+import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
 
 import {
   isInputOnlyPolicyTemplate,
@@ -108,6 +108,7 @@ export const useAvailablePackages = () => {
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
     boolean | undefined
   >(undefined);
+  const { showIntegrationsSubcategories } = ExperimentalFeaturesService.get();
 
   const {
     initialSelectedCategory,
@@ -130,7 +131,7 @@ export const useAvailablePackages = () => {
     data: eprPackages,
     isLoading: isLoadingAllPackages,
     error: eprPackageLoadingError,
-  } = usePackages(prereleaseIntegrationsEnabled);
+  } = useGetPackagesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {
@@ -185,23 +186,14 @@ export const useAvailablePackages = () => {
     data: eprCategoriesRes,
     isLoading: isLoadingCategories,
     error: eprCategoryLoadingError,
-  } = useCategories(prereleaseIntegrationsEnabled);
+  } = useGetCategoriesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
   const eprCategories = useMemo(() => eprCategoriesRes?.items || [], [eprCategoriesRes]);
-  // Subcategories
-  const subCategories = useMemo(() => {
-    return eprCategories?.filter((item) => item.parent_id !== undefined);
-  }, [eprCategories]);
 
   const allCategories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
       ? []
-      : mergeCategoriesAndCount(
-          eprCategories
-            ? (eprCategories as Array<{ id: string; title: string; count: number }>)
-            : [],
-          cards
-        );
+      : mergeCategoriesAndCount(eprCategories ? eprCategories : [], cards);
     return [
       {
         ...ALL_CATEGORY,
@@ -212,11 +204,17 @@ export const useAvailablePackages = () => {
   }, [cards, eprCategories, isLoadingCategories]);
 
   // Filter out subcategories
-  const mainCategories = xorBy(allCategories, subCategories, 'id');
+  const mainCategories = useMemo(() => {
+    return showIntegrationsSubcategories
+      ? allCategories.filter((category) => category.parent_id === undefined)
+      : allCategories;
+  }, [allCategories, showIntegrationsSubcategories]);
 
   const availableSubCategories = useMemo(() => {
-    return subCategories?.filter((c) => c.parent_id === selectedCategory);
-  }, [selectedCategory, subCategories]);
+    return showIntegrationsSubcategories
+      ? allCategories?.filter((c) => c.parent_id === selectedCategory)
+      : [];
+  }, [allCategories, selectedCategory, showIntegrationsSubcategories]);
 
   return {
     initialSelectedCategory,

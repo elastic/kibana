@@ -28,7 +28,6 @@ import {
   alertStateActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
-  groupActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
   metricActionVariableDescription,
@@ -53,6 +52,7 @@ import {
   FIRED_ACTIONS_ID,
   WARNING_ACTIONS,
 } from './inventory_metric_threshold_executor';
+import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
 
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
@@ -74,6 +74,13 @@ const condition = schema.object({
     })
   ),
 });
+
+const groupActionVariableDescription = i18n.translate(
+  'xpack.infra.inventory.alerting.groupActionVariableDescription',
+  {
+    defaultMessage: 'Name of the group reporting data',
+  }
+);
 
 export async function registerMetricInventoryThresholdRuleType(
   alertingPlugin: PluginSetupContract,
@@ -112,14 +119,24 @@ export async function registerMetricInventoryThresholdRuleType(
         { name: 'group', description: groupActionVariableDescription },
         { name: 'alertState', description: alertStateActionVariableDescription },
         ...(getAlertDetailsPageEnabledForApp(config, 'metrics')
-          ? [{ name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }]
+          ? [
+              {
+                name: 'alertDetailsUrl',
+                description: alertDetailUrlActionVariableDescription,
+                usesPublicBaseUrl: true,
+              },
+            ]
           : []),
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
         { name: 'value', description: valueActionVariableDescription },
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
-        { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
+        {
+          name: 'viewInAppUrl',
+          description: viewInAppUrlActionVariableDescription,
+          usesPublicBaseUrl: true,
+        },
         { name: 'cloud', description: cloudActionVariableDescription },
         { name: 'host', description: hostActionVariableDescription },
         { name: 'container', description: containerActionVariableDescription },
@@ -138,5 +155,6 @@ export async function registerMetricInventoryThresholdRuleType(
       ],
     },
     getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
+    alerts: MetricsRulesTypeAlertDefinition,
   });
 }

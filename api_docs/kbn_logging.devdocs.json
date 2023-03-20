@@ -609,7 +609,7 @@
             "section": "def-common.EcsBase",
             "text": "EcsBase"
           },
-          ", \"message\" | \"@timestamp\"> & ",
+          ", \"@timestamp\" | \"message\"> & ",
           {
             "pluginId": "@kbn/ecs",
             "scope": "common",

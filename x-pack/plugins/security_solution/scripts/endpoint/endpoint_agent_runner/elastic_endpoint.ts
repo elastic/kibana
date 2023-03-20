@@ -8,7 +8,12 @@
 import { userInfo } from 'os';
 import execa from 'execa';
 import nodeFetch from 'node-fetch';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  packagePolicyRouteService,
+  type UpdatePackagePolicyResponse,
+  type UpdatePackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import chalk from 'chalk';
 import { getEndpointPackageInfo } from '../../../common/endpoint/index_data';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
@@ -19,6 +24,8 @@ import {
   waitForHostToEnroll,
 } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
+import { type PolicyData, ProtectionModes } from '../../../common/endpoint/types';
+import { dump } from './utils';
 
 interface ElasticArtifactSearchResponse {
   manifest: {
@@ -37,7 +44,8 @@ interface ElasticArtifactSearchResponse {
   };
 }
 
-export const enrollEndpointHost = async () => {
+export const enrollEndpointHost = async (): Promise<string | undefined> => {
+  let vmName;
   const {
     log,
     kbnClient,
@@ -48,7 +56,7 @@ export const enrollEndpointHost = async () => {
   log.indent(4);
 
   try {
-    const uniqueId = Math.random().toString(32).substring(2).substring(0, 4);
+    const uniqueId = Math.random().toString().substring(2, 6);
     const username = userInfo().username.toLowerCase();
     const policyId: string = policy || (await getOrCreateAgentPolicyId());
 
@@ -73,11 +81,11 @@ export const enrollEndpointHost = async () => {
       throw new Error(`No API enrollment key found for policy id [${policyId}]`);
     }
 
-    const vmName = `${username}-dev-${uniqueId}`;
+    vmName = `${username}-dev-${uniqueId}`;
 
     log.info(`Creating VM named: ${vmName}`);
 
-    await execa.command(`multipass launch --name ${vmName}`);
+    await execa.command(`multipass launch --name ${vmName} --disk 8G`);
 
     log.verbose(await execa('multipass', ['info', vmName]));
 
@@ -94,7 +102,7 @@ export const enrollEndpointHost = async () => {
     await execa.command(`multipass exec ${vmName} -- tar -zxf ${agentDownloadedFile}`);
     await execa.command(`multipass exec ${vmName} -- rm -f ${agentDownloadedFile}`);
 
-    const agentEnrollArgs = [
+    const agentInstallArguments = [
       'exec',
 
       vmName,
@@ -108,7 +116,7 @@ export const enrollEndpointHost = async () => {
 
       './elastic-agent',
 
-      'enroll',
+      'install',
 
       '--insecure',
 
@@ -122,25 +130,9 @@ export const enrollEndpointHost = async () => {
     ];
 
     log.info(`Enrolling elastic agent with Fleet`);
-    log.verbose(`Command: multipass ${agentEnrollArgs.join(' ')}`);
+    log.verbose(`Command: multipass ${agentInstallArguments.join(' ')}`);
 
-    await execa(`multipass`, agentEnrollArgs);
-
-    const runAgentCommand = `multipass exec ${vmName} --working-directory /home/ubuntu/${vmDirName} -- sudo ./elastic-agent \&>/dev/null`;
-
-    log.info(`Running elastic agent`);
-    log.verbose(`Command: ${runAgentCommand}`);
-
-    // About `timeout` option below
-    // The `multipass exec` command seems to have some issues when a command pass to it redirects output,
-    // as is with the command that runs endpoint. See https://github.com/canonical/multipass/issues/667
-    // To get around it, `timeout` is set to 5s, which should be enough time for the command to be executed
-    // in the VM.
-    await execa.command(runAgentCommand, { timeout: 5000 }).catch((error) => {
-      if (error.originalMessage !== 'Timed out') {
-        throw error;
-      }
-    });
+    await execa(`multipass`, agentInstallArguments);
 
     log.info(`Waiting for Agent to check-in with Fleet`);
     await waitForHostToEnroll(kbnClient, vmName);
@@ -153,18 +145,21 @@ export const enrollEndpointHost = async () => {
     Delete VM:    ${chalk.bold(`multipass delete -p ${vmName}${await getVmCountNotice()}`)}
 `);
   } catch (error) {
-    log.error(error);
+    log.error(dump(error));
     log.indent(-4);
     throw error;
   }
 
   log.indent(-4);
+
+  return vmName;
 };
 
 const getAgentDownloadUrl = async (version: string): Promise<string> => {
   const { log } = getRuntimeServices();
-  // TODO:PT use arch and platform of VM to build download file name below (will be needed if tools ever supports different types of VMs)
-  const agentFile = `elastic-agent-${version}-linux-arm64.tar.gz`;
+  const downloadArch =
+    { arm64: 'arm64', x64: 'x86_64' }[process.arch] ?? `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
+  const agentFile = `elastic-agent-${version}-linux-${downloadArch}.tar.gz`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${version}/${agentFile}`;
 
   log.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
@@ -215,8 +210,39 @@ const getOrCreateAgentPolicyId = async (): Promise<string> => {
     endpointPackageVersion,
     agentPolicyName
   );
-
   const agentPolicy = response.agentPolicies[0];
+
+  // Update the Endpoint integration policy to enable all protections
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { created_by, created_at, updated_at, updated_by, id, version, revision, ...restOfPolicy } =
+    response.integrationPolicies[0];
+  const updatedEndpointPolicy: UpdatePackagePolicy = restOfPolicy;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const policy = updatedEndpointPolicy!.inputs[0]!.config!.policy.value;
+
+  policy.mac.malware.mode = ProtectionModes.prevent;
+  policy.windows.malware.mode = ProtectionModes.prevent;
+  policy.linux.malware.mode = ProtectionModes.prevent;
+
+  policy.mac.memory_protection.mode = ProtectionModes.prevent;
+  policy.windows.memory_protection.mode = ProtectionModes.prevent;
+  policy.linux.memory_protection.mode = ProtectionModes.prevent;
+
+  policy.mac.behavior_protection.mode = ProtectionModes.prevent;
+  policy.windows.behavior_protection.mode = ProtectionModes.prevent;
+  policy.linux.behavior_protection.mode = ProtectionModes.prevent;
+
+  policy.windows.ransomware.mode = ProtectionModes.prevent;
+
+  response.integrationPolicies[0] = (
+    await kbnClient
+      .request<UpdatePackagePolicyResponse>({
+        method: 'PUT',
+        path: packagePolicyRouteService.getUpdatePath(response.integrationPolicies[0].id),
+        body: updatedEndpointPolicy,
+      })
+      .then((res) => res.data)
+  ).item as PolicyData;
 
   log.info(`New agent policy with Endpoint integration created:
   Name: ${agentPolicy.name}

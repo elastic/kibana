@@ -28,7 +28,7 @@ export const MonitorAsyncError = () => {
           />
         }
         color="warning"
-        iconType="alert"
+        iconType="warning"
       >
         <p>
           <FormattedMessage
@@ -49,7 +49,11 @@ export const MonitorAsyncError = () => {
             );
           })}
         </ul>
-        <EuiButton onClick={() => setIsDismissed(true)} color="warning">
+        <EuiButton
+          data-test-subj="syntheticsMonitorAsyncErrorButton"
+          onClick={() => setIsDismissed(true)}
+          color="warning"
+        >
           {DISMISS_LABEL}
         </EuiButton>
       </EuiCallOut>

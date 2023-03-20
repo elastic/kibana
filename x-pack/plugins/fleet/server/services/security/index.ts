@@ -15,3 +15,5 @@ export {
   getAuthzFromRequest,
   doesNotHaveRequiredFleetAuthz,
 } from './security';
+export type { MessageSigningServiceInterface } from './message_signing_service';
+export { MessageSigningService } from './message_signing_service';

@@ -48,7 +48,7 @@ export const createAPMTransactionDurationIndicator = (
     service: 'irrelevant',
     transactionName: 'irrelevant',
     transactionType: 'irrelevant',
-    'threshold.us': 500000,
+    threshold: 500,
     ...params,
   },
 });
@@ -80,11 +80,23 @@ const defaultSLO: Omit<SLO, 'id' | 'revision' | 'createdAt' | 'updatedAt'> = {
     syncDelay: new Duration(1, DurationUnit.Minute),
     frequency: new Duration(1, DurationUnit.Minute),
   },
+  tags: ['critical', 'k8s'],
   enabled: true,
 };
 
+const defaultCreateSloParams: CreateSLOParams = {
+  name: 'irrelevant',
+  description: 'irrelevant',
+  timeWindow: sevenDaysRolling(),
+  budgetingMethod: 'occurrences',
+  objective: {
+    target: 0.99,
+  },
+  indicator: createAPMTransactionDurationIndicator(),
+};
+
 export const createSLOParams = (params: Partial<CreateSLOParams> = {}): CreateSLOParams => ({
-  ...defaultSLO,
+  ...defaultCreateSloParams,
   ...params,
 });
 

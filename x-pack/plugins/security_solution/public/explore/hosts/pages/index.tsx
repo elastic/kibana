@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
+
 import { HOSTS_PATH } from '../../../../common/constants';
 import { HostDetails } from './details';
 import { HostsTableType } from '../store/model';

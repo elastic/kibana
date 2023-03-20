@@ -17,8 +17,11 @@ import {
   AggregationsTopHitsAggregate,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
+import {
+  getSAMLRequestId,
+  getSAMLResponse,
+} from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
@@ -368,16 +371,18 @@ export default function ({ getService }: FtrProviderContext) {
         unauthenticatedSessionOne.cookie,
         unauthenticatedSessionOne.location
       );
-      await setTimeoutAsync(500);
+      await setTimeoutAsync(500); // Ensure the order of session cookie timestamps
       const samlSessionCookieTwo = await finishSAMLHandshake(
         unauthenticatedSessionTwo.cookie,
         unauthenticatedSessionTwo.location
       );
-      await setTimeoutAsync(500);
+      await setTimeoutAsync(500); // Ensure the order of session cookie timestamps
       const samlSessionCookieThree = await finishSAMLHandshake(
         unauthenticatedSessionThree.cookie,
         unauthenticatedSessionThree.location
       );
+
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       // For authenticated sessions limit should be enforced
       await checkSessionCookieInvalid(samlSessionCookieOne);

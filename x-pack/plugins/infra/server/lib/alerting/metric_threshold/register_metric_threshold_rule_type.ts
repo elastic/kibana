@@ -17,7 +17,6 @@ import {
   alertStateActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
-  groupActionVariableDescription,
   groupByKeysActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
@@ -43,6 +42,7 @@ import {
   WARNING_ACTIONS,
   NO_DATA_ACTIONS,
 } from './metric_threshold_executor';
+import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
 
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
@@ -108,6 +108,14 @@ export async function registerMetricThresholdRuleType(
     label: schema.maybe(schema.string()),
   });
 
+  const groupActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.groupActionVariableDescription',
+    {
+      defaultMessage:
+        'Name of the group(s) reporting data. For accessing each group key, use context.groupByKeys.',
+    }
+  );
+
   alertingPlugin.registerType({
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.alertName', {
@@ -143,7 +151,13 @@ export async function registerMetricThresholdRuleType(
         { name: 'group', description: groupActionVariableDescription },
         { name: 'groupByKeys', description: groupByKeysActionVariableDescription },
         ...(getAlertDetailsPageEnabledForApp(config, 'metrics')
-          ? [{ name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }]
+          ? [
+              {
+                name: 'alertDetailsUrl',
+                description: alertDetailUrlActionVariableDescription,
+                usesPublicBaseUrl: true,
+              },
+            ]
           : []),
         { name: 'alertState', description: alertStateActionVariableDescription },
         { name: 'reason', description: reasonActionVariableDescription },
@@ -151,7 +165,11 @@ export async function registerMetricThresholdRuleType(
         { name: 'value', description: valueActionVariableDescription },
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
-        { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
+        {
+          name: 'viewInAppUrl',
+          description: viewInAppUrlActionVariableDescription,
+          usesPublicBaseUrl: true,
+        },
         { name: 'cloud', description: cloudActionVariableDescription },
         { name: 'host', description: hostActionVariableDescription },
         { name: 'container', description: containerActionVariableDescription },
@@ -175,5 +193,6 @@ export async function registerMetricThresholdRuleType(
     },
     producer: 'infrastructure',
     getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
+    alerts: MetricsRulesTypeAlertDefinition,
   });
 }

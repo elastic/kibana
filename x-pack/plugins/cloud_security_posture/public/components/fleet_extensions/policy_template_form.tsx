@@ -4,25 +4,42 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useEffect } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { EuiFieldText, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
+import type {
+  NewPackagePolicyInput,
+  PackagePolicyReplaceDefineStepExtensionComponentProps,
+} from '@kbn/fleet-plugin/public/types';
 import { useParams } from 'react-router-dom';
-import type { PostureInput, PosturePolicyTemplate } from '../../../common/types';
-import { CLOUDBEAT_AWS, CLOUDBEAT_VANILLA } from '../../../common/constants';
-import { getPosturePolicy, getEnabledPostureInput, getPostureInputHiddenVars } from './utils';
+import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
+import {
+  CLOUDBEAT_AWS,
+  CLOUDBEAT_VANILLA,
+  CLOUDBEAT_VULN_MGMT_AWS,
+  CSPM_POLICY_TEMPLATE,
+  SUPPORTED_POLICY_TEMPLATES,
+} from '../../../common/constants';
+import {
+  getPosturePolicy,
+  getPostureInputHiddenVars,
+  POSTURE_NAMESPACE,
+  NewPackagePolicyPostureInput,
+  isPostureInput,
+} from './utils';
 import {
   PolicyTemplateInfo,
   PolicyTemplateInputSelector,
   PolicyTemplateSelector,
   PolicyTemplateVarsForm,
 } from './policy_template_selectors';
+import { assert } from '../../../common/utils/helpers';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
   cspm: CLOUDBEAT_AWS,
+  vuln_mgmt: CLOUDBEAT_VULN_MGMT_AWS,
 } as const;
 
 const EditScreenStepTitle = () => (
@@ -61,11 +78,16 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
 
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
   ({ newPolicy, onChange, validationResults, isEditPage }) => {
-    const { integration } = useParams<{ integration: PosturePolicyTemplate }>();
-    const input = getEnabledPostureInput(newPolicy);
+    const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
+    const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
+      ? integrationParam
+      : undefined;
+    const input = getSelectedOption(newPolicy.inputs, integration);
 
-    const updatePolicy = (updatedPolicy: NewPackagePolicy) =>
-      onChange({ isValid: true, updatedPolicy });
+    const updatePolicy = useCallback(
+      (updatedPolicy: NewPackagePolicy) => onChange({ isValid: true, updatedPolicy }),
+      [onChange]
+    );
 
     /**
      * - Updates policy inputs by user selection
@@ -113,6 +135,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isEditPage]);
 
+    useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
+
     return (
       <div>
         {isEditPage && <EditScreenStepTitle />}
@@ -159,3 +183,38 @@ CspPolicyTemplateForm.displayName = 'CspPolicyTemplateForm';
 
 // eslint-disable-next-line import/no-default-export
 export { CspPolicyTemplateForm as default };
+
+const useEnsureDefaultNamespace = ({
+  newPolicy,
+  input,
+  updatePolicy,
+}: {
+  newPolicy: NewPackagePolicy;
+  input: NewPackagePolicyPostureInput;
+  updatePolicy: (policy: NewPackagePolicy) => void;
+}) => {
+  useEffect(() => {
+    if (newPolicy.namespace === POSTURE_NAMESPACE) return;
+
+    const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
+    updatePolicy(policy);
+  }, [newPolicy, input, updatePolicy]);
+};
+
+const getSelectedOption = (
+  options: NewPackagePolicyInput[],
+  policyTemplate: string = CSPM_POLICY_TEMPLATE
+) => {
+  // Looks for the enabled deployment (aka input). By default, all inputs are disabled.
+  // Initial state when all inputs are disabled is to choose the first available of the relevant policyTemplate
+  // Default selected policy template is CSPM
+  const selectedOption =
+    options.find((i) => i.enabled) ||
+    options.find((i) => i.policy_template === policyTemplate) ||
+    options[0];
+
+  assert(selectedOption, 'Failed to determine selected option'); // We can't provide a default input without knowing the policy template
+  assert(isPostureInput(selectedOption), 'Unknown option: ' + selectedOption.type);
+
+  return selectedOption;
+};

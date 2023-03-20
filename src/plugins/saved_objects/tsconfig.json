@@ -14,7 +14,7 @@
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
     "@kbn/utility-types",
-    "@kbn/config-schema",
+    "@kbn/core-saved-objects-server",
   ],
   "exclude": [
     "target/**/*",

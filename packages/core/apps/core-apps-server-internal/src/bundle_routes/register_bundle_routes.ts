@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { join } from 'path';
 import type { PackageInfo } from '@kbn/config';
 import { fromRoot } from '@kbn/repo-info';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
@@ -61,7 +60,9 @@ export function registerBundleRoutes({
   registerRouteForBundle(router, {
     publicPath: `${serverBasePath}/${buildNum}/bundles/core/`,
     routePath: `/${buildNum}/bundles/core/`,
-    bundlesPath: fromRoot(join('src', 'core', 'target', 'public')),
+    bundlesPath: isDist
+      ? fromRoot('node_modules/@kbn/core/target/public')
+      : fromRoot('src/core/target/public'),
     fileHashCache,
     isDist,
   });

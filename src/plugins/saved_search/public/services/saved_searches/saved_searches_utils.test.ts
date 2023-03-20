@@ -14,7 +14,8 @@ import {
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 
-import type { SavedSearchAttributes, SavedSearch } from './types';
+import type { SavedSearchAttributes } from '../../../common';
+import type { SavedSearch } from './types';
 
 describe('saved_searches_utils', () => {
   describe('fromSavedSearchAttributes', () => {

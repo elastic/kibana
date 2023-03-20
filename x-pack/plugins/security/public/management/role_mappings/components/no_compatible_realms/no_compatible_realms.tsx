@@ -22,7 +22,7 @@ export const NoCompatibleRealms: React.FunctionComponent = () => {
         />
       }
       color="warning"
-      iconType="alert"
+      iconType="warning"
     >
       <FormattedMessage
         id="xpack.security.management.roleMappings.noCompatibleRealmsErrorDescription"

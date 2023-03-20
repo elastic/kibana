@@ -22,7 +22,6 @@ import type {
   SavedObjectsBulkDeleteResponse,
   SavedObjectsBulkDeleteOptions,
 } from './apis';
-
 import type { SimpleSavedObject } from './simple_saved_object';
 
 /**
@@ -129,7 +128,15 @@ export interface SavedObjectsClientContract {
   bulkGet(objects: SavedObjectTypeIdTuple[]): Promise<SavedObjectsBatchResponse<unknown>>;
 
   /**
-   * Resolves a single object
+   * Resolves a single object.
+   *
+   * After 8.0.0, saved objects are provided a unique ID _across_ spaces.
+   * A subset of existing saved objects may have IDs regenerated while upgrading to 8+.
+   * `.resolve` provides a way for clients with legacy IDs to still retrieve the correct
+   * saved object.
+   *
+   * An example of a client with a "legacy ID" is a bookmarked dashboard in a
+   * non-default space.
    *
    * @param {string} type - the type of the object to resolve
    * @param {string} id - the ID of the object to resolve
@@ -144,7 +151,9 @@ export interface SavedObjectsClientContract {
   resolve<T = unknown>(type: string, id: string): Promise<ResolvedSimpleSavedObject<T>>;
 
   /**
-   * Resolves an array of objects by id, using any legacy URL aliases if they exist
+   * Resolves an array of objects by id.
+   *
+   * See documentation for `.resolve`.
    *
    * @param objects - an array of objects containing id, type
    * @returns The bulk resolve result for the saved objects for the given types and ids.

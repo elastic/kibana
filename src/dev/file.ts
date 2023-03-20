@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { dirname, extname, join, relative, resolve, sep, basename } from 'path';
+import { dirname, extname, join, relative, resolve, basename } from 'path';
 
 export class File {
   public readonly path: string;
@@ -47,20 +47,6 @@ export class File {
 
   public isSass() {
     return this.ext === '.sass' || this.ext === '.scss';
-  }
-
-  public isFixture() {
-    const parts = this.relativePath.split(sep);
-    if (parts.includes('__fixtures__') || this.path.endsWith('.test-d.ts')) {
-      return true;
-    }
-
-    const i = parts.indexOf('kbn-generate');
-    if (i >= 0 && parts[i + 1] === 'templates') {
-      return true;
-    }
-
-    return false;
   }
 
   public getRelativeParentDirs() {

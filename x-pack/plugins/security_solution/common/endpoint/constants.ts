@@ -40,7 +40,9 @@ export const METADATA_UNITED_TRANSFORM = 'endpoint.metadata_united-default';
 // united metadata transform destination index
 export const METADATA_UNITED_INDEX = '.metrics-endpoint.metadata_united_default';
 
+export const POLICY_RESPONSE_INDEX = 'metrics-endpoint.policy-default';
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
+
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
 // File storage indexes supporting endpoint Upload/download
@@ -94,6 +96,7 @@ export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
 
 export const ENDPOINT_ERROR_CODES: Record<string, number> = {
   ES_CONNECTION_ERROR: -272,
+  OUTPUT_SERVER_ERROR: -273,
 };
 
 export const ENDPOINT_FIELDS_SEARCH_STRATEGY = 'endpointFields';

@@ -114,8 +114,9 @@ const AlertProvidedActionVariableDescriptions = {
     name: AlertProvidedActionVariables.ruleUrl,
     description: i18n.translate('xpack.triggersActionsUI.actionVariables.ruleUrlLabel', {
       defaultMessage:
-        'The URL to the Stack Management rule page that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
+        'The URL to the rule that generated the alert. This will be an empty string if the server.publicBaseUrl is not configured.',
     }),
+    usesPublicBaseUrl: true,
   },
   [AlertProvidedActionVariables.date]: {
     name: AlertProvidedActionVariables.date,

@@ -17,5 +17,6 @@ export const httpServiceFactory: HttpServiceFactory = () => {
 
   return {
     basePath: serviceMock.http.basePath,
+    get: serviceMock.http.get,
   };
 };

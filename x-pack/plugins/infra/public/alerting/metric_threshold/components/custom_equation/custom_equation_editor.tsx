@@ -16,6 +16,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { omit, range, first, xor, debounce } from 'lodash';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DataViewBase } from '@kbn/es-query';
 import { OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS } from '../../../../../common/http_api';
 import {
   Aggregators,
@@ -39,6 +40,7 @@ export interface CustomEquationEditorProps {
   fields: NormalizedFields;
   aggregationTypes: AggregationTypes;
   errors: IErrorObject;
+  dataView: DataViewBase;
 }
 
 const NEW_METRIC = { name: 'A', aggType: Aggregators.AVERAGE as CustomMetricAggTypes };
@@ -53,6 +55,7 @@ export const CustomEquationEditor = ({
   fields,
   aggregationTypes,
   errors,
+  dataView,
 }: CustomEquationEditorProps) => {
   const [customMetrics, setCustomMetrics] = useState<CustomMetrics>(
     expression?.customMetrics ?? [NEW_METRIC]
@@ -130,6 +133,7 @@ export const CustomEquationEditor = ({
           disableDelete={disableDelete}
           onChange={handleChange}
           errors={errors}
+          dataView={dataView}
         />
       );
     }
@@ -161,6 +165,7 @@ export const CustomEquationEditor = ({
       {metricRows}
       <EuiFlexGroup>
         <EuiButtonEmpty
+          data-test-subj="infraCustomEquationEditorAddAggregationFieldButton"
           color={'primary'}
           flush={'left'}
           size="xs"
@@ -185,6 +190,7 @@ export const CustomEquationEditor = ({
             error={[errors.equation]}
           >
             <EuiFieldText
+              data-test-subj="infraCustomEquationEditorFieldText"
               isInvalid={errors.equation != null}
               compressed
               fullWidth
@@ -200,6 +206,7 @@ export const CustomEquationEditor = ({
         <EuiFlexItem>
           <EuiFormRow label={LABEL_LABEL} fullWidth helpText={LABEL_HELP_MESSAGE}>
             <EuiFieldText
+              data-test-subj="infraCustomEquationEditorFieldText"
               compressed
               fullWidth
               value={label}

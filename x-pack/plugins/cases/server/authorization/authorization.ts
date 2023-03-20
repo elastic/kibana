@@ -57,19 +57,21 @@ export class Authorization {
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
-    spaces: SpacesPluginStart;
+    spaces?: SpacesPluginStart;
     features: FeaturesPluginStart;
     auditLogger: AuthorizationAuditLogger;
     logger: Logger;
   }): Promise<Authorization> {
-    const getSpace = async (): Promise<Space> => {
-      return spaces.spacesService.getActiveSpace(request);
+    const getSpace = async (): Promise<Space | undefined> => {
+      return spaces?.spacesService.getActiveSpace(request);
     };
 
     // Since we need to do async operations, this static method handles that before creating the Auth class
     let caseOwners: Set<string>;
+
     try {
-      const disabledFeatures = new Set((await getSpace()).disabledFeatures ?? []);
+      const maybeSpace = await getSpace();
+      const disabledFeatures = new Set(maybeSpace?.disabledFeatures ?? []);
 
       caseOwners = new Set(
         features

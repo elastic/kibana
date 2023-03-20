@@ -36,6 +36,7 @@ export const StdErrorLogs = ({
   title,
   summaryMessage,
   hideTitle = false,
+  pageSize = 5,
 }: {
   monitorId?: string;
   checkGroup?: string;
@@ -43,6 +44,7 @@ export const StdErrorLogs = ({
   title?: string;
   summaryMessage?: string;
   hideTitle?: boolean;
+  pageSize?: number;
 }) => {
   const columns = [
     {
@@ -100,8 +102,9 @@ export const StdErrorLogs = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink>
+              <EuiLink data-test-subj="syntheticsStdErrorLogsLink">
                 <EuiButtonEmpty
+                  data-test-subj="syntheticsStdErrorLogsButton"
                   href={discoverLink}
                   iconType="discoverApp"
                   isDisabled={!discoverLink}
@@ -111,9 +114,11 @@ export const StdErrorLogs = ({
               </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="alert">
-            <p>{summaryMessage}</p>
-          </EuiCallOut>
+          {summaryMessage && (
+            <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="warning">
+              <p>{summaryMessage}</p>
+            </EuiCallOut>
+          )}
         </>
       )}
 
@@ -128,6 +133,9 @@ export const StdErrorLogs = ({
         itemId="id"
         executeQueryOptions={{
           defaultFields: ['@timestamp', 'synthetics.payload.message'],
+        }}
+        pagination={{
+          pageSize,
         }}
       />
     </>

@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
@@ -9,7 +9,7 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../typings/**/*",
+    "../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -62,16 +62,19 @@
     "@kbn/logging-mocks",
     "@kbn/logging",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/core-saved-objects-utils-server",
     "@kbn/share-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/slo-schema",
     "@kbn/guided-onboarding",
     "@kbn/charts-plugin",
     "@kbn/securitysolution-ecs",
+    "@kbn/shared-ux-router",
     "@kbn/alerts-ui-shared",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/core-application-browser",
+    "@kbn/files-plugin",
+    "@kbn/core-theme-browser",
+    "@kbn/core-elasticsearch-server"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

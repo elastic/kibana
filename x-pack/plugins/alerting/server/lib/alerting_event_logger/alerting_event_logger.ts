@@ -54,8 +54,13 @@ interface AlertOpts {
 interface ActionOpts {
   id: string;
   typeId: string;
-  alertId: string;
+  alertId?: string;
   alertGroup?: string;
+  alertSummary?: {
+    new: number;
+    ongoing: number;
+    recovered: number;
+  };
 }
 
 export class AlertingEventLogger {
@@ -278,6 +283,7 @@ export function createActionExecuteRecord(context: RuleContextOpts, action: Acti
       },
     ],
     ruleName: context.ruleName,
+    alertSummary: action.alertSummary,
   });
 }
 

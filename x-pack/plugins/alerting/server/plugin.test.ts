@@ -132,10 +132,11 @@ describe('Alerting Plugin', () => {
       plugin = new AlertingPlugin(context);
 
       // need await to test number of calls of setupMocks.status.set, because it is under async function which awaiting core.getStartServices()
-      await plugin.setup(setupMocks, mockPlugins);
+      const setupContract = await plugin.setup(setupMocks, mockPlugins);
 
       expect(AlertsService).toHaveBeenCalled();
-      expect(mockAlertService.initialize).toHaveBeenCalled();
+
+      expect(setupContract.frameworkAlerts.enabled()).toEqual(true);
     });
 
     it(`exposes configured minimumScheduleInterval()`, async () => {
@@ -150,6 +151,8 @@ describe('Alerting Plugin', () => {
         isUsingSecurity: false,
         minimumScheduleInterval: { value: '1m', enforce: false },
       });
+
+      expect(setupContract.frameworkAlerts.enabled()).toEqual(false);
     });
 
     describe('registerType()', () => {

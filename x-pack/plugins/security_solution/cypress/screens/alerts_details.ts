@@ -50,7 +50,7 @@ export const CELL_EXPAND_VALUE = '[data-test-subj="euiDataGridCellExpandButton"]
 
 export const CELL_EXPANSION_POPOVER = '[data-test-subj="euiDataGridExpansionPopover"]';
 
-export const USER_DETAILS_LINK = '[data-test-subj="data-grid-user-details"]';
+export const USER_DETAILS_LINK = '[data-test-subj="users-link-anchor"]';
 
 export const TABLE_TAB = '[data-test-subj="tableTab"]';
 

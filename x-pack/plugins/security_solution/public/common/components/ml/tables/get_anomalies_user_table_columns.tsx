@@ -38,6 +38,7 @@ export const getAnomaliesUserTableColumns = (
         idPrefix: `anomalies-user-table-userName-${createCompoundAnomalyKey(
           anomaliesByUser.anomaly
         )}-userName`,
+        aggregatable: true,
         fieldType: 'keyword',
         render: (item) => <UserDetailsLink userName={item} />,
       }),

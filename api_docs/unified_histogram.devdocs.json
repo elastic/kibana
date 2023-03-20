@@ -458,7 +458,7 @@
             "section": "def-public.UnifiedHistogramApi",
             "text": "UnifiedHistogramApi"
           },
-          ">, \"children\" | \"className\" | \"key\" | \"css\" | \"resizeRef\" | \"appendHitsCounter\"> & React.RefAttributes<{}>>"
+          ">, \"children\" | \"className\" | \"css\" | \"key\" | \"resizeRef\" | \"appendHitsCounter\"> & React.RefAttributes<{}>>"
         ],
         "path": "src/plugins/unified_histogram/public/container/index.tsx",
         "deprecated": false,
@@ -619,7 +619,7 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly clear: () => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "{ readonly addTriggerAction: (triggerId: string, action: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -677,7 +677,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -727,7 +727,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"init\" | \"register\"> & { deserialize: ",
+              ", \"register\" | \"init\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",

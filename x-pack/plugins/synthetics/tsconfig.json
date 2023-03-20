@@ -73,6 +73,9 @@
     "@kbn/core-saved-objects-server",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/logging",
+    "@kbn/safer-lodash-set",
+    "@kbn/shared-ux-router",
+    "@kbn/alerts-as-data-utils",
   ],
   "exclude": [
     "target/**/*",

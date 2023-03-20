@@ -21,7 +21,7 @@ import {
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
-import { ProductAccess } from '../../../../common/types';
+import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
 
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';
@@ -30,8 +30,10 @@ type RequiredFieldsOnly<T> = {
   [K in keyof T as T[K] extends Required<T>[K] ? K : never]: T[K];
 };
 interface KibanaLogicProps {
-  config: { host?: string };
+  application: ApplicationStart;
+  config: ClientConfigType;
   productAccess: ProductAccess;
+  productFeatures: ProductFeatures;
   // Kibana core
   capabilities: Capabilities;
   history: ScopedHistory;
@@ -57,6 +59,7 @@ export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
 export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
   path: ['enterprise_search', 'kibana_logic'],
   reducers: ({ props }) => ({
+    application: [props.application || {}, {}],
     capabilities: [props.capabilities || {}, {}],
     config: [props.config || {}, {}],
     charts: [props.charts, {}],
@@ -72,6 +75,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
       {},
     ],
     productAccess: [props.productAccess, {}],
+    productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
     security: [props.security, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],

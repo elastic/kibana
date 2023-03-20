@@ -23,6 +23,7 @@ import {
 } from '../../../../hooks';
 import type { Output, PostOutputRequest } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
+import { ExperimentalFeaturesService } from '../../../../services';
 
 import {
   validateName,
@@ -64,6 +65,8 @@ export interface OutputFormInputsType {
 
 export function useOutputForm(onSucess: () => void, output?: Output) {
   const fleetStatus = useFleetStatus();
+
+  const { showExperimentalShipperOptions } = ExperimentalFeaturesService.get();
 
   const hasEncryptedSavedObjectConfigured = !fleetStatus.missingOptionalFeatures?.includes(
     'encrypted_saved_object_encryption_key_required'
@@ -159,7 +162,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     !diskQueueCompressionEnabled.value ?? false
   );
 
-  // These parameters are yet tbd - https://github.com/elastic/kibana/issues/147613
   const memQueueEvents = useNumberInput(output?.shipper?.mem_queue_events || undefined);
   const queueFlushTimeout = useNumberInput(output?.shipper?.queue_flush_timeout || undefined);
   const maxBatchBytes = useNumberInput(output?.shipper?.max_batch_bytes || undefined);
@@ -265,8 +267,20 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
       setIsloading(true);
 
       let shipperParams = {};
+
       if (!isShipperDisabled) {
         shipperParams = {
+          shipper: {
+            mem_queue_events: memQueueEvents.value ? Number(memQueueEvents.value) : null,
+            queue_flush_timeout: queueFlushTimeout.value ? Number(queueFlushTimeout.value) : null,
+            max_batch_bytes: maxBatchBytes.value ? Number(maxBatchBytes.value) : null,
+          },
+        };
+      }
+
+      if (!isShipperDisabled && showExperimentalShipperOptions) {
+        shipperParams = {
+          ...shipperParams,
           shipper: {
             disk_queue_enabled: diskQueueEnabledInput.value,
             disk_queue_path:
@@ -284,9 +298,6 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               ? Number(compressionLevelInput.value)
               : null,
             loadbalance: loadBalanceEnabledInput.value,
-            mem_queue_events: memQueueEvents.value ? Number(memQueueEvents.value) : null,
-            queue_flush_timeout: queueFlushTimeout.value ? Number(queueFlushTimeout.value) : null,
-            max_batch_bytes: maxBatchBytes.value ? Number(maxBatchBytes.value) : null,
           },
         };
       }
@@ -353,8 +364,10 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     }
   }, [
     validate,
-    isLogstash,
     isShipperDisabled,
+    showExperimentalShipperOptions,
+    proxyIdInput.value,
+    isLogstash,
     nameInput.value,
     typeInput.value,
     logstashHostsInput.value,
@@ -366,10 +379,11 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     sslCertificateAuthoritiesInput.value,
     elasticsearchUrlInput.value,
     caTrustedFingerprintInput.value,
-    proxyIdInput.value,
-    notifications.toasts,
-    onSucess,
     output,
+    onSucess,
+    memQueueEvents.value,
+    queueFlushTimeout.value,
+    maxBatchBytes.value,
     diskQueueEnabledInput.value,
     diskQueuePathInput.value,
     diskQueueMaxSizeInput.value,
@@ -377,10 +391,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     diskQueueCompressionEnabled.value,
     compressionLevelInput.value,
     loadBalanceEnabledInput.value,
-    memQueueEvents.value,
-    queueFlushTimeout.value,
-    maxBatchBytes.value,
     confirm,
+    notifications.toasts,
   ]);
 
   return {

@@ -76,10 +76,12 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             connector_type_id: createdAction.connector_type_id,
             group: 'default',
             params: {},
+            uuid: response.body.actions[0].uuid,
           },
         ],
         enabled: true,
         rule_type_id: 'test.noop',
+        revision: 0,
         running: false,
         consumer: 'alertsFixture',
         params: {},
@@ -169,6 +171,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             connector_type_id: createdAction.connector_type_id,
             group: 'default',
             params: {},
+            uuid: response.body.actions[0].uuid,
           },
           {
             id: 'my-slack1',
@@ -177,10 +180,12 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             params: {
               message: 'something important happened!',
             },
+            uuid: response.body.actions[1].uuid,
           },
         ],
         enabled: true,
         rule_type_id: 'test.noop',
+        revision: 0,
         running: false,
         consumer: 'alertsFixture',
         params: {},
@@ -219,6 +224,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           actionTypeId: 'test.noop',
           group: 'default',
           params: {},
+          uuid: rawActions[0].uuid,
         },
         {
           actionRef: 'preconfigured:my-slack1',
@@ -227,6 +233,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           params: {
             message: 'something important happened!',
           },
+          uuid: rawActions[1].uuid,
         },
       ]);
 
@@ -479,6 +486,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               actionTypeId: createdAction.connector_type_id,
               group: 'default',
               params: {},
+              uuid: response.body.actions[0].uuid,
             },
           ],
           enabled: true,
@@ -497,6 +505,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           createdAt: response.body.createdAt,
           updatedAt: response.body.updatedAt,
           executionStatus: response.body.executionStatus,
+          revision: 0,
           running: false,
           ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
           ...(response.body.last_run ? { last_run: response.body.last_run } : {}),

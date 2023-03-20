@@ -116,6 +116,13 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (
+      (await doAnyChangesMatch([/^x-pack\/plugins\/profiling/])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/profiling_cypress.yml'));
+    }
+
+    if (
       (await doAnyChangesMatch([/^x-pack\/plugins\/fleet/, /^x-pack\/test\/fleet_cypress/])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -169,6 +176,19 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     if (GITHUB_PR_LABELS.includes('ci:build-webpack-bundle-analyzer')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/webpack_bundle_analyzer.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /\.docnav\.json$/,
+        /\.apidocs\.json$/,
+        /\.devdocs\.json$/,
+        /\.mdx$/,
+        /^dev_docs\/.*(png|gif|jpg|jpeg|webp)$/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:build-next-docs')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_next_docs.yml'));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));

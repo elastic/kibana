@@ -14,12 +14,10 @@ import {
   createCase,
   updateCase,
   pushCase,
-} from '../../../../../common/lib/utils';
-import {
   createCaseWithConnector,
   getServiceNowSimulationServer,
-} from '../../../../../common/lib/connectors';
-import { findCaseUserActions } from '../../../../../common/lib/user_actions';
+  findCaseUserActions,
+} from '../../../../../common/lib/api';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';

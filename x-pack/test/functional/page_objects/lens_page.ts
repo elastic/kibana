@@ -1602,6 +1602,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     /**
      * Applicable both on the embeddable and in the editor. In both scenarios, a popover containing user messages (errors, warnings) is shown.
+     *
+     * If you're going to use this many times in your test consider retrieving all the messages in one go using getMessageListTexts
+     * and running your own assertions for performance reasons.
      */
     async assertMessageListContains(assertText: string, severity: 'warning' | 'error') {
       await testSubjects.click('lens-message-list-trigger');
@@ -1620,6 +1623,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (!found) {
         throw new Error(`Message with text "${assertText}" not found`);
       }
+    },
+
+    async getMessageListTexts(severity: 'warning' | 'error') {
+      await testSubjects.click('lens-message-list-trigger');
+
+      const messageSelector = `lens-message-list-${severity}`;
+
+      await testSubjects.existOrFail(messageSelector);
+
+      const messageEls = await testSubjects.findAll(messageSelector);
+
+      const messages = await Promise.all(messageEls.map((el) => el.getVisibleText()));
+
+      await testSubjects.click('lens-message-list-trigger');
+
+      return messages;
     },
 
     async getPaletteColorStops() {

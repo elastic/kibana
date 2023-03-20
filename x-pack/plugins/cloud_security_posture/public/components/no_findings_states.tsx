@@ -12,6 +12,7 @@ import {
   EuiEmptyPrompt,
   EuiIcon,
   EuiMarkdownFormat,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -60,8 +61,7 @@ const NotDeployed = () => {
         <p>
           <FormattedMessage
             id="xpack.csp.noFindingsStates.noAgentsDeployed.noAgentsDeployedDescription"
-            defaultMessage="To see findings, please finish the setup process by installing an elastic agent on your
-          Kubernetes cluster."
+            defaultMessage="In order to begin detecting security misconfigurations, you'll need to deploy elastic-agent into the cloud account or Kubernetes cluster you want to monitor."
           />
         </p>
       }
@@ -118,7 +118,17 @@ const IndexTimeout = () => (
       <p>
         <FormattedMessage
           id="xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDescription"
-          defaultMessage="Collecting findings is taking longer than expected, check back again soon"
+          defaultMessage="Collecting findings is taking longer than expected, please review our {docs} or reach out to support"
+          values={{
+            docs: (
+              <EuiLink href="https://ela.st/findings" target="_blank">
+                <FormattedMessage
+                  id="xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDocLink"
+                  defaultMessage="docs"
+                />
+              </EuiLink>
+            ),
+          }}
         />
       </p>
     }

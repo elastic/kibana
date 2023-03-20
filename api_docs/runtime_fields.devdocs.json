@@ -348,7 +348,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\""
+              "\"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\""
             ],
             "path": "x-pack/plugins/runtime_fields/public/types.ts",
             "deprecated": false,
@@ -383,7 +383,7 @@
         "description": [],
         "signature": [
           "ComboBoxOption",
-          "<\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\">[]"
+          "<\"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\">[]"
         ],
         "path": "x-pack/plugins/runtime_fields/public/constants.ts",
         "deprecated": false,
@@ -398,7 +398,7 @@
         "label": "RuntimeType",
         "description": [],
         "signature": [
-          "\"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"long\" | \"double\""
+          "\"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\""
         ],
         "path": "x-pack/plugins/runtime_fields/public/types.ts",
         "deprecated": false,

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { v4 as uuidv4 } from 'uuid';
 
 import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { orderBy } from 'lodash';
@@ -16,7 +17,7 @@ import {
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/new_terms/utils';
 import {
   createRule,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getOpenSignals,
   getPreviewAlerts,
@@ -26,9 +27,13 @@ import {
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { previewRuleWithExceptionEntries } from '../../utils/preview_rule_with_exception_entries';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
+import { dataGeneratorFactory } from '../../utils/data_generator';
 
 import { largeArraysBuckets } from './mocks/new_terms';
 import { removeRandomValuedProperties } from './utils';
+
+const historicalWindowStart = '2022-10-13T05:00:04.000Z';
+const ruleExecutionStart = '2022-10-19T05:00:04.000Z';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -36,6 +41,40 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const { indexEnhancedDocuments } = dataGeneratorFactory({
+    es,
+    index: 'new_terms',
+    log,
+  });
+
+  /**
+   * indexes 2 sets of documents:
+   * - documents in historical window
+   * - documents in rule execution window
+   * @returns id of documents
+   */
+  const newTermsTestExecutionSetup = async ({
+    historicalDocuments,
+    ruleExecutionDocuments,
+  }: {
+    historicalDocuments: Array<Record<string, unknown>>;
+    ruleExecutionDocuments: Array<Record<string, unknown>>;
+  }) => {
+    const testId = uuidv4();
+
+    await indexEnhancedDocuments({
+      interval: [historicalWindowStart, ruleExecutionStart],
+      id: testId,
+      documents: historicalDocuments,
+    });
+
+    await indexEnhancedDocuments({
+      id: testId,
+      documents: ruleExecutionDocuments,
+    });
+
+    return testId;
+  };
 
   describe('New terms type rules', () => {
     before(async () => {
@@ -47,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/new_terms');
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     // First test creates a real rule - remaining tests use preview API
@@ -246,13 +285,36 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should generate 1 alert for unique combination of existing terms', async () => {
+      // historical window documents
+      const historicalDocuments = [
+        {
+          host: { name: 'host-0', ip: '127.0.0.1' },
+        },
+        {
+          host: { name: 'host-1', ip: '127.0.0.2' },
+        },
+      ];
+
+      // rule execution documents
+      const ruleExecutionDocuments = [
+        {
+          host: { name: 'host-0', ip: '127.0.0.2' },
+        },
+      ];
+
+      const testId = await newTermsTestExecutionSetup({
+        historicalDocuments,
+        ruleExecutionDocuments,
+      });
+
       // ensure there are no alerts for single new terms fields, it means values are not new
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         index: ['new_terms'],
         new_terms_fields: ['host.name', 'host.ip'],
-        from: '2020-10-19T05:00:04.000Z',
-        history_window_start: '2020-10-13T05:00:04.000Z',
+        from: ruleExecutionStart,
+        history_window_start: historicalWindowStart,
+        query: `id: "${testId}"`,
       };
       // shouldn't be terms for 'host.ip'
       const hostIpPreview = await previewRule({
@@ -285,12 +347,36 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should generate 5 alerts, 1 for each new unique combination in 2 fields', async () => {
+      const historicalDocuments = [
+        {
+          'source.ip': ['192.168.1.1'],
+          tags: ['tag-1', 'tag-2'],
+        },
+        {
+          'source.ip': ['192.168.1.1'],
+          tags: ['tag-1'],
+        },
+      ];
+
+      const ruleExecutionDocuments = [
+        {
+          'source.ip': ['192.168.1.1', '192.168.1.2'],
+          tags: ['tag-new-1', 'tag-2', 'tag-new-3'],
+        },
+      ];
+
+      const testId = await newTermsTestExecutionSetup({
+        historicalDocuments,
+        ruleExecutionDocuments,
+      });
+
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         index: ['new_terms'],
         new_terms_fields: ['source.ip', 'tags'],
-        from: '2020-10-19T05:00:04.000Z',
-        history_window_start: '2020-10-13T05:00:04.000Z',
+        from: ruleExecutionStart,
+        history_window_start: historicalWindowStart,
+        query: `id: "${testId}"`,
       };
 
       const { previewId } = await previewRule({ supertest, rule });
@@ -313,12 +399,24 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should generate 1 alert for unique combination of terms, one of which is a number', async () => {
+      const historicalDocuments = [
+        { user: { name: 'user-0', id: 0 } },
+        { user: { name: 'user-1', id: 1 } },
+      ];
+      const ruleExecutionDocuments = [{ user: { name: 'user-0', id: 1 } }];
+
+      const testId = await newTermsTestExecutionSetup({
+        historicalDocuments,
+        ruleExecutionDocuments,
+      });
+
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         index: ['new_terms'],
         new_terms_fields: ['user.name', 'user.id'],
-        from: '2020-10-19T05:00:04.000Z',
-        history_window_start: '2020-10-13T05:00:04.000Z',
+        from: ruleExecutionStart,
+        history_window_start: historicalWindowStart,
+        query: `id: "${testId}"`,
       };
 
       const { previewId } = await previewRule({ supertest, rule });

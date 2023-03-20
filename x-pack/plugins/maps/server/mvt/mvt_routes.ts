@@ -44,6 +44,7 @@ export function initMVTRoutes({
           z: schema.number(),
         }),
         query: schema.object({
+          buffer: schema.maybe(schema.number()),
           geometryFieldName: schema.string(),
           hasLabels: schema.boolean(),
           requestBody: schema.string(),
@@ -68,6 +69,7 @@ export function initMVTRoutes({
       };
       try {
         tileRequest = getHitsTileRequest({
+          buffer: 'buffer' in query ? parseInt(query.buffer, 10) : 5,
           encodedRequestBody: query.requestBody as string,
           geometryFieldName: query.geometryFieldName as string,
           hasLabels: query.hasLabels as boolean,
@@ -107,6 +109,7 @@ export function initMVTRoutes({
           z: schema.number(),
         }),
         query: schema.object({
+          buffer: schema.maybe(schema.number()),
           geometryFieldName: schema.string(),
           hasLabels: schema.boolean(),
           requestBody: schema.string(),
@@ -133,6 +136,7 @@ export function initMVTRoutes({
       };
       try {
         tileRequest = getAggsTileRequest({
+          buffer: 'buffer' in query ? parseInt(query.buffer, 10) : 5,
           encodedRequestBody: query.requestBody as string,
           geometryFieldName: query.geometryFieldName as string,
           gridPrecision: parseInt(query.gridPrecision, 10),

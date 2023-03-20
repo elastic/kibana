@@ -34,7 +34,7 @@ export const summaryMessage = i18n.translate(
   'xpack.triggersActionsUI.sections.actionForm.SummaryMessage',
   {
     defaultMessage:
-      'The system has detected \\{\\{alerts.new.count\\}\\} new, \\{\\{alerts.ongoing.count\\}\\} ongoing, and \\{\\{alerts.recovered.count\\}\\} alerts.',
+      'The system has detected \\{\\{alerts.new.count\\}\\} new, \\{\\{alerts.ongoing.count\\}\\} ongoing, and \\{\\{alerts.recovered.count\\}\\} recovered alerts.',
   }
 );
 

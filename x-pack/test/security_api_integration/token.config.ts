@@ -14,7 +14,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
 
-  const auditLogPath = resolve(__dirname, './fixtures/audit/token.log');
+  const auditLogPath = resolve(__dirname, './packages/helpers/audit/token.log');
 
   return {
     testFiles: [require.resolve('./tests/token')],

@@ -431,7 +431,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"top\" | \"bottom\" | \"left\" | \"right\""
+          "\"right\" | \"left\" | \"top\" | \"bottom\""
         ],
         "path": "src/plugins/expression_image/common/types/expression_renderers.ts",
         "deprecated": false,
