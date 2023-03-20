@@ -40,13 +40,19 @@
 
 @keyframes highlightOutline {
   0% {
+    outline: solid $euiSizeXS transparentize($euiColorSuccess, 1);
+  }
+  25% {
     outline: solid $euiSizeXS transparentize($euiColorAccent, .5);
   }
   50% {
+    outline: solid $euiSizeXS transparentize($euiColorSuccess, .75);
+  }
+  75% {
     outline: solid $euiSizeXS transparentize($euiColorAccent, .75);
   }
   100% {
-    outline: solid $euiSizeXS transparentize($euiColorAccent, 1);
+    outline: solid $euiSizeXS transparentize($euiColorSuccess, 1);
   }
 }
 
