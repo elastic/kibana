@@ -15,7 +15,7 @@ import { useRightPanelContext } from '../context';
 import { TABLE_TAB_ERROR_TEST_ID } from './test_ids';
 
 /**
- * Table view displayed in the alert details expandable flyout right section
+ * Table view displayed in the document details expandable flyout right section
  */
 export const TableTab: FC = memo(() => {
   const { browserFields, dataFormattedForFieldBrowser, eventId } = useRightPanelContext();
