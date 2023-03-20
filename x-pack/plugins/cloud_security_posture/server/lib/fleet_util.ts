@@ -18,7 +18,7 @@ import type {
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import { errors } from '@elastic/elasticsearch';
-import { PosturePolicyTemplate, PostureTypes } from '../../common/types';
+import { CloudSecurityPolicyTemplate, PostureTypes } from '../../common/types';
 import { SUPPORTED_POLICY_TEMPLATES } from '../../common/constants';
 import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
 import {

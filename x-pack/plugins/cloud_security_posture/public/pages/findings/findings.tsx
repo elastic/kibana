@@ -14,6 +14,8 @@ import {
   EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { NoFindingsStates } from '../../components/no_findings_states';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { Redirect, Switch, useHistory, useLocation } from 'react-router-dom';
@@ -25,7 +27,6 @@ import { Vulnerabilities } from '../vulnerabilities';
 export const Findings = () => {
   const history = useHistory();
   const location = useLocation();
-  const dataViewQuery = useLatestFindingsDataView();
   const getSetupStatus = useCspSetupStatusApi();
 
   const hasFindings =

@@ -21,8 +21,8 @@ export const Configurations = () => {
   const dataViewQuery = useLatestFindingsDataView();
   const getSetupStatus = useCspSetupStatusApi();
 
-  const hasFindings = getSetupStatus.data?.status === 'indexed';
-  if (!hasFindings) return <NoFindingsStates />;
+  const hasFindings = getSetupStatus.data?.kspm.status === 'indexed' || getSetupStatus.data?.cspm.status === 'indexed';
+  if (!hasFindings) return <NoFindingsStates posturetype={'cspm'}/>;
 
   return (
     <CloudPosturePage query={dataViewQuery}>

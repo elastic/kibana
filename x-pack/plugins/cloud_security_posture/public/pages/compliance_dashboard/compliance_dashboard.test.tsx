@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import Chance from 'chance';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { render } from '@testing-library/react';
 import { TestProvider } from '../../test/test_provider';
@@ -22,8 +22,6 @@ import {
 import { mockDashboardData } from './mock';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
-import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
-import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { expectIdsInDoc } from '../../test/utils';
 
 jest.mock('../../common/api/use_setup_status_api');
@@ -31,8 +29,6 @@ jest.mock('../../common/api/use_stats_api');
 jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_csp_integration_link');
-
-const chance = new Chance();
 
 describe('<ComplianceDashboard />', () => {
   beforeEach(() => {

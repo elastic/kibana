@@ -302,12 +302,10 @@ export const ComplianceDashboard = () => {
       getSetupStatus.data?.cspm?.status,
       kspmIntegrationLink,
       selectedTab,
+      hasFindingsKspm,
+      hasFindingsCspm,
     ]
   );
-
-  // if (!hasFindingsKspm && !hasFindingsCspm) return <NoFindingsStates posturetype={'cspm'}/>;
-  // if (!hasFindingsCspm) return <NoFindingsStates posturetype={'cspm'}/>;
-  // if (!hasFindingsKspm) return <NoFindingsStates posturetype={'kspm'}/>;
 
   return (
     <CloudPosturePage query={selectedTab === 'cspm' ? getCspmDashboardData : getKspmDashboardData}>
