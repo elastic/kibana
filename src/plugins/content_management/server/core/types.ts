@@ -6,12 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { Type } from '@kbn/config-schema';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { ContentManagementGetTransformsFn, Version } from '@kbn/object-versioning';
 
 /** Context that is sent to all storage instance methods */
 export interface StorageContext {
   requestHandlerContext: RequestHandlerContext;
+  version: {
+    request: Version;
+    latest: Version;
+  };
+  utils: {
+    getTransforms: ContentManagementGetTransformsFn;
+  };
 }
 
 export interface ContentStorage {
@@ -34,68 +41,12 @@ export interface ContentStorage {
   search(ctx: StorageContext, query: object, options: unknown): Promise<any>;
 }
 
-export interface RpcSchemas {
-  get?: {
-    in?: {
-      options?: Type<any>;
-    };
-    out?: {
-      result: Type<any>;
-    };
-  };
-  bulkGet?: {
-    in?: {
-      options?: Type<any>;
-    };
-    out?: {
-      result: Type<any>;
-    };
-  };
-  create: {
-    in: {
-      data: Type<any>;
-      options?: Type<any>;
-    };
-    out?: {
-      result: Type<any>;
-    };
-  };
-  update: {
-    in: {
-      data: Type<any>;
-      options?: Type<any>;
-    };
-    out?: {
-      result: Type<any>;
-    };
-  };
-  delete?: {
-    in?: {
-      options?: Type<any>;
-    };
-    out?: {
-      result: Type<any>;
-    };
-  };
-  search: {
-    in: {
-      query: Type<any>;
-      options?: Type<any>;
-    };
-    out?: {
-      result: Type<any>;
-    };
-  };
-}
-
-export type ContentSchemas = RpcSchemas;
-
 export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage> {
   /** Unique id for the content type */
   id: string;
   /** The storage layer for the content. It must implment the ContentStorage interface. */
   storage: S;
-  schemas: {
-    content: ContentSchemas;
+  version: {
+    latest: Version;
   };
 }

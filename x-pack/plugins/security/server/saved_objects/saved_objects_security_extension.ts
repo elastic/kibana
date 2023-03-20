@@ -123,10 +123,21 @@ export interface AddAuditEventParams {
    */
   addToSpaces?: readonly string[];
   /**
-   * Array of spaces being removed. For
-   * UPDATE_OBJECTS_SPACES action only
+   * Array of spaces being removed.
+   * For the UPDATE_OBJECTS_SPACES action
+   * and the auditObjectsForSpaceDeletions method
    */
   deleteFromSpaces?: readonly string[];
+  /**
+   * Array of saved object types not authorized for the action.
+   * Used with FIND and OPEN_POINT_IN_TIME_FOR_TYPE actions
+   */
+  unauthorizedTypes?: readonly string[];
+  /**
+   * Array of spaces not authorized for the action.
+   * Used with FIND and OPEN_POINT_IN_TIME_FOR_TYPE actions
+   */
+  unauthorizedSpaces?: readonly string[];
   /**
    * Relevant error information to add to
    * the audit event
@@ -170,7 +181,7 @@ interface InternalAuthorizeParams {
     allowGlobalResource?: boolean;
   };
   /** auditOptions - options for audit logging */
-  auditOptions?: AuditOptions | UpdateSpacesAuditOptions;
+  auditOptions?: AuditOptions;
 }
 
 /**
@@ -190,7 +201,7 @@ interface EnforceAuthorizationParams<A extends string> {
    */
   typeMap: AuthorizationTypeMap<A>;
   /** auditOptions - options for audit logging */
-  auditOptions?: AuditOptions | UpdateSpacesAuditOptions;
+  auditOptions?: AuditOptions;
 }
 
 /**
@@ -205,17 +216,28 @@ interface AuditHelperParams {
   /** Whether or not to use success as the non-failure outcome. Default is 'unknown' */
   useSuccessOutcome?: boolean;
   /**
-   * The spaces in which to add the objects.
-   * Used only with the AuditAction.UPDATE_OBJECTS_SPACES.
+   * The spaces in which to add the objects
+   * Used only with the AuditAction.UPDATE_OBJECTS_SPACES
    * Default is none
    */
   addToSpaces?: string[];
   /**
-   * The spaces from which to remove the objects.
-   * Used only with the AuditAction.UPDATE_OBJECTS_SPACES.
+   * The spaces from which to remove the objects
+   * Used only with the AuditAction.UPDATE_OBJECTS_SPACES
+   * action and the auditObjectsForSpaceDeletions method
    * Default is none
    */
   deleteFromSpaces?: string[];
+  /**
+   * The spaces unauthorized for the action
+   * Used with AuditAction.FIND and AuditAction.OPEN_POINT_IN_TIME
+   */
+  unauthorizedSpaces?: string[];
+  /**
+   * The types unauthorized for the action
+   * Used with AuditAction.FIND and AuditAction.OPEN_POINT_IN_TIME
+   */
+  unauthorizedTypes?: string[];
   /** Error information produced by the action */
   error?: Error;
 }
@@ -236,20 +258,9 @@ interface AuditOptions {
   bypass?: 'never' | 'on_success' | 'on_failure' | 'always';
   /** If authz success should be logged as 'success'. Default false */
   useSuccessOutcome?: boolean;
-}
-
-/**
- * The UpdateSpacesAuditOptions interface contains optional settings for
- * auditing the UPDATE_OBJECTS_SPACES action.
- */
-interface UpdateSpacesAuditOptions extends AuditOptions {
-  /**
-   * An array of spaces which to add the objects (used in updateObjectsSpaces)
-   */
+  /** An array of spaces which to add the objects (used in updateObjectsSpaces) */
   addToSpaces?: string[];
-  /**
-   * An array of spaces from which to remove the objects (used in updateObjectsSpaces)
-   */
+  /** An array of spaces from which to remove the objects (used in updateObjectsSpaces) */
   deleteFromSpaces?: string[];
 }
 
@@ -479,10 +490,20 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   }
 
   private auditHelper(params: AuditHelperParams) {
-    const { action, useSuccessOutcome, objects, error, addToSpaces, deleteFromSpaces } = params;
+    const {
+      action,
+      useSuccessOutcome,
+      objects,
+      error,
+      addToSpaces,
+      deleteFromSpaces,
+      unauthorizedSpaces,
+      unauthorizedTypes,
+    } = params;
 
     // If there are no objects, we at least want to add a single audit log for the action
     const toAudit = !!objects && objects?.length > 0 ? objects : ([undefined] as undefined[]);
+
     for (const obj of toAudit) {
       this.addAuditEvent({
         action,
@@ -493,6 +514,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         ...(!error && { outcome: useSuccessOutcome ? 'success' : 'unknown' }),
         addToSpaces,
         deleteFromSpaces,
+        unauthorizedSpaces,
+        unauthorizedTypes,
       });
     }
   }
@@ -510,7 +533,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       useSuccessOutcome,
       addToSpaces,
       deleteFromSpaces,
-    } = (auditOptions as UpdateSpacesAuditOptions) ?? {};
+    } = (auditOptions as AuditOptions) ?? {};
 
     const { authzAction, auditAction } = this.decodeSecurityAction(action);
 
@@ -543,7 +566,13 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
 
     if (auditAction && bypass !== 'always' && bypass !== 'on_success') {
-      this.auditHelper({ action: auditAction, objects: auditObjects, useSuccessOutcome });
+      this.auditHelper({
+        action: auditAction,
+        objects: auditObjects,
+        useSuccessOutcome,
+        addToSpaces,
+        deleteFromSpaces,
+      });
     }
   }
 
@@ -944,18 +973,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       this.addAuditEvent({
         action: AuditAction.OPEN_POINT_IN_TIME,
         error: new Error('User is unauthorized for any requested types/spaces'),
-        // TODO: include object type(s) that were requested?
-        // requestedTypes: types,
-        // requestedSpaces: namespaces,
+        unauthorizedTypes: [...types],
+        unauthorizedSpaces: [...namespaces],
       });
       throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error('unauthorized'));
     }
     this.addAuditEvent({
       action: AuditAction.OPEN_POINT_IN_TIME,
       outcome: 'unknown',
-      // TODO: include object type(s) that were requested?
-      // requestedTypes: types,
-      // requestedSpaces: namespaces,
     });
 
     return preAuthorizationResult;
@@ -1258,8 +1283,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const preAuthorizationResult = await this.authorize({
       actions: new Set([SecurityAction.FIND]),
-      types: new Set(types),
-      spaces: new Set(namespaces),
+      types,
+      spaces: namespaces,
     });
     if (preAuthorizationResult?.status === 'unauthorized') {
       // If the user is unauthorized to find *anything* they requested, audit but don't throw
@@ -1267,10 +1292,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       this.addAuditEvent({
         action: AuditAction.FIND,
         error: new Error(`User is unauthorized for any requested types/spaces`),
-        // TODO: Improve authorization and auditing (https://github.com/elastic/kibana/issues/135259)
-        // include object type(s) that were requested?
-        // requestedTypes: types,
-        // requestedSpaces: namespaces,
+        unauthorizedTypes: [...types],
+        unauthorizedSpaces: [...namespaces],
       });
     }
     return preAuthorizationResult;

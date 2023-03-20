@@ -317,11 +317,10 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
       } as ResponseOutput<ResponseActionGetFileOutputContent>;
 
     case 'execute':
-      const outputFileId = getFileDownloadId(action, action.agents[0]);
       return {
         output: endpointActionGenerator.generateExecuteActionResponseOutput({
           content: {
-            outputFileId,
+            output_file_id: getFileDownloadId(action, action.agents[0]),
           },
         }),
       } as ResponseOutput<ResponseActionExecuteOutputContent>;

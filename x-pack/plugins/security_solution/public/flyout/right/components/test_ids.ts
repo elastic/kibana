@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export const FLYOUT_HEADER_TITLE = 'securitySolutionDocumentDetailsFlyoutHeaderTitle';
+export const FLYOUT_HEADER_TITLE_TEST_ID = 'securitySolutionDocumentDetailsFlyoutHeaderTitle';
+export const EXPAND_DETAILS_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHeaderExpandDetailButton';
+export const COLLAPSE_DETAILS_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsFlyoutHeaderCollapseDetailButton';
+export const MITRE_ATTACK_TITLE_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackTitle';
+export const MITRE_ATTACK_DETAILS_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackDetails';

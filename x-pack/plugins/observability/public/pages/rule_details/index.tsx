@@ -45,7 +45,7 @@ import {
 } from '../../utils/alert_summary_widget';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
-import { CenterJustifiedSpinner } from './components/center_justified_spinner';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
 import {
   EXECUTION_TAB,
@@ -76,7 +76,7 @@ export function RuleDetailsPage() {
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
       ruleTypeRegistry,
-      getEditAlertFlyout: EditAlertFlyout,
+      getEditRuleFlyout: EditRuleFlyout,
       getRuleEventLogList,
       getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
@@ -302,7 +302,7 @@ export function RuleDetailsPage() {
     return (
       <EuiPanel>
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           color="danger"
           title={
             <h2>
@@ -424,7 +424,7 @@ export function RuleDetailsPage() {
         }}
       />
       {editFlyoutVisible && (
-        <EditAlertFlyout
+        <EditRuleFlyout
           initialRule={rule}
           onClose={() => {
             setEditFlyoutVisible(false);
