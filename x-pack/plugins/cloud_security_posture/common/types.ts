@@ -62,7 +62,7 @@ export type CspStatusCode =
   | 'index-timeout' // index timeout was surpassed since installation
   | 'not-deployed' // no healthy agents were deployed
   | 'not-installed' // number of installed csp integrations is 0;
-  | 'waiting_for_results'; //have healthy agents but no findings at all, assumes data is being indexed for the 1st time
+  | 'waiting_for_results'; // have healthy agents but no findings at all, assumes data is being indexed for the 1st time
 
 export type IndexStatus =
   | 'not-empty' // Index contains documents
