@@ -91,23 +91,21 @@ export class EditControlAction implements Action<EditControlActionContext> {
       throw new IncompatibleActionError();
     }
     const controlGroup = embeddable.parent as ControlGroupContainer;
-    const ControlsServicesProvider = pluginServices.getContextProvider();
     const ReduxWrapper = controlGroup.getReduxEmbeddableTools().Wrapper;
 
     const flyoutInstance = this.openFlyout(
       toMountPoint(
-        <ControlsServicesProvider>
-          <ReduxWrapper>
-            <EditControlFlyout
-              embeddable={embeddable}
-              removeControl={() => this.deleteControlAction.execute({ embeddable })}
-              closeFlyout={() => {
-                setFlyoutRef(undefined);
-                flyoutInstance.close();
-              }}
-            />
-          </ReduxWrapper>
-        </ControlsServicesProvider>,
+        <ReduxWrapper>
+          <EditControlFlyout
+            embeddable={embeddable}
+            removeControl={() => this.deleteControlAction.execute({ embeddable })}
+            closeFlyout={() => {
+              setFlyoutRef(undefined);
+              flyoutInstance.close();
+            }}
+          />
+        </ReduxWrapper>,
+
         { theme$: this.theme$ }
       ),
       {

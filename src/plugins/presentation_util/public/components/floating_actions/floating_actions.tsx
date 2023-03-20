@@ -18,26 +18,25 @@ import { ReduxEmbeddableState } from '../../redux_embeddables';
 
 export interface FloatingActionsProps {
   children: ReactElement;
-  select: TypedUseSelectorHook<ReduxEmbeddableState>;
 
   className?: string;
   isEnabled?: boolean;
   embeddable?: IEmbeddable;
+  viewMode?: ReduxEmbeddableState['explicitInput']['viewMode'];
+  disabledActions?: ReduxEmbeddableState['explicitInput']['disabledActions'];
 }
 
 export const FloatingActions: FC<FloatingActionsProps> = ({
-  select,
   children,
+  viewMode,
   isEnabled,
   embeddable,
   className = '',
+  disabledActions,
 }) => {
   const {
     uiActions: { getTriggerCompatibleActions },
   } = pluginServices.getServices();
-
-  const viewMode = select((state) => state.explicitInput.viewMode);
-  const disabledActions = select((state) => state.explicitInput.disabledActions);
 
   const [floatingActions, setFloatingActions] = useState<JSX.Element | undefined>(undefined);
 

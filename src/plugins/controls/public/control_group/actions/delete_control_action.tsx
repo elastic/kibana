@@ -67,8 +67,7 @@ export class DeleteControlAction implements Action<DeleteControlActionContext> {
     if (isErrorEmbeddable(embeddable)) return false;
     const controlGroup = embeddable.parent;
     return Boolean(
-      !isErrorEmbeddable(embeddable) &&
-        controlGroup &&
+      controlGroup &&
         isControlGroup(controlGroup) &&
         controlGroup.getInput().viewMode === ViewMode.EDIT
     );

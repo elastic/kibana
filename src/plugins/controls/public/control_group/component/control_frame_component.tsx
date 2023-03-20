@@ -89,7 +89,9 @@ export const ControlFrame = ({
       ControlGroupContainer
     >();
 
+  const viewMode = select((state) => state.explicitInput.viewMode);
   const controlStyle = select((state) => state.explicitInput.controlStyle);
+  const disabledActions = select((state) => state.explicitInput.disabledActions);
 
   const embeddable = useChildEmbeddable({
     untilEmbeddableLoaded: controlGroup.untilEmbeddableLoaded.bind(controlGroup),
@@ -180,8 +182,9 @@ export const ControlFrame = ({
         'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
         'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
-      select={select}
+      viewMode={viewMode}
       embeddable={embeddable}
+      disabledActions={disabledActions}
       isEnabled={embeddable && enableActions}
     >
       <EuiFormRow
