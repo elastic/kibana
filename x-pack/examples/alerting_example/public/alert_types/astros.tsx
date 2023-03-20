@@ -28,7 +28,7 @@ export function registerNavigation(alerting: AlertingSetup) {
   alerting.registerNavigation(
     ALERTING_EXAMPLE_APP_ID,
     'example.people-in-space',
-    (rule: SanitizedRule) => `/astros/${rule.id}`
+    (rule: SanitizedRule) => `/app/${ALERTING_EXAMPLE_APP_ID}/astros/${rule.id}`
   );
 }
 
@@ -139,7 +139,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
   return (
     <Fragment>
       {errorsCallout.length ? (
-        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
+        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="warning">
           {errorsCallout}
         </EuiCallOut>
       ) : (

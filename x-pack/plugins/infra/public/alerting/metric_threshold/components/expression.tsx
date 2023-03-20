@@ -311,6 +311,7 @@ export const Expressions: React.FC<Props> = (props) => {
               setRuleParams={updateParams}
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
+              dataView={derivedIndexPattern}
             >
               <ExpressionChart
                 expression={e}
@@ -336,6 +337,7 @@ export const Expressions: React.FC<Props> = (props) => {
       <EuiSpacer size={'m'} />
       <div>
         <EuiButtonEmpty
+          data-test-subj="infraExpressionsAddConditionButton"
           color={'primary'}
           iconSide={'left'}
           flush={'left'}
@@ -404,6 +406,7 @@ export const Expressions: React.FC<Props> = (props) => {
           />
         )) || (
           <EuiFieldSearch
+            data-test-subj="infraExpressionsFieldSearch"
             onChange={handleFieldSearchChange}
             value={ruleParams.filterQueryText}
             fullWidth
@@ -445,6 +448,7 @@ export const Expressions: React.FC<Props> = (props) => {
                 groupCount: redundantFilterGroupBy.length,
                 filteringAndGroupingLink: (
                   <EuiLink
+                    data-test-subj="infraExpressionsTheDocsLink"
                     href={`${docLinks.links.observability.metricsThreshold}#filtering-and-grouping`}
                   >
                     {i18n.translate(

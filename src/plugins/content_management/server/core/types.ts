@@ -7,10 +7,18 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { ContentManagementGetTransformsFn, Version } from '@kbn/object-versioning';
 
 /** Context that is sent to all storage instance methods */
 export interface StorageContext {
-  requestHandlerContext?: RequestHandlerContext;
+  requestHandlerContext: RequestHandlerContext;
+  version: {
+    request: Version;
+    latest: Version;
+  };
+  utils: {
+    getTransforms: ContentManagementGetTransformsFn;
+  };
 }
 
 export interface ContentStorage {
@@ -21,13 +29,16 @@ export interface ContentStorage {
   bulkGet(ctx: StorageContext, ids: string[], options: unknown): Promise<any>;
 
   /** Create an item */
-  create(ctx: StorageContext, fields: object, options: unknown): Promise<any>;
+  create(ctx: StorageContext, data: object, options: unknown): Promise<any>;
 
   /** Update an item */
-  update(ctx: StorageContext, id: string, fields: object, options: unknown): Promise<any>;
+  update(ctx: StorageContext, id: string, data: object, options: unknown): Promise<any>;
 
   /** Delete an item */
   delete(ctx: StorageContext, id: string, options: unknown): Promise<any>;
+
+  /** Search items */
+  search(ctx: StorageContext, query: object, options: unknown): Promise<any>;
 }
 
 export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage> {
@@ -35,4 +46,7 @@ export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage
   id: string;
   /** The storage layer for the content. It must implment the ContentStorage interface. */
   storage: S;
+  version: {
+    latest: Version;
+  };
 }

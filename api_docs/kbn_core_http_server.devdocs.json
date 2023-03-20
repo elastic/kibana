@@ -790,6 +790,148 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.FileHttpResponseOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "FileHttpResponseOptions",
+        "description": [
+          "\nHTTP response parameters for a response with adjustable status code."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.FileHttpResponseOptions",
+            "text": "FileHttpResponseOptions"
+          },
+          "<T>"
+        ],
+        "path": "packages/core/http/core-http-server/src/router/response.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.FileHttpResponseOptions.body",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "body",
+            "description": [
+              "Attachment content to send to the client"
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.FileHttpResponseOptions.filename",
+            "type": "string",
+            "tags": [],
+            "label": "filename",
+            "description": [
+              "Attachment name, encoded and added to the headers to send to the client"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.FileHttpResponseOptions.fileContentType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fileContentType",
+            "description": [
+              "Explicitly set the attachment content type. Tries to detect the type based on extension and defaults to application/octet-stream"
+            ],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.FileHttpResponseOptions.fileContentSize",
+            "type": "number",
+            "tags": [],
+            "label": "fileContentSize",
+            "description": [
+              "Attachment content size in bytes, Tries to detect the content size from body"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.FileHttpResponseOptions.headers",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "headers",
+            "description": [
+              "HTTP Headers with additional information about response"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.ResponseHeaders",
+                "text": "ResponseHeaders"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.FileHttpResponseOptions.bypassErrorFormat",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "bypassErrorFormat",
+            "description": [
+              "Bypass the default error formatting"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.FileHttpResponseOptions.bypassFileNameEncoding",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "bypassFileNameEncoding",
+            "description": [
+              "Bypass filename encoding, only set to true if the filename is already encoded"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.HttpAuth",
         "type": "Interface",
         "tags": [],
@@ -915,6 +1057,16 @@
         "description": [
           "\nHTTP response parameters"
         ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.HttpResponseOptions",
+            "text": "HttpResponseOptions"
+          },
+          "<T>"
+        ],
         "path": "packages/core/http/core-http-server/src/router/response.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -922,16 +1074,14 @@
           {
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.HttpResponseOptions.body",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "body",
             "description": [
               "HTTP message to send to the client"
             ],
             "signature": [
-              "string | Record<string, any> | Buffer | ",
-              "Stream",
-              " | undefined"
+              "T | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
@@ -2540,7 +2690,8 @@
                 "docId": "kibKbnCoreHttpServerPluginApi",
                 "section": "def-common.HttpResponseOptions",
                 "text": "HttpResponseOptions"
-              }
+              },
+              "<any>"
             ],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
@@ -4864,6 +5015,20 @@
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.KibanaRouteOptions.access",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "access",
+            "description": [],
+            "signature": [
+              "\"internal\" | \"public\""
+            ],
+            "path": "packages/core/http/core-http-server/src/router/request.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4889,7 +5054,17 @@
               "\nThe request has succeeded.\nStatus code: `200`."
             ],
             "signature": [
-              "(options?: ",
+              "<T extends string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
+              },
+              " | undefined; } | undefined = any>(options?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -4897,7 +5072,7 @@
                 "section": "def-common.HttpResponseOptions",
                 "text": "HttpResponseOptions"
               },
-              " | undefined) => ",
+              "<T> | undefined) => ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -4905,7 +5080,7 @@
                 "section": "def-common.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>"
+              "<T>"
             ],
             "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
             "deprecated": false,
@@ -4928,7 +5103,7 @@
                     "section": "def-common.HttpResponseOptions",
                     "text": "HttpResponseOptions"
                   },
-                  " | undefined"
+                  "<T> | undefined"
                 ],
                 "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
                 "deprecated": false,
@@ -4948,7 +5123,17 @@
               "\nThe request has been accepted for processing.\nStatus code: `202`."
             ],
             "signature": [
-              "(options?: ",
+              "<T extends string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
+              },
+              " | undefined; } | undefined = any>(options?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -4956,7 +5141,7 @@
                 "section": "def-common.HttpResponseOptions",
                 "text": "HttpResponseOptions"
               },
-              " | undefined) => ",
+              "<T> | undefined) => ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -4964,7 +5149,7 @@
                 "section": "def-common.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>"
+              "<T>"
             ],
             "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
             "deprecated": false,
@@ -4987,7 +5172,7 @@
                     "section": "def-common.HttpResponseOptions",
                     "text": "HttpResponseOptions"
                   },
-                  " | undefined"
+                  "<T> | undefined"
                 ],
                 "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
                 "deprecated": false,
@@ -5015,7 +5200,7 @@
                 "section": "def-common.HttpResponseOptions",
                 "text": "HttpResponseOptions"
               },
-              " | undefined) => ",
+              "<any> | undefined) => ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -5046,7 +5231,7 @@
                     "section": "def-common.HttpResponseOptions",
                     "text": "HttpResponseOptions"
                   },
-                  " | undefined"
+                  "<any> | undefined"
                 ],
                 "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
                 "deprecated": false,
@@ -5928,6 +6113,22 @@
             ],
             "signature": [
               "(Method extends \"get\" ? never : boolean) | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouteConfigOptions.access",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "access",
+            "description": [
+              "\nDefines intended request origin of the route:\n- public. The route is public, declared stable and intended for external access.\n          In the future, may require an incomming request to contain a specified header.\n- internal. The route is internal and intended for internal access only.\n\nIf not declared, infers access from route path:\n- access =`internal` for '/internal' route path prefix\n- access = `public` for everything else"
+            ],
+            "signature": [
+              "\"internal\" | \"public\" | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,
@@ -7520,7 +7721,33 @@
             "section": "def-common.KibanaErrorResponseFactory",
             "text": "KibanaErrorResponseFactory"
           },
-          " & { custom<T extends string | Record<string, any> | Error | Buffer | ",
+          " & { file<T extends string | Record<string, any> | Error | Buffer | ",
+          "Stream",
+          " | { message: string | Error; attributes?: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.ResponseErrorAttributes",
+            "text": "ResponseErrorAttributes"
+          },
+          " | undefined; } | undefined>(options: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.FileHttpResponseOptions",
+            "text": "FileHttpResponseOptions"
+          },
+          "<T>): ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IKibanaResponse",
+            "text": "IKibanaResponse"
+          },
+          "<any>; custom<T extends string | Record<string, any> | Error | Buffer | ",
           "Stream",
           " | { message: string | Error; attributes?: ",
           {
@@ -8345,7 +8572,7 @@
             "section": "def-common.HttpResponseOptions",
             "text": "HttpResponseOptions"
           },
-          " & { headers: { location: string; }; }"
+          "<any> & { headers: { location: string; }; }"
         ],
         "path": "packages/core/http/core-http-server/src/router/response.ts",
         "deprecated": false,

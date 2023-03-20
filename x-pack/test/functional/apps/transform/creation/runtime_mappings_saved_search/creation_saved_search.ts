@@ -68,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
             status: TRANSFORM_STATE.STOPPED,
             mode: 'batch',
             progress: '100',
+            health: 'Healthy',
           },
           sourceIndex: 'ft_farequote',
           indexPreview: {
@@ -105,6 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
             status: TRANSFORM_STATE.STOPPED,
             mode: 'batch',
             progress: '100',
+            health: 'Healthy',
           },
           sourceIndex: 'ft_farequote',
           indexPreview: {
@@ -297,6 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,
+            health: testData.expected.row.health,
           });
 
           await transform.testExecution.logTestStep(

@@ -10,9 +10,3 @@
  * Fetch Telemetry Config
  */
 export const FetchTelemetryConfigRoute = '/api/telemetry/v2/config';
-export interface FetchTelemetryConfigResponse {
-  allowChangingOptInStatus: boolean;
-  optIn: boolean | null;
-  sendUsageFrom: 'server' | 'browser';
-  telemetryNotifyUserAboutOptInDefault: boolean;
-}

@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   const TEST_TYPES = [
-    'sampleOneTimeTaskTimingOut',
+    'sampleOneTimeTaskThrowingError',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',
     'sampleTask',
@@ -97,6 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:siem.queryRule',
         'alerting:siem.savedQueryRule',
         'alerting:siem.thresholdRule',
+        'alerting:slo.rules.burnRate',
         'alerting:transform_health',
         'alerting:xpack.ml.anomaly_detection_alert',
         'alerting:xpack.ml.anomaly_detection_jobs_health',

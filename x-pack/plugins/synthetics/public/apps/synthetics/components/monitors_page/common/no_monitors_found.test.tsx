@@ -18,7 +18,7 @@ describe('NoMonitorsFound', () => {
     useUrlParamsSpy = jest.spyOn(URL, 'useUrlParams');
     updateUrlParamsMock = jest.fn();
 
-    useUrlParamsSpy.mockImplementation(() => [jest.fn(), updateUrlParamsMock]);
+    useUrlParamsSpy.mockImplementation(() => [jest.fn().mockReturnValue({}), updateUrlParamsMock]);
   });
 
   afterEach(() => {

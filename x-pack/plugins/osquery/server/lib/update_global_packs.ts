@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectsClient, SavedObjectsFindResponse } from '@kbn/core/server';
-import { has, map, mapKeys, set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { has, map, mapKeys } from 'lodash';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import produce from 'immer';

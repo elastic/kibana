@@ -108,6 +108,12 @@ describe('Response actions', () => {
       const routerMock = httpServiceMock.createRouter();
       mockResponse = httpServerMock.createResponseFactory();
       const startContract = createMockEndpointAppContextServiceStartContract();
+      (startContract.messageSigningService?.sign as jest.Mock).mockImplementation(() => {
+        return {
+          data: 'thisisthedata',
+          signature: 'thisisasignature',
+        };
+      });
       endpointAppContextService = new EndpointAppContextService();
       const mockSavedObjectClient = savedObjectsClientMock.create();
 
@@ -637,6 +643,35 @@ describe('Response actions', () => {
         expect(responseBody.action).toBeUndefined();
       });
 
+      it('signs the action', async () => {
+        const ctx = await callRoute(
+          ISOLATE_HOST_ROUTE_V2,
+          {
+            body: { endpoint_ids: ['XYZ'] },
+          },
+          { endpointDsExists: true }
+        );
+
+        const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
+        const actionDocs: [
+          { index: string; body?: LogsEndpointAction },
+          { index: string; body?: EndpointAction }
+        ] = [
+          indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
+          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
+        ];
+
+        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
+        expect(actionDocs[1].body?.signed).toEqual({
+          data: 'thisisthedata',
+          signature: 'thisisasignature',
+        });
+
+        expect(mockResponse.ok).toBeCalled();
+        const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
+        expect(responseBody.action).toBeTruthy();
+      });
+
       it('handles errors', async () => {
         const ErrMessage = 'Uh oh!';
         await callRoute(
@@ -741,6 +776,8 @@ describe('Response actions', () => {
         casesClient = (await endpointAppContextService.getCasesClient(
           {} as KibanaRequest
         )) as CasesClientMock;
+
+        casesClient.attachments.add.mockClear();
 
         let counter = 1;
         casesClient.cases.getCasesByAlertID.mockImplementation(async () => {

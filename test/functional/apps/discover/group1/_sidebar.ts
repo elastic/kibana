@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
+  const dataGrid = getService('dataGrid');
   const INITIAL_FIELD_LIST_SUMMARY = '53 available fields. 0 empty fields. 3 meta fields.';
 
   describe('discover sidebar', function describeIndexTests() {
@@ -714,6 +715,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload(
           'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
         );
+      });
+
+      it('should remove the table column after a field was deleted', async () => {
+        const newField = '_test_field_and_column_removal';
+        await PageObjects.discover.addRuntimeField(newField, `emit("hi there")`);
+
+        await retry.waitFor('form to close', async () => {
+          return !(await testSubjects.exists('fieldEditor'));
+        });
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        let selectedFields = await PageObjects.discover.getSidebarSectionFieldNames('selected');
+        expect(selectedFields.includes(newField)).to.be(false);
+        expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Document']);
+
+        await PageObjects.discover.clickFieldListItemAdd(newField);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        selectedFields = await PageObjects.discover.getSidebarSectionFieldNames('selected');
+        expect(selectedFields.includes(newField)).to.be(true);
+        expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', newField]);
+
+        await PageObjects.discover.removeField(newField);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
+        await retry.waitFor('sidebar to update', async () => {
+          return !(await PageObjects.discover.getAllFieldNames()).includes(newField);
+        });
+
+        expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'Document']);
       });
     });
   });

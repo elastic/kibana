@@ -47,6 +47,9 @@ disabled:
   - x-pack/plugins/apm/ftr_e2e/ftr_config_open.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_run.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config.ts
+  - x-pack/plugins/profiling/e2e/ftr_config_open.ts
+  - x-pack/plugins/profiling/e2e/ftr_config_runner.ts
+  - x-pack/plugins/profiling/e2e/ftr_config.ts
 
   # Elastic Synthetics configs
   - x-pack/plugins/synthetics/e2e/config.ts
@@ -359,3 +362,5 @@ enabled:
   - x-pack/performance/journeys/ecommerce_dashboard_saved_search_only.ts
   - x-pack/performance/journeys/ecommerce_dashboard_tsvb_gauge_only.ts
   - x-pack/performance/journeys/dashboard_listing_page.ts
+  - x-pack/performance/journeys/cloud_security_dashboard.ts
+  - x-pack/test/custom_branding/config.ts

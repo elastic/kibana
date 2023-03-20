@@ -10,15 +10,15 @@ import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { type ChartBaseProps, KPIChart } from './kpi_chart';
 
 export const HostsTile = ({ type, ...props }: ChartBaseProps) => {
-  const { hostViewState } = useHostsViewContext();
+  const { hostNodes, loading } = useHostsViewContext();
 
   return (
     <KPIChart
       id={`$metric-${type}`}
       type={type}
       nodes={[]}
-      loading={hostViewState.loading}
-      overrideValue={hostViewState?.totalHits}
+      loading={loading}
+      overrideValue={hostNodes?.length}
       {...props}
     />
   );

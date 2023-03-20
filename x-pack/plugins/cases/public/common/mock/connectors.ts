@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import type { ActionConnector, ActionTypeConnector } from '../../../common/api';
 import { basicPush } from '../../containers/mock';
 import type { CaseConnectors } from '../../containers/types';

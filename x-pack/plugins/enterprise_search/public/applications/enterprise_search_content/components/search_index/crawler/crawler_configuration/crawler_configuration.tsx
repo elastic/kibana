@@ -79,7 +79,7 @@ export const CrawlerConfiguration: React.FC = () => {
                 label={i18n.translate(
                   'xpack.enterpriseSearch.content.crawler.crawlerConfiguration.extractHTML.extractionSwitchLabel',
                   {
-                    defaultMessage: 'Content extraction.',
+                    defaultMessage: 'Store full HTML',
                   }
                 )}
                 disabled={status === Status.LOADING}

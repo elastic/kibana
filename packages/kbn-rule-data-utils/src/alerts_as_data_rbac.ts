@@ -20,6 +20,7 @@ export const AlertConsumers = {
   LOGS: 'logs',
   INFRASTRUCTURE: 'infrastructure',
   OBSERVABILITY: 'observability',
+  SLO: 'slo',
   SIEM: 'siem',
   UPTIME: 'uptime',
 } as const;

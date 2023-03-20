@@ -278,18 +278,23 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
 
-  const replaceStepConfigurePackagePolicy = replaceDefineStepView && packageInfo?.name && (
-    <ExtensionWrapper>
-      <replaceDefineStepView.Component
-        agentPolicy={agentPolicy}
-        packageInfo={packageInfo}
-        newPolicy={packagePolicy}
-        onChange={handleExtensionViewOnChange}
-        validationResults={validationResults}
-        isEditPage={false}
-      />
-    </ExtensionWrapper>
-  );
+  const replaceStepConfigurePackagePolicy =
+    replaceDefineStepView && packageInfo?.name ? (
+      !isInitialized ? (
+        <Loading />
+      ) : (
+        <ExtensionWrapper>
+          <replaceDefineStepView.Component
+            agentPolicy={agentPolicy}
+            packageInfo={packageInfo}
+            newPolicy={packagePolicy}
+            onChange={handleExtensionViewOnChange}
+            validationResults={validationResults}
+            isEditPage={false}
+          />
+        </ExtensionWrapper>
+      )
+    ) : undefined;
 
   const stepConfigurePackagePolicy = useMemo(
     () =>
