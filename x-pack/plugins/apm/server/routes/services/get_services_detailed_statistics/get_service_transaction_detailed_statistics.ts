@@ -25,6 +25,7 @@ import {
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import { maybe } from '../../../../common/utils/maybe';
 
 export async function getServiceTransactionDetailedStats({
   serviceNames,
@@ -133,26 +134,25 @@ export async function getServiceTransactionDetailedStats({
 
   return keyBy(
     response.aggregations?.sample.services.buckets.map((bucket) => {
-      const topTransactionTypeBucket =
+      const topTransactionTypeBucket = maybe(
         bucket.transactionType.buckets.find(({ key }) =>
           isDefaultTransactionType(key as string)
-        ) ?? bucket.transactionType.buckets[0];
+        ) ?? bucket.transactionType.buckets[0]
+      );
 
       return {
         serviceName: bucket.key as string,
-        latency: topTransactionTypeBucket.timeseries.buckets.map(
-          (dateBucket) => ({
+        latency:
+          topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
             x: dateBucket.key + offsetInMs,
             y: dateBucket.avg_duration.value,
-          })
-        ),
-        transactionErrorRate: topTransactionTypeBucket.timeseries.buckets.map(
-          (dateBucket) => ({
+          })) ?? [],
+        transactionErrorRate:
+          topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
             x: dateBucket.key + offsetInMs,
             y: calculateFailedTransactionRate(dateBucket),
-          })
-        ),
-        throughput: topTransactionTypeBucket.timeseries.buckets.map(
+          })) ?? undefined,
+        throughput: topTransactionTypeBucket?.timeseries.buckets.map(
           (dateBucket) => ({
             x: dateBucket.key + offsetInMs,
             y: calculateThroughputWithInterval({
