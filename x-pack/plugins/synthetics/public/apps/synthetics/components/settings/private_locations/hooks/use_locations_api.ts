@@ -17,7 +17,7 @@ import {
 } from '../../../../state/private_locations/api';
 import { PrivateLocation } from '../../../../../../../common/runtime_types';
 
-export const useLocationsAPI = () => {
+export const usePrivateLocationsAPI = () => {
   const [formData, setFormData] = useState<PrivateLocation>();
   const [deleteId, setDeleteId] = useState<string>();
   const [privateLocations, setPrivateLocations] = useState<PrivateLocation[]>([]);

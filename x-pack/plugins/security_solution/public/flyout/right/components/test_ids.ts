@@ -10,3 +10,5 @@ export const EXPAND_DETAILS_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHeaderExpandDetailButton';
 export const COLLAPSE_DETAILS_BUTTON_TEST_ID =
   'securitySolutionDocumentDetailsFlyoutHeaderCollapseDetailButton';
+export const MITRE_ATTACK_TITLE_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackTitle';
+export const MITRE_ATTACK_DETAILS_TEST_ID = 'securitySolutionAlertDetailsFlyoutMitreAttackDetails';

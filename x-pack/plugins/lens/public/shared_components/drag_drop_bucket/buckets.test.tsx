@@ -64,7 +64,7 @@ describe('buckets shared components', () => {
       const instance = mount(<DraggableBucketContainer {...defaultProps} isInvalid />);
       const iconProps = instance.find(EuiIcon).first().props();
       expect(iconProps.color).toEqual('#BD271E');
-      expect(iconProps.type).toEqual('alert');
+      expect(iconProps.type).toEqual('warning');
     });
     it('should call onRemoveClick when remove icon is clicked', () => {
       const instance = mount(<DraggableBucketContainer {...defaultProps} />);

@@ -79,6 +79,7 @@ describe('FindSLO', () => {
                 isEstimated: false,
               },
             },
+            tags: ['critical', 'k8s'],
             createdAt: slo.createdAt.toISOString(),
             updatedAt: slo.updatedAt.toISOString(),
             enabled: slo.enabled,
