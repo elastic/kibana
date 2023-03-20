@@ -8,6 +8,7 @@
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import React, { useCallback, useMemo, useReducer } from 'react';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { groupsReducerWithStorage, initialState } from './state/reducer';
 import { GroupingProps, GroupSelectorProps } from '..';
 import { useGroupingPagination } from './use_grouping_pagination';
@@ -31,14 +32,21 @@ interface Grouping<T> {
 
 interface GroupingArgs {
   defaultGroupingOptions: GroupOption[];
-
   fields: FieldSpec[];
   groupingId: string;
+  onGroupChangeCallback?: (param: { groupByField: string; tableId: string }) => void;
+  tracker: (
+    type: UiCounterMetricType,
+    event: string | string[],
+    count?: number | undefined
+  ) => void;
 }
 export const useGrouping = <T,>({
   defaultGroupingOptions,
   fields,
   groupingId,
+  onGroupChangeCallback,
+  tracker,
 }: GroupingArgs): Grouping<T> => {
   const [groupingState, dispatch] = useReducer(groupsReducerWithStorage, initialState);
 
@@ -53,6 +61,8 @@ export const useGrouping = <T,>({
     fields,
     groupingId,
     groupingState,
+    onGroupChangeCallback,
+    tracker,
   });
 
   const pagination = useGroupingPagination({ groupingId, groupingState, dispatch });

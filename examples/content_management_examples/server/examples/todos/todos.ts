@@ -13,20 +13,13 @@ import {
 } from '@kbn/content-management-plugin/server';
 import { v4 } from 'uuid';
 import {
-  createInSchema,
-  searchInSchema,
   Todo,
   TODO_CONTENT_ID,
-  updateInSchema,
   TodoSearchOut,
   TodoCreateOut,
   TodoUpdateOut,
   TodoDeleteOut,
   TodoGetOut,
-  createOutSchema,
-  getOutSchema,
-  updateOutSchema,
-  searchOutSchema,
   TodoUpdateIn,
   TodoSearchIn,
   TodoCreateIn,
@@ -39,40 +32,10 @@ export const registerTodoContentType = ({
 }) => {
   contentManagement.register({
     id: TODO_CONTENT_ID,
-    schemas: {
-      content: {
-        create: {
-          in: {
-            data: createInSchema,
-          },
-          out: {
-            result: createOutSchema,
-          },
-        },
-        update: {
-          in: {
-            data: updateInSchema,
-          },
-          out: {
-            result: updateOutSchema,
-          },
-        },
-        search: {
-          in: {
-            query: searchInSchema,
-          },
-          out: {
-            result: searchOutSchema,
-          },
-        },
-        get: {
-          out: {
-            result: getOutSchema,
-          },
-        },
-      },
-    },
     storage: new TodosStorage(),
+    version: {
+      latest: 1,
+    },
   });
 };
 

@@ -31,6 +31,7 @@ import {
 } from '../../../lib/helpers/latency_aggregation_type';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { Coordinate } from '../../../../typings/timeseries';
 
 export type LatencyChartsSearchResponse = Awaited<
   ReturnType<typeof searchLatency>
@@ -186,6 +187,17 @@ export async function getLatencyTimeseries({
   };
 }
 
+export interface TransactionLatencyResponse {
+  currentPeriod: {
+    overallAvgDuration: number | null;
+    latencyTimeseries: Coordinate[];
+  };
+  previousPeriod: {
+    overallAvgDuration: number | null;
+    latencyTimeseries: Coordinate[];
+  };
+}
+
 export async function getLatencyPeriods({
   serviceName,
   transactionType,
@@ -210,7 +222,7 @@ export async function getLatencyPeriods({
   start: number;
   end: number;
   offset?: string;
-}) {
+}): Promise<TransactionLatencyResponse> {
   const options = {
     serviceName,
     transactionType,

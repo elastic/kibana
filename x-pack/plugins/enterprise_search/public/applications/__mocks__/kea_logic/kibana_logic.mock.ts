@@ -37,6 +37,11 @@ export const mockKibanaValues = {
     hasSearchEnginesAccess: false,
     hasWorkplaceSearchAccess: true,
   },
+  productFeatures: {
+    hasNativeConnectors: true,
+    hasSearchApplications: false,
+    hasWebCrawler: true,
+  },
   uiSettings: uiSettingsServiceMock.createStartContract(),
   security: securityMock.createStart(),
   setBreadcrumbs: jest.fn(),

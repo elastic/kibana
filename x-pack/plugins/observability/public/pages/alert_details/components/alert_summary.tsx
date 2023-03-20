@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { ReactNode } from 'react';
 import {
   EuiText,
   EuiFlexItem,
@@ -27,10 +27,19 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { asDuration } from '../../../../common/utils/formatters';
-import { AlertSummaryProps } from '../types';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
-import { DEFAULT_DATE_FORMAT } from '../constants';
-import { TopAlert } from '../../alerts';
+import type { TopAlert } from '../../../typings/alerts';
+
+export interface AlertSummaryField {
+  label: ReactNode | string;
+  value: string | number;
+}
+export interface AlertSummaryProps {
+  alert: TopAlert | null;
+  alertSummaryFields?: AlertSummaryField[];
+}
+
+const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 const getAndFormatAlertSummaryBasicFields = (alert: TopAlert | null): React.ReactElement => {
   const tags = alert?.fields[ALERT_RULE_TAGS];

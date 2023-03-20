@@ -39,7 +39,7 @@ export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
                   defaultMessage: 'No examples were obtained for this field',
                 }
               )}
-              iconType="alert"
+              iconType="warning"
             >
               <FormattedMessage
                 id="xpack.dataVisualizer.dataGrid.fieldText.fieldNotPresentDescription"

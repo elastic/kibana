@@ -49,7 +49,7 @@ const FieldInfoIcon: React.FC = memo(() => (
   >
     <EuiIcon
       tabIndex={0}
-      type="alert"
+      type="warning"
       title={i18n.translate('discover.field.mappingConflict.title', {
         defaultMessage: 'Mapping Conflict',
       })}
