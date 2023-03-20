@@ -90,3 +90,6 @@ export function SlosPage() {
     </ObservabilityPageTemplate>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default SlosPage;

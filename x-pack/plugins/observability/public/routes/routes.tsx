@@ -6,20 +6,34 @@
  */
 
 import * as t from 'io-ts';
-import React from 'react';
-import { either } from 'fp-ts/lib/Either';
+import React, { lazy } from 'react';
 import { useHistory } from 'react-router-dom';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { DatePickerContextProvider } from '../context/date_picker_context';
-import { AlertsPage } from './pages/alerts/alerts';
-import { AlertDetails } from './pages/alert_details/alert_details';
-import { CasesPage } from './pages/cases/cases';
-import { OverviewPage } from './pages/overview/overview';
-import { RulesPage } from './pages/rules/rules';
-import { RuleDetailsPage } from './pages/rule_details';
-import { SlosPage } from './pages/slos/slos';
-import { SloDetailsPage } from './pages/slo_details/slo_details';
-import { SloEditPage } from './pages/slo_edit/slo_edit';
-import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
+
+const AlertsPageLazy = lazy(() => import('./pages/alerts/alerts'));
+const AlertDetailsPageLazy = lazy(() => import('./pages/alert_details/alert_details'));
+const CasesPageLazy = lazy(() => import('./pages/cases/cases'));
+const OverviewPageLazy = lazy(() => import('./pages/overview/overview'));
+const RulesPageLazy = lazy(() => import('./pages/rules/rules'));
+const RuleDetailsPageLazy = lazy(() => import('./pages/rule_details'));
+const SlosPageLazy = lazy(() => import('./pages/slos/slos'));
+const SloDetailsPageLazy = lazy(() => import('./pages/slo_details/slo_details'));
+const SloEditPageLazy = lazy(() => import('./pages/slo_edit/slo_edit'));
+const ObservabilityExploratoryViewLazy = lazy(
+  () => import('../components/shared/exploratory_view/obsv_exploratory_view')
+);
+
+const AlertsPage = withSuspense(AlertsPageLazy);
+const AlertDetailsPage = withSuspense(AlertDetailsPageLazy);
+const CasesPage = withSuspense(CasesPageLazy);
+const OverviewPage = withSuspense(OverviewPageLazy);
+const RulesPage = withSuspense(RulesPageLazy);
+const RuleDetailsPage = withSuspense(RuleDetailsPageLazy);
+const SlosPage = withSuspense(SlosPageLazy);
+const SloDetailsPage = withSuspense(SloDetailsPageLazy);
+const SloEditPage = withSuspense(SloEditPageLazy);
+const ObservabilityExploratoryView = withSuspense(ObservabilityExploratoryViewLazy);
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -31,20 +45,6 @@ export interface Params {
   query?: t.HasProps;
   path?: t.HasProps;
 }
-
-const jsonRt = new t.Type<any, string, unknown>(
-  'JSON',
-  t.any.is,
-  (input, context) =>
-    either.chain(t.string.validate(input, context), (str) => {
-      try {
-        return t.success(JSON.parse(str));
-      } catch (e) {
-        return t.failure(input, context);
-      }
-    }),
-  (a) => JSON.stringify(a)
-);
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
@@ -108,13 +108,6 @@ export const routes = {
     params: {},
     exact: true,
   },
-  [CASES_URL]: {
-    handler: () => {
-      return <CasesPage />;
-    },
-    params: {},
-    exact: false,
-  },
   [ALERTS_URL]: {
     handler: () => {
       return <AlertsPage />;
@@ -124,6 +117,20 @@ export const routes = {
     },
     exact: true,
   },
+  [ALERT_DETAIL_URL]: {
+    handler: () => {
+      return <AlertDetailsPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [CASES_URL]: {
+    handler: () => {
+      return <CasesPage />;
+    },
+    params: {},
+    exact: false,
+  },
   [EXPLORATORY_VIEW_URL]: {
     handler: () => {
       return <ObservabilityExploratoryView />;
@@ -132,8 +139,8 @@ export const routes = {
       query: t.partial({
         rangeFrom: t.string,
         rangeTo: t.string,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
+        refreshPaused: t.boolean,
+        refreshInterval: t.number,
       }),
     },
     exact: true,
@@ -148,13 +155,6 @@ export const routes = {
   [RULE_DETAIL_URL]: {
     handler: () => {
       return <RuleDetailsPage />;
-    },
-    params: {},
-    exact: true,
-  },
-  [ALERT_DETAIL_URL]: {
-    handler: () => {
-      return <AlertDetails />;
     },
     params: {},
     exact: true,

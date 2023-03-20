@@ -233,3 +233,6 @@ export function AlertsPage() {
     </Provider>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default AlertsPage;

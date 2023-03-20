@@ -452,3 +452,6 @@ export function RuleDetailsPage() {
     </ObservabilityPageTemplate>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default RuleDetailsPage;

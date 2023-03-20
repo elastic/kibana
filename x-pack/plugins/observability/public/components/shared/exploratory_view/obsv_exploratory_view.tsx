@@ -110,3 +110,6 @@ export function ObservabilityExploratoryView() {
     </EuiErrorBoundary>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default ObservabilityExploratoryView;

@@ -67,3 +67,6 @@ export function SloEditPage() {
     </ObservabilityPageTemplate>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default SloEditPage;
