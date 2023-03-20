@@ -192,7 +192,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
   ): Promise<{
     currentPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
       serviceName: string;
-      latency?: Array<{
+      latency: Array<{
         x: number;
         y: number | null;
       }>;
@@ -207,7 +207,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
     }>;
     previousPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
       serviceName: string;
-      latency?: Array<{
+      latency: Array<{
         x: number;
         y: number | null;
       }>;
