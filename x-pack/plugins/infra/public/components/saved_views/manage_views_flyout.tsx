@@ -66,7 +66,14 @@ const DeleteConfimation = (props: DeleteConfimationProps) => {
           </EuiButton>
         </EuiFlexGroup>
       )}
-      {!confirmVisible && <EuiButtonEmpty iconType="trash" color="danger" onClick={showConfirm} />}
+      {!confirmVisible && (
+        <EuiButtonEmpty
+          data-test-subj="infraDeleteConfimationButton"
+          iconType="trash"
+          color="danger"
+          onClick={showConfirm}
+        />
+      )}
     </>
   );
 };
@@ -85,6 +92,7 @@ export function SavedViewManageViewsFlyout<ViewState>({
   const renderName = useCallback(
     (name: string, item: SavedView<ViewState>) => (
       <EuiButtonEmpty
+        data-test-subj="infraRenderNameButton"
         onClick={() => {
           setView(item);
           close();
@@ -120,6 +128,7 @@ export function SavedViewManageViewsFlyout<ViewState>({
       return (
         <>
           <EuiButtonEmpty
+            data-test-subj="infraRenderMakeDefaultActionButton"
             isLoading={inProgressView === item.id && sourceIsLoading}
             iconType={isDefault ? 'starFilled' : 'starEmpty'}
             onClick={() => {
