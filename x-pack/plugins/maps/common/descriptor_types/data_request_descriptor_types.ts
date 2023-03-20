@@ -33,6 +33,7 @@ export type DataFilters = {
   zoom: number;
   isReadOnly: boolean;
   joinKeyFilter?: Filter;
+  savedObjectId?: string;
 };
 
 export type VectorSourceRequestMeta = DataFilters & {

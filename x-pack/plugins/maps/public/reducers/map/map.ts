@@ -23,6 +23,7 @@ import {
   MAP_DESTROYED,
   SET_EMBEDDABLE_SEARCH_CONTEXT,
   SET_QUERY,
+  SET_SAVED_OBJECT_ID,
   UPDATE_LAYER,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
@@ -82,6 +83,7 @@ export const DEFAULT_MAP_STATE: MapState = {
   selectedLayerId: null,
   layerList: [],
   waitingForMapReadyLayerList: [],
+  savedObjectId: undefined,
   settings: getDefaultMapSettings(),
   __rollbackSettings: null,
 };
@@ -322,6 +324,12 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
           embeddableSearchContext: action.embeddableSearchContext,
         },
       };
+    case SET_SAVED_OBJECT_ID: {
+      return {
+        ...state,
+        savedObjectId: action.savedObjectId,
+      };
+    }
     default:
       return state;
   }

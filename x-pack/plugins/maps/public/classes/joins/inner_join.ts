@@ -137,8 +137,8 @@ export class InnerJoin {
     return this._descriptor;
   }
 
-  async getTooltipProperties(properties: GeoJsonProperties) {
-    return await this.getRightJoinSource().getTooltipProperties(properties);
+  async getTooltipProperties(properties: GeoJsonProperties, savedObjectId?: string) {
+    return await this.getRightJoinSource().getTooltipProperties(properties, savedObjectId);
   }
 
   getIndexPatternIds() {

@@ -38,7 +38,7 @@ import { IField } from '../../fields/field';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
-import { makePublicExecutionContext } from '../../../util';
+import { makeHierarchicalExecutionContext } from '../es_source';
 
 type ESGeoLineSourceSyncMeta = Pick<ESGeoLineSourceDescriptor, 'splitField' | 'sortField'>;
 
@@ -218,7 +218,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         defaultMessage: 'Elasticsearch terms request to fetch entities within map buffer.',
       }),
       searchSessionId: searchFilters.searchSessionId,
-      executionContext: makePublicExecutionContext('es_geo_line:entities'),
+      executionContext: makeHierarchicalExecutionContext('es_geo_line:entities', searchFilters.savedObjectId),
       requestsAdapter: inspectorAdapters.requests,
     });
     const entityBuckets: Array<{ key: string; doc_count: number }> = _.get(
@@ -291,7 +291,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
           'Elasticsearch geo_line request to fetch tracks for entities. Tracks are not filtered by map buffer.',
       }),
       searchSessionId: searchFilters.searchSessionId,
-      executionContext: makePublicExecutionContext('es_geo_line:tracks'),
+      executionContext: makeHierarchicalExecutionContext('es_geo_line:tracks', searchFilters.savedObjectId),
       requestsAdapter: inspectorAdapters.requests,
     });
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(

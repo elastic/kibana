@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { makePublicExecutionContext } from './util';
+import { makeHierarchicalExecutionContext } from './execution_context';
 
-describe('makePublicExecutionContext', () => {
+describe('makeHierarchicalExecutionContext', () => {
   let injectedContext = {};
   beforeAll(() => {
-    require('./kibana_services').getExecutionContext = () => ({
+    require('../../../kibana_services').getExecutionContext = () => ({
       get: () => injectedContext,
     });
   });
 
   test('creates basic context when no top level context is provided', () => {
-    const context = makePublicExecutionContext('test');
+    const context = makeHierarchicalExecutionContext('test');
     expect(context).toStrictEqual({
       description: 'test',
       name: 'maps',
@@ -30,7 +30,7 @@ describe('makePublicExecutionContext', () => {
       name: 'maps',
       id: '1234',
     };
-    const context = makePublicExecutionContext('test');
+    const context = makeHierarchicalExecutionContext('test');
     expect(context).toStrictEqual({
       description: 'test',
       name: 'maps',
@@ -43,14 +43,15 @@ describe('makePublicExecutionContext', () => {
   test('nests inside top level context if its from a different app', () => {
     injectedContext = {
       name: 'other-app',
-      id: '1234',
+      id: 'otherApp1234',
     };
-    const context = makePublicExecutionContext('test');
+    const context = makeHierarchicalExecutionContext('test', 'map1234');
     expect(context).toStrictEqual({
       name: 'other-app',
-      id: '1234',
+      id: 'otherApp1234',
       child: {
         description: 'test',
+        id: 'map1234',
         type: 'application',
         name: 'maps',
         url: '/',

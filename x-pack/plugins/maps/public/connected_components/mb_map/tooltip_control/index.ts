@@ -16,6 +16,7 @@ import {
   closeOnHoverTooltip,
   openOnHoverTooltip,
   updateOpenTooltips,
+  getSavedObjectId,
 } from '../../../actions';
 import {
   getLayerList,
@@ -36,6 +37,7 @@ function mapStateToProps(state: MapStoreState) {
       getDrawMode(state) === DRAW_MODE.DRAW_SHAPES || getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
     openTooltips: getOpenTooltips(state),
     geoFieldNames: getGeoFieldNames(state),
+    savedObjectId: getSavedObjectId(state),
   };
 }
 

@@ -50,6 +50,7 @@ import {
   SET_MOUSE_COORDINATES,
   SET_OPEN_TOOLTIPS,
   SET_QUERY,
+  SET_SAVED_OBJECT_ID,
   TRACK_MAP_SETTINGS,
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
@@ -351,6 +352,13 @@ export function setEmbeddableSearchContext({
   return {
     type: SET_EMBEDDABLE_SEARCH_CONTEXT,
     embeddableSearchContext: { filters, query },
+  };
+}
+
+export function setSavedObjectId(savedObjectId?: string) {
+  return {
+    type: SET_SAVED_OBJECT_ID,
+    savedObjectId,
   };
 }
 

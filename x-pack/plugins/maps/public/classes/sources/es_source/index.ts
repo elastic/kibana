@@ -6,3 +6,5 @@
  */
 
 export * from './es_source';
+
+export { makeHierarchicalExecutionContext } from './hierarchical_execution_context';

@@ -62,6 +62,7 @@ export interface BoundsRequestMeta {
   timeslice?: Timeslice;
   isFeatureEditorOpenForLayer: boolean;
   joinKeyFilter?: Filter;
+  savedObjectId?: string;
 }
 
 export interface GetFeatureActionsArgs {
@@ -84,7 +85,7 @@ export interface GetFeatureActionsArgs {
 
 export interface IVectorSource extends ISource {
   isMvt(): boolean;
-  getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  getTooltipProperties(properties: GeoJsonProperties, savedObjectId?: string): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     layerDataFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void

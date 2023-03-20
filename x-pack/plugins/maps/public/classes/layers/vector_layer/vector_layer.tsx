@@ -94,7 +94,7 @@ export interface IVectorLayer extends ILayer {
   getSource(): IVectorSource;
   getFeatureId(feature: Feature): string | number | undefined;
   getFeatureById(id: string | number): Feature | null;
-  getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  getPropertiesForTooltip(properties: GeoJsonProperties, savedObjectId?: string): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
   showJoinEditor(): boolean;
   canShowTooltip(): boolean;
@@ -466,6 +466,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         timeFilters: nextMeta.timeFilters,
         searchSessionId: dataFilters.searchSessionId,
         inspectorAdapters,
+        savedObjectId: dataFilters.savedObjectId,
       });
 
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
@@ -931,13 +932,13 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     }
   }
 
-  async getPropertiesForTooltip(properties: GeoJsonProperties) {
+  async getPropertiesForTooltip(properties: GeoJsonProperties, savedObjectId?: string) {
     const vectorSource = this.getSource();
-    let allProperties = await vectorSource.getTooltipProperties(properties);
+    let allProperties = await vectorSource.getTooltipProperties(properties, savedObjectId);
     this._addJoinsToSourceTooltips(allProperties);
 
     for (let i = 0; i < this.getJoins().length; i++) {
-      const propsFromJoin = await this.getJoins()[i].getTooltipProperties(properties);
+      const propsFromJoin = await this.getJoins()[i].getTooltipProperties(properties, savedObjectId);
       allProperties = [...allProperties, ...propsFromJoin];
     }
     return allProperties;

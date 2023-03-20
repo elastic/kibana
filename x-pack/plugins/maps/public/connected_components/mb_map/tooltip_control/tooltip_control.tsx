@@ -65,6 +65,7 @@ export interface Props {
   openTooltips: TooltipState[];
   renderTooltipContent?: RenderToolTipContent;
   updateOpenTooltips: (openTooltips: TooltipState[]) => void;
+  savedObjectId?: string;
 }
 
 export class TooltipControl extends Component<Props, {}> {
@@ -376,6 +377,7 @@ export class TooltipControl extends Component<Props, {}> {
           isLocked={isLocked}
           index={index}
           loadFeatureGeometry={this._getFeatureGeometry}
+          savedObjectId={this.props.savedObjectId}
         />
       );
     });

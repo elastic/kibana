@@ -229,6 +229,9 @@ export function getLayerDescriptor(state: MapStoreState, layerId: string) {
   return layerListRaw.find((layer) => layer.id === layerId);
 }
 
+function getSavedObjectId({ map }: MapStoreState): string | undefined =>
+  map.savedObjectId;
+
 export function getDataRequestDescriptor(state: MapStoreState, layerId: string, dataId: string) {
   const layerDescriptor = getLayerDescriptor(state, layerId);
   if (!layerDescriptor || !layerDescriptor.__dataRequests) {
@@ -251,6 +254,7 @@ export const getDataFilters = createSelector(
   getSearchSessionId,
   getSearchSessionMapBuffer,
   getIsReadOnly,
+  getSavedObjectId,
   (
     mapExtent,
     mapBuffer,
@@ -262,7 +266,8 @@ export const getDataFilters = createSelector(
     embeddableSearchContext,
     searchSessionId,
     searchSessionMapBuffer,
-    isReadOnly
+    isReadOnly,
+    savedObjectId,
   ) => {
     return {
       extent: mapExtent,
@@ -275,6 +280,7 @@ export const getDataFilters = createSelector(
       embeddableSearchContext,
       searchSessionId,
       isReadOnly,
+      savedObjectId,
     };
   }
 );

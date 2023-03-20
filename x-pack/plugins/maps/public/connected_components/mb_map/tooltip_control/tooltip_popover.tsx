@@ -39,6 +39,7 @@ interface Props {
   mbMap: MbMap;
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
   renderTooltipContent?: RenderToolTipContent;
+  savedObjectId?: string;
 }
 
 interface State {
@@ -98,7 +99,7 @@ export class TooltipPopover extends Component<Props, State> {
       return [];
     }
 
-    return await tooltipLayer.getPropertiesForTooltip(properties);
+    return await tooltipLayer.getPropertiesForTooltip(properties, this.props.savedObjectId);
   };
 
   _getLayerName = async (layerId: string) => {

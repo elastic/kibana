@@ -33,6 +33,7 @@ import {
   setIsLayerTOCOpen,
   setOpenTOCDetails,
   setHiddenLayers,
+  setSavedObjectId,
 } from '../../../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
 import { getMapAttributeService, SharingSavedObjectProps } from '../../../map_attribute_service';
@@ -250,6 +251,8 @@ export class SavedMap {
     if (this._defaultLayerWizard) {
       this._store.dispatch<any>(setAutoOpenLayerWizardId(this._defaultLayerWizard));
     }
+
+    this._store.dispatch(setSavedObjectId(this.getSavedObjectId()));
   }
 
   hasUnsavedChanges = () => {

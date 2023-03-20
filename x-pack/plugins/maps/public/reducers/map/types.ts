@@ -60,6 +60,7 @@ export type MapState = {
   selectedLayerId: string | null;
   layerList: LayerDescriptor[];
   waitingForMapReadyLayerList: LayerDescriptor[];
+  savedObjectId?: string;
   settings: MapSettings;
   __rollbackSettings: MapSettings | null;
 };

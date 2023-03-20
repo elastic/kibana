@@ -14,7 +14,7 @@ import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { SortDirection, SortDirectionNumeric } from '@kbn/data-plugin/common';
-import { AbstractESSource } from '../es_source';
+import { AbstractESSource, makeHierarchicalExecutionContext } from '../es_source';
 import {
   getHttp,
   getSearchService,
@@ -74,7 +74,6 @@ import {
   getIsDrawLayer,
   getMatchingIndexes,
 } from './util/feature_edit';
-import { makePublicExecutionContext } from '../../../util';
 import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/tooltip_control/features_tooltip';
 
 type ESSearchSourceSyncMeta = Pick<
@@ -354,7 +353,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       registerCancelCallback,
       requestDescription: 'Elasticsearch document top hits request',
       searchSessionId: searchFilters.searchSessionId,
-      executionContext: makePublicExecutionContext('es_search_source:top_hits'),
+      executionContext: makeHierarchicalExecutionContext('es_search_source:top_hits', searchFilters.savedObjectId),
       requestsAdapter: inspectorAdapters.requests,
     });
 
@@ -438,7 +437,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       registerCancelCallback,
       requestDescription: 'Elasticsearch document request',
       searchSessionId: searchFilters.searchSessionId,
-      executionContext: makePublicExecutionContext('es_search_source:doc_search'),
+      executionContext: makeHierarchicalExecutionContext('es_search_source:doc_search', searchFilters.savedObjectId),
       requestsAdapter: inspectorAdapters.requests,
     });
 
@@ -574,7 +573,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return this._tooltipFields.length > 0;
   }
 
-  async _loadTooltipProperties(docId: string | number, index: string, indexPattern: DataView) {
+  async _loadTooltipProperties(docId: string | number, index: string, indexPattern: DataView, savedObjectId: string) {
     if (this._tooltipFields.length === 0) {
       return {};
     }
@@ -616,7 +615,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const { rawResponse: resp } = await lastValueFrom(
       searchSource.fetch$({
         legacyHitsTotal: false,
-        executionContext: makePublicExecutionContext('es_search_source:load_tooltip_properties'),
+        executionContext: makeHierarchicalExecutionContext('es_search_source:load_tooltip_properties', savedObjectId),
       })
     );
 
@@ -643,7 +642,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return this._tooltipFields.map((field: IField) => field.getName());
   }
 
-  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
+  async getTooltipProperties(properties: GeoJsonProperties, savedObjectId?: string): Promise<ITooltipProperty[]> {
     if (properties === null) {
       throw new Error('properties cannot be null');
     }
@@ -651,7 +650,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const propertyValues = await this._loadTooltipProperties(
       properties._id,
       properties._index,
-      indexPattern
+      indexPattern,
+      savedObjectId,
     );
     const tooltipProperties = this._tooltipFields.map((field) => {
       const value = propertyValues[field.getName()];
@@ -935,7 +935,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         abortSignal: abortController.signal,
         sessionId: searchFilters.searchSessionId,
         legacyHitsTotal: false,
-        executionContext: makePublicExecutionContext('es_search_source:all_doc_counts'),
+        executionContext: makeHierarchicalExecutionContext('es_search_source:all_doc_counts', searchFilters.savedObjectId),
       })
     );
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);

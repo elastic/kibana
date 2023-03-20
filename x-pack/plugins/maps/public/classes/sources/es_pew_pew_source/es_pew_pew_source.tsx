@@ -26,7 +26,7 @@ import { AbstractESAggSource } from '../es_agg_source';
 import { registerSource } from '../source_registry';
 import { turfBboxToBounds } from '../../../../common/elasticsearch_util';
 import { DataRequestAbortError } from '../../util/data_request';
-import { makePublicExecutionContext } from '../../../util';
+import { makeHierarchicalExecutionContext } from '../es_source';
 import { SourceEditorArgs } from '../source';
 import {
   ESPewPewSourceDescriptor,
@@ -184,7 +184,7 @@ export class ESPewPewSource extends AbstractESAggSource {
         defaultMessage: 'Source-destination connections request',
       }),
       searchSessionId: searchFilters.searchSessionId,
-      executionContext: makePublicExecutionContext('es_pew_pew_source:connections'),
+      executionContext: makeHierarchicalExecutionContext('es_pew_pew_source:connections', searchFilters.savedObjectId),
       requestsAdapter: inspectorAdapters.requests,
     });
 
@@ -229,7 +229,7 @@ export class ESPewPewSource extends AbstractESAggSource {
         searchSource.fetch$({
           abortSignal: abortController.signal,
           legacyHitsTotal: false,
-          executionContext: makePublicExecutionContext('es_pew_pew_source:bounds'),
+          executionContext: makeHierarchicalExecutionContext('es_pew_pew_source:bounds', boundsFilters.savedObjectId),
         })
       );
       const destBounds = (esResp.aggregations?.destFitToBounds as AggregationsGeoBoundsAggregate)
