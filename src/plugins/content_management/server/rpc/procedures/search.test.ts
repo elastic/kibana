@@ -35,7 +35,7 @@ const FOO_CONTENT_ID = 'foo';
 describe('RPC -> search()', () => {
   describe('Input/Output validation', () => {
     const query = { title: 'hello' };
-    const validInput = { contentTypeId: 'foo', version: 'v1', query };
+    const validInput = { contentTypeId: 'foo', version: 1, query };
 
     test('should validate that a contentTypeId and "query" object is passed', () => {
       [
@@ -46,11 +46,14 @@ describe('RPC -> search()', () => {
         },
         {
           input: omit(validInput, 'version'),
-          expectedError: '[version]: expected value of type [string] but got [undefined]',
+          expectedError: '[version]: expected value of type [number] but got [undefined]',
         },
         {
-          input: { ...validInput, version: '1' }, // invalid version format
-          expectedError: '[version]: must follow the pattern [v${number}]',
+          input: { ...validInput, version: '1' }, // string number is OK
+        },
+        {
+          input: { ...validInput, version: 'foo' }, // invalid version format
+          expectedError: '[version]: expected value of type [number] but got [string]',
         },
         {
           input: omit(validInput, 'query'),
@@ -84,7 +87,7 @@ describe('RPC -> search()', () => {
         {
           contentTypeId: 'foo',
           query: { title: 'hello' },
-          version: 'v1',
+          version: 1,
           options: { any: 'object' },
         },
         inputSchema
@@ -95,7 +98,7 @@ describe('RPC -> search()', () => {
       error = validate(
         {
           contentTypeId: 'foo',
-          version: 'v1',
+          version: 1,
           query: { title: 'hello' },
           options: 123, // Not an object
         },
@@ -145,7 +148,7 @@ describe('RPC -> search()', () => {
         id: FOO_CONTENT_ID,
         storage,
         version: {
-          latest: 'v2',
+          latest: 2,
         },
       });
 
@@ -167,7 +170,7 @@ describe('RPC -> search()', () => {
 
       const result = await fn(ctx, {
         contentTypeId: FOO_CONTENT_ID,
-        version: 'v1', // version in request
+        version: 1, // version in request
         query: { title: 'Hello' },
       });
 
@@ -180,8 +183,8 @@ describe('RPC -> search()', () => {
         {
           requestHandlerContext: ctx.requestHandlerContext,
           version: {
-            request: 'v1',
-            latest: 'v2', // from the registry
+            request: 1,
+            latest: 2, // from the registry
           },
           utils: {
             getTransforms: expect.any(Function),
@@ -206,16 +209,16 @@ describe('RPC -> search()', () => {
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
             query: { title: 'Hello' },
-            version: 'v7',
+            version: 7,
           })
-        ).rejects.toEqual(new Error('Invalid version. Latest version is [v2].'));
+        ).rejects.toEqual(new Error('Invalid version. Latest version is [2].'));
       });
     });
 
     describe('object versioning', () => {
       test('should expose a  utility to transform and validate services objects', () => {
         const { ctx, storage } = setup();
-        fn(ctx, { contentTypeId: FOO_CONTENT_ID, query: { title: 'Hello' }, version: 'v1' });
+        fn(ctx, { contentTypeId: FOO_CONTENT_ID, query: { title: 'Hello' }, version: 1 });
         const [[storageContext]] = storage.search.mock.calls;
 
         // getTransforms() utils should be available from context

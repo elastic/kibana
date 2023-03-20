@@ -6,7 +6,6 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { APMConfig } from '../..';
 import { ApmTransactionDocumentType } from '../../../common/document_type';
 import {
   SERVICE_NAME,
@@ -38,6 +37,19 @@ export type ServiceOverviewTransactionGroupSortField =
   | 'errorRate'
   | 'impact';
 
+export interface ServiceTransactionGroupsResponse {
+  transactionGroups: Array<{
+    transactionType: string;
+    name: string;
+    latency: number | null;
+    throughput: number;
+    errorRate: number;
+    impact: number;
+  }>;
+  maxTransactionGroupsExceeded: boolean;
+  transactionOverflowCount: number;
+}
+
 export async function getServiceTransactionGroups({
   environment,
   kuery,
@@ -53,7 +65,6 @@ export async function getServiceTransactionGroups({
   environment: string;
   kuery: string;
   serviceName: string;
-  config: APMConfig;
   apmEventClient: APMEventClient;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
@@ -61,7 +72,7 @@ export async function getServiceTransactionGroups({
   end: number;
   documentType: ApmTransactionDocumentType;
   rollupInterval: RollupInterval;
-}) {
+}): Promise<ServiceTransactionGroupsResponse> {
   const field = getDurationFieldForTransactions(documentType);
 
   const response = await apmEventClient.search(

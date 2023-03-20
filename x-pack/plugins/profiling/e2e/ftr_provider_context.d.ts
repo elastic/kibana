@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { HeaderActions } from './header_actions';
-export { AlertSummary } from './alert_summary';
-export { AlertDetails } from './alert_details';
-export { PageTitle } from './page_title';
+import { GenericFtrProviderContext } from '@kbn/test';
+
+export type FtrProviderContext = GenericFtrProviderContext<{}, {}>;

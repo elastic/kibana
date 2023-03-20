@@ -19,14 +19,23 @@ import {
   transactionDataSourceRt,
 } from '../../default_api_types';
 import { getServerlessAgentMetricsCharts } from './get_serverless_agent_metrics_chart';
-import { getServerlessActiveInstancesOverview } from './get_active_instances_overview';
-import { getServerlessFunctionsOverview } from './get_serverless_functions_overview';
+import {
+  ActiveInstanceOverview,
+  getServerlessActiveInstancesOverview,
+} from './get_active_instances_overview';
+import {
+  getServerlessFunctionsOverview,
+  ServerlessFunctionsOverviewResponse,
+} from './get_serverless_functions_overview';
 import {
   AWSLambdaPriceFactor,
   getServerlessSummary,
+  ServerlessSummaryResponse,
 } from './get_serverless_summary';
 import { getActiveInstancesTimeseries } from './get_active_instances_timeseries';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
+import { FetchAndTransformMetrics } from '../fetch_and_transform_metrics';
+import { Coordinate } from '../../../../typings/timeseries';
 
 const serverlessMetricsChartsRoute = createApmServerRoute({
   endpoint:
@@ -50,7 +59,7 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    charts: Awaited<ReturnType<typeof getServerlessAgentMetricsCharts>>;
+    charts: FetchAndTransformMetrics[];
   }> => {
     const { params, config } = resources;
     const apmEventClient = await getApmEventClient(resources);
@@ -103,10 +112,8 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    activeInstances: Awaited<
-      ReturnType<typeof getServerlessActiveInstancesOverview>
-    >;
-    timeseries: Awaited<ReturnType<typeof getActiveInstancesTimeseries>>;
+    activeInstances: ActiveInstanceOverview[];
+    timeseries: Coordinate[];
   }> => {
     const { params, config } = resources;
     const apmEventClient = await getApmEventClient(resources);
@@ -145,9 +152,7 @@ const serverlessMetricsFunctionsOverviewRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    serverlessFunctionsOverview: Awaited<
-      ReturnType<typeof getServerlessFunctionsOverview>
-    >;
+    serverlessFunctionsOverview: ServerlessFunctionsOverviewResponse;
   }> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
@@ -182,9 +187,7 @@ const serverlessMetricsSummaryRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<Awaited<ReturnType<typeof getServerlessSummary>>> => {
+  handler: async (resources): Promise<ServerlessSummaryResponse> => {
     const { params, context } = resources;
     const {
       uiSettings: { client: uiSettingsClient },

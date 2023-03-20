@@ -22,6 +22,7 @@ import { RollupInterval } from '../../../../common/rollup';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
+import { Coordinate } from '../../../../typings/timeseries';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   getLatencyAggregation,
@@ -183,6 +184,17 @@ export async function getLatencyTimeseries({
   };
 }
 
+export interface TransactionLatencyResponse {
+  currentPeriod: {
+    overallAvgDuration: number | null;
+    latencyTimeseries: Coordinate[];
+  };
+  previousPeriod: {
+    overallAvgDuration: number | null;
+    latencyTimeseries: Coordinate[];
+  };
+}
+
 export async function getLatencyPeriods({
   serviceName,
   transactionType,
@@ -211,7 +223,7 @@ export async function getLatencyPeriods({
   documentType: ApmServiceTransactionDocumentType;
   rollupInterval: RollupInterval;
   bucketSizeInSeconds: number;
-}) {
+}): Promise<TransactionLatencyResponse> {
   const options = {
     serviceName,
     transactionType,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-const { unoptimizeTsConfig } = require('./optimize_tsconfig/unoptimize');
-
-unoptimizeTsConfig().catch((err) => {
-  console.error(err);
-  process.exit(1);
+Cypress.on('uncaught:exception', (err, runnable) => {
+  return false;
 });
+
+import './commands';
+// import './output_command_timings';
