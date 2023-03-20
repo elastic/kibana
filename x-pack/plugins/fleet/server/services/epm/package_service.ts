@@ -190,6 +190,7 @@ class PackageClientImpl implements PackageClient {
       this.internalEsClient,
       this.internalSoClient,
       this.logger
+      // @todo: need credentials
     );
     return installedTransforms;
   }

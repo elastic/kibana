@@ -608,8 +608,8 @@ export const installTransforms = async (
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger,
-  apiKeyWithCurrentUserPermission?: APIKey,
-  esReferences?: EsAssetReference[]
+  esReferences?: EsAssetReference[],
+  apiKeyWithCurrentUserPermission?: APIKey
 ) => {
   const transformPaths = paths.filter((path) => isTransform(path));
 

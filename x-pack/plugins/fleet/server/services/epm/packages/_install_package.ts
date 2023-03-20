@@ -41,6 +41,7 @@ import { isTopLevelPipeline, deletePreviousPipelines } from '../elasticsearch/in
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
+import type { APIKey } from '../elasticsearch/transform/install';
 import { installTransforms } from '../elasticsearch/transform/install';
 import { installMlModel } from '../elasticsearch/ml_model';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
@@ -87,7 +88,7 @@ export async function _installPackage({
   installSource: InstallSource;
   spaceId: string;
   verificationResult?: PackageVerificationResult;
-  apiKeyWithCurrentUserPermission;
+  apiKeyWithCurrentUserPermission?: APIKey;
 }): Promise<AssetReference[]> {
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
 
@@ -247,8 +248,8 @@ export async function _installPackage({
         esClient,
         savedObjectsClient,
         logger,
-        apiKeyWithCurrentUserPermission,
-        esReferences
+        esReferences,
+        apiKeyWithCurrentUserPermission
       )
     ));
 
