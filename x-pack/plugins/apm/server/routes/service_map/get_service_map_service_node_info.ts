@@ -59,7 +59,7 @@ interface TaskParameters {
   offsetInMs: number;
 }
 
-export function getServiceMapServiceNodeInfo({
+function getServiceMapServiceNodeInfoForTimeRange({
   environment,
   serviceName,
   apmEventClient,
@@ -361,4 +361,37 @@ function getMemoryStats({
 
     return memoryUsage;
   });
+}
+
+export interface ServiceMapServiceNodeInfoResponse {
+  currentPeriod: NodeStats;
+  previousPeriod: NodeStats | undefined;
+}
+
+export async function getServiceMapServiceNodeInfo({
+  environment,
+  apmEventClient,
+  serviceName,
+  searchAggregatedTransactions,
+  start,
+  end,
+  offset,
+}: Options): Promise<ServiceMapServiceNodeInfoResponse> {
+  const commonProps = {
+    environment,
+    apmEventClient,
+    serviceName,
+    searchAggregatedTransactions,
+    start,
+    end,
+  };
+
+  const [currentPeriod, previousPeriod] = await Promise.all([
+    getServiceMapServiceNodeInfoForTimeRange(commonProps),
+    offset
+      ? getServiceMapServiceNodeInfoForTimeRange({ ...commonProps, offset })
+      : undefined,
+  ]);
+
+  return { currentPeriod, previousPeriod };
 }

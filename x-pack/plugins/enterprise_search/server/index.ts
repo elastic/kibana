@@ -17,7 +17,12 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 export const configSchema = schema.object({
   accessCheckTimeout: schema.number({ defaultValue: 5000 }),
   accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
+  canDeployEntSearch: schema.boolean({ defaultValue: true }),
   customHeaders: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  hasConnectors: schema.boolean({ defaultValue: true }),
+  hasDefaultIngestPipeline: schema.boolean({ defaultValue: true }),
+  hasNativeConnectors: schema.boolean({ defaultValue: true }),
+  hasWebCrawler: schema.boolean({ defaultValue: true }),
   host: schema.maybe(schema.string()),
   ssl: schema.object({
     certificateAuthorities: schema.maybe(
@@ -34,6 +39,7 @@ export type ConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigType> = {
   exposeToBrowser: {
+    canDeployEntSearch: true,
     host: true,
   },
   schema: configSchema,
