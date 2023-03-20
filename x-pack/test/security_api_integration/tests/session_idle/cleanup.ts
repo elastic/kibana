@@ -32,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     provider: AuthenticationProvider
   ) {
     log.debug(`Verifying session cookie for ${username}.`);
+    await es.indices.refresh({ index: '.kibana_security_session*' });
     const apiResponse = await supertest
       .get('/internal/security/me')
       .set('kbn-xsrf', 'xxx')
@@ -48,6 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function getNumberOfSessionDocuments() {
+    await es.indices.refresh({ index: '.kibana_security_session*' });
     return (
       // @ts-expect-error doesn't handle total as number
       (await es.search({ index: '.kibana_security_session*' })).hits.total.value as number
@@ -101,7 +103,6 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
-      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       const sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, { type: 'basic', name: 'basic1' });
@@ -144,7 +145,6 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
-      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       const basicSessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(basicSessionCookie, basicUsername, {
@@ -196,7 +196,6 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
-      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       let sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, { type: 'basic', name: 'basic1' });

@@ -23,6 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   // session id used during a test run, and we might have lots of unrelated
   // sessions in the index created by the tests that didn't clean up the index.
   async function getSessionsCreatedAt() {
+    await es.indices.refresh({ index: '.kibana_security_session*' });
     const searchResponse = await es.search<{ createdAt: number }>({
       index: '.kibana_security_session*',
     });
@@ -38,22 +39,26 @@ export default function ({ getService }: FtrProviderContext) {
       sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       return response;
     };
-    const getSessionInfo = async () =>
-      supertestWithoutAuth
+    const getSessionInfo = async () => {
+      await es.indices.refresh({ index: '.kibana_security_session*' });
+      return supertestWithoutAuth
         .get('/internal/security/session')
         .set('kbn-xsrf', 'xxx')
         .set('kbn-system-request', 'true')
         .set('Cookie', sessionCookie.cookieString())
         .send()
         .expect(200);
-    const extendSession = async () =>
-      supertestWithoutAuth
+    };
+    const extendSession = async () => {
+      await es.indices.refresh({ index: '.kibana_security_session*' });
+      return supertestWithoutAuth
         .post('/internal/security/session')
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
         .send()
         .expect(302)
         .then(saveCookie);
+    };
 
     beforeEach(async () => {
       await supertestWithoutAuth
