@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { AlertDetails } from './components';
+import { GenericFtrProviderContext } from '@kbn/test';
+
+export type FtrProviderContext = GenericFtrProviderContext<{}, {}>;

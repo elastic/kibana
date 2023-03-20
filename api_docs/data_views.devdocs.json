@@ -26197,10 +26197,6 @@
             "path": "src/core/types/index.ts"
           },
           {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/server/routes/settings/apm_indices/route.ts"
-          },
-          {
             "plugin": "savedObjectsTaggingOss",
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
