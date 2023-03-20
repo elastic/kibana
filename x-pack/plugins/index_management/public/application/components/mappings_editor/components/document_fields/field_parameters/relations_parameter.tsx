@@ -94,7 +94,7 @@ export const RelationsParameter = () => {
   const renderWarning = () => (
     <EuiCallOut
       color="warning"
-      iconType="alert"
+      iconType="warning"
       size="s"
       title={
         <FormattedMessage

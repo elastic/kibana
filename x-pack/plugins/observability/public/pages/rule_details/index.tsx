@@ -45,7 +45,7 @@ import {
 } from '../../utils/alert_summary_widget';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
-import { CenterJustifiedSpinner } from './components/center_justified_spinner';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
 import {
   EXECUTION_TAB,
@@ -58,16 +58,15 @@ import { RuleDetailsPathParams, TabId } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
-import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
 import { PageTitle } from './components';
 import { getHealthColor } from './config';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../config/paths';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
-import { AlertStatus } from '../../../common/typings';
 import { observabilityFeatureId, ruleDetailsLocatorID } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
-import { ObservabilityAppServices } from '../../application/types';
+import type { AlertStatus } from '../../../common/typings';
+import type { ObservabilityAppServices } from '../../application/types';
 
 export function RuleDetailsPage() {
   const {
@@ -76,7 +75,7 @@ export function RuleDetailsPage() {
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
       ruleTypeRegistry,
-      getEditAlertFlyout: EditAlertFlyout,
+      getEditRuleFlyout: EditRuleFlyout,
       getRuleEventLogList,
       getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
@@ -219,7 +218,9 @@ export function RuleDetailsPage() {
     },
     {
       href: http.basePath.prepend(paths.observability.rules),
-      text: RULES_BREADCRUMB_TEXT,
+      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+        defaultMessage: 'Rules',
+      }),
     },
     {
       text: rule && rule.name,
@@ -302,7 +303,7 @@ export function RuleDetailsPage() {
     return (
       <EuiPanel>
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           color="danger"
           title={
             <h2>
@@ -424,7 +425,7 @@ export function RuleDetailsPage() {
         }}
       />
       {editFlyoutVisible && (
-        <EditAlertFlyout
+        <EditRuleFlyout
           initialRule={rule}
           onClose={() => {
             setEditFlyoutVisible(false);
