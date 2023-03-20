@@ -13,8 +13,37 @@ import { delayRetryState, resetRetryState } from '../../model/retry_state';
 import { throwBadControlState } from '../../model/helpers';
 import { isTypeof } from '../actions';
 import type { MigratorContext } from '../context';
-import type { StateActionResponse } from './types';
+import type { ModelStage } from './types';
 import * as Stages from './stages';
+
+type ModelStageMap = {
+  [K in AllActionStates]: ModelStage<K, any>;
+};
+
+export const modelStageMap: ModelStageMap = {
+  INIT: Stages.init,
+  CREATE_TARGET_INDEX: Stages.createTargetIndex,
+  UPDATE_ALIASES: Stages.updateAliases,
+  UPDATE_INDEX_MAPPINGS: Stages.updateIndexMappings,
+  UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: Stages.updateIndexMappingsWaitForTask,
+  UPDATE_MAPPING_MODEL_VERSIONS: Stages.updateMappingModelVersion,
+  INDEX_STATE_UPDATE_DONE: Stages.indexStateUpdateDone,
+  DOCUMENTS_UPDATE_INIT: Stages.documentsUpdateInit,
+  SET_DOC_MIGRATION_STARTED: Stages.setDocMigrationStarted,
+  SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES: Stages.setDocMigrationStartedWaitForInstances,
+  CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS: Stages.cleanupUnknownAndExcludedDocs,
+  CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK: Stages.cleanupUnknownAndExcludedDocsWaitForTask,
+  REFRESH_INDEX_AFTER_CLEANUP: Stages.refreshIndexAfterCleanup,
+  OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: Stages.outdatedDocumentsSearchOpenPit,
+  OUTDATED_DOCUMENTS_SEARCH_READ: Stages.outdatedDocumentsSearchRead,
+  OUTDATED_DOCUMENTS_SEARCH_TRANSFORM: Stages.outdatedDocumentsSearchTransform,
+  OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX: Stages.outdatedDocumentsSearchBulkIndex,
+  OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: Stages.outdatedDocumentsSearchClosePit,
+  OUTDATED_DOCUMENTS_SEARCH_REFRESH: Stages.outdatedDocumentsSearchRefresh,
+  UPDATE_DOCUMENT_MODEL_VERSIONS: Stages.updateDocumentModelVersion,
+  UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES:
+    Stages.updateDocumentModelVersionWaitForInstances,
+};
 
 export const model = (
   current: State,
@@ -29,66 +58,16 @@ export const model = (
     current = resetRetryState(current);
   }
 
-  switch (current.controlState) {
-    case 'INIT':
-      return Stages.init(current, response as StateActionResponse<'INIT'>, context);
-    case 'CREATE_TARGET_INDEX':
-      return Stages.createTargetIndex(
-        current,
-        response as StateActionResponse<'CREATE_TARGET_INDEX'>,
-        context
-      );
-    case 'UPDATE_ALIASES':
-      return Stages.updateAliases(
-        current,
-        response as StateActionResponse<'UPDATE_ALIASES'>,
-        context
-      );
-    case 'UPDATE_INDEX_MAPPINGS':
-      return Stages.updateIndexMappings(
-        current,
-        response as StateActionResponse<'UPDATE_INDEX_MAPPINGS'>,
-        context
-      );
-    case 'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK':
-      return Stages.updateIndexMappingsWaitForTask(
-        current,
-        response as StateActionResponse<'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'>,
-        context
-      );
-    case 'UPDATE_MAPPING_MODEL_VERSIONS':
-      return Stages.updateMappingModelVersion(
-        current,
-        response as StateActionResponse<'UPDATE_MAPPING_MODEL_VERSIONS'>,
-        context
-      );
-    case 'INDEX_STATE_UPDATE_DONE':
-      return Stages.indexStateUpdateDone(
-        current,
-        response as StateActionResponse<'INDEX_STATE_UPDATE_DONE'>,
-        context
-      );
-    // TODO: implement
-    case 'DOCUMENTS_UPDATE_INIT':
-    case 'SET_DOC_MIGRATION_STARTED':
-    case 'SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES':
-    case 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS':
-    case 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK':
-    case 'REFRESH_INDEX_AFTER_CLEANUP':
-    case 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT':
-    case 'OUTDATED_DOCUMENTS_SEARCH_READ':
-    case 'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM':
-    case 'OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX':
-    case 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT':
-    case 'UPDATE_DOCUMENT_MODEL_VERSIONS':
-    case 'UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES':
-      return throwBadControlState(current as never);
-    // TODO - end
-    case 'DONE':
-    case 'FATAL':
-      // The state-action machine will never call the model in the terminating states
-      return throwBadControlState(current as never);
-    default:
-      return throwBadControlState(current);
+  if (current.controlState === 'DONE' || current.controlState === 'FATAL') {
+    return throwBadControlState(current as never);
   }
+
+  const stageHandler = modelStageMap[current.controlState];
+  if (!stageHandler) {
+    return throwBadControlState(current as never);
+  }
+
+  // couldn't find a way to infer the type of the state depending on the state of the handler
+  // even if they are directly coupled, so had to force-cast to this ugly any instead.
+  return stageHandler(current as any, response, context);
 };

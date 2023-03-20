@@ -10,30 +10,16 @@ import * as Either from 'fp-ts/lib/Either';
 import { throwBadResponse } from '../../../model/helpers';
 import type { ModelStage } from '../types';
 
-export const outdatedDocumentsSearchClosePit: ModelStage<
-  'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
-  'OUTDATED_DOCUMENTS_SEARCH_REFRESH'
+export const updateDocumentModelVersion: ModelStage<
+  'UPDATE_DOCUMENT_MODEL_VERSIONS',
+  'UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES' | 'FATAL'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     throwBadResponse(state, res as never);
   }
 
-  /*
-   const { pitId, hasTransformedDocs, ...state } = stateP;
-    if (hasTransformedDocs) {
-      return {
-        ...state,
-        controlState: 'OUTDATED_DOCUMENTS_REFRESH',
-      };
-    }
-    return {
-      ...state,
-      controlState: 'CHECK_TARGET_MAPPINGS',
-    };
-   */
-
   return {
     ...state,
-    controlState: 'OUTDATED_DOCUMENTS_SEARCH_REFRESH',
+    controlState: 'UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES',
   };
 };

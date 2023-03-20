@@ -154,6 +154,10 @@ export interface OutdatedDocumentsSearchClosePitState extends OutdatedDocumentsS
   readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT';
 }
 
+export interface OutdatedDocumentsSearchRefreshState extends OutdatedDocumentsSearchState {
+  readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_REFRESH';
+}
+
 export interface UpdateDocumentModelVersionsState extends PostDocInitState {
   readonly controlState: 'UPDATE_DOCUMENT_MODEL_VERSIONS';
 }
@@ -196,7 +200,8 @@ export type State =
   | OutdatedDocumentsSearchBulkIndexState
   | OutdatedDocumentsSearchClosePitState
   | UpdateDocumentModelVersionsState
-  | UpdateDocumentModelVersionsWaitForInstancesState;
+  | UpdateDocumentModelVersionsWaitForInstancesState
+  | OutdatedDocumentsSearchRefreshState;
 
 export type AllControlStates = State['controlState'];
 
@@ -226,6 +231,7 @@ export interface ControlStateMap {
   OUTDATED_DOCUMENTS_SEARCH_TRANSFORM: OutdatedDocumentsSearchTransformState;
   OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX: OutdatedDocumentsSearchBulkIndexState;
   OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: OutdatedDocumentsSearchClosePitState;
+  OUTDATED_DOCUMENTS_SEARCH_REFRESH: OutdatedDocumentsSearchRefreshState;
   UPDATE_DOCUMENT_MODEL_VERSIONS: UpdateDocumentModelVersionsState;
   UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES: UpdateDocumentModelVersionsWaitForInstancesState;
 }

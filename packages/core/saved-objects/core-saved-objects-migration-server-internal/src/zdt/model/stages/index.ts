@@ -24,3 +24,6 @@ export { outdatedDocumentsSearchRead } from './outdated_documents_search_read';
 export { outdatedDocumentsSearchTransform } from './outdated_documents_search_transform';
 export { outdatedDocumentsSearchBulkIndex } from './outdated_documents_search_bulk_index';
 export { outdatedDocumentsSearchClosePit } from './outdated_documents_search_close_pit';
+export { outdatedDocumentsSearchRefresh } from './outdated_documents_search_refresh';
+export { updateDocumentModelVersion } from './update_document_model_version';
+export { updateDocumentModelVersionWaitForInstances } from './update_document_model_version_wait_for_instances';

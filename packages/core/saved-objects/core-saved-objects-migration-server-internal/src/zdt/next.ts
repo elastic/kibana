@@ -27,6 +27,7 @@ import type {
   RefreshIndexAfterCleanupState,
   SetDocMigrationStartedState,
   SetDocMigrationStartedWaitForInstancesState,
+  OutdatedDocumentsSearchRefreshState,
   UpdateDocumentModelVersionsState,
   UpdateDocumentModelVersionsWaitForInstancesState,
 } from './state';
@@ -46,8 +47,7 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
-/** @deprecated */
-const NOT_IMPLEMENTED_YET = () => Promise.resolve({} as any);
+// const NOT_IMPLEMENTED_YET = () => Promise.resolve({} as any);
 
 export const nextActionMap = (context: MigratorContext) => {
   const client = context.elasticsearchClient;
@@ -146,19 +146,31 @@ export const nextActionMap = (context: MigratorContext) => {
         client,
         index: state.currentIndex,
         operations: state.bulkOperationBatches[state.currentBatch],
-        refresh: true, // TODO: do we want true or false here -> is OUTDATED_DOCUMENTS_SEARCH_REFRESH needed or not?
+        refresh: false,
       }),
     OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePitState) =>
       Actions.closePit({
         client,
         pitId: state.pitId,
       }),
-    // TODO: OUTDATED_DOCUMENTS_SEARCH_REFRESH
+    OUTDATED_DOCUMENTS_SEARCH_REFRESH: (state: OutdatedDocumentsSearchRefreshState) =>
+      Actions.refreshIndex({
+        client,
+        index: state.currentIndex,
+      }),
     UPDATE_DOCUMENT_MODEL_VERSIONS: (state: UpdateDocumentModelVersionsState) =>
-      NOT_IMPLEMENTED_YET,
+      Actions.updateIndexMeta({
+        // TODO: update the meta in previous stage
+        client,
+        index: state.currentIndex,
+        meta: state.currentIndexMeta,
+      }),
     UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES: (
       state: UpdateDocumentModelVersionsWaitForInstancesState
-    ) => NOT_IMPLEMENTED_YET,
+    ) =>
+      Actions.waitForDelay({
+        delayInSec: context.migrationConfig.zdt.metaPickupSyncDelaySec,
+      }),
   };
 };
 

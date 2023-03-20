@@ -33,6 +33,7 @@ export type {
   OutdatedDocumentsSearchTransformState,
   OutdatedDocumentsSearchBulkIndexState,
   OutdatedDocumentsSearchClosePitState,
+  OutdatedDocumentsSearchRefreshState,
   UpdateDocumentModelVersionsState,
   UpdateDocumentModelVersionsWaitForInstancesState,
 } from './types';

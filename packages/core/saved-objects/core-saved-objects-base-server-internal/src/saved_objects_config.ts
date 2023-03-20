@@ -32,9 +32,8 @@ const migrationSchema = schema.object({
   pollInterval: schema.number({ defaultValue: 1_500 }),
   skip: schema.boolean({ defaultValue: false }),
   retryAttempts: schema.number({ defaultValue: 15 }),
-
   zdt: schema.object({
-    metaPickupSyncDelaySec: schema.number({ min: 1, defaultValue: 60 * 3 }),
+    metaPickupSyncDelaySec: schema.number({ min: 1, defaultValue: 120 }),
   }),
 });
 
