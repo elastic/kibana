@@ -31,7 +31,7 @@ export const Page = () => {
         <EuiFlexItem grow={false}>
           <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
             <EuiEmptyPrompt
-              iconType="alert"
+              iconType="warning"
               title={
                 <h2>
                   <FormattedMessage

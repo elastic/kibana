@@ -41,6 +41,7 @@ export const AlertAttributesExcludedFromAAD = [
   'isSnoozedUntil',
   'lastRun',
   'nextRun',
+  'revision',
   'running',
 ];
 
@@ -61,6 +62,7 @@ export type AlertAttributesExcludedFromAADType =
   | 'isSnoozedUntil'
   | 'lastRun'
   | 'nextRun'
+  | 'revision'
   | 'running';
 
 export function setupSavedObjects(

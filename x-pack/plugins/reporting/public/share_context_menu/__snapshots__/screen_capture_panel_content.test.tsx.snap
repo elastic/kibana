@@ -164,7 +164,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
                 aria-hidden="true"
                 class="emotion-euiCallOut__icon"
                 color="inherit"
-                data-euiicon-type="alert"
+                data-euiicon-type="warning"
               />
               Unsaved work
             </p>
@@ -356,7 +356,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
                 aria-hidden="true"
                 class="emotion-euiCallOut__icon"
                 color="inherit"
-                data-euiicon-type="alert"
+                data-euiicon-type="warning"
               />
               Unsaved work
             </p>
@@ -489,7 +489,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
                 aria-hidden="true"
                 class="emotion-euiCallOut__icon"
                 color="inherit"
-                data-euiicon-type="alert"
+                data-euiicon-type="warning"
               />
               Unsaved work
             </p>

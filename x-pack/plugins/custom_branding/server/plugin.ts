@@ -96,7 +96,6 @@ export class CustomBrandingPlugin implements Plugin {
       const key = settingsKeys[i];
       const fullKey = `xpackCustomBranding:${key}`;
       const value = await uiSettingsClient.get(fullKey);
-      this.logger.info(`Fetching custom branding key ${fullKey} with value ${value}`);
       if (value) {
         branding[key] = value;
       }

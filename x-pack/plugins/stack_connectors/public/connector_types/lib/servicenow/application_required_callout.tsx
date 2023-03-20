@@ -35,7 +35,7 @@ const ApplicationRequiredCalloutComponent: React.FC<Props> = ({ appId, message }
       <EuiSpacer size="s" />
       <EuiCallOut
         size="m"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="snApplicationCallout"
         color="danger"
         title={i18n.translate(

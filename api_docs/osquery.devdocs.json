@@ -43,7 +43,13 @@
             "((props: ",
             "OsqueryActionProps",
             " & { ecsData?: ",
-            "Ecs",
+            {
+              "pluginId": "@kbn/securitysolution-ecs",
+              "scope": "common",
+              "docId": "kibKbnSecuritysolutionEcsPluginApi",
+              "section": "def-common.EcsSecurityExtension",
+              "text": "EcsSecurityExtension"
+            },
             " | undefined; }) => JSX.Element) | undefined"
           ],
           "path": "x-pack/plugins/osquery/public/types.ts",

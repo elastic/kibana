@@ -71,7 +71,7 @@ describe('transformServiceMapResponses', () => {
       anomalies,
     };
 
-    const { elements } = transformServiceMapResponses(response);
+    const { elements } = transformServiceMapResponses({ response });
 
     const connection = elements.find(
       (element) => 'source' in element.data && 'target' in element.data
@@ -113,7 +113,7 @@ describe('transformServiceMapResponses', () => {
       anomalies,
     };
 
-    const { elements } = transformServiceMapResponses(response);
+    const { elements } = transformServiceMapResponses({ response });
 
     const connections = elements.filter((element) => 'source' in element.data);
 
@@ -151,7 +151,7 @@ describe('transformServiceMapResponses', () => {
       anomalies,
     };
 
-    const { elements } = transformServiceMapResponses(response);
+    const { elements } = transformServiceMapResponses({ response });
 
     const nodes = elements.filter((element) => !('source' in element.data));
 
@@ -176,7 +176,7 @@ describe('transformServiceMapResponses', () => {
       anomalies,
     };
 
-    const { elements } = transformServiceMapResponses(response);
+    const { elements } = transformServiceMapResponses({ response });
 
     expect(elements.length).toBe(3);
   });
