@@ -46,7 +46,7 @@ import {
 } from './saved_object_types';
 
 import type { CasesClient } from './client';
-import type { CasesRequestHandlerContext, PluginSetupContract, PluginStartContract } from './types';
+import type { CasesRequestHandlerContext, CasesSetup, CasesStart } from './types';
 import { CasesClientFactory } from './client/factory';
 import { getCasesKibanaFeature } from './features';
 import { registerRoutes } from './routes/api/register_routes';
@@ -57,6 +57,7 @@ import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/p
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import { UserProfileService } from './services';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
+import { registerInternalAttachments } from './internal_attachments';
 import { registerCaseFileKinds } from './files';
 
 export interface PluginsSetup {
@@ -100,13 +101,14 @@ export class CasePlugin {
     this.userProfileService = new UserProfileService(this.logger);
   }
 
-  public setup(core: CoreSetup, plugins: PluginsSetup): PluginSetupContract {
+  public setup(core: CoreSetup, plugins: PluginsSetup): CasesSetup {
     this.logger.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
         core
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
+    registerInternalAttachments(this.externalReferenceAttachmentTypeRegistry);
     registerCaseFileKinds(plugins.files);
 
     this.securityPluginSetup = plugins.security;
@@ -174,7 +176,7 @@ export class CasePlugin {
     };
   }
 
-  public start(core: CoreStart, plugins: PluginsStart): PluginStartContract {
+  public start(core: CoreStart, plugins: PluginsStart): CasesStart {
     this.logger.debug(`Starting Case Workflow`);
 
     if (plugins.taskManager) {
@@ -224,6 +226,9 @@ export class CasePlugin {
 
     return {
       getCasesClientWithRequest,
+      getExternalReferenceAttachmentTypeRegistry: () =>
+        this.externalReferenceAttachmentTypeRegistry,
+      getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
     };
   }
 

@@ -30,6 +30,7 @@ export type {
   RuleParamsAndRefs,
   GetSummarizedAlertsFnOpts,
   ExecutorType,
+  IRuleTypeAlerts,
 } from './types';
 export { RuleNotifyWhen } from '../common';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
@@ -59,6 +60,7 @@ export {
   ECS_COMPONENT_TEMPLATE_NAME,
   ECS_CONTEXT,
   getComponentTemplate,
+  type PublicFrameworkAlertsService,
 } from './alerts_service';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);

@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from './index_documents';
+export * from './data_generator_factory';
+export * from './enhance_document';
+export * from './enhance_documents';
+export * from './generate_documents';
+export * from './get_kql_query_from_documents_list';

@@ -99,7 +99,7 @@
                 "section": "def-common.RuleLastRun",
                 "text": "RuleLastRun"
               },
-              " | null | undefined; nextRun?: Date | null | undefined; running?: boolean | null | undefined; viewInAppRelativeUrl?: string | undefined; }"
+              " | null | undefined; nextRun?: Date | null | undefined; revision: number; running?: boolean | null | undefined; viewInAppRelativeUrl?: string | undefined; }"
             ],
             "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
             "deprecated": false,
@@ -875,56 +875,27 @@
         "label": "getComponentTemplate",
         "description": [],
         "signature": [
-          "(fieldMap: ",
-          {
-            "pluginId": "@kbn/alerts-as-data-utils",
-            "scope": "common",
-            "docId": "kibKbnAlertsAsDataUtilsPluginApi",
-            "section": "def-common.FieldMap",
-            "text": "FieldMap"
-          },
-          ", context?: string | undefined) => ",
+          "({ fieldMap, context, name, dynamic, includeSettings, }: GetComponentTemplateOpts) => ",
           "ClusterPutComponentTemplateRequest"
         ],
-        "path": "x-pack/plugins/alerting/server/alerts_service/types.ts",
+        "path": "x-pack/plugins/alerting/server/alerts_service/resource_installer_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "alerting",
             "id": "def-server.getComponentTemplate.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "fieldMap",
+            "label": "{\n  fieldMap,\n  context,\n  name,\n  dynamic,\n  includeSettings,\n}",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/alerts-as-data-utils",
-                "scope": "common",
-                "docId": "kibKbnAlertsAsDataUtilsPluginApi",
-                "section": "def-common.FieldMap",
-                "text": "FieldMap"
-              }
+              "GetComponentTemplateOpts"
             ],
-            "path": "x-pack/plugins/alerting/server/alerts_service/types.ts",
+            "path": "x-pack/plugins/alerting/server/alerts_service/resource_installer_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.getComponentTemplate.$2",
-            "type": "string",
-            "tags": [],
-            "label": "context",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/server/alerts_service/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1326,6 +1297,21 @@
             "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.BulkEditOptionsFilter.shouldIncrementRevision",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldIncrementRevision",
+            "description": [],
+            "signature": [
+              "ShouldIncrementRevision",
+              "<Params> | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1395,6 +1381,21 @@
             "description": [],
             "signature": [
               "RuleParamsModifier",
+              "<Params> | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.BulkEditOptionsIds.shouldIncrementRevision",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldIncrementRevision",
+            "description": [],
+            "signature": [
+              "ShouldIncrementRevision",
               "<Params> | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
@@ -1629,6 +1630,97 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-server.IRuleTypeAlerts",
+        "type": "Interface",
+        "tags": [],
+        "label": "IRuleTypeAlerts",
+        "description": [],
+        "path": "x-pack/plugins/alerting/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.IRuleTypeAlerts.context",
+            "type": "string",
+            "tags": [],
+            "label": "context",
+            "description": [
+              "\nSpecifies the target alerts-as-data resource\nfor this rule type. All alerts created with the same\ncontext are written to the same alerts-as-data index.\n\nAll custom mappings defined for a context must be the same!"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.IRuleTypeAlerts.mappings",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [
+              "\nSpecifies custom mappings for the target alerts-as-data\nindex. These mappings will be translated into a component template\nand used in the index template for the index."
+            ],
+            "signature": [
+              "ComponentTemplateSpec"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.IRuleTypeAlerts.useEcs",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useEcs",
+            "description": [
+              "\nOptional flag to include a reference to the ECS component template."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.IRuleTypeAlerts.useLegacyAlerts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useLegacyAlerts",
+            "description": [
+              "\nOptional flag to include a reference to the legacy alert component template.\nAny rule type that is migrating from the rule registry should set this\nflag to true to ensure their alerts-as-data indices are backwards compatible."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.IRuleTypeAlerts.secondaryAlias",
+            "type": "string",
+            "tags": [],
+            "label": "secondaryAlias",
+            "description": [
+              "\nOptional secondary alias to use. This alias should not include the namespace."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-server.PluginSetupContract",
         "type": "Interface",
         "tags": [],
@@ -1776,19 +1868,18 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-server.PluginSetupContract.getFrameworkAlertsEnabled",
-            "type": "Function",
+            "id": "def-server.PluginSetupContract.frameworkAlerts",
+            "type": "CompoundType",
             "tags": [],
-            "label": "getFrameworkAlertsEnabled",
+            "label": "frameworkAlerts",
             "description": [],
             "signature": [
-              "() => boolean"
+              "PublicAlertsService",
+              " & { enabled: () => boolean; }"
             ],
             "path": "x-pack/plugins/alerting/server/plugin.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3026,7 +3117,13 @@
             "label": "alerts",
             "description": [],
             "signature": [
-              "IRuleTypeAlerts",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.IRuleTypeAlerts",
+                "text": "IRuleTypeAlerts"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
@@ -3430,6 +3527,22 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-server.PublicFrameworkAlertsService",
+        "type": "Type",
+        "tags": [],
+        "label": "PublicFrameworkAlertsService",
+        "description": [],
+        "signature": [
+          "PublicAlertsService",
+          " & { enabled: () => boolean; }"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_service/alerts_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-server.RuleActionParams",
         "type": "Type",
         "tags": [],
@@ -3543,11 +3656,9 @@
             "section": "def-server.FindResult",
             "text": "FindResult"
           },
-          "<Params>>; muteAll: (options: { id: string; }) => Promise<void>; aggregate: (params?: { options?: ",
-          "AggregateOptions",
-          " | undefined; } | undefined) => Promise<",
-          "AggregateResult",
-          ">; clone: <Params extends ",
+          "<Params>>; muteAll: (options: { id: string; }) => Promise<void>; aggregate: <T = Record<string, unknown>>(params: ",
+          "AggregateParams",
+          "<T>) => Promise<T>; clone: <Params extends ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -3918,6 +4029,60 @@
     "functions": [
       {
         "parentPluginId": "alerting",
+        "id": "def-common.formatDefaultAggregationResult",
+        "type": "Function",
+        "tags": [],
+        "label": "formatDefaultAggregationResult",
+        "description": [],
+        "signature": [
+          "(aggregations: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.DefaultRuleAggregationResult",
+            "text": "DefaultRuleAggregationResult"
+          },
+          ") => ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleAggregationFormattedResult",
+            "text": "RuleAggregationFormattedResult"
+          }
+        ],
+        "path": "x-pack/plugins/alerting/common/default_rule_aggregation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.formatDefaultAggregationResult.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "aggregations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.DefaultRuleAggregationResult",
+                "text": "DefaultRuleAggregationResult"
+              }
+            ],
+            "path": "x-pack/plugins/alerting/common/default_rule_aggregation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.formatDuration",
         "type": "Function",
         "tags": [],
@@ -3959,6 +4124,60 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.formatRuleTagsAggregationResult",
+        "type": "Function",
+        "tags": [],
+        "label": "formatRuleTagsAggregationResult",
+        "description": [],
+        "signature": [
+          "(aggregations: ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTagsAggregationResult",
+            "text": "RuleTagsAggregationResult"
+          },
+          ") => ",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleTagsAggregationFormattedResult",
+            "text": "RuleTagsAggregationFormattedResult"
+          }
+        ],
+        "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.formatRuleTagsAggregationResult.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "aggregations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTagsAggregationResult",
+                "text": "RuleTagsAggregationResult"
+              }
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -4036,7 +4255,7 @@
         "label": "getComponentTemplateFromFieldMap",
         "description": [],
         "signature": [
-          "({ name, fieldMap, fieldLimit, }: ",
+          "({ name, fieldMap, dynamic, includeSettings, }: ",
           "GetComponentTemplateFromFieldMapOpts",
           ") => ",
           "ClusterPutComponentTemplateRequest"
@@ -4050,7 +4269,7 @@
             "id": "def-common.getComponentTemplateFromFieldMap.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  name,\n  fieldMap,\n  fieldLimit,\n}",
+            "label": "{\n  name,\n  fieldMap,\n  dynamic,\n  includeSettings,\n}",
             "description": [],
             "signature": [
               "GetComponentTemplateFromFieldMapOpts"
@@ -4059,6 +4278,41 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.getDefaultRuleAggregation",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultRuleAggregation",
+        "description": [],
+        "signature": [
+          "(params?: GetDefaultRuleAggregationParams | undefined) => Record<string, ",
+          "AggregationsAggregationContainer",
+          ">"
+        ],
+        "path": "x-pack/plugins/alerting/common/default_rule_aggregation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.getDefaultRuleAggregation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "GetDefaultRuleAggregationParams | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/default_rule_aggregation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -4125,6 +4379,41 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.getRuleTagsAggregation",
+        "type": "Function",
+        "tags": [],
+        "label": "getRuleTagsAggregation",
+        "description": [],
+        "signature": [
+          "(params?: GetRuleTagsAggregationParams | undefined) => Record<string, ",
+          "AggregationsAggregationContainer",
+          ">"
+        ],
+        "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.getRuleTagsAggregation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "GetRuleTagsAggregationParams | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -4461,6 +4750,126 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.AggregateOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggregateOptions",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AggregateOptions.search",
+            "type": "string",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AggregateOptions.defaultSearchOperator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultSearchOperator",
+            "description": [],
+            "signature": [
+              "\"AND\" | \"OR\" | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AggregateOptions.searchFields",
+            "type": "Array",
+            "tags": [],
+            "label": "searchFields",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AggregateOptions.hasReference",
+            "type": "Object",
+            "tags": [],
+            "label": "hasReference",
+            "description": [],
+            "signature": [
+              "{ type: string; id: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AggregateOptions.filter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.KueryNode",
+                "text": "KueryNode"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AggregateOptions.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AggregateOptions.perPage",
+            "type": "number",
+            "tags": [],
+            "label": "perPage",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -4944,6 +5353,104 @@
               "\"RULE_NOT_MODIFIED\""
             ],
             "path": "x-pack/plugins/alerting/common/bulk_edit.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.DefaultRuleAggregationResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "DefaultRuleAggregationResult",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/default_rule_aggregation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.DefaultRuleAggregationResult.status",
+            "type": "Object",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "{ buckets: { key: string; doc_count: number; }[]; }"
+            ],
+            "path": "x-pack/plugins/alerting/common/default_rule_aggregation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.DefaultRuleAggregationResult.outcome",
+            "type": "Object",
+            "tags": [],
+            "label": "outcome",
+            "description": [],
+            "signature": [
+              "{ buckets: { key: string; doc_count: number; }[]; }"
+            ],
+            "path": "x-pack/plugins/alerting/common/default_rule_aggregation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.DefaultRuleAggregationResult.muted",
+            "type": "Object",
+            "tags": [],
+            "label": "muted",
+            "description": [],
+            "signature": [
+              "{ buckets: { key: number; key_as_string: string; doc_count: number; }[]; }"
+            ],
+            "path": "x-pack/plugins/alerting/common/default_rule_aggregation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.DefaultRuleAggregationResult.enabled",
+            "type": "Object",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "signature": [
+              "{ buckets: { key: number; key_as_string: string; doc_count: number; }[]; }"
+            ],
+            "path": "x-pack/plugins/alerting/common/default_rule_aggregation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.DefaultRuleAggregationResult.snoozed",
+            "type": "Object",
+            "tags": [],
+            "label": "snoozed",
+            "description": [],
+            "signature": [
+              "{ count: { doc_count: number; }; }"
+            ],
+            "path": "x-pack/plugins/alerting/common/default_rule_aggregation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.DefaultRuleAggregationResult.tags",
+            "type": "Object",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "{ buckets: { key: string; doc_count: number; }[]; }"
+            ],
+            "path": "x-pack/plugins/alerting/common/default_rule_aggregation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6137,6 +6644,17 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-common.Rule.revision",
+            "type": "number",
+            "tags": [],
+            "label": "revision",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-common.Rule.running",
             "type": "CompoundType",
             "tags": [],
@@ -6263,10 +6781,10 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.RuleAggregations",
+        "id": "def-common.RuleAggregationFormattedResult",
         "type": "Interface",
         "tags": [],
-        "label": "RuleAggregations",
+        "label": "RuleAggregationFormattedResult",
         "description": [],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
@@ -6274,10 +6792,10 @@
         "children": [
           {
             "parentPluginId": "alerting",
-            "id": "def-common.RuleAggregations.alertExecutionStatus",
+            "id": "def-common.RuleAggregationFormattedResult.ruleExecutionStatus",
             "type": "Object",
             "tags": [],
-            "label": "alertExecutionStatus",
+            "label": "ruleExecutionStatus",
             "description": [],
             "signature": [
               "{ [status: string]: number; }"
@@ -6288,7 +6806,7 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-common.RuleAggregations.ruleLastRunOutcome",
+            "id": "def-common.RuleAggregationFormattedResult.ruleLastRunOutcome",
             "type": "Object",
             "tags": [],
             "label": "ruleLastRunOutcome",
@@ -6302,7 +6820,7 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-common.RuleAggregations.ruleEnabledStatus",
+            "id": "def-common.RuleAggregationFormattedResult.ruleEnabledStatus",
             "type": "Object",
             "tags": [],
             "label": "ruleEnabledStatus",
@@ -6316,7 +6834,7 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-common.RuleAggregations.ruleMutedStatus",
+            "id": "def-common.RuleAggregationFormattedResult.ruleMutedStatus",
             "type": "Object",
             "tags": [],
             "label": "ruleMutedStatus",
@@ -6330,7 +6848,7 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-common.RuleAggregations.ruleSnoozedStatus",
+            "id": "def-common.RuleAggregationFormattedResult.ruleSnoozedStatus",
             "type": "Object",
             "tags": [],
             "label": "ruleSnoozedStatus",
@@ -6344,7 +6862,7 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-common.RuleAggregations.ruleTags",
+            "id": "def-common.RuleAggregationFormattedResult.ruleTags",
             "type": "Array",
             "tags": [],
             "label": "ruleTags",
@@ -7182,6 +7700,62 @@
             "label": "updatedAt",
             "description": [],
             "path": "x-pack/plugins/alerting/common/rules_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleTagsAggregationFormattedResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleTagsAggregationFormattedResult",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleTagsAggregationFormattedResult.ruleTags",
+            "type": "Array",
+            "tags": [],
+            "label": "ruleTags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RuleTagsAggregationResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleTagsAggregationResult",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleTagsAggregationResult.tags",
+            "type": "Object",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "{ buckets: { key: { tags: string; }; doc_count: number; }[]; }"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8183,6 +8757,29 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.RuleTagsAggregationOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTagsAggregationOptions",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.AggregateOptions",
+            "text": "AggregateOptions"
+          },
+          ", \"filter\" | \"search\"> & { after?: Record<string, string | number | null> | undefined; maxTags?: number | undefined; }"
+        ],
+        "path": "x-pack/plugins/alerting/common/rule_tags_aggregation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.RuleTaskParams",
         "type": "Type",
         "tags": [],
@@ -8305,7 +8902,7 @@
             "section": "def-common.RuleLastRun",
             "text": "RuleLastRun"
           },
-          " | null | undefined; nextRun?: Date | null | undefined; running?: boolean | null | undefined; viewInAppRelativeUrl?: string | undefined; }"
+          " | null | undefined; nextRun?: Date | null | undefined; revision: number; running?: boolean | null | undefined; viewInAppRelativeUrl?: string | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
