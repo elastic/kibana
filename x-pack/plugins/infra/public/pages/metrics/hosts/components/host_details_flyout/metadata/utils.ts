@@ -7,7 +7,7 @@
 
 import type { InfraMetadata } from '../../../../../../../common/http_api';
 
-export const getAllFields = (metadata: InfraMetadata) => {
+export const getAllFields = (metadata: InfraMetadata | null) => {
   if (!metadata?.info) return [];
   return prune([
     {

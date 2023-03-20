@@ -37,10 +37,7 @@ const Metadata = ({ node, currentTimeRange }: TabProps) => {
     currentTimeRange
   );
 
-  const fields = useMemo(() => {
-    if (!metadata) return [];
-    return getAllFields(metadata);
-  }, [metadata]);
+  const fields = useMemo(() => getAllFields(metadata), [metadata]);
 
   if (metadataLoading) {
     return <LoadingPlaceholder />;
