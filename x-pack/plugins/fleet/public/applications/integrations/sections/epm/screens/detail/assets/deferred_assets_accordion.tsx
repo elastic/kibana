@@ -31,13 +31,13 @@ import { AssetTitleMap } from '../../../constants';
 
 import { getHrefToObjectInKibanaApp, useStartServices } from '../../../../../hooks';
 
-import { KibanaAssetType } from '../../../../../types';
+import type { ElasticsearchAssetType } from '../../../../../types';
 
-import type { AllowedAssetType, AssetSavedObject } from './types';
+import type { AssetSavedObject } from './types';
 
 interface Props {
-  type: AllowedAssetType;
-  savedObjects: AssetSavedObject[] | 'transform';
+  type: ElasticsearchAssetType.transform;
+  deferredInstallations: AssetSavedObject[];
 }
 
 export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
@@ -52,8 +52,6 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
     },
   }));
   const { http } = useStartServices();
-
-  const isDashboard = type === KibanaAssetType.dashboard;
 
   return (
     <>
@@ -80,7 +78,6 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
       <EuiSpacer size="l" />
 
       <EuiAccordion
-        initialIsOpen={isDashboard}
         buttonContent={
           <EuiFlexGroup
             justifyContent="center"

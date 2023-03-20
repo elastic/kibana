@@ -374,9 +374,9 @@ const installTransformsAssets = async (
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger,
-  apiKeyWithCurrentUserPermission: APIKey,
   esReferences: EsAssetReference[] = [],
-  previousInstalledTransformEsAssets: EsAssetReference[] = []
+  previousInstalledTransformEsAssets: EsAssetReference[] = [],
+  apiKeyWithCurrentUserPermission?: APIKey
 ) => {
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
@@ -655,9 +655,9 @@ export const installTransforms = async (
     esClient,
     savedObjectsClient,
     logger,
-    apiKeyWithCurrentUserPermission,
     esReferences,
-    previousInstalledTransformEsAssets
+    previousInstalledTransformEsAssets,
+    apiKeyWithCurrentUserPermission
   );
 };
 
@@ -768,7 +768,7 @@ async function handleTransformInstall({
         err?.body?.error?.type === 'security_exception' &&
         err?.body?.error?.reason?.includes('unauthorized for API key');
 
-      // swallow the error if the transform already exists or if API key has insufficient permissions
+      // swallow the error if the transform can't be started if API key has insufficient permissions
       if (!isUnauthorizedAPIKey) {
         throw err;
       }
