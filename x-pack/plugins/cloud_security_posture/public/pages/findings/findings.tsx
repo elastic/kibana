@@ -14,12 +14,12 @@ import {
   EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { NoFindingsStates } from '../../components/no_findings_states';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { Redirect, Switch, useHistory, useLocation } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
+import { NoFindingsStates } from '../../components/no_findings_states';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { Configurations } from '../configurations';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { Vulnerabilities } from '../vulnerabilities';
