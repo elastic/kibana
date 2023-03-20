@@ -251,6 +251,7 @@ export const Criterion: React.FC<Props> = ({
                   <EuiFlexItem grow={false}>
                     <EuiFormRow isInvalid={errors.comparator.length > 0} error={errors.comparator}>
                       <EuiSelect
+                        data-test-subj="infraCriterionSelect"
                         compressed
                         hasNoInitialSelection={criterion.comparator == null}
                         value={criterion.comparator}
@@ -265,6 +266,7 @@ export const Criterion: React.FC<Props> = ({
                     <EuiFormRow isInvalid={errors.value.length > 0} error={errors.value}>
                       {fieldInfo?.type === 'number' ? (
                         <EuiFieldNumber
+                          data-test-subj="infraCriterionFieldNumber"
                           compressed
                           value={criterion.value as number | undefined}
                           onChange={(e) => {
@@ -276,6 +278,7 @@ export const Criterion: React.FC<Props> = ({
                         />
                       ) : (
                         <EuiFieldText
+                          data-test-subj="infraCriterionFieldText"
                           compressed
                           value={criterion.value}
                           onChange={(e) => updateCriterion(idx, { value: e.target.value })}

@@ -1060,6 +1060,7 @@
     "@kbn/eslint-plugin-disable": "link:packages/kbn-eslint-plugin-disable",
     "@kbn/eslint-plugin-eslint": "link:packages/kbn-eslint-plugin-eslint",
     "@kbn/eslint-plugin-imports": "link:packages/kbn-eslint-plugin-imports",
+    "@kbn/eslint-plugin-telemetry": "link:packages/kbn-eslint-plugin-telemetry",
     "@kbn/expect": "link:packages/kbn-expect",
     "@kbn/failed-test-reporter-cli": "link:packages/kbn-failed-test-reporter-cli",
     "@kbn/find-used-node-modules": "link:packages/kbn-find-used-node-modules",

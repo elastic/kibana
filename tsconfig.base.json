@@ -664,6 +664,8 @@
       "@kbn/eslint-plugin-eslint/*": ["packages/kbn-eslint-plugin-eslint/*"],
       "@kbn/eslint-plugin-imports": ["packages/kbn-eslint-plugin-imports"],
       "@kbn/eslint-plugin-imports/*": ["packages/kbn-eslint-plugin-imports/*"],
+      "@kbn/eslint-plugin-telemetry": ["packages/kbn-eslint-plugin-telemetry"],
+      "@kbn/eslint-plugin-telemetry/*": ["packages/kbn-eslint-plugin-telemetry/*"],
       "@kbn/eso-plugin": ["x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin"],
       "@kbn/eso-plugin/*": ["x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/*"],
       "@kbn/event-annotation-plugin": ["src/plugins/event_annotation"],
