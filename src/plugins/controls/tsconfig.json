@@ -34,6 +34,7 @@
     "@kbn/storybook",
     "@kbn/ui-theme",
     "@kbn/safer-lodash-set",
+    "@kbn/core-mount-utils-browser",
   ],
   "exclude": [
     "target/**/*",
