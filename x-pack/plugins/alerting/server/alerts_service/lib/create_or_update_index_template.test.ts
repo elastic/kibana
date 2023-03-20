@@ -12,18 +12,18 @@ const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-const IndexTemplate = {
-  name: '.alerts-test.alerts-default-index-template',
+const IndexTemplate = (namespace: string = 'default') => ({
+  name: `.alerts-test.alerts-${namespace}-index-template`,
   body: {
     _meta: {
       kibana: {
         version: '8.6.1',
       },
       managed: true,
-      namespace: 'default',
+      namespace,
     },
     composed_of: ['mappings1', 'framework-mappings'],
-    index_patterns: ['.internal.alerts-test.alerts-default-*'],
+    index_patterns: [`.internal.alerts-test.alerts-${namespace}-*`],
     template: {
       mappings: {
         _meta: {
@@ -31,7 +31,7 @@ const IndexTemplate = {
             version: '8.6.1',
           },
           managed: true,
-          namespace: 'default',
+          namespace,
         },
         dynamic: false,
       },
@@ -40,13 +40,14 @@ const IndexTemplate = {
         hidden: true,
         'index.lifecycle': {
           name: 'test-ilm-policy',
-          rollover_alias: '.alerts-test.alerts-default',
+          rollover_alias: `.alerts-test.alerts-${namespace}`,
         },
         'index.mapping.total_fields.limit': 2500,
       },
     },
+    priority: namespace.length,
   },
-};
+});
 
 const SimulateTemplateResponse = {
   template: {
@@ -64,22 +65,42 @@ const SimulateTemplateResponse = {
 };
 
 describe('getIndexTemplate', () => {
-  it(`should create index template with given parameters`, () => {
+  it(`should create index template with given parameters in default namespace`, () => {
     expect(
-      getIndexTemplate(
-        '8.6.1',
-        'test-ilm-policy',
-        {
+      getIndexTemplate({
+        kibanaVersion: '8.6.1',
+        ilmPolicyName: 'test-ilm-policy',
+        indexPatterns: {
           template: '.alerts-test.alerts-default-index-template',
           pattern: '.internal.alerts-test.alerts-default-*',
           basePattern: '.alerts-test.alerts-*',
           alias: '.alerts-test.alerts-default',
           name: '.internal.alerts-test.alerts-default-000001',
         },
-        ['mappings1', 'framework-mappings'],
-        2500
-      )
-    ).toEqual(IndexTemplate);
+        namespace: 'default',
+        componentTemplateRefs: ['mappings1', 'framework-mappings'],
+        totalFieldsLimit: 2500,
+      })
+    ).toEqual(IndexTemplate());
+  });
+
+  it(`should create index template with given parameters in custom namespace`, () => {
+    expect(
+      getIndexTemplate({
+        kibanaVersion: '8.6.1',
+        ilmPolicyName: 'test-ilm-policy',
+        indexPatterns: {
+          template: '.alerts-test.alerts-another-space-index-template',
+          pattern: '.internal.alerts-test.alerts-another-space-*',
+          basePattern: '.alerts-test.alerts-*',
+          alias: '.alerts-test.alerts-another-space',
+          name: '.internal.alerts-test.alerts-another-space-000001',
+        },
+        namespace: 'another-space',
+        componentTemplateRefs: ['mappings1', 'framework-mappings'],
+        totalFieldsLimit: 2500,
+      })
+    ).toEqual(IndexTemplate('another-space'));
   });
 });
 
@@ -94,11 +115,11 @@ describe('createOrUpdateIndexTemplate', () => {
     await createOrUpdateIndexTemplate({
       logger,
       esClient: clusterClient,
-      template: IndexTemplate,
+      template: IndexTemplate(),
     });
 
-    expect(clusterClient.indices.simulateTemplate).toHaveBeenCalledWith(IndexTemplate);
-    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(IndexTemplate);
+    expect(clusterClient.indices.simulateTemplate).toHaveBeenCalledWith(IndexTemplate());
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(IndexTemplate());
   });
 
   it(`should retry on transient ES errors`, async () => {
@@ -110,7 +131,7 @@ describe('createOrUpdateIndexTemplate', () => {
     await createOrUpdateIndexTemplate({
       logger,
       esClient: clusterClient,
-      template: IndexTemplate,
+      template: IndexTemplate(),
     });
 
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
@@ -123,7 +144,7 @@ describe('createOrUpdateIndexTemplate', () => {
       createOrUpdateIndexTemplate({
         logger,
         esClient: clusterClient,
-        template: IndexTemplate,
+        template: IndexTemplate(),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
 
@@ -141,7 +162,7 @@ describe('createOrUpdateIndexTemplate', () => {
       createOrUpdateIndexTemplate({
         logger,
         esClient: clusterClient,
-        template: IndexTemplate,
+        template: IndexTemplate(),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic error"`);
 
@@ -157,7 +178,7 @@ describe('createOrUpdateIndexTemplate', () => {
     await createOrUpdateIndexTemplate({
       logger,
       esClient: clusterClient,
-      template: IndexTemplate,
+      template: IndexTemplate(),
     });
 
     expect(logger.error).toHaveBeenCalledWith(
@@ -179,7 +200,7 @@ describe('createOrUpdateIndexTemplate', () => {
       createOrUpdateIndexTemplate({
         logger,
         esClient: clusterClient,
-        template: IndexTemplate,
+        template: IndexTemplate(),
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"No mappings would be generated for .alerts-test.alerts-default-index-template, possibly due to failed/misconfigured bootstrapping"`

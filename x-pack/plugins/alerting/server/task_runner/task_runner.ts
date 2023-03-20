@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ExecutionHandler, RunResult } from './execution_handler';
 import { TaskRunnerContext } from './task_runner_factory';
 import {
@@ -277,6 +278,19 @@ export class TaskRunner<
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
 
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
+
+    if (this.context.alertsService && ruleType.alerts) {
+      // Wait for alerts-as-data resources to be installed
+      // Since this occurs at the beginning of rule execution, we can be
+      // assured that all resources will be ready for reading/writing when
+      // the rule type executors are called
+
+      // TODO - add retry if any initialization steps have failed
+      await this.context.alertsService.getContextInitializationPromise(
+        ruleType.alerts.context,
+        namespace ?? DEFAULT_NAMESPACE_STRING
+      );
+    }
 
     const wrappedClientOptions = {
       rule: {

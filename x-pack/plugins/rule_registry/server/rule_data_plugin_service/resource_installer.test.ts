@@ -352,34 +352,8 @@ describe('resourceInstaller', () => {
       expect(mockClusterClient.indices.create).not.toHaveBeenCalled();
     });
 
-    it('should install namespace level resources for non-default space even when framework alerts are available', async () => {
+    it('should not install namespace level resources for non-default space when framework alerts are available', async () => {
       const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-      mockClusterClient.indices.simulateTemplate.mockImplementation(async () => ({
-        template: {
-          aliases: {
-            alias_name_1: {
-              is_hidden: true,
-            },
-            alias_name_2: {
-              is_hidden: true,
-            },
-          },
-          mappings: { enabled: false },
-          settings: {},
-        },
-      }));
-      mockClusterClient.indices.getAlias.mockImplementation(async () => ({
-        real_index: {
-          aliases: {
-            alias_1: {
-              is_hidden: true,
-            },
-            alias_2: {
-              is_hidden: true,
-            },
-          },
-        },
-      }));
       const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
       const installer = new ResourceInstaller({
         logger: loggerMock.create(),
@@ -390,6 +364,7 @@ describe('resourceInstaller', () => {
         frameworkAlerts: {
           ...frameworkAlertsService,
           enabled: () => true,
+          getContextInitializationPromise: async () => ({ result: true }),
         },
         pluginStop$,
       });
@@ -408,24 +383,10 @@ describe('resourceInstaller', () => {
       const indexInfo = new IndexInfo({ indexOptions, kibanaVersion: '8.1.0' });
 
       await installer.installAndUpdateNamespaceLevelResources(indexInfo, 'my-staging-space');
-      expect(mockClusterClient.indices.simulateTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: '.alerts-observability.logs.alerts-my-staging-space-index-template',
-        })
-      );
-      expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: '.alerts-observability.logs.alerts-my-staging-space-index-template',
-        })
-      );
-      expect(mockClusterClient.indices.getAlias).toHaveBeenCalledWith(
-        expect.objectContaining({ name: '.alerts-observability.logs.alerts-*' })
-      );
-      expect(mockClusterClient.indices.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: '.internal.alerts-observability.logs.alerts-my-staging-space-000001',
-        })
-      );
+      expect(mockClusterClient.indices.simulateTemplate).not.toHaveBeenCalled();
+      expect(mockClusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(mockClusterClient.indices.getAlias).not.toHaveBeenCalled();
+      expect(mockClusterClient.indices.create).not.toHaveBeenCalled();
     });
   });
 
