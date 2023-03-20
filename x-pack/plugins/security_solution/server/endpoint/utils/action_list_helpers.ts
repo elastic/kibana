@@ -37,6 +37,7 @@ export const getActions = async ({
   userIds,
   unExpiredOnly,
   withRuleActions,
+  alertIds,
 }: Omit<GetActionDetailsListParam, 'logger'>): Promise<{
   actionIds: string[];
   actionRequests: TransportResult<estypes.SearchResponse<LogsEndpointAction>, unknown>;
@@ -49,6 +50,10 @@ export const getActions = async ({
         'data.command': commands,
       },
     });
+  }
+
+  if (alertIds?.length) {
+    additionalFilters.push({ terms: { 'EndpointActions.data.alert_ids': alertIds } });
   }
 
   if (elasticAgentIds?.length) {

@@ -37,7 +37,9 @@ interface OptionalFilterParams {
   unExpiredOnly?: boolean;
   /** list of action Ids that should have outputs */
   withOutputs?: string[];
+  /** Include automated response actions */
   withRuleActions?: boolean;
+  alertIds?: string[];
 }
 
 /**
@@ -120,6 +122,7 @@ export const getActionList = async ({
   unExpiredOnly = false,
   withOutputs,
   withRuleActions,
+  alertIds,
 }: OptionalFilterParams & {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -144,6 +147,7 @@ export const getActionList = async ({
     unExpiredOnly,
     withOutputs,
     withRuleActions,
+    alertIds,
   });
 
   return {
@@ -180,6 +184,7 @@ const getActionDetailsList = async ({
   unExpiredOnly,
   withOutputs,
   withRuleActions,
+  alertIds,
 }: GetActionDetailsListParam & { metadataService: EndpointMetadataService }): Promise<{
   actionDetails: ActionListApiResponse['data'];
   totalRecords: number;
@@ -202,6 +207,7 @@ const getActionDetailsList = async ({
       userIds,
       unExpiredOnly,
       withRuleActions,
+      alertIds,
     });
     actionRequests = _actionRequests;
     actionReqIds = actionIds;
