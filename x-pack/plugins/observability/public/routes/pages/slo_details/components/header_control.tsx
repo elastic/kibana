@@ -41,6 +41,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
       data-test-subj="sloDetailsHeaderControlPopover"
       button={
         <EuiButton
+          data-test-subj="o11yHeaderControlActionsButton"
           fill
           iconSide="right"
           iconType="arrowDown"

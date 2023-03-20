@@ -96,6 +96,7 @@ export const getRenderCellValue = ({
 
         return (
           <EuiLink
+            data-test-subj="o11yGetRenderCellValueLink"
             css={{ display: 'contents' }}
             onClick={() => setFlyoutAlert && setFlyoutAlert(alert)}
           >
