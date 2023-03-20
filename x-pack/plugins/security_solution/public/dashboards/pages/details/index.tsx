@@ -18,6 +18,10 @@ import { useCapabilities } from '../../../common/lib/kibana';
 import { DashboardViewPromptState } from '../../hooks/use_dashboard_view_prompt_state';
 import { DashboardRenderer } from '../../components/dashboard_renderer';
 import { StatusPropmpt } from '../../components/status_prompt';
+import { SiemSearchBar } from '../../../common/components/search_bar';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
+import { FiltersGlobal } from '../../../common/components/filters_global';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 
 type DashboardDetails = Record<string, string | undefined>;
 
@@ -36,14 +40,19 @@ const DashboardViewComponent: React.FC = () => {
   }, []);
   return (
     <>
-      <DashboardRenderer
-        from={from}
-        to={to}
-        canReadDashboard={canReadDashboard}
-        onDashboardContainerLoaded={onDashboardContainerLoaded}
-      />
-      <StatusPropmpt currentState={currentState} />
-      <SpyRoute pageName={SecurityPageName.dashboardView} state={dashboardDetails} />
+      <FiltersGlobal>
+        <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
+      </FiltersGlobal>
+      <SecuritySolutionPageWrapper>
+        <DashboardRenderer
+          from={from}
+          to={to}
+          canReadDashboard={canReadDashboard}
+          onDashboardContainerLoaded={onDashboardContainerLoaded}
+        />
+        <StatusPropmpt currentState={currentState} />
+        <SpyRoute pageName={SecurityPageName.dashboardView} state={dashboardDetails} />
+      </SecuritySolutionPageWrapper>
     </>
   );
 };
