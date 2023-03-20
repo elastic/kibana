@@ -43,9 +43,6 @@ import {
 } from './helpers';
 import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { UsersTableType } from '../../../explore/users/store/model';
-import { METRIC_TYPE, track } from '../../lib/telemetry';
-import { useRouteSpy } from '../../utils/route/use_route_spy';
-import { LINKS_TELEMETRY_EVENTS } from './telemetry';
 
 export { LinkButton, LinkAnchor } from './helpers';
 
@@ -68,10 +65,12 @@ const UserDetailsLinkComponent: React.FC<{
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void;
 }> = ({ children, Component, userName, isButton, onClick: onClickParam, title, userTab }) => {
-  const [{ pageName }] = useRouteSpy();
   const encodedUserName = encodeURIComponent(userName);
   const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    telemetry,
+  } = useKibana().services;
   const goToUsersDetails = useCallback(
     (ev) => {
       ev.preventDefault();
@@ -97,15 +96,11 @@ const UserDetailsLinkComponent: React.FC<{
 
   const onClick = useCallback(
     (e: SyntheticEvent) => {
-      track(
-        METRIC_TYPE.CLICK,
-        LINKS_TELEMETRY_EVENTS.ENTITY_DETAILS_CLICKED_EVENT(pageName, 'user')
-      );
-
+      telemetry.reportEntityDetailsClicked({ entity: 'user' });
       const callback = onClickParam ?? goToUsersDetails;
       callback(e);
     },
-    [goToUsersDetails, onClickParam, pageName]
+    [goToUsersDetails, onClickParam, telemetry]
   );
 
   return isButton ? (
@@ -137,9 +132,11 @@ const HostDetailsLinkComponent: React.FC<{
   hostTab?: HostsTableType;
   title?: string;
 }> = ({ children, Component, hostName, isButton, onClick: onClickParam, title, hostTab }) => {
-  const [{ pageName }] = useRouteSpy();
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    telemetry,
+  } = useKibana().services;
 
   const encodedHostName = encodeURIComponent(hostName);
 
@@ -167,15 +164,12 @@ const HostDetailsLinkComponent: React.FC<{
 
   const onClick = useCallback(
     (e: SyntheticEvent) => {
-      track(
-        METRIC_TYPE.CLICK,
-        LINKS_TELEMETRY_EVENTS.ENTITY_DETAILS_CLICKED_EVENT(pageName, 'host')
-      );
+      telemetry.reportEntityDetailsClicked({ entity: 'host' });
 
       const callback = onClickParam ?? goToHostDetails;
       callback(e);
     },
-    [goToHostDetails, onClickParam, pageName]
+    [goToHostDetails, onClickParam, telemetry]
   );
 
   return isButton ? (

@@ -19,10 +19,8 @@ import type { RiskScoreEntity, RiskSeverity } from '../../../../../common/search
 import { SEVERITY_UI_SORT_ORDER } from '../../../../../common/search_strategy';
 import type { SeverityCount } from './types';
 import { RiskScore } from './common';
-import { METRIC_TYPE, track } from '../../../../common/lib/telemetry';
-import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { ENTITY_RISK_CLASSIFICATION } from '../translations';
-import { ENTITY_RISK_FILTERED } from './telemetry';
+import { useKibana } from '../../../../common/lib/kibana';
 
 interface SeverityItems {
   risk: RiskSeverity;
@@ -35,7 +33,7 @@ export const SeverityFilterGroup: React.FC<{
   onSelect: (newSelection: RiskSeverity[]) => void;
   riskEntity: RiskScoreEntity;
 }> = ({ severityCount, selectedSeverities, onSelect, riskEntity }) => {
-  const [{ pageName }] = useRouteSpy();
+  const { telemetry } = useKibana().services;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(() => {
@@ -69,12 +67,12 @@ export const SeverityFilterGroup: React.FC<{
         : currentSelection.filter((s) => s !== selectedSeverity);
 
       if (isAddingSeverity) {
-        track(METRIC_TYPE.COUNT, ENTITY_RISK_FILTERED(pageName, riskEntity, selectedSeverity));
+        telemetry.reportEntityRiskFiltered({ entity: riskEntity, selectedSeverity });
       }
 
       onSelect(newSelection);
     },
-    [selectedSeverities, pageName, onSelect, riskEntity]
+    [selectedSeverities, onSelect, telemetry, riskEntity]
   );
 
   const totalActiveItem = useMemo(
