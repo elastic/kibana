@@ -29,6 +29,7 @@ import type {
   EndpointActionDataParameterTypes,
   ResponseActionParametersWithPidOrEntityId,
   ResponseActionsExecuteParameters,
+  ActionDetails,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -189,7 +190,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
 
     const casesClient = await endpointContext.service.getCasesClient(req);
-    let action;
+    let action: ActionDetails;
 
     try {
       action = await endpointContext.service
@@ -202,8 +203,12 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       });
     }
 
+    const { action: actionId, ...data } = action;
     return res.ok({
-      body: action,
+      body: {
+        action: actionId,
+        data,
+      },
     });
   };
 }

@@ -15,17 +15,17 @@ import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { AuthenticationServiceStart } from '@kbn/security-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { ResponseActionBodySchema } from '../../../../common/endpoint/schema/actions';
-import { APP_ID } from '../../../../common/constants';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
-import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../common/endpoint/service/response_actions/constants';
+import type { ResponseActionBodySchema } from '../../../../../common/endpoint/schema/actions';
+import { APP_ID } from '../../../../../common/constants';
+import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
+import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_ACTIONS_DS,
   ENDPOINT_ACTIONS_INDEX,
   ENDPOINT_ACTION_RESPONSES_DS,
   failedFleetActionErrorCode,
-} from '../../../../common/endpoint/constants';
-import { doLogsEndpointActionDsExists } from '../../utils';
+} from '../../../../../common/endpoint/constants';
+import { doLogsEndpointActionDsExists } from '../../../utils';
 import type {
   ActionDetails,
   EndpointAction,
@@ -33,9 +33,9 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionsExecuteParameters,
-} from '../../../../common/endpoint/types';
-import type { EndpointAppContext } from '../../types';
-import type { FeatureKeys } from '../feature_usage';
+} from '../../../../../common/endpoint/types';
+import type { EndpointAppContext } from '../../../types';
+import type { FeatureKeys } from '../../feature_usage';
 import { getActionDetailsById } from '..';
 
 const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKeys>([
@@ -59,7 +59,7 @@ export class ActionCreateService {
       user?: ReturnType<AuthenticationServiceStart['getCurrentUser']>;
     },
     casesClient?: CasesClient
-  ): Promise<{ data: ActionDetails }> {
+  ): Promise<ActionDetails> {
     const featureKey = commandToFeatureKeyMap.get(payload.command) as FeatureKeys;
     if (featureKey) {
       this.endpointContext.service.getFeatureUsageService().notifyUsage(featureKey);
@@ -258,7 +258,7 @@ export class ActionCreateService {
 
     return {
       ...body,
-      data,
+      ...data,
     };
   }
 }

@@ -67,7 +67,7 @@ import { registerResponseActionRoutes } from './response_actions';
 import * as ActionDetailsService from '../../services/actions/action_details_by_id';
 import { CaseStatuses } from '@kbn/cases-components';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
-import { ActionCreateService } from '../../services';
+import { ActionCreateService } from '../../services/actions';
 
 interface CallRouteInterface {
   body?: ResponseActionRequestBody;

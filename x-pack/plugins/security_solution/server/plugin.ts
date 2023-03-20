@@ -101,7 +101,7 @@ import type {
 } from './plugin_contract';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
-import { ActionCreateService } from './endpoint/services/action_create';
+import { ActionCreateService } from './endpoint/services/actions';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
