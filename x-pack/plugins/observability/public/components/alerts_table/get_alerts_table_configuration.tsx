@@ -53,7 +53,6 @@ export const getAlertsTableConfiguration = (
             []
           )}
           ecsData={{ _id: alert._id, _index: alert._index }}
-          eventId={alert._id}
           id={id}
           observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
           setFlyoutAlert={setFlyoutAlert}

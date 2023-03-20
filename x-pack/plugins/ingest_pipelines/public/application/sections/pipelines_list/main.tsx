@@ -83,7 +83,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     return (
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
         <EuiEmptyPrompt
-          iconType="alert"
+          iconType="warning"
           title={
             <h2 data-test-subj="pipelineLoadError">
               <FormattedMessage

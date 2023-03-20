@@ -22,6 +22,54 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-server",
+        "id": "def-common.ElasticsearchApiToRedactInLogs",
+        "type": "Interface",
+        "tags": [],
+        "label": "ElasticsearchApiToRedactInLogs",
+        "description": [
+          "\nDefinition of an API that should redact the requested body in the logs"
+        ],
+        "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-common.ElasticsearchApiToRedactInLogs.path",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "path",
+            "description": [
+              "\nThe ES path.\n- If specified as a string, it'll be checked as `contains`.\n- If specified as a RegExp, it'll be tested against the path."
+            ],
+            "signature": [
+              "string | RegExp"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-common.ElasticsearchApiToRedactInLogs.method",
+            "type": "string",
+            "tags": [],
+            "label": "method",
+            "description": [
+              "\nHTTP method.\nIf not provided, the path will be checked for all methods."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-elasticsearch-server",
         "id": "def-common.ElasticsearchClientConfig",
         "type": "Interface",
         "tags": [],
@@ -272,6 +320,27 @@
                 "text": "ElasticsearchClientSslConfig"
               },
               " | undefined"
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-common.ElasticsearchClientConfig.apisToRedactInLogs",
+            "type": "Array",
+            "tags": [],
+            "label": "apisToRedactInLogs",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchApiToRedactInLogs",
+                "text": "ElasticsearchApiToRedactInLogs"
+              },
+              "[] | undefined"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/client/client_config.ts",
             "deprecated": false,
@@ -2549,6 +2618,29 @@
                 "section": "def-common.ElasticsearchSslConfig",
                 "text": "ElasticsearchSslConfig"
               }
+            ],
+            "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-common.IElasticsearchConfig.apisToRedactInLogs",
+            "type": "Array",
+            "tags": [],
+            "label": "apisToRedactInLogs",
+            "description": [
+              "\nExtends the list of APIs that should be redacted in logs."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchApiToRedactInLogs",
+                "text": "ElasticsearchApiToRedactInLogs"
+              },
+              "[]"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-server/src/elasticsearch_config.ts",
             "deprecated": false,
