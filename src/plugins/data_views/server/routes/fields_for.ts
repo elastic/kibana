@@ -16,6 +16,7 @@ import {
 } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '../fetcher';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
+import { DataViewMissingIndices } from '../../common';
 
 const parseMetaFields = (metaFields: string | string[]) => {
   let parsedFields: string[] = [];
@@ -90,6 +91,10 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
       indexFilter,
       fields: request.query.fields,
     });
+
+    if (indices.length === 0) {
+      throw new DataViewMissingIndices(pattern);
+    }
 
     return response.ok({
       body: { fields, indices },
