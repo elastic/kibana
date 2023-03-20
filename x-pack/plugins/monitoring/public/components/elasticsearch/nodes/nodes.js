@@ -201,15 +201,16 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
         );
       }
 
-      if (roles.length > 5) {
-        const head = roles.slice(0, 5);
-        const tail = roles.slice(5, roles.length);
+      const head = roles.slice(0, 5);
+      const tail = roles.slice(5);
+      const hasMoreRoles = tail.length > 0;
 
-        return (
-          <EuiBadgeGroup gutterSize="xs">
-            {head.map((role) => (
-              <EuiBadge color={role === 'master' ? 'hollow' : 'default'}>{role}</EuiBadge>
-            ))}
+      return (
+        <EuiBadgeGroup gutterSize="xs">
+          {head.map((role) => (
+            <EuiBadge color={role === 'master' ? 'hollow' : 'default'}>{role}</EuiBadge>
+          ))}
+          {hasMoreRoles && (
             <EuiToolTip
               anchorProps={{
                 style: { lineHeight: '1' },
@@ -219,15 +220,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
             >
               <EuiBadge>+{tail.length}</EuiBadge>
             </EuiToolTip>
-          </EuiBadgeGroup>
-        );
-      }
-
-      return (
-        <EuiBadgeGroup gutterSize="xs">
-          {roles.map((role) => (
-            <EuiBadge color={role === 'master' ? 'hollow' : 'default'}>{role}</EuiBadge>
-          ))}
+          )}
         </EuiBadgeGroup>
       );
     },

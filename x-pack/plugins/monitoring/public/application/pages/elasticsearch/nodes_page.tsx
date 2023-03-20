@@ -29,6 +29,35 @@ import {
   RULE_MISSING_MONITORING_DATA,
 } from '../../../../common/constants';
 
+type ElasticsearchNodeRole =
+  | 'master'
+  | 'voting_only'
+  | 'data'
+  | 'data_content'
+  | 'data_hot'
+  | 'data_warm'
+  | 'data_cold'
+  | 'data_frozen'
+  | 'ingest'
+  | 'transform'
+  | 'ml'
+  | 'remote_cluster_client';
+
+const rolesByImportance: ElasticsearchNodeRole[] = [
+  'master',
+  'voting_only',
+  'data',
+  'data_content',
+  'data_hot',
+  'data_warm',
+  'data_cold',
+  'data_frozen',
+  'ingest',
+  'transform',
+  'ml',
+  'remote_cluster_client',
+];
+
 export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
   const { showCgroupMetricsElasticsearch } = useContext(ExternalConfigContext);
@@ -163,28 +192,9 @@ function sortNodeRoles(roles: string[]): string[] | undefined {
   }
 
   if (roles.length === 0) {
-    return roles;
+    return [];
   }
 
-  const roleMap: { [key: string]: string } = {};
-  roles.forEach((role) => {
-    roleMap[role] = role;
-  });
-
-  const sortedRoles = [
-    roleMap.master,
-    roleMap.voting_only,
-    roleMap.data,
-    roleMap.data_content,
-    roleMap.data_hot,
-    roleMap.data_warm,
-    roleMap.data_cold,
-    roleMap.data_frozen,
-    roleMap.ingest,
-    roleMap.transform,
-    roleMap.ml,
-    roleMap.remote_cluster_client,
-  ];
-
-  return sortedRoles.filter((role) => role);
+  const rolesAsSet = new Set(roles);
+  return rolesByImportance.filter((role) => rolesAsSet.has(role));
 }
