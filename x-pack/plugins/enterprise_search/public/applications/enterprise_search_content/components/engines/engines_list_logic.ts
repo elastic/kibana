@@ -28,7 +28,7 @@ import {
   FetchEnginesAPILogic,
 } from '../../api/engines/fetch_engines_api_logic';
 
-import { DEFAULT_META, updateMetaPageIndex } from './types';
+import { DEFAULT_META, updateMetaPageIndex, updateMetaState } from './types';
 
 interface EuiBasicTableOnChange {
   page: { index: number };
@@ -67,7 +67,8 @@ interface EngineListValues {
   isFirstRequest: boolean;
   isLoading: boolean;
   meta: Page;
-  parameters: { meta: Page; searchQuery?: string }; // Added this variable to store to the search Query value as well
+  parameters: { meta: Page; searchQuery?: string; count: number }; // Added this variable to store to the search Query value as well
+  total: number;
   results: EnterpriseSearchEngine[]; // stores engine list value from data
   searchQuery: string;
   status: typeof FetchEnginesAPILogic.values.status;
@@ -134,8 +135,9 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     parameters: [
       { meta: DEFAULT_META },
       {
-        apiSuccess: (_, { meta }) => ({
-          meta,
+        apiSuccess: (state, { count }) => ({
+          ...state,
+          meta: updateMetaState(state.meta, count),
         }),
         onPaginate: (state, { pageNumber }) => ({
           ...state,
@@ -167,11 +169,15 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
         [Status.LOADING, Status.IDLE].includes(status) && isFirstRequest,
     ],
     results: [() => [selectors.data], (data) => data?.results ?? []],
-
+    total: [() => [selectors.data], (data) => data?.counts ?? 0],
     hasNoEngines: [
-      () => [selectors.data, selectors.results],
-      (data: EngineListValues['data'], results: EngineListValues['results']) =>
-        (data?.meta?.from === 0 && results.length === 0 && !data?.params?.q) ?? false,
+      () => [selectors.data, selectors.results, selectors.meta],
+      (
+        data: EngineListValues['data'],
+        results: EngineListValues['results'],
+        meta: EngineListValues['meta']
+      ) => (meta?.from === 0 && results.length === 0 && !data?.params?.q) ?? false,
+      // (data?.meta?.from === 0 && results.length === 0 && !data?.params?.q) ?? false,
     ],
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
   }),

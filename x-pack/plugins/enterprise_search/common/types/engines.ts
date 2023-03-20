@@ -8,6 +8,7 @@
 import { HealthStatus, FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export interface EnterpriseSearchEnginesResponse {
+  count: number;
   meta: {
     from: number;
     size: number;
@@ -18,10 +19,10 @@ export interface EnterpriseSearchEnginesResponse {
 }
 
 export interface EnterpriseSearchEngine {
-  created: string;
+  // created: string;
   indices: string[];
   name: string;
-  updated: string;
+  // updated: string;
 }
 
 export interface EnterpriseSearchEngineDetails {

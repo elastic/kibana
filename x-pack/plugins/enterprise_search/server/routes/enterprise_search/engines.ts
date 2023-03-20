@@ -43,7 +43,7 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
           path: `/_application/search_application`,
         }
       );
-      return response.ok({ body: { engines } });
+      return response.ok({ body: engines });
     })
   );
 
@@ -62,7 +62,7 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
         method: 'GET',
         path: `/_application/search_application/${request.params.engine_name}`,
       });
-      return response.ok({ body: { engines } });
+      return response.ok({ body: engines });
     })
   );
 
@@ -87,7 +87,7 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
           path: `/_application/search_application/${request.params.engine_name}`,
           body: {},
         });
-      return response.ok({ body: { engines } });
+      return response.ok({ body: engines });
     })
   );
 
@@ -106,7 +106,7 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
         method: 'DELETE',
         path: `/${request.params.engine_name}`,
       });
-      return response.ok({ body: { engines } });
+      return response.ok({ body: engines });
     })
   );
 
@@ -129,7 +129,7 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
         path: `/${request.params.engine_name}/_search/`,
         body: {},
       });
-      return response.ok({ body: { engines } });
+      return response.ok({ body: engines });
     })
   );
 

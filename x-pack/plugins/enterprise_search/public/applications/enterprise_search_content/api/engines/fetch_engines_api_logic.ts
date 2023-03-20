@@ -24,13 +24,14 @@ export const fetchEngines = async ({
   const query = {
     from: meta.from,
     size: meta.size,
-    ...(searchQuery && searchQuery.trim() !== '' ? { q: searchQuery } : {}),
+    ...(searchQuery && searchQuery.trim() !== '' ? { q: searchQuery + '*' } : {}),
   };
-
+  console.log('query', query);
   const response = await HttpLogic.values.http.get<EnterpriseSearchEnginesResponse>(route, {
     query,
   });
-
+  // eslint-disable-next-line no-console
+  console.log(response);
   return { ...response, params: query };
 };
 

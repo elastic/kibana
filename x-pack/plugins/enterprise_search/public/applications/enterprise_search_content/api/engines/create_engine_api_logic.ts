@@ -22,9 +22,9 @@ export const createEngine = async ({
   engineName,
   indices,
 }: CreateEngineApiParams): Promise<CreateEngineApiResponse> => {
-  const route = `/internal/enterprise_search/engines`;
+  const route = `/internal/enterprise_search/engines/` + `${engineName}`;
 
-  return await HttpLogic.values.http.post<EnterpriseSearchEngine>(route, {
+  return await HttpLogic.values.http.put<EnterpriseSearchEngine>(route, {
     body: JSON.stringify({ indices, name: engineName }),
   });
 };
