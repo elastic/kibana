@@ -36,7 +36,6 @@ jest.mock('../../hooks/response_actions/use_get_endpoint_action_list', () => {
   const original = jest.requireActual('../../hooks/response_actions/use_get_endpoint_action_list');
   return {
     ...original,
-    // Make hook a mocked function
     useGetEndpointActionList: jest.fn(original.useGetEndpointActionList),
   };
 });
@@ -180,8 +179,7 @@ describe('Response actions history', () => {
 
       allFilterOptions.forEach((option, i) => {
         if (selectedOptionIndexes.includes(i)) {
-          option.style.pointerEvents = 'all';
-          userEvent.click(option);
+          userEvent.click(option, undefined, { skipPointerEventsCheck: true });
         }
       });
     }
@@ -1110,7 +1108,7 @@ describe('Response actions history', () => {
       expect(popoverButton.textContent).toEqual('Hosts4');
     });
 
-    it('should call the API with the selected host ids', async () => {
+    it('should call the API with the selected host ids', () => {
       render({ showHostNames: true });
       filterByHosts([0, 2, 4, 6]);
 
