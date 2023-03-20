@@ -77,7 +77,53 @@ export { useEsSearch, createEsParams } from './hooks/use_es_search';
 import { TopAlert } from './typings/alerts';
 import { AlertSummary } from './routes/pages/alert_details/components/alert_summary';
 import { AlertSummaryField } from './routes/pages/alert_details/components/alert_summary';
-export type { TopAlert, AlertSummary, AlertSummaryField };
+import {
+  ApmFetchDataResponse,
+  APMHasDataResponse,
+  Coordinates,
+  FetchDataParams,
+  FetchDataResponse,
+  HasDataParams,
+  HasDataResponse,
+  InfraLogsHasDataResponse,
+  InfraMetricsHasDataResponse,
+  LogsFetchDataResponse,
+  MetricsFetchDataResponse,
+  MetricsFetchDataSeries,
+  ObservabilityFetchDataResponse,
+  ObservabilityHasDataResponse,
+  Series,
+  Stat,
+  SyntheticsHasDataResponse,
+  UptimeFetchDataResponse,
+  UXHasDataResponse,
+  UxFetchDataResponse,
+} from './routes/pages/overview/helpers/data_handler';
+export type {
+  TopAlert,
+  AlertSummary,
+  AlertSummaryField,
+  ApmFetchDataResponse,
+  APMHasDataResponse,
+  Coordinates,
+  FetchDataParams,
+  FetchDataResponse,
+  HasDataParams,
+  HasDataResponse,
+  InfraLogsHasDataResponse,
+  InfraMetricsHasDataResponse,
+  LogsFetchDataResponse,
+  MetricsFetchDataResponse,
+  MetricsFetchDataSeries,
+  ObservabilityFetchDataResponse,
+  ObservabilityHasDataResponse,
+  Series,
+  Stat,
+  SyntheticsHasDataResponse,
+  UptimeFetchDataResponse,
+  UXHasDataResponse,
+  UxFetchDataResponse,
+};
 
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useBreadcrumbs } from './hooks/use_breadcrumbs';
