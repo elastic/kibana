@@ -72,7 +72,7 @@ const LoadingPlaceholder = () => {
 };
 
 export const MetadataTab = {
-  id: 'properties',
+  id: 'metadata',
   name: i18n.translate('xpack.infra.nodeDetails.tabs.metadata.title', {
     defaultMessage: 'Metadata',
   }),
