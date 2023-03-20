@@ -8,6 +8,7 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/core-http-request-handler-context-server",
+    "@kbn/object-versioning",
   ],
   "exclude": [
     "target/**/*",

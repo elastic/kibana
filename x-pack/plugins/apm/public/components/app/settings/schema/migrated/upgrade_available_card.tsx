@@ -22,7 +22,7 @@ export function UpgradeAvailableCard({
 
   return (
     <EuiCard
-      icon={<EuiIcon size="xxl" type="alert" color="warning" />}
+      icon={<EuiIcon size="xxl" type="warning" color="warning" />}
       title={i18n.translate(
         'xpack.apm.settings.schema.upgradeAvailable.title',
         {
