@@ -24,6 +24,8 @@ import type {
 import type { NewPackagePolicy, UpdatePackagePolicy, PackagePolicy } from '../types';
 import type { ExternalCallback } from '..';
 
+import type { APIKey } from './epm/elasticsearch/transform/install';
+
 import type { NewPackagePolicyWithId } from './package_policy';
 
 export interface PackagePolicyService {
@@ -40,6 +42,7 @@ export interface PackagePolicyClient {
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
+      apiKeyWithCurrentUserPermission?: APIKey;
       bumpRevision?: boolean;
       force?: boolean;
       skipEnsureInstalled?: boolean;

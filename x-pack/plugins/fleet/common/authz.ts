@@ -11,6 +11,7 @@ import { TRANSFORM_PLUGIN_ID } from './constants/plugin';
 
 import { ENDPOINT_PRIVILEGES } from './constants';
 
+export type TransformPrivilege = 'createTransform' | 'startOrStopTransform' | 'viewTransform';
 export interface FleetAuthz {
   fleet: {
     all: boolean;
@@ -159,23 +160,33 @@ export function calculatePackagePrivilegesFromKibanaPrivileges(
     },
     {}
   );
-  //
-  const transformActions = {
-    createTransform: getAuthorizationFromPrivileges(
-      kibanaPrivileges,
-      `${TRANSFORM_PLUGIN_ID}0`,
-      `admin`
-    ),
-    startTransform: getAuthorizationFromPrivileges(
-      kibanaPrivileges,
-      `${TRANSFORM_PLUGIN_ID}-`,
-      'all'
-    ),
-    viewTransform: getAuthorizationFromPrivileges(
-      kibanaPrivileges,
-      `${TRANSFORM_PLUGIN_ID}-`,
-      `read`
-    ),
+
+  const transformActions: {
+    [key in TransformPrivilege]: {
+      executePackageAction: boolean;
+    };
+  } = {
+    createTransform: {
+      executePackageAction: getAuthorizationFromPrivileges(
+        kibanaPrivileges,
+        `${TRANSFORM_PLUGIN_ID}0`,
+        `admin`
+      ),
+    },
+    startOrStopTransform: {
+      executePackageAction: getAuthorizationFromPrivileges(
+        kibanaPrivileges,
+        `${TRANSFORM_PLUGIN_ID}-`,
+        'all'
+      ),
+    },
+    viewTransform: {
+      executePackageAction: getAuthorizationFromPrivileges(
+        kibanaPrivileges,
+        `${TRANSFORM_PLUGIN_ID}-`,
+        `read`
+      ),
+    },
   };
 
   return {

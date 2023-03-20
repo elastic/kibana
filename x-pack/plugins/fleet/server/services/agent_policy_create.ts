@@ -17,6 +17,8 @@ import {
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
+import type { APIKey } from './epm/elasticsearch/transform/install';
+
 import { agentPolicyService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
@@ -51,7 +53,7 @@ async function createPackagePolicy(
   options: {
     spaceId: string;
     user: AuthenticatedUser | undefined;
-    apiKeyWithCurrentUserPermission: object;
+    apiKeyWithCurrentUserPermission?: APIKey;
   }
 ) {
   const newPackagePolicy = await packagePolicyService

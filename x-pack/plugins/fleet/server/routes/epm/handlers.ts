@@ -344,18 +344,6 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const spaceId = fleetContext.spaceId;
 
-  const apiKeyWithCurrentUserPermission = await appContextService
-    .getSecurity()
-    .authc.apiKeys.grantAsInternalUser(request, {
-      name: `auto-generated-transform-api-key`,
-      role_descriptors: {},
-    });
-
-  console.log(
-    '\nbulkInstallPackagesFromRegistryHandler request',
-    JSON.stringify(apiKeyWithCurrentUserPermission)
-  );
-
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
     esClient,
@@ -363,7 +351,6 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     spaceId,
     prerelease: request.query.prerelease,
     force: request.body.force,
-    apiKeyWithCurrentUserPermission,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
@@ -391,11 +378,6 @@ export const installPackageByUploadHandler: FleetRequestHandler<
       name: `auto-generated-transform-api-key`,
       role_descriptors: {},
     });
-
-  console.log(
-    '\ninstallPackageByUploadHandler request',
-    JSON.stringify(apiKeyWithCurrentUserPermission)
-  );
 
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
@@ -432,8 +414,6 @@ export const deletePackageHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof DeletePackageRequestSchema.body>
 > = async (context, request, response) => {
-  console.log('\ndeletePackageHandler request', JSON.stringify(request.headers));
-
   try {
     const { pkgName, pkgVersion } = request.params;
     const coreContext = await context.core;

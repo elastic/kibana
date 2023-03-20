@@ -32,9 +32,7 @@ export async function bulkInstallPackages({
   spaceId,
   force,
   prerelease,
-  apiKeyWithCurrentUserPermission,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
-  console.log('bulkInstallPackages', apiKeyWithCurrentUserPermission);
   const logger = appContextService.getLogger();
 
   const packagesResults = await Promise.allSettled(
@@ -88,10 +86,6 @@ export async function bulkInstallPackages({
 
       const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
 
-      console.log(
-        'bulkInstallPackages apiKeyWithCurrentUserPermission',
-        apiKeyWithCurrentUserPermission
-      );
       const installResult = await installPackage({
         savedObjectsClient,
         esClient,
@@ -100,7 +94,6 @@ export async function bulkInstallPackages({
         spaceId,
         force,
         prerelease,
-        apiKeyWithCurrentUserPermission,
       });
 
       if (installResult.error) {

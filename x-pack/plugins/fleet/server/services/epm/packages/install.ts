@@ -23,6 +23,8 @@ import pRetry from 'p-retry';
 
 import { uniqBy } from 'lodash';
 
+import type { APIKey } from '../elasticsearch/transform/install';
+
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
@@ -116,7 +118,7 @@ export async function ensureInstalledPackage(options: {
   pkgVersion?: string;
   spaceId?: string;
   force?: boolean;
-  apiKeyWithCurrentUserPermission;
+  apiKeyWithCurrentUserPermission?: APIKey;
 }): Promise<Installation> {
   const {
     savedObjectsClient,
@@ -142,7 +144,7 @@ export async function ensureInstalledPackage(options: {
     return installedPackageResult.package;
   }
   const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
-  console.log('--@@ensureInstalledPackage', apiKeyWithCurrentUserPermission);
+  console.log('--@@DO NOT REMOVE ensureInstalledPackage', apiKeyWithCurrentUserPermission);
   const installResult = await installPackage({
     installSource: 'registry',
     savedObjectsClient,
@@ -225,7 +227,6 @@ export async function handleInstallPackageFailure({
       }
       const prevVersion = `${pkgName}-${installedPkg.attributes.version}`;
       logger.error(`rolling back to ${prevVersion} after error installing ${pkgkey}`);
-      console.log('--@@handleInstallPackageFailure');
       await installPackage({
         installSource: 'registry',
         savedObjectsClient,
@@ -610,7 +611,7 @@ async function installPackageByUpload({
 export type InstallPackageParams = {
   spaceId: string;
   neverIgnoreVerificationError?: boolean;
-  apiKeyWithCurrentUserPermission: object;
+  apiKeyWithCurrentUserPermission?: object;
 } & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
@@ -625,7 +626,10 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
   const logger = appContextService.getLogger();
   const { savedObjectsClient, esClient } = args;
   const apiKeyWithCurrentUserPermission = args.apiKeyWithCurrentUserPermission;
-  console.log('installPackage apiKeyWithCurrentUserPermission ', apiKeyWithCurrentUserPermission);
+  console.log(
+    '--@@DO NOT REMOVE installPackage apiKeyWithCurrentUserPermission ',
+    apiKeyWithCurrentUserPermission
+  );
 
   const bundledPackages = await getBundledPackages();
 
@@ -932,7 +936,6 @@ export async function ensurePackagesCompletedInstall(
       const pkgkey = `${pkg.attributes.name}-${pkg.attributes.install_version}`;
       // reinstall package
       if (elapsedTime > MAX_TIME_COMPLETE_INSTALL) {
-        console.log('--@@ensurePackagesCompletedInstall');
         acc.push(
           installPackage({
             installSource: 'registry',

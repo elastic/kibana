@@ -84,6 +84,8 @@ import type {
 } from '../types';
 import type { ExternalCallback } from '..';
 
+import type { APIKey } from './epm/elasticsearch/transform/install';
+
 import type { FleetAuthzRouteConfig } from './security';
 
 import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
@@ -134,6 +136,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
+      apiKeyWithCurrentUserPermission?: APIKey;
     },
     context?: RequestHandlerContext,
     request?: KibanaRequest
@@ -188,7 +191,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // Make sure the associated package is installed
     if (enrichedPackagePolicy.package?.name) {
-      console.log('--@@policy.create', options.apiKeyWithCurrentUserPermission);
+      console.log('--@@DO NOT REMOVE policy.create', options.apiKeyWithCurrentUserPermission);
       if (!options?.skipEnsureInstalled) {
         await ensureInstalledPackage({
           esClient,
