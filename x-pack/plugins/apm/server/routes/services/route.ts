@@ -76,17 +76,17 @@ const servicesRoute = createApmServerRoute({
     items: import('./../../../common/utils/join_by_key/index').JoinedReturnType<
       | {
           serviceName: string;
-          transactionType: string;
+          transactionType?: string;
           environments: string[];
-          agentName: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
-          latency: number | null;
-          transactionErrorRate: number;
-          throughput: number;
+          agentName?: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
+          latency?: number | null;
+          transactionErrorRate?: number;
+          throughput?: number;
         }
       | {
           serviceName: string;
           environments: string[];
-          agentName: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
+          agentName?: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
         }
       | {
           serviceName: string;
@@ -98,16 +98,16 @@ const servicesRoute = createApmServerRoute({
         },
       {
         serviceName: string;
-        transactionType: string;
+        transactionType?: string;
         environments: string[];
-        agentName: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
-        latency: number | null;
-        transactionErrorRate: number;
-        throughput: number;
+        agentName?: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
+        latency?: number | null;
+        transactionErrorRate?: number;
+        throughput?: number;
       } & {
         serviceName: string;
         environments: string[];
-        agentName: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
+        agentName?: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
       } & {
         serviceName: string;
         healthStatus: import('./../../../common/service_health_status').ServiceHealthStatus;
@@ -192,30 +192,30 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
   ): Promise<{
     currentPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
       serviceName: string;
-      latency: Array<{
+      latency?: Array<{
         x: number;
         y: number | null;
       }>;
-      transactionErrorRate: Array<{
+      transactionErrorRate?: Array<{
         x: number;
         y: number;
       }>;
-      throughput: Array<{
+      throughput?: Array<{
         x: number;
         y: number;
       }>;
     }>;
     previousPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
       serviceName: string;
-      latency: Array<{
+      latency?: Array<{
         x: number;
         y: number | null;
       }>;
-      transactionErrorRate: Array<{
+      transactionErrorRate?: Array<{
         x: number;
         y: number;
       }>;
-      throughput: Array<{
+      throughput?: Array<{
         x: number;
         y: number;
       }>;
