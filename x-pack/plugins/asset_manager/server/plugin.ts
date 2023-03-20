@@ -17,7 +17,7 @@ import {
 } from '@kbn/core/server';
 import { upsertTemplate } from './lib/manage_index_templates';
 import { setupRoutes } from './routes';
-import { assetsIndexTemplateConfig } from './templates/assets-template';
+import { assetsIndexTemplateConfig } from './templates/assets_template';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
 export interface AssetManagerConfig {
