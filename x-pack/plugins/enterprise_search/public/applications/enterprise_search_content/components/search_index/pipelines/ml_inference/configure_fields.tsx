@@ -35,13 +35,13 @@ import { TargetFieldHelpText } from './target_field_help_text';
 
 const NoSourceFieldsError: React.FC = () => (
   <FormattedMessage
-    id="xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.sourceField.error"
+    id="xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceField.error"
     defaultMessage="Selecting a source field is required for pipeline configuration, but this index does not have a field mapping. {learnMore}"
     values={{
       learnMore: (
         <EuiLink href={docLinks.elasticsearchMapping} target="_blank" color="danger">
           {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.sourceField.error.docLink',
+            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceField.error.docLink',
             { defaultMessage: 'Learn more about field mapping' }
           )}
         </EuiLink>
@@ -72,8 +72,8 @@ export const ConfigureFields: React.FC = () => {
       <EuiTitle size="xs">
         <h4>
           {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.title',
-            { defaultMessage: 'Create or select pipeline' }
+            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.title',
+            { defaultMessage: 'Select field mappings' }
           )}
         </h4>
       </EuiTitle>
@@ -81,21 +81,13 @@ export const ConfigureFields: React.FC = () => {
       <EuiText color="subdued">
         <p>
           {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.description',
+            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.description',
             {
               defaultMessage:
-                "Once created, this pipeline will be added as a processor on your Enterprise Search Ingestion Pipeline. You'll also be able to use this pipeline elsewhere in your Elastic deployment.",
+                "Choose fields to be enhanced from your existing documents or manually enter in fields you anticipate using.",
             }
           )}
         </p>
-        <EuiLink href={docLinks.deployTrainedModels} target="_blank">
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.docsLink',
-            {
-              defaultMessage: 'Learn more about using ML models in Enterprise Search',
-            }
-          )}
-        </EuiLink>
       </EuiText>
       <EuiSpacer />
       <EuiForm component="form">
@@ -104,7 +96,7 @@ export const ConfigureFields: React.FC = () => {
             <EuiFormRow
               fullWidth
               label={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.sourceFieldLabel',
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceFieldLabel',
                 {
                   defaultMessage: 'Source field',
                 }
@@ -121,7 +113,7 @@ export const ConfigureFields: React.FC = () => {
                   {
                     disabled: true,
                     text: i18n.translate(
-                      'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.sourceField.placeholder',
+                      'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceField.placeholder',
                       { defaultMessage: 'Select a schema field' }
                     ),
                     value: '',
@@ -143,7 +135,7 @@ export const ConfigureFields: React.FC = () => {
           <EuiFlexItem>
             <EuiFormRow
               label={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.targetField.label',
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.label',
                 {
                   defaultMessage: 'Target field (optional)',
                 }

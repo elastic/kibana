@@ -179,7 +179,7 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.test.title',
         {
-          defaultMessage: 'Test',
+          defaultMessage: 'Test (Optional)',
         }
       ),
     },
