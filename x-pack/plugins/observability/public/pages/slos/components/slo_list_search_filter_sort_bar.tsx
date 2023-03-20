@@ -117,6 +117,7 @@ export function SloListSearchFilterSortBar({
     <EuiFlexGroup direction="row" gutterSize="s">
       <EuiFlexItem grow>
         <EuiFieldSearch
+          data-test-subj="o11ySloListSearchFilterSortBarFieldSearch"
           fullWidth
           isLoading={loading}
           onChange={onChangeQuery}

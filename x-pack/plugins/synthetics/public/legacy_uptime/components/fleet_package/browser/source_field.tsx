@@ -263,6 +263,7 @@ export const SourceField = ({
               values={{
                 link: (
                   <EuiLink
+                    data-test-subj="syntheticsSourceFieldLearnMoreLink"
                     target="_blank"
                     href={getDocLinks()?.links?.observability?.syntheticsProjectMonitors}
                     external
