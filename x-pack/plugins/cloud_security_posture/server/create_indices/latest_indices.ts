@@ -15,19 +15,19 @@ import {
   LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '../../common/constants';
-import { IndexConfig } from './types';
+import { LatestIndexConfig } from './types';
 
-export const latestIndexConfigs: IndexConfig[] = [
-  {
+export const latestIndexConfigs: LatestIndexConfig = {
+  findings: {
     indexName: FINDINGS_INDEX_NAME,
     indexPattern: LATEST_FINDINGS_INDEX_PATTERN,
     indexTemplateName: LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
     indexDefaultName: LATEST_FINDINGS_INDEX_DEFAULT_NS,
   },
-  {
+  vulnerabilities: {
     indexName: VULNERABILITIES_INDEX_NAME,
     indexPattern: LATEST_VULNERABILITIES_INDEX_PATTERN,
     indexTemplateName: LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME,
     indexDefaultName: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   },
-];
+};

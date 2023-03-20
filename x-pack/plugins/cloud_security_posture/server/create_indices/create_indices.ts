@@ -27,10 +27,25 @@ export const initializeCspIndices = async (esClient: ElasticsearchClient, logger
     createPipelineIfNotExists(esClient, latestFindingsPipelineIngestConfig, logger),
   ]);
 
-  return Promise.allSettled([
-    ...createLatestIndices(esClient, logger),
+  const [
+    createFindingsLatestIndexPromise,
+    createVulnerabilitiesLatestIndexPromise,
+    createBenchmarkScoreIndexPromise,
+  ] = await Promise.allSettled([
+    createLatestIndex(esClient, logger, latestIndexConfigs.findings),
+    createLatestIndex(esClient, logger, latestIndexConfigs.vulnerabilities),
     createBenchmarkScoreIndex(esClient, logger),
   ]);
+
+  if (createFindingsLatestIndexPromise.status === 'rejected') {
+    logger.error(createFindingsLatestIndexPromise.reason);
+  }
+  if (createVulnerabilitiesLatestIndexPromise.status === 'rejected') {
+    logger.error(createVulnerabilitiesLatestIndexPromise.reason);
+  }
+  if (createBenchmarkScoreIndexPromise.status === 'rejected') {
+    logger.error(createBenchmarkScoreIndexPromise.reason);
+  }
 };
 
 const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: Logger) => {
@@ -74,10 +89,10 @@ const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: 
       );
     }
   } catch (e) {
-    logger.error(
+    logger.error(e);
+    throw Error(
       `Failed to upsert index template [Template: ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME}]`
     );
-    logger.error(e);
   }
 };
 
@@ -119,8 +134,8 @@ const createLatestIndex = async (
       await updateIndexSafe(esClient, logger, indexDefaultName, simulateResponse.template.mappings);
     }
   } catch (e) {
-    logger.error(`Failed to upsert index template [Template: ${indexTemplateName}]`);
     logger.error(e);
+    throw Error(`Failed to upsert index template [Template: ${indexTemplateName}]`);
   }
 };
 
@@ -224,6 +239,3 @@ const updateIndexSafe = async (
     logger.error(e);
   }
 };
-
-const createLatestIndices = (esClient: ElasticsearchClient, logger: Logger) =>
-  latestIndexConfigs.map((indexConfig) => createLatestIndex(esClient, logger, indexConfig));

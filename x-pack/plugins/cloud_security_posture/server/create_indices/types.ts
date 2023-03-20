@@ -10,6 +10,11 @@ import {
   Metadata,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+export interface LatestIndexConfig {
+  findings: IndexConfig;
+  vulnerabilities: IndexConfig;
+}
+
 export interface IndexConfig {
   indexName: string;
   indexPattern: string;
