@@ -81,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // Failing: See https://github.com/elastic/kibana/issues/121482
   // Failing: See https://github.com/elastic/kibana/issues/152260
-  describe.skip('Session Idle cleanup', () => {
+  describe('Session Idle cleanup', () => {
     beforeEach(async () => {
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
       await esDeleteAllIndices('.kibana_security_session*');
