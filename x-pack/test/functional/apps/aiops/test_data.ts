@@ -18,10 +18,14 @@ export const farequoteDataViewTestData: TestData = {
   expected: {
     totalDocCountFormatted: '86,374',
     analysisGroupsTable: [
-      { docCount: '297', group: 'airline: AAL' },
+      {
+        docCount: '297',
+        group: '* airline: AALShowing 1 out of 1 group items. 1 items unique to this group.',
+      },
       {
         docCount: '100',
-        group: 'airline: UALcustom_field.keyword: deviation',
+        group:
+          '* custom_field.keyword: deviation* airline: UALShowing 2 out of 2 group items. 2 items unique to this group.',
       },
     ],
     analysisTable: [
@@ -54,16 +58,41 @@ export const artificialLogDataViewTestData: TestData = {
   expected: {
     totalDocCountFormatted: '8,400',
     analysisGroupsTable: [
-      { group: 'user: Peter', docCount: '1981' },
-      { group: 'response_code: 500url: home.phpurl: login.php', docCount: '792' },
+      {
+        group:
+          'response_code: 500url: home.phpShowing 2 out of 2 group items. 0 items unique to this group.',
+        docCount: '792',
+      },
+      {
+        group:
+          'response_code: 500url: login.phpShowing 2 out of 2 group items. 0 items unique to this group.',
+        docCount: '792',
+      },
+      {
+        docCount: '634',
+        group:
+          'user: Peterurl: home.phpShowing 2 out of 2 group items. 0 items unique to this group.',
+      },
+      {
+        docCount: '634',
+        group:
+          'user: Peterurl: login.phpShowing 2 out of 2 group items. 0 items unique to this group.',
+      },
     ],
     analysisTable: [
       {
-        fieldName: 'user',
-        fieldValue: 'Peter',
+        fieldName: 'response_code',
+        fieldValue: '500',
         logRate: 'Chart type:bar chart',
-        pValue: '2.75e-21',
+        pValue: '2.96e-12',
         impact: 'High',
+      },
+      {
+        fieldName: 'url',
+        fieldValue: 'home.php',
+        impact: 'Low',
+        logRate: 'Chart type:bar chart',
+        pValue: '0.0108',
       },
     ],
   },
