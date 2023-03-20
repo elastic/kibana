@@ -231,7 +231,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(alertsCount).to.be('6');
         });
 
-        describe('#FilterButtonGroup', () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/153236
+        describe.skip('#FilterButtonGroup', () => {
           it('can be filtered to only show "active" alerts using the filter button', async () => {
             await pageObjects.infraHostsView.setAlertStatusFilter(ALERT_STATUS_ACTIVE);
             await retry.try(async () => {

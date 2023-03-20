@@ -108,7 +108,11 @@ const getRoutes = (
             defaultMessage="For more information about available monitor types and other options, see our {docs}."
             values={{
               docs: (
-                <EuiLink target="_blank" href="#">
+                <EuiLink
+                  data-test-subj="syntheticsGetRoutesDocumentationLink"
+                  target="_blank"
+                  href="#"
+                >
                   <FormattedMessage
                     id="xpack.synthetics.addMonitor.pageHeader.docsLink"
                     defaultMessage="documentation"
@@ -220,6 +224,7 @@ export const PageRouter: FC = () => {
             <NotFoundPrompt
               actions={[
                 <EuiButtonEmpty
+                  data-test-subj="syntheticsPageRouterGoToSyntheticsHomePageButton"
                   iconType="arrowLeft"
                   flush="both"
                   onClick={() => {

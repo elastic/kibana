@@ -35,7 +35,7 @@ const FOO_CONTENT_ID = 'foo';
 describe('RPC -> update()', () => {
   describe('Input/Output validation', () => {
     const data = { title: 'hello' };
-    const validInput = { contentTypeId: 'foo', id: '123', version: 'v1', data };
+    const validInput = { contentTypeId: 'foo', id: '123', version: 1, data };
 
     test('should validate that a "contentTypeId", an "id" and "data" object is passed', () => {
       [
@@ -54,11 +54,10 @@ describe('RPC -> update()', () => {
         },
         {
           input: omit(validInput, 'version'),
-          expectedError: '[version]: expected value of type [string] but got [undefined]',
+          expectedError: '[version]: expected value of type [number] but got [undefined]',
         },
         {
-          input: { ...validInput, version: '1' }, // invalid version format
-          expectedError: '[version]: must follow the pattern [v${number}]',
+          input: { ...validInput, version: '1' }, // string number is OK
         },
         {
           input: omit(validInput, 'data'),
@@ -88,7 +87,7 @@ describe('RPC -> update()', () => {
         {
           contentTypeId: 'foo',
           id: '123',
-          version: 'v1',
+          version: 1,
           data: { title: 'hello' },
           options: { any: 'object' },
         },
@@ -102,7 +101,7 @@ describe('RPC -> update()', () => {
           contentTypeId: 'foo',
           data: { title: 'hello' },
           id: '123',
-          version: 'v1',
+          version: 1,
           options: 123, // Not an object
         },
         inputSchema
@@ -137,7 +136,7 @@ describe('RPC -> update()', () => {
         id: FOO_CONTENT_ID,
         storage,
         version: {
-          latest: 'v2',
+          latest: 2,
         },
       });
 
@@ -160,7 +159,7 @@ describe('RPC -> update()', () => {
       const result = await fn(ctx, {
         contentTypeId: FOO_CONTENT_ID,
         id: '123',
-        version: 'v1',
+        version: 1,
         data: { title: 'Hello' },
       });
 
@@ -173,8 +172,8 @@ describe('RPC -> update()', () => {
         {
           requestHandlerContext: ctx.requestHandlerContext,
           version: {
-            request: 'v1',
-            latest: 'v2', // from the registry
+            request: 1,
+            latest: 2, // from the registry
           },
           utils: {
             getTransforms: expect.any(Function),
@@ -201,9 +200,9 @@ describe('RPC -> update()', () => {
             contentTypeId: FOO_CONTENT_ID,
             id: '123',
             data: { title: 'Hello' },
-            version: 'v7',
+            version: 7,
           })
-        ).rejects.toEqual(new Error('Invalid version. Latest version is [v2].'));
+        ).rejects.toEqual(new Error('Invalid version. Latest version is [2].'));
       });
     });
 
@@ -213,7 +212,7 @@ describe('RPC -> update()', () => {
         fn(ctx, {
           contentTypeId: FOO_CONTENT_ID,
           id: '123',
-          version: 'v1',
+          version: 1,
           data: { title: 'Hello' },
         });
         const [[storageContext]] = storage.update.mock.calls;
