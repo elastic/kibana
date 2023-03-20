@@ -9,26 +9,26 @@
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
-import { getAddControlButtonTitle } from '../../_dashboard_app_strings';
+import { getEditControlGroupButtonTitle } from '../../_dashboard_app_strings';
 
 interface Props {
   closePopover: () => void;
   controlGroup: ControlGroupContainer;
 }
 
-export const AddDataControlButton = ({ closePopover, controlGroup, ...rest }: Props) => {
+export const EditControlGroupButton = ({ closePopover, controlGroup, ...rest }: Props) => {
   return (
     <EuiContextMenuItem
       {...rest}
-      icon="plusInCircle"
-      data-test-subj="controls-create-button"
-      aria-label={getAddControlButtonTitle()}
+      icon="gear"
+      data-test-subj="controls-settings-button"
+      aria-label={getEditControlGroupButtonTitle()}
       onClick={() => {
-        controlGroup.openAddDataControlFlyout();
+        controlGroup.openEditControlGroupFlyout();
         closePopover();
       }}
     >
-      {getAddControlButtonTitle()}
+      {getEditControlGroupButtonTitle()}
     </EuiContextMenuItem>
   );
 };
