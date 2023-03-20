@@ -140,6 +140,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [loading, input.policy_template, isEditPage]);
 
+    useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
+
     if (loading) {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
