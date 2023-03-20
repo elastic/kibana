@@ -32,19 +32,25 @@ describe('getGroupsWithReaddedDuplicates', () => {
         docCount: 792,
         group: [
           {
-            duplicate: false,
             fieldName: 'response_code',
             fieldValue: '500',
+            duplicate: 1,
+            docCount: 1821,
+            pValue: 2.9589053032077285e-12,
           },
           {
-            duplicate: false,
             fieldName: 'url',
             fieldValue: 'home.php',
+            duplicate: 1,
+            docCount: 1742,
+            pValue: 0.010770456205312423,
           },
           {
-            duplicate: false,
             fieldName: 'url',
             fieldValue: 'login.php',
+            duplicate: 1,
+            docCount: 1742,
+            pValue: 0.010770456205312423,
           },
         ],
         id: '2038579476',

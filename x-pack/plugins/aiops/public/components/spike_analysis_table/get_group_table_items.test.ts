@@ -16,37 +16,95 @@ describe('getGroupTableItems', () => {
     expect(groupTableItems).toEqual([
       {
         docCount: 792,
-        group: [
+        group: [],
+        mostSignificantValues: [
           {
             fieldName: 'response_code',
             fieldValue: '500',
+            docCount: 792,
+            duplicate: 2,
+            pValue: 0.010770456205312423,
           },
           {
             fieldName: 'url',
             fieldValue: 'home.php',
+            docCount: 792,
+            duplicate: 2,
+            pValue: 0.010770456205312423,
+          },
+        ],
+        histogram: undefined,
+        id: '40215074',
+        pValue: 0.010770456205312423,
+      },
+      {
+        docCount: 792,
+        group: [],
+        mostSignificantValues: [
+          {
+            fieldName: 'response_code',
+            fieldValue: '500',
+            docCount: 792,
+            duplicate: 2,
+            pValue: 0.010770456205312423,
           },
           {
             fieldName: 'url',
             fieldValue: 'login.php',
+            docCount: 792,
+            duplicate: 2,
+            pValue: 0.010770456205312423,
           },
         ],
         histogram: undefined,
-        id: '2038579476',
+        id: '237328782',
         pValue: 0.010770456205312423,
-        mostSignificantValues: [],
       },
       {
-        docCount: 1981,
-        group: [
+        docCount: 634,
+        group: [],
+        histogram: undefined,
+        id: '47022118',
+        mostSignificantValues: [
           {
             fieldName: 'user',
             fieldValue: 'Peter',
+            docCount: 634,
+            duplicate: 2,
+            pValue: 0.010770456205312423,
+          },
+          {
+            fieldName: 'url',
+            fieldValue: 'home.php',
+            docCount: 792,
+            duplicate: 2,
+            pValue: 0.010770456205312423,
+          },
+        ],
+        pValue: 0.010770456205312423,
+      },
+      {
+        docCount: 634,
+        group: [],
+        mostSignificantValues: [
+          {
+            fieldName: 'user',
+            fieldValue: 'Peter',
+            docCount: 634,
+            duplicate: 2,
+            pValue: 0.010770456205312423,
+          },
+          {
+            fieldName: 'url',
+            fieldValue: 'login.php',
+            docCount: 792,
+            duplicate: 2,
+            pValue: 0.010770456205312423,
           },
         ],
         histogram: undefined,
-        id: '817080373',
-        pValue: 2.7454255728359757e-21,
-        mostSignificantValues: [],
+        id: '1176404482',
+        pValue: 0.010770456205312423,
       },
     ]);
   });

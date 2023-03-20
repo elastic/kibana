@@ -43,7 +43,15 @@ describe('getMissingSignificantTerms', () => {
 
     expect(transformed).toEqual({
       docCount: 1981,
-      group: [{ duplicate: false, fieldName: 'user', fieldValue: 'Peter' }],
+      group: [
+        {
+          duplicate: 1,
+          fieldName: 'user',
+          fieldValue: 'Peter',
+          docCount: 1981,
+          pValue: 2.7454255728359757e-21,
+        },
+      ],
       id: '817080373',
       pValue: 2.7454255728359757e-21,
     });
