@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { RangeFilterParams } from '../../filters';
 import { KueryNode, nodeTypes } from '../types';
 
 export const nodeBuilder = {
@@ -20,5 +21,16 @@ export const nodeBuilder = {
   },
   and: (nodes: KueryNode[]): KueryNode => {
     return nodes.length > 1 ? nodeTypes.function.buildNode('and', nodes) : nodes[0];
+  },
+  range: (
+    fieldName: string,
+    operator: keyof Pick<RangeFilterParams, 'gt' | 'gte' | 'lt' | 'lte'>,
+    value: number | string
+  ) => {
+    return nodeTypes.function.buildNodeWithArgumentNodes('range', [
+      nodeTypes.literal.buildNode(fieldName),
+      operator,
+      typeof value === 'string' ? nodeTypes.literal.buildNode(value) : value,
+    ]);
   },
 };

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { ContentManagementPlugin } from './plugin';
 import { IRouter } from '@kbn/core/server';
 import type { ProcedureName } from '../common';
@@ -62,22 +62,29 @@ jest.mock('./rpc/procedures/all_procedures', () => {
 });
 
 const setup = () => {
-  const logger = loggingSystemMock.create();
-  const { http } = coreMock.createSetup();
+  const coreSetup = coreMock.createSetup();
+  const router: IRouter<any> = coreSetup.http.createRouter();
+  const http = { ...coreSetup.http, createRouter: () => router };
+  const plugin = new ContentManagementPlugin(coreMock.createPluginInitializerContext());
 
-  const router: IRouter<any> = http.createRouter();
   router.post = jest.fn();
 
-  const plugin = new ContentManagementPlugin({ logger });
-
-  return { plugin, http: { createRouter: () => router }, router };
+  return {
+    plugin,
+    http,
+    router,
+    coreSetup: {
+      ...coreSetup,
+      http,
+    },
+  };
 };
 
 describe('ContentManagementPlugin', () => {
   describe('setup()', () => {
     test('should expose the core API', () => {
-      const { plugin, http } = setup();
-      const api = plugin.setup({ http });
+      const { plugin, coreSetup } = setup();
+      const api = plugin.setup(coreSetup);
 
       expect(Object.keys(api).sort()).toEqual(['crud', 'eventBus', 'register']);
       expect(api.crud('')).toBe('mockedCrud');
@@ -87,8 +94,8 @@ describe('ContentManagementPlugin', () => {
 
     describe('RPC', () => {
       test('should create a single POST HTTP route on the router', () => {
-        const { plugin, http, router } = setup();
-        plugin.setup({ http });
+        const { plugin, coreSetup, router } = setup();
+        plugin.setup(coreSetup);
 
         expect(router.post).toBeCalledTimes(1);
         const [routeConfig]: Parameters<IRouter['post']> = (router.post as jest.Mock).mock.calls[0];
@@ -97,8 +104,8 @@ describe('ContentManagementPlugin', () => {
       });
 
       test('should register all the procedures in the RPC service and the route handler must send to each procedure the core request context + the request body as input', async () => {
-        const { plugin, http, router } = setup();
-        plugin.setup({ http });
+        const { plugin, coreSetup, router } = setup();
+        plugin.setup(coreSetup);
 
         const [_, handler]: Parameters<IRouter['post']> = (router.post as jest.Mock).mock.calls[0];
 
@@ -139,8 +146,8 @@ describe('ContentManagementPlugin', () => {
       });
 
       test('should return error in custom error format', async () => {
-        const { plugin, http, router } = setup();
-        plugin.setup({ http });
+        const { plugin, coreSetup, router } = setup();
+        plugin.setup(coreSetup);
 
         const [_, handler]: Parameters<IRouter['post']> = (router.post as jest.Mock).mock.calls[0];
 

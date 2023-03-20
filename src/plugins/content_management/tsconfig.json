@@ -8,6 +8,9 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/core-http-request-handler-context-server",
+    "@kbn/es-query",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/bfetch-plugin",
     "@kbn/object-versioning",
   ],
   "exclude": [
