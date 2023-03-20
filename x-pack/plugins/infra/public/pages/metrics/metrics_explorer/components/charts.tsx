@@ -80,6 +80,7 @@ export const MetricsExplorerCharts = ({
 
   const and = i18n.translate('xpack.infra.metricsExplorer.andLabel', { defaultMessage: '" and "' });
   const firstPage = first(data.pages)!;
+  const hasMore = last(data.pages)!.pageInfo.afterKey;
 
   return (
     <div style={{ width: '100%' }}>
@@ -121,7 +122,7 @@ export const MetricsExplorerCharts = ({
               />
             </p>
           </EuiText>
-          {last(data.pages)!.pageInfo.afterKey ? (
+          {hasMore ? (
             <div style={{ margin: '16px 0' }}>
               <EuiButton isLoading={isLoading} size="s" onClick={onLoadMore}>
                 <FormattedMessage
