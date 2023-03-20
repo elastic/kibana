@@ -72,16 +72,15 @@ describe('ObservabilityActions component', () => {
   const setup = async (pageId: string) => {
     const props: Props = {
       config,
-      eventId: '6d4c6d74-d51a-495c-897d-88ced3b95e30',
+      data: inventoryThresholdAlert as unknown as TimelineNonEcsData[],
       ecsData: {
         _id: '6d4c6d74-d51a-495c-897d-88ced3b95e30',
         _index: '.internal.alerts-observability.metrics.alerts-default-000001',
       },
-      data: inventoryThresholdAlert as unknown as TimelineNonEcsData[],
+      id: pageId,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       setFlyoutAlert: jest.fn(),
       refresh,
-      id: pageId,
     };
 
     const wrapper = mountWithIntl(<AlertActions {...props} />);
