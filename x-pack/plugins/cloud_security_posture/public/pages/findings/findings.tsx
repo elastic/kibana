@@ -30,8 +30,9 @@ export const Findings = () => {
   const getSetupStatus = useCspSetupStatusApi();
 
   const hasFindings =
-    getSetupStatus.data?.cspm?.status === 'indexed' ||
-    getSetupStatus.data?.kspm?.status === 'indexed';
+    getSetupStatus.data?.indicesDetails[0].status === 'not-empty' ||
+    getSetupStatus.data?.kspm.status === 'indexed' ||
+    getSetupStatus.data?.cspm.status === 'indexed';
   if (!hasFindings) return <NoFindingsStates posturetype={'cspm'} />;
 
   const navigateToVulnerabilitiesTab = () => {

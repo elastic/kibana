@@ -20,8 +20,8 @@ export const Configurations = () => {
   const location = useLocation();
   const dataViewQuery = useLatestFindingsDataView();
   const getSetupStatus = useCspSetupStatusApi();
-
   const hasFindings =
+    getSetupStatus.data?.indicesDetails[0].status === 'not-empty' ||
     getSetupStatus.data?.kspm.status === 'indexed' ||
     getSetupStatus.data?.cspm.status === 'indexed';
   if (!hasFindings) return <NoFindingsStates posturetype={'cspm'} />;

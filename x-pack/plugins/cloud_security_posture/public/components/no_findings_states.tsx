@@ -23,12 +23,12 @@ import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from './test_subjects';
 import { CloudPosturePage } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import type { IndexDetails } from '../../common/types';
+import type { CloudSecurityPolicyTemplate, IndexDetails } from '../../common/types';
 
 const REFETCH_INTERVAL_MS = 20000;
 
 interface PostureTypes {
-  posturetype: 'cspm' | 'kspm';
+  posturetype: CloudSecurityPolicyTemplate;
 }
 
 const NotDeployed = () => {

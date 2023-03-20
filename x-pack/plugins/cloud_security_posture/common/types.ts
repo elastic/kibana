@@ -80,7 +80,7 @@ interface BaseCspSetupBothPolicy {
   healthyAgents: number;
 }
 
-interface BaseCspSetupStatus {
+export interface BaseCspSetupStatus {
   indicesDetails: IndexDetails[];
   latestPackageVersion: string;
   cspm: BaseCspSetupBothPolicy;
