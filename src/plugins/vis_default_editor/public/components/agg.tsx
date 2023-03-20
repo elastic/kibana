@@ -159,7 +159,7 @@ function DefaultEditorAgg({
       actionIcons.push({
         id: 'hasErrors',
         color: 'danger',
-        type: 'alert',
+        type: 'error',
         tooltip: i18n.translate('visDefaultEditor.agg.errorsAriaLabel', {
           defaultMessage: '{schemaTitle} {aggTitle} aggregation has errors',
           values: { aggTitle, schemaTitle },

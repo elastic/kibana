@@ -21,7 +21,7 @@ import { useUpdateSlo } from '../../hooks/slo/use_update_slo';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
 import { buildSlo } from '../../data/slo/slo';
-import { paths } from '../../config';
+import { paths } from '../../config/paths';
 import { SloEditPage } from './slo_edit';
 
 jest.mock('react-router-dom', () => ({

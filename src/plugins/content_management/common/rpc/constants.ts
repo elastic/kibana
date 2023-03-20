@@ -5,7 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { schema } from '@kbn/config-schema';
+import { validateVersion } from '@kbn/object-versioning/lib/utils';
 
 export const procedureNames = ['get', 'bulkGet', 'create', 'update', 'delete', 'search'] as const;
 
 export type ProcedureName = typeof procedureNames[number];
+
+export const versionSchema = schema.number({
+  validate: (value) => {
+    const { result } = validateVersion(value);
+    if (!result) {
+      return 'must be an integer';
+    }
+  },
+});

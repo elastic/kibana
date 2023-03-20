@@ -227,7 +227,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
                   <EuiIcon
                     data-test-subj="mappingConflictsAccordionIcon"
                     tabIndex={0}
-                    type="alert"
+                    type="warning"
                     size="s"
                     css={warningIconCss}
                   />
