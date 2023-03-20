@@ -406,6 +406,50 @@ describe('actions', () => {
     unsubscribe();
   });
 
+  test('loadSavedSearch data view handling', async () => {
+    const { state } = getState('/');
+    await state.actions.loadDataViewList();
+    await state.actions.loadSavedSearch('the-saved-search-id');
+    expect(state.savedSearchState.get().searchSource.getField('index')?.id).toBe(
+      'the-data-view-id'
+    );
+    const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
+    dataViewsCreateMock.mockImplementation(() => savedSearchMockWithTimeField);
+    discoverServiceMock.data.search.searchSource.create = jest
+      .fn()
+      .mockReturnValue(savedSearchMockWithTimeField.searchSource);
+    discoverServiceMock.core.savedObjects.client.resolve = jest.fn().mockReturnValue({
+      saved_object: {
+        attributes: {
+          kibanaSavedObjectMeta: {
+            searchSourceJSON:
+              '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          },
+          title: 'The saved search with a timefield',
+          sort: [],
+          columns: ['test-again'],
+          description: 'description',
+          hideChart: false,
+        },
+        id: 'the-saved-search-id-with-timefield',
+        type: 'search',
+        references: [
+          {
+            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+            id: 'index-pattern-with-timefield',
+            type: 'index-pattern',
+          },
+        ],
+        namespaces: ['default'],
+      },
+      outcome: 'exactMatch',
+    });
+    await state.actions.loadSavedSearch('the-saved-search-id-with-timefield');
+    expect(state.savedSearchState.get().searchSource.getField('index')?.id).toBe(
+      'index-pattern-with-timefield-id'
+    );
+  });
+
   it('loads a new saved search, updated by ad-hoc data view', async () => {
     const { state } = getState('/');
     await state.actions.loadDataViewList();

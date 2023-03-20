@@ -33,13 +33,9 @@ export const loadSavedSearch = async (
     ? await savedSearchContainer.load(id, dataView)
     : await savedSearchContainer.new(dataView);
 
-  const updateDataView =
-    dataView?.id && dataView?.id !== nextSavedSearch.searchSource.getField('index')?.id;
-  const updateAppState = Boolean(appState);
-
-  if (updateDataView || updateAppState) {
+  if (appState) {
     nextSavedSearch = savedSearchContainer.update({
-      nextDataView: updateDataView ? dataView : nextSavedSearch.searchSource.getField('index'),
+      nextDataView: nextSavedSearch.searchSource.getField('index'),
       nextState: appState,
     });
   }
