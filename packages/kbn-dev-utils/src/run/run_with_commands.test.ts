@@ -9,6 +9,7 @@
 import { RunWithCommands } from './run_with_commands';
 import { ToolingLog, ToolingLogCollectingWriter } from '../tooling_log';
 import { ProcRunner } from '../proc_runner';
+jest.mock('./metrics');
 
 const testLog = new ToolingLog();
 const testLogWriter = new ToolingLogCollectingWriter();
@@ -45,7 +46,7 @@ it('extends the context using extendContext()', async () => {
     flags: expect.any(Object),
     addCleanupTask: expect.any(Function),
     procRunner: expect.any(ProcRunner),
-    statsMeta: expect.any(Map),
+    statsMeta: undefined,
     extraContext: true,
   });
 

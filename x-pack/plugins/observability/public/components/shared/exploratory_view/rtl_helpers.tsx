@@ -208,7 +208,7 @@ export function render<ExtraCore>(
     history,
     core,
     ...seriesContextValue,
-  };
+  } as any;
 }
 
 export const getHistoryFromUrl = (url: Url) => {

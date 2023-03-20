@@ -18,6 +18,6 @@
 
 // compile typescript on the fly
 // eslint-disable-next-line import/no-extraneous-dependencies
-require('@kbn/optimizer').registerNodeAutoTranspilation();
+require('@kbn/babel-register').registerNodeAutoTranspilation();
 
 require('./create-apm-users-and-roles/create_apm_users_and_roles_cli.ts');

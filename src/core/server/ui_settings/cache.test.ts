@@ -10,7 +10,7 @@ import { Cache } from './cache';
 
 describe('Cache', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterEach(() => {

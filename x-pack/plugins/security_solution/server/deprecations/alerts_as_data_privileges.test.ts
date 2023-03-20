@@ -188,10 +188,22 @@ describe('alerts as data privileges deprecation', () => {
           message: `In order to view detection alerts in 8.0+, users will need read privileges to new detection alerts index aliases \
 (.alerts-security.alerts-<KIBANA_SPACE>) and backing indices (.internal.alerts-security.alerts-<KIBANA_SPACE>-*), \
 analogous to existing detection alerts indices (.siem-signals-<KIBANA_SPACE>). \
-In addition, any enabled Detection rules will be automatically disabled during the upgrade and must be manually re-enabled after \
-upgrading. Rules that are automatically disabled will also automatically be tagged to assist in manually re-enabling them post-upgrade. \
 Alerts created after upgrading will use a different schema.`,
           title: 'The Detection Alerts index names are changing',
+        },
+        {
+          correctiveActions: {
+            manualSteps: [
+              "After upgrading, re-enable rules that were automatically disabled. Automatically disabled rules can be found by filtering for the tag 'auto_disabled_8.0' in the Rules table.",
+            ],
+          },
+          deprecationType: 'feature',
+          documentationUrl:
+            'https://www.elastic.co/guide/en/security/8.0/upgrade-intro.html#upgrade-reqs',
+          level: 'warning',
+          message: `Any enabled Detection rules will be automatically disabled during the upgrade and must be manually re-enabled after upgrading. \
+Rules that are automatically disabled will also automatically be tagged to assist in manually re-enabling them post-upgrade.`,
+          title: 'Detection rules will be disabled after upgrading',
         },
       ]);
     });

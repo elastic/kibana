@@ -26,7 +26,7 @@ describe('useSwimlaneInputResolver', () => {
   };
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
 
     embeddableInput = new BehaviorSubject({
       id: 'test-swimlane-embeddable',

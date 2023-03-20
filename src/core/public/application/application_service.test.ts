@@ -835,7 +835,8 @@ describe('#start()', () => {
       const history = createMemoryHistory();
       setupDeps.history = history;
 
-      const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+      const flushPromises = () =>
+        new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
       // Create an app and a promise that allows us to control when the app completes mounting
       const createWaitingApp = (props: Partial<App>): [App, () => void] => {
         let finishMount: () => void;

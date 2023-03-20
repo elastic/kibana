@@ -177,7 +177,7 @@ test.skip('DashboardGrid renders expanded panel', () => {
 });
 
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
-test.skip('DashboardGrid unmount unsubscribes', async (done) => {
+test.skip('DashboardGrid unmount unsubscribes', (done) => {
   const { props, options } = prepare();
   const component = mountWithIntl(
     <KibanaContextProvider services={options}>

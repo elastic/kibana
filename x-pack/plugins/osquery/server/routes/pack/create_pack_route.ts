@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment-timezone';
-import { has, mapKeys, set, unset, find } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { has, mapKeys, unset, find } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import {

@@ -197,7 +197,7 @@ describe('#setup', () => {
     });
   });
 
-  it('esNodeVersionCompatibility$ only starts polling when subscribed to', async (done) => {
+  it('esNodeVersionCompatibility$ only starts polling when subscribed to', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
@@ -209,11 +209,10 @@ describe('#setup', () => {
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
     setupContract.esNodesCompatibility$.subscribe(() => {
       expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-      done();
     });
   });
 
-  it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async (done) => {
+  it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
@@ -226,7 +225,6 @@ describe('#setup', () => {
       sub.unsubscribe();
       await delay(100);
       expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-      done();
     });
   });
 });
@@ -378,9 +376,7 @@ describe('#stop', () => {
     expect(mockClusterClientInstance.close).toHaveBeenCalledTimes(1);
   });
 
-  it('stops pollEsNodeVersions even if there are active subscriptions', async (done) => {
-    expect.assertions(3);
-
+  it('stops pollEsNodeVersions even if there are active subscriptions', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
@@ -396,7 +392,7 @@ describe('#stop', () => {
       await elasticsearchService.stop();
       await delay(100);
       expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
-      done();
+      expect.assertions(3);
     });
   });
 });

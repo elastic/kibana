@@ -25,7 +25,7 @@ export function escapeSearchQueryPhrase(val: string): string {
 // filtering SOs
 export const normalizeKuery = (savedObjectType: string, kuery: string): string => {
   return kuery.replace(
-    new RegExp(`${savedObjectType}\.(?!attributes\.)`, 'g'),
+    new RegExp(`${savedObjectType}\\.(?!attributes\\.)`, 'g'),
     `${savedObjectType}.attributes.`
   );
 };

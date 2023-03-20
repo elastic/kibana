@@ -16,7 +16,7 @@ describe('<FieldEditorFlyoutContent />', () => {
 
   beforeAll(() => {
     httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['foo'] });
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterAll(() => {

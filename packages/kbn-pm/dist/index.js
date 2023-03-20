@@ -20381,11 +20381,11 @@ function mkdirP (p, opts, f, made) {
     var xfs = opts.fs || fs;
     
     if (mode === undefined) {
-        mode = _0777 & (~process.umask());
+        mode = _0777
     }
     if (!made) made = null;
     
-    var cb = f || function () {};
+    var cb = f || /* istanbul ignore next */ function () {};
     p = path.resolve(p);
     
     xfs.mkdir(p, mode, function (er) {
@@ -20395,8 +20395,10 @@ function mkdirP (p, opts, f, made) {
         }
         switch (er.code) {
             case 'ENOENT':
+                /* istanbul ignore if */
                 if (path.dirname(p) === p) return cb(er);
                 mkdirP(path.dirname(p), opts, function (er, made) {
+                    /* istanbul ignore if */
                     if (er) cb(er, made);
                     else mkdirP(p, opts, cb, made);
                 });
@@ -20426,7 +20428,7 @@ mkdirP.sync = function sync (p, opts, made) {
     var xfs = opts.fs || fs;
     
     if (mode === undefined) {
-        mode = _0777 & (~process.umask());
+        mode = _0777
     }
     if (!made) made = null;
 
@@ -20451,9 +20453,10 @@ mkdirP.sync = function sync (p, opts, made) {
                 try {
                     stat = xfs.statSync(p);
                 }
-                catch (err1) {
+                catch (err1) /* istanbul ignore next */ {
                     throw err0;
                 }
+                /* istanbul ignore if */
                 if (!stat.isDirectory()) throw err0;
                 break;
         }

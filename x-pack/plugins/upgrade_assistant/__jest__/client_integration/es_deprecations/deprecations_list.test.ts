@@ -103,9 +103,13 @@ describe('ES deprecations table', () => {
       (deprecation) => deprecation.isCritical === false
     );
 
-    expect(find('criticalDeprecationsCount').text()).toContain(criticalDeprecations.length);
+    expect(String(find('criticalDeprecationsCount').text())).toContain(
+      String(criticalDeprecations.length)
+    );
 
-    expect(find('warningDeprecationsCount').text()).toContain(warningDeprecations.length);
+    expect(String(find('warningDeprecationsCount').text())).toContain(
+      String(warningDeprecations.length)
+    );
   });
 
   describe('remote clusters callout', () => {

@@ -86,6 +86,6 @@ describe('AlertsCount', () => {
     );
 
     expect(wrapper.text()).toContain(alertFiedlKey);
-    expect(wrapper.text()).toContain(alertFiedlCount);
+    expect(wrapper.text()).toContain(String(alertFiedlCount));
   });
 });

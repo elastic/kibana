@@ -21,7 +21,7 @@ describe('<JsonWatchEdit /> create route', () => {
   let testBed: WatchCreateJsonTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterAll(() => {

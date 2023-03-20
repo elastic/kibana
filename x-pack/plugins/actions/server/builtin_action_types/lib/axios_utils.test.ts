@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 import { Agent as HttpsAgent } from 'https';
-import HttpProxyAgent from 'http-proxy-agent';
+import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { Logger } from '../../../../../../src/core/server';
 import {

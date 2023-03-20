@@ -7,6 +7,6 @@
 
 // compile typescript on the fly
 // eslint-disable-next-line import/no-extraneous-dependencies
-require('@kbn/optimizer').registerNodeAutoTranspilation();
+require('@kbn/babel-register').registerNodeAutoTranspilation();
 
 require('./upload-telemetry-data/index.ts');

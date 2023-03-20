@@ -7,7 +7,7 @@ Lodash v4.x.
 ## Example Usage
 
 ```js
-const { set } = require('@elastic/safer-loadsh-set');
+const { set } = require('@elastic/safer-lodash-set');
 
 const object = { a: [{ b: { c: 3 } }] };
 

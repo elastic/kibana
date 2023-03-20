@@ -8,7 +8,7 @@
 
 const babelJest = require('babel-jest');
 
-module.exports = babelJest.createTransformer({
+module.exports = babelJest.default.createTransformer({
   presets: [
     [
       require.resolve('@kbn/babel-preset/node_preset'),

@@ -109,7 +109,7 @@ describe('mapSpatialFilter()', () => {
     expect(result).toHaveProperty('type', FILTERS.SPATIAL_FILTER);
   });
 
-  test('should return undefined for none matching', async (done) => {
+  test('should return undefined for none matching', (done) => {
     const filter = {
       meta: {
         key: 'location',

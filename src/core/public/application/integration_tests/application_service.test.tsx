@@ -19,7 +19,8 @@ import { AppMountParameters } from '../types';
 import { Observable } from 'rxjs';
 import { MountPoint } from 'kibana/public';
 
-const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+const flushPromises = () =>
+  new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
 
 describe('ApplicationService', () => {
   let setupDeps: MockLifecycle<'setup'>;

@@ -1,0 +1,19 @@
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "timeFieldName": "timestamp",
+    "title": "test_elastic",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "7.17.10",
+  "id": "0b3ad420-a7d9-11ed-b7bc-4b80fc2e7c64",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2023-02-08T17:50:15.652Z",
+  "version": "WzExNiwyXQ=="
+}

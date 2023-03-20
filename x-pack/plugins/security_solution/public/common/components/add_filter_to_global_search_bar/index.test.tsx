@@ -39,7 +39,7 @@ describe('AddFilterToGlobalSearchBar Component', () => {
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
     store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     mockAddFilters.mockClear();
   });

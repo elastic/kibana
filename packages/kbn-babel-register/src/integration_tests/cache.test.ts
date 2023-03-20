@@ -47,6 +47,10 @@ afterEach(async () => {
   instances.length = 0;
 });
 
+afterAll(async () => {
+  await del(Path.dirname(DIR));
+});
+
 it('returns undefined until values are set', async () => {
   const path = '/foo/bar.js';
   const mtime = new Date().toJSON();
@@ -81,6 +85,7 @@ it('returns undefined until values are set', async () => {
     PUT   [sourceMaps]   prefix:bar.js
     HIT   [mtimes]   prefix:bar.js
     HIT   [codes]   prefix:bar.js
+    PUT   [atimes]   prefix:bar.js
     HIT   [sourceMaps]   prefix:bar.js
     "
   `);

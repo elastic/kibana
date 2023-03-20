@@ -70,7 +70,7 @@ describe('StatefulFieldsBrowser', () => {
 
   describe('updateSelectedCategoryId', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
     });
     test('it updates the selectedCategoryId state, which makes the category bold, when the user clicks a category name in the left hand side of the field browser', async () => {
       const wrapper = mount(
