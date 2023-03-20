@@ -101,7 +101,7 @@ describe('useMetricsExplorerState', () => {
       expect(result.all.length).toBe(2);
       const numberOfHookCalls = result.all.length;
       act(() => {
-        result.current.refetch();
+        result.current.refresh();
       });
       expect(result.all.length).toBe(numberOfHookCalls + 1);
     });

@@ -43,7 +43,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     handleTimeChange,
     handleLoadMore,
     onViewStateChange,
-    refetch,
+    refresh,
   } = useMetricsExplorerState(source, derivedIndexPattern, enabled);
   const { currentView, shouldLoadDefault } = useSavedViewContext();
 
@@ -92,7 +92,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
           timeRange={timeRange}
           options={options}
           chartOptions={chartOptions}
-          onRefresh={refetch}
+          onRefresh={refresh}
           onTimeChange={handleTimeChange}
           onGroupByChange={handleGroupByChange}
           onFilterQuerySubmit={handleFilterQuerySubmit}
@@ -107,7 +107,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
               defaultMessage: 'It looks like the request failed with "{message}"',
               values: { message: error.message },
             })}
-            onRefetch={refetch}
+            onRefetch={refresh}
             refetchText="Try Again"
           />
         ) : (
@@ -120,7 +120,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
             chartOptions={chartOptions}
             onLoadMore={handleLoadMore}
             onFilter={handleFilterQuerySubmit}
-            onRefetch={refetch}
+            onRefetch={refresh}
             onTimeChange={handleTimeChange}
           />
         )}

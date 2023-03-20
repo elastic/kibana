@@ -28,16 +28,6 @@ export interface MetricExplorerViewState {
   id?: string;
 }
 
-const getTimestamps = (from: string, to: string) => {
-  const fromTimestamp = DateMath.parse(from)!.valueOf();
-  const toTimestamp = DateMath.parse(to, { roundUp: true })!.valueOf();
-
-  return {
-    fromTimestamp,
-    toTimestamp,
-  };
-};
-
 export const useMetricsExplorerState = (
   source: MetricsSourceConfigurationProperties,
   derivedIndexPattern: DataViewBase,
@@ -55,6 +45,17 @@ export const useMetricsExplorerState = (
     setTimestamps,
   } = useMetricsExplorerOptionsContainerContext();
 
+  const refreshTimestamps = useCallback(() => {
+    const fromTimestamp = DateMath.parse(timeRange.from)!.valueOf();
+    const toTimestamp = DateMath.parse(timeRange.to, { roundUp: true })!.valueOf();
+
+    setTimestamps({
+      interval: timeRange.interval,
+      fromTimestamp,
+      toTimestamp,
+    });
+  }, [setTimestamps, timeRange]);
+
   const { data, error, fetchNextPage, isLoading } = useMetricsExplorerData(
     options,
     source,
@@ -64,11 +65,10 @@ export const useMetricsExplorerState = (
   );
 
   useEffect(() => {
-    setTimestamps({
-      interval: timeRange.interval,
-      ...getTimestamps(timeRange.from, timeRange.to),
-    });
-  }, [timeRange, setTimestamps, options, setOptions]);
+    refreshTimestamps();
+    // options, setOptions are added to dependencies since we need to refresh the timestamps
+    // every time options change
+  }, [options, setOptions, refreshTimestamps]);
 
   const handleTimeChange = useCallback(
     (start: string, end: string) => {
@@ -76,13 +76,6 @@ export const useMetricsExplorerState = (
     },
     [setTimeRange, timeRange.interval]
   );
-
-  const refetch = useCallback(() => {
-    setTimestamps({
-      interval: timeRange.interval,
-      ...getTimestamps(timeRange.from, timeRange.to),
-    });
-  }, [setTimestamps, timeRange]);
 
   const handleGroupByChange = useCallback(
     (groupBy: string | null | string[]) => {
@@ -165,6 +158,6 @@ export const useMetricsExplorerState = (
     onViewStateChange,
     options,
     setChartOptions,
-    refetch,
+    refresh: refreshTimestamps,
   };
 };
