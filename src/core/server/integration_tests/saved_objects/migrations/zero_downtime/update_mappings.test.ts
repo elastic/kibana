@@ -41,6 +41,9 @@ describe('ZDT upgrades - basic mapping update', () => {
     settings: {
       migrations: {
         algorithm: 'zdt',
+        zdt: {
+          metaPickupSyncDelaySec: 5,
+        },
       },
     },
   };

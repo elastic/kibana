@@ -28,16 +28,19 @@ export const getOutdatedDocumentsQuery = ({
 
   return {
     bool: {
-      should: types.map((type) => ({
-        bool: {
-          must: { term: { type } },
-          must_not: {
-            term: {
-              [`migrationVersion.${type}`]: modelVersionToVirtualVersion(modelVersions[type.name]),
+      should: types.map((type) => {
+        const virtualVersion = modelVersionToVirtualVersion(modelVersions[type.name]);
+        return {
+          bool: {
+            must: { term: { type: type.name } },
+            must_not: {
+              term: {
+                [`migrationVersion.${type.name}`]: virtualVersion,
+              },
             },
           },
-        },
-      })),
+        };
+      }),
     },
   };
 };
