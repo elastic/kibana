@@ -28,3 +28,32 @@ get:
         type: boolean
   security:
     - basicAuth: []
+post:
+  summary: List agents by action ids
+  tags:
+    - Agents
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/agent_get_by_actions.yaml
+    '400':
+      $ref: ../components/responses/error.yaml
+  operationId: get-agents-by-actions
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            actionIds:
+              type: array
+              items:
+                  type: string
+          required:
+            - policy_id

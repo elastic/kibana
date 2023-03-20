@@ -27,6 +27,9 @@ export const create: ProcedureDefinition<Context, CreateIn<string>> = {
         request: version,
         latest: contentDefinition.version.latest,
       },
+      utils: {
+        getTransforms: ctx.getTransformsFactory(contentTypeId),
+      },
     };
     const result = await crudInstance.create(storageContext, data, options);
 

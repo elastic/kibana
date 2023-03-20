@@ -14,7 +14,7 @@ import { useStyles } from './styles';
 import { useConfigModel } from './hooks/use_config_model';
 import { getInputFromPolicy } from '../../common/utils';
 import * as i18n from './translations';
-import { ControlResponseAction, ViewDeps } from '../../types';
+import { ViewDeps } from '../../types';
 
 const { editor } = monaco;
 
@@ -45,14 +45,17 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
         return error;
       });
 
-      onChange({ isValid: actionsValid && errs.length === 0, updatedPolicy: policy });
-      setErrors(errs);
+      // prevents infinite loop
+      if (JSON.stringify(errs) !== JSON.stringify(errors)) {
+        onChange({ isValid: actionsValid && errs.length === 0, updatedPolicy: policy });
+        setErrors(errs);
+      }
     });
 
     return () => {
       listener.dispose();
     };
-  }, [actionsValid, onChange, policy]);
+  }, [actionsValid, errors, onChange, policy]);
 
   // for now we force 'alert' action on all responses. This restriction may be removed in future when we have a plan to record all responses. e.g. audit
   const validateActions = useCallback((value) => {
@@ -62,7 +65,7 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
       for (let i = 0; i < json.responses.length; i++) {
         const response = json.responses[i];
 
-        if (!response.actions.includes(ControlResponseAction.alert)) {
+        if (!response.actions.includes('alert')) {
           return false;
         }
       }
