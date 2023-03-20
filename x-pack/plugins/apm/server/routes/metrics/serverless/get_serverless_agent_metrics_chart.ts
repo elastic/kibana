@@ -14,6 +14,7 @@ import { getComputeUsageChart } from './get_compute_usage_chart';
 import { getServerlessFunctionLatencyChart } from './get_serverless_function_latency_chart';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { FetchAndTransformMetrics } from '../fetch_and_transform_metrics';
 
 export function getServerlessAgentMetricsCharts({
   environment,
@@ -33,7 +34,7 @@ export function getServerlessAgentMetricsCharts({
   start: number;
   end: number;
   serverlessId?: string;
-}) {
+}): Promise<FetchAndTransformMetrics[]> {
   return withApmSpan('get_serverless_agent_metric_charts', async () => {
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       config,

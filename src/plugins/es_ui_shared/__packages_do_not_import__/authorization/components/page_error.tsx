@@ -65,7 +65,7 @@ export const PageError: React.FunctionComponent<Props> = ({
             </>
           )
         }
-        iconType="alert"
+        iconType="warning"
         actions={actions}
         {...rest}
       />

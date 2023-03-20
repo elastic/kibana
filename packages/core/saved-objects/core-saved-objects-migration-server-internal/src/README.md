@@ -63,10 +63,10 @@
   - [CHECK_TARGET_MAPPINGS](#check_target_mappings)
     - [Next action](#next-action-20)
     - [New control state](#new-control-state-20)
-  - [UPDATE_TARGET_MAPPINGS](#update_target_mappings)
+  - [UPDATE_TARGET_MAPPINGS_PROPERTIES](#update_target_mappings_properties)
     - [Next action](#next-action-21)
     - [New control state](#new-control-state-21)
-  - [UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK](#update_target_mappings_wait_for_task)
+  - [UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK](#update_target_mappings_properties_wait_for_task)
     - [Next action](#next-action-22)
     - [New control state](#new-control-state-22)
   - [CHECK_VERSION_INDEX_READY_ACTIONS](#check_version_index_ready_actions)
@@ -360,7 +360,7 @@ ensuring that each Kibana instance generates the same new `_id` for the same doc
 Use the bulk API create action to write a batch of up-to-date documents. The
 create action ensures that there will be only one write per reindexed document
 even if multiple Kibana instances are performing this step. Use
-`refresh=false` to speed up the create actions, the `UPDATE_TARGET_MAPPINGS`
+`refresh=false` to speed up the create actions, the `UPDATE_TARGET_MAPPINGS_PROPERTIES`
 step will ensure that the index is refreshed before we start serving traffic.
 
 The following errors are ignored because it means another instance already
@@ -420,7 +420,7 @@ and transform them to ensure that everything is up to date.
 1. Found outdated documents?
   → `OUTDATED_DOCUMENTS_TRANSFORM`
 2. All documents up to date
-  → `UPDATE_TARGET_MAPPINGS`
+  → `UPDATE_TARGET_MAPPINGS_PROPERTIES`
 
 ## OUTDATED_DOCUMENTS_TRANSFORM
 ### Next action
@@ -442,11 +442,11 @@ Compare the calculated mappings' hashes against those stored in the `<index>.map
 ### New control state
 
 1. If calculated mappings don't match, we must update them.
-  → `UPDATE_TARGET_MAPPINGS`
+  → `UPDATE_TARGET_MAPPINGS_PROPERTIES`
 2. If calculated mappings and stored mappings match, we can skip directly to the next step.
   → `CHECK_VERSION_INDEX_READY_ACTIONS`
 
-## UPDATE_TARGET_MAPPINGS
+## UPDATE_TARGET_MAPPINGS_PROPERTIES
 ### Next action
 `updateAndPickupMappings`
 
@@ -454,9 +454,9 @@ If another instance has some plugins disabled it will disable the mappings of th
 update the mappings and then use an update_by_query to ensure that all fields are “picked-up” and ready to be searched over.
 
 ### New control state
-  → `UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK`
+  → `UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK`
 
-## UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK
+## UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK
 ### Next action
 `waitForPickupUpdatedMappingsTask`
 

@@ -61,6 +61,10 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
     const summaryClient = new DefaultSLIClient(esClient.asCurrentUser);
     const slo = await sloRepository.findById(params.sloId);
 
+    if (!slo.enabled) {
+      return { state: {} };
+    }
+
     const longWindowDuration = new Duration(
       params.longWindow.value,
       toDurationUnit(params.longWindow.unit)

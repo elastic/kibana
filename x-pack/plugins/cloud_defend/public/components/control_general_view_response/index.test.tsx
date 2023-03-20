@@ -10,12 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { TestProvider } from '../../test/test_provider';
 import { ControlGeneralViewResponse } from '.';
-import {
-  ControlResponse,
-  ControlResponseAction,
-  ControlSelector,
-  ControlSelectorOperation,
-} from '../../types';
+import { Response, Selector } from '../../types';
 import * as i18n from '../control_general_view/translations';
 
 describe('<ControlGeneralViewSelector />', () => {
@@ -26,37 +21,42 @@ describe('<ControlGeneralViewSelector />', () => {
   // defining this here to avoid a warning in testprovider with params.history changing on rerender.
   const params = coreMock.createAppMountParameters();
 
-  const mockSelector: ControlSelector = {
+  const mockSelector: Selector = {
+    type: 'file',
     name: 'mock',
-    operation: [ControlSelectorOperation.createExecutable],
+    operation: ['createExecutable'],
   };
 
-  const mockSelector2: ControlSelector = {
+  const mockSelector2: Selector = {
+    type: 'file',
     name: 'mock2',
-    operation: [ControlSelectorOperation.modifyExecutable],
+    operation: ['modifyExecutable'],
   };
 
-  const mockExclude: ControlSelector = {
+  const mockExclude: Selector = {
+    type: 'file',
     name: 'mockExclude',
     containerImageName: ['nginx'],
   };
 
-  const mockResponse: ControlResponse = {
+  const mockResponse: Response = {
+    type: 'file',
     match: [mockSelector.name],
-    actions: [ControlResponseAction.alert],
+    actions: ['alert'],
   };
 
-  const mockResponse2: ControlResponse = {
+  const mockResponse2: Response = {
+    type: 'file',
     match: [mockSelector.name],
-    actions: [ControlResponseAction.alert, ControlResponseAction.block],
+    actions: ['alert', 'block'],
   };
 
   const WrappedComponent = ({
     response = { ...mockResponse },
     responses,
   }: {
-    response?: ControlResponse;
-    responses?: ControlResponse[];
+    response?: Response;
+    responses?: Response[];
   }) => {
     return (
       <TestProvider params={params}>
@@ -83,12 +83,8 @@ describe('<ControlGeneralViewSelector />', () => {
     const { getByTestId, queryByTestId } = render(<WrappedComponent />);
     expect(getByTestId('cloud-defend-responsematch').querySelector('.euiBadge__text')).toBeTruthy();
     expect(queryByTestId('cloud-defend-responseexclude')).toBeFalsy();
-    expect(
-      getByTestId('cloud-defend-chkalertaction').querySelector('.euiRadio__input')
-    ).toBeChecked();
-    expect(
-      getByTestId('cloud-defend-chkblockaction').querySelector('.euiRadio__input')
-    ).not.toBeChecked();
+    expect(getByTestId('cloud-defend-chkalertaction')).toBeChecked();
+    expect(getByTestId('cloud-defend-chkblockaction')).not.toBeChecked();
   });
 
   it('allows the user to add more selectors to match on', () => {
@@ -103,7 +99,7 @@ describe('<ControlGeneralViewSelector />', () => {
 
     userEvent.click(options[0]);
 
-    const updatedResponse: ControlResponse = onChange.mock.calls[0][0];
+    const updatedResponse: Response = onChange.mock.calls[0][0];
 
     rerender(<WrappedComponent response={updatedResponse} />);
 
@@ -123,7 +119,7 @@ describe('<ControlGeneralViewSelector />', () => {
 
     userEvent.click(getByTitle('Remove mock from selection in this group'));
 
-    const updatedResponse: ControlResponse = onChange.mock.calls[0][0];
+    const updatedResponse: Response = onChange.mock.calls[0][0];
     rerender(<WrappedComponent response={updatedResponse} />);
 
     expect(getByText(i18n.errorValueRequired)).toBeTruthy();
@@ -135,7 +131,7 @@ describe('<ControlGeneralViewSelector />', () => {
     // first must click button to show combobox
     userEvent.click(getByTestId('cloud-defend-btnshowexclude'));
 
-    let updatedResponse: ControlResponse = onChange.mock.calls[0][0];
+    let updatedResponse: Response = onChange.mock.calls[0][0];
     rerender(<WrappedComponent response={updatedResponse} />);
 
     getAllByTestId('comboBoxSearchInput')[1].focus();
@@ -168,14 +164,15 @@ describe('<ControlGeneralViewSelector />', () => {
 
   it('allows the user to enable block action (which should force alert action on)', () => {
     const { getByTestId } = render(<WrappedComponent />);
-    const radioBtn = getByTestId('cloud-defend-chkblockaction').querySelector('.euiRadio__input');
-    if (radioBtn) {
-      userEvent.click(radioBtn);
+    const checkBox = getByTestId('cloud-defend-chkblockaction');
+
+    if (checkBox) {
+      userEvent.click(checkBox);
     }
 
-    const response: ControlResponse = onChange.mock.calls[0][0];
-    expect(response.actions).toContain(ControlResponseAction.alert);
-    expect(response.actions).toContain(ControlResponseAction.block);
+    const response: Response = onChange.mock.calls[0][0];
+    expect(response.actions).toContain('alert');
+    expect(response.actions).toContain('block');
   });
 
   it('allows the user to remove the response', async () => {

@@ -9,10 +9,12 @@
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useCallback, useEffect } from 'react';
 
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { getGroupSelector, isNoneGroup } from '../..';
 import { groupActions, groupByIdSelector } from './state';
 import type { GroupOption } from './types';
 import { Action, defaultGroup, GroupMap } from './types';
+import { getTelemetryEvent } from '../telemetry/const';
 
 export interface UseGetGroupSelectorArgs {
   defaultGroupingOptions: GroupOption[];
@@ -20,6 +22,12 @@ export interface UseGetGroupSelectorArgs {
   fields: FieldSpec[];
   groupingId: string;
   groupingState: GroupMap;
+  onGroupChangeCallback?: (param: { groupByField: string; tableId: string }) => void;
+  tracker: (
+    type: UiCounterMetricType,
+    event: string | string[],
+    count?: number | undefined
+  ) => void;
 }
 
 export const useGetGroupSelector = ({
@@ -28,6 +36,8 @@ export const useGetGroupSelector = ({
   fields,
   groupingId,
   groupingState,
+  onGroupChangeCallback,
+  tracker,
 }: UseGetGroupSelectorArgs) => {
   const { activeGroup: selectedGroup, options } =
     groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
@@ -53,7 +63,51 @@ export const useGetGroupSelector = ({
     [dispatch, groupingId]
   );
 
+  const onGroupChange = useCallback(
+    (groupSelection: string) => {
+      if (groupSelection === selectedGroup) {
+        return;
+      }
+      setGroupsActivePage(0);
+      setSelectedGroup(groupSelection);
+
+      // built-in telemetry: UI-counter
+      tracker?.(
+        METRIC_TYPE.CLICK,
+        getTelemetryEvent.groupChanged({ groupingId, selected: groupSelection })
+      );
+
+      onGroupChangeCallback?.({ tableId: groupingId, groupByField: groupSelection });
+
+      // only update options if the new selection is a custom field
+      if (
+        !isNoneGroup(groupSelection) &&
+        !options.find((o: GroupOption) => o.key === groupSelection)
+      ) {
+        setOptions([
+          ...defaultGroupingOptions,
+          {
+            label: groupSelection,
+            key: groupSelection,
+          },
+        ]);
+      }
+    },
+    [
+      defaultGroupingOptions,
+      groupingId,
+      onGroupChangeCallback,
+      options,
+      selectedGroup,
+      setGroupsActivePage,
+      setOptions,
+      setSelectedGroup,
+      tracker,
+    ]
+  );
+
   useEffect(() => {
+    // only set options the first time, all other updates will be taken care of by onGroupChange
     if (options.length > 0) return;
     setOptions(
       defaultGroupingOptions.find((o) => o.key === selectedGroup)
@@ -70,33 +124,13 @@ export const useGetGroupSelector = ({
               : []),
           ]
     );
-  }, [defaultGroupingOptions, selectedGroup, setOptions, options]);
+  }, [defaultGroupingOptions, options.length, selectedGroup, setOptions]);
 
   return getGroupSelector({
+    groupingId,
     groupSelected: selectedGroup,
     'data-test-subj': 'alerts-table-group-selector',
-    onGroupChange: (groupSelection: string) => {
-      if (groupSelection === selectedGroup) {
-        return;
-      }
-      setGroupsActivePage(0);
-      setSelectedGroup(groupSelection);
-
-      if (
-        !isNoneGroup(groupSelection) &&
-        !options.find((o: GroupOption) => o.key === groupSelection)
-      ) {
-        setOptions([
-          ...defaultGroupingOptions,
-          {
-            label: groupSelection,
-            key: groupSelection,
-          },
-        ]);
-      } else {
-        setOptions(defaultGroupingOptions);
-      }
-    },
+    onGroupChange,
     fields,
     options,
   });
