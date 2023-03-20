@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import React, { FC, ReactElement, useEffect, useState } from 'react';
-import { TypedUseSelectorHook } from 'react-redux';
 import classNames from 'classnames';
 
 import { IEmbeddable, panelHoverTrigger, PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
