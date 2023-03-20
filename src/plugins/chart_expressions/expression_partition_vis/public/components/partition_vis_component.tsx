@@ -18,6 +18,7 @@ import {
   TooltipType,
   SeriesIdentifier,
   PartitionElementEvent,
+  SettingsProps,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -34,7 +35,7 @@ import {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { getOverridesFor, mergeThemeWithOverrides } from '@kbn/chart-expressions-common';
 import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
@@ -356,9 +357,19 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     return 1;
   }, [visData.rows, metricColumn]);
 
+  const { theme: settingsThemeOverrides, ...settingsOverrides } = getOverridesFor(
+    overrides,
+    'settings'
+  ) as Partial<SettingsProps>;
+
   const themeOverrides = useMemo(
-    () => getPartitionTheme(visType, visParams, chartTheme, containerDimensions, rescaleFactor),
-    [visType, visParams, chartTheme, containerDimensions, rescaleFactor]
+    () =>
+      mergeThemeWithOverrides(
+        getPartitionTheme(visType, visParams, chartTheme, containerDimensions, rescaleFactor),
+        settingsThemeOverrides,
+        ['partition']
+      ),
+    [visType, visParams, chartTheme, containerDimensions, rescaleFactor, settingsThemeOverrides]
   );
 
   const fixedViewPort = document.getElementById('app-fixed-viewport');
@@ -496,7 +507,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 onRenderChange={onRenderChange}
                 ariaLabel={props.visParams.ariaLabel}
                 ariaUseDefaultSummary={!props.visParams.ariaLabel}
-                {...getOverridesFor(overrides, 'settings')}
+                {...settingsOverrides}
               />
               <Partition
                 id={visType}
