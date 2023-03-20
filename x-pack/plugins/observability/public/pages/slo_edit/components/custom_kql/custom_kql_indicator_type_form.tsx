@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -15,15 +14,16 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Controller, useFormContext } from 'react-hook-form';
 import { CreateSLOInput } from '@kbn/slo-schema';
-
+import React from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import {
   Field,
   useFetchIndexPatternFields,
 } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
-import { IndexSelection } from '../custom_common/index_selection';
+import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
+import { IndexSelection } from '../custom_common/index_selection';
 
 interface Option {
   label: string;
@@ -32,7 +32,6 @@ interface Option {
 
 export function CustomKqlIndicatorTypeForm() {
   const { control, watch, getFieldState } = useFormContext<CreateSLOInput>();
-
   const { isLoading, data: indexFields } = useFetchIndexPatternFields(
     watch('indicator.params.index')
   );
@@ -87,13 +86,7 @@ export function CustomKqlIndicatorTypeForm() {
                     !!watch('indicator.params.index') &&
                     !!field.value &&
                     timestampFields.some((timestampField) => timestampField.name === field.value)
-                      ? [
-                          {
-                            value: field.value,
-                            label: field.value,
-                            'data-test-subj': `customKqlIndicatorFormTimestampFieldSelectedValue`,
-                          },
-                        ]
+                      ? [{ value: field.value, label: field.value }]
                       : []
                   }
                   singleSelection={{ asPlainText: true }}
@@ -192,6 +185,8 @@ export function CustomKqlIndicatorTypeForm() {
           }
         />
       </EuiFlexItem>
+
+      <DataPreviewChart />
     </EuiFlexGroup>
   );
 }

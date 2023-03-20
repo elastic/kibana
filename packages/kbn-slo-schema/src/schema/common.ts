@@ -53,6 +53,11 @@ const historicalSummarySchema = t.intersection([
   summarySchema,
 ]);
 
+const previewDataSchema = t.type({
+  date: dateType,
+  sliValue: t.number,
+});
+
 const dateRangeSchema = t.type({ from: dateType, to: dateType });
 
 export type { SummarySchema };
@@ -64,6 +69,7 @@ export {
   dateType,
   errorBudgetSchema,
   historicalSummarySchema,
+  previewDataSchema,
   statusSchema,
   summarySchema,
 };

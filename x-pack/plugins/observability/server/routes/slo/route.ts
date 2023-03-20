@@ -11,6 +11,7 @@ import {
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
   findSLOParamsSchema,
+  getPreviewDataParamsSchema,
   getSLODiagnosisParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
@@ -41,6 +42,7 @@ import type { IndicatorTypes } from '../../domain/models';
 import type { ObservabilityRequestHandlerContext } from '../../types';
 import { ManageSLO } from '../../services/slo/manage_slo';
 import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
+import { GetPreviewData } from '../../services/slo/get_preview_data';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
@@ -303,6 +305,19 @@ const getSloDiagnosisRoute = createObservabilityServerRoute({
   },
 });
 
+const getPreviewData = createObservabilityServerRoute({
+  endpoint: 'POST /internal/observability/slos/_preview',
+  options: {
+    tags: ['access:slo_read'],
+  },
+  params: getPreviewDataParamsSchema,
+  handler: async ({ context, params }) => {
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const service = new GetPreviewData(esClient);
+    return await service.execute(params.body);
+  },
+});
+
 export const sloRouteRepository = {
   ...createSLORoute,
   ...deleteSLORoute,
@@ -314,4 +329,5 @@ export const sloRouteRepository = {
   ...updateSLORoute,
   ...getDiagnosisRoute,
   ...getSloDiagnosisRoute,
+  ...getPreviewData,
 };
