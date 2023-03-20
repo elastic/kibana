@@ -14,13 +14,12 @@ import { AlertsPage } from './pages/alerts/alerts';
 import { AlertDetails } from './pages/alert_details/alert_details';
 import { CasesPage } from './pages/cases/cases';
 import { OverviewPage } from './pages/overview/overview';
-import { RulesPage } from './pages/rules';
+import { RulesPage } from './pages/rules/rules';
 import { RuleDetailsPage } from './pages/rule_details';
 import { SlosPage } from './pages/slos/slos';
 import { SloDetailsPage } from './pages/slo_details/slo_details';
 import { SloEditPage } from './pages/slo_edit/slo_edit';
 import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
-import { casesPath } from '../../common';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -59,6 +58,7 @@ export const OBSERVABILITY_BASE_PATH = '/app/observability';
 export const OVERVIEW_URL = '/overview';
 export const ALERTS_URL = '/alerts';
 export const ALERT_DETAIL_URL = '/alerts/:alertId';
+export const CASES_URL = '/cases';
 export const EXPLORATORY_VIEW_URL = '/exploratory-view/';
 export const RULES_URL = `${ALERTS_URL}/rules`;
 export const RULE_DETAIL_URL = `${RULES_URL}/:ruleId'`;
@@ -108,7 +108,7 @@ export const routes = {
     params: {},
     exact: true,
   },
-  [casesPath]: {
+  [CASES_URL]: {
     handler: () => {
       return <CasesPage />;
     },

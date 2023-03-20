@@ -44,7 +44,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { RuleDetailsLocatorDefinition } from './routes/locators/rule_details';
-import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
+import { observabilityAppId, observabilityFeatureId } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './routes/pages/overview/helpers/data_handler';
 import {
@@ -61,6 +61,7 @@ import { createExploratoryViewUrl } from './components/shared/exploratory_view/c
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
 import { registerObservabilityRuleTypes } from './plugin/rule_registry/register_observability_rule_types';
+import { CASES_URL } from './routes/routes';
 
 export interface ConfigSchema {
   unsafe: {
@@ -160,7 +161,7 @@ export class Plugin
       path: '/slos',
     },
     getCasesDeepLinks({
-      basePath: casesPath,
+      basePath: CASES_URL,
       extend: {
         [CasesDeepLinkId.cases]: {
           order: 8003,

@@ -58,15 +58,14 @@ import { RuleDetailsPathParams, TabId } from './types';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
-import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
 import { PageTitle } from './components';
 import { getHealthColor } from './config';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../routes';
-import { ALERT_STATUS_ALL } from '../../../../common/constants';
-import { AlertStatus } from '../../../../common/typings';
-import { observabilityFeatureId, ruleDetailsLocatorID } from '../../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
+import type { AlertStatus } from '../../../../common/typings';
+import { ALERT_STATUS_ALL } from '../../../../common/constants';
+import { ruleDetailsLocatorID, observabilityFeatureId } from '../../../../common';
 
 export function RuleDetailsPage() {
   const {
@@ -218,7 +217,9 @@ export function RuleDetailsPage() {
     },
     {
       href: http.basePath.prepend(paths.observability.rules),
-      text: RULES_BREADCRUMB_TEXT,
+      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+        defaultMessage: 'Rules',
+      }),
     },
     {
       text: rule && rule.name,

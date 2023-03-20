@@ -7,13 +7,13 @@
 
 import React, { Suspense, useState } from 'react';
 import { CasesPermissions } from '@kbn/cases-plugin/common';
-import { casesPath, observabilityFeatureId } from '../../../../../common';
+import { observabilityFeatureId } from '../../../../../common';
 import { useKibana } from '../../../../utils/kibana_react';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useFetchAlertDetail } from '../../../../hooks/use_fetch_alert_detail';
 import { useFetchAlertData } from '../../../../hooks/use_fetch_alert_data';
 import { LazyAlertsFlyout } from '../../../..';
-import { paths } from '../../../routes';
+import { paths, CASES_URL } from '../../../routes';
 
 export interface CasesProps {
   permissions: CasesPermissions;
@@ -45,7 +45,7 @@ export function Cases({ permissions }: CasesProps) {
   return (
     <>
       <CasesList
-        basePath={casesPath}
+        basePath={CASES_URL}
         features={{ alerts: { sync: false, isExperimental: false } }}
         owner={[observabilityFeatureId]}
         permissions={permissions}
