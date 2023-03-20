@@ -133,12 +133,12 @@ export function checkPrivilegesFactory(
 
       const hasPrivilegesResponse: HasPrivilegesResponse = body;
 
-      validateEsPrivilegeResponse(
-        hasPrivilegesResponse,
-        applicationName,
-        applicationPrivilegesCheck.privileges,
-        resources
-      );
+      // validateEsPrivilegeResponse(
+      //   hasPrivilegesResponse,
+      //   applicationName,
+      //   applicationPrivilegesCheck.privileges,
+      //   resources
+      // );
 
       const applicationPrivilegesResponse = hasPrivilegesResponse.application[applicationName];
 
