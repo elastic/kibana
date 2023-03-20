@@ -84,7 +84,7 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
           />
         }
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="sectionError"
       >
         <p>{error.message}</p>

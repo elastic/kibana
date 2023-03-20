@@ -69,7 +69,7 @@ export function AddEnvironments({
   if (!canCreateJob) {
     return (
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         body={<>{ML_ERRORS.MISSING_WRITE_PRIVILEGES}</>}
       />
     );

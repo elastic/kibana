@@ -53,7 +53,7 @@ export const TransformAlertFlyout: FC<TransformAlertFlyoutProps> = ({
       });
     }
 
-    return triggersActionsUi.getAddAlertFlyout({
+    return triggersActionsUi.getAddRuleFlyout({
       ...commonProps,
       consumer: 'stackAlerts',
       canChangeTrigger: false,
