@@ -147,7 +147,8 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
   } = useValues(MLInferenceLogic);
   const { setAddInferencePipelineStep } = useActions(MLInferenceLogic);
   const navSteps: EuiStepsHorizontalProps['steps'] = [
-    { // Configure
+    {
+      // Configure
       onClick: () => setAddInferencePipelineStep(AddInferencePipelineSteps.Configuration),
       status: isConfigureStepValid ? 'complete' : 'disabled',
       title: i18n.translate(
@@ -157,7 +158,8 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
         }
       ),
     },
-    { // Fields
+    {
+      // Fields
       onClick: () => {
         if (!isConfigureStepValid) return;
         setAddInferencePipelineStep(AddInferencePipelineSteps.Fields);
@@ -170,7 +172,8 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
         }
       ),
     },
-    { // Test
+    {
+      // Test
       onClick: () => {
         if (!isPipelineDataValid) return;
         setAddInferencePipelineStep(AddInferencePipelineSteps.Test);
@@ -183,7 +186,8 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
         }
       ),
     },
-    { // Review
+    {
+      // Review
       onClick: () => {
         if (!isPipelineDataValid) return;
         setAddInferencePipelineStep(AddInferencePipelineSteps.Review);
@@ -217,7 +221,11 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
 export const AddInferencePipelineFooter: React.FC<
   AddInferencePipelineFlyoutProps & { ingestionMethod: string }
 > = ({ ingestionMethod, onClose }) => {
-  const { addInferencePipelineModal: modal, isPipelineDataValid, isConfigureStepValid } = useValues(MLInferenceLogic);
+  const {
+    addInferencePipelineModal: modal,
+    isPipelineDataValid,
+    isConfigureStepValid,
+  } = useValues(MLInferenceLogic);
   const { attachPipeline, createPipeline, setAddInferencePipelineStep } =
     useActions(MLInferenceLogic);
 

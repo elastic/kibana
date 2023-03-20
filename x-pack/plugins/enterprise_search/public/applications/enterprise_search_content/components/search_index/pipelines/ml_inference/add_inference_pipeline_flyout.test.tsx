@@ -376,7 +376,7 @@ describe('AddInferencePipelineFlyout', () => {
       expect(actions.setAddInferencePipelineStep).toHaveBeenCalledWith(
         AddInferencePipelineSteps.Configuration
       );
-    });    
+    });
     it('renders back button on test step', () => {
       setMockValues({
         ...DEFAULT_VALUES,

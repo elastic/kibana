@@ -57,8 +57,7 @@ export const ConfigureFields: React.FC = () => {
     supportedMLModels,
     sourceFields,
   } = useValues(MLInferenceLogic);
-  const { setInferencePipelineConfiguration } =
-    useActions(MLInferenceLogic);
+  const { setInferencePipelineConfiguration } = useActions(MLInferenceLogic);
   const { ingestionMethod } = useValues(IndexViewLogic);
 
   const { destinationField, modelID, pipelineName, sourceField } = configuration;
@@ -84,7 +83,7 @@ export const ConfigureFields: React.FC = () => {
             'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.description',
             {
               defaultMessage:
-                "Choose fields to be enhanced from your existing documents or manually enter in fields you anticipate using.",
+                'Choose fields to be enhanced from your existing documents or manually enter in fields you anticipate using.',
             }
           )}
         </p>

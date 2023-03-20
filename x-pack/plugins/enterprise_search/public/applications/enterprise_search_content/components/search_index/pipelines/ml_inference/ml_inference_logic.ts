@@ -323,7 +323,7 @@ export const MLInferenceLogic = kea<
       (modal: AddInferencePipelineModal) => ({
         ...validateInferencePipelineConfiguration(modal.configuration),
         ...validateInferencePipelineFields(modal.configuration),
-      })
+      }),
     ],
     isConfigureStepValid: [
       () => [selectors.addInferencePipelineModal],
@@ -331,7 +331,7 @@ export const MLInferenceLogic = kea<
         const errors = validateInferencePipelineConfiguration(modal.configuration);
 
         return Object.keys(errors).length === 0;
-      }
+      },
     ],
     isLoading: [
       () => [selectors.mlModelsStatus, selectors.mappingStatus],
