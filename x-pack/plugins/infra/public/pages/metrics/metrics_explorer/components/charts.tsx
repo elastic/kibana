@@ -120,6 +120,7 @@ export const MetricsExplorerCharts = ({
           {data.pageInfo.afterKey ? (
             <div style={{ margin: '16px 0' }}>
               <EuiButton
+                data-test-subj="infraMetricsExplorerChartsLoadMoreChartsButton"
                 isLoading={loading}
                 size="s"
                 onClick={() => onLoadMore(data.pageInfo.afterKey || null)}

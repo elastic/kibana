@@ -108,7 +108,9 @@ export function SloListItem({
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexItem>
                   <EuiText size="s">
-                    <EuiLink onClick={handleViewDetails}>{slo.name}</EuiLink>
+                    <EuiLink data-test-subj="o11ySloListItemLink" onClick={handleViewDetails}>
+                      {slo.name}
+                    </EuiLink>
                   </EuiText>
                 </EuiFlexItem>
                 <SloBadges slo={slo} activeAlerts={activeAlerts} />

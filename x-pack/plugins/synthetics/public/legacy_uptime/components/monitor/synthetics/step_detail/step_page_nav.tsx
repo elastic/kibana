@@ -44,6 +44,7 @@ export const StepPageNavigation = ({
     <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          data-test-subj="syntheticsStepPageNavigationButton"
           onClick={handlePreviousRun}
           disabled={!previousCheckGroup}
           iconType="arrowLeft"
@@ -57,6 +58,7 @@ export const StepPageNavigation = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          data-test-subj="syntheticsStepPageNavigationButton"
           onClick={handleNextRun}
           disabled={!nextCheckGroup}
           iconType="arrowRight"
