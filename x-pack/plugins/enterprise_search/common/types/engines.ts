@@ -13,7 +13,7 @@ export interface EnterpriseSearchEnginesResponse {
     size: number;
     total: number;
   };
-  params: { q?: string; from: number; size: number };
+  params: { from: number; q?: string; size: number };
   results: EnterpriseSearchEngine[];
 }
 
@@ -54,7 +54,6 @@ export interface SchemaFieldIndex {
   type: string;
 }
 
-// TODO: This should replace EnterpriseSearchSchemaField once parseFieldsCapabilities is ready
 export interface SchemaField {
   fields?: SchemaField[];
   indices: SchemaFieldIndex[];
