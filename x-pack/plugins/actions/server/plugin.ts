@@ -28,7 +28,6 @@ import {
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-  RunContext,
 } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
