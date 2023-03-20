@@ -21,6 +21,15 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 
+export interface ServicesWithoutTransactionsResponse {
+  services: Array<{
+    serviceName: string;
+    environments: string[];
+    agentName: AgentName;
+  }>;
+  maxServiceCountExceeded: boolean;
+}
+
 export async function getServicesWithoutTransactions({
   environment,
   apmEventClient,
@@ -43,7 +52,7 @@ export async function getServicesWithoutTransactions({
   randomSampler: RandomSampler;
   documentType: ApmDocumentType;
   rollupInterval: RollupInterval;
-}) {
+}): Promise<ServicesWithoutTransactionsResponse> {
   const isServiceTransactionMetric =
     documentType === ApmDocumentType.ServiceTransactionMetric;
 

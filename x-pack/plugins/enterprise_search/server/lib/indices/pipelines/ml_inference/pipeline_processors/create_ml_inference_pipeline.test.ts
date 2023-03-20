@@ -58,6 +58,7 @@ describe('createMlInferencePipeline lib function', () => {
 
     const actualResult = await createMlInferencePipeline(
       pipelineName,
+      undefined,
       modelId,
       sourceField,
       destinationField,
@@ -72,6 +73,7 @@ describe('createMlInferencePipeline lib function', () => {
   it('should convert spaces to underscores in the pipeline name', async () => {
     await createMlInferencePipeline(
       'my pipeline with spaces  ',
+      undefined,
       modelId,
       sourceField,
       destinationField,
@@ -92,6 +94,7 @@ describe('createMlInferencePipeline lib function', () => {
 
     await createMlInferencePipeline(
       pipelineName,
+      undefined,
       modelId,
       sourceField,
       undefined, // Omitted destination field
@@ -119,6 +122,7 @@ describe('createMlInferencePipeline lib function', () => {
 
     await createMlInferencePipeline(
       pipelineName,
+      undefined,
       modelId,
       sourceField,
       destinationField,
@@ -157,6 +161,7 @@ describe('createMlInferencePipeline lib function', () => {
 
     const actualResult = createMlInferencePipeline(
       pipelineName,
+      undefined,
       modelId,
       sourceField,
       destinationField,

@@ -31,7 +31,7 @@ import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_buck
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { observabilityFeatureId } from '../../../common';
-import { observabilityAlertFeatureIds } from '../../config';
+import { observabilityAlertFeatureIds } from '../../config/alert_feature_ids';
 import type { ObservabilityAppServices } from '../../application/types';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';

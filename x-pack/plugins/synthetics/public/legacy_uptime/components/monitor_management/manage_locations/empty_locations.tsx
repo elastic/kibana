@@ -34,6 +34,7 @@ export const EmptyLocations = ({
       }
       actions={
         <EuiButton
+          data-test-subj="syntheticsEmptyLocationsButton"
           disabled={disabled}
           color="primary"
           fill
@@ -57,6 +58,7 @@ export const EmptyLocations = ({
 
 export const PrivateLocationDocsLink = ({ label }: { label?: string }) => (
   <EuiLink
+    data-test-subj="syntheticsPrivateLocationDocsLinkLink"
     href="https://www.elastic.co/guide/en/observability/current/uptime-set-up-choose-agent.html#private-locations"
     target="_blank"
   >
