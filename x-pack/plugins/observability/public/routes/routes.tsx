@@ -10,6 +10,7 @@ import React, { lazy } from 'react';
 import { useHistory } from 'react-router-dom';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { DatePickerContextProvider } from '../context/date_picker_context';
+import { LoadingObservability } from '../components/loading_observability';
 
 const AlertsPageLazy = lazy(() => import('./pages/alerts/alerts'));
 const AlertDetailsPageLazy = lazy(() => import('./pages/alert_details/alert_details'));
@@ -24,16 +25,19 @@ const ObservabilityExploratoryViewLazy = lazy(
   () => import('../components/shared/exploratory_view/obsv_exploratory_view')
 );
 
-const AlertsPage = withSuspense(AlertsPageLazy);
-const AlertDetailsPage = withSuspense(AlertDetailsPageLazy);
-const CasesPage = withSuspense(CasesPageLazy);
-const OverviewPage = withSuspense(OverviewPageLazy);
-const RulesPage = withSuspense(RulesPageLazy);
-const RuleDetailsPage = withSuspense(RuleDetailsPageLazy);
-const SlosPage = withSuspense(SlosPageLazy);
-const SloDetailsPage = withSuspense(SloDetailsPageLazy);
-const SloEditPage = withSuspense(SloEditPageLazy);
-const ObservabilityExploratoryView = withSuspense(ObservabilityExploratoryViewLazy);
+const AlertsPage = withSuspense(AlertsPageLazy, <LoadingObservability />);
+const AlertDetailsPage = withSuspense(AlertDetailsPageLazy, <LoadingObservability />);
+const CasesPage = withSuspense(CasesPageLazy, <LoadingObservability />);
+const OverviewPage = withSuspense(OverviewPageLazy, <LoadingObservability />);
+const RulesPage = withSuspense(RulesPageLazy, <LoadingObservability />);
+const RuleDetailsPage = withSuspense(RuleDetailsPageLazy, <LoadingObservability />);
+const SlosPage = withSuspense(SlosPageLazy, <LoadingObservability />);
+const SloDetailsPage = withSuspense(SloDetailsPageLazy, <LoadingObservability />);
+const SloEditPage = withSuspense(SloEditPageLazy, <LoadingObservability />);
+const ObservabilityExploratoryView = withSuspense(
+  ObservabilityExploratoryViewLazy,
+  <LoadingObservability />
+);
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
