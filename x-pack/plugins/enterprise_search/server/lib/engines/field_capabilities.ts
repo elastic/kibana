@@ -53,7 +53,6 @@ export const parseFieldsCapabilities = (fieldCaps: FieldCapsResponse): SchemaFie
 };
 
 export const isTopLevelField = (fieldName: string): boolean => {
-  if (fieldName.startsWith('_')) return false;
   if (fieldName.includes('.')) return false;
   return true;
 };
