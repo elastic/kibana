@@ -8,7 +8,7 @@
 import React, { useMemo, useState } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
-import { PropertiesTab } from './metadata/metadata';
+import { MetadataTab } from './metadata/metadata';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import type { MetricsTimeInput } from '../../../metric_detail/hooks/use_metrics_time';
 
@@ -20,7 +20,7 @@ interface Props {
 
 export const Flyout = ({ node, currentTimeRange, onClose }: Props) => {
   const tabs = useMemo(() => {
-    const tabConfigs = [PropertiesTab];
+    const tabConfigs = [MetadataTab];
     return tabConfigs.map((m) => {
       const TabContent = m.content;
       return {

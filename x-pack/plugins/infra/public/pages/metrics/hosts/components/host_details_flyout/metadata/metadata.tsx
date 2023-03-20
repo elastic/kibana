@@ -8,13 +8,13 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { EuiText } from '@elastic/eui';
 import { useSourceContext } from '../../../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../../../common/inventory_models';
 import type { InventoryItemType } from '../../../../../../../common/inventory_models/types';
 import { useMetadata } from '../../../../metric_detail/hooks/use_metadata';
 import { Table } from './table';
-import { getAllFields } from './build_fields';
+import { getAllFields } from './utils';
 import type { HostNodeRow } from '../../../hooks/use_hosts_table';
 import type { MetricsTimeInput } from '../../../../metric_detail/hooks/use_metrics_time';
 
@@ -25,7 +25,7 @@ export interface TabProps {
   node: HostNodeRow;
 }
 
-const TabComponent = ({ node, currentTimeRange }: TabProps) => {
+const Metadata = ({ node, currentTimeRange }: TabProps) => {
   const nodeId = node.name;
   const inventoryModel = findInventoryModel(NODE_TYPE);
   const { sourceId } = useSourceContext();
@@ -46,22 +46,16 @@ const TabComponent = ({ node, currentTimeRange }: TabProps) => {
     return <LoadingPlaceholder />;
   }
 
-  return (
-    <>
-      {metadata && (
-        <TableWrapper>
-          <Table rows={fields} />
-        </TableWrapper>
-      )}
-    </>
+  return fields.length > 0 ? (
+    <Table rows={fields} />
+  ) : (
+    <EuiText>
+      {i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
+        defaultMessage: 'No metadata found for this host',
+      })}
+    </EuiText>
   );
 };
-
-const TableWrapper = euiStyled.div`
-  &:not(:last-child) {
-    margin-bottom: 16px
-  }
-`;
 
 const LoadingPlaceholder = () => {
   return (
@@ -80,10 +74,10 @@ const LoadingPlaceholder = () => {
   );
 };
 
-export const PropertiesTab = {
+export const MetadataTab = {
   id: 'properties',
   name: i18n.translate('xpack.infra.nodeDetails.tabs.metadata.title', {
     defaultMessage: 'Metadata',
   }),
-  content: TabComponent,
+  content: Metadata,
 };
