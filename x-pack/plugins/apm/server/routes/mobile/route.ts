@@ -15,14 +15,17 @@ import {
   getMobileHttpRequests,
   HttpRequestsTimeseries,
 } from './get_mobile_http_requests';
-import { getMobileFilters } from './get_mobile_filters';
+import { getMobileFilters, MobileFiltersResponse } from './get_mobile_filters';
 import { getMobileSessions, SessionsTimeseries } from './get_mobile_sessions';
 import { getMobileStatsPeriods, MobilePeriodStats } from './get_mobile_stats';
 import {
   getMobileLocationStatsPeriods,
   MobileLocationStats,
 } from './get_mobile_location_stats';
-import { getMobileTermsByField } from './get_mobile_terms_by_field';
+import {
+  getMobileTermsByField,
+  MobileTermsByFieldResponse,
+} from './get_mobile_terms_by_field';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -43,7 +46,7 @@ const mobileFiltersRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    mobileFilters: Awaited<ReturnType<typeof getMobileFilters>>;
+    mobileFilters: MobileFiltersResponse;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -241,7 +244,7 @@ const mobileTermsByFieldRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    terms: Awaited<ReturnType<typeof getMobileTermsByField>>;
+    terms: MobileTermsByFieldResponse;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;

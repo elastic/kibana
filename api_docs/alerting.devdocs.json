@@ -99,7 +99,7 @@
                 "section": "def-common.RuleLastRun",
                 "text": "RuleLastRun"
               },
-              " | null | undefined; nextRun?: Date | null | undefined; running?: boolean | null | undefined; viewInAppRelativeUrl?: string | undefined; }"
+              " | null | undefined; nextRun?: Date | null | undefined; revision: number; running?: boolean | null | undefined; viewInAppRelativeUrl?: string | undefined; }"
             ],
             "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
             "deprecated": false,
@@ -1297,6 +1297,21 @@
             "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.BulkEditOptionsFilter.shouldIncrementRevision",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldIncrementRevision",
+            "description": [],
+            "signature": [
+              "ShouldIncrementRevision",
+              "<Params> | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1366,6 +1381,21 @@
             "description": [],
             "signature": [
               "RuleParamsModifier",
+              "<Params> | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.BulkEditOptionsIds.shouldIncrementRevision",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldIncrementRevision",
+            "description": [],
+            "signature": [
+              "ShouldIncrementRevision",
               "<Params> | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/rules_client/methods/bulk_edit.ts",
@@ -6614,6 +6644,17 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-common.Rule.revision",
+            "type": "number",
+            "tags": [],
+            "label": "revision",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-common.Rule.running",
             "type": "CompoundType",
             "tags": [],
@@ -8861,7 +8902,7 @@
             "section": "def-common.RuleLastRun",
             "text": "RuleLastRun"
           },
-          " | null | undefined; nextRun?: Date | null | undefined; running?: boolean | null | undefined; viewInAppRelativeUrl?: string | undefined; }"
+          " | null | undefined; nextRun?: Date | null | undefined; revision: number; running?: boolean | null | undefined; viewInAppRelativeUrl?: string | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,

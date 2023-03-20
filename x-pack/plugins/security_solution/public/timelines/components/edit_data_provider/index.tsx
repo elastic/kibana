@@ -272,7 +272,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
               <>
                 <EuiCallOut
                   color="warning"
-                  iconType="alert"
+                  iconType="warning"
                   size="s"
                   title={i18n.UNAVAILABLE_OPERATOR(updatedOperator[0].label)}
                 />

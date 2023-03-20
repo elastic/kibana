@@ -18,8 +18,3 @@ export type {
   DeleteIn,
   SearchIn,
 } from './rpc';
-
-export { procedureNames } from './rpc/constants';
-
-// intentionally not exporting schemas to not include @kbn/schema in the public bundle
-// export { schemas as rpcSchemas } from './rpc';
