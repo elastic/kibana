@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { StringOrNull } from '../../../..';
+import { StringOrNull } from '../../../../routes/pages/overview/helpers/data_handler';
 
 interface Props {
   name: StringOrNull;

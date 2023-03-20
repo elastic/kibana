@@ -6,18 +6,17 @@
  */
 
 import { useEffect } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import { useKibana } from '../../../../utils/kibana_react';
 import { useTrackPageview } from '../../../..';
 import { useUiTracker } from '../../../../hooks/use_track_metric';
-import { ObservabilityAppServices } from '../../../plugin/types';
 
 const CAPABILITIES_KEYS = ['logs', 'infrastructure', 'apm', 'uptime'];
 
 export const useOverviewMetrics = ({ hasAnyData }: { hasAnyData: boolean | undefined }) => {
   const {
     application: { capabilities },
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
 
   const trackMetric = useUiTracker({ app: 'observability-overview' });
 

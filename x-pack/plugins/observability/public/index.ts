@@ -123,6 +123,6 @@ export { fromQuery, toQuery } from './utils/url';
 export { getAlertSummaryTimeRange } from './utils/alert_summary_widget';
 export { calculateTimeRangeBucketSize } from './routes/pages/overview/helpers/calculate_bucket_size';
 
-export type { NavigationSection } from './plugin/navigation_registry';
+export type { NavigationSection } from './plugin/navigation_registry/navigation_registry';
 export { convertTo } from '../common/utils/formatters/duration';
 export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';

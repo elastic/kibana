@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { truncate } from 'lodash';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { NewsItem as INewsItem } from '../../../../services/get_news_feed';
+import { NewsItem as INewsItem } from '../helpers/get_news_feed';
 import './news_feed.scss';
 
 interface Props {

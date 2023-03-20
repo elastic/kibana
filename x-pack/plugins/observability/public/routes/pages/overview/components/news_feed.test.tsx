@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { NewsItem } from '../../../../services/get_news_feed';
 import { render } from '../../../../utils/test_helper';
 import { NewsFeed } from './news_feed';
+import type { NewsItem } from '../helpers/get_news_feed';
 
 const newsFeedItems = [
   {

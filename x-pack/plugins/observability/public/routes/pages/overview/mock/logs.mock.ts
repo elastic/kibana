@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FetchData, LogsFetchDataResponse } from '../../../typings';
+import { LogsFetchDataResponse, FetchData } from '../helpers/data_handler';
 
 export const fetchLogsData: FetchData<LogsFetchDataResponse> = () => {
   return Promise.resolve(response);

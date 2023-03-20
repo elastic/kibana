@@ -6,7 +6,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { Stat } from '../typings';
+import { Stat } from '../routes/pages/overview/helpers/data_handler';
 
 export function formatStatValue(stat: Stat) {
   const { value, type } = stat;

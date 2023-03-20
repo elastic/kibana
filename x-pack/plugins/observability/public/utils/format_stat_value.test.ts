@@ -6,7 +6,7 @@
  */
 
 import { formatStatValue } from './format_stat_value';
-import { Stat } from '../typings';
+import type { Stat } from '../routes/pages/overview/helpers/data_handler';
 
 describe('formatStatValue', () => {
   it('formats value as number', () => {
