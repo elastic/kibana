@@ -15,7 +15,7 @@ beforeEach(() => {
 });
 
 const versionInfo = {
-  latest: 'v2',
+  latest: 2,
 } as const;
 
 test('registering a content type', () => {
@@ -45,12 +45,21 @@ test('registering already registered content type throws', () => {
   ).toThrowErrorMatchingInlineSnapshot(`"Content type with id \\"test\\" already registered."`);
 });
 
+test('registering string number version converts it to number', () => {
+  registry.register({
+    id: 'test',
+    version: { latest: '123' },
+  } as any);
+
+  expect(registry.get('test')?.version).toEqual({ latest: 123 });
+});
+
 test('registering without version throws', () => {
   expect(() => {
     registry.register({
       id: 'test',
     } as any);
-  }).toThrowError('Invalid version [undefined]. Must follow the pattern [v${number}]');
+  }).toThrowError('Invalid version [undefined]. Must be an integer.');
 });
 
 test('registering invalid version throws', () => {
@@ -61,13 +70,13 @@ test('registering invalid version throws', () => {
         latest: 'bad',
       },
     } as any);
-  }).toThrowError('Invalid version [bad]. Must follow the pattern [v${number}]');
+  }).toThrowError('Invalid version [bad]. Must be an integer.');
 
   expect(() => {
     registry.register({
       id: 'test',
       version: {
-        latest: 'v0',
+        latest: 0,
       },
     });
   }).toThrowError('Version must be >= 1');
