@@ -5,14 +5,14 @@ for inventory and topology purposes.
 
 ## Documentation
 
-See [docs for the provided APIs in the docs folder](./docs).
+See [docs for the provided APIs in the docs folder](./docs/index.md).
 
 ## Running Tests
 
 There are integration tests for the endpoints implemented thus far as well as for
 the sample data tests. There is also a small set of tests meant to ensure that the
 plugin is not doing anything without the proper config value in place to enable
-the plugin fully. For more on enabling the plugin, see [the docs page](./docs).
+the plugin fully. For more on enabling the plugin, see [the docs page](./docs/index.md).
 
 The "not enabled" tests are run by default in CI. To run them manually, do the following:
 
@@ -36,4 +36,4 @@ This plugin comes with a full "working set" of sample asset documents, meant
 to provide enough data in the correct schema format so that all of the API
 endpoints return expected values.
 
-To create the sample data, follow [the instructions in the REST API docs](./docs#sample-data).
+To create the sample data, follow [the instructions in the REST API docs](./docs/index.md#sample-data).
