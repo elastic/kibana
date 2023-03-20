@@ -86,8 +86,18 @@ export const calculateCspStatusCode = (
     return 'unprivileged';
   if (!installedPolicyTemplates.includes(postureTypeCheck)) return 'not-installed';
   if (healthyAgents === 0) return 'not-deployed';
-  if (indicesStatus.findingsLatest === 'empty' && indicesStatus.findings === 'empty'  && timeSinceInstallationInMinutes < INDEX_TIMEOUT_IN_MINUTES) return 'waiting_for_results';
-  if (indicesStatus.findingsLatest === 'empty' && indicesStatus.findings === 'empty'  && timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
+  if (
+    indicesStatus.findingsLatest === 'empty' &&
+    indicesStatus.findings === 'empty' &&
+    timeSinceInstallationInMinutes < INDEX_TIMEOUT_IN_MINUTES
+  )
+    return 'waiting_for_results';
+  if (
+    indicesStatus.findingsLatest === 'empty' &&
+    indicesStatus.findings === 'empty' &&
+    timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES
+  )
+    return 'index-timeout';
   if (indicesStatus.findingsLatest === 'empty') return 'indexing';
   if (indicesStatus.findings === 'not-empty') return 'indexed';
 
@@ -163,7 +173,7 @@ const getCspStatus = async ({
     ),
     getInstalledPolicyTemplates(packagePolicyService, soClient),
   ]);
- 
+
   const healthyAgentsKspm = await getHealthyAgents(
     soClient,
     installedPackagePoliciesKspm.items,
@@ -297,7 +307,6 @@ export const defineGetCspStatusRoute = (router: CspRouter): void =>
       } catch (err) {
         cspContext.logger.error(`Error getting csp status`);
         cspContext.logger.error(err);
-        console.log(err);
 
         const error = transformError(err);
         return response.customError({

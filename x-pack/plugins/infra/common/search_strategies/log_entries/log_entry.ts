@@ -7,12 +7,13 @@
 
 import * as rt from 'io-ts';
 import { logEntryCursorRT, logEntryFieldRT } from '../../log_entry';
+import { logViewReferenceRT } from '../../log_views';
 import { searchStrategyErrorRT } from '../common/errors';
 
 export const LOG_ENTRY_SEARCH_STRATEGY = 'infra-log-entry';
 
 export const logEntrySearchRequestParamsRT = rt.type({
-  sourceId: rt.string,
+  logView: logViewReferenceRT,
   logEntryId: rt.string,
 });
 

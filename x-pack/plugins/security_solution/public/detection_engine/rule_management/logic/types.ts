@@ -124,7 +124,6 @@ const MetaRule = t.intersection([
   }),
 ]);
 
-// TODO: make a ticket
 export const RuleSchema = t.intersection([
   t.type({
     author: RuleAuthorArray,

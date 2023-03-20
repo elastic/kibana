@@ -29,7 +29,7 @@ than the current time minus the amount of the interval. If data older than
 [float]
 ==== Create the rule
 
-Fill in the <<defining-rules-general-details, rule details>>, then select Tracking containment.
+Fill in the name and optional tags, then select Tracking containment.
 
 [float]
 ==== Define the conditions

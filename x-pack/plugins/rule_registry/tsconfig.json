@@ -16,7 +16,6 @@
     "@kbn/data-plugin",
     "@kbn/alerting-plugin",
     "@kbn/security-plugin",
-    "@kbn/safer-lodash-set",
     "@kbn/rule-data-utils",
     "@kbn/es-query",
     "@kbn/data-views-plugin",
@@ -32,6 +31,7 @@
     "@kbn/logging",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/share-plugin",
+    "@kbn/alerts-as-data-utils",
   ],
   "exclude": [
     "target/**/*",

@@ -16,6 +16,7 @@ import { ControlsExampleStartDeps } from './plugin';
 import { BasicReduxExample } from './basic_redux_example';
 import { EditExample } from './edit_example';
 import { SearchExample } from './search_example';
+import { AddButtonExample } from './add_button_example';
 
 export const renderApp = async (
   { data, navigation }: ControlsExampleStartDeps,
@@ -30,6 +31,8 @@ export const renderApp = async (
         <EditExample />
         <EuiSpacer size="xl" />
         <BasicReduxExample dataViewId={dataViews[0].id!} />
+        <EuiSpacer size="xl" />
+        <AddButtonExample dataViewId={dataViews[0].id!} />
       </>
     ) : (
       <div>{'Install web logs sample data to run controls examples.'}</div>

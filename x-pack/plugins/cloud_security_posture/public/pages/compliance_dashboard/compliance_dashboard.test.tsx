@@ -87,20 +87,30 @@ describe('<ComplianceDashboard />', () => {
 
   it('no findings state: not-deployed - shows NotDeployed instead of dashboard', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: { kspm: { status: 'not-deployed' }, cspm: { status: 'not-deployed' } },
-      })
-    );
-    (useCISIntegrationPoliciesLink as jest.Mock).mockImplementation(() => chance.url());
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    createReactQueryResponse({
+      status: 'success',
+      data: {
+        kspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
+        cspm: { status: 'not-deployed', healthyAgents: 0, installedPackagePolicies: 1 },
+      },
+    })
+  );
+  (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    isSuccess: true,
+    isLoading: false,
+    data: { stats: { totalFindings: 0 } },
+  }));
+  (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    isSuccess: true,
+    isLoading: false,
+    data: { stats: { totalFindings: 0 } },
+  }));
 
-    renderComplianceDashboardPage();
+  renderComplianceDashboardPage();
 
     expectIdsInDoc({
       be: [NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED],
       notToBe: [
-        DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
@@ -110,19 +120,30 @@ describe('<ComplianceDashboard />', () => {
 
   it('no findings state: indexing - shows Indexing instead of dashboard', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: { kspm: { status: 'indexing' }, cspm: { status: 'indexing' } },
-      })
-    );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    createReactQueryResponse({
+      status: 'success',
+      data: {
+        kspm: { status: 'indexing', healthyAgents: 1, installedPackagePolicies: 1 },
+        cspm: { status: 'indexing', healthyAgents: 1, installedPackagePolicies: 1 },
+      },
+    })
+  );
+  (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    isSuccess: true,
+    isLoading: false,
+    data: { stats: { totalFindings: 1 } },
+  }));
+  (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    isSuccess: true,
+    isLoading: false,
+    data: { stats: { totalFindings: 1 } },
+  }));
 
-    renderComplianceDashboardPage();
+  renderComplianceDashboardPage();
 
     expectIdsInDoc({
       be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING],
       notToBe: [
-        DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
@@ -132,19 +153,30 @@ describe('<ComplianceDashboard />', () => {
 
   it('no findings state: index-timeout - shows IndexTimeout instead of dashboard', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: { kspm: { status: 'index-timeout' }, cspm: { status: 'index-timeout' } },
-      })
-    );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    createReactQueryResponse({
+      status: 'success',
+      data: {
+        kspm: { status: 'index-timeout', healthyAgents: 1, installedPackagePolicies: 1 },
+        cspm: { status: 'index-timeout', healthyAgents: 1, installedPackagePolicies: 1 },
+      },
+    })
+  );
+  (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    isSuccess: true,
+    isLoading: false,
+    data: { stats: { totalFindings: 0 } },
+  }));
+  (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    isSuccess: true,
+    isLoading: false,
+    data: { stats: { totalFindings: 0 } },
+  }));
 
-    renderComplianceDashboardPage();
+  renderComplianceDashboardPage();
 
     expectIdsInDoc({
       be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT],
       notToBe: [
-        DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
         NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
@@ -154,19 +186,30 @@ describe('<ComplianceDashboard />', () => {
 
   it('no findings state: unprivileged - shows Unprivileged instead of dashboard', () => {
     (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: { kspm: { status: 'unprivileged' }, cspm: { status: 'unprivileged' } },
-      })
-    );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    createReactQueryResponse({
+      status: 'success',
+      data: {
+        kspm: { status: 'unprivileged', healthyAgents: 1, installedPackagePolicies: 1 },
+        cspm: { status: 'unprivileged', healthyAgents: 1, installedPackagePolicies: 1 },
+      },
+    })
+  );
+  (useKspmStatsApi as jest.Mock).mockImplementation(() => ({
+    isSuccess: true,
+    isLoading: false,
+    data: { stats: { totalFindings: 0 } },
+  }));
+  (useCspmStatsApi as jest.Mock).mockImplementation(() => ({
+    isSuccess: true,
+    isLoading: false,
+    data: { stats: { totalFindings: 0 } },
+  }));
 
-    renderComplianceDashboardPage();
+  renderComplianceDashboardPage();
 
     expectIdsInDoc({
       be: [NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED],
       notToBe: [
-        DASHBOARD_CONTAINER,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,

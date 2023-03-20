@@ -202,6 +202,10 @@ $controlMinWidth: $euiSize * 14;
     box-shadow: 0 0 0 1px $euiColorLightShade;
   }
 
+  &--twoLine {
+    top: (-$euiSizeXS) !important;
+  }
+
   &--fatalError {
     padding: $euiSizeXS;
     border-radius: $euiBorderRadius;

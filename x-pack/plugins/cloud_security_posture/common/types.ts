@@ -103,4 +103,5 @@ export type BenchmarkName = CspRuleTemplateMetadata['benchmark']['name'];
 
 // Fleet Integration types
 export type PostureInput = typeof SUPPORTED_CLOUDBEAT_INPUTS[number];
-export type PosturePolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
+export type CloudSecurityPolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[number];
+export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' | 'cspm'>;

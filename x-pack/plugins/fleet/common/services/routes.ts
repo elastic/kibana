@@ -26,6 +26,10 @@ import {
 } from '../constants';
 
 export const epmRouteService = {
+  getVerificationKeyIdPath: () => {
+    return EPM_API_ROUTES.VERIFICATION_KEY_ID;
+  },
+
   getCategoriesPath: () => {
     return EPM_API_ROUTES.CATEGORIES_PATTERN;
   },

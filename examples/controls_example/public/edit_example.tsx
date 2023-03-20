@@ -104,12 +104,14 @@ export const EditExample = () => {
           </>
         ) : null}
         <ControlGroupRenderer
-          getInitialInput={async (initialInput, builder) => {
+          getCreationOptions={async (initialInput, builder) => {
             const persistedInput = await onLoad();
             return {
-              ...initialInput,
-              ...persistedInput,
-              viewMode: ViewMode.EDIT,
+              initialInput: {
+                ...initialInput,
+                ...persistedInput,
+                viewMode: ViewMode.EDIT,
+              },
             };
           }}
           onLoadComplete={async (newControlGroup) => {

@@ -38,6 +38,8 @@ export const DETECTIONS_RULE_MANAGEMENT_URL = 'app/security/rules';
 export const DETECTIONS = '/app/siem#/detections';
 export const SECURITY_DETECTIONS_URL = '/app/security/detections';
 export const SECURITY_DETECTIONS_RULES_URL = '/app/security/detections/rules';
+export const SECURITY_DETECTIONS_RULES_MANAGEMENT_URL = '/app/security/detections/rules/management';
+export const SECURITY_DETECTIONS_RULES_MONITORING_URL = '/app/security/detections/rules/monitoring';
 export const SECURITY_DETECTIONS_RULES_CREATION_URL = '/app/security/detections/rules/create';
 
 export const HOSTS_PAGE_TAB_URLS = {

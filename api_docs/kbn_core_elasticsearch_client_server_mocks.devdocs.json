@@ -21,57 +21,26 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-        "id": "def-common.createAgentStoreMock",
+        "id": "def-common.createAgentStatsProviderMock",
         "type": "Function",
         "tags": [],
-        "label": "createAgentStoreMock",
+        "label": "createAgentStatsProviderMock",
         "description": [],
         "signature": [
-          "(agents?: Set<",
+          "() => jest.Mocked<",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-internal",
             "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
-            "section": "def-common.NetworkAgent",
-            "text": "NetworkAgent"
+            "section": "def-common.AgentStatsProvider",
+            "text": "AgentStatsProvider"
           },
-          ">) => ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "scope": "common",
-            "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
-            "section": "def-common.AgentStore",
-            "text": "AgentStore"
-          }
+          ">"
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/agent_manager.mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "id": "def-common.createAgentStoreMock.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "agents",
-            "description": [],
-            "signature": [
-              "Set<",
-              {
-                "pluginId": "@kbn/core-elasticsearch-client-server-internal",
-                "scope": "common",
-                "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
-                "section": "def-common.NetworkAgent",
-                "text": "NetworkAgent"
-              },
-              ">"
-            ],
-            "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/agent_manager.mocks.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }

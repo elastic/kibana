@@ -65,8 +65,7 @@ const NotDeployed = () => {
         <p>
           <FormattedMessage
             id="xpack.csp.noFindingsStates.noAgentsDeployed.noAgentsDeployedDescription"
-            defaultMessage="To see findings, please finish the setup process by installing an elastic agent on your
-          Kubernetes cluster."
+            defaultMessage="In order to begin detecting security misconfigurations, you'll need to deploy elastic-agent into the cloud account or Kubernetes cluster you want to monitor."
           />
         </p>
       }
@@ -189,14 +188,12 @@ export const NoFindingsStates = (posturetype: postureTypes) => {
   const statusCspm = getSetupStatus.data?.cspm?.status;
   const indicesStatus = getSetupStatus.data?.indicesDetails;
   const status = posturetype.posturetype === 'cspm' ? statusCspm : statusKspm;
-  // const status = getSetupStatus.data?.kspm?.status;
   const unprivilegedIndices =
     indicesStatus &&
     indicesStatus
       .filter((idxDetails) => idxDetails.status === 'unprivileged')
       .map((idxDetails: IndexDetails) => idxDetails.index)
       .sort((a, b) => a.localeCompare(b));
-
   const render = () => {
     if (status === 'not-deployed') return <NotDeployed />; // integration installed, but no agents added
     if (status === 'indexing') return <Indexing />; // agent added, index timeout hasn't passed since installation
