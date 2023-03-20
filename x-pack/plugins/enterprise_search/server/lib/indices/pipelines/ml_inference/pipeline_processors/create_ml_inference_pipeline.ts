@@ -14,7 +14,6 @@ import type {
   CreateMlInferencePipelineResponse,
   InferencePipelineInferenceConfig,
 } from '../../../../../../common/types/pipelines';
-import { MlInferencePipeline } from '../../../../../../common/types/pipelines';
 import { addSubPipelineToIndexSpecificMlPipeline } from '../../../../../utils/create_ml_inference_pipeline';
 import { getPrefixedInferencePipelineProcessorName } from '../../../../../utils/ml_inference_pipeline_utils';
 import { formatMlPipelineBody } from '../../../../pipelines/create_pipeline_definitions';
@@ -97,22 +96,20 @@ export const createMlInferencePipeline = async (
     throw new Error(ErrorCode.PIPELINE_ALREADY_EXISTS);
   }
 
-  let mlInferencePipeline: MlInferencePipeline;
-  if (modelId && sourceField) {
-    // Generate pipeline with default processors
-    mlInferencePipeline = await formatMlPipelineBody(
-      inferencePipelineGeneratedName,
-      modelId,
-      sourceField,
-      destinationField || formatPipelineName(pipelineName),
-      inferenceConfig,
-      esClient
-    );
-  } else if (pipelineDefinition) {
-    mlInferencePipeline = { ...pipelineDefinition, version: 1 };
-  } else {
+  if (!(modelId && sourceField) && !pipelineDefinition) {
     throw new Error(ErrorCode.PARAMETER_CONFLICT);
   }
+  const mlInferencePipeline =
+    modelId && sourceField
+      ? await formatMlPipelineBody(
+          inferencePipelineGeneratedName,
+          modelId,
+          sourceField,
+          destinationField || formatPipelineName(pipelineName),
+          inferenceConfig,
+          esClient
+        )
+      : { ...pipelineDefinition, version: 1 };
 
   await esClient.ingest.putPipeline({
     id: inferencePipelineGeneratedName,

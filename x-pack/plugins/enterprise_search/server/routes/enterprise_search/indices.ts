@@ -18,10 +18,7 @@ import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { AlwaysShowPattern } from '../../../common/types/indices';
 
-import type {
-  CreateMlInferencePipelineResponse,
-  AttachMlInferencePipelineResponse,
-} from '../../../common/types/pipelines';
+import type { AttachMlInferencePipelineResponse } from '../../../common/types/pipelines';
 
 import { deleteConnectorById } from '../../lib/connectors/delete_connector';
 
@@ -454,10 +451,9 @@ export function registerIndexRoutes({
         });
       }
 
-      let createPipelineResult: CreateMlInferencePipelineResponse | undefined;
       try {
         // Create the sub-pipeline for inference
-        createPipelineResult = await createAndReferenceMlInferencePipeline(
+        const createPipelineResult = await createAndReferenceMlInferencePipeline(
           indexName,
           pipelineName,
           pipelineDefinition,
@@ -467,6 +463,12 @@ export function registerIndexRoutes({
           inferenceConfig,
           client.asCurrentUser
         );
+        return response.ok({
+          body: {
+            created: createPipelineResult?.id,
+          },
+          headers: { 'content-type': 'application/json' },
+        });
       } catch (error) {
         // Handle scenario where pipeline already exists
         if ((error as Error).message === ErrorCode.PIPELINE_ALREADY_EXISTS) {
@@ -484,13 +486,6 @@ export function registerIndexRoutes({
 
         throw error;
       }
-
-      return response.ok({
-        body: {
-          created: createPipelineResult?.id,
-        },
-        headers: { 'content-type': 'application/json' },
-      });
     })
   );
 
