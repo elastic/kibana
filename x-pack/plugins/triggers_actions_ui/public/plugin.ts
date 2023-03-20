@@ -30,7 +30,7 @@ import { TypeRegistry } from './application/type_registry';
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getAddRuleFlyoutLazy } from './common/get_add_rule_flyout';
-import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
+import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getFieldBrowserLazy } from './common/get_field_browser';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
@@ -108,7 +108,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getAddRuleFlyout: (
     props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleAddProps>;
-  getEditAlertFlyout: (
+  getEditRuleFlyout: (
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
@@ -374,10 +374,10 @@ export class Plugin
           connectorServices: this.connectorServices!,
         });
       },
-      getEditAlertFlyout: (
+      getEditRuleFlyout: (
         props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
       ) => {
-        return getEditAlertFlyoutLazy({
+        return getEditRuleFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           ruleTypeRegistry: this.ruleTypeRegistry,

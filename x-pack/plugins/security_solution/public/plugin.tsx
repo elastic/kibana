@@ -167,6 +167,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         securityLayout: {
           getPluginWrapper: () => SecuritySolutionTemplateWrapper,
         },
+        savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
         telemetry: this.telemetry.start(),
       };
       return services;
