@@ -25,15 +25,15 @@ export function getGroupTableItems(
       }
     });
 
-    const mostSignificantValues = sortBy(group, ['duplicate', 'docCount']);
+    const groupItemsSortedByUniqueness = sortBy(group, ['duplicate', 'docCount']);
     const sortedDedupedGroup = sortBy(dedupedGroup, (d) => [-1 * (d.pValue ?? 0), d.docCount]);
 
     return {
       id,
       docCount,
       pValue,
-      group: sortedDedupedGroup,
-      mostSignificantValues,
+      uniqueItemsCount: sortedDedupedGroup.length,
+      groupItemsSortedByUniqueness,
       histogram,
     };
   });

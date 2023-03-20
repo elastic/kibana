@@ -16,8 +16,7 @@ describe('getGroupTableItems', () => {
     expect(groupTableItems).toEqual([
       {
         docCount: 792,
-        group: [],
-        mostSignificantValues: [
+        groupItemsSortedByUniqueness: [
           {
             fieldName: 'response_code',
             fieldValue: '500',
@@ -36,11 +35,11 @@ describe('getGroupTableItems', () => {
         histogram: undefined,
         id: '40215074',
         pValue: 0.010770456205312423,
+        uniqueItemsCount: 0,
       },
       {
         docCount: 792,
-        group: [],
-        mostSignificantValues: [
+        groupItemsSortedByUniqueness: [
           {
             fieldName: 'response_code',
             fieldValue: '500',
@@ -59,13 +58,13 @@ describe('getGroupTableItems', () => {
         histogram: undefined,
         id: '237328782',
         pValue: 0.010770456205312423,
+        uniqueItemsCount: 0,
       },
       {
         docCount: 634,
-        group: [],
         histogram: undefined,
         id: '47022118',
-        mostSignificantValues: [
+        groupItemsSortedByUniqueness: [
           {
             fieldName: 'user',
             fieldValue: 'Peter',
@@ -82,11 +81,11 @@ describe('getGroupTableItems', () => {
           },
         ],
         pValue: 0.010770456205312423,
+        uniqueItemsCount: 0,
       },
       {
         docCount: 634,
-        group: [],
-        mostSignificantValues: [
+        groupItemsSortedByUniqueness: [
           {
             fieldName: 'user',
             fieldValue: 'Peter',
@@ -105,6 +104,7 @@ describe('getGroupTableItems', () => {
         histogram: undefined,
         id: '1176404482',
         pValue: 0.010770456205312423,
+        uniqueItemsCount: 0,
       },
     ]);
   });

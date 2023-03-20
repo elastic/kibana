@@ -27,22 +27,8 @@ const selectedGroupMock: GroupTableItem = {
   id: '21289599',
   docCount: 20468,
   pValue: 2.2250738585072626e-308,
-  group: [
-    {
-      fieldName: 'error.message',
-      fieldValue: 'rate limit exceeded',
-      docCount: 10,
-      pValue: 0.05,
-    },
-    { fieldName: 'message', fieldValue: 'too many requests', docCount: 10, pValue: 0.05 },
-    {
-      fieldName: 'user_agent.original.keyword',
-      fieldValue: 'Mozilla/5.0',
-      docCount: 10,
-      pValue: 0.05,
-    },
-  ],
-  mostSignificantValues: [
+  uniqueItemsCount: 3,
+  groupItemsSortedByUniqueness: [
     { fieldName: 'error.message', fieldValue: 'rate limit exceeded', docCount: 10, pValue: 0.05 },
     { fieldName: 'message', fieldValue: 'too many requests', docCount: 10, pValue: 0.05 },
     {

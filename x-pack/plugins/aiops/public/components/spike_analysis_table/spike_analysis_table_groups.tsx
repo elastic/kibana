@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { escapeKuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SignificantTerm, FieldValuePair } from '@kbn/ml-agg-utils';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -84,50 +84,30 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   const { pinnedGroup, selectedGroup, setPinnedGroup, setSelectedGroup } =
     useSpikeAnalysisTableRowContext();
 
-  const pushExpandedTableItem = (
-    expandedTableItems: SignificantTerm[],
-    items: FieldValuePair[],
-    unique = false
-  ) => {
-    for (const groupItem of items) {
-      const { fieldName, fieldValue } = groupItem;
-      const itemToPush = {
-        ...(significantTerms.find(
-          (significantTerm) =>
-            (significantTerm.fieldName === fieldName ||
-              significantTerm.fieldName === `${fieldName}.keyword`) &&
-            (significantTerm.fieldValue === fieldValue ||
-              significantTerm.fieldValue === `${fieldValue}.keyword`)
-        ) ?? {}),
-        fieldName: `${fieldName}`,
-        fieldValue: `${fieldValue}`,
-        unique,
-      } as SignificantTerm;
-
-      expandedTableItems.push(itemToPush);
-    }
-    return expandedTableItems;
-  };
-
   const toggleDetails = (item: GroupTableItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMapValues[item.id]) {
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
-      const { group, mostSignificantValues } = item;
-      const expandedTableItems: SignificantTerm[] = [];
-
-      pushExpandedTableItem(expandedTableItems, group, true);
-      pushExpandedTableItem(
-        expandedTableItems,
-        mostSignificantValues.filter(
-          (d) => !group.some((gi) => gi.fieldName === d.fieldName && gi.fieldValue === d.fieldValue)
-        )
-      );
-
       itemIdToExpandedRowMapValues[item.id] = (
         <SpikeAnalysisTable
-          significantTerms={expandedTableItems as SignificantTerm[]}
+          significantTerms={item.groupItemsSortedByUniqueness.reduce<SignificantTerm[]>(
+            (p, groupItem) => {
+              const st = significantTerms.find(
+                (d) => d.fieldName === groupItem.fieldName && d.fieldValue === groupItem.fieldValue
+              );
+
+              if (st !== undefined) {
+                p.push({
+                  ...st,
+                  unique: (groupItem.duplicate ?? 0) <= 1,
+                });
+              }
+
+              return p;
+            },
+            []
+          )}
           loading={loading}
           dataViewId={dataViewId}
           isExpandedRow
@@ -186,7 +166,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         query: {
           language: SEARCH_QUERY_LANGUAGE.KUERY,
           query: [
-            ...groupTableItem.mostSignificantValues.map(
+            ...groupTableItem.groupItemsSortedByUniqueness.map(
               ({ fieldName, fieldValue }) =>
                 `${escapeKuery(fieldName)}:${escapeKuery(String(fieldValue))}`
             ),
@@ -255,10 +235,10 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
           </>
         </EuiToolTip>
       ),
-      render: (_, { group, mostSignificantValues }) => {
+      render: (_, { uniqueItemsCount, groupItemsSortedByUniqueness }) => {
         const valuesBadges = [];
 
-        for (const groupItem of mostSignificantValues) {
+        for (const groupItem of groupItemsSortedByUniqueness) {
           const { fieldName, fieldValue, duplicate } = groupItem;
           if (valuesBadges.length >= MAX_GROUP_BADGES) break;
           valuesBadges.push(
@@ -291,9 +271,9 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                 id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupInfo"
                 defaultMessage="Showing {valuesBadges} out of {count} group items. {unique} items unique to this group."
                 values={{
-                  count: mostSignificantValues.length,
+                  count: groupItemsSortedByUniqueness.length,
                   valuesBadges: valuesBadges.length,
-                  unique: group.length,
+                  unique: uniqueItemsCount,
                 }}
               />
             </EuiText>

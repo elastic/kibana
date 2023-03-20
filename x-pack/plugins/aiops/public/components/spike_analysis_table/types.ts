@@ -16,7 +16,7 @@ export interface GroupTableItem {
   id: string;
   docCount: number;
   pValue: number | null;
-  group: GroupTableItemGroup[];
-  mostSignificantValues: GroupTableItemGroup[];
+  uniqueItemsCount: number;
+  groupItemsSortedByUniqueness: GroupTableItemGroup[];
   histogram: SignificantTerm['histogram'];
 }
