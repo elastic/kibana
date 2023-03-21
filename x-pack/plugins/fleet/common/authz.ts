@@ -169,7 +169,7 @@ export function calculatePackagePrivilegesFromKibanaPrivileges(
     createTransform: {
       executePackageAction: getAuthorizationFromPrivileges(
         kibanaPrivileges,
-        `${TRANSFORM_PLUGIN_ID}0`,
+        `${TRANSFORM_PLUGIN_ID}-`,
         `admin`
       ),
     },

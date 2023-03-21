@@ -65,15 +65,7 @@ function getAuthorizationFromPrivileges(
 
 export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuthz> {
   const security = appContextService.getSecurity();
-  // @todo
-  // const createAPIKeyResult = await appContextService
-  //   .getSecurity()
-  //   .authc.apiKeys.grantAsInternalUser(req, {
-  //     name: `fleet-api-key`,
-  //     role_descriptors: {},
-  //   });
-  //
-  // console.log('createAPIKeyResult', createAPIKeyResult);
+
   if (security.authz.mode.useRbacForRequest(req)) {
     const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(req);
     const endpointPrivileges = Object.entries(ENDPOINT_PRIVILEGES).map(
@@ -118,7 +110,6 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
         isSuperuser: checkSuperuser(req),
       }),
       packagePrivileges: calculatePackagePrivilegesFromKibanaPrivileges(privileges.kibana),
-      // @todo apiKey: createAPIKeyResult,
     };
 
     return authz;

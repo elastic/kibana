@@ -117,16 +117,19 @@ class PackageClientImpl implements PackageClient {
     private readonly request?: KibanaRequest
   ) {}
 
-  private async initAPIKeyWithCurrentUserPermission(request: KibanaRequest) {
-    if (!this.apiKeyWithCurrentUserPermission) {
+  private async initAPIKeyWithCurrentUserPermission() {
+    if (!this.apiKeyWithCurrentUserPermission && this.request) {
       const apiKeyWithCurrentUserPermission = await appContextService
         .getSecurity()
-        .authc.apiKeys.grantAsInternalUser(request, {
+        .authc.apiKeys.grantAsInternalUser(this.request, {
           name: `auto-generated-transform-api-key`,
           role_descriptors: {},
         });
-      this.apiKeyWithCurrentUserPermission = apiKeyWithCurrentUserPermission as APIKey;
-      return apiKeyWithCurrentUserPermission;
+
+      if (apiKeyWithCurrentUserPermission) {
+        this.apiKeyWithCurrentUserPermission = apiKeyWithCurrentUserPermission as APIKey;
+        return this.apiKeyWithCurrentUserPermission;
+      }
     }
   }
 
@@ -214,6 +217,7 @@ class PackageClientImpl implements PackageClient {
       this.internalEsClient,
       this.internalSoClient,
       this.logger,
+      undefined,
       apiKeyWithCurrentUserPermission
     );
     return installedTransforms;
