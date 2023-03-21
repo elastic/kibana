@@ -85,6 +85,7 @@ export const GettingStartedPage = () => {
               <SimpleMonitorForm />
             </>
           }
+          footer={<GettingStartedLink />}
         />
       )}
     </Wrapper>
@@ -141,21 +142,7 @@ export const GettingStartedOnPrem = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        footer={
-          <>
-            <EuiText size="s" color="subdued" className="eui-displayInlineBlock">
-              {FOR_MORE_INFO_LABEL}
-            </EuiText>{' '}
-            <EuiLink
-              data-test-subj="syntheticsGettingStartedOnPremLink"
-              href="https://www.elastic.co/guide/en/observability/current/synthetics-get-started.html"
-              target="_blank"
-              className="eui-displayInline"
-            >
-              {GETTING_STARTED_LABEL}
-            </EuiLink>
-          </>
-        }
+        footer={<GettingStartedLink />}
       />
 
       {isAddingNewLocation ? (
@@ -169,6 +156,22 @@ export const GettingStartedOnPrem = () => {
     </>
   );
 };
+
+export const GettingStartedLink = () => (
+  <>
+    <EuiText size="s" color="subdued" className="eui-displayInlineBlock">
+      {FOR_MORE_INFO_LABEL}
+    </EuiText>{' '}
+    <EuiLink
+      data-test-subj="syntheticsGettingStartedOnPremLink"
+      href="https://www.elastic.co/guide/en/observability/current/synthetics-get-started.html"
+      target="_blank"
+      className="eui-displayInline"
+    >
+      {GETTING_STARTED_LABEL}
+    </EuiLink>
+  </>
+);
 
 const Wrapper = styled.div`
   &&& {
@@ -232,6 +235,7 @@ const CREATE_LOCATION_DESCRIPTION = (
     }}
   />
 );
+
 const PUBLIC_LOCATION_DESCRIPTION = (
   <FormattedMessage
     id="xpack.synthetics.gettingStarted.publicLocationDescription"
