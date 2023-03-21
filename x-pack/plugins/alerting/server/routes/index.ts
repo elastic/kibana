@@ -46,6 +46,13 @@ import { getFlappingSettingsRoute } from './get_flapping_settings';
 import { updateFlappingSettingsRoute } from './update_flapping_settings';
 import { getRuleTagsRoute } from './get_rule_tags';
 
+import { createMaintenanceWindowRoute } from './create_maintenance_window';
+import { getMaintenanceWindowRoute } from './get_maintenance_window';
+import { updateMaintenanceWindowRoute } from './update_maintenance_window';
+import { deleteMaintenanceWindowRoute } from './delete_maintenance_window';
+import { findMaintenanceWindowRoute } from './find_maintenace_window';
+import { archiveMaintenanceWindowRoute } from './archive_maintenance_window';
+
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
@@ -93,4 +100,10 @@ export function defineRoutes(opts: RouteOptions) {
   getFlappingSettingsRoute(router, licenseState);
   updateFlappingSettingsRoute(router, licenseState);
   getRuleTagsRoute(router, licenseState);
+  createMaintenanceWindowRoute(router, licenseState);
+  getMaintenanceWindowRoute(router, licenseState);
+  updateMaintenanceWindowRoute(router, licenseState);
+  deleteMaintenanceWindowRoute(router, licenseState);
+  findMaintenanceWindowRoute(router, licenseState);
+  archiveMaintenanceWindowRoute(router, licenseState);
 }

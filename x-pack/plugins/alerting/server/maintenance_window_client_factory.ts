@@ -12,6 +12,7 @@ import {
   SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { MaintenanceWindowClient } from './maintenance_window_client';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../common';
 
 export interface MaintenanceWindowClientFactoryOpts {
@@ -35,16 +36,32 @@ export class MaintenanceWindowClientFactory {
     this.savedObjectsService = options.savedObjectsService;
     this.securityPluginStart = options.securityPluginStart;
   }
-  
-  private createMaintenanceWindowClient(request: KibanaRequest, withAuth: boolean) {
 
+  private createMaintenanceWindowClient(request: KibanaRequest, withAuth: boolean) {
+    const { securityPluginStart } = this;
+    const savedObjectsClient = this.savedObjectsService.getScopedClient(request, {
+      includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
+      ...(withAuth ? {} : { excludedExtensions: [SECURITY_EXTENSION_ID] }),
+    });
+
+    return new MaintenanceWindowClient({
+      logger: this.logger,
+      savedObjectsClient,
+      async getUserName() {
+        if (!securityPluginStart || !request) {
+          return null;
+        }
+        const user = securityPluginStart.authc.getCurrentUser(request);
+        return user ? user.username : null;
+      },
+    });
   }
 
   public createWithAuthorization(request: KibanaRequest) {
-
+    return this.createMaintenanceWindowClient(request, true);
   }
 
   public create(request: KibanaRequest) {
-
+    return this.createMaintenanceWindowClient(request, false);
   }
 }

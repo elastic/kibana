@@ -93,7 +93,7 @@ export class RulesSettingsClient {
 
   /**
    * Helper function to ensure that a rules-settings saved object always exists.
-   * Enabled the creation of the saved object is done lazily during retrieval.
+   * Ensures the creation of the saved object is done lazily during retrieval.
    */
   private async getOrCreate(): Promise<SavedObject<RulesSettings>> {
     try {

@@ -23,7 +23,10 @@ import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import { RuleTypeRegistry } from '../rule_type_registry';
 export { partiallyUpdateAlert } from './partially_update_alert';
-import { RULES_SETTINGS_SAVED_OBJECT_TYPE, MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../common';
+import {
+  RULES_SETTINGS_SAVED_OBJECT_TYPE,
+  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+} from '../../common';
 
 // Use caution when removing items from this array! Any field which has
 // ever existed in the rule SO must be included in this array to prevent

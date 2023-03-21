@@ -5,34 +5,11 @@
  * 2.0.
  */
 
-import { RRule, ByWeekday, Weekday, rrulestr } from 'rrule';
+import { RRule, Weekday } from 'rrule';
+import { parseByWeekday } from '../rrule';
 import { RuleSnoozeSchedule } from '../../types';
 
 const MAX_TIMESTAMP = 8640000000000000;
-
-export const utcToLocal = (date: Date) => {
-  return new Date(Date.UTC(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    date.getHours(),
-    date.getMinutes(),
-    date.getSeconds(),
-    date.getMilliseconds(),
-  ));
-}
-
-export const localToUtc = (date: Date) => {
-  return new Date(
-    date.getUTCFullYear(), 
-    date.getUTCMonth(),
-    date.getUTCDate(), 
-    date.getUTCHours(),
-    date.getUTCMinutes(), 
-    date.getUTCSeconds(),
-    date.getUTCMilliseconds(),
-  );
-}
 
 export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
   const { duration, rRule, id } = snooze;
@@ -41,7 +18,6 @@ export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
       id,
       snoozeEndTime: new Date(MAX_TIMESTAMP),
     };
-
   const startTimeMS = Date.parse(rRule.dtstart);
   const initialEndTime = startTimeMS + duration;
   const isInitialStartSkipped = snooze.skipRecurrences?.includes(rRule.dtstart);
@@ -55,22 +31,17 @@ export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
     };
 
   // Check to see if now is during a recurrence of the snooze
-  const { tzid, ...restRule } = rRule;
   try {
     const rRuleOptions = {
-      ...restRule,
-      dtstart: utcToLocal(new Date(rRule.dtstart)),
-      until: rRule.until ? utcToLocal(new Date(rRule.until)) : null,
+      ...rRule,
+      dtstart: new Date(rRule.dtstart),
+      until: rRule.until ? new Date(rRule.until) : null,
       wkst: rRule.wkst ? Weekday.fromStr(rRule.wkst) : null,
       byweekday: rRule.byweekday ? parseByWeekday(rRule.byweekday) : null,
     };
 
     const recurrenceRule = new RRule(rRuleOptions);
-    const lastOccurrence = recurrenceRule.before(utcToLocal(new Date(now)), true);
-
-    console.log('rrule: ',rRuleOptions);
-    console.log('last occurence', lastOccurrence);
-
+    const lastOccurrence = recurrenceRule.before(new Date(now), true);
     if (!lastOccurrence) return null;
     // Check if the current recurrence has been skipped manually
     if (snooze.skipRecurrences?.includes(lastOccurrence.toISOString())) return null;
@@ -82,10 +53,4 @@ export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
   }
 
   return null;
-}
-
-export function parseByWeekday(byweekday: Array<string | number>): ByWeekday[] {
-  const rRuleString = `RRULE:BYDAY=${byweekday.join(',')}`;
-  const parsedRRule = rrulestr(rRuleString);
-  return parsedRRule.origOptions.byweekday as ByWeekday[];
 }

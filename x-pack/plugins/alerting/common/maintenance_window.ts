@@ -5,4 +5,35 @@
  * 2.0.
  */
 
+import { RRuleParams } from './rrule_type';
+
+export interface MaintenanceWindowModificationMetadata {
+  createdBy: string | null;
+  updatedBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface DateRange {
+  gte: string;
+  lte: string;
+}
+
+export interface MaintenanceWindowProperties {
+  title: string;
+  archived: boolean;
+  enabled: boolean;
+  duration: number;
+  expirationDate: string;
+  events: DateRange[];
+  rRule: RRuleParams;
+}
+
+export type MaintenanceWindowSavedObject = MaintenanceWindowProperties &
+  MaintenanceWindowModificationMetadata;
+
+export type MaintenanceWindow = MaintenanceWindowSavedObject & {
+  id: string;
+};
+
 export const MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE = 'maintenance-window';

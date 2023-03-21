@@ -18,6 +18,15 @@ export const maintenanceWindowMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
+    enabled: {
+      type: 'boolean',
+    },
+    archived: {
+      type: 'boolean',
+    },
+    duration: {
+      type: 'long',
+    },
     expirationDate: {
       type: 'date',
     },
@@ -38,5 +47,5 @@ export const maintenanceWindowMappings: SavedObjectsTypeMappingDefinition = {
     updatedAt: {
       type: 'date',
     },
-  }
+  },
 };
