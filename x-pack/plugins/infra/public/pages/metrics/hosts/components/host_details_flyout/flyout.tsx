@@ -9,7 +9,7 @@ import React, { useMemo, useState } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 import { MetadataTab } from './metadata/metadata';
-import { HostNodeRow } from '../../hooks/use_hosts_table';
+import type { HostNodeRow } from '../../hooks/use_hosts_table';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
 interface Props {
