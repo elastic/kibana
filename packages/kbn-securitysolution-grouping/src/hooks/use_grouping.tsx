@@ -9,22 +9,18 @@
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import React, { useCallback, useMemo, useReducer } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { StatRenderer } from '../components/accordion_panel';
 import { groupsReducerWithStorage, initialState } from './state/reducer';
-import { GroupingProps, GroupSelectorProps, RawBucket } from '..';
+import { GroupingProps, GroupSelectorProps, isNoneGroup } from '..';
 import { useGroupingPagination } from './use_grouping_pagination';
 import { groupActions, groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';
 import { defaultGroup, GroupOption } from './types';
 import { Grouping as GroupingComponent } from '../components/grouping';
 
+type GetGroupingArgs<T> = Pick<GroupingProps<T>, 'data' | 'isLoading' | 'takeActionItems'>;
+
 interface Grouping<T> {
-  getGrouping: (
-    props: Omit<
-      GroupingProps<T>,
-      'groupStatsRenderer' | 'groupSelector' | 'pagination' | 'selectedGroup'
-    >
-  ) => React.ReactElement<GroupingProps<T>>;
+  getGrouping: (props: GetGroupingArgs<T>) => React.ReactElement;
   groupSelector: React.ReactElement<GroupSelectorProps>;
   pagination: {
     reset: () => void;
@@ -34,7 +30,18 @@ interface Grouping<T> {
   selectedGroup: string;
 }
 
+type ComponentProps<T> = Pick<
+  GroupingProps<T>,
+  | 'groupPanelRenderer'
+  | 'groupStatsRenderer'
+  | 'inspectButton'
+  | 'onGroupToggle'
+  | 'renderChildComponent'
+  | 'unit'
+>;
+
 interface GroupingArgs<T> {
+  componentProps: ComponentProps<T>;
   // provide default groups with the metrics settings
   // available without customization
   defaultGroupingOptions: GroupOption[];
@@ -44,7 +51,6 @@ interface GroupingArgs<T> {
   // Unique identifier of the grouping component.
   // Used in local storage
   groupingId: string;
-  groupStatsRenderer?: (selectedGroup: string, fieldBucket: RawBucket<T>) => StatRenderer[];
   // for tracking
   onGroupChangeCallback?: (param: { groupByField: string; tableId: string }) => void;
   tracker?: (
@@ -58,9 +64,9 @@ export const useGrouping = <T,>({
   defaultGroupingOptions,
   fields,
   groupingId,
-  groupStatsRenderer,
   onGroupChangeCallback,
   tracker,
+  componentProps,
 }: GroupingArgs<T>): Grouping<T> => {
   const [groupingState, dispatch] = useReducer(groupsReducerWithStorage, initialState);
 
@@ -82,21 +88,21 @@ export const useGrouping = <T,>({
   const pagination = useGroupingPagination({ groupingId, groupingState, dispatch });
 
   const getGrouping = useCallback(
-    (
-      props: Omit<
-        GroupingProps<T>,
-        'groupStatsRenderer' | 'groupSelector' | 'pagination' | 'selectedGroup'
-      >
-    ): React.ReactElement<GroupingProps<T>> => (
-      <GroupingComponent
-        {...props}
-        groupStatsRenderer={groupStatsRenderer}
-        groupSelector={groupSelector}
-        pagination={pagination}
-        selectedGroup={selectedGroup}
-      />
-    ),
-    [groupSelector, groupStatsRenderer, pagination, selectedGroup]
+    (props: GetGroupingArgs<T>): React.ReactElement =>
+      isNoneGroup(selectedGroup) ? (
+        componentProps.renderChildComponent([])
+      ) : (
+        <GroupingComponent
+          {...componentProps}
+          {...props}
+          groupingId={groupingId}
+          groupSelector={groupSelector}
+          pagination={pagination}
+          selectedGroup={selectedGroup}
+          tracker={tracker}
+        />
+      ),
+    [componentProps, groupSelector, groupingId, pagination, selectedGroup, tracker]
   );
 
   const resetPagination = useCallback(() => {

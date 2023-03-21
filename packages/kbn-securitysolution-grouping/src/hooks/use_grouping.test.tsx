@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { renderHook } from '@testing-library/react-hooks';
+import React from 'react';
+import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useGrouping } from './use_grouping';
 
@@ -22,33 +23,32 @@ const defaultArgs = {
   fields: [],
   groupingId,
   tracker: jest.fn(),
+  componentProps: {
+    groupPanelRenderer: jest.fn(),
+    groupStatsRenderer: jest.fn(),
+    inspectButton: <></>,
+    onGroupToggle: jest.fn(),
+    renderChildComponent: () => <p data-test-subj="innerTable">{'hello'}</p>,
+  },
 };
 
 const groupingArgs = {
-  from: '2020-07-07T08:20:18.966Z',
-  globalFilters: [],
-  hasIndexMaintenance: true,
-  globalQuery: {
-    query: 'query',
-    language: 'language',
-  },
-  hasIndexWrite: true,
+  data: {},
   isLoading: false,
-  renderChildComponent: jest.fn(),
-  runtimeMappings: {},
-  signalIndexName: 'test',
-  groupingId,
   takeActionItems: jest.fn(),
-  to: '2020-07-08T08:20:18.966Z',
 };
 
 describe('useGrouping', () => {
-  it('Returns the expected default results on initial mount', () => {
-    const { result } = renderHook(() => useGrouping(defaultArgs));
-    expect(result.current.selectedGroup).toEqual('none');
-    expect(result.current.getGrouping(groupingArgs).props.selectedGroup).toEqual('none');
-    expect(result.current.groupSelector.props.options).toEqual(defaultGroupingOptions);
-    const { reset, ...withoutReset } = result.current.pagination;
-    expect(withoutReset).toEqual({ pageIndex: 0, pageSize: 25 });
+  it('Returns the expected default results on initial mount', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useGrouping(defaultArgs));
+      await waitForNextUpdate();
+      expect(result.current.selectedGroup).toEqual('none');
+      const grouping = result.current.getGrouping(groupingArgs);
+      await waitForNextUpdate();
+      expect(grouping.props['data-test-subj']).toEqual('innerTable');
+      const { reset, ...withoutReset } = result.current.pagination;
+      expect(withoutReset).toEqual({ pageIndex: 0, pageSize: 25 });
+    });
   });
 });

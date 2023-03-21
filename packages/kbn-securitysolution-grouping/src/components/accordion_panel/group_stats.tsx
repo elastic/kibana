@@ -16,7 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { StatRenderer } from '.';
+import { StatRenderer } from '../types';
 import { statsContainerCss } from '../styles';
 import { TAKE_ACTION } from '../translations';
 
