@@ -12,16 +12,37 @@ import {
   latencyAggregationTypeRt,
 } from '../../../common/latency_aggregation_types';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
-import { getServiceTransactionGroups } from '../services/get_service_transaction_groups';
-import { getServiceTransactionGroupDetailedStatisticsPeriods } from '../services/get_service_transaction_group_detailed_statistics';
-import { getTransactionBreakdown } from './breakdown';
-import { getLatencyPeriods } from './get_latency_charts';
-import { getFailedTransactionRatePeriods } from './get_failed_transaction_rate_periods';
-import { getColdstartRatePeriods } from '../../lib/transaction_groups/get_coldstart_rate';
+import {
+  getServiceTransactionGroups,
+  ServiceTransactionGroupsResponse,
+} from '../services/get_service_transaction_groups';
+import {
+  getServiceTransactionGroupDetailedStatisticsPeriods,
+  ServiceTransactionGroupDetailedStatisticsResponse,
+} from '../services/get_service_transaction_group_detailed_statistics';
+import {
+  getTransactionBreakdown,
+  TransactionBreakdownResponse,
+} from './breakdown';
+import {
+  getLatencyPeriods,
+  TransactionLatencyResponse,
+} from './get_latency_charts';
+import {
+  FailedTransactionRateResponse,
+  getFailedTransactionRatePeriods,
+} from './get_failed_transaction_rate_periods';
+import {
+  ColdstartRateResponse,
+  getColdstartRatePeriods,
+} from '../../lib/transaction_groups/get_coldstart_rate';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { offsetRt } from '../../../common/comparison_rt';
-import { getTraceSamples } from './trace_samples';
+import {
+  getTraceSamples,
+  TransactionTraceSamplesResponse,
+} from './trace_samples';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const transactionGroupsMainStatisticsRoute = createApmServerRoute({
@@ -42,20 +63,7 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<{
-    transactionGroups: Array<{
-      transactionType: string;
-      name: string;
-      latency: number | null;
-      throughput: number;
-      errorRate: number;
-      impact: number;
-    }>;
-    transactionOverflowCount: number;
-    maxTransactionGroupsExceeded: boolean;
-  }> => {
+  handler: async (resources): Promise<ServiceTransactionGroupsResponse> => {
     const { params, config } = resources;
     const apmEventClient = await getApmEventClient(resources);
     const {
@@ -80,7 +88,6 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
     return getServiceTransactionGroups({
       environment,
       kuery,
-      config,
       apmEventClient,
       serviceName,
       searchAggregatedTransactions,
@@ -115,31 +122,7 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
   },
   handler: async (
     resources
-  ): Promise<{
-    currentPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
-      transactionName: string;
-      latency: Array<import('./../../../typings/timeseries').Coordinate>;
-      throughput: Array<import('./../../../typings/timeseries').Coordinate>;
-      errorRate: Array<import('./../../../typings/timeseries').Coordinate>;
-      impact: number;
-    }>;
-    previousPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
-      errorRate: Array<{
-        x: number;
-        y: import('./../../../typings/common').Maybe<number>;
-      }>;
-      throughput: Array<{
-        x: number;
-        y: import('./../../../typings/common').Maybe<number>;
-      }>;
-      latency: Array<{
-        x: number;
-        y: import('./../../../typings/common').Maybe<number>;
-      }>;
-      transactionName: string;
-      impact: number;
-    }>;
-  }> => {
+  ): Promise<ServiceTransactionGroupDetailedStatisticsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, config } = resources;
 
@@ -166,7 +149,7 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
       end,
     });
 
-    return await getServiceTransactionGroupDetailedStatisticsPeriods({
+    return getServiceTransactionGroupDetailedStatisticsPeriods({
       environment,
       kuery,
       apmEventClient,
@@ -200,29 +183,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    currentPeriod: {
-      overallAvgDuration: number | null;
-      latencyTimeseries: Array<{ x: number; y: number | null }>;
-    };
-    previousPeriod:
-      | {
-          latencyTimeseries: Array<{
-            x: number;
-            y: import('./../../../typings/common').Maybe<number>;
-          }>;
-          overallAvgDuration: number | null;
-        }
-      | {
-          latencyTimeseries: Array<{
-            x: number;
-            y: import('./../../../typings/common').Maybe<number>;
-          }>;
-          overallAvgDuration: null;
-        };
-  }> => {
+  handler: async (resources): Promise<TransactionLatencyResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, logger, config } = resources;
 
@@ -259,16 +220,11 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       end,
     };
 
-    const { currentPeriod, previousPeriod } = await getLatencyPeriods({
+    return getLatencyPeriods({
       ...options,
       latencyAggregationType: latencyAggregationType as LatencyAggregationType,
       offset,
     });
-
-    return {
-      currentPeriod,
-      previousPeriod,
-    };
   },
 });
 
@@ -296,11 +252,7 @@ const transactionTraceSamplesRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    traceSamples: Array<{ transactionId: string; traceId: string }>;
-  }> => {
+  handler: async (resources): Promise<TransactionTraceSamplesResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
@@ -350,18 +302,7 @@ const transactionChartsBreakdownRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    timeseries: Array<{
-      title: string;
-      color: string;
-      type: string;
-      data: Array<{ x: number; y: number | null }>;
-      hideLegend: boolean;
-      legendValue: string;
-    }>;
-  }> => {
+  handler: async (resources): Promise<TransactionBreakdownResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, config } = resources;
 
@@ -397,29 +338,7 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    currentPeriod: {
-      timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
-      average: number | null;
-    };
-    previousPeriod:
-      | {
-          timeseries: Array<{
-            x: number;
-            y: import('./../../../typings/common').Maybe<number>;
-          }>;
-          average: number | null;
-        }
-      | {
-          timeseries: Array<{
-            x: number;
-            y: import('./../../../typings/common').Maybe<number>;
-          }>;
-          average: null;
-        };
-  }> => {
+  handler: async (resources): Promise<FailedTransactionRateResponse> => {
     const apmEventClient = await getApmEventClient(resources);
 
     const { params, config } = resources;
@@ -470,31 +389,7 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    currentPeriod: {
-      transactionColdstartRate: Array<
-        import('../../../typings/timeseries').Coordinate
-      >;
-      average: number | null;
-    };
-    previousPeriod:
-      | {
-          transactionColdstartRate: Array<{
-            x: number;
-            y: import('../../../typings/common').Maybe<number>;
-          }>;
-          average: number | null;
-        }
-      | {
-          transactionColdstartRate: Array<{
-            x: number;
-            y: import('../../../typings/common').Maybe<number>;
-          }>;
-          average: null;
-        };
-  }> => {
+  handler: async (resources): Promise<ColdstartRateResponse> => {
     const apmEventClient = await getApmEventClient(resources);
 
     const { params, config } = resources;
@@ -538,31 +433,7 @@ const transactionChartsColdstartRateByTransactionNameRoute =
       ]),
     }),
     options: { tags: ['access:apm'] },
-    handler: async (
-      resources
-    ): Promise<{
-      currentPeriod: {
-        transactionColdstartRate: Array<
-          import('../../../typings/timeseries').Coordinate
-        >;
-        average: number | null;
-      };
-      previousPeriod:
-        | {
-            transactionColdstartRate: Array<{
-              x: number;
-              y: import('../../../typings/common').Maybe<number>;
-            }>;
-            average: number | null;
-          }
-        | {
-            transactionColdstartRate: Array<{
-              x: number;
-              y: import('../../../typings/common').Maybe<number>;
-            }>;
-            average: null;
-          };
-    }> => {
+    handler: async (resources): Promise<ColdstartRateResponse> => {
       const apmEventClient = await getApmEventClient(resources);
 
       const { params, config } = resources;

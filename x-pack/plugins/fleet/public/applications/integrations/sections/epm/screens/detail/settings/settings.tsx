@@ -73,7 +73,7 @@ const UpdatesAvailableMsg = ({
 }) => (
   <EuiCallOut
     color="warning"
-    iconType="alert"
+    iconType="warning"
     title={i18n.translate('xpack.fleet.integrations.settings.versionInfo.updatesAvailable', {
       defaultMessage: 'New version available',
     })}

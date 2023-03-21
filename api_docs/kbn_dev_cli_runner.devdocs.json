@@ -1526,7 +1526,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              "{ defaultLevel?: \"error\" | \"warning\" | \"success\" | \"debug\" | \"info\" | \"silent\" | \"verbose\" | undefined; } | undefined"
+              "{ defaultLevel?: \"error\" | \"info\" | \"warning\" | \"success\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
             "deprecated": false,
@@ -1585,7 +1585,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              "{ defaultLevel?: \"error\" | \"warning\" | \"success\" | \"debug\" | \"info\" | \"silent\" | \"verbose\" | undefined; } | undefined"
+              "{ defaultLevel?: \"error\" | \"info\" | \"warning\" | \"success\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run_with_commands.ts",
             "deprecated": false,

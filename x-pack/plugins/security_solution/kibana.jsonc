@@ -40,7 +40,8 @@
       "unifiedSearch",
       "files",
       "controls",
-      "dataViews"
+      "dataViews",
+      "savedObjectsManagement",
     ],
     "optionalPlugins": [
       "cloudExperiments",
