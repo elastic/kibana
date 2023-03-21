@@ -10,7 +10,7 @@ import { Adapters } from '@kbn/inspector-plugin/common';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
-import { AppState } from '../services/discover_app_state_container';
+import { DiscoverAppState } from '../services/discover_app_state_container';
 import { getRawRecordType } from './get_raw_record_type';
 import {
   checkHitCount,
@@ -29,7 +29,7 @@ import { fetchSql } from './fetch_sql';
 
 export interface FetchDeps {
   abortController: AbortController;
-  appStateContainer: ReduxLikeStateContainer<AppState>;
+  appStateContainer: ReduxLikeStateContainer<DiscoverAppState>;
   data: DataPublicPluginStart;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
