@@ -84,4 +84,18 @@ export const aggregationFunctionsDefinitions: AutocompleteCommandDefinition[] = 
     },
     sortText: 'C',
   },
+  {
+    label: 'count',
+    insertText: 'count',
+    kind: 1,
+    detail: i18n.translate('monaco.esql.autocomplete.countDoc', {
+      defaultMessage: 'Returns the count of the values in a field.',
+    }),
+    documentation: {
+      value: buildDocumentation('count(grouped[T]): aggregated[T]', [
+        'from index | stats count = count(field)',
+      ]),
+    },
+    sortText: 'C',
+  },
 ];

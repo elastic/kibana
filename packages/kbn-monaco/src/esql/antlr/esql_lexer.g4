@@ -123,6 +123,7 @@ UNARY_FUNCTION
     | 'min'
     | 'max'
     | 'sum'
+    | 'count'
     ;
 
 UNQUOTED_IDENTIFIER

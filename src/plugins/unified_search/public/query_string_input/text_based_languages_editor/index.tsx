@@ -366,10 +366,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         const pipes = currentCursorContent?.split('|');
         pipes?.pop();
         const validContent = pipes?.join('|');
-        // change the limit 1 to 0 when this bug is fixed https://github.com/elastic/elasticsearch-internal/issues/867
         if (validContent) {
           const esqlQuery = {
-            esql: `${validContent} | limit 1`,
+            esql: `${validContent} | limit 0`,
           };
           try {
             const table = await fetchFieldsFromESQL(esqlQuery, expressions);
