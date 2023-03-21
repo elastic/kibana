@@ -21,7 +21,7 @@ describe('test useInspector', () => {
     let adapters: Adapters | undefined;
     jest.spyOn(discoverServiceMock.inspector, 'open').mockImplementation((localAdapters) => {
       adapters = localAdapters;
-      return {} as OverlayRef;
+      return { close: jest.fn() } as unknown as OverlayRef;
     });
     const requests = new RequestAdapter();
     const lensRequests = new RequestAdapter();
@@ -32,7 +32,7 @@ describe('test useInspector', () => {
         inspectorAdapters: { requests, lensRequests },
         savedSearch: savedSearchMock,
         inspector: discoverServiceMock.inspector,
-        stateContainer: getDiscoverStateMock({ isTimeBased: true }),
+        stateContainer,
       });
     });
     await act(async () => {
