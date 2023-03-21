@@ -32,14 +32,14 @@ describe('Endpoint Responder - Utilities', () => {
     it('should return `undefined` if timeout does not match pattern', () => {
       expect(parsedExecuteTimeout('23d')).toEqual(undefined);
     });
-    it('should return correct milliseconds for hours', () => {
-      expect(parsedExecuteTimeout('23h')).toEqual(82800000);
+    it('should return correct seconds for hours', () => {
+      expect(parsedExecuteTimeout('23h')).toEqual(82800);
     });
-    it('should return correct milliseconds for minutes', () => {
-      expect(parsedExecuteTimeout('23m')).toEqual(1380000);
+    it('should return correct seconds for minutes', () => {
+      expect(parsedExecuteTimeout('23m')).toEqual(1380);
     });
-    it('should return correct milliseconds for seconds', () => {
-      expect(parsedExecuteTimeout('23s')).toEqual(23000);
+    it('should return correct seconds for seconds', () => {
+      expect(parsedExecuteTimeout('23s')).toEqual(23);
     });
   });
 });
