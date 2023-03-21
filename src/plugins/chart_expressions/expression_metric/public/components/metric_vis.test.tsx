@@ -1401,6 +1401,26 @@ describe('MetricVisComponent', function () {
       expect(moreThanPetaValue).toBe('1 EB');
     });
 
+    it('correctly formats bits (decimal)', () => {
+      const base = 1000;
+      const bitFormat = {
+        id: 'number',
+        params: { pattern: '0.0bitd' },
+      };
+
+      const { primary: bytesValue } = getFormattedMetrics(base - 1, 0, bitFormat);
+      expect(bytesValue).toBe('999 bit');
+
+      const { primary: kiloBytesValue } = getFormattedMetrics(Math.pow(base, 1), 0, bitFormat);
+      expect(kiloBytesValue).toBe('1 kbit');
+
+      const { primary: megaBytesValue } = getFormattedMetrics(Math.pow(base, 2), 0, bitFormat);
+      expect(megaBytesValue).toBe('1 Mbit');
+
+      const { primary: moreThanPetaValue } = getFormattedMetrics(Math.pow(base, 6), 0, bitFormat);
+      expect(moreThanPetaValue).toBe('1 Ebit');
+    });
+
     it('correctly formats durations', () => {
       const { primary, secondary } = getFormattedMetrics(1, 1, {
         id: 'duration',
