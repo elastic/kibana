@@ -177,16 +177,20 @@ const IntegrationPostureDashboard = ({
 export const ComplianceDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(CSPM_POLICY_TEMPLATE);
   const getSetupStatus = useCspSetupStatusApi();
-  const hasFindingsKspm = getSetupStatus.data?.kspm?.status === 'indexed';
-  const hasFindingsCspm = getSetupStatus.data?.cspm?.status === 'indexed';
+  const hasFindingsKspm =
+    getSetupStatus.data?.kspm?.status === 'indexed' ||
+    getSetupStatus.data?.indicesDetails[0].status === 'not-empty';
+  const hasFindingsCspm =
+    getSetupStatus.data?.cspm?.status === 'indexed' ||
+    getSetupStatus.data?.indicesDetails[0].status === 'not-empty';
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
 
   const getCspmDashboardData = useCspmStatsApi({
-    enabled: hasFindingsCspm,
+    enabled: hasFindingsCspm || hasFindingsKspm,
   });
   const getKspmDashboardData = useKspmStatsApi({
-    enabled: hasFindingsKspm,
+    enabled: hasFindingsKspm || hasFindingsCspm,
   });
 
   useEffect(() => {

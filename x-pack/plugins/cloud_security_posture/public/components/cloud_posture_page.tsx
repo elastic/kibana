@@ -275,6 +275,7 @@ export const CloudPosturePage = <TData, TError>({
       return defaultLoadingRenderer();
     }
 
+    /* Checks if its a completely new user which means no integration has been installed and no latest findings default index has been found */
     if (
       getSetupStatus.data?.kspm?.status === 'not-installed' &&
       getSetupStatus.data?.cspm?.status === 'not-installed' &&
