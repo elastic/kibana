@@ -11,6 +11,8 @@ import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
 import type { Role } from '@kbn/security-plugin/common';
+import { getWithResponseActionsRole } from '../../../../scripts/endpoint/common/roles_users/with_response_actions_role';
+import { getNoResponseActionsRole } from '../../../../scripts/endpoint/common/roles_users/without_response_actions_role';
 import { request } from './common';
 import { getT1Analyst } from '../../../../scripts/endpoint/common/roles_users/t1_analyst';
 import { getT2Analyst } from '../../../../scripts/endpoint/common/roles_users/t2_analyst';
@@ -32,6 +34,8 @@ export enum ROLE {
   platform_engineer = 'platformEngineer',
   endpoint_operations_analyst = 'endpointOperationsAnalyst',
   endpoint_security_policy_manager = 'endpointSecurityPolicyManager',
+  endpoint_response_actions_access = 'endpointResponseActionsAccess',
+  endpoint_response_actions_no_access = 'endpointResponseActionsNoAccess',
 }
 
 export const rolesMapping: { [key in ROLE]: Omit<Role, 'name'> } = {
@@ -44,6 +48,8 @@ export const rolesMapping: { [key in ROLE]: Omit<Role, 'name'> } = {
   endpointOperationsAnalyst: getEndpointOperationsAnalyst(),
   endpointSecurityPolicyManager: getEndpointSecurityPolicyManager(),
   detectionsEngineer: getDetectionsEngineer(),
+  endpointResponseActionsAccess: getWithResponseActionsRole(),
+  endpointResponseActionsNoAccess: getNoResponseActionsRole(),
 };
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
