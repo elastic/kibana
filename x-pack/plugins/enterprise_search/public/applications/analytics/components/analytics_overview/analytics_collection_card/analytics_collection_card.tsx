@@ -174,7 +174,7 @@ const AnalyticsCollectionCard: React.FC<
         )
       }
     >
-      {!!data?.length && !isLoading && (
+      {!isLoading && data?.some(([, y]) => y && y !== 0) && (
         <Chart size={['100%', 130]} css={cardStyles.chart}>
           <Settings
             theme={{
@@ -305,8 +305,8 @@ export const AnalyticsCollectionCardWithLens = withLensData<
                       isBucketed: false,
                       label: 'Timestamp',
                       operationType: 'date_histogram',
-                      params: { interval: 'auto' },
-                      scale: 'ratio',
+                      params: { includeEmptyRows: true, interval: 'auto' },
+                      scale: 'ordinal',
                       sourceField: dataView?.timeFieldName!,
                     } as DateHistogramIndexPatternColumn,
                   },
