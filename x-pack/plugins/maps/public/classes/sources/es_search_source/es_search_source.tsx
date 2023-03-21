@@ -583,7 +583,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     docId: string | number,
     index: string,
     indexPattern: DataView,
-    savedObjectId: string
+    savedObjectId?: string
   ) {
     if (this._tooltipFields.length === 0) {
       return {};

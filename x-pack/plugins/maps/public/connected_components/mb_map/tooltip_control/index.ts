@@ -16,13 +16,13 @@ import {
   closeOnHoverTooltip,
   openOnHoverTooltip,
   updateOpenTooltips,
-  getSavedObjectId,
 } from '../../../actions';
 import {
   getLayerList,
   getOpenTooltips,
   getHasLockedTooltips,
   getGeoFieldNames,
+  getSavedObjectId,
 } from '../../../selectors/map_selectors';
 import { getDrawMode } from '../../../selectors/ui_selectors';
 import { DRAW_MODE } from '../../../../common/constants';

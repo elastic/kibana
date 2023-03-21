@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { makeHierarchicalExecutionContext } from './execution_context';
+import { makeHierarchicalExecutionContext } from './hierarchical_execution_context';
 
 describe('makeHierarchicalExecutionContext', () => {
   let injectedContext = {};

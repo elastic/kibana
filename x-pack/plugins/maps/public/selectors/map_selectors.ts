@@ -229,8 +229,9 @@ export function getLayerDescriptor(state: MapStoreState, layerId: string) {
   return layerListRaw.find((layer) => layer.id === layerId);
 }
 
-function getSavedObjectId({ map }: MapStoreState): string | undefined =>
-  map.savedObjectId;
+export function getSavedObjectId({ map }: MapStoreState): string | undefined {
+  return map.savedObjectId;
+}
 
 export function getDataRequestDescriptor(state: MapStoreState, layerId: string, dataId: string) {
   const layerDescriptor = getLayerDescriptor(state, layerId);
