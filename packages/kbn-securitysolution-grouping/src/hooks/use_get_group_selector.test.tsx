@@ -10,6 +10,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { useGetGroupSelector } from './use_get_group_selector';
 import { initialState } from './state';
 import { ActionType, defaultGroup } from '..';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 const defaultGroupingOptions = [
   { label: 'ruleName', key: 'kibana.alert.rule.name' },
@@ -25,6 +26,8 @@ const defaultArgs = {
   fields: [],
   groupingId,
   groupingState: initialState,
+  tracker: jest.fn(),
+  onGroupChangeCallback: jest.fn(),
 };
 const customField = 'custom.field';
 describe('useGetGroupSelector', () => {
@@ -121,6 +124,54 @@ describe('useGetGroupSelector', () => {
       type: ActionType.updateActiveGroup,
     });
     expect(dispatch).toHaveBeenCalledTimes(2);
+  });
+
+  it('On group change, sends telemetry', () => {
+    const testGroup = {
+      [groupingId]: {
+        ...defaultGroup,
+        options: defaultGroupingOptions,
+        activeGroup: 'host.name',
+      },
+    };
+    const { result } = renderHook((props) => useGetGroupSelector(props), {
+      initialProps: {
+        ...defaultArgs,
+        groupingState: {
+          groupById: testGroup,
+        },
+      },
+    });
+    act(() => result.current.props.onGroupChange(customField));
+    expect(defaultArgs.tracker).toHaveBeenCalledTimes(1);
+    expect(defaultArgs.tracker).toHaveBeenCalledWith(
+      METRIC_TYPE.CLICK,
+      `alerts_table_group_by_test-table_${customField}`
+    );
+  });
+
+  it('On group change, executes callback', () => {
+    const testGroup = {
+      [groupingId]: {
+        ...defaultGroup,
+        options: defaultGroupingOptions,
+        activeGroup: 'host.name',
+      },
+    };
+    const { result } = renderHook((props) => useGetGroupSelector(props), {
+      initialProps: {
+        ...defaultArgs,
+        groupingState: {
+          groupById: testGroup,
+        },
+      },
+    });
+    act(() => result.current.props.onGroupChange(customField));
+    expect(defaultArgs.onGroupChangeCallback).toHaveBeenCalledTimes(1);
+    expect(defaultArgs.onGroupChangeCallback).toHaveBeenCalledWith({
+      tableId: groupingId,
+      groupByField: customField,
+    });
   });
 
   it('On group change to custom field, updates options', () => {

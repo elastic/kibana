@@ -29,7 +29,7 @@ export const InlineError = ({ errorSummary }: { errorSummary: Ping }) => {
         <EuiToolTip content={errorMessage}>
           <EuiButtonIcon
             aria-label={errorMessage}
-            iconType="alert"
+            iconType="warning"
             onClick={() => setIsOpen(true)}
             color="danger"
           />

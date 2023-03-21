@@ -19,7 +19,7 @@ import { ROOT_PATH } from '../../routes';
 
 export interface DeleteAnalyticsCollectionActions {
   apiSuccess: Actions<{}, DeleteAnalyticsCollectionApiLogicResponse>['apiSuccess'];
-  deleteAnalyticsCollection(id: string): { id: string };
+  deleteAnalyticsCollection(name: string): { name: string };
   makeRequest: Actions<{}, DeleteAnalyticsCollectionApiLogicResponse>['makeRequest'];
 }
 export interface DeleteAnalyticsCollectionValues {
@@ -32,7 +32,7 @@ export const DeleteAnalyticsCollectionLogic = kea<
   MakeLogicType<DeleteAnalyticsCollectionValues, DeleteAnalyticsCollectionActions>
 >({
   actions: {
-    deleteAnalyticsCollection: (id) => ({ id }),
+    deleteAnalyticsCollection: (name) => ({ name }),
   },
   connect: {
     actions: [DeleteAnalyticsCollectionAPILogic, ['makeRequest', 'apiSuccess']],
@@ -44,8 +44,8 @@ export const DeleteAnalyticsCollectionLogic = kea<
       await breakpoint(1000);
       KibanaLogic.values.navigateToUrl(ROOT_PATH);
     },
-    deleteAnalyticsCollection: ({ id }) => {
-      actions.makeRequest({ id });
+    deleteAnalyticsCollection: ({ name }) => {
+      actions.makeRequest({ name });
     },
   }),
   path: ['enterprise_search', 'analytics', 'collections', 'delete'],
