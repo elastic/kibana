@@ -39,7 +39,7 @@ export const useEndpointResponseActionsTab = ({
       alertIds: [rawEventData?._id ?? ''],
       withRuleActions: true,
     },
-    { retry: false }
+    { retry: false, enabled: rawEventData && responseActionsEnabled }
   );
 
   const totalItemCount = useMemo(() => actionList?.total ?? 0, [actionList]);
