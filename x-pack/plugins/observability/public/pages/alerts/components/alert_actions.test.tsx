@@ -47,7 +47,6 @@ jest.mock('../../../hooks/use_get_user_cases_permissions', () => ({
 const config = {
   unsafe: {
     alertDetails: {
-      apm: { enabled: false },
       logs: { enabled: false },
       metrics: { enabled: false },
       uptime: { enabled: false },
