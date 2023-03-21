@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
@@ -33,7 +34,7 @@ export interface HostNodeRow extends HostMetrics {
   servicesOnHost?: number | null;
   title: { name: string; cloudProvider?: CloudProvider | null };
   name: string;
-  index: number;
+  uuid: string;
 }
 
 interface HostTableParams {
@@ -48,8 +49,8 @@ const formatMetric = (type: SnapshotMetricInput['type'], value: number | undefin
 };
 
 const buildItemsList = (nodes: SnapshotNode[]) => {
-  return nodes.map(({ metrics, path, name }, index) => ({
-    index,
+  return nodes.map(({ metrics, path, name }) => ({
+    uuid: uuidv4(),
     name,
     os: path.at(-1)?.os ?? '-',
     title: {
@@ -123,7 +124,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
   } = useKibanaContextForPlugin();
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const [clickedItemIndex, setClickedItemIndex] = useState(0);
+  const [clickedItemUuid, setClickedItemUuid] = useState(uuidv4());
 
   const closeFlyout = () => setIsFlyoutOpen(false);
 
@@ -144,16 +145,16 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
       {
         name: '',
         width: '40px',
-        field: 'index',
+        field: 'uuid',
         actions: [
           {
             description: toggleDialogActionLabel,
-            icon: ({ index }) =>
-              isFlyoutOpen && index === clickedItemIndex ? 'minimize' : 'expand',
+            icon: ({ uuid }) =>
+              isFlyoutOpen && uuid === clickedItemUuid ? 'minimize' : 'expand',
             type: 'icon',
-            onClick: ({ index }) => {
-              setClickedItemIndex(index);
-              if (isFlyoutOpen && index === clickedItemIndex) {
+            onClick: ({ uuid }) => {
+              setClickedItemUuid(uuid);
+              if (isFlyoutOpen && uuid === clickedItemUuid) {
                 setIsFlyoutOpen(false);
               } else {
                 setIsFlyoutOpen(true);
@@ -224,8 +225,8 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         align: 'right',
       },
     ],
-    [clickedItemIndex, isFlyoutOpen, reportHostEntryClick, time]
+    [clickedItemUuid, isFlyoutOpen, reportHostEntryClick, time]
   );
 
-  return { columns, items, isFlyoutOpen, closeFlyout, clickedItemIndex };
+  return { columns, items, isFlyoutOpen, closeFlyout, clickedItemUuid };
 };
