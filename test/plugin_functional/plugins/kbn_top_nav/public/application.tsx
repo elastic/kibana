@@ -25,12 +25,7 @@ export const renderApp = (
       testId: 'demoNewButton',
     },
   ];
-  render(
-    <TopNavMenu appName="demo-app" config={config}>
-      Hey
-    </TopNavMenu>,
-    element
-  );
+  render(<TopNavMenu appName="demo-app" config={config} />, element);
 
   return () => unmountComponentAtNode(element);
 };

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import datemath from '@kbn/datemath';
 import { EuiModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
@@ -60,14 +59,9 @@ export function SaveGroupModal({ onClose, savedServiceGroup }: Props) {
     async function (newServiceGroup: StagedServiceGroup) {
       setIsLoading(true);
       try {
-        const start = datemath.parse('now-24h')?.toISOString();
-        const end = datemath.parse('now', { roundUp: true })?.toISOString();
-        if (!start || !end) {
-          throw new Error('Unable to determine start/end time range.');
-        }
         await callApmApi('POST /internal/apm/service-group', {
           params: {
-            query: { start, end, serviceGroupId: savedServiceGroup?.id },
+            query: { serviceGroupId: savedServiceGroup?.id },
             body: {
               groupName: newServiceGroup.groupName,
               kuery: newServiceGroup.kuery,

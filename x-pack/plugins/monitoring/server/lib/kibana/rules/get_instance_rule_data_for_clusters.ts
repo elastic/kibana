@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Cluster, LegacyRequest } from '../../../types';
-import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { getIndexPatterns, getKibanaDataset } from '../../cluster/get_index_patterns';
 import { Globals } from '../../../static_globals';
 import { createQuery } from '../../create_query';
 import { KibanaClusterRuleMetric } from '../../metrics';
@@ -21,7 +21,7 @@ export async function getInstanceRuleDataForClusters(
   const moduleType = 'kibana';
   const type = 'kibana_node_rules';
   const dataset = 'node_rules';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType,
     dataset,
@@ -39,7 +39,7 @@ export async function getInstanceRuleDataForClusters(
         body: {
           query: createQuery({
             type,
-            dsDataset: `${moduleType}.${dataset}`,
+            dsDataset: getKibanaDataset(dataset),
             metricset: dataset,
             start,
             end,

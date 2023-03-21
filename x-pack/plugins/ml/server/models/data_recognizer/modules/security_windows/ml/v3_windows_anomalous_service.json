@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "groups": [
     "endpoint",
     "event-log",
@@ -32,19 +31,20 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
-          "job_tags": {
+    "job_tags": {
       "euid": "8007",
       "maturity": "release",
       "author": "@randomuserid/Elastic",
       "version": "3",
       "updated_date": "5/16/2022"
-  },
+    },
     "created_by": "ml-module-security-windows-v3",
     "custom_urls": [
       {
         "url_name": "Host Details",
         "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
       }
-    ]
+    ],
+    "security_app_display_name": "Unusual Windows Service"
   }
 }

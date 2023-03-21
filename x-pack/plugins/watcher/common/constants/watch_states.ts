@@ -8,16 +8,12 @@
 import { i18n } from '@kbn/i18n';
 
 export const WATCH_STATES: { [key: string]: string } = {
-  DISABLED: i18n.translate('xpack.watcher.constants.watchStates.disabledStateText', {
-    defaultMessage: 'Disabled',
+  INACTIVE: i18n.translate('xpack.watcher.constants.watchStates.inactiveStateText', {
+    defaultMessage: 'Inactive',
   }),
 
-  OK: i18n.translate('xpack.watcher.constants.watchStates.okStateText', {
-    defaultMessage: 'OK',
-  }),
-
-  FIRING: i18n.translate('xpack.watcher.constants.watchStates.firingStateText', {
-    defaultMessage: 'Firing',
+  ACTIVE: i18n.translate('xpack.watcher.constants.watchStates.activeStateText', {
+    defaultMessage: 'Active',
   }),
 
   ERROR: i18n.translate('xpack.watcher.constants.watchStates.errorStateText', {

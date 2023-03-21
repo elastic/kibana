@@ -5,5 +5,19 @@
       "timedOut": false,
       "errors": []
     }
+  },
+  "metricbeatErrors": {
+    "execution": {
+      "errors": [],
+      "timedOut": false
+    },
+    "products": {}
+  },
+  "packageErrors": {
+    "execution": {
+      "errors": [],
+      "timedOut": false
+    },
+    "products": {}
   }
 }

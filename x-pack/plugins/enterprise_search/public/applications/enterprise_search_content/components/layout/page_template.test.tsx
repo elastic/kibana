@@ -13,7 +13,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SetEnterpriseSearchChrome } from '../../../shared/kibana_chrome';
+import { SetEnterpriseSearchContentChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
@@ -39,7 +39,7 @@ describe('EnterpriseSearchContentPageTemplate', () => {
         .find(EnterpriseSearchPageTemplateWrapper)
         .prop('setPageChrome') as any;
 
-      expect(setPageChrome.type).toEqual(SetEnterpriseSearchChrome);
+      expect(setPageChrome.type).toEqual(SetEnterpriseSearchContentChrome);
       expect(setPageChrome.props.trail).toEqual(['Some page']);
     });
   });

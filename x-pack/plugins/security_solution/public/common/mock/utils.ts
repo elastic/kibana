@@ -5,21 +5,13 @@
  * 2.0.
  */
 
-import type { AnyAction, Reducer } from 'redux';
-import reduceReducers from 'reduce-reducers';
-
-import { tGridReducer } from '@kbn/timelines-plugin/public';
-
-import { hostsReducer } from '../../hosts/store';
-import { networkReducer } from '../../network/store';
-import { usersReducer } from '../../users/store';
+import { hostsReducer } from '../../explore/hosts/store';
+import { networkReducer } from '../../explore/network/store';
+import { usersReducer } from '../../explore/users/store';
 import { timelineReducer } from '../../timelines/store/timeline/reducer';
 import { managementReducer } from '../../management/store/reducer';
 import type { ManagementPluginReducer } from '../../management';
 import type { SubPluginsInitReducer } from '../store';
-import { mockGlobalState } from './global_state';
-import type { TimelineState } from '../../timelines/store/timeline/types';
-import { defaultHeaders } from '../../timelines/components/timeline/body/column_headers/default_headers';
 
 type GlobalThis = typeof globalThis;
 interface Global extends GlobalThis {
@@ -31,33 +23,11 @@ interface Global extends GlobalThis {
 
 export const globalNode: Global = global;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const combineTimelineReducer = reduceReducers<any>(
-  {
-    ...mockGlobalState.timeline,
-    timelineById: {
-      ...mockGlobalState.timeline.timelineById,
-      test: {
-        ...mockGlobalState.timeline.timelineById.test,
-        defaultColumns: defaultHeaders,
-        loadingText: 'events',
-        footerText: 'events',
-        documentType: '',
-        selectAll: false,
-        queryFields: [],
-        unit: (n: number) => n,
-      },
-    },
-  },
-  tGridReducer,
-  timelineReducer
-) as Reducer<TimelineState, AnyAction>;
-
 export const SUB_PLUGINS_REDUCER: SubPluginsInitReducer = {
   hosts: hostsReducer,
   network: networkReducer,
   users: usersReducer,
-  timeline: combineTimelineReducer,
+  timeline: timelineReducer,
   /**
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
    * they are cast to mutable versions here.

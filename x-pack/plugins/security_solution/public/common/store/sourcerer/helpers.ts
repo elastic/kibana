@@ -10,17 +10,7 @@ import type { SourcererDataView, SourcererModel, SourcererScopeById } from './mo
 import { SourcererScopeName } from './model';
 import type { SelectedDataViewPayload } from './actions';
 import type { sourcererModel } from '../model';
-
-export const sortWithExcludesAtEnd = (indices: string[]) => {
-  const allSorted = indices.reduce(
-    (acc: { includes: string[]; excludes: string[] }, index) =>
-      index.trim().startsWith('-')
-        ? { includes: acc.includes, excludes: [...acc.excludes, index] }
-        : { includes: [...acc.includes, index], excludes: acc.excludes },
-    { includes: [], excludes: [] }
-  );
-  return [...allSorted.includes.sort(), ...allSorted.excludes.sort()];
-};
+import { ensurePatternFormat, sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 
 export const getScopePatternListSelection = (
   theDataView: SourcererDataView | undefined,
@@ -46,13 +36,6 @@ export const getScopePatternListSelection = (
   }
 };
 
-export const ensurePatternFormat = (patternList: string[]): string[] =>
-  sortWithExcludesAtEnd([
-    ...new Set(
-      patternList.reduce((acc: string[], pattern: string) => [...pattern.split(','), ...acc], [])
-    ),
-  ]);
-
 export const validateSelectedPatterns = (
   state: SourcererModel,
   payload: SelectedDataViewPayload,
@@ -75,7 +58,12 @@ export const validateSelectedPatterns = (
   const selectedPatterns =
     // shouldValidateSelectedPatterns is false when upgrading from
     // legacy pre-8.0 timeline index patterns to data view.
-    shouldValidateSelectedPatterns && dataView != null && missingPatterns.length === 0
+    shouldValidateSelectedPatterns &&
+    dataView != null &&
+    missingPatterns.length === 0 &&
+    // don't validate when the data view has not been initialized (default is initialized already always)
+    dataView.id !== state.defaultDataView.id &&
+    dataView.patternList.length > 0
       ? dedupePatterns.filter(
           (pattern) =>
             (dataView != null && dataView.patternList.includes(pattern)) ||

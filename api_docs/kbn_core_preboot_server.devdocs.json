@@ -11,10 +11,18 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-preboot-server",
-        "id": "def-server.PrebootServicePreboot",
+        "id": "def-common.PrebootServicePreboot",
         "type": "Interface",
         "tags": [],
         "label": "PrebootServicePreboot",
@@ -23,10 +31,11 @@
         ],
         "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-preboot-server",
-            "id": "def-server.PrebootServicePreboot.isSetupOnHold",
+            "id": "def-common.PrebootServicePreboot.isSetupOnHold",
             "type": "Function",
             "tags": [],
             "label": "isSetupOnHold",
@@ -38,12 +47,13 @@
             ],
             "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/core-preboot-server",
-            "id": "def-server.PrebootServicePreboot.holdSetupUntilResolved",
+            "id": "def-common.PrebootServicePreboot.holdSetupUntilResolved",
             "type": "Function",
             "tags": [],
             "label": "holdSetupUntilResolved",
@@ -55,10 +65,11 @@
             ],
             "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-preboot-server",
-                "id": "def-server.PrebootServicePreboot.holdSetupUntilResolved.$1",
+                "id": "def-common.PrebootServicePreboot.holdSetupUntilResolved.$1",
                 "type": "string",
                 "tags": [],
                 "label": "reason",
@@ -70,11 +81,12 @@
                 ],
                 "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-preboot-server",
-                "id": "def-server.PrebootServicePreboot.holdSetupUntilResolved.$2",
+                "id": "def-common.PrebootServicePreboot.holdSetupUntilResolved.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "promise",
@@ -86,6 +98,7 @@
                 ],
                 "path": "packages/core/preboot/core-preboot-server/src/contracts.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -95,14 +108,6 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

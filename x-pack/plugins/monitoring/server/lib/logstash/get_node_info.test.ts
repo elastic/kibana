@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment';
-import { set, unset } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { unset } from 'lodash';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import { handleResponse, getNodeInfo } from './get_node_info';
 import { LegacyRequest } from '../../types';
@@ -33,6 +34,7 @@ jest.mock('../../static_globals', () => ({
 // deletes, adds, or updates the properties based on a default object
 function createResponseObjHit(params?: HitParams[]): ElasticsearchResponseHit {
   const defaultResponseObj: ElasticsearchResponseHit = {
+    _id: '123123a',
     _index: 'index',
     _source: {
       cluster_uuid: '123',

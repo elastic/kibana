@@ -8,17 +8,17 @@
 import React, { memo, useCallback, useMemo, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-import { ActionConnector } from '../../../common/api';
+import type { FieldHook, FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   UseField,
   useFormData,
-  FieldHook,
   useFormContext,
-  FieldConfig,
-} from '../../common/shared_imports';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ActionConnector } from '../../../common/api';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
-import { FormProps, schema } from './schema';
+import type { FormProps } from './schema';
+import { schema } from './schema';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { useApplicationCapabilities } from '../../common/lib/kibana';

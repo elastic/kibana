@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { UiComponent, CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
+import type { FC } from 'react';
+import type { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 import type {
   MigrateFunctionsObject,
   GetMigrationFunctionObjectFn,
 } from '@kbn/kibana-utils-plugin/common';
-import { uiToReactComponent } from '@kbn/kibana-react-plugin/public';
 import type {
   UiActionsPresentable as Presentable,
   ActionMenuItemProps,
@@ -48,11 +48,9 @@ export class ActionFactory<
   public readonly minimalLicense?: LicenseType;
   public readonly licenseFeatureName?: string;
   public readonly order: number;
-  public readonly MenuItem?: UiComponent<ActionMenuItemProps<FactoryContext>>;
-  public readonly ReactMenuItem?: React.FC<ActionMenuItemProps<FactoryContext>>;
+  public readonly MenuItem?: FC<ActionMenuItemProps<any>>;
 
-  public readonly CollectConfig: UiComponent<CollectConfigProps<Config, FactoryContext>>;
-  public readonly ReactCollectConfig: React.FC<CollectConfigProps<Config, FactoryContext>>;
+  public readonly CollectConfig: FC<CollectConfigProps<Config, FactoryContext>>;
   public readonly createConfig: (context: FactoryContext) => Config;
   public readonly isConfigValid: (config: Config, context: FactoryContext) => boolean;
   public readonly migrations: MigrateFunctionsObject | GetMigrationFunctionObjectFn;
@@ -73,9 +71,7 @@ export class ActionFactory<
     this.licenseFeatureName = this.def.licenseFeatureName;
     this.order = this.def.order || 0;
     this.MenuItem = this.def.MenuItem;
-    this.ReactMenuItem = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
     this.CollectConfig = this.def.CollectConfig;
-    this.ReactCollectConfig = uiToReactComponent(this.CollectConfig);
     this.createConfig = this.def.createConfig;
     this.isConfigValid = this.def.isConfigValid;
     this.migrations = this.def.migrations || {};

@@ -12,7 +12,7 @@ import { identity } from 'fp-ts/lib/function';
 
 import { throwErrors, CasePushRequestParamsRt } from '../../../../common/api';
 import { CASE_PUSH_URL } from '../../../../common/constants';
-import { CaseRoute } from '../types';
+import type { CaseRoute } from '../types';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 

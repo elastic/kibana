@@ -250,8 +250,12 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
     return false;
   }
 
-  async cloneDescriptor(): Promise<VectorLayerDescriptor> {
-    const clonedDescriptor = await super.cloneDescriptor();
+  async cloneDescriptor(): Promise<VectorLayerDescriptor[]> {
+    const clones = await super.cloneDescriptor();
+    if (clones.length === 0) {
+      return [];
+    }
+    const clonedDescriptor = clones[0];
 
     // Use super getDisplayName instead of instance getDisplayName to avoid getting 'Clustered Clone of Clustered'
     const displayName = await super.getDisplayName();
@@ -260,7 +264,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
     // sourceDescriptor must be document source descriptor
     clonedDescriptor.sourceDescriptor = this._documentSource.cloneDescriptor();
 
-    return clonedDescriptor;
+    return [clonedDescriptor];
   }
 
   getSource(): IVectorSource {

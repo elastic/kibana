@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../routes/security');
+jest.mock('../security');
 
 import type { MockedLogger } from '@kbn/logging-mocks';
 
@@ -31,7 +31,7 @@ const testKeys = [
   'getInstallation',
   'ensureInstalledPackage',
   'fetchFindLatestPackage',
-  'getRegistryPackage',
+  'getPackage',
   'reinstallEsAssets',
 ];
 
@@ -92,23 +92,23 @@ function getTest(
         method: mocks.packageClient.fetchFindLatestPackage.bind(mocks.packageClient),
         args: ['package name'],
         spy: jest.spyOn(epmRegistry, 'fetchFindLatestPackageOrThrow'),
-        spyArgs: ['package name'],
+        spyArgs: ['package name', undefined],
         spyResponse: { name: 'fetchFindLatestPackage test' },
         expectedReturnValue: { name: 'fetchFindLatestPackage test' },
       };
       break;
     case testKeys[3]:
       test = {
-        method: mocks.packageClient.getRegistryPackage.bind(mocks.packageClient),
+        method: mocks.packageClient.getPackage.bind(mocks.packageClient),
         args: ['package name', '8.0.0'],
-        spy: jest.spyOn(epmRegistry, 'getRegistryPackage'),
+        spy: jest.spyOn(epmRegistry, 'getPackage'),
         spyArgs: ['package name', '8.0.0', undefined],
         spyResponse: {
-          packageInfo: { name: 'getRegistryPackage test' },
+          packageInfo: { name: 'getPackage test' },
           paths: ['/some/test/path'],
         },
         expectedReturnValue: {
-          packageInfo: { name: 'getRegistryPackage test' },
+          packageInfo: { name: 'getPackage test' },
           paths: ['/some/test/path'],
         },
       };
@@ -128,7 +128,7 @@ function getTest(
       test = {
         method: mocks.packageClient.reinstallEsAssets.bind(mocks.packageClient),
         args: [pkg, paths],
-        spy: jest.spyOn(epmTransformsInstall, 'installTransform'),
+        spy: jest.spyOn(epmTransformsInstall, 'installTransforms'),
         spyArgs: [pkg, paths, mocks.esClient, mocks.soClient, mocks.logger],
         spyResponse: {
           installedTransforms: [

@@ -8,11 +8,11 @@
 
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-import { SeverityMapping, severity_mapping } from '../severity_mapping';
+import { SeverityMapping } from '../severity_mapping';
 
 /**
  * Types the DefaultStringArray as:
- *   - If null or undefined, then a default severity_mapping array will be set
+ *   - If null or undefined, then a default SeverityMapping array will be set
  */
 export const DefaultSeverityMappingArray = new t.Type<
   SeverityMapping,
@@ -20,8 +20,8 @@ export const DefaultSeverityMappingArray = new t.Type<
   unknown
 >(
   'DefaultSeverityMappingArray',
-  severity_mapping.is,
+  SeverityMapping.is,
   (input, context): Either<t.Errors, SeverityMapping> =>
-    input == null ? t.success([]) : severity_mapping.validate(input, context),
+    input == null ? t.success([]) : SeverityMapping.validate(input, context),
   t.identity
 );

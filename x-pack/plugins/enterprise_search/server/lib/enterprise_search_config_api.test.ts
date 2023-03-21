@@ -13,7 +13,7 @@ import fetch from 'node-fetch';
 
 const { Response } = jest.requireActual('node-fetch');
 
-jest.mock('@kbn/utils', () => ({
+jest.mock('@kbn/repo-info', () => ({
   kibanaPackageJson: { version: '1.0.0' },
 }));
 
@@ -70,6 +70,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
       name: 'someuser',
       access: {
         app_search: true,
+        search_engines: true,
         workplace_search: false,
       },
       app_search: {
@@ -123,6 +124,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
       kibanaVersion: '1.0.0',
       access: {
         hasAppSearchAccess: true,
+        hasSearchEnginesAccess: true,
         hasWorkplaceSearchAccess: false,
       },
       publicUrl: 'http://some.vanity.url',
@@ -136,6 +138,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
       kibanaVersion: '1.0.0',
       access: {
         hasAppSearchAccess: false,
+        hasSearchEnginesAccess: false,
         hasWorkplaceSearchAccess: false,
       },
       publicUrl: undefined,
@@ -223,7 +226,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
   });
 
   it('handles timeouts', async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     // Warning
     callEnterpriseSearchConfigAPI(mockDependencies);

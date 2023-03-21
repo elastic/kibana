@@ -13,24 +13,26 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  DEFAULT_ILM_POLICY_ID,
+  DEFAULT_ALERTS_ILM_POLICY,
+  DEFAULT_ALERTS_ILM_POLICY_NAME,
   ECS_COMPONENT_TEMPLATE_NAME,
-  TECHNICAL_COMPONENT_TEMPLATE_NAME,
-} from '../../common/assets';
+  type PublicFrameworkAlertsService,
+} from '@kbn/alerting-plugin/server';
+import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
 import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
-import { defaultLifecyclePolicy } from '../../common/assets/lifecycle_policies/default_lifecycle_policy';
 
 import type { IndexInfo } from './index_info';
 
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
-
+const TOTAL_FIELDS_LIMIT = 2500;
 interface ConstructorOptions {
   getResourceName(relativeName: string): string;
   getClusterClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
   isWriteEnabled: boolean;
   disabledRegistrationContexts: string[];
+  frameworkAlerts: PublicFrameworkAlertsService;
   pluginStop$: Observable<void>;
 }
 
@@ -95,25 +97,36 @@ export class ResourceInstaller {
    */
   public async installCommonResources(): Promise<void> {
     await this.installWithTimeout('common resources shared between all indices', async () => {
-      const { getResourceName } = this.options;
+      const { logger, frameworkAlerts } = this.options;
 
-      // We can install them in parallel
-      await Promise.all([
-        this.createOrUpdateLifecyclePolicy({
-          name: getResourceName(DEFAULT_ILM_POLICY_ID),
-          body: defaultLifecyclePolicy,
-        }),
-
-        this.createOrUpdateComponentTemplate({
-          name: getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
-          body: technicalComponentTemplate,
-        }),
-
-        this.createOrUpdateComponentTemplate({
-          name: getResourceName(ECS_COMPONENT_TEMPLATE_NAME),
-          body: ecsComponentTemplate,
-        }),
-      ]);
+      try {
+        // We can install them in parallel
+        await Promise.all([
+          // Install ILM policy and ECS component template only if framework alerts are not enabled
+          // If framework alerts are enabled, the alerting framework will install these
+          ...(frameworkAlerts.enabled()
+            ? []
+            : [
+                this.createOrUpdateLifecyclePolicy({
+                  name: DEFAULT_ALERTS_ILM_POLICY_NAME,
+                  body: DEFAULT_ALERTS_ILM_POLICY,
+                }),
+                this.createOrUpdateComponentTemplate({
+                  name: ECS_COMPONENT_TEMPLATE_NAME,
+                  body: ecsComponentTemplate,
+                }),
+              ]),
+          this.createOrUpdateComponentTemplate({
+            name: TECHNICAL_COMPONENT_TEMPLATE_NAME,
+            body: technicalComponentTemplate,
+          }),
+        ]);
+      } catch (err) {
+        logger.error(
+          `Error installing common resources in RuleRegistry ResourceInstaller - ${err.message}`
+        );
+        throw err;
+      }
     });
   }
 
@@ -127,7 +140,8 @@ export class ResourceInstaller {
    */
   public async installIndexLevelResources(indexInfo: IndexInfo): Promise<void> {
     await this.installWithTimeout(`resources for index ${indexInfo.baseName}`, async () => {
-      const { componentTemplates, ilmPolicy } = indexInfo.indexOptions;
+      const { frameworkAlerts } = this.options;
+      const { componentTemplates, ilmPolicy, additionalPrefix } = indexInfo.indexOptions;
       if (ilmPolicy != null) {
         await this.createOrUpdateLifecyclePolicy({
           name: indexInfo.getIlmPolicyName(),
@@ -135,20 +149,22 @@ export class ResourceInstaller {
         });
       }
 
-      await Promise.all(
-        componentTemplates.map(async (ct) => {
-          await this.createOrUpdateComponentTemplate({
-            name: indexInfo.getComponentTemplateName(ct.name),
-            body: {
-              template: {
-                settings: ct.settings ?? {},
-                mappings: ct.mappings,
+      if (!frameworkAlerts.enabled() || additionalPrefix) {
+        await Promise.all(
+          componentTemplates.map(async (ct) => {
+            await this.createOrUpdateComponentTemplate({
+              name: indexInfo.getComponentTemplateName(ct.name),
+              body: {
+                template: {
+                  settings: ct.settings ?? {},
+                  mappings: ct.mappings,
+                },
+                _meta: ct._meta,
               },
-              _meta: ct._meta,
-            },
-          });
-        })
-      );
+            });
+          })
+        );
+      }
     });
   }
 
@@ -162,8 +178,30 @@ export class ResourceInstaller {
 
     // Find all concrete indices for all namespaces of the index.
     const concreteIndices = await this.fetchConcreteIndices(aliases, backingIndices);
+    // Update total field limit setting of found indices
+    await Promise.all(concreteIndices.map((item) => this.updateTotalFieldLimitSetting(item)));
     // Update mappings of the found indices.
     await Promise.all(concreteIndices.map((item) => this.updateAliasWriteIndexMapping(item)));
+  }
+
+  private async updateTotalFieldLimitSetting({ index, alias }: ConcreteIndexInfo) {
+    const { logger, getClusterClient } = this.options;
+    const clusterClient = await getClusterClient();
+
+    try {
+      await clusterClient.indices.putSettings({
+        index,
+        body: {
+          'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
+        },
+      });
+      return;
+    } catch (err) {
+      logger.error(
+        `Failed to PUT index.mapping.total_fields.limit settings for alias ${alias}: ${err.message}`
+      );
+      throw err;
+    }
   }
 
   // NOTE / IMPORTANT: Please note this will update the mappings of backing indices but
@@ -173,10 +211,25 @@ export class ResourceInstaller {
   private async updateAliasWriteIndexMapping({ index, alias }: ConcreteIndexInfo) {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
-    const simulatedIndexMapping = await clusterClient.indices.simulateIndexTemplate({
-      name: index,
-    });
+
+    let simulatedIndexMapping: estypes.IndicesSimulateIndexTemplateResponse;
+    try {
+      simulatedIndexMapping = await clusterClient.indices.simulateIndexTemplate({
+        name: index,
+      });
+    } catch (err) {
+      logger.error(
+        `Ignored PUT mappings for alias ${alias}; error generating simulated mappings: ${err.message}`
+      );
+      return;
+    }
+
     const simulatedMapping = get(simulatedIndexMapping, ['template', 'mappings']);
+
+    if (simulatedMapping == null) {
+      logger.error(`Ignored PUT mappings for alias ${alias}; simulated mappings were empty`);
+      return;
+    }
 
     try {
       await clusterClient.indices.putMapping({
@@ -203,9 +256,27 @@ export class ResourceInstaller {
     indexInfo: IndexInfo,
     namespace: string
   ): Promise<void> {
-    const { logger } = this.options;
+    const { logger, frameworkAlerts } = this.options;
 
     const alias = indexInfo.getPrimaryAlias(namespace);
+
+    if (
+      namespace === 'default' &&
+      !indexInfo.indexOptions.additionalPrefix &&
+      frameworkAlerts.enabled()
+    ) {
+      const { result: initialized, error } = await frameworkAlerts.getContextInitializationPromise(
+        indexInfo.indexOptions.registrationContext
+      );
+
+      if (!initialized) {
+        throw new Error(
+          `There was an error in the framework installing namespace-level resources and creating concrete indices for ${alias} - ${error}`
+        );
+      } else {
+        return;
+      }
+    }
 
     logger.info(`Installing namespace-level resources and creating concrete index for ${alias}`);
 
@@ -263,7 +334,7 @@ export class ResourceInstaller {
   }
 
   private async installNamespacedIndexTemplate(indexInfo: IndexInfo, namespace: string) {
-    const { logger, getResourceName } = this.options;
+    const { logger } = this.options;
     const {
       componentTemplateRefs,
       componentTemplates,
@@ -277,14 +348,11 @@ export class ResourceInstaller {
 
     logger.debug(`Installing index template for ${primaryNamespacedAlias}`);
 
-    const technicalComponentNames = [getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME)];
-    const referencedComponentNames = componentTemplateRefs.map((ref) => getResourceName(ref));
+    const technicalComponentNames = [TECHNICAL_COMPONENT_TEMPLATE_NAME];
     const ownComponentNames = componentTemplates.map((template) =>
       indexInfo.getComponentTemplateName(template.name)
     );
-    const ilmPolicyName = ilmPolicy
-      ? indexInfo.getIlmPolicyName()
-      : getResourceName(DEFAULT_ILM_POLICY_ID);
+    const ilmPolicyName = ilmPolicy ? indexInfo.getIlmPolicyName() : DEFAULT_ALERTS_ILM_POLICY_NAME;
 
     const indexMetadata: estypes.Metadata = {
       ...indexTemplate._meta,
@@ -315,21 +383,17 @@ export class ResourceInstaller {
         // - then we include own component templates registered with this index
         // - finally, we include technical component templates to make sure the index gets all the
         //   mappings and settings required by all Kibana plugins using rule registry to work properly
-        composed_of: [
-          ...referencedComponentNames,
-          ...ownComponentNames,
-          ...technicalComponentNames,
-        ],
+        composed_of: [...componentTemplateRefs, ...ownComponentNames, ...technicalComponentNames],
 
         template: {
           settings: {
             hidden: true,
-            // @ts-expect-error type only defines nested structure
             'index.lifecycle': {
               name: ilmPolicyName,
               rollover_alias: primaryNamespacedAlias,
             },
-            'index.mapping.total_fields.limit': 1700,
+            'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
+            auto_expand_replicas: '0-1',
           },
           mappings: {
             dynamic: false,
@@ -375,6 +439,9 @@ export class ResourceInstaller {
         },
       });
     } catch (err) {
+      logger.error(
+        `Error creating index ${initialIndexName} as the write index for alias ${primaryNamespacedAlias} in RuleRegistry ResourceInstaller: ${err.message}`
+      );
       // If the index already exists and it's the write index for the alias,
       // something else created it so suppress the error. If it's not the write
       // index, that's bad, throw an error.
@@ -460,6 +527,9 @@ export class ResourceInstaller {
         return createConcreteIndexInfo({});
       }
 
+      logger.error(
+        `Error fetching concrete indices for ${indexPatternForBackingIndices} in RuleRegistry ResourceInstaller - ${err.message}`
+      );
       // A non-404 error is a real problem so we re-throw.
       throw err;
     }

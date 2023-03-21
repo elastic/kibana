@@ -24,7 +24,6 @@ import {
   useLensDispatch,
   useLensSelector,
 } from '../state_management';
-import { trackUiEvent } from '../lens_ui_telemetry';
 import { writeToStorage } from '../settings_storage';
 import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
 
@@ -46,15 +45,14 @@ export function SettingsMenu({
   const dispatch = useLensDispatch();
 
   const toggleAutoApply = useCallback(() => {
-    trackUiEvent('toggle_autoapply');
-
+    onClose();
     writeToStorage(
       new Storage(localStorage),
       AUTO_APPLY_DISABLED_STORAGE_KEY,
       String(autoApplyEnabled)
     );
     dispatch(autoApplyEnabled ? disableAutoApply() : enableAutoApply());
-  }, [dispatch, autoApplyEnabled]);
+  }, [dispatch, autoApplyEnabled, onClose]);
 
   return (
     <EuiWrappingPopover

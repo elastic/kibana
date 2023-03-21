@@ -6,41 +6,9 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
 import expect from '@kbn/expect';
-import { RetryService } from '../../../../../test/common/services/retry';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-class FileWrapper {
-  constructor(private readonly path: string, private readonly retry: RetryService) {}
-  async reset() {
-    // "touch" each file to ensure it exists and is empty before each test
-    await Fs.promises.writeFile(this.path, '');
-  }
-  async read() {
-    const content = await Fs.promises.readFile(this.path, { encoding: 'utf8' });
-    return content.trim().split('\n');
-  }
-  async readJSON() {
-    return this.retry.try(async () => {
-      const content = await this.read();
-      try {
-        return content.map((l) => JSON.parse(l));
-      } catch (err) {
-        const contentString = content.join('\n');
-        throw new Error(
-          `Failed to parse audit log JSON, error: "${err.message}", audit.log contents:\n${contentString}`
-        );
-      }
-    });
-  }
-  // writing in a file is an async operation. we use this method to make sure logs have been written.
-  async isNotEmpty() {
-    const content = await this.read();
-    const line = content[0];
-    return line.length > 0;
-  }
-}
+import { FileWrapper } from './file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -48,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const { username, password } = getService('config').get('servers.kibana');
 
   describe('Audit Log', function () {
-    const logFilePath = Path.resolve(__dirname, '../../fixtures/audit/audit.log');
+    const logFilePath = Path.resolve(__dirname, '../../plugins/audit_log/audit.log');
     const logFile = new FileWrapper(logFilePath, retry);
 
     beforeEach(async () => {
@@ -87,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
+        .set('X-Forwarded-For', '1.1.1.1, 2.2.2.2')
         .send({
           providerType: 'basic',
           providerName: 'basic',
@@ -103,12 +72,15 @@ export default function ({ getService }: FtrProviderContext) {
       expect(loginEvent.event.outcome).to.be('success');
       expect(loginEvent.trace.id).to.be.ok();
       expect(loginEvent.user.name).to.be(username);
+      expect(loginEvent.client.ip).to.be.ok();
+      expect(loginEvent.http.request.headers['x-forwarded-for']).to.be('1.1.1.1, 2.2.2.2');
     });
 
     it('logs audit events when failing to log in', async () => {
       await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
+        .set('X-Forwarded-For', '1.1.1.1, 2.2.2.2')
         .send({
           providerType: 'basic',
           providerName: 'basic',
@@ -125,6 +97,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(loginEvent.event.outcome).to.be('failure');
       expect(loginEvent.trace.id).to.be.ok();
       expect(loginEvent.user).not.to.be.ok();
+      expect(loginEvent.client.ip).to.be.ok();
+      expect(loginEvent.http.request.headers['x-forwarded-for']).to.be('1.1.1.1, 2.2.2.2');
     });
   });
 }

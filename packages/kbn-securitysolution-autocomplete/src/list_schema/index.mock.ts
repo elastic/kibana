@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { FoundListSchema, ListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  FoundListSchema,
+  ListSchema,
+  FoundListsBySizeSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 // TODO: Once this mock is available within packages, use it instead, https://github.com/elastic/kibana/issues/100715
 // import { getFoundListSchemaMock } from '../../../../../lists/common/schemas/response/found_list_schema.mock';
@@ -16,6 +20,11 @@ export const getFoundListSchemaMock = (): FoundListSchema => ({
   page: 1,
   per_page: 1,
   total: 1,
+});
+
+export const getFoundListsBySizeSchemaMock = (): FoundListsBySizeSchema => ({
+  smallLists: [getListResponseMock()],
+  largeLists: [getListResponseMock()],
 });
 
 // TODO: Once these mocks are available from packages use it instead, https://github.com/elastic/kibana/issues/100715

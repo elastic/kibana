@@ -18,7 +18,7 @@ import { NestedFilterOpen } from './filter_expanded';
 interface Props {
   value: string;
   field: string;
-  allSelectedValues?: string[];
+  allSelectedValues?: Array<string | number>;
   negate: boolean;
   nestedField?: string;
   seriesId: number;

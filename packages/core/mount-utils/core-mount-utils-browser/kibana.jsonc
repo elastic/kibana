@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-mount-utils-browser",
+  "owner": "@elastic/kibana-core"
+}

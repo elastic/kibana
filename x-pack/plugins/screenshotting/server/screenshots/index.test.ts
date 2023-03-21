@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { Logger, PackageInfo } from '@kbn/core/server';
 import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { lastValueFrom, of, throwError } from 'rxjs';
@@ -14,12 +15,11 @@ import {
   SCREENSHOTTING_EXPRESSION,
   SCREENSHOTTING_EXPRESSION_INPUT,
 } from '../../common';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import * as errors from '../../common/errors';
 import type { HeadlessChromiumDriverFactory } from '../browsers';
 import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
 import type { ConfigType } from '../config';
 import type { PngScreenshotOptions } from '../formats';
-import * as errors from '../../common/errors';
 import * as Layouts from '../layouts/create_layout';
 import { createMockLayout } from '../layouts/mock';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
@@ -72,7 +72,6 @@ describe('Screenshot Observable Pipeline', () => {
           waitForElements: 30000,
           renderComplete: 30000,
         },
-        loadDelay: 5000000000,
         zoom: 2,
       },
       networkPolicy: { enabled: false, rules: [] },
@@ -125,13 +124,13 @@ describe('Screenshot Observable Pipeline', () => {
   });
 
   it('captures screenshot of an expression', async () => {
-    await screenshots
-      .getScreenshots({
+    await lastValueFrom(
+      screenshots.getScreenshots({
         ...options,
         expression: 'kibana',
         input: 'something',
       } as PngScreenshotOptions)
-      .toPromise();
+    );
 
     expect(driver.open).toHaveBeenCalledTimes(1);
     expect(driver.open).toHaveBeenCalledWith(
@@ -148,7 +147,7 @@ describe('Screenshot Observable Pipeline', () => {
 
   describe('error handling', () => {
     it('recovers if waitForSelector fails', async () => {
-      driver.waitForSelector.mockImplementation((selectorArg: string) => {
+      driver.waitForSelector.mockImplementation(() => {
         throw new Error('Mock error!');
       });
       const result = await lastValueFrom(
@@ -169,14 +168,14 @@ describe('Screenshot Observable Pipeline', () => {
       driverFactory.createPage.mockReturnValue(
         of({
           driver,
-          error$: throwError('Instant timeout has fired!'),
+          error$: throwError(() => 'Instant timeout has fired!'),
           close: () => of({}),
         })
       );
 
-      await expect(screenshots.getScreenshots(options).toPromise()).rejects.toMatchInlineSnapshot(
-        `"Instant timeout has fired!"`
-      );
+      await expect(
+        lastValueFrom(screenshots.getScreenshots(options))
+      ).rejects.toMatchInlineSnapshot(`"Instant timeout has fired!"`);
     });
 
     it(`uses defaults for element positions and size when Kibana page is not ready`, async () => {
@@ -191,6 +190,24 @@ describe('Screenshot Observable Pipeline', () => {
 
       expect(result).toHaveProperty('results');
       expect(result.results).toMatchSnapshot();
+    });
+
+    it("initial page is create with layout's width and deviceScaleFactor", async () => {
+      const result = await lastValueFrom(
+        screenshots.getScreenshots(options as PngScreenshotOptions)
+      );
+
+      expect(driverFactory.createPage).toBeCalledWith(
+        expect.objectContaining({
+          defaultViewport: {
+            width: layout.width,
+            deviceScaleFactor: layout.getBrowserZoom(),
+          },
+        }), // config with layout
+        expect.anything() // logger
+      );
+
+      expect(result).toHaveProperty('results');
     });
   });
 

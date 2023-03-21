@@ -12,7 +12,7 @@ import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { TimeseriesLoading } from './timeseries_loading';
@@ -37,6 +37,7 @@ interface TimeseriesVisualizationProps {
   visData: TimeseriesVisData;
   uiState: PersistedState;
   syncColors: boolean;
+  syncCursor: boolean;
   syncTooltips: boolean;
   initialRender: () => void;
 }
@@ -48,6 +49,7 @@ function TimeseriesVisualization({
   uiState,
   getConfig,
   syncColors,
+  syncCursor,
   syncTooltips,
   initialRender,
 }: TimeseriesVisualizationProps) {
@@ -194,6 +196,7 @@ function TimeseriesVisualization({
             onUiState={handleUiState}
             syncColors={syncColors}
             syncTooltips={syncTooltips}
+            syncCursor={syncCursor}
             palettesService={palettesService}
             indexPattern={indexPattern}
             fieldFormatMap={indexPattern?.fieldFormatMap}

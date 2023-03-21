@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Metrics: Hosts - Identify unusual spikes in inbound traffic across hosts.",
   "groups": [
     "hosts",
@@ -31,7 +30,7 @@
     "custom_urls": [
       {
         "url_name": "Host Metrics",
-        "url_value": "metrics/detail/host/$host.name$?metricTime=(autoReload:!f,refreshInterval:5000,time:(from:%27$earliest$%27,interval:%3E%3D1m,to:%27$latest$%27))"
+        "url_value": "metrics/detail/host/$host.name$?_a=(autoReload:!f,refreshInterval:5000,time:(from:%27$earliest$%27,interval:%3E%3D1m,to:%27$latest$%27))"
       }
     ]
   }

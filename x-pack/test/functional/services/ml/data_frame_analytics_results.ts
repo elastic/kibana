@@ -13,12 +13,14 @@ import type { MlCommonUI } from './common_ui';
 import type { MlCommonDataGrid } from './common_data_grid';
 
 export function MachineLearningDataFrameAnalyticsResultsProvider(
-  { getService }: FtrProviderContext,
+  { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
   commonDataGrid: MlCommonDataGrid
 ) {
+  const headerPage = getPageObject('header');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   return {
     async assertRegressionEvaluatePanelElementsExists() {
@@ -55,6 +57,10 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
       await testSubjects.existOrFail('mlExplorationDataGrid loaded', { timeout: 5000 });
     },
 
+    async selectResultsTablePage(page: number) {
+      await commonDataGrid.selectPage('mlExplorationDataGrid loaded', page);
+    },
+
     async assertResultsTableTrainingFiltersExist() {
       await testSubjects.existOrFail('mlDFAnalyticsExplorationQueryBarFilterButtons', {
         timeout: 5000,
@@ -71,6 +77,26 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
         expectedCheckState,
         `Chart histogram button check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
+    },
+
+    async getViewContainer() {
+      return find.byCssSelector('div.vgaVis__view');
+    },
+
+    async assertOpensExploreInCustomVisualization() {
+      await testSubjects.existOrFail('mlSplomExploreInCustomVisualizationLink', {
+        timeout: 5000,
+      });
+      await testSubjects.click('mlSplomExploreInCustomVisualizationLink');
+      await testSubjects.existOrFail('visualizationLoader');
+
+      const view = await this.getViewContainer();
+      expect(view).to.be.ok();
+      const size = await view.getSize();
+      expect(size).to.have.property('width');
+      expect(size).to.have.property('height');
+      expect(size.width).to.be.above(0);
+      expect(size.height).to.be.above(0);
     },
 
     async enableResultsTablePreviewHistogramCharts(expectedButtonState: boolean) {
@@ -190,7 +216,15 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     async assertTotalFeatureImportanceEvaluatePanelExists() {
       await testSubjects.existOrFail('mlDFExpandableSection-FeatureImportanceSummary');
       await this.scrollFeatureImportanceIntoView();
-      await testSubjects.existOrFail('mlTotalFeatureImportanceChart', { timeout: 30 * 1000 });
+
+      // Depending on the analytics result, there's either the feature
+      // importance chart or a callout about uniform data. Since we're not
+      // testing the quality of analytics here, we're fine with both panel
+      // contents.
+      await mlCommonUI.assertOneOfExists(
+        ['mlTotalFeatureImportanceChart', 'mlNoTotalFeatureImportanceCallout'],
+        30 * 1000
+      );
     },
 
     async assertFeatureImportanceDecisionPathElementsExists() {
@@ -364,12 +398,13 @@ export function MachineLearningDataFrameAnalyticsResultsProvider(
     },
 
     async expandContentSection(sectionId: string, shouldExpand: boolean) {
+      await headerPage.waitUntilLoadingHasFinished();
       const contentSubj = `mlDFExpandableSection-${sectionId}-content`;
       const expandableContentExists = await testSubjects.exists(contentSubj, { timeout: 1000 });
 
       if (expandableContentExists !== shouldExpand) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(
+          await testSubjects.clickWhenNotDisabledWithoutRetry(
             `mlDFExpandableSection-${sectionId}-toggle-button`
           );
           if (shouldExpand) {

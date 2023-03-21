@@ -13,7 +13,7 @@ import {
   getSavedSearch,
   SavedSearch,
   throwErrorOnSavedSearchUrlConflict,
-} from '@kbn/discover-plugin/public';
+} from '@kbn/saved-search-plugin/public';
 import { createVisAsync } from '../../vis_async';
 import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
 import {
@@ -37,7 +37,8 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   vis: Vis,
   visualizeServices: VisualizeServices
 ) => {
-  const { data, createVisEmbeddableFromObject, savedObjects, spaces } = visualizeServices;
+  const { data, createVisEmbeddableFromObject, savedObjects, spaces, savedObjectsTagging } =
+    visualizeServices;
 
   let savedSearch: SavedSearch | undefined;
 
@@ -47,6 +48,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
         search: data.search,
         savedObjectsClient: savedObjects.client,
         spaces,
+        savedObjectsTagging,
       });
     } catch (e) {
       // skip this catch block

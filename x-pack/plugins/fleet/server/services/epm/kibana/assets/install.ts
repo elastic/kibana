@@ -11,12 +11,15 @@ import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
-  SavedObjectsImporter,
+  ISavedObjectsImporter,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportFailure,
   Logger,
 } from '@kbn/core/server';
-import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from '@kbn/core/server/types';
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
+
+import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
@@ -27,7 +30,11 @@ import { indexPatternTypes, getIndexPatternSavedObjects } from '../index_pattern
 import { saveKibanaAssetsRefs } from '../../packages/install';
 import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
 
-type SavedObjectsImporterContract = Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+import { withPackageSpan } from '../../packages/utils';
+
+import { tagKibanaAssets } from './tag_assets';
+
+type SavedObjectsImporterContract = Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
 const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
   JSON.stringify(
     errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
@@ -45,7 +52,7 @@ export type ArchiveAsset = Pick<
 
 // KibanaSavedObjectTypes are used to ensure saved objects being created for a given
 // KibanaAssetType have the correct type
-const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectType> = {
+export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectType> = {
   [KibanaAssetType.dashboard]: KibanaSavedObjectType.dashboard,
   [KibanaAssetType.indexPattern]: KibanaSavedObjectType.indexPattern,
   [KibanaAssetType.map]: KibanaSavedObjectType.map,
@@ -128,17 +135,25 @@ export async function installKibanaAssets(options: {
 export async function installKibanaAssetsAndReferences({
   savedObjectsClient,
   savedObjectsImporter,
+  savedObjectTagAssignmentService,
+  savedObjectTagClient,
   logger,
   pkgName,
+  pkgTitle,
   paths,
   installedPkg,
+  spaceId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+  savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+  savedObjectTagAssignmentService: IAssignmentService;
+  savedObjectTagClient: ITagsClient;
   logger: Logger;
   pkgName: string;
+  pkgTitle: string;
   paths: string[];
   installedPkg?: SavedObject<Installation>;
+  spaceId: string;
 }) {
   const kibanaAssets = await getKibanaAssets(paths);
   if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
@@ -149,12 +164,23 @@ export async function installKibanaAssetsAndReferences({
     kibanaAssets
   );
 
-  await installKibanaAssets({
+  const importedAssets = await installKibanaAssets({
     logger,
     savedObjectsImporter,
     pkgName,
     kibanaAssets,
   });
+  await withPackageSpan('Create and assign package tags', () =>
+    tagKibanaAssets({
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
+      kibanaAssets,
+      pkgTitle,
+      pkgName,
+      spaceId,
+      importedAssets,
+    })
+  );
 
   return installedKibanaAssetsRefs;
 }

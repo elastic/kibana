@@ -19,9 +19,9 @@ import {
 } from '../charts/visitor_breakdown_chart';
 import { I18LABELS, VisitorBreakdownLabel } from '../translations';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useStaticDataView } from '../../../../hooks/use_static_data_view';
 import { useLocalUIFilters } from '../hooks/use_local_uifilters';
 import { getExcludedName } from '../local_uifilters';
+import { useDataView } from '../local_uifilters/use_data_view';
 
 type VisitorBreakdownFieldMap = Record<
   VisitorBreakdownMetric,
@@ -40,20 +40,21 @@ const EuiLoadingEmbeddable = styled(EuiFlexGroup)`
   }
 `;
 
+const vistorBreakdownFilter = {
+  filterNames: uxLocalUIFilterNames.filter((name) =>
+    ['browser', 'browserExcluded', 'os', 'osExcluded'].includes(name)
+  ),
+};
+
 const getInvertedFilterName = (filter: UxLocalUIFilterName, negate: boolean) =>
   negate ? filter : getExcludedName(filter);
 
 export function VisitorBreakdown() {
   const { urlParams, uxUiFilters } = useLegacyUrlParams();
   const { start, end, searchTerm } = urlParams;
-  // static dataView is required for lens
-  const { dataView, loading } = useStaticDataView();
+  const { dataView } = useDataView();
 
-  const { filters, setFilterValue } = useLocalUIFilters({
-    filterNames: uxLocalUIFilterNames.filter((name) =>
-      ['browser', 'browserExcluded', 'os', 'osExcluded'].includes(name)
-    ),
-  });
+  const { filters, setFilterValue } = useLocalUIFilters(vistorBreakdownFilter);
 
   const onFilter = useCallback(
     (metric: VisitorBreakdownMetric, event: any) => {
@@ -96,7 +97,7 @@ export function VisitorBreakdown() {
             <h4>{I18LABELS.browser}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          {!!loading ? (
+          {!dataView?.id ? (
             <EuiLoadingEmbeddable
               justifyContent="spaceAround"
               alignItems={'center'}
@@ -107,7 +108,7 @@ export function VisitorBreakdown() {
             </EuiLoadingEmbeddable>
           ) : (
             <VisitorBreakdownChart
-              dataView={dataView?.id ?? ''}
+              dataView={dataView}
               start={start ?? ''}
               end={end ?? ''}
               uiFilters={uxUiFilters}
@@ -122,7 +123,7 @@ export function VisitorBreakdown() {
             <h4>{I18LABELS.operatingSystem}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          {!!loading ? (
+          {!dataView?.id ? (
             <EuiLoadingEmbeddable
               justifyContent="spaceAround"
               alignItems={'center'}
@@ -133,7 +134,7 @@ export function VisitorBreakdown() {
             </EuiLoadingEmbeddable>
           ) : (
             <VisitorBreakdownChart
-              dataView={dataView?.id ?? ''}
+              dataView={dataView}
               start={start ?? ''}
               end={end ?? ''}
               uiFilters={uxUiFilters}

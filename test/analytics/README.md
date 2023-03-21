@@ -20,4 +20,4 @@ expect(events).to...
 
 If you are reusing these helpers in another suite, please remember to make sure to optIn via `await getService('kibana_ebt_ui').setOptIn(true);`
 
-Refer to [`EBTHelpersContract`](./fixtures/plugins/analytics_ftr_helpers/common/types.ts#:~:text=EBTHelpersContract) for more details about the existing APIs and all the options they accept.
+Refer to [`EBTHelpersContract`](./plugins/analytics_ftr_helpers/common/types.ts#:~:text=EBTHelpersContract) for more details about the existing APIs and all the options they accept.

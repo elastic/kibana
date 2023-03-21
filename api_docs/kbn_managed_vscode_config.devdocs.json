@@ -1,0 +1,136 @@
+{
+  "id": "@kbn/managed-vscode-config",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/managed-vscode-config",
+        "id": "def-common.updateVscodeConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "updateVscodeConfig",
+        "description": [
+          "\nUpdate the settings.json file used by VSCode in the Kibana repository. If the file starts\nwith the comment \"// self managed\" then it is not touched. If a top-level keys is prefixed with\n`// self managed` then all the properties of that setting are left untouched. And finally, if\na specific child property of a setting like `search.exclude` is prefixed with `// self managed`\nthen it is left untouched.\n\nWe don't just use `JSON.parse()` and `JSON.stringify()` in order to support this customization and\nalso to support users using comments in this file, which is very useful for temporarily disabling settings.\n\nAfter the config file is updated it is formatted with prettier.\n"
+        ],
+        "signature": [
+          "(keys: ",
+          "ManagedConfigKey",
+          "[], infoText: string, json: string | undefined) => string"
+        ],
+        "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/managed-vscode-config",
+            "id": "def-common.updateVscodeConfig.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "keys",
+            "description": [
+              "The config keys which are managed"
+            ],
+            "signature": [
+              "ManagedConfigKey",
+              "[]"
+            ],
+            "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/managed-vscode-config",
+            "id": "def-common.updateVscodeConfig.$2",
+            "type": "string",
+            "tags": [],
+            "label": "infoText",
+            "description": [
+              "The text which should be written to the top of the file to educate users how to customize the settings"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/managed-vscode-config",
+            "id": "def-common.updateVscodeConfig.$3",
+            "type": "string",
+            "tags": [],
+            "label": "json",
+            "description": [
+              "The settings file as a string"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-managed-vscode-config/src/update_vscode_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/managed-vscode-config",
+        "id": "def-common.MANAGED_CONFIG_FILES",
+        "type": "Array",
+        "tags": [],
+        "label": "MANAGED_CONFIG_FILES",
+        "description": [],
+        "signature": [
+          "{ name: string; content: string; }[]"
+        ],
+        "path": "packages/kbn-managed-vscode-config/src/managed_config_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/managed-vscode-config",
+        "id": "def-common.MANAGED_CONFIG_KEYS",
+        "type": "Array",
+        "tags": [],
+        "label": "MANAGED_CONFIG_KEYS",
+        "description": [
+          "\nDefines the keys which we overrite in user's vscode config for the workspace. We currently\nonly support object values because that's all we needed to support, but support for non object\nvalues should be easy to add."
+        ],
+        "signature": [
+          "ManagedConfigKey",
+          "[]"
+        ],
+        "path": "packages/kbn-managed-vscode-config/src/managed_config_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

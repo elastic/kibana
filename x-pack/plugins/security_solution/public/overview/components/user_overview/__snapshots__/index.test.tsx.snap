@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`User Summary Component rendering it renders the default User Summary 1`] = `
+exports[`User Summary Component it renders the default User Summary 1`] = `
 <UserOverview
   anomaliesData={
     Object {
@@ -171,6 +171,7 @@ exports[`User Summary Component rendering it renders the default User Summary 1`
   indexPatterns={Array []}
   isInDetailsSidePanel={false}
   isLoadingAnomaliesData={false}
+  jobNameById={Object {}}
   loading={false}
   narrowDateRange={[MockFunction]}
   startDate="2019-06-15T06:00:00.000Z"
@@ -178,7 +179,7 @@ exports[`User Summary Component rendering it renders the default User Summary 1`
 />
 `;
 
-exports[`User Summary Component rendering it renders the panel view User Summary 1`] = `
+exports[`User Summary Component it renders the panel view User Summary 1`] = `
 <UserOverview
   anomaliesData={
     Object {
@@ -349,6 +350,7 @@ exports[`User Summary Component rendering it renders the panel view User Summary
   indexPatterns={Array []}
   isInDetailsSidePanel={true}
   isLoadingAnomaliesData={false}
+  jobNameById={Object {}}
   loading={false}
   narrowDateRange={[MockFunction]}
   startDate="2019-06-15T06:00:00.000Z"

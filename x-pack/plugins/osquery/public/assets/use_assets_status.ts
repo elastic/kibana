@@ -6,7 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core/public';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../common/lib/kibana';
 import { INTEGRATION_ASSETS_STATUS_ID } from './constants';
 

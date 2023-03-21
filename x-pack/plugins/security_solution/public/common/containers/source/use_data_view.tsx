@@ -12,7 +12,6 @@ import memoizeOne from 'memoize-one';
 import { omit, pick } from 'lodash/fp';
 import type {
   BrowserField,
-  DocValueFields,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -25,13 +24,16 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 import { sourcererActions } from '../../store/sourcerer';
 import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { getSourcererDataView } from '../sourcerer/api';
+import { getSourcererDataView } from '../sourcerer/get_sourcerer_data_view';
+import { useTrackHttpRequest } from '../../lib/apm/use_track_http_request';
+import { APP_UI_ID } from '../../../../common/constants';
 
 export type IndexFieldSearch = (param: {
   dataViewId: string;
   scopeId?: SourcererScopeName;
   needToBeInit?: boolean;
   cleanCache?: boolean;
+  skipScopeUpdate?: boolean;
 }) => Promise<void>;
 
 type DangerCastForBrowserFieldsMutation = Record<
@@ -40,7 +42,6 @@ type DangerCastForBrowserFieldsMutation = Record<
 >;
 interface DataViewInfo {
   browserFields: DangerCastForBrowserFieldsMutation;
-  docValueFields: DocValueFields[];
   indexFields: FieldSpec[];
 }
 
@@ -49,7 +50,7 @@ interface DataViewInfo {
  * VERY mutatious on purpose to improve the performance of the transform.
  */
 export const getDataViewStateFromIndexFields = memoizeOne(
-  (_title: string, fields: IndexField[]): DataViewInfo => {
+  (_title: string, fields: IndexField[], _includeUnmapped: boolean = false): DataViewInfo => {
     // Adds two dangerous casts to allow for mutations within this function
     type DangerCastForMutation = Record<string, {}>;
 
@@ -69,22 +70,18 @@ export const getDataViewStateFromIndexFields = memoizeOne(
           pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
         );
 
-        // mutate docValueFields
-        if (field.readFromDocValues && acc.docValueFields.length < 100) {
-          acc.docValueFields.push({
-            field: field.name,
-          });
-        }
         return acc;
       },
       {
         browserFields: {},
-        docValueFields: [],
         indexFields: [],
       }
     );
   },
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
+  (newArgs, lastArgs) =>
+    newArgs[0] === lastArgs[0] &&
+    newArgs[1].length === lastArgs[1].length &&
+    newArgs[2] === lastArgs[2]
 );
 
 export const useDataView = (): {
@@ -95,6 +92,7 @@ export const useDataView = (): {
   const searchSubscription$ = useRef<Record<string, Subscription>>({});
   const dispatch = useDispatch();
   const { addError, addWarning } = useAppToasts();
+  const { startTracking } = useTrackHttpRequest();
 
   const setLoading = useCallback(
     ({ id, loading }: { id: string; loading: boolean }) => {
@@ -108,6 +106,7 @@ export const useDataView = (): {
       scopeId = SourcererScopeName.default,
       needToBeInit = false,
       cleanCache = false,
+      skipScopeUpdate = false,
     }) => {
       const unsubscribe = () => {
         searchSubscription$.current[dataViewId]?.unsubscribe();
@@ -121,16 +120,12 @@ export const useDataView = (): {
           [dataViewId]: new AbortController(),
         };
         setLoading({ id: dataViewId, loading: true });
+
+        const { endTracking } = startTracking({ name: `${APP_UI_ID} indexFieldsSearch` });
+
         if (needToBeInit) {
-          const dataViewToUpdate = await getSourcererDataView(
-            dataViewId,
-            abortCtrl.current[dataViewId].signal
-          );
-          dispatch(
-            sourcererActions.updateSourcererDataViews({
-              dataView: dataViewToUpdate,
-            })
-          );
+          const dataView = await getSourcererDataView(dataViewId, data.dataViews);
+          dispatch(sourcererActions.setDataView(dataView));
         }
 
         return new Promise<void>((resolve) => {
@@ -148,8 +143,10 @@ export const useDataView = (): {
             .subscribe({
               next: async (response) => {
                 if (isCompleteResponse(response)) {
+                  endTracking('success');
+
                   const patternString = response.indicesExist.sort().join();
-                  if (needToBeInit && scopeId) {
+                  if (needToBeInit && scopeId && !skipScopeUpdate) {
                     dispatch(
                       sourcererActions.setSelectedDataView({
                         id: scopeId,
@@ -176,6 +173,7 @@ export const useDataView = (): {
                     })
                   );
                 } else if (isErrorResponse(response)) {
+                  endTracking('invalid');
                   setLoading({ id: dataViewId, loading: false });
                   addWarning(i18n.ERROR_BEAT_FIELDS);
                 }
@@ -183,6 +181,7 @@ export const useDataView = (): {
                 resolve();
               },
               error: (msg) => {
+                endTracking('error');
                 if (msg.message === DELETED_SECURITY_SOLUTION_DATA_VIEW) {
                   // reload app if security solution data view is deleted
                   return location.reload();
@@ -209,7 +208,7 @@ export const useDataView = (): {
       }
       return asyncSearch();
     },
-    [addError, addWarning, data.search, dispatch, setLoading]
+    [addError, addWarning, data.search, dispatch, setLoading, startTracking, data.dataViews]
   );
 
   useEffect(() => {

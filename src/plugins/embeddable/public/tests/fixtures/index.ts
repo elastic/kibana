@@ -8,3 +8,4 @@
 
 export * from './hello_world_embeddable';
 export * from './hello_world_embeddable_factory';
+export * from './hello_world_embeddable_react';

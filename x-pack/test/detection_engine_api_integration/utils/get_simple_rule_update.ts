@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { UpdateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { RuleUpdateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
  * @param ruleId The rule id
  * @param enabled Set to true to enable it, by default it is off
  */
-export const getSimpleRuleUpdate = (ruleId = 'rule-1', enabled = false): UpdateRulesSchema => ({
+export const getSimpleRuleUpdate = (ruleId = 'rule-1', enabled = false): RuleUpdateProps => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
   enabled,

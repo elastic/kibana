@@ -111,6 +111,9 @@ export const configSchema = schema.object(
     }),
     monitored_stats_health_verbose_log: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
+      level: schema.oneOf([schema.literal('debug'), schema.literal('info')], {
+        defaultValue: 'debug',
+      }),
       /* The amount of seconds we allow a task to delay before printing a warning server log */
       warn_delayed_task_start_in_seconds: schema.number({
         defaultValue: DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS,

@@ -6,65 +6,71 @@
  * Side Public License, v 1.
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
-import {
-  AppState as DiscoverState,
-  GetStateReturn as DiscoverGetStateReturn,
-} from '../application/main/services/discover_state';
-import {
-  AppState as ContextState,
-  GetStateReturn as ContextGetStateReturn,
-} from '../application/context/services/context_state';
+import { isEqual } from 'lodash';
+import { DiscoverAppStateContainer } from '../application/main/services/discover_app_state_container';
+import { GetStateReturn as ContextGetStateReturn } from '../application/context/services/context_state';
 import { getStateColumnActions } from '../components/doc_table/actions/columns';
 
 interface UseColumnsProps {
   capabilities: Capabilities;
   config: IUiSettingsClient;
-  indexPattern: DataView;
-  indexPatterns: DataViewsContract;
+  dataView: DataView;
+  dataViews: DataViewsContract;
   useNewFieldsApi: boolean;
-  setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
-  state: DiscoverState | ContextState;
+  setAppState: DiscoverAppStateContainer['update'] | ContextGetStateReturn['setAppState'];
+  columns?: string[];
+  sort?: string[][];
 }
 
 export const useColumns = ({
   capabilities,
   config,
-  indexPattern,
-  indexPatterns,
+  dataView,
+  dataViews,
   setAppState,
-  state,
   useNewFieldsApi,
+  columns,
+  sort,
 }: UseColumnsProps) => {
+  const [usedColumns, setUsedColumns] = useState(getColumns(columns, useNewFieldsApi));
+  useEffect(() => {
+    const nextColumns = getColumns(columns, useNewFieldsApi);
+    if (isEqual(usedColumns, nextColumns)) {
+      return;
+    }
+    setUsedColumns(nextColumns);
+  }, [columns, useNewFieldsApi, usedColumns]);
   const { onAddColumn, onRemoveColumn, onSetColumns, onMoveColumn } = useMemo(
     () =>
       getStateColumnActions({
         capabilities,
         config,
-        indexPattern,
-        indexPatterns,
+        dataView,
+        dataViews,
         setAppState,
-        state,
         useNewFieldsApi,
+        columns: usedColumns,
+        sort,
       }),
-    [capabilities, config, indexPattern, indexPatterns, setAppState, state, useNewFieldsApi]
+    [capabilities, config, dataView, dataViews, setAppState, sort, useNewFieldsApi, usedColumns]
   );
 
-  const columns = useMemo(() => {
-    if (!state.columns) {
-      return [];
-    }
-    return useNewFieldsApi ? state.columns.filter((col) => col !== '_source') : state.columns;
-  }, [state, useNewFieldsApi]);
-
   return {
-    columns,
+    columns: usedColumns,
     onAddColumn,
     onRemoveColumn,
     onMoveColumn,
     onSetColumns,
   };
 };
+
+function getColumns(columns: string[] | undefined, useNewFieldsApi: boolean) {
+  if (!columns) {
+    return [];
+  }
+  return useNewFieldsApi ? columns.filter((col) => col !== '_source') : columns;
+}

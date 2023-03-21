@@ -35,7 +35,7 @@ const InspectFlyout = ({ uiSettings, searchSession }: InspectFlyoutProps) => {
       <Fragment>
         <CodeEditor
           languageId="json"
-          value={JSON.stringify(searchSession.initialState, null, 2)}
+          value={JSON.stringify(searchSession, null, 2)}
           options={{
             readOnly: true,
             lineNumbers: 'off',

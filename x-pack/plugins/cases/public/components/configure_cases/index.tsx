@@ -11,14 +11,13 @@ import styled, { css } from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SUPPORTED_CONNECTORS } from '../../../common/constants';
+import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 
-import { ClosureType } from '../../containers/configure/types';
+import type { ClosureType } from '../../containers/configure/types';
 
 import { SectionWrapper, ContentWrapper, WhitePageWrapper } from '../wrappers';
 import { Connectors } from './connectors';
@@ -30,7 +29,7 @@ import { HeaderPage } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { CasesDeepLinkId } from '../../common/navigation';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -78,23 +77,36 @@ export const ConfigureCases: React.FC = React.memo(() => {
     isLoading: isLoadingConnectors,
     data: connectors = [],
     refetch: refetchConnectors,
-  } = useGetConnectors();
+  } = useGetSupportedActionConnectors();
   const {
     isLoading: isLoadingActionTypes,
     data: actionTypes = [],
     refetch: refetchActionTypes,
   } = useGetActionTypes();
 
-  const supportedActionTypes = useMemo(
-    () => actionTypes.filter((actionType) => SUPPORTED_CONNECTORS.includes(actionType.id)),
-    [actionTypes]
+  const onConnectorUpdated = useCallback(
+    async (updatedConnector) => {
+      setEditedConnectorItem(updatedConnector);
+      refetchConnectors();
+      refetchActionTypes();
+      refetchCaseConfigure();
+    },
+    [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
   );
 
-  const onConnectorUpdated = useCallback(async () => {
-    refetchConnectors();
-    refetchActionTypes();
-    refetchCaseConfigure();
-  }, [refetchActionTypes, refetchCaseConfigure, refetchConnectors]);
+  const onConnectorCreated = useCallback(
+    async (createdConnector) => {
+      const caseConnector = normalizeActionConnector(createdConnector);
+
+      await persistCaseConfigure({
+        connector: caseConnector,
+        closureType,
+      });
+      onConnectorUpdated(createdConnector);
+      setConnector(caseConnector);
+    },
+    [onConnectorUpdated, closureType, setConnector, persistCaseConfigure]
+  );
 
   const isLoadingAny =
     isLoadingConnectors || persistLoading || loadingCaseConfigure || isLoadingActionTypes;
@@ -169,12 +181,12 @@ export const ConfigureCases: React.FC = React.memo(() => {
       addFlyoutVisible
         ? triggersActionsUi.getAddConnectorFlyout({
             onClose: onCloseAddFlyout,
-            supportedActionTypes,
-            onConnectorCreated: onConnectorUpdated,
+            featureId: CasesConnectorFeatureId,
+            onConnectorCreated,
           })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [addFlyoutVisible, supportedActionTypes]
+    [addFlyoutVisible]
   );
 
   const ConnectorEditFlyout = useMemo(
@@ -187,7 +199,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
           })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [connector.id, editFlyoutVisible]
+    [connector.id, editedConnectorItem, editFlyoutVisible]
   );
 
   return (

@@ -39,6 +39,7 @@ export async function syncBoundsData({
     query: dataFilters.query,
     timeFilters: dataFilters.timeFilters,
     timeslice: dataFilters.timeslice,
+    embeddableSearchContext: dataFilters.embeddableSearchContext,
     filters: dataFilters.filters,
     joinKeyFilter: dataFilters.joinKeyFilter,
     applyGlobalQuery: source.getApplyGlobalQuery(),

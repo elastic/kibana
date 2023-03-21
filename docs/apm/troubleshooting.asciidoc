@@ -41,20 +41,18 @@ don't forget to check our other troubleshooting guides or discussion forum:
 This section can help with any of the following:
 
 * Data isn't displaying in the APM app
+* Data isn't displaying in the APM app after an upgrade
 * You see a message like "No Services Found",
 * You see errors like "Fielddata is disabled on text fields by default..."
 
-There are a number of factors that could be at play here.
-One important thing to double-check first is your index template.
+These problems are likely to be caused by a missing index template or ingest pipeline.
+By default, {fleet} sets up these and other APM assets when the APM integration is installed.
+Try reinstalling the APM integration by navigating to
+**Integrations** > **Elastic APM** > **Manage in Fleet** > **Settings** > **Reinstall Elastic APM**.
 
-*Index templates*
-For the APM app to work correctly, an index template must exist for each APM data stream.
-By default, {fleet} sets up APM index templates when the APM integration is installed.
-Take note that index templates *cannot* be applied retroactively -- they are only applied at index creation time.
-More information is available in {apm-guide-ref}/apm-server-configuration.html[Set up and configure].
-
-You can check for the existence of APM index templates in Kibana.
-Go to **Stack Management** > **Index Management** > **Index Templates** and search for `apm`.
+Because assets cannot be applied to indices retroactively,
+after reinstalling the APM integration you must either wait for the index to rollover or force a rollover.
+To force a rollover, use the {ref}/indices-rollover-index.html[rollover API] to target the relevant {apm-guide-ref}/apm-data-streams.html[APM data streams].
 
 [float]
 [[troubleshooting-too-many-transactions]]
@@ -95,13 +93,19 @@ Instead, we should strip away the unique information and group our transactions 
 In this case, that means naming all blog transactions, `/blog`, and all documentation transactions, `/guide`.
 
 If you feel like you'd be losing valuable information by following this naming convention, don't fret!
-You can always add additional metadata to your transactions using {apm-guide-ref-v}/metadata.html#labels-fields[labels] (indexed) or
-{apm-guide-ref-v}/metadata.html#custom-fields[custom context] (non-indexed).
+You can always add additional metadata to your transactions using {apm-guide-ref}/metadata.html#labels-fields[labels] (indexed) or
+{apm-guide-ref}/metadata.html#custom-fields[custom context] (non-indexed).
 
 After ensuring you've correctly named your transactions,
-you might still see an error in the APM app related to too many transaction names.
-If this is the case, you can increase the default number of transaction groups displayed in the APM app by configuring
-<<apm-settings-kb,`xpack.apm.ui.transactionGroupBucketSize`>>.
+you might still see errors in the APM app related to transaction group limit reached:
+
+`The number of transaction groups has been reached. Current APM server capacity for handling unique transaction groups has been reached. There are at least X transactions missing in this list. Please decrease the number of transaction groups in your service or increase the memory allocated to APM server.`
+
+You will see this warning if an agent is creating too many transaction groups. This could indicate incorrect instrumentation which will have to be fixed in your application. Alternatively you can increase the memory of the APM server.
+
+`Number of transaction groups exceed the allowed maximum(1,000) that are displayed. The maximum number of transaction groups displayed in Kibana has been reached. Try narrowing down results by using the query bar..`
+
+You will see this warning if your results have more than `1000` unique transaction groups. Alternatively you can use the query bar to reduce the number of unique transaction groups in your results.
 
 **More information**
 

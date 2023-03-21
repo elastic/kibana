@@ -43,7 +43,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 
 jest.mock('../../services', () => ({
   getUISettings: jest.fn(() => ({
-    get: jest.fn((token) => Boolean(token === 'visualization:visualize:legacyPieChartsLibrary')),
+    get: jest.fn(),
   })),
 }));
 
@@ -200,46 +200,5 @@ describe('VisualizeEditorCommon', () => {
       />
     );
     expect(wrapper.find(VizChartWarning).length).toBe(0);
-  });
-
-  it('should display a warning callout for old pie implementation', async () => {
-    const wrapper = shallowWithIntl(
-      <VisualizeEditorCommon
-        appState={null}
-        hasUnsavedChanges={false}
-        setHasUnsavedChanges={() => {}}
-        hasUnappliedChanges={false}
-        isEmbeddableRendered={false}
-        onAppLeave={() => {}}
-        visEditorRef={React.createRef()}
-        visInstance={
-          {
-            savedVis: {
-              id: 'test',
-              sharingSavedObjectProps: {
-                outcome: 'conflict',
-                aliasTargetId: 'alias_id',
-              },
-            },
-            vis: {
-              type: {
-                title: 'pie',
-                name: 'pie',
-              },
-              data: {
-                aggs: {
-                  aggs: [
-                    {
-                      schema: 'buckets',
-                    },
-                  ],
-                },
-              },
-            },
-          } as unknown as VisualizeEditorVisInstance
-        }
-      />
-    );
-    expect(wrapper.find(VizChartWarning).length).toBe(1);
   });
 });

@@ -89,7 +89,6 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       style={{ height: 'auto' }}
-      initialFocus={false}
     >
       <div
         style={{ width: '360px' }}

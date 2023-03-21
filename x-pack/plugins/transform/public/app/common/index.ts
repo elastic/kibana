@@ -8,7 +8,7 @@
 export { isAggName } from './aggregations';
 export {
   getIndexDevConsoleStatement,
-  getPivotPreviewDevConsoleStatement,
+  getTransformPreviewDevConsoleStatement,
   INIT_MAX_COLUMNS,
 } from './data_grid';
 export type { EsDoc, EsDocSource } from './fields';
@@ -37,7 +37,7 @@ export type {
 } from './pivot_aggs';
 export {
   getEsAggFromAggConfig,
-  isPivotAggsConfigWithUiSupport,
+  isPivotAggsConfigWithUiBase,
   isPivotAggsConfigPercentiles,
   isPivotAggsConfigTerms,
   PERCENTILES_AGG_DEFAULT_PERCENTS,
@@ -64,12 +64,12 @@ export {
   pivotGroupByFieldSupport,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from './pivot_group_by';
-export type { PivotQuery, SimpleQuery } from './request';
+export type { TransformConfigQuery, SimpleQuery } from './request';
 export {
   defaultQuery,
   getPreviewTransformRequestBody,
   getCreateTransformRequestBody,
-  getPivotQuery,
+  getTransformConfigQuery,
   getRequestPayload,
   isDefaultQuery,
   isMatchAllQuery,

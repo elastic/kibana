@@ -16,8 +16,13 @@ import { AlertingAuthorization } from '../../authorization/alerting_authorizatio
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
-import { RecoveredActionGroup } from '../../../common';
+import {
+  RecoveredActionGroup,
+  getDefaultRuleAggregation,
+  DefaultRuleAggregationResult,
+} from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
+import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -89,6 +94,13 @@ describe('aggregate()', () => {
             { key: 'warning', doc_count: 1 },
           ],
         },
+        outcome: {
+          buckets: [
+            { key: 'succeeded', doc_count: 2 },
+            { key: 'failed', doc_count: 4 },
+            { key: 'warning', doc_count: 6 },
+          ],
+        },
         enabled: {
           buckets: [
             { key: 0, key_as_string: '0', doc_count: 2 },
@@ -102,15 +114,10 @@ describe('aggregate()', () => {
           ],
         },
         snoozed: {
-          buckets: [
-            {
-              key: '2022-03-21T20:22:01.501Z-*',
-              format: 'strict_date_time',
-              from: 1.647894121501e12,
-              from_as_string: '2022-03-21T20:22:01.501Z',
-              doc_count: 2,
-            },
-          ],
+          doc_count: 0,
+          count: {
+            doc_count: 0,
+          },
         },
         tags: {
           buckets: [
@@ -154,33 +161,107 @@ describe('aggregate()', () => {
 
   test('calls saved objects client with given params to perform aggregation', async () => {
     const rulesClient = new RulesClient(rulesClientParams);
-    const result = await rulesClient.aggregate({ options: {} });
+    const result = await rulesClient.aggregate<DefaultRuleAggregationResult>({
+      options: {},
+      aggs: getDefaultRuleAggregation(),
+    });
+
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "alertExecutionStatus": Object {
-          "active": 8,
-          "error": 6,
-          "ok": 10,
-          "pending": 4,
-          "unknown": 2,
-          "warning": 1,
+        "enabled": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 2,
+              "key": 0,
+              "key_as_string": "0",
+            },
+            Object {
+              "doc_count": 28,
+              "key": 1,
+              "key_as_string": "1",
+            },
+          ],
         },
-        "ruleEnabledStatus": Object {
-          "disabled": 2,
-          "enabled": 28,
+        "muted": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 27,
+              "key": 0,
+              "key_as_string": "0",
+            },
+            Object {
+              "doc_count": 3,
+              "key": 1,
+              "key_as_string": "1",
+            },
+          ],
         },
-        "ruleMutedStatus": Object {
-          "muted": 3,
-          "unmuted": 27,
+        "outcome": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 2,
+              "key": "succeeded",
+            },
+            Object {
+              "doc_count": 4,
+              "key": "failed",
+            },
+            Object {
+              "doc_count": 6,
+              "key": "warning",
+            },
+          ],
         },
-        "ruleSnoozedStatus": Object {
-          "snoozed": 2,
+        "snoozed": Object {
+          "count": Object {
+            "doc_count": 0,
+          },
+          "doc_count": 0,
         },
-        "ruleTags": Array [
-          "a",
-          "b",
-          "c",
-        ],
+        "status": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 8,
+              "key": "active",
+            },
+            Object {
+              "doc_count": 6,
+              "key": "error",
+            },
+            Object {
+              "doc_count": 10,
+              "key": "ok",
+            },
+            Object {
+              "doc_count": 4,
+              "key": "pending",
+            },
+            Object {
+              "doc_count": 2,
+              "key": "unknown",
+            },
+            Object {
+              "doc_count": 1,
+              "key": "warning",
+            },
+          ],
+        },
+        "tags": Object {
+          "buckets": Array [
+            Object {
+              "doc_count": 10,
+              "key": "a",
+            },
+            Object {
+              "doc_count": 20,
+              "key": "b",
+            },
+            Object {
+              "doc_count": 30,
+              "key": "c",
+            },
+          ],
+        },
       }
     `);
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -195,6 +276,9 @@ describe('aggregate()', () => {
           status: {
             terms: { field: 'alert.attributes.executionStatus.status' },
           },
+          outcome: {
+            terms: { field: 'alert.attributes.lastRun.outcome' },
+          },
           enabled: {
             terms: { field: 'alert.attributes.enabled' },
           },
@@ -202,10 +286,21 @@ describe('aggregate()', () => {
             terms: { field: 'alert.attributes.muteAll' },
           },
           snoozed: {
-            terms: { field: 'alert.attributes.isSnoozedUntil' },
+            aggs: {
+              count: {
+                filter: {
+                  exists: {
+                    field: 'alert.attributes.snoozeSchedule.duration',
+                  },
+                },
+              },
+            },
+            nested: {
+              path: 'alert.attributes.snoozeSchedule',
+            },
           },
           tags: {
-            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
+            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 50 },
           },
         },
       },
@@ -213,20 +308,37 @@ describe('aggregate()', () => {
   });
 
   test('supports filters when aggregating', async () => {
+    const authFilter = fromKueryExpression(
+      'alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp'
+    );
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter: authFilter,
+      ensureRuleTypeIsAuthorized() {},
+    });
+
     const rulesClient = new RulesClient(rulesClientParams);
-    await rulesClient.aggregate({ options: { filter: 'someTerm' } });
+    await rulesClient.aggregate({
+      options: { filter: 'foo: someTerm' },
+      aggs: getDefaultRuleAggregation(),
+    });
 
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toEqual([
       {
         fields: undefined,
-        filter: 'someTerm',
+        filter: nodeTypes.function.buildNode('and', [
+          fromKueryExpression('foo: someTerm'),
+          authFilter,
+        ]),
         page: 1,
         perPage: 0,
         type: 'alert',
         aggs: {
           status: {
             terms: { field: 'alert.attributes.executionStatus.status' },
+          },
+          outcome: {
+            terms: { field: 'alert.attributes.lastRun.outcome' },
           },
           enabled: {
             terms: { field: 'alert.attributes.enabled' },
@@ -235,10 +347,21 @@ describe('aggregate()', () => {
             terms: { field: 'alert.attributes.muteAll' },
           },
           snoozed: {
-            terms: { field: 'alert.attributes.isSnoozedUntil' },
+            aggs: {
+              count: {
+                filter: {
+                  exists: {
+                    field: 'alert.attributes.snoozeSchedule.duration',
+                  },
+                },
+              },
+            },
+            nested: {
+              path: 'alert.attributes.snoozeSchedule',
+            },
           },
           tags: {
-            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
+            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' }, size: 50 },
           },
         },
       },
@@ -249,7 +372,7 @@ describe('aggregate()', () => {
     const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
     authorization.getFindAuthorizationFilter.mockRejectedValue(new Error('Unauthorized'));
 
-    await expect(rulesClient.aggregate()).rejects.toThrow();
+    await expect(rulesClient.aggregate({ aggs: getDefaultRuleAggregation() })).rejects.toThrow();
     expect(auditLogger.log).toHaveBeenCalledWith(
       expect.objectContaining({
         event: expect.objectContaining({
@@ -262,5 +385,41 @@ describe('aggregate()', () => {
         },
       })
     );
+  });
+
+  describe('tags number limit', () => {
+    test('sets to default (50) if it is not provided', async () => {
+      const rulesClient = new RulesClient(rulesClientParams);
+
+      await rulesClient.aggregate({ aggs: getDefaultRuleAggregation() });
+
+      expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchObject([
+        {
+          aggs: {
+            tags: {
+              terms: { size: 50 },
+            },
+          },
+        },
+      ]);
+    });
+
+    test('sets to the provided value', async () => {
+      const rulesClient = new RulesClient(rulesClientParams);
+
+      await rulesClient.aggregate({
+        aggs: getDefaultRuleAggregation({ maxTags: 1000 }),
+      });
+
+      expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchObject([
+        {
+          aggs: {
+            tags: {
+              terms: { size: 1000 },
+            },
+          },
+        },
+      ]);
+    });
   });
 });

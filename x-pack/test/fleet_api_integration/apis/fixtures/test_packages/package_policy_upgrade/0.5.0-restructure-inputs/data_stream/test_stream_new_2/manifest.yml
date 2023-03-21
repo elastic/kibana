@@ -2,6 +2,7 @@ title: Test stream
 type: logs
 streams:
   - input: test_input_new_2
+    title: test input new 2
     vars:
     - name: test_input_new_2_var_1
       type: text

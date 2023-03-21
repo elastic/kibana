@@ -90,22 +90,29 @@ describe('Security Plugin', () => {
           dataViews: {} as DataViewsPublicPluginStart,
           features: {} as FeaturesPluginStart,
         })
-      ).toEqual({
-        uiApi: {
-          components: {
-            getChangePassword: expect.any(Function),
-            getPersonalInfo: expect.any(Function),
+      ).toMatchInlineSnapshot(`
+        Object {
+          "authc": Object {
+            "areAPIKeysEnabled": [Function],
+            "getCurrentUser": [Function],
           },
-        },
-        authc: {
-          getCurrentUser: expect.any(Function),
-          areAPIKeysEnabled: expect.any(Function),
-        },
-        navControlService: {
-          getUserMenuLinks$: expect.any(Function),
-          addUserMenuLinks: expect.any(Function),
-        },
-      });
+          "navControlService": Object {
+            "addUserMenuLinks": [Function],
+            "getUserMenuLinks$": [Function],
+          },
+          "uiApi": Object {
+            "components": Object {
+              "getChangePassword": [Function],
+              "getPersonalInfo": [Function],
+            },
+          },
+          "userProfiles": Object {
+            "bulkGet": [Function],
+            "getCurrent": [Function],
+            "suggest": [Function],
+          },
+        }
+      `);
     });
 
     it('starts Management Service if `management` plugin is available', () => {

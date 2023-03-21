@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ProcessorEvent } from './processor_event';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   PROCESSOR_EVENT,
   SPAN_DESTINATION_SERVICE_RESOURCE,
-} from './elasticsearch_fieldnames';
+} from './es_fields/apm';
 import { environmentQuery } from './utils/environment_query';
 
 export const kueryBarPlaceholder = i18n.translate(

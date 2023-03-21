@@ -8,14 +8,16 @@
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import type { Ecs } from '../../../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData } from '../../../../../../common/mock';
 import '../../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { suricataRowRenderer } from './suricata_row_renderer';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
+import { TimelineId } from '../../../../../../../common/types';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -30,20 +32,26 @@ jest.mock('@elastic/eui', () => {
 jest.mock('../../../../../../common/components/link_to');
 
 describe('suricata_row_renderer', () => {
-  const mount = useMountAppended();
   let nonSuricata: Ecs;
   let suricata: Ecs;
+  const mount = useMountAppended();
+
+  const getWrapper = async (childrenComponent: JSX.Element) => {
+    const wrapper = mount(childrenComponent);
+    await waitFor(() => wrapper.find('[data-test-subj="suricataRefs"]').exists());
+    return wrapper;
+  };
 
   beforeEach(() => {
     nonSuricata = cloneDeep(mockTimelineData[0].ecs);
     suricata = cloneDeep(mockTimelineData[2].ecs);
   });
 
-  test('renders correctly against snapshot', () => {
+  test('renders correctly against snapshot', async () => {
     const children = suricataRowRenderer.renderRow({
       data: nonSuricata,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
 
     const wrapper = shallow(<span>{children}</span>);
@@ -58,13 +66,14 @@ describe('suricata_row_renderer', () => {
     expect(suricataRowRenderer.isInstance(suricata)).toBe(true);
   });
 
-  test('should render a suricata row', () => {
+  test('should render a suricata row', async () => {
     const children = suricataRowRenderer.renderRow({
       data: suricata,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
-    const wrapper = mount(
+
+    const wrapper = await getWrapper(
       <TestProviders>
         <span>{children}</span>
       </TestProviders>
@@ -79,14 +88,14 @@ describe('suricata_row_renderer', () => {
     );
   });
 
-  test('should render a suricata row even if it does not have a suricata signature', () => {
+  test('should render a suricata row even if it does not have a suricata signature', async () => {
     delete suricata?.suricata?.eve?.alert?.signature;
     const children = suricataRowRenderer.renderRow({
       data: suricata,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
-    const wrapper = mount(
+    const wrapper = await getWrapper(
       <TestProviders>
         <span>{children}</span>
       </TestProviders>

@@ -10,12 +10,13 @@ import type { LensAttributes } from '../../types';
 export const kpiNetworkEventsLensAttributes: LensAttributes = {
   title: '[Network] Network events',
   description: '',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
   state: {
     visualization: {
       layerId: 'eaadfec7-deaa-4aeb-a403-3b4e516416d2',
       accessor: '370ebd07-5ce0-4f46-a847-0e363c50d037',
       layerType: 'data',
+      autoScaleMetricAlignment: 'left',
     },
     query: {
       query: '',
@@ -62,7 +63,7 @@ export const kpiNetworkEventsLensAttributes: LensAttributes = {
       },
     ],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           'eaadfec7-deaa-4aeb-a403-3b4e516416d2': {
             columns: {

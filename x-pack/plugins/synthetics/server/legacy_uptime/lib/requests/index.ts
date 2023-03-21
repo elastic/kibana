@@ -28,7 +28,6 @@ import { getJourneyScreenshotBlocks } from './get_journey_screenshot_blocks';
 import { getSyntheticsMonitor } from './get_monitor';
 import {
   getSyntheticsEnablement,
-  deleteServiceApiKey,
   generateAndSaveServiceAPIKey,
   getAPIKeyForSyntheticsService,
 } from '../../../synthetics_service/get_api_key';
@@ -57,7 +56,6 @@ export const uptimeRequests = {
   getNetworkEvents,
   getSyntheticsEnablement,
   getAPIKeyForSyntheticsService,
-  deleteServiceApiKey,
   generateAndSaveServiceAPIKey,
 };
 

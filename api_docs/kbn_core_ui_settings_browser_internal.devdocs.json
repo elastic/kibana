@@ -33,11 +33,12 @@
             "section": "def-common.UiSettingsClient",
             "text": "UiSettingsClient"
           },
-          " implements ",
-          "IUiSettingsClient"
+          " extends ",
+          "UiSettingsClientCommon"
         ],
         "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-internal",
@@ -51,6 +52,7 @@
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
@@ -64,6 +66,7 @@
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -71,39 +74,21 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsClient.getAll",
+            "id": "def-common.UiSettingsClient.update",
             "type": "Function",
             "tags": [],
-            "label": "getAll",
+            "label": "update",
             "description": [],
             "signature": [
-              "() => Record<string, ",
-              "PublicUiSettingsParams",
-              " & ",
-              "UserProvidedValues",
-              "<any>>"
+              "(key: string, newVal: any) => Promise<boolean>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
             "deprecated": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsClient.get",
-            "type": "Function",
-            "tags": [],
-            "label": "get",
-            "description": [],
-            "signature": [
-              "<T = any>(key: string, defaultOverride?: T | undefined) => any"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
-            "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-                "id": "def-common.UiSettingsClient.get.$1",
+                "id": "def-common.UiSettingsClient.update.$1",
                 "type": "string",
                 "tags": [],
                 "label": "key",
@@ -113,140 +98,80 @@
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-                "id": "def-common.UiSettingsClient.get.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "defaultOverride",
-                "description": [],
-                "signature": [
-                  "T | undefined"
-                ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
-                "deprecated": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsClient.get$",
-            "type": "Function",
-            "tags": [],
-            "label": "get$",
-            "description": [],
-            "signature": [
-              "<T = any>(key: string, defaultOverride?: T | undefined) => ",
-              "Observable",
-              "<any>"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-                "id": "def-common.UiSettingsClient.get$.$1",
-                "type": "string",
-                "tags": [],
-                "label": "key",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-                "id": "def-common.UiSettingsClient.get$.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "defaultOverride",
-                "description": [],
-                "signature": [
-                  "T | undefined"
-                ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
-                "deprecated": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsClient.set",
-            "type": "Function",
-            "tags": [],
-            "label": "set",
-            "description": [],
-            "signature": [
-              "(key: string, value: any) => Promise<boolean>"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-                "id": "def-common.UiSettingsClient.set.$1",
-                "type": "string",
-                "tags": [],
-                "label": "key",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-                "id": "def-common.UiSettingsClient.set.$2",
+                "id": "def-common.UiSettingsClient.update.$2",
                 "type": "Any",
                 "tags": [],
-                "label": "value",
+                "label": "newVal",
                 "description": [],
                 "signature": [
                   "any"
                 ],
                 "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
-          },
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-browser-internal",
+        "id": "def-common.UiSettingsService",
+        "type": "Class",
+        "tags": [
+          "Internal",
+          "Deprecated"
+        ],
+        "label": "UiSettingsService",
+        "description": [],
+        "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsClient.remove",
+            "id": "def-common.UiSettingsService.setup",
             "type": "Function",
             "tags": [],
-            "label": "remove",
+            "label": "setup",
             "description": [],
             "signature": [
-              "(key: string) => Promise<boolean>"
+              "({ http, injectedMetadata }: ",
+              "UiSettingsServiceDeps",
+              ") => ",
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
+            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-                "id": "def-common.UiSettingsClient.remove.$1",
-                "type": "string",
+                "id": "def-common.UiSettingsService.setup.$1",
+                "type": "Object",
                 "tags": [],
-                "label": "key",
+                "label": "{ http, injectedMetadata }",
                 "description": [],
                 "signature": [
-                  "string"
+                  "UiSettingsServiceDeps"
                 ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
+                "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -254,155 +179,40 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsClient.isDeclared",
+            "id": "def-common.UiSettingsService.start",
             "type": "Function",
             "tags": [],
-            "label": "isDeclared",
-            "description": [],
-            "signature": [
-              "(key: string) => boolean"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-                "id": "def-common.UiSettingsClient.isDeclared.$1",
-                "type": "string",
-                "tags": [],
-                "label": "key",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsClient.isDefault",
-            "type": "Function",
-            "tags": [],
-            "label": "isDefault",
-            "description": [],
-            "signature": [
-              "(key: string) => boolean"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-                "id": "def-common.UiSettingsClient.isDefault.$1",
-                "type": "string",
-                "tags": [],
-                "label": "key",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsClient.isCustom",
-            "type": "Function",
-            "tags": [],
-            "label": "isCustom",
-            "description": [],
-            "signature": [
-              "(key: string) => boolean"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-                "id": "def-common.UiSettingsClient.isCustom.$1",
-                "type": "string",
-                "tags": [],
-                "label": "key",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsClient.isOverridden",
-            "type": "Function",
-            "tags": [],
-            "label": "isOverridden",
-            "description": [],
-            "signature": [
-              "(key: string) => boolean"
-            ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
-            "deprecated": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-                "id": "def-common.UiSettingsClient.isOverridden.$1",
-                "type": "string",
-                "tags": [],
-                "label": "key",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsClient.getUpdate$",
-            "type": "Function",
-            "tags": [],
-            "label": "getUpdate$",
+            "label": "start",
             "description": [],
             "signature": [
               "() => ",
-              "Observable",
-              "<{ key: string; newValue: any; oldValue: any; }>"
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
+            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-browser-internal",
-            "id": "def-common.UiSettingsClient.getUpdateErrors$",
+            "id": "def-common.UiSettingsService.stop",
             "type": "Function",
             "tags": [],
-            "label": "getUpdateErrors$",
+            "label": "stop",
             "description": [],
             "signature": [
-              "() => ",
-              "Observable",
-              "<Error>"
+              "() => void"
             ],
-            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_client.ts",
+            "path": "packages/core/ui-settings/core-ui-settings-browser-internal/src/ui_settings_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }

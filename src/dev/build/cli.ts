@@ -22,7 +22,7 @@ const { showHelp, unknownFlags, log, buildOptions } = readCliArgs(process.argv);
 
 if (unknownFlags.length) {
   const pluralized = unknownFlags.length > 1 ? 'flags' : 'flag';
-  log.error(`Unknown ${pluralized}: ${unknownFlags.join(', ')}}`);
+  log.error(`Unknown ${pluralized}: ${unknownFlags.join(', ')}`);
 }
 
 if (showHelp) {
@@ -42,6 +42,7 @@ if (showHelp) {
         --docker-context-use-local-artifact  {dim Use a local artifact when building the Docker context}
         --docker-cross-compile               {dim Produce arm64 and amd64 Docker images}
         --docker-contexts                    {dim Only build the Docker build contexts}
+        --skip-canvas-shareable-runtime      {dim Don't build the Canvas shareable runtime}
         --skip-docker-ubi                    {dim Don't build the docker ubi image}
         --skip-docker-ubuntu                 {dim Don't build the docker ubuntu image}
         --release                            {dim Produce a release-ready distributable}
@@ -50,6 +51,8 @@ if (showHelp) {
         --verbose,-v                         {dim Turn on verbose logging}
         --no-debug                           {dim Turn off debug logging}
         --epr-registry                       {dim Specify the EPR registry to use for Fleet packages, 'production' or 'snapshot'}
+        --with-test-plugins                  {dim Pass to include test plugins in the build output}
+        --with-example-plugins               {dim Pass to include example plugins in the build output}
     `) + '\n'
   );
   process.exit(1);

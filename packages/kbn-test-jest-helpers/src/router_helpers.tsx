@@ -7,7 +7,8 @@
  */
 
 import React, { Component, ComponentType } from 'react';
-import { MemoryRouter, Route, withRouter } from 'react-router-dom';
+import { MemoryRouter, withRouter } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { History, LocationDescriptor } from 'history';
 
 const stringifyPath = (path: LocationDescriptor): string => {
@@ -40,12 +41,11 @@ export const WithMemoryRouter =
       </MemoryRouter>
     );
 
-export const WithRoute =
-  (
-    componentRoutePath: LocationDescriptor | LocationDescriptor[] = ['/'],
-    onRouter = (router: any) => {}
-  ) =>
-  (WrappedComponent: ComponentType) => {
+export function WithRoute<T extends object = Record<string, any>>(
+  componentRoutePath: LocationDescriptor | LocationDescriptor[] = ['/'],
+  onRouter = (router: any) => {}
+) {
+  return (WrappedComponent: ComponentType<T>) => {
     // Create a class component that will catch the router
     // and forward it to our "onRouter()" handler.
     const CatchRouter = withRouter(
@@ -57,7 +57,7 @@ export const WithRoute =
         }
 
         render() {
-          return <WrappedComponent {...this.props} />;
+          return <WrappedComponent {...(this.props as any)} />;
         }
       }
     );
@@ -69,6 +69,7 @@ export const WithRoute =
       />
     );
   };
+}
 
 interface Router {
   history: Partial<History>;

@@ -26,9 +26,9 @@ import {
   GetServicesFunction,
   PreConfiguredAction,
   RawAction,
+  ValidatorServices,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
@@ -41,10 +41,6 @@ export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceStart;
   getServices: GetServicesFunction;
-  getActionsClientWithRequest: (
-    request: KibanaRequest,
-    authorizationContext?: ActionExecutionSource<unknown>
-  ) => Promise<PublicMethodsOf<ActionsClient>>;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
@@ -58,6 +54,7 @@ export interface TaskInfo {
 
 export interface ExecuteOptions<Source = unknown> {
   actionId: string;
+  actionExecutionId: string;
   isEphemeral?: boolean;
   request: KibanaRequest;
   params: Record<string, unknown>;
@@ -99,15 +96,10 @@ export class ActionExecutor {
     executionId,
     consumer,
     relatedSavedObjects,
+    actionExecutionId,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
-    }
-
-    if (!this.isESOCanEncrypt) {
-      throw new Error(
-        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
-      );
     }
 
     return withSpan(
@@ -120,14 +112,12 @@ export class ActionExecutor {
       },
       async (span) => {
         const {
-          logger,
           spaces,
           getServices,
           encryptedSavedObjectsClient,
           actionTypeRegistry,
           eventLogger,
           preconfiguredActions,
-          getActionsClientWithRequest,
         } = this.actionExecutorContext!;
 
         const services = getServices(request);
@@ -135,7 +125,7 @@ export class ActionExecutor {
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
         const actionInfo = await getActionInfoInternal(
-          await getActionsClientWithRequest(request, source),
+          this.isESOCanEncrypt,
           encryptedSavedObjectsClient,
           preconfiguredActions,
           actionId,
@@ -143,6 +133,9 @@ export class ActionExecutor {
         );
 
         const { actionTypeId, name, config, secrets } = actionInfo;
+        const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
+        let { logger } = this.actionExecutorContext!;
+        logger = logger.get(loggerId);
 
         if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
           this.actionInfo = actionInfo;
@@ -189,6 +182,10 @@ export class ActionExecutor {
             },
           ],
           relatedSavedObjects,
+          name,
+          actionExecutionId,
+          isPreconfigured: this.actionInfo.isPreconfigured,
+          ...(source ? { source } : {}),
         });
 
         eventLogger.startTiming(event);
@@ -206,13 +203,17 @@ export class ActionExecutor {
 
         let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
-          const { validatedParams, validatedConfig, validatedSecrets } = validateAction({
-            actionId,
-            actionType,
-            params,
-            config,
-            secrets,
-          });
+          const configurationUtilities = actionTypeRegistry.getUtils();
+          const { validatedParams, validatedConfig, validatedSecrets } = validateAction(
+            {
+              actionId,
+              actionType,
+              params,
+              config,
+              secrets,
+            },
+            { configurationUtilities }
+          );
 
           rawResult = await actionType.executor({
             actionId,
@@ -222,6 +223,8 @@ export class ActionExecutor {
             secrets: validatedSecrets,
             isEphemeral,
             taskInfo,
+            configurationUtilities,
+            logger,
           });
         } catch (err) {
           if (err.reason === ActionExecutionErrorReason.Validation) {
@@ -233,7 +236,7 @@ export class ActionExecutor {
               message: 'an error occurred while running the action',
               serviceMessage: err.message,
               error: err,
-              retry: false,
+              retry: true,
             };
           }
         }
@@ -291,8 +294,10 @@ export class ActionExecutor {
     executionId,
     taskInfo,
     consumer,
+    actionExecutionId,
   }: {
     actionId: string;
+    actionExecutionId: string;
     request: KibanaRequest;
     taskInfo?: TaskInfo;
     executionId?: string;
@@ -300,19 +305,14 @@ export class ActionExecutor {
     source?: ActionExecutionSource<Source>;
     consumer?: string;
   }) {
-    const {
-      spaces,
-      encryptedSavedObjectsClient,
-      preconfiguredActions,
-      eventLogger,
-      getActionsClientWithRequest,
-    } = this.actionExecutorContext!;
+    const { spaces, encryptedSavedObjectsClient, preconfiguredActions, eventLogger } =
+      this.actionExecutorContext!;
 
     const spaceId = spaces && spaces.getSpaceId(request);
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
       this.actionInfo = await getActionInfoInternal(
-        await getActionsClientWithRequest(request, source),
+        this.isESOCanEncrypt,
         encryptedSavedObjectsClient,
         preconfiguredActions,
         actionId,
@@ -348,6 +348,9 @@ export class ActionExecutor {
         },
       ],
       relatedSavedObjects,
+      actionExecutionId,
+      isPreconfigured: this.actionInfo.isPreconfigured,
+      ...(source ? { source } : {}),
     });
 
     eventLogger.logEvent(event);
@@ -360,10 +363,11 @@ interface ActionInfo {
   config: unknown;
   secrets: unknown;
   actionId: string;
+  isPreconfigured?: boolean;
 }
 
 async function getActionInfoInternal(
-  actionsClient: PublicMethodsOf<ActionsClient>,
+  isESOCanEncrypt: boolean,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string,
@@ -380,15 +384,18 @@ async function getActionInfoInternal(
       config: pcAction.config,
       secrets: pcAction.secrets,
       actionId,
+      isPreconfigured: true,
     };
   }
 
-  // if not pre-configured action, should be a saved object
-  // ensure user can read the action before processing
-  const { actionTypeId, config, name } = await actionsClient.get({ id: actionId });
+  if (!isESOCanEncrypt) {
+    throw new Error(
+      `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+    );
+  }
 
   const {
-    attributes: { secrets },
+    attributes: { secrets, actionTypeId, config, name },
   } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>('action', actionId, {
     namespace: namespace === 'default' ? undefined : namespace,
   });
@@ -426,15 +433,18 @@ interface ValidateActionOpts {
   secrets: unknown;
 }
 
-function validateAction({ actionId, actionType, params, config, secrets }: ValidateActionOpts) {
+function validateAction(
+  { actionId, actionType, params, config, secrets }: ValidateActionOpts,
+  validatorServices: ValidatorServices
+) {
   let validatedParams: Record<string, unknown>;
   let validatedConfig: Record<string, unknown>;
   let validatedSecrets: Record<string, unknown>;
 
   try {
-    validatedParams = validateParams(actionType, params);
-    validatedConfig = validateConfig(actionType, config);
-    validatedSecrets = validateSecrets(actionType, secrets);
+    validatedParams = validateParams(actionType, params, validatorServices);
+    validatedConfig = validateConfig(actionType, config, validatorServices);
+    validatedSecrets = validateSecrets(actionType, secrets, validatorServices);
     if (actionType.validate?.connector) {
       validateConnector(actionType, {
         config,

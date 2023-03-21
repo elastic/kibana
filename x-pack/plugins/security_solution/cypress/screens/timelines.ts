@@ -30,6 +30,12 @@ export const TIMELINE_CHECKBOX = (id: string) => {
   return `[data-test-subj="checkboxSelectRow-${id}"]`;
 };
 
+export const TIMELINE_ITEM_ACTION_BTN = (id: string) => {
+  return `[id="${id}-actions"`;
+};
+
+export const EXPORT_TIMELINE = '[data-test-subj="export-timeline"]';
+
 export const TIMELINE_NAME = '[data-test-subj^=title]';
 
 export const TIMELINES_FAVORITE = '[data-test-subj="favorite-starFilled-star"]';
@@ -46,7 +52,7 @@ export const TIMELINES_USERNAME = '[data-test-subj="username"]';
 
 export const REFRESH_BUTTON = '[data-test-subj="refreshButton-linkIcon"]';
 
-export const TIMELINES_OVERVIEW = '[data-test-subj="timelines-container"]';
+const TIMELINES_OVERVIEW = '[data-test-subj="timelines-container"]';
 
 export const TIMELINES_OVERVIEW_ONLY_FAVORITES = `${TIMELINES_OVERVIEW} [data-test-subj="only-favorites-toggle"]`;
 

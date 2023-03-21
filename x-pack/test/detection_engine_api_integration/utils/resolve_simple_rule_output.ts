@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response/rules_schema';
-
 import { getSimpleRuleOutput } from './get_simple_rule_output';
 
-export const resolveSimpleRuleOutput = (
-  ruleId = 'rule-1',
-  enabled = false
-): Partial<RulesSchema> => ({ outcome: 'exactMatch', ...getSimpleRuleOutput(ruleId, enabled) });
+export const resolveSimpleRuleOutput = (ruleId = 'rule-1', enabled = false) => ({
+  ...getSimpleRuleOutput(ruleId, enabled),
+  outcome: 'exactMatch',
+});

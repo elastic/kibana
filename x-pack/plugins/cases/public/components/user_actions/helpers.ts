@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash';
 import { CommentType } from '../../../common/api';
 import type { Comment } from '../../containers/types';
 import { SUPPORTED_ACTION_TYPES } from './constants';
-import { SupportedUserActionTypes } from './types';
+import type { SupportedUserActionTypes } from './types';
 
 export const isUserActionTypeSupported = (type: string): type is SupportedUserActionTypes =>
   SUPPORTED_ACTION_TYPES.includes(type as SupportedUserActionTypes);

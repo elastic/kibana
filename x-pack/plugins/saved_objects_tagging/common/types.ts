@@ -21,6 +21,7 @@ export type TagWithRelations = Tag & {
 export type {
   Tag,
   TagAttributes,
+  TagWithOptionalId,
   GetAllTagsOptions,
   ITagsClient,
 } from '@kbn/saved-objects-tagging-oss-plugin/common';

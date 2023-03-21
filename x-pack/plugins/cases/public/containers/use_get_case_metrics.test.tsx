@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { SingleCaseMetricsFeature } from '../../common/ui';
+import type { SingleCaseMetricsFeature } from '../../common/ui';
 import { useGetCaseMetrics } from './use_get_case_metrics';
 import { basicCase } from './mock';
 import * as api from './api';
@@ -48,13 +48,11 @@ describe('useGetCaseMetrics', () => {
       throw new Error('Something went wrong');
     });
 
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
-        wrapper,
-      });
-      await waitForNextUpdate();
-      expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
-      expect(addError).toHaveBeenCalled();
+    const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
+      wrapper,
     });
+    await waitForNextUpdate();
+    expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
+    expect(addError).toHaveBeenCalled();
   });
 });

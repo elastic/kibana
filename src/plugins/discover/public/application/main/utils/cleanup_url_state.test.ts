@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { AppStateUrl } from '../services/discover_app_state_container';
 import { cleanupUrlState } from './cleanup_url_state';
-import { AppStateUrl } from '../services/discover_state';
 
 describe('cleanupUrlState', () => {
   test('cleaning up legacy sort', async () => {
@@ -53,6 +53,31 @@ describe('cleanupUrlState', () => {
     const state = {
       sort: [],
     } as AppStateUrl;
+    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`Object {}`);
+  });
+
+  test('should keep a valid rowsPerPage', async () => {
+    const state = {
+      rowsPerPage: 50,
+    } as AppStateUrl;
+    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`
+      Object {
+        "rowsPerPage": 50,
+      }
+    `);
+  });
+
+  test('should remove a negative rowsPerPage', async () => {
+    const state = {
+      rowsPerPage: -50,
+    } as AppStateUrl;
+    expect(cleanupUrlState(state)).toMatchInlineSnapshot(`Object {}`);
+  });
+
+  test('should remove an invalid rowsPerPage', async () => {
+    const state = {
+      rowsPerPage: 'test',
+    } as unknown as AppStateUrl;
     expect(cleanupUrlState(state)).toMatchInlineSnapshot(`Object {}`);
   });
 });

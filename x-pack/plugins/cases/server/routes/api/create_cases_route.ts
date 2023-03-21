@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { CaseRoute } from './types';
+import type { CaseRoute } from './types';
 
 export const createCasesRoute = <P, Q, B>(route: CaseRoute<P, Q, B>) => route;

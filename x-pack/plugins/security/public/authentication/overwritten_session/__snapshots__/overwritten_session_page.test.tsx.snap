@@ -34,18 +34,14 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
     class="secAuthenticationStatePage__content eui-textCenter"
   >
     <a
-      class="euiButton euiButton--primary"
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
       href="/mock-base-path/"
       rel="noreferrer"
     >
       <span
-        class="euiButtonContent euiButton__content"
+        class="emotion-euiButtonDisplayContent"
       >
-        <span
-          class="euiButton__text"
-        >
-          Continue as mock-user
-        </span>
+        Continue as mock-user
       </span>
     </a>
   </div>

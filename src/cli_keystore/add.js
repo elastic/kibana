@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from '../cli_plugin/lib/logger';
+import { Logger } from '../cli/logger';
 import { confirm, question } from './utils';
 // import from path since add.test.js mocks 'fs' required for @kbn/utils
-import { createPromiseFromStreams, createConcatStream } from '@kbn/utils/target_node/streams';
+import { createPromiseFromStreams, createConcatStream } from '@kbn/utils/src/streams';
 
 /**
  * @param {Keystore} keystore

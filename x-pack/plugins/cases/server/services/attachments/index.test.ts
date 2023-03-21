@@ -14,7 +14,7 @@ import {
   externalReferenceAttachmentSO,
   externalReferenceAttachmentSOAttributes,
   externalReferenceAttachmentSOAttributesWithoutRefs,
-  getPersistableStateAttachmentTypeRegistry,
+  createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
   persistableStateAttachmentAttributes,
   persistableStateAttachmentAttributesWithoutInjectedId,
@@ -23,12 +23,16 @@ import {
 describe('CasesService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
-  const persistableStateAttachmentTypeRegistry = getPersistableStateAttachmentTypeRegistry();
+  const persistableStateAttachmentTypeRegistry = createPersistableStateAttachmentTypeRegistryMock();
   let service: AttachmentService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new AttachmentService(mockLogger, persistableStateAttachmentTypeRegistry);
+    service = new AttachmentService({
+      log: mockLogger,
+      persistableStateAttachmentTypeRegistry,
+      unsecuredSavedObjectsClient,
+    });
   });
 
   describe('update', () => {
@@ -44,7 +48,6 @@ describe('CasesService', () => {
       unsecuredSavedObjectsClient.update.mockResolvedValue(soClientRes);
 
       const res = await service.update({
-        unsecuredSavedObjectsClient,
         attachmentId: '1',
         updatedAttributes: persistableStateAttachment,
         options: { references: [] },
@@ -60,7 +63,6 @@ describe('CasesService', () => {
       });
 
       const res = await service.update({
-        unsecuredSavedObjectsClient,
         attachmentId: '1',
         updatedAttributes: externalReferenceAttachmentSO,
         options: { references: [] },
@@ -76,7 +78,6 @@ describe('CasesService', () => {
       });
 
       const res = await service.update({
-        unsecuredSavedObjectsClient,
         attachmentId: '1',
         updatedAttributes: externalReferenceAttachmentES,
         options: { references: [] },
@@ -111,7 +112,6 @@ describe('CasesService', () => {
       });
 
       const res = await service.bulkUpdate({
-        unsecuredSavedObjectsClient,
         comments: [
           {
             attachmentId: '1',

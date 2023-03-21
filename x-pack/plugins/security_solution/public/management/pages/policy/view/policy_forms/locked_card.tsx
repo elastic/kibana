@@ -26,7 +26,7 @@ const LockedPolicyDiv = styled.div`
     }
   }
   .lockedCardDescription {
-    padding: 0 ${(props) => props.theme.eui.fractions.thirds.percentage};
+    padding: 0 33.3%;
   }
 `;
 

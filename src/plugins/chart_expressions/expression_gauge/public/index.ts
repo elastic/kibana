@@ -13,4 +13,3 @@ export function plugin() {
 }
 
 export { getGoalValue, getMaxValue, getMinValue, getValueFromAccessor } from './components/utils';
-export { VerticalBulletIcon, HorizontalBulletIcon } from './components/icons';

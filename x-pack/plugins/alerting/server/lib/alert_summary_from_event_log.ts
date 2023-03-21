@@ -31,7 +31,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     statusEndDate: dateEnd,
     status: 'OK',
     muteAll: rule.muteAll,
-    throttle: rule.throttle,
+    throttle: rule.throttle ?? null,
     enabled: rule.enabled,
     lastRun: undefined,
     errorMessages: [],
@@ -80,6 +80,11 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     if (alertId === undefined) continue;
 
     const status = getAlertStatus(alerts, alertId);
+
+    if (event?.kibana?.alert?.flapping) {
+      status.flapping = true;
+    }
+
     switch (action) {
       case EVENT_LOG_ACTIONS.newInstance:
         status.activeStartDate = timeStamp;
@@ -87,14 +92,12 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
       case EVENT_LOG_ACTIONS.activeInstance:
         status.status = 'Active';
         status.actionGroupId = event?.kibana?.alerting?.action_group_id;
-        status.actionSubgroup = event?.kibana?.alerting?.action_subgroup;
         break;
       case LEGACY_EVENT_LOG_ACTIONS.resolvedInstance:
       case EVENT_LOG_ACTIONS.recoveredInstance:
         status.status = 'OK';
         status.activeStartDate = undefined;
         status.actionGroupId = undefined;
-        status.actionSubgroup = undefined;
     }
   }
 
@@ -153,8 +156,8 @@ function getAlertStatus(alerts: Map<string, AlertStatus>, alertId: string): Aler
     status: 'OK',
     muted: false,
     actionGroupId: undefined,
-    actionSubgroup: undefined,
     activeStartDate: undefined,
+    flapping: false,
   };
   alerts.set(alertId, status);
   return status;

@@ -4,6 +4,10 @@ exports[`Initializing the store should initialize all datasources with state fro
 Object {
   "lens": Object {
     "activeDatasourceId": "testDatasource",
+    "dataViews": Object {
+      "indexPatternRefs": Array [],
+      "indexPatterns": Object {},
+    },
     "datasourceStates": Object {
       "testDatasource": Object {
         "isLoading": false,
@@ -94,7 +98,9 @@ Object {
     },
     "visualization": Object {
       "activeId": "testVis",
-      "state": Object {},
+      "state": Object {
+        "newState": "newState",
+      },
     },
   },
 }

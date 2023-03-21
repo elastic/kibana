@@ -2,21 +2,15 @@
 
 exports[`VisitorBreakdownChart getVisitorBreakdownLensAttributes generates expected lens attributes 1`] = `
 Object {
-  "references": Array [
-    Object {
-      "id": "Required",
-      "name": "indexpattern-datasource-current-indexpattern",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "Required",
-      "name": "indexpattern-datasource-layer-layer1",
-      "type": "index-pattern",
-    },
-  ],
+  "references": Array [],
   "state": Object {
+    "adHocDataViews": Object {
+      "xxxx-xxxxxxxxxxx-xxxx": Object {
+        "id": "xxxx-xxxxxxxxxxx-xxxx",
+      },
+    },
     "datasourceStates": Object {
-      "indexpattern": Object {
+      "formBased": Object {
         "layers": Object {
           "layer1": Object {
             "columnOrder": Array [
@@ -95,6 +89,18 @@ Object {
         },
       },
     ],
+    "internalReferences": Array [
+      Object {
+        "id": "xxxx-xxxxxxxxxxx-xxxx",
+        "name": "indexpattern-datasource-current-indexpattern",
+        "type": "index-pattern",
+      },
+      Object {
+        "id": "xxxx-xxxxxxxxxxx-xxxx",
+        "name": "indexpattern-datasource-layer-layer1",
+        "type": "index-pattern",
+      },
+    ],
     "query": Object {
       "language": "kuery",
       "query": "",
@@ -103,15 +109,17 @@ Object {
       "layers": Array [
         Object {
           "categoryDisplay": "default",
-          "groups": Array [
-            "col1",
-          ],
           "layerId": "layer1",
           "layerType": "data",
           "legendDisplay": "hide",
-          "metric": "col2",
+          "metrics": Array [
+            "col2",
+          ],
           "nestedLegend": false,
           "numberDisplay": "percent",
+          "primaryGroups": Array [
+            "col1",
+          ],
           "showValuesInLegend": true,
         },
       ],

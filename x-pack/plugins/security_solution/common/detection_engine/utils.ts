@@ -16,7 +16,7 @@ import type {
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
-import type { Threshold, ThresholdNormalized } from './schemas/common';
+import type { Threshold, ThresholdNormalized } from './rule_schema';
 
 export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
@@ -45,6 +45,7 @@ export const isQueryRule = (ruleType: Type | undefined): boolean =>
 export const isThreatMatchRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'threat_match';
 export const isMlRule = (ruleType: Type | undefined): boolean => ruleType === 'machine_learning';
+export const isNewTermsRule = (ruleType: Type | undefined): boolean => ruleType === 'new_terms';
 
 export const normalizeThresholdField = (
   thresholdField: string | string[] | null | undefined

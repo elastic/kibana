@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-import { Outlet, Route } from '@kbn/typed-react-router-config';
+import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React, { ComponentProps } from 'react';
 import { offsetRt } from '../../../../common/comparison_rt';
@@ -19,57 +19,15 @@ import { ServiceInventory } from '../../app/service_inventory';
 import { ServiceMapHome } from '../../app/service_map';
 import { TopTracesOverview } from '../../app/top_traces_overview';
 import { TraceExplorer } from '../../app/trace_explorer';
+import { TraceExplorerAggregatedCriticalPath } from '../../app/trace_explorer/trace_explorer_aggregated_critical_path';
+import { TraceExplorerWaterfall } from '../../app/trace_explorer/trace_explorer_waterfall';
 import { TraceOverview } from '../../app/trace_overview';
 import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
 import { RedirectTo } from '../redirect_to';
-import { ServiceGroupsRedirect } from '../service_groups_redirect';
-import { ApmMainTemplate } from '../templates/apm_main_template';
 import { ServiceGroupTemplate } from '../templates/service_group_template';
 import { dependencies } from './dependencies';
 import { legacyBackends } from './legacy_backends';
-
-export function page<
-  TPath extends string,
-  TChildren extends Record<string, Route> | undefined = undefined,
-  TParams extends t.Type<any> | undefined = undefined
->({
-  path,
-  element,
-  children,
-  title,
-  showServiceGroupSaveButton = false,
-  params,
-}: {
-  path: TPath;
-  element: React.ReactElement<any, any>;
-  children?: TChildren;
-  title: string;
-  showServiceGroupSaveButton?: boolean;
-  params?: TParams;
-}): Record<
-  TPath,
-  {
-    element: React.ReactElement<any, any>;
-  } & (TChildren extends Record<string, Route> ? { children: TChildren } : {}) &
-    (TParams extends t.Type<any> ? { params: TParams } : {})
-> {
-  return {
-    [path]: {
-      element: (
-        <Breadcrumb title={title} href={path}>
-          <ApmMainTemplate
-            pageTitle={title}
-            showServiceGroupSaveButton={showServiceGroupSaveButton}
-          >
-            {element}
-          </ApmMainTemplate>
-        </Breadcrumb>
-      ),
-      children,
-      params,
-    },
-  } as any;
-}
+import { storageExplorer } from './storage_explorer';
 
 function serviceGroupPage<TPath extends string>({
   path,
@@ -184,11 +142,7 @@ export const home = {
         element: <ServiceMapHome />,
         serviceGroupContextTab: 'service-map',
       }),
-      ...page({
-        path: '/traces',
-        title: i18n.translate('xpack.apm.views.traceOverview.title', {
-          defaultMessage: 'Traces',
-        }),
+      '/traces': {
         element: (
           <TraceOverview>
             <Outlet />
@@ -196,7 +150,47 @@ export const home = {
         ),
         children: {
           '/traces/explorer': {
-            element: <TraceExplorer />,
+            element: (
+              <TraceExplorer>
+                <Outlet />
+              </TraceExplorer>
+            ),
+            children: {
+              '/traces/explorer/waterfall': {
+                element: <TraceExplorerWaterfall />,
+                params: t.type({
+                  query: t.intersection([
+                    t.type({
+                      traceId: t.string,
+                      transactionId: t.string,
+                      waterfallItemId: t.string,
+                      detailTab: t.union([
+                        t.literal(TransactionTab.timeline),
+                        t.literal(TransactionTab.metadata),
+                        t.literal(TransactionTab.logs),
+                      ]),
+                    }),
+                    t.partial({
+                      flyoutDetailTab: t.string,
+                    }),
+                  ]),
+                }),
+                defaults: {
+                  query: {
+                    waterfallItemId: '',
+                    traceId: '',
+                    transactionId: '',
+                    detailTab: TransactionTab.timeline,
+                  },
+                },
+              },
+              '/traces/explorer/critical_path': {
+                element: <TraceExplorerAggregatedCriticalPath />,
+              },
+              '/traces/explorer': {
+                element: <RedirectTo pathname="/traces/explorer/waterfall" />,
+              },
+            },
             params: t.type({
               query: t.type({
                 query: t.string,
@@ -204,24 +198,14 @@ export const home = {
                   t.literal(TraceSearchType.kql),
                   t.literal(TraceSearchType.eql),
                 ]),
-                waterfallItemId: t.string,
-                traceId: t.string,
-                transactionId: t.string,
-                detailTab: t.union([
-                  t.literal(TransactionTab.timeline),
-                  t.literal(TransactionTab.metadata),
-                  t.literal(TransactionTab.logs),
-                ]),
+                showCriticalPath: toBooleanRt,
               }),
             }),
             defaults: {
               query: {
                 query: '',
                 type: TraceSearchType.kql,
-                waterfallItemId: '',
-                traceId: '',
-                transactionId: '',
-                detailTab: TransactionTab.timeline,
+                showCriticalPath: '',
               },
             },
           },
@@ -229,16 +213,11 @@ export const home = {
             element: <TopTracesOverview />,
           },
         },
-      }),
+      },
       ...dependencies,
       ...legacyBackends,
-      '/': {
-        element: (
-          <ServiceGroupsRedirect>
-            <RedirectTo pathname="/service-groups" />
-          </ServiceGroupsRedirect>
-        ),
-      },
+      ...storageExplorer,
+      '/': { element: <RedirectTo pathname="/services" /> },
     },
   },
 };

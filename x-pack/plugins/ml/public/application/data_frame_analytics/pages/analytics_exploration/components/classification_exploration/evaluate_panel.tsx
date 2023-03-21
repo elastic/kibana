@@ -193,6 +193,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
           },
         });
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [rowIndex, columnId, setCellProps]);
 
     let cellContent = columnId === ACTUAL_CLASS_ID ? cellValue : accuracy;
@@ -236,15 +237,16 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
             target="_blank"
             iconType="help"
             iconSide="left"
+            size="xs"
             color="primary"
             href={docLink}
           >
-            {i18n.translate(
-              'xpack.ml.dataframe.analytics.classificationExploration.classificationDocsLink',
-              {
-                defaultMessage: 'Classification evaluation docs ',
-              }
-            )}
+            <EuiText size="xs" color="primary">
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.classificationExploration.classificationDocsLink"
+                defaultMessage="Classification evaluation docs "
+              />
+            </EuiText>
           </EuiButtonEmpty>
         }
         headerItems={

@@ -5,39 +5,222 @@
  * 2.0.
  */
 
-import { SearchIndex } from '../types';
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 
-export const searchIndices = [
+import {
+  ConnectorStatus,
+  FilteringPolicy,
+  FilteringRuleRule,
+  FilteringValidationState,
+  SyncStatus,
+} from '../../../../common/types/connectors';
+import { ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
+
+export const indices: ElasticsearchIndexWithIngestion[] = [
   {
-    name: 'Our API Index',
-    elasticsearch_index_name: 'ent-search-api-one',
-    document_count: 100,
-    health: 'green',
-    data_ingestion: 'connected',
-    storage: '9.3mb',
+    count: 1,
+    hidden: false,
+    name: 'api',
+    total: {
+      docs: {
+        count: 1,
+        deleted: 0,
+      },
+      store: { size_in_bytes: '8024' },
+    },
   },
   {
-    name: 'Customer Feedback',
-    elasticsearch_index_name: 'es-index-two',
-    document_count: 100,
-    health: 'green',
-    data_ingestion: 'connected',
-    storage: '9.3mb',
+    connector: {
+      api_key_id: null,
+      configuration: { foo: { label: 'bar', value: 'barbar' } },
+      custom_scheduling: {
+        foo: {
+          configuration_overrides: {},
+          enabled: false,
+          interval: '',
+          last_synced: null,
+          name: '',
+        },
+      },
+      description: null,
+      error: null,
+      features: null,
+      filtering: [
+        {
+          active: {
+            advanced_snippet: {
+              created_at: expect.any(String),
+              updated_at: expect.any(String),
+              value: {},
+            },
+            rules: [
+              {
+                created_at: expect.any(String),
+                field: '_',
+                id: 'DEFAULT',
+                order: 0,
+                policy: FilteringPolicy.INCLUDE,
+                rule: FilteringRuleRule.REGEX,
+                updated_at: expect.any(String),
+                value: '.*',
+              },
+            ],
+            validation: {
+              errors: [],
+              state: FilteringValidationState.VALID,
+            },
+          },
+          domain: 'DEFAULT',
+          draft: {
+            advanced_snippet: {
+              created_at: expect.any(String),
+              updated_at: expect.any(String),
+              value: {},
+            },
+            rules: [
+              {
+                created_at: expect.any(String),
+                field: '_',
+                id: 'DEFAULT',
+                order: 0,
+                policy: FilteringPolicy.INCLUDE,
+                rule: FilteringRuleRule.REGEX,
+                updated_at: expect.any(String),
+                value: '.*',
+              },
+            ],
+            validation: {
+              errors: [],
+              state: FilteringValidationState.VALID,
+            },
+          },
+        },
+      ],
+      id: '2',
+      index_name: 'connector',
+      is_native: false,
+      language: 'en',
+      last_seen: null,
+      last_sync_error: null,
+      last_sync_status: SyncStatus.COMPLETED,
+      last_synced: null,
+      name: 'connector',
+      scheduling: {
+        enabled: false,
+        interval: '',
+      },
+      service_type: null,
+      status: ConnectorStatus.CONFIGURED,
+      sync_now: false,
+    },
+    count: 1,
+    hidden: false,
+    name: 'connector',
+    total: {
+      docs: {
+        count: 1,
+        deleted: 0,
+      },
+      store: { size_in_bytes: '8024' },
+    },
   },
   {
-    name: 'Dharma Crawler',
-    elasticsearch_index_name: 'ent-search-crawler-one',
-    document_count: 100,
-    health: 'yellow',
-    data_ingestion: 'incomplete',
-    storage: '9.3mb',
+    connector: {
+      api_key_id: null,
+      configuration: { foo: { label: 'bar', value: 'barbar' } },
+      custom_scheduling: {
+        foo: {
+          configuration_overrides: {},
+          enabled: false,
+          interval: '',
+          last_synced: null,
+          name: '',
+        },
+      },
+      description: null,
+      error: null,
+      features: null,
+      filtering: [
+        {
+          active: {
+            advanced_snippet: {
+              created_at: expect.any(String),
+              updated_at: expect.any(String),
+              value: {},
+            },
+            rules: [
+              {
+                created_at: expect.any(String),
+                field: '_',
+                id: 'DEFAULT',
+                order: 0,
+                policy: FilteringPolicy.INCLUDE,
+                rule: FilteringRuleRule.REGEX,
+                updated_at: expect.any(String),
+                value: '.*',
+              },
+            ],
+            validation: {
+              errors: [],
+              state: FilteringValidationState.VALID,
+            },
+          },
+          domain: 'DEFAULT',
+          draft: {
+            advanced_snippet: {
+              created_at: expect.any(String),
+              updated_at: expect.any(String),
+              value: {},
+            },
+            rules: [
+              {
+                created_at: expect.any(String),
+                field: '_',
+                id: 'DEFAULT',
+                order: 0,
+                policy: FilteringPolicy.INCLUDE,
+                rule: FilteringRuleRule.REGEX,
+                updated_at: expect.any(String),
+                value: '.*',
+              },
+            ],
+            validation: {
+              errors: [],
+              state: FilteringValidationState.VALID,
+            },
+          },
+        },
+      ],
+      id: '4',
+      index_name: 'crawler',
+      is_native: true,
+      language: 'en',
+      last_seen: null,
+      last_sync_error: null,
+      last_sync_status: SyncStatus.COMPLETED,
+      last_synced: null,
+      name: 'crawler',
+      scheduling: {
+        enabled: false,
+        interval: '',
+      },
+      service_type: ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+      status: ConnectorStatus.CONFIGURED,
+      sync_now: false,
+    },
+    count: 1,
+    crawler: {
+      id: '5',
+      index_name: 'connector-crawler',
+    },
+    hidden: false,
+    name: 'crawler',
+    total: {
+      docs: {
+        count: 1,
+        deleted: 0,
+      },
+      store: { size_in_bytes: '8024' },
+    },
   },
-  {
-    name: 'My Custom Source',
-    elasticsearch_index_name: 'ent-search-custom-source-one',
-    document_count: 1,
-    health: 'red',
-    data_ingestion: 'incomplete',
-    storage: '0mb',
-  },
-] as SearchIndex[];
+];

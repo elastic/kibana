@@ -7,13 +7,13 @@
 
 import type { History } from 'history';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { Observable } from 'rxjs';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import type {
   ApplicationStart,
   AppMountParameters,
   ChromeStart,
+  CoreStart,
   CoreTheme,
   ExecutionContextStart,
   HttpStart,
@@ -32,21 +32,33 @@ import type { DashboardFeatureFlagConfig } from '@kbn/dashboard-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { VisualizeFieldContext, ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
+import {
+  VisualizeFieldContext,
+  ACTION_VISUALIZE_LENS_FIELD,
+  UiActionsStart,
+} from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   DatasourceMap,
   EditorFrameInstance,
   VisualizeEditorContext,
   LensTopNavMenuEntryGenerator,
   VisualizationMap,
+  UserMessagesGetter,
 } from '../types';
 import type { LensAttributeService } from '../lens_attribute_service';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
 import type { LensInspector } from '../lens_inspector_service';
+import { IndexPatternServiceAPI } from '../data_views_service/service';
+import { Document } from '../persistence/saved_object_store';
+import { type LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
 
 export interface RedirectToOriginProps {
   input?: LensEmbeddableInput;
@@ -72,6 +84,7 @@ export interface LensAppProps {
   contextOriginatingApp?: string;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   theme$: Observable<CoreTheme>;
+  coreStart: CoreStart;
 }
 
 export type RunSave = (
@@ -99,6 +112,7 @@ export interface LensTopNavMenuProps {
   setIsSaveModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   runSave: RunSave;
   datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
   title?: string;
   lensInspector: LensInspector;
   goBackToOriginatingApp?: () => void;
@@ -106,7 +120,13 @@ export interface LensTopNavMenuProps {
   initialContextIsEmbedded?: boolean;
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  currentDoc: Document | undefined;
   theme$: Observable<CoreTheme>;
+  indexPatternService: IndexPatternServiceAPI;
+  onTextBasedSavedAndExit: ({ onSave }: { onSave: () => void }) => Promise<void>;
+  getUserMessages: UserMessagesGetter;
+  shortUrlService: (params: LensAppLocatorParams) => Promise<string>;
+  isCurrentStateDirty: boolean;
 }
 
 export interface HistoryLocationState {
@@ -127,6 +147,7 @@ export interface LensAppServices {
   data: DataPublicPluginStart;
   inspector: LensInspector;
   uiSettings: IUiSettingsClient;
+  uiActions: UiActionsStart;
   application: ApplicationStart;
   notifications: NotificationsStart;
   usageCollection?: UsageCollectionStart;
@@ -137,27 +158,33 @@ export interface LensAppServices {
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
   presentationUtil: PresentationUtilPluginStart;
-  spaces: SpacesApi;
-  discover?: DiscoverStart;
-
+  spaces?: SpacesApi;
+  charts: ChartsPluginSetup;
+  share?: SharePluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  docLinks: DocLinksStart;
   // Temporarily required until the 'by value' paradigm is default.
   dashboardFeatureFlag: DashboardFeatureFlagConfig;
   dataViewEditor: DataViewEditorStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
+  locator?: LensAppLocator;
 }
 
-export interface LensTopNavTooltips {
-  showExportWarning: () => string | undefined;
-  showUnderlyingDataWarning: () => string | undefined;
+interface TopNavAction {
+  visible: boolean;
+  enabled?: boolean;
+  execute: (anchorElement: HTMLElement) => void;
+  getLink?: () => string | undefined;
+  tooltip?: () => string | undefined;
 }
 
-export interface LensTopNavActions {
-  inspect: () => void;
-  saveAndReturn: () => void;
-  showSaveModal: () => void;
-  goBack: () => void;
-  cancel: () => void;
-  exportToCSV: () => void;
-  getUnderlyingDataUrl: () => string | undefined;
-  openSettings: (anchorElement: HTMLElement) => void;
-}
+type AvailableTopNavActions =
+  | 'inspect'
+  | 'saveAndReturn'
+  | 'showSaveModal'
+  | 'goBack'
+  | 'cancel'
+  | 'share'
+  | 'getUnderlyingDataUrl'
+  | 'openSettings';
+export type LensTopNavActions = Record<AvailableTopNavActions, TopNavAction>;

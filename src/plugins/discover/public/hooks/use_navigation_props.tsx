@@ -6,151 +6,178 @@
  * Side Public License, v 1.
  */
 
-import { MouseEventHandler, useMemo, useRef } from 'react';
-import { useHistory, matchPath } from 'react-router-dom';
-import type { Location } from 'history';
-import { stringify } from 'query-string';
-import rison from 'rison-node';
-import { disableFilter } from '@kbn/es-query';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { url } from '@kbn/kibana-utils-plugin/common';
+import { useCallback, useEffect, useMemo, useState, MouseEventHandler, MouseEvent } from 'react';
+import { AggregateQuery, Query, TimeRange, Filter, disableFilter } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { useHistory } from 'react-router-dom';
+import { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 
-export type DiscoverNavigationProps = { onClick: () => void } | { href: string };
-
 export interface UseNavigationProps {
-  indexPatternId: string;
+  dataView: DataView;
   rowIndex: string;
   rowId: string;
   columns: string[];
-  filterManager: FilterManager;
-  addBasePath: (url: string) => string;
+  savedSearchId?: string;
+  // provided by embeddable only
+  filters?: Filter[];
 }
 
-export type HistoryState = { breadcrumb?: string } | undefined;
-
-export const getContextHash = (columns: string[], filterManager: FilterManager) => {
-  const globalFilters = filterManager.getGlobalFilters();
-  const appFilters = filterManager.getAppFilters();
-
-  const hash = stringify(
-    url.encodeQuery({
-      _g: rison.encode({
-        filters: globalFilters || [],
-      }),
-      _a: rison.encode({
-        columns,
-        filters: (appFilters || []).map(disableFilter),
-      }),
-    }),
-    { encode: false, sort: false }
-  );
-
-  return hash;
-};
-
-/**
- * When it's context route, breadcrumb link should point to the main discover page anyway.
- * Otherwise, we are on main page and should create breadcrumb link from it.
- * Current history object should be used in callback, since url state might be changed
- * after expanded document opened.
- */
-
-const getCurrentBreadcrumbs = (
-  isContextRoute: boolean,
-  currentLocation: Location,
-  prevBreadcrumb?: string
-) => {
-  return isContextRoute ? prevBreadcrumb : '#' + currentLocation.pathname + currentLocation.search;
-};
-
-export const useMainRouteBreadcrumb = () => {
-  // useRef needed to retrieve initial breadcrumb link from the push state without updates
-  const breadcrumb = useRef<string>();
-  const history = useHistory<HistoryState>();
-
-  if (history.location.state?.breadcrumb) {
-    breadcrumb.current = history.location.state.breadcrumb;
+const getStateParams = ({
+  isEmbeddableView,
+  columns,
+  filters,
+  filterManager,
+  data,
+  savedSearchId,
+}: {
+  isEmbeddableView: boolean;
+  columns: string[];
+  savedSearchId?: string;
+  filters?: Filter[];
+  filterManager: FilterManager;
+  data: DataPublicPluginStart;
+}) => {
+  let appliedFilters: Filter[] = [];
+  let query: Query | AggregateQuery | undefined;
+  let timeRange: TimeRange | undefined;
+  if (!isEmbeddableView) {
+    // applied from discover main and context app
+    appliedFilters = [...filterManager.getGlobalFilters(), ...filterManager.getAppFilters()];
+    query = data.query.queryString.getQuery();
+    timeRange = data.query.timefilter.timefilter.getTime();
+  } else if (isEmbeddableView && filters?.length) {
+    // applied from saved search embeddable
+    appliedFilters = filters;
   }
 
-  return breadcrumb.current;
+  return {
+    columns,
+    query,
+    timeRange,
+    filters: appliedFilters,
+    savedSearchId,
+  };
 };
 
+const isModifiedEvent = (event: MouseEvent) =>
+  !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
+
 export const useNavigationProps = ({
-  indexPatternId,
+  dataView,
   rowIndex,
   rowId,
   columns,
-  filterManager,
-  addBasePath,
+  savedSearchId,
+  filters,
 }: UseNavigationProps) => {
-  const history = useHistory<HistoryState>();
-  const currentLocation = useDiscoverServices().history().location;
+  const isEmbeddableView = !useHistory();
+  const services = useDiscoverServices();
+  const [singleDocHref, setSingleDocHref] = useState('');
+  const [contextViewHref, setContextViewHref] = useState('');
 
-  const prevBreadcrumb = useRef(history?.location.state?.breadcrumb).current;
-  const contextSearchHash = useMemo(
-    () => getContextHash(columns, filterManager),
-    [columns, filterManager]
+  const index = useMemo(
+    () => (dataView.isPersisted() ? dataView.id! : dataView.toSpec(false)),
+    [dataView]
   );
 
-  const singleDocHref = addBasePath(
-    `/app/discover#/doc/${indexPatternId}/${rowIndex}?id=${encodeURIComponent(rowId)}`
+  const buildParams = useCallback(
+    () =>
+      getStateParams({
+        isEmbeddableView,
+        columns,
+        filters,
+        filterManager: services.filterManager,
+        data: services.data,
+        savedSearchId,
+      }),
+    [columns, filters, isEmbeddableView, savedSearchId, services.data, services.filterManager]
   );
-  const surDocsHref = addBasePath(
-    `/app/discover#/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
-      rowId
-    )}?${contextSearchHash}`
+
+  useEffect(() => {
+    const dataViewId = typeof index === 'object' ? index.id : index;
+    services.locator
+      .getUrl({ dataViewId, ...buildParams() })
+      .then((referrer) => {
+        return services.singleDocLocator.getRedirectUrl({ index, rowIndex, rowId, referrer });
+      })
+      .then(setSingleDocHref);
+  }, [
+    index,
+    rowIndex,
+    rowId,
+    services.singleDocLocator,
+    setSingleDocHref,
+    services.locator,
+    buildParams,
+  ]);
+
+  useEffect(() => {
+    const params = buildParams();
+    const dataViewId = typeof index === 'object' ? index.id : index;
+    services.locator
+      .getUrl({ dataViewId, ...params })
+      .then((referrer) =>
+        services.contextLocator.getRedirectUrl({
+          index,
+          rowId,
+          columns: params.columns,
+          filters: params.filters?.map(disableFilter),
+          referrer,
+        })
+      )
+      .then(setContextViewHref);
+  }, [
+    index,
+    rowIndex,
+    rowId,
+    setContextViewHref,
+    buildParams,
+    services.contextLocator,
+    services.locator,
+  ]);
+
+  const onOpenSingleDoc: MouseEventHandler = useCallback(
+    (event) => {
+      if (isModifiedEvent(event)) {
+        return;
+      }
+      event.preventDefault();
+      const dataViewId = typeof index === 'object' ? index.id : index;
+      services.locator
+        .getUrl({ dataViewId, ...buildParams() })
+        .then((referrer) =>
+          services.singleDocLocator.navigate({ index, rowIndex, rowId, referrer })
+        );
+    },
+    [buildParams, index, rowId, rowIndex, services.locator, services.singleDocLocator]
   );
 
-  /**
-   * When history can be accessed via hooks,
-   * it is discover main or context route.
-   */
-  if (!!history) {
-    const isContextRoute = matchPath(history.location.pathname, {
-      path: '/context/:indexPatternId/:id',
-      exact: true,
-    });
+  const onOpenContextView: MouseEventHandler = useCallback(
+    (event) => {
+      const params = buildParams();
+      if (isModifiedEvent(event)) {
+        return;
+      }
+      event.preventDefault();
+      const dataViewId = typeof index === 'object' ? index.id : index;
+      services.locator.getUrl({ dataViewId, ...params }).then((referrer) =>
+        services.contextLocator.navigate({
+          index,
+          rowId,
+          columns: params.columns,
+          filters: params.filters?.map(disableFilter),
+          referrer,
+        })
+      );
+    },
+    [buildParams, index, rowId, services.contextLocator, services.locator]
+  );
 
-    const onOpenSingleDoc: MouseEventHandler<HTMLAnchorElement> = (event) => {
-      event?.preventDefault?.();
-
-      history.push({
-        pathname: `/doc/${indexPatternId}/${rowIndex}`,
-        search: `?id=${encodeURIComponent(rowId)}`,
-        state: {
-          breadcrumb: getCurrentBreadcrumbs(!!isContextRoute, currentLocation, prevBreadcrumb),
-        },
-      });
-    };
-
-    const onOpenSurrDocs: MouseEventHandler<HTMLAnchorElement> = (event) => {
-      event?.preventDefault?.();
-
-      history.push({
-        pathname: `/context/${encodeURIComponent(indexPatternId)}/${encodeURIComponent(
-          String(rowId)
-        )}`,
-        search: `?${contextSearchHash}`,
-        state: {
-          breadcrumb: getCurrentBreadcrumbs(!!isContextRoute, currentLocation, prevBreadcrumb),
-        },
-      });
-    };
-
-    return {
-      singleDocProps: { onClick: onOpenSingleDoc, href: singleDocHref },
-      surrDocsProps: { onClick: onOpenSurrDocs, href: surDocsHref },
-    };
-  }
-
-  // for embeddable absolute href should be kept
   return {
-    singleDocProps: {
-      href: singleDocHref,
-    },
-    surrDocsProps: {
-      href: surDocsHref,
-    },
+    singleDocHref,
+    contextViewHref,
+    onOpenSingleDoc,
+    onOpenContextView,
   };
 };

@@ -7,9 +7,13 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { ActionTypes, CaseUserActionsResponse, CommentType } from '@kbn/cases-plugin/common/api';
+import {
+  ActionTypes,
+  CaseUserActionsDeprecatedResponse,
+  CommentType,
+} from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { deleteAllCaseItems, getCaseUserActions } from '../../../../common/lib/utils';
+import { deleteAllCaseItems, getCaseUserActions } from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -23,11 +27,16 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       const CASE_ID = 'e1900ac0-017f-11eb-93f8-d161651bf509';
 
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
+        );
+        await deleteAllCaseItems(es);
       });
 
       it('7.10.0 migrates user actions connector', async () => {
@@ -78,6 +87,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 id: 'none',
               },
               severity: 'low',
+              assignees: [],
               owner: 'securitySolution',
               settings: { syncAlerts: true },
             },
@@ -191,6 +201,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 syncAlerts: true,
               },
               severity: 'low',
+              assignees: [],
               owner: 'securitySolution',
             },
             type: 'create_case',
@@ -253,7 +264,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     describe('7.13 connector id extraction', () => {
-      let userActions: CaseUserActionsResponse;
+      let userActions: CaseUserActionsDeprecatedResponse;
 
       before(async () => {
         await esArchiver.load(
@@ -298,6 +309,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 syncAlerts: true,
               },
               severity: 'low',
+              assignees: [],
               owner: 'securitySolution',
             },
             type: 'create_case',
@@ -327,6 +339,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 syncAlerts: true,
               },
               severity: 'low',
+              assignees: [],
             },
             type: 'create_case',
             action_id: 'b3094de0-005e-11ec-91f1-6daf2ab59fb5',
@@ -372,6 +385,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               },
               owner: 'securitySolution',
               severity: 'low',
+              assignees: [],
             },
             type: 'create_case',
             action_id: 'e7882d70-005e-11ec-91f1-6daf2ab59fb5',
@@ -744,6 +758,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               title: 'User actions',
               owner: 'securitySolution',
               severity: 'low',
+              assignees: [],
             },
             type: 'create_case',
           },
@@ -1109,6 +1124,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               title: 'User actions',
               owner: 'securitySolution',
               severity: 'low',
+              assignees: [],
             },
             type: 'create_case',
           });
@@ -1130,9 +1146,88 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         });
       });
     });
+
+    describe('8.5.0', () => {
+      const CASE_ID = '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c';
+      const CREATE_UA_ID = '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c';
+
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.0.0/cases.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.0.0/cases.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      describe('assignees', () => {
+        it('adds the assignees field to the create case user action', async () => {
+          const userActions = await getCaseUserActions({
+            supertest,
+            caseID: CASE_ID,
+          });
+
+          const createUserAction = userActions.find(
+            (userAction) => userAction.action_id === CREATE_UA_ID
+          );
+
+          expect(createUserAction).to.eql({
+            action: 'create',
+            action_id: '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c',
+            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
+            comment_id: null,
+            created_at: '2021-12-16T14:34:48.709Z',
+            created_by: {
+              email: '',
+              full_name: '',
+              username: 'elastic',
+            },
+            owner: 'securitySolution',
+            payload: {
+              connector: {
+                fields: null,
+                id: 'none',
+                name: 'none',
+                type: '.none',
+              },
+              description: 'migrating user actions',
+              settings: {
+                syncAlerts: true,
+              },
+              status: 'open',
+              tags: ['user', 'actions'],
+              title: 'User actions',
+              owner: 'securitySolution',
+              severity: 'low',
+              assignees: [],
+            },
+            type: 'create_case',
+          });
+        });
+
+        it('does NOT add the assignees field to the other user actions', async () => {
+          const userActions = await getCaseUserActions({
+            supertest,
+            caseID: CASE_ID,
+          });
+
+          const userActionsWithoutCreateAction = userActions.filter(
+            (userAction) => userAction.type !== ActionTypes.create_case
+          );
+
+          for (const userAction of userActionsWithoutCreateAction) {
+            expect(userAction.payload).not.to.have.property('assignees');
+          }
+        });
+      });
+    });
   });
 }
 
-function getUserActionById(userActions: CaseUserActionsResponse, id: string): any {
+function getUserActionById(userActions: CaseUserActionsDeprecatedResponse, id: string): any {
   return userActions.find((userAction) => userAction.action_id === id);
 }

@@ -5,29 +5,40 @@
  * 2.0.
  */
 
-import { CommentResponseTypePersistableState } from '../../../../common/api';
-import { UserActionBuilder, UserActionBuilderArgs } from '../types';
-import { SnakeToCamelCase } from '../../../../common/types';
+import type { CommentResponseTypePersistableState } from '../../../../common/api';
+import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
+import type { SnakeToCamelCase } from '../../../../common/types';
 import { createRegisteredAttachmentUserActionBuilder } from './registered_attachments';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
-  'userAction' | 'persistableStateAttachmentTypeRegistry' | 'caseData'
+  | 'userAction'
+  | 'persistableStateAttachmentTypeRegistry'
+  | 'caseData'
+  | 'handleDeleteComment'
+  | 'userProfiles'
 > & {
   comment: SnakeToCamelCase<CommentResponseTypePersistableState>;
+  isLoading: boolean;
 };
 
 export const createPersistableStateAttachmentUserActionBuilder = ({
   userAction,
+  userProfiles,
   comment,
   persistableStateAttachmentTypeRegistry,
   caseData,
+  isLoading,
+  handleDeleteComment,
 }: BuilderArgs): ReturnType<UserActionBuilder> => {
   return createRegisteredAttachmentUserActionBuilder({
     userAction,
+    userProfiles,
     comment,
     registry: persistableStateAttachmentTypeRegistry,
     caseData,
+    handleDeleteComment,
+    isLoading,
     getId: () => comment.persistableStateAttachmentTypeId,
     getAttachmentViewProps: () => ({
       persistableStateAttachmentTypeId: comment.persistableStateAttachmentTypeId,

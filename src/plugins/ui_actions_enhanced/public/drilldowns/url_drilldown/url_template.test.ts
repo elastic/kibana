@@ -108,6 +108,13 @@ describe('date helper', () => {
     );
   });
 
+  test('can configure roundUp for dateMath', async () => {
+    const url = 'https://elastic.co/from={{date from}}&to={{date to roundUp=true}}';
+    expect(await compile(url, { from: 'now/d', to: 'now/d' })).toMatchInlineSnapshot(
+      `"https://elastic.co/from=2020-08-18T00:00:00.000Z&to=2020-08-18T23:59:59.999Z"`
+    );
+  });
+
   test('can use format', async () => {
     const url = 'https://elastic.co/{{date time "dddd, MMMM Do YYYY, h:mm:ss a"}}';
     expect(await compile(url, { time: 'now' })).toMatchInlineSnapshot(

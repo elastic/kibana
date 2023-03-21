@@ -107,6 +107,7 @@ describe('get()', () => {
         "schedule": Object {
           "interval": "10s",
         },
+        "snoozeSchedule": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -187,6 +188,7 @@ describe('get()', () => {
         "schedule": Object {
           "interval": "10s",
         },
+        "snoozeSchedule": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -212,7 +214,9 @@ describe('get()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -287,6 +291,7 @@ describe('get()', () => {
         "schedule": Object {
           "interval": "10s",
         },
+        "snoozeSchedule": Array [],
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
@@ -332,7 +337,9 @@ describe('get()', () => {
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      async executor() {},
+      async executor() {
+        return { state: {} };
+      },
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),

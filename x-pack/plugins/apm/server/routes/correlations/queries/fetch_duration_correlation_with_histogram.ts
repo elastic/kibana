@@ -18,14 +18,15 @@ import {
   KS_TEST_THRESHOLD,
 } from '../../../../common/correlations/constants';
 
-import { ProcessorEvent } from '../../../../common/processor_event';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { fetchDurationCorrelation } from './fetch_duration_correlation';
 import { fetchDurationRanges } from './fetch_duration_ranges';
+import { getEventType } from '../utils';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function fetchDurationCorrelationWithHistogram({
-  setup,
-  eventType,
+  apmEventClient,
+  chartType,
   start,
   end,
   environment,
@@ -38,8 +39,8 @@ export async function fetchDurationCorrelationWithHistogram({
   totalDocCount,
   fieldValuePair,
 }: CommonCorrelationsQueryParams & {
-  setup: Setup;
-  eventType: ProcessorEvent;
+  apmEventClient: APMEventClient;
+  chartType: LatencyDistributionChartType;
   expectations: number[];
   ranges: estypes.AggregationsAggregationRange[];
   fractions: number[];
@@ -47,6 +48,8 @@ export async function fetchDurationCorrelationWithHistogram({
   totalDocCount: number;
   fieldValuePair: FieldValuePair;
 }) {
+  const searchMetrics = false; // latency correlations does not search metrics documents
+  const eventType = getEventType(chartType, searchMetrics);
   const queryWithFieldValuePair = {
     bool: {
       filter: [
@@ -57,7 +60,7 @@ export async function fetchDurationCorrelationWithHistogram({
   };
 
   const { correlation, ksTest } = await fetchDurationCorrelation({
-    setup,
+    apmEventClient,
     eventType,
     start,
     end,
@@ -72,21 +75,22 @@ export async function fetchDurationCorrelationWithHistogram({
 
   if (correlation !== null && ksTest !== null && !isNaN(ksTest)) {
     if (correlation > CORRELATION_THRESHOLD && ksTest < KS_TEST_THRESHOLD) {
-      const logHistogram = await fetchDurationRanges({
-        setup,
-        eventType,
+      const { durationRanges: histogram } = await fetchDurationRanges({
+        apmEventClient,
+        chartType,
         start,
         end,
         environment,
         kuery,
         query: queryWithFieldValuePair,
         rangeSteps: histogramRangeSteps,
+        searchMetrics,
       });
       return {
         ...fieldValuePair,
         correlation,
         ksTest,
-        histogram: logHistogram,
+        histogram,
       };
     } else {
       return {

@@ -50,6 +50,9 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should display the enabled "Overview" tab');
             await ml.navigation.assertOverviewTabEnabled(true);
 
+            await ml.testExecution.logTestStep('should display the enabled "Notifications" tab');
+            await ml.navigation.assertNotificationsTabEnabled(true);
+
             await ml.testExecution.logTestStep(
               'should display the enabled "Anomaly Detection" section correctly'
             );
@@ -84,8 +87,6 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.commonUI.waitForDatePickerIndicatorLoaded();
 
             await ml.testExecution.logTestStep('should display a welcome callout');
-            await ml.overviewPage.assertGettingStartedCalloutVisible(true);
-            await ml.overviewPage.dismissGettingStartedCallout();
 
             await ml.testExecution.logTestStep('should display ML Nodes panel');
             await ml.mlNodesPanel.assertNodeOverviewPanel();
@@ -104,7 +105,6 @@ export default function ({ getService }: FtrProviderContext) {
               'should persist the getting started callout state after refresh'
             );
             await browser.refresh();
-            await ml.overviewPage.assertGettingStartedCalloutVisible(false);
           });
         });
       }

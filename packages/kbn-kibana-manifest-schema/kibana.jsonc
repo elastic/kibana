@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/kibana-manifest-schema",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations"
+}

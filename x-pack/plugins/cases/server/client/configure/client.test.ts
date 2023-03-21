@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { CasesClientArgs } from '../types';
+import type { CasesClientArgs } from '../types';
 import { getConnectors } from './client';
 
 describe('client', () => {
@@ -25,6 +25,7 @@ describe('client', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic' as const,
+        supportedFeatureIds: ['alerting', 'cases'],
       },
       {
         id: '.servicenow',
@@ -33,6 +34,7 @@ describe('client', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic' as const,
+        supportedFeatureIds: ['alerting', 'cases'],
       },
       {
         id: '.unsupported',
@@ -41,6 +43,7 @@ describe('client', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'basic' as const,
+        supportedFeatureIds: ['alerting'],
       },
       {
         id: '.swimlane',
@@ -49,6 +52,7 @@ describe('client', () => {
         enabledInConfig: true,
         enabledInLicense: false,
         minimumLicenseRequired: 'basic' as const,
+        supportedFeatureIds: ['alerting', 'cases'],
       },
     ];
 

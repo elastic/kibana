@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   Logger,
   SavedObject,
@@ -13,7 +13,7 @@ import {
   SavedObjectsType,
 } from '@kbn/core/server';
 import { CASE_SAVED_OBJECT } from '../../common/constants';
-import { ESCaseAttributes } from '../services/cases/types';
+import type { ESCaseAttributes } from '../services/cases/types';
 import { handleExport } from './import_export/export';
 import { caseMigrations } from './migrations';
 
@@ -26,7 +26,15 @@ export const createCaseSavedObjectType = (
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
+    dynamic: false,
     properties: {
+      assignees: {
+        properties: {
+          uid: {
+            type: 'keyword',
+          },
+        },
+      },
       closed_at: {
         type: 'date',
       },
@@ -39,6 +47,9 @@ export const createCaseSavedObjectType = (
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },
@@ -55,6 +66,9 @@ export const createCaseSavedObjectType = (
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },
@@ -101,6 +115,9 @@ export const createCaseSavedObjectType = (
               email: {
                 type: 'keyword',
               },
+              profile_uid: {
+                type: 'keyword',
+              },
             },
           },
           connector_name: {
@@ -122,9 +139,14 @@ export const createCaseSavedObjectType = (
       },
       title: {
         type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
       },
       status: {
-        type: 'keyword',
+        type: 'short',
       },
       tags: {
         type: 'keyword',
@@ -143,6 +165,9 @@ export const createCaseSavedObjectType = (
           email: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
       settings: {
@@ -153,7 +178,13 @@ export const createCaseSavedObjectType = (
         },
       },
       severity: {
-        type: 'keyword',
+        type: 'short',
+      },
+      total_alerts: {
+        type: 'integer',
+      },
+      total_comments: {
+        type: 'integer',
       },
     },
   },

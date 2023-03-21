@@ -1,0 +1,29 @@
+[[upgrade-assistant]]
+== Upgrade Assistant
+
+The Upgrade Assistant helps you prepare for your upgrade 
+to the next version of the {stack}.
+To access the assistant, go to *{stack-manage-app} > Upgrade Assistant*.
+
+The assistant identifies deprecated settings in your configuration
+and guides you through the process of resolving issues if any deprecated features are enabled.
+
+[discrete]
+=== Required permissions
+
+The `manage` cluster privilege is required to access the *Upgrade assistant*.
+Additional privileges may be needed to perform certain actions.
+
+[discrete]
+=== Feature set
+Some features of the Upgrade assistant are only needed when upgrading to a new major version. The feature set enabled by default are those for the very next version from the one Kibana currently runs on.
+
+[discrete]
+=== Deprecations
+The Upgrade assistant pulls information about deprecations from the following sources:
+
+* Elasticsearch Deprecation Info API
+* Elasticsearch deprecation logs
+* Kibana deprecations API
+
+For more information about the API's the Upgraed assistant provides, refer to <<upgrade-assistant-api, Upgrade Assistant APIs>>.

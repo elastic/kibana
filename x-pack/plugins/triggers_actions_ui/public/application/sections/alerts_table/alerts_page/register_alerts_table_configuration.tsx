@@ -26,6 +26,7 @@ export function registerAlertsTableConfiguration({
 }) {
   alertsTableConfigurationRegistry.register({
     id: PLUGIN_ID,
+    casesFeatureId: `${PLUGIN_ID}Cases`,
     columns: [
       {
         id: 'event.action',

@@ -29,6 +29,7 @@ export const DEFAULT_INITIAL_APP_DATA = {
   },
   access: {
     hasAppSearchAccess: true,
+    hasSearchEnginesAccess: false,
     hasWorkplaceSearchAccess: true,
   },
   appSearch: {

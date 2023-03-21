@@ -6,7 +6,6 @@
  */
 
 import { useMemo } from 'react';
-import { APP_ID } from '../../../../../common/constants';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { ADD_TO_CASE_DISABLED, ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
@@ -21,11 +20,12 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
 
   const userCasesPermissions = useGetUserCasesPermissions();
 
-  const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
+  const addToNewCase = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
     onClose,
     onSuccess,
   });
-  const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
+
+  const addToExisting = casesUi.hooks.getUseCasesAddToExistingCaseModal({
     onClose,
     onRowClick: onSuccess,
   });
@@ -40,8 +40,8 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
             disableOnQuery: true,
             disabledLabel: ADD_TO_CASE_DISABLED,
             onClick: (items?: TimelineItem[]) => {
-              const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items, APP_ID) : [];
-              createCaseFlyout.open({ attachments: caseAttachments });
+              const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items) : [];
+              addToNewCase.open({ attachments: caseAttachments });
             },
           },
           {
@@ -51,17 +51,18 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
             disabledLabel: ADD_TO_CASE_DISABLED,
             'data-test-subj': 'attach-existing-case',
             onClick: (items?: TimelineItem[]) => {
-              const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items, APP_ID) : [];
-              selectCaseModal.open({ attachments: caseAttachments });
+              const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items) : [];
+
+              addToExisting.open({ attachments: caseAttachments });
             },
           },
         ]
       : [];
   }, [
     casesUi.helpers,
-    createCaseFlyout,
+    addToExisting,
+    addToNewCase,
     userCasesPermissions.create,
     userCasesPermissions.read,
-    selectCaseModal,
   ]);
 };

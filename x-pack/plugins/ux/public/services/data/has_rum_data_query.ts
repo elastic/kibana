@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { ESSearchResponse } from '@kbn/es-types';
 import moment from 'moment';
 import {
   SERVICE_NAME,
@@ -22,8 +22,7 @@ export function formatHasRumResult<T>(
   if (!esResult) return esResult;
   return {
     indices,
-    // @ts-ignore total.value is undefined by the returned type, total is a `number`
-    hasData: esResult.hits.total > 0,
+    hasData: esResult.hits.total.value > 0,
     serviceName:
       esResult.aggregations?.services?.mostTraffic?.buckets?.[0]?.key,
   };

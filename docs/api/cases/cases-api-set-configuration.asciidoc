@@ -7,6 +7,12 @@
 Sets external connection details, such as the closure type and
 default connector for cases.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+====
+
 === {api-request-title}
 
 `POST <kibana host>:<port>/api/cases/configure`
@@ -35,6 +41,7 @@ you must still specify all of the connector details.
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
+[role="child_attributes"]
 === {api-request-body-title}
 
 `closure_type`::
@@ -73,8 +80,8 @@ connector, use `none`. To retrieve connector names, use
 <<cases-api-find-connectors>>.
 
 `type`::
-(Required, string) The type of the connector. Valid values are: `.jira`, `.none`,
-`.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
+(Required, string) The type of the connector. Valid values are: `.cases-webhook`,
+`.jira`, `.none`, `.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
 ====
 
 `owner`::

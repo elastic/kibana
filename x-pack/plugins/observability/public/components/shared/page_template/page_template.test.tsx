@@ -10,7 +10,9 @@ import { render } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
 import { of } from 'rxjs';
-import { sharedUXPluginMock } from '@kbn/shared-ux-plugin/public/mocks';
+import { getKibanaPageTemplateKibanaDependenciesMock as getPageTemplateServices } from '@kbn/shared-ux-page-kibana-template-mocks';
+import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
+
 import { createNavigationRegistry } from '../../../services/navigation_registry';
 import { createLazyObservabilityPageTemplate } from './lazy_page_template';
 import { ObservabilityPageTemplate } from './page_template';
@@ -52,7 +54,8 @@ describe('Page template', () => {
       getUrlForApp: () => '/test-url',
       navigateToApp: async () => {},
       navigationSections$: navigationRegistry.sections$,
-      getSharedUXContext: sharedUXPluginMock.createStartContract().getContextServices,
+      getPageTemplateServices,
+      guidedOnboardingApi: guidedOnboardingMock.createStart().guidedOnboardingApi,
     });
 
     const component = shallow(
@@ -76,11 +79,12 @@ describe('Page template', () => {
         getUrlForApp={() => '/test-url'}
         navigateToApp={async () => {}}
         navigationSections$={navigationRegistry.sections$}
-        getSharedUXContext={sharedUXPluginMock.createStartContract().getContextServices}
         pageHeader={{
           pageTitle: 'Test title',
           rightSideItems: [<span>Test side item</span>],
         }}
+        getPageTemplateServices={getPageTemplateServices}
+        guidedOnboardingApi={guidedOnboardingMock.createStart().guidedOnboardingApi}
       >
         <div>Test structure</div>
       </ObservabilityPageTemplate>
@@ -97,11 +101,12 @@ describe('Page template', () => {
           getUrlForApp={() => '/test-url'}
           navigateToApp={async () => {}}
           navigationSections$={navigationRegistry.sections$}
-          getSharedUXContext={sharedUXPluginMock.createStartContract().getContextServices}
           pageHeader={{
             pageTitle: 'Test title',
             rightSideItems: [<span>Test side item</span>],
           }}
+          getPageTemplateServices={getPageTemplateServices}
+          guidedOnboardingApi={guidedOnboardingMock.createStart().guidedOnboardingApi}
         >
           <div>Test structure</div>
         </ObservabilityPageTemplate>

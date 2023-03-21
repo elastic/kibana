@@ -13,7 +13,7 @@ import type { Panel, IndexPatternValue, FetchedIndexPattern } from './types';
 
 export const isStringTypeIndexPattern = (
   indexPatternValue: IndexPatternValue
-): indexPatternValue is string => typeof indexPatternValue === 'string';
+): indexPatternValue is string => typeof indexPatternValue === 'string' && indexPatternValue !== '';
 
 export const isDataViewTypeIndexPattern = (
   indexPatternValue: IndexPatternValue

@@ -8,12 +8,12 @@
 import { AnalysisTokenFilter } from '@elastic/elasticsearch/lib/api/types';
 
 interface LanguageDataEntry {
+  custom_filter_definitions?: object;
   name: string;
   stemmer: string;
   stop_words: string;
-  custom_filter_definitions?: object;
-  prepended_filters?: string[];
   postpended_filters?: string[];
+  prepended_filters?: string[];
 }
 
 const languageData: Record<string, LanguageDataEntry> = {
@@ -282,13 +282,13 @@ const filterDefinitions = (language: string) => {
   return {
     ...genericFilters,
     [stemFilterName(language)]: {
-      type: 'stemmer' as const,
-      name: stemmerName,
       language: stemmerName,
+      name: stemmerName,
+      type: 'stemmer' as const,
     },
     [stopWordsFilterName(language)]: {
-      type: 'stop' as const,
       stopwords: stopWordsName,
+      type: 'stop' as const,
     },
     ...customFilterDefinitions,
   };

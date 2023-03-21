@@ -14,6 +14,7 @@ import { mount, shallow } from 'enzyme';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { TestProviders } from '../../../../common/mock';
 import { useCreateTimelineButton } from './use_create_timeline';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 
 const mockDispatch = jest.fn();
 
@@ -92,9 +93,7 @@ describe('useCreateTimelineButton', () => {
         fill: false,
       });
       const wrapper = shallow(button);
-      expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').prop('fill')).toEqual(
-        false
-      );
+      expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').prop('fill')).toBeFalsy();
     });
   });
 
@@ -127,18 +126,26 @@ describe('useCreateTimelineButton', () => {
 
         wrapper.find('[data-test-subj="timeline-new"]').first().simulate('click');
 
+        expect(mockDispatch.mock.calls.length).toBe(6);
+
         expect(mockDispatch.mock.calls[0][0].type).toEqual(
           'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW'
         );
         expect(mockDispatch.mock.calls[1][0].type).toEqual(
           'x-pack/security_solution/local/timeline/CREATE_TIMELINE'
         );
+
         expect(mockDispatch.mock.calls[2][0].type).toEqual(
-          'x-pack/security_solution/local/inputs/ADD_GLOBAL_LINK_TO'
+          'x-pack/security_solution/local/timeline/SET_TIMELINE_UPDATED_AT'
         );
+
         expect(mockDispatch.mock.calls[3][0].type).toEqual(
-          'x-pack/security_solution/local/inputs/ADD_TIMELINE_LINK_TO'
+          'x-pack/security_solution/local/inputs/ADD_LINK_TO'
         );
+        expect(mockDispatch.mock.calls[3][0].payload).toEqual([
+          InputsModelId.global,
+          InputsModelId.timeline,
+        ]);
         expect(mockDispatch.mock.calls[4][0].type).toEqual(
           'x-pack/security_solution/local/app/ADD_NOTE'
         );

@@ -6,17 +6,19 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { alertsClientMock } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client.mock';
 import { AlertService } from '../../services';
-import { CasesClientArgs } from '../types';
+import type { CasesClientArgs } from '../types';
 import { getAlerts } from './get';
 
 describe('getAlerts', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.create().get('case');
+  const alertsClient = alertsClientMock.create();
   let alertsService: AlertService;
 
   beforeEach(async () => {
-    alertsService = new AlertService(esClient, logger);
+    alertsService = new AlertService(esClient, logger, alertsClient);
     jest.clearAllMocks();
   });
 
@@ -39,14 +41,14 @@ describe('getAlerts', () => {
   esClient.mget.mockResolvedValue({ docs });
 
   it('returns an empty array if the alert info are empty', async () => {
-    const clientArgs = { alertsService } as unknown as CasesClientArgs;
+    const clientArgs = { services: { alertsService } } as unknown as CasesClientArgs;
     const res = await getAlerts([], clientArgs);
 
     expect(res).toEqual([]);
   });
 
   it('returns the alerts correctly', async () => {
-    const clientArgs = { alertsService } as unknown as CasesClientArgs;
+    const clientArgs = { services: { alertsService } } as unknown as CasesClientArgs;
     const res = await getAlerts(
       [
         {
@@ -79,7 +81,7 @@ describe('getAlerts', () => {
         },
       ],
     });
-    const clientArgs = { alertsService } as unknown as CasesClientArgs;
+    const clientArgs = { services: { alertsService } } as unknown as CasesClientArgs;
 
     const res = await getAlerts(
       [
@@ -113,7 +115,7 @@ describe('getAlerts', () => {
         },
       ],
     });
-    const clientArgs = { alertsService } as unknown as CasesClientArgs;
+    const clientArgs = { services: { alertsService } } as unknown as CasesClientArgs;
 
     const res = await getAlerts(
       [

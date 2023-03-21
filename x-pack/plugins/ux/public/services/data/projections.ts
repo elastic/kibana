@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AGENT_NAME,
   PROCESSOR_EVENT,
   SERVICE_LANGUAGE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 import { SetupUX } from '../../../typings/ui_filters';
 import { getEsFilter } from './get_es_filter';

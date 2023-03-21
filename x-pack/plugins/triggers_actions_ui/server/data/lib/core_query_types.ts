@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
+import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { MAX_GROUPS } from '..';
 
 export const CoreQueryParamsSchemaProperties = {
@@ -28,6 +29,8 @@ export const CoreQueryParamsSchemaProperties = {
   groupBy: schema.string({ validate: validateGroupBy }),
   // field to group on (for groupBy: top)
   termField: schema.maybe(schema.string({ minLength: 1 })),
+  // filter field
+  filterKuery: schema.maybe(schema.string({ validate: validateKuery })),
   // limit on number of groups returned
   termSize: schema.maybe(schema.number({ min: 1 })),
   // size of time window for date range aggregations
@@ -92,7 +95,7 @@ export function validateCoreQueryBody(anyParams: unknown): string | undefined {
 
 const AggTypes = new Set(['count', 'avg', 'min', 'max', 'sum']);
 
-function validateAggType(aggType: string): string | undefined {
+export function validateAggType(aggType: string): string | undefined {
   if (AggTypes.has(aggType)) {
     return;
   }
@@ -134,4 +137,17 @@ export function validateTimeWindowUnits(timeWindowUnit: string): string | undefi
       },
     }
   );
+}
+
+export function validateKuery(query: string): string | undefined {
+  try {
+    toElasticsearchQuery(fromKueryExpression(query));
+  } catch (e) {
+    return i18n.translate(
+      'xpack.triggersActionsUI.data.coreQueryParams.invalidKQLQueryErrorMessage',
+      {
+        defaultMessage: 'Filter query is invalid.',
+      }
+    );
+  }
 }

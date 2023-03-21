@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type JobId = string;
-export type BucketSpan = string;
+export type BucketSpan = estypes.Duration;
 
 // temporary Job override, waiting for es client to have correct types
 export type Job = estypes.MlJob;

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { Feature } from 'geojson';
-// @ts-expect-error
 import { BrowserFileSystem, DBFLoader, loadInBatches, ShapefileLoader } from '../loaders';
 import type { ImportFailure } from '../../../../common/types';
 import { ShapefileEditor } from './shapefile_editor';

@@ -28,18 +28,22 @@ export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }
   useEffect(() => {
     jobCreator.bucketSpan = bucketSpan;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bucketSpan]);
 
   useEffect(() => {
     setBucketSpan(jobCreator.bucketSpan);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
     setValidation(jobValidator.bucketSpan);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   useEffect(() => {
     setIsValid(estimating === false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [estimating]);
 
   return (
@@ -48,6 +52,7 @@ export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }
         <EuiFlexItem>
           <BucketSpanInput
             setBucketSpan={setBucketSpan}
+            // @ts-expect-error bucketSpan is of type `estypes.Duration`
             bucketSpan={bucketSpan}
             isInvalid={validation.valid === false}
             disabled={estimating}

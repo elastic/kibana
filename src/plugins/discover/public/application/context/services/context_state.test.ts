@@ -14,6 +14,7 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 import { discoverServiceMock } from '../../../__mocks__/services';
+import { dataViewMock } from '../../../__mocks__/data_view';
 
 discoverServiceMock.data.query.filterManager.getAppFilters = jest.fn(() => []);
 discoverServiceMock.data.query.filterManager.getGlobalFilters = jest.fn(() => []);
@@ -34,6 +35,7 @@ describe('Test Discover Context State', () => {
           (key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown as T,
       } as IUiSettingsClient,
       data: discoverServiceMock.data,
+      dataView: dataViewMock,
     });
     state.startSync();
   });
@@ -131,7 +133,7 @@ describe('Test Discover Context State', () => {
               "query": "jpg",
             },
             "type": "phrase",
-            "value": [Function],
+            "value": undefined,
           },
           "query": Object {
             "match_phrase": Object {
@@ -155,7 +157,7 @@ describe('Test Discover Context State', () => {
               "query": "png",
             },
             "type": "phrase",
-            "value": [Function],
+            "value": undefined,
           },
           "query": Object {
             "match_phrase": Object {

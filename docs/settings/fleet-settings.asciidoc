@@ -33,11 +33,18 @@ The address to use to reach the {package-manager} registry.
 The proxy address to use to reach the {package-manager} registry if an internet connection is not directly available.
 Refer to {fleet-guide}/air-gapped.html[Air-gapped environments] for details.
 
+`xpack.fleet.packageVerification.gpgKeyPath`::
+The path on disk to the GPG key used to verify {package-manager} packages. If the Elastic public key
+is ever reissued as a security precaution, you can use this setting to specify the new key.
 
 ==== {fleet} settings
 
 `xpack.fleet.agents.fleet_server.hosts`::
 Hostnames used by {agent} for accessing {fleet-server}.
++
+If configured in your `kibana.yml`, this setting is grayed out and unavailable
+in the {fleet} UI. To make this setting editable in the UI, do not configure it
+in the configuration file. 
 
 `xpack.fleet.agents.elasticsearch.hosts`::
 Hostnames used by {agent} for accessing {es}.
@@ -51,6 +58,9 @@ Hash pin used for certificate verification. The pin is a base64-encoded string o
 
 Use these settings to pre-define integrations and agent policies that you
 want {fleet} to load up by default.
+
+NOTE: These settings are not supported to pre-configure the Endpoint and Cloud
+Security integration.
 
 `xpack.fleet.packages`::
 List of integrations that are installed when the {fleet} app starts up for the first time.
@@ -126,7 +136,11 @@ List of agent policies that are configured when the {fleet} app starts.
 =====
 
 `xpack.fleet.outputs`::
-List of outputs that are configured when the {fleet} app starts. 
+List of outputs that are configured when the {fleet} app starts.
++
+If configured in your `kibana.yml`, output settings are grayed out and
+unavailable in the {fleet} UI. To make these settings editable in the UI, do not
+configure them in the configuration file. 
 +
 .Required properties of `xpack.fleet.outputs`
 [%collapsible%open]
@@ -183,3 +197,6 @@ xpack.fleet.agentPolicies:
           - type: winlog
             enabled: false
 ----
+
+`xpack.fleet.enableExperimental`::
+List of experimental feature flag to enable in Fleet.

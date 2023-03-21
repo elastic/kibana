@@ -20,8 +20,6 @@
  * divide([14, 42, 65, 108], [2, 7, 5, 12]) // returns [7, 6, 13, 9]
  */
 
-module.exports = { divide };
-
 function divide(a, b) {
   if (Array.isArray(a) && Array.isArray(b)) {
     if (a.length !== b.length) throw new Error('Array length mismatch');
@@ -30,8 +28,14 @@ function divide(a, b) {
       return val / b[i];
     });
   }
-  if (Array.isArray(b)) return b.map((b) => a / b);
+  if (Array.isArray(b)) {
+    return b.map((bi) => {
+      if (bi === 0) throw new Error('Cannot divide by 0');
+      return a / bi;
+    });
+  }
   if (b === 0) throw new Error('Cannot divide by 0');
   if (Array.isArray(a)) return a.map((a) => a / b);
   return a / b;
 }
+module.exports = { divide };

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { install, paths } from '@kbn/screenshotting-plugin/server/utils';
 
 export const InstallChromium = {
@@ -40,7 +39,10 @@ export const InstallChromium = {
         log: log.write.bind(log),
       };
 
-      const path = build.resolvePathForPlatform(platform, 'x-pack/plugins/screenshotting/chromium');
+      const path = build.resolvePathForPlatform(
+        platform,
+        'node_modules/@kbn/screenshotting-plugin/chromium'
+      );
       await install(logger, pkg, path);
     }
   },

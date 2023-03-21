@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "keystore/**/*",
+    "serve/**/*",
+    "*.js",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    { "path": "../setup_node_env/tsconfig.json" },
+    "@kbn/utils",
+    "@kbn/repo-info",
+    "@kbn/safer-lodash-set",
+    "@kbn/config",
+    "@kbn/dev-utils",
+    "@kbn/apm-config-loader",
+    "@kbn/babel-register",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

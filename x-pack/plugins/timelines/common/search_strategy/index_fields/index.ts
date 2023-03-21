@@ -10,7 +10,7 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesW
 import type { IEsSearchRequest, IEsSearchResponse, FieldSpec } from '@kbn/data-plugin/common';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
-import type { DocValueFields, Maybe } from '../common';
+import type { Maybe } from '../common';
 
 export type BeatFieldsFactoryQueryType = 'beatFields';
 
@@ -40,6 +40,7 @@ export type BeatFields = Record<string, FieldInfo>;
 export interface IndexFieldsStrategyRequestByIndices extends IEsSearchRequest {
   indices: string[];
   onlyCheckIfIndicesExist: boolean;
+  includeUnmapped?: boolean;
 }
 export interface IndexFieldsStrategyRequestById extends IEsSearchRequest {
   dataViewId: string;
@@ -76,5 +77,4 @@ export interface BrowserField {
 export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
 
 export const EMPTY_BROWSER_FIELDS = {};
-export const EMPTY_DOCVALUE_FIELD: DocValueFields[] = [];
 export const EMPTY_INDEX_FIELDS: FieldSpec[] = [];

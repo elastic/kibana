@@ -56,7 +56,7 @@ describe('convertServerResultFieldsToResultFields', () => {
           },
         },
         {
-          foo: SchemaType.Text,
+          foo: { type: SchemaType.Text, capabilities: {} },
         }
       )
     ).toEqual({
@@ -132,8 +132,9 @@ describe('splitResultFields', () => {
           },
         },
         {
-          foo: SchemaType.Text,
-          bar: SchemaType.Number,
+          foo: { type: SchemaType.Text, capabilities: {} },
+          bar: { type: SchemaType.Number, capabilities: {} },
+          nested_object: { type: SchemaType.Nested, capabilities: {} },
         }
       )
     ).toEqual({

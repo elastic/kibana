@@ -1,0 +1,30 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/apm-config-loader",
+    "@kbn/logging",
+    "@kbn/core-http-server",
+    "@kbn/core-http-resources-server",
+    "@kbn/core-rendering-server-internal",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-ui-settings-server-mocks",
+    "@kbn/core-base-server-mocks",
+    "@kbn/core-rendering-server-mocks",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-http-server-internal",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

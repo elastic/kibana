@@ -7,13 +7,16 @@
  */
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import {
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { Observable } from 'rxjs';
 import { CoreTheme } from '@kbn/core/public';
 import { CoreSetup } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { getElasticLogo, defaultTheme$, isValidUrl } from '@kbn/presentation-util-plugin/public';
+import { getElasticLogo, defaultTheme$, isValidUrl } from '@kbn/presentation-util-plugin/common';
 import { ImageRendererConfig } from '../../common/types';
 
 const strings = {

@@ -6,6 +6,8 @@
  */
 
 import { fork } from 'redux-saga/effects';
+import { deleteMonitorEffect } from './delete_monitor';
+import { fetchAgentPoliciesEffect } from '../private_locations';
 import { fetchMonitorDetailsEffect } from './monitor';
 import { fetchMonitorListEffect, fetchUpdatedMonitorEffect } from './monitor_list';
 import {
@@ -49,4 +51,6 @@ export function* rootEffect() {
   yield fork(generateBlockStatsOnPut);
   yield fork(pruneBlockCache);
   yield fork(fetchSyntheticsServiceAllowedEffect);
+  yield fork(fetchAgentPoliciesEffect);
+  yield fork(deleteMonitorEffect);
 }

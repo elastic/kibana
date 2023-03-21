@@ -166,7 +166,7 @@ for (const testSuite of testSuites) {
       steps.push({
         command: `.buildkite/scripts/steps/functional/${CYPRESS_SUITE}.sh`,
         label: group.name,
-        agents: { queue: 'ci-group-6' },
+        agents: { queue: 'n2-4-spot' },
         depends_on: 'build',
         parallelism: testSuite.count,
         concurrency,

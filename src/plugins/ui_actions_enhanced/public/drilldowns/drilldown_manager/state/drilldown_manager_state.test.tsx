@@ -42,7 +42,7 @@ const createDrilldownManagerState = () => {
   const factory1 = new ActionFactory(
     {
       id: 'FACTORY1',
-      CollectConfig: () => ({ render: () => {} }),
+      CollectConfig: () => null,
       supportedTriggers: () => ['TRIGGER1', 'TRIGGER2'],
       isConfigValid: () => true,
       createConfig: () => ({}),
@@ -56,7 +56,7 @@ const createDrilldownManagerState = () => {
   const factory2 = new ActionFactory(
     {
       id: 'FACTORY2',
-      CollectConfig: () => ({ render: () => {} }),
+      CollectConfig: () => null,
       supportedTriggers: () => ['TRIGGER2', 'TRIGGER3'],
       isConfigValid: () => true,
       createConfig: () => ({}),
@@ -70,7 +70,7 @@ const createDrilldownManagerState = () => {
   const factory3 = new ActionFactory(
     {
       id: 'FACTORY3',
-      CollectConfig: () => ({ render: () => {} }),
+      CollectConfig: () => null,
       supportedTriggers: () => ['TRIGGER_MISSING'],
       isConfigValid: () => true,
       createConfig: () => ({}),

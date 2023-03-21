@@ -38,14 +38,15 @@ export const RenderCellValue: React.FC<
   rowIndex,
   colIndex,
   setCellProps,
-  timelineId,
+  key,
+  scopeId,
 }) => {
   const value =
     useGetMappedNonEcsValue({
       data,
       fieldName: columnId,
     })?.reduce((x) => x[0]) ?? '';
-  const draggableId = `${timelineId}-${eventId}-${columnId}-${value}`;
+  const draggableId = `${key}-${eventId}-${columnId}-${value}`;
 
   switch (columnId) {
     case 'signal.rule.severity':
@@ -56,6 +57,7 @@ export const RenderCellValue: React.FC<
           field={columnId}
           id={draggableId}
           value={value}
+          scopeId={scopeId}
         >
           <Severity severity={value} />
         </DefaultDraggable>
@@ -78,7 +80,7 @@ export const RenderCellValue: React.FC<
           rowIndex={rowIndex}
           colIndex={colIndex}
           setCellProps={setCellProps}
-          timelineId={timelineId}
+          scopeId={scopeId}
         />
       );
   }

@@ -5,82 +5,150 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react'; //  useCallback, useRef
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { useAiOpsKibana } from '../kibana_context';
-import { useTimefilter } from './use_time_filter';
-import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
-import { TimeBuckets } from '../../common/time_buckets';
+
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { SavedSearch } from '@kbn/discover-plugin/public';
+import type { Dictionary } from '@kbn/ml-url-state';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+
+import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
+import type { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_app_state';
+import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
+import type { GroupTableItem } from '../components/spike_analysis_table/types';
+
+import { useTimeBuckets } from './use_time_buckets';
+import { useAiopsAppContext } from './use_aiops_app_context';
+
 import { useDocumentCountStats } from './use_document_count_stats';
-import { Dictionary } from './url_state';
-import { DocumentStatsSearchStrategyParams } from '../get_document_stats';
+
+const DEFAULT_BAR_TARGET = 75;
 
 export const useData = (
-  currentDataView: DataView,
-  onUpdate: (params: Dictionary<unknown>) => void
+  {
+    selectedDataView,
+    selectedSavedSearch,
+  }: { selectedDataView: DataView; selectedSavedSearch: SavedSearch | null },
+  aiopsListState: AiOpsIndexBasedAppState,
+  onUpdate: (params: Dictionary<unknown>) => void,
+  selectedSignificantTerm?: SignificantTerm,
+  selectedGroup?: GroupTableItem | null,
+  barTarget: number = DEFAULT_BAR_TARGET
 ) => {
-  const { services } = useAiOpsKibana();
-  const { uiSettings } = services;
-  const [lastRefresh, setLastRefresh] = useState(0);
+  const {
+    uiSettings,
+    data: {
+      query: { filterManager },
+    },
+  } = useAiopsAppContext();
 
-  const _timeBuckets = useMemo(() => {
-    return new TimeBuckets({
-      [UI_SETTINGS.HISTOGRAM_MAX_BARS]: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
-      [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-      dateFormat: uiSettings.get('dateFormat'),
-      'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+  const [lastRefresh, setLastRefresh] = useState(0);
+  const [fieldStatsRequest, setFieldStatsRequest] = useState<
+    DocumentStatsSearchStrategyParams | undefined
+  >();
+
+  /** Prepare required params to pass to search strategy **/
+  const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
+    const searchData = getEsQueryFromSavedSearch({
+      dataView: selectedDataView,
+      uiSettings,
+      savedSearch: selectedSavedSearch,
+      filterManager,
     });
-  }, [uiSettings]);
+
+    if (searchData === undefined || aiopsListState.searchString !== '') {
+      if (aiopsListState.filters) {
+        const globalFilters = filterManager?.getGlobalFilters();
+
+        if (filterManager) filterManager.setFilters(aiopsListState.filters);
+        if (globalFilters) filterManager?.addFilters(globalFilters);
+      }
+      return {
+        searchQuery: aiopsListState.searchQuery,
+        searchString: aiopsListState.searchString,
+        searchQueryLanguage: aiopsListState.searchQueryLanguage,
+      };
+    } else {
+      return {
+        searchQuery: searchData.searchQuery,
+        searchString: searchData.searchString,
+        searchQueryLanguage: searchData.queryLanguage,
+      };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    selectedSavedSearch?.id,
+    selectedDataView.id,
+    aiopsListState.searchString,
+    aiopsListState.searchQueryLanguage,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify({
+      searchQuery: aiopsListState.searchQuery,
+    }),
+    lastRefresh,
+  ]);
+
+  const _timeBuckets = useTimeBuckets();
 
   const timefilter = useTimefilter({
-    timeRangeSelector: currentDataView?.timeFieldName !== undefined,
+    timeRangeSelector: selectedDataView?.timeFieldName !== undefined,
     autoRefreshSelector: true,
   });
 
-  const fieldStatsRequest: DocumentStatsSearchStrategyParams | undefined = useMemo(
-    () => {
-      // Obtain the interval to use for date histogram aggregations
-      // (such as the document count chart). Aim for 75 bars.
-      const buckets = _timeBuckets;
-      const tf = timefilter;
-      if (!buckets || !tf || !currentDataView) return;
-      const activeBounds = tf.getActiveBounds();
-      let earliest: number | undefined;
-      let latest: number | undefined;
-      if (activeBounds !== undefined && currentDataView.timeFieldName !== undefined) {
-        earliest = activeBounds.min?.valueOf();
-        latest = activeBounds.max?.valueOf();
-      }
-      const bounds = tf.getActiveBounds();
-      const BAR_TARGET = 75;
-      buckets.setInterval('auto');
-      if (bounds) {
-        buckets.setBounds(bounds);
-        buckets.setBarTarget(BAR_TARGET);
-      }
-      const aggInterval = buckets.getInterval();
+  const overallStatsRequest = useMemo(() => {
+    return fieldStatsRequest
+      ? {
+          ...fieldStatsRequest,
+          selectedSignificantTerm,
+          selectedGroup,
+          includeSelectedSignificantTerm: false,
+        }
+      : undefined;
+  }, [fieldStatsRequest, selectedSignificantTerm, selectedGroup]);
 
-      return {
-        earliest,
-        latest,
-        intervalMs: aggInterval?.asMilliseconds(),
-        index: currentDataView.title,
-        timeFieldName: currentDataView.timeFieldName,
-        runtimeFieldMap: currentDataView.getRuntimeMappings(),
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [_timeBuckets, timefilter, currentDataView.id, lastRefresh]
+  const selectedSignificantTermStatsRequest = useMemo(() => {
+    return fieldStatsRequest && (selectedSignificantTerm || selectedGroup)
+      ? {
+          ...fieldStatsRequest,
+          selectedSignificantTerm,
+          selectedGroup,
+          includeSelectedSignificantTerm: true,
+        }
+      : undefined;
+  }, [fieldStatsRequest, selectedSignificantTerm, selectedGroup]);
+
+  const documentStats = useDocumentCountStats(
+    overallStatsRequest,
+    selectedSignificantTermStatsRequest,
+    lastRefresh
   );
-  const { docStats } = useDocumentCountStats(fieldStatsRequest, lastRefresh);
+
+  function updateFieldStatsRequest() {
+    const timefilterActiveBounds = timefilter.getActiveBounds();
+    if (timefilterActiveBounds !== undefined) {
+      _timeBuckets.setInterval('auto');
+      _timeBuckets.setBounds(timefilterActiveBounds);
+      _timeBuckets.setBarTarget(barTarget);
+      setFieldStatsRequest({
+        earliest: timefilterActiveBounds.min?.valueOf(),
+        latest: timefilterActiveBounds.max?.valueOf(),
+        intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
+        index: selectedDataView.getIndexPattern(),
+        searchQuery,
+        timeFieldName: selectedDataView.timeFieldName,
+        runtimeFieldMap: selectedDataView.getRuntimeMappings(),
+      });
+      setLastRefresh(Date.now());
+    }
+  }
 
   useEffect(() => {
-    const timeUpdateSubscription = merge(
-      timefilter.getTimeUpdate$(),
+    const timefilterUpdateSubscription = merge(
       timefilter.getAutoRefreshFetch$(),
-      aiopsRefresh$
+      timefilter.getTimeUpdate$(),
+      mlTimefilterRefresh$
     ).subscribe(() => {
       if (onUpdate) {
         onUpdate({
@@ -88,15 +156,39 @@ export const useData = (
           refreshInterval: timefilter.getRefreshInterval(),
         });
       }
-      setLastRefresh(Date.now());
+      updateFieldStatsRequest();
     });
+
+    // This listens just for an initial update of the timefilter to be switched on.
+    const timefilterEnabledSubscription = timefilter.getEnabledUpdated$().subscribe(() => {
+      if (fieldStatsRequest === undefined) {
+        updateFieldStatsRequest();
+      }
+    });
+
     return () => {
-      timeUpdateSubscription.unsubscribe();
+      timefilterUpdateSubscription.unsubscribe();
+      timefilterEnabledSubscription.unsubscribe();
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Ensure request is updated when search changes
+  useEffect(() => {
+    updateFieldStatsRequest();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchString, JSON.stringify(searchQuery)]);
 
   return {
-    docStats,
+    documentStats,
     timefilter,
+    /** Start timestamp filter */
+    earliest: fieldStatsRequest?.earliest,
+    /** End timestamp filter */
+    latest: fieldStatsRequest?.latest,
+    intervalMs: fieldStatsRequest?.intervalMs,
+    searchQueryLanguage,
+    searchString,
+    searchQuery,
   };
 };

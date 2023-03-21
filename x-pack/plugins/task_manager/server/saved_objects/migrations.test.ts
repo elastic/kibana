@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from './migrations';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
@@ -226,6 +226,47 @@ describe('successful migrations', () => {
       expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
     });
   });
+
+  describe('8.5.0', () => {
+    test('adds enabled: true to tasks that are running, claiming, or idle', () => {
+      const migration850 = getMigrations()['8.5.0'];
+      const activeTasks = [
+        getMockData({
+          status: 'running',
+        }),
+        getMockData({
+          status: 'claiming',
+        }),
+        getMockData({
+          status: 'idle',
+        }),
+      ];
+      activeTasks.forEach((task) => {
+        expect(migration850(task, migrationContext)).toEqual({
+          ...task,
+          attributes: {
+            ...task.attributes,
+            enabled: true,
+          },
+        });
+      });
+    });
+
+    test('does not modify tasks that are failed or unrecognized', () => {
+      const migration850 = getMigrations()['8.5.0'];
+      const inactiveTasks = [
+        getMockData({
+          status: 'failed',
+        }),
+        getMockData({
+          status: 'unrecognized',
+        }),
+      ];
+      inactiveTasks.forEach((task) => {
+        expect(migration850(task, migrationContext)).toEqual(task);
+      });
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {
@@ -281,7 +322,7 @@ function getMockData(
       ...overwrites,
     },
     updated_at: getUpdatedAt(),
-    id: uuid.v4(),
+    id: uuidv4(),
     type: 'task',
   };
 }

@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/saved-objects-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "savedObjects",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "data",
+      "dataViews"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact"
+    ]
+  }
+}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { Page } from '@elastic/synthetics';
+import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
 
 export function loginPageProvider({
   page,
@@ -19,10 +20,7 @@ export function loginPageProvider({
 }) {
   return {
     async waitForLoadingToFinish() {
-      while (true) {
-        if ((await page.$('[data-test-subj=kbnLoadingMessage]')) === null) break;
-        await page.waitForTimeout(5 * 1000);
-      }
+      await waitForLoadingToFinish({ page });
     },
     async loginToKibana(usernameT?: 'editor' | 'viewer', passwordT?: string) {
       if (isRemote) {
@@ -35,13 +33,15 @@ export function loginPageProvider({
 
       await page.click('[data-test-subj=loginSubmit]');
 
-      await this.waitForLoadingToFinish();
-      // Close Monitor Management tour added in 8.2.0
       try {
-        await page.click('[data-test-subj=syntheticsManagementTourDismiss]');
+        while (await page.isVisible('[data-test-subj=loginSubmit]')) {
+          await page.waitForTimeout(1000);
+        }
       } catch (e) {
-        return;
+        // ignore
       }
+
+      await waitForLoadingToFinish({ page });
     },
   };
 }

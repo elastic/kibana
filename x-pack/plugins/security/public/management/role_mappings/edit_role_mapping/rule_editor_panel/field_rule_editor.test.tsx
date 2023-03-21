@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiButtonIcon } from '@elastic/eui';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
@@ -44,6 +45,16 @@ function assertValueType(wrapper: ReactWrapper<any, any, any>, index: number, ty
 function assertValue(wrapper: ReactWrapper<any, any, any>, index: number, value: any) {
   const valueField = findTestSubject(wrapper, `fieldRuleEditorValue-${index}`);
   expect(valueField.props()).toMatchObject({ value });
+}
+
+function assertValueTypeDisabled(wrapper: ReactWrapper<any, any, any>, index: number) {
+  const valueTypeField = findTestSubject(wrapper, `fieldRuleEditorValueType-${index}`);
+  expect(valueTypeField.props().disabled).toBeTruthy();
+}
+
+function assertValueDisabled(wrapper: ReactWrapper<any, any, any>, index: number) {
+  const valueField = findTestSubject(wrapper, `fieldRuleEditorValue-${index}`);
+  expect(valueField.props().disabled).toBeTruthy();
 }
 
 describe('FieldRuleEditor', () => {
@@ -228,5 +239,34 @@ describe('FieldRuleEditor', () => {
         username: 0,
       },
     });
+  });
+
+  describe('can render a readonly view', () => {
+    const props = {
+      rule: new FieldRule('username', ['*', 12, null, true]),
+      onChange: jest.fn(),
+      onDelete: jest.fn(),
+      readOnly: true,
+    };
+
+    const wrapper = mountWithIntl(<FieldRuleEditor {...props} />);
+
+    // No add or delete buttons
+    expect(wrapper.find(EuiButtonIcon)).toHaveLength(0);
+
+    // User field disabled
+    const userFields = wrapper.find(`EuiComboBox[data-test-subj~="fieldRuleEditorField-0"]`);
+    expect(userFields).toHaveLength(1);
+    expect(userFields.at(0).props().disabled).toBeTruthy();
+
+    // All type and value fields disabled
+    assertValueTypeDisabled(wrapper, 0); // text
+    assertValueDisabled(wrapper, 0);
+    assertValueTypeDisabled(wrapper, 1); // number
+    assertValueDisabled(wrapper, 1);
+    assertValueTypeDisabled(wrapper, 2); // null
+    assertValueDisabled(wrapper, 2);
+    assertValueTypeDisabled(wrapper, 3); // bool
+    assertValueDisabled(wrapper, 3);
   });
 });

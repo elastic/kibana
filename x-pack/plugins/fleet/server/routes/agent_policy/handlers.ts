@@ -6,7 +6,12 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RequestHandler, ResponseHeaders } from '@kbn/core/server';
+import type {
+  RequestHandler,
+  ResponseHeaders,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
 
@@ -24,6 +29,8 @@ import type {
   GetFullAgentPolicyRequestSchema,
   GetK8sManifestRequestSchema,
   FleetRequestHandler,
+  BulkGetAgentPoliciesRequestSchema,
+  AgentPolicy,
 } from '../../types';
 
 import type {
@@ -37,9 +44,28 @@ import type {
   GetFullAgentPolicyResponse,
   GetFullAgentConfigMapResponse,
   GetFullAgentManifestResponse,
-} from '../../../common';
-import { defaultIngestErrorHandler } from '../../errors';
+  BulkGetAgentPoliciesResponse,
+} from '../../../common/types';
+import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
+
+async function populateAssignedAgentsCount(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  agentPolicies: AgentPolicy[]
+) {
+  await pMap(
+    agentPolicies,
+    (agentPolicy: GetAgentPoliciesResponseItem) =>
+      getAgentsByKuery(esClient, soClient, {
+        showInactive: false,
+        perPage: 0,
+        page: 1,
+        kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
+      }).then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
+    { concurrency: 10 }
+  );
+}
 
 export const getAgentPoliciesHandler: FleetRequestHandler<
   undefined,
@@ -47,36 +73,64 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { full: withPackagePolicies = false, ...restOfQuery } = request.query;
+  const { full: withPackagePolicies = false, noAgentCount = false, ...restOfQuery } = request.query;
   try {
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
       withPackagePolicies,
       ...restOfQuery,
     });
+
     const body: GetAgentPoliciesResponse = {
       items,
       total,
       page,
       perPage,
     };
+    if (!noAgentCount) {
+      await populateAssignedAgentsCount(esClient, soClient, items);
+    } else {
+      items.forEach((item) => (item.agents = 0));
+    }
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
 
-    await pMap(
+export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkGetAgentPoliciesRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const soClient = fleetContext.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
+  try {
+    const items = await agentPolicyService.getByIDs(soClient, ids, {
+      withPackagePolicies,
+      ignoreMissing,
+    });
+    const body: BulkGetAgentPoliciesResponse = {
       items,
-      (agentPolicy: GetAgentPoliciesResponseItem) =>
-        getAgentsByKuery(esClient, {
-          showInactive: false,
-          perPage: 0,
-          page: 1,
-          kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
-        }).then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
-      { concurrency: 10 }
-    );
+    };
+
+    await populateAssignedAgentsCount(esClient, soClient, items);
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    if (error instanceof AgentPolicyNotFoundError) {
+      return response.notFound({
+        body: {
+          message: error.message,
+        },
+      });
+    }
+
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -84,10 +138,12 @@ export const getOneAgentPolicyHandler: RequestHandler<
   TypeOf<typeof GetOneAgentPolicyRequestSchema.params>
 > = async (context, request, response) => {
   const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
   try {
     const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
     if (agentPolicy) {
+      await populateAssignedAgentsCount(esClient, soClient, [agentPolicy]);
       const body: GetOneAgentPolicyResponse = {
         item: agentPolicy,
       };
@@ -101,7 +157,7 @@ export const getOneAgentPolicyHandler: RequestHandler<
       });
     }
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -112,7 +168,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
@@ -137,7 +193,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -170,7 +226,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -199,7 +255,7 @@ export const copyAgentPolicyHandler: RequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -221,7 +277,7 @@ export const deleteAgentPoliciesHandler: RequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -230,7 +286,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
   TypeOf<typeof GetFullAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = fleetContext.internalSoClient;
 
   if (request.query.kubernetes === true) {
     try {
@@ -253,7 +309,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   } else {
     try {
@@ -276,7 +332,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   }
 };
@@ -286,7 +342,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   TypeOf<typeof GetFullAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = fleetContext.internalSoClient;
   const {
     params: { agentPolicyId },
   } = request;
@@ -302,7 +358,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         const body = fullAgentConfigMap;
         const headers: ResponseHeaders = {
           'content-type': 'text/x-yaml',
-          'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yaml"`,
+          'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yml"`,
         };
         return response.ok({
           body,
@@ -315,7 +371,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   } else {
     try {
@@ -339,7 +395,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   }
 };
@@ -366,7 +422,7 @@ export const getK8sManifest: FleetRequestHandler<
       });
     }
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -382,7 +438,7 @@ export const downloadK8sManifest: FleetRequestHandler<
       const body = fullAgentManifest;
       const headers: ResponseHeaders = {
         'content-type': 'text/x-yaml',
-        'content-disposition': `attachment; filename="elastic-agent-managed-kubernetes.yaml"`,
+        'content-disposition': `attachment; filename="elastic-agent-managed-kubernetes.yml"`,
       };
       return response.ok({
         body,
@@ -395,6 +451,6 @@ export const downloadK8sManifest: FleetRequestHandler<
       });
     }
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

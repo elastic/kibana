@@ -20,7 +20,9 @@ export const AgentStatusBadges: React.FC<{
   agentStatus: { [k in SimplifiedAgentStatus]: number };
 }> = memo(({ agentStatus, showInactive }) => {
   const agentStatuses = useMemo(() => {
-    return AGENT_STATUSES.filter((status) => (showInactive ? true : status !== 'inactive'));
+    return AGENT_STATUSES.filter((status) =>
+      showInactive ? true : status !== 'inactive' && status !== 'unenrolled'
+    );
   }, [showInactive]);
 
   return (

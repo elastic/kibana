@@ -11,11 +11,14 @@ import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '../lib';
 import { verifyAccessAndContext, rewriteRule, handleDisabledApiKeysError } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import { snoozeScheduleSchema } from './snooze_rule';
+import { scheduleIdsSchema } from './unsnooze_rule';
 
 const ruleActionSchema = schema.object({
   group: schema.string(),
   id: schema.string(),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  uuid: schema.maybe(schema.string()),
 });
 
 const operationsSchema = schema.arrayOf(
@@ -54,6 +57,20 @@ const operationsSchema = schema.arrayOf(
           schema.literal('onThrottleInterval'),
         ])
       ),
+    }),
+    schema.object({
+      operation: schema.oneOf([schema.literal('set')]),
+      field: schema.literal('snoozeSchedule'),
+      value: snoozeScheduleSchema,
+    }),
+    schema.object({
+      operation: schema.oneOf([schema.literal('delete')]),
+      field: schema.literal('snoozeSchedule'),
+      value: schema.maybe(scheduleIdsSchema),
+    }),
+    schema.object({
+      operation: schema.literal('set'),
+      field: schema.literal('apiKey'),
     }),
   ]),
   { minSize: 1 }

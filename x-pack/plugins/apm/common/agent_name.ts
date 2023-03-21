@@ -6,6 +6,7 @@
  */
 
 import { AgentName } from '../typings/es_schemas/ui/fields/agent';
+import { ServerlessType } from './serverless';
 
 /*
  * Agent names can be any string. This list only defines the official agents
@@ -41,8 +42,12 @@ export const AGENT_NAMES: AgentName[] = [
   'python',
   'ruby',
   'rum-js',
+  'android/java',
   ...OPEN_TELEMETRY_AGENT_NAMES,
 ];
+
+export const isOpenTelemetryAgentName = (agentName: AgentName) =>
+  OPEN_TELEMETRY_AGENT_NAMES.includes(agentName);
 
 export const JAVA_AGENT_NAMES: AgentName[] = ['java', 'opentelemetry/java'];
 
@@ -64,33 +69,34 @@ export function isRumAgentName(
   return RUM_AGENT_NAMES.includes(agentName! as AgentName);
 }
 
-export function normalizeAgentName<T extends string | undefined>(
-  agentName: T
-): T | string {
-  if (isRumAgentName(agentName)) {
-    return 'rum-js';
-  }
-
-  if (isJavaAgentName(agentName)) {
-    return 'java';
-  }
-
-  if (isIosAgentName(agentName)) {
-    return 'ios';
-  }
-
-  return agentName;
+export function isMobileAgentName(agentName?: string) {
+  return isIosAgentName(agentName) || isAndroidAgentName(agentName);
 }
 
 export function isIosAgentName(agentName?: string) {
   const lowercased = agentName && agentName.toLowerCase();
-  return lowercased === 'ios/swift' || lowercased === 'opentelemetry/swift';
+  return lowercased === 'ios/swift';
 }
 
 export function isJRubyAgent(agentName?: string, runtimeName?: string) {
   return agentName === 'ruby' && runtimeName?.toLowerCase() === 'jruby';
 }
 
-export function isServerlessAgent(runtimeName?: string) {
-  return runtimeName?.toLowerCase().startsWith('aws_lambda');
+export function isServerlessAgent(serverlessType?: ServerlessType) {
+  return (
+    isAWSLambdaAgent(serverlessType) || isAzureFunctionsAgent(serverlessType)
+  );
+}
+
+export function isAWSLambdaAgent(serverlessType?: ServerlessType) {
+  return serverlessType === ServerlessType.AWS_LAMBDA;
+}
+
+export function isAzureFunctionsAgent(serverlessType?: ServerlessType) {
+  return serverlessType === ServerlessType.AZURE_FUNCTIONS;
+}
+
+export function isAndroidAgentName(agentName?: string) {
+  const lowercased = agentName && agentName.toLowerCase();
+  return lowercased === 'android/java';
 }

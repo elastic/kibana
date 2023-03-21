@@ -10,11 +10,15 @@ import type { KbnClient } from '@kbn/test';
 import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { clone, merge } from 'lodash';
 import type { DeepPartial } from 'utility-types';
+import type { GetMetadataListRequestQuery } from '../../../common/endpoint/schema/metadata';
 import { resolvePathVariables } from '../../../public/common/utils/resolve_path_variables';
-import { HOST_METADATA_GET_ROUTE, METADATA_DATASTREAM } from '../../../common/endpoint/constants';
-import type { HostInfo, HostMetadata } from '../../../common/endpoint/types';
+import {
+  HOST_METADATA_GET_ROUTE,
+  HOST_METADATA_LIST_ROUTE,
+  METADATA_DATASTREAM,
+} from '../../../common/endpoint/constants';
+import type { HostInfo, HostMetadata, MetadataListResponse } from '../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
-import { checkInFleetAgent } from './fleet_services';
 
 const endpointGenerator = new EndpointDocGenerator();
 
@@ -30,21 +34,34 @@ export const fetchEndpointMetadata = async (
   ).data;
 };
 
+export const fetchEndpointMetadataList = async (
+  kbnClient: KbnClient,
+  { page = 0, pageSize = 100, ...otherOptions }: Partial<GetMetadataListRequestQuery> = {}
+): Promise<MetadataListResponse> => {
+  return (
+    await kbnClient.request<MetadataListResponse>({
+      method: 'GET',
+      path: HOST_METADATA_LIST_ROUTE,
+      query: {
+        page,
+        pageSize,
+        ...otherOptions,
+      },
+    })
+  ).data;
+};
+
 export const sendEndpointMetadataUpdate = async (
   esClient: Client,
   agentId: string,
-  overrides: DeepPartial<HostMetadata> = {},
-  { checkInAgent = true }: Partial<{ checkInAgent: boolean }> = {}
+  overrides: DeepPartial<HostMetadata> = {}
 ): Promise<WriteResponseBase> => {
   const lastStreamedDoc = await fetchLastStreamedEndpointUpdate(esClient, agentId);
 
   if (!lastStreamedDoc) {
-    throw new Error(`An endpoint with agent.id of [${agentId}] not found!`);
-  }
-
-  if (checkInAgent) {
-    // Trigger an agent checkin and just let it run
-    checkInFleetAgent(esClient, agentId);
+    throw new Error(
+      `An endpoint with agent.id of [${agentId}] not found! [sendEndpointMetadataUpdate()]`
+    );
   }
 
   const generatedHostMetadataDoc = clone(endpointGenerator.generateHostMetadata());

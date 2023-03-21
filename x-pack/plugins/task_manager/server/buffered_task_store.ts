@@ -15,15 +15,12 @@ import { unwrapPromise } from './lib/result_type';
 const DEFAULT_BUFFER_MAX_DURATION = 50;
 
 export class BufferedTaskStore implements Updatable {
-  private bufferedUpdate: Operation<ConcreteTaskInstance, Error>;
+  private bufferedUpdate: Operation<ConcreteTaskInstance>;
   constructor(private readonly taskStore: TaskStore, options: BufferOptions) {
-    this.bufferedUpdate = createBuffer<ConcreteTaskInstance, Error>(
-      (docs) => taskStore.bulkUpdate(docs),
-      {
-        bufferMaxDuration: DEFAULT_BUFFER_MAX_DURATION,
-        ...options,
-      }
-    );
+    this.bufferedUpdate = createBuffer<ConcreteTaskInstance>((docs) => taskStore.bulkUpdate(docs), {
+      bufferMaxDuration: DEFAULT_BUFFER_MAX_DURATION,
+      ...options,
+    });
   }
 
   public async update(doc: ConcreteTaskInstance): Promise<ConcreteTaskInstance> {

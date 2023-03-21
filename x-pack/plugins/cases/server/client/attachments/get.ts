@@ -4,19 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
-import {
+import type {
   AlertResponse,
   AllCommentsResponse,
-  AllCommentsResponseRt,
   AttributesTypeAlerts,
   CommentResponse,
-  CommentResponseRt,
   CommentsResponse,
-  CommentsResponseRt,
-  FindQueryParams,
 } from '../../../common/api';
+import { AllCommentsResponseRt, CommentResponseRt, CommentsResponseRt } from '../../../common/api';
 import {
   defaultSortField,
   transformComments,
@@ -26,53 +23,12 @@ import {
 } from '../../common/utils';
 import { createCaseError } from '../../common/error';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
-import { CasesClientArgs } from '../types';
+import type { CasesClientArgs } from '../types';
 import { combineFilters, stringToKueryNode } from '../utils';
 import { Operations } from '../../authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
-import { CasesClient } from '../client';
-
-/**
- * Parameters for finding attachments of a case
- */
-export interface FindArgs {
-  /**
-   * The case ID for finding associated attachments
-   */
-  caseID: string;
-  /**
-   * Optional parameters for filtering the returned attachments
-   */
-  queryParams?: FindQueryParams;
-}
-
-/**
- * Parameters for retrieving all attachments of a case
- */
-export interface GetAllArgs {
-  /**
-   * The case ID to retrieve all attachments for
-   */
-  caseID: string;
-}
-
-export interface GetArgs {
-  /**
-   * The ID of the case to retrieve an attachment from
-   */
-  caseID: string;
-  /**
-   * The ID of the attachment to retrieve
-   */
-  attachmentID: string;
-}
-
-export interface GetAllAlertsAttachToCase {
-  /**
-   * The ID of the case to retrieve the alerts from
-   */
-  caseId: string;
-}
+import type { CasesClient } from '../client';
+import type { FindArgs, GetAllAlertsAttachToCase, GetAllArgs, GetArgs } from './types';
 
 const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>): AlertResponse =>
   alerts.reduce((acc: AlertResponse, alert) => {
@@ -94,15 +50,17 @@ const normalizeAlertResponse = (alerts: Array<SavedObject<AttributesTypeAlerts>>
 
 /**
  * Retrieves all alerts attached to a specific case.
- *
- * @ignore
  */
 export const getAllAlertsAttachToCase = async (
   { caseId }: GetAllAlertsAttachToCase,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<AlertResponse> => {
-  const { unsecuredSavedObjectsClient, authorization, attachmentService, logger } = clientArgs;
+  const {
+    authorization,
+    services: { attachmentService },
+    logger,
+  } = clientArgs;
 
   try {
     // This will perform an authorization check to ensure the user has access to the parent case
@@ -114,8 +72,7 @@ export const getAllAlertsAttachToCase = async (
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
 
-    const alerts = await attachmentService.getAllAlertsAttachToCase({
-      unsecuredSavedObjectsClient,
+    const alerts = await attachmentService.getter.getAllAlertsAttachToCase({
       caseId: theCase.id,
       filter: authorizationFilter,
     });
@@ -139,14 +96,17 @@ export const getAllAlertsAttachToCase = async (
 
 /**
  * Retrieves the attachments for a case entity. This support pagination.
- *
- * @ignore
  */
 export async function find(
   { caseID, queryParams }: FindArgs,
   clientArgs: CasesClientArgs
 ): Promise<CommentsResponse> {
-  const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
@@ -211,18 +171,19 @@ export async function find(
 
 /**
  * Retrieves a single attachment by its ID.
- *
- * @ignore
  */
 export async function get(
   { attachmentID, caseID }: GetArgs,
   clientArgs: CasesClientArgs
 ): Promise<CommentResponse> {
-  const { attachmentService, unsecuredSavedObjectsClient, logger, authorization } = clientArgs;
+  const {
+    services: { attachmentService },
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
-    const comment = await attachmentService.get({
-      unsecuredSavedObjectsClient,
+    const comment = await attachmentService.getter.get({
       attachmentId: attachmentID,
     });
 
@@ -243,14 +204,16 @@ export async function get(
 
 /**
  * Retrieves all the attachments for a case.
- *
- * @ignore
  */
 export async function getAll(
   { caseID }: GetAllArgs,
   clientArgs: CasesClientArgs
 ): Promise<AllCommentsResponse> {
-  const { caseService, logger, authorization } = clientArgs;
+  const {
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
 
   try {
     const { filter, ensureSavedObjectsAreAuthorized } = await authorization.getAuthorizationFilter(

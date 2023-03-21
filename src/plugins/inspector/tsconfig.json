@@ -1,15 +1,19 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": ["common/**/*", "public/**/*", "index.ts"],
-  "references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../share/tsconfig.json" }
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/share-plugin",
+    "@kbn/i18n",
+    "@kbn/test-jest-helpers",
+    "@kbn/i18n-react",
+    "@kbn/monaco",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

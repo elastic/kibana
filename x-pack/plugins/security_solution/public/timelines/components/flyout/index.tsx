@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { EuiFocusTrap, EuiOutsideClickDetector } from '@elastic/eui';
 import React, { useEffect, useMemo, useCallback, useState, useRef } from 'react';
-import { useDispatch } from 'react-redux';
 
 import type { AppLeaveHandler } from '@kbn/core/public';
-import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
+import type { TimelineId } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { timelineActions } from '../../store/timeline';
 import { FlyoutBottomBar } from './bottom_bar';
 import { Pane } from './pane';
 import { getTimelineShowStatusByIdSelector } from './selectors';
+import { useTimelineSavePrompt } from '../../../common/hooks/timeline/use_timeline_save_prompt';
 
 interface OwnProps {
   timelineId: TimelineId;
@@ -26,14 +24,8 @@ interface OwnProps {
 type VoidFunc = () => void;
 
 const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
-  const dispatch = useDispatch();
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-  const {
-    activeTab,
-    show,
-    status: timelineStatus,
-    updated,
-  } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
+  const { show } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
 
   const [focusOwnership, setFocusOwnership] = useState(true);
   const [triggerOnBlur, setTriggerOnBlur] = useState(true);
@@ -59,6 +51,8 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
     }
   }, []);
 
+  useTimelineSavePrompt(timelineId, onAppLeave);
+
   useEffect(() => {
     if (searchRef.current != null) {
       if (callbackRef.current !== null) {
@@ -74,55 +68,13 @@ const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
     };
   }, [handleSearch, triggerOnBlur]);
 
-  useEffect(() => {
-    onAppLeave((actions, nextAppId) => {
-      if (show) {
-        dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
-      }
-      // Confirm when the user has made any changes to a timeline
-      if (
-        !(nextAppId ?? '').includes('securitySolution') &&
-        timelineStatus === TimelineStatus.draft &&
-        updated != null
-      ) {
-        const showSaveTimelineModal = () => {
-          dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: true }));
-          dispatch(
-            timelineActions.setActiveTabTimeline({
-              id: TimelineId.active,
-              activeTab: TimelineTabs.query,
-            })
-          );
-          dispatch(
-            timelineActions.toggleModalSaveTimeline({
-              id: TimelineId.active,
-              showModalSaveTimeline: true,
-            })
-          );
-        };
-
-        return actions.confirm(
-          i18n.translate('xpack.securitySolution.timeline.unsavedWorkMessage', {
-            defaultMessage: 'Leave Timeline with unsaved work?',
-          }),
-          i18n.translate('xpack.securitySolution.timeline.unsavedWorkTitle', {
-            defaultMessage: 'Unsaved changes',
-          }),
-          showSaveTimelineModal
-        );
-      } else {
-        return actions.default();
-      }
-    });
-  }, [dispatch, onAppLeave, show, timelineStatus, updated]);
-
   return (
     <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
       <>
         <EuiFocusTrap disabled={!focusOwnership}>
           <Pane timelineId={timelineId} visible={show} />
         </EuiFocusTrap>
-        <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
+        <FlyoutBottomBar showTimelineHeaderPanel={!show} timelineId={timelineId} />
       </>
     </EuiOutsideClickDetector>
   );

@@ -6,10 +6,10 @@
  */
 
 import React, { Component, CSSProperties } from 'react';
-// @ts-expect-error
+import { CommonProps } from '@elastic/eui';
 import { styleSvg, buildSrcUrl } from '../../symbol_utils';
 
-interface Props {
+interface Props extends CommonProps {
   symbolId: string;
   fill?: string;
   stroke?: string;

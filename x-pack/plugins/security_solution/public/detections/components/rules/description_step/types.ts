@@ -23,6 +23,7 @@ export interface BuildQueryBarDescription {
   savedId: string;
   indexPatterns?: DataViewBase;
   queryLabel?: string;
+  savedQueryName?: string;
 }
 
 export interface BuildThreatDescription {

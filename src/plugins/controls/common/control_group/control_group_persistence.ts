@@ -9,7 +9,7 @@
 import { SerializableRecord } from '@kbn/utility-types';
 import deepEqual from 'fast-deep-equal';
 
-import { pick } from 'lodash';
+import { pick, omit, xor } from 'lodash';
 import { ControlGroupInput } from '..';
 import {
   DEFAULT_CONTROL_GROW,
@@ -17,6 +17,10 @@ import {
   DEFAULT_CONTROL_WIDTH,
 } from './control_group_constants';
 import { PersistableControlGroupInput, RawControlGroupAttributes } from './types';
+import {
+  ControlPanelDiffSystems,
+  genericControlPanelDiffSystem,
+} from './control_group_panel_diff_system';
 
 const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
   if (!jsonString && typeof jsonString !== 'string') return;
@@ -54,8 +58,38 @@ export const persistableControlGroupInputIsEqual = (
     ...defaultInput,
     ...pick(b, ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']),
   };
-  if (deepEqual(inputA, inputB)) return true;
+
+  if (
+    getPanelsAreEqual(inputA.panels, inputB.panels) &&
+    deepEqual(omit(inputA, 'panels'), omit(inputB, 'panels'))
+  )
+    return true;
+
   return false;
+};
+
+const getPanelsAreEqual = (
+  originalPanels: PersistableControlGroupInput['panels'],
+  newPanels: PersistableControlGroupInput['panels']
+) => {
+  const originalPanelIds = Object.keys(originalPanels);
+  const newPanelIds = Object.keys(newPanels);
+  const panelIdDiff = xor(originalPanelIds, newPanelIds);
+  if (panelIdDiff.length > 0) {
+    return false;
+  }
+
+  for (const panelId of newPanelIds) {
+    const newPanelType = newPanels[panelId].type;
+    const panelIsEqual = ControlPanelDiffSystems[newPanelType]
+      ? ControlPanelDiffSystems[newPanelType].getPanelIsEqual(
+          originalPanels[panelId],
+          newPanels[panelId]
+        )
+      : genericControlPanelDiffSystem.getPanelIsEqual(originalPanels[panelId], newPanels[panelId]);
+    if (!panelIsEqual) return false;
+  }
+  return true;
 };
 
 export const controlGroupInputToRawControlGroupAttributes = (

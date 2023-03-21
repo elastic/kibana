@@ -117,7 +117,7 @@ export const getStdDeviationMetricAgg = () => {
     getValue(agg, bucket) {
       const showBounds = agg.getParam('showBounds');
       if (showBounds === false) {
-        return bucket[agg.id].std_deviation;
+        return bucket[agg.id]?.std_deviation;
       }
       return get(bucket[agg.parentId], agg.valProp());
     },

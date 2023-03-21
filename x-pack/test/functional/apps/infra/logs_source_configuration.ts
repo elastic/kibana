@@ -16,26 +16,30 @@ const COMMON_REQUEST_HEADERS = {
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
   const logsUi = getService('logsUi');
   const infraSourceConfigurationForm = getService('infraSourceConfigurationForm');
   const pageObjects = getPageObjects(['common', 'header', 'infraLogs']);
   const retry = getService('retry');
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
 
   describe('Logs Source Configuration', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('Allows indices configuration', () => {
-      const logPosition = {
-        start: DATES.metricsAndLogs.stream.startWithData,
-        end: DATES.metricsAndLogs.stream.endWithData,
+      const logFilter = {
+        timeRange: {
+          from: DATES.metricsAndLogs.stream.startWithData,
+          to: DATES.metricsAndLogs.stream.endWithData,
+        },
       };
-      const formattedLocalStart = new Date(logPosition.start).toLocaleDateString('en-US', {
+      const formattedLocalStart = new Date(logFilter.timeRange.from).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -46,6 +50,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      });
+
+      it('renders the correct page title', async () => {
+        await pageObjects.infraLogs.navigateToTab('settings');
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        retry.try(async () => {
+          const documentTitle = await browser.getTitle();
+          expect(documentTitle).to.contain('Settings - Logs - Observability - Elastic');
+        });
       });
 
       it('can change the log indices to a pattern that matches nothing', async () => {
@@ -93,7 +108,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the default log columns with their headers', async () => {
-        await logsUi.logStreamPage.navigateTo({ logPosition });
+        await logsUi.logStreamPage.navigateTo({ logFilter });
 
         await retry.try(async () => {
           const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();
@@ -113,7 +128,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('records telemetry for logs', async () => {
-        await logsUi.logStreamPage.navigateTo({ logPosition });
+        await logsUi.logStreamPage.navigateTo({ logFilter });
 
         await logsUi.logStreamPage.getStreamEntries();
 
@@ -148,7 +163,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders the changed log columns with their headers', async () => {
-        await logsUi.logStreamPage.navigateTo({ logPosition });
+        await logsUi.logStreamPage.navigateTo({ logFilter });
 
         await retry.try(async () => {
           const columnHeaderLabels = await logsUi.logStreamPage.getColumnHeaderLabels();

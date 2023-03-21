@@ -9,15 +9,16 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import type { EqlRuleParams } from '../../schemas/rule_schemas';
-import { eqlRuleParams } from '../../schemas/rule_schemas';
-import { eqlExecutor } from '../../signals/executors/eql';
+import type { EqlRuleParams } from '../../rule_schema';
+import { eqlRuleParams } from '../../rule_schema';
+import { eqlExecutor } from './eql';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
-import { validateImmutable, validateIndexPatterns } from '../utils';
+import { validateIndexPatterns } from '../utils';
+
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, logger, version } = createOptions;
+  const { version } = createOptions;
   return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
@@ -40,7 +41,6 @@ export const createEqlAlertType = (
          * @returns mutatedRuleParams
          */
         validateMutatedParams: (mutatedRuleParams) => {
-          validateImmutable(mutatedRuleParams.immutable);
           validateIndexPatterns(mutatedRuleParams.index);
 
           return mutatedRuleParams;
@@ -63,36 +63,37 @@ export const createEqlAlertType = (
     async executor(execOptions) {
       const {
         runOpts: {
-          inputIndex,
-          runtimeMappings,
-          bulkCreate,
-          exceptionItems,
           completeRule,
           tuple,
+          inputIndex,
+          runtimeMappings,
+          ruleExecutionLogger,
+          bulkCreate,
           wrapHits,
           wrapSequences,
           primaryTimestamp,
           secondaryTimestamp,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         state,
       } = execOptions;
-
       const result = await eqlExecutor({
+        completeRule,
+        tuple,
         inputIndex,
         runtimeMappings,
-        bulkCreate,
-        exceptionItems,
-        experimentalFeatures,
-        logger,
-        completeRule,
+        ruleExecutionLogger,
         services,
-        tuple,
         version,
+        bulkCreate,
         wrapHits,
         wrapSequences,
         primaryTimestamp,
         secondaryTimestamp,
+        exceptionFilter,
+        unprocessedExceptions,
       });
       return { ...result, state };
     },

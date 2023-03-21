@@ -15,6 +15,9 @@ const APM_SERVER_URL = 'https://142fea2d3047486e925eb8b223559cae.apm.europe-west
 const APM_PUBLIC_TOKEN = 'pWFFEym07AKBBhUE2i';
 const AGGS_SHARD_DELAY = process.env.LOAD_TESTING_SHARD_DELAY;
 const DISABLE_PLUGINS = process.env.LOAD_TESTING_DISABLE_PLUGINS;
+const journeyName = process.env.GATLING_SIMULATIONS;
+const testBuildId = process.env.BUILD_ID;
+const branchName = process.env.KIBANA_BRANCH;
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
@@ -60,12 +63,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ELASTIC_APM_SERVER_URL: APM_SERVER_URL,
         ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
         ELASTIC_APM_GLOBAL_LABELS: Object.entries({
-          simulation: process.env.GATLING_SIMULATIONS
-            ? process.env.GATLING_SIMULATIONS
-            : 'unknown simulation',
+          journeyName,
+          testBuildId,
+          branchName,
         })
-          .filter(([, v]) => !!v)
-          .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), ''),
+          .flatMap(([key, value]) => (value == null ? [] : `${key}=${value}`))
+          .join(','),
       },
       // delay shutdown by 150 seconds to ensure that APM can report the data it collects during test execution
       delayShutdown: 150_000,

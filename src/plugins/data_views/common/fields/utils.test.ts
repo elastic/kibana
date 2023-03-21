@@ -16,8 +16,8 @@ describe('shortenDottedString', () => {
   test('should ignore non-string values', () => {
     const obj = { key: 'val' };
 
-    expect(shortenDottedString(true)).toBe(true);
-    expect(shortenDottedString(123)).toBe(123);
-    expect(shortenDottedString(obj)).toBe(obj);
+    expect(shortenDottedString(true as unknown as string)).toBe(true);
+    expect(shortenDottedString(123 as unknown as string)).toBe(123);
+    expect(shortenDottedString(obj as unknown as string)).toBe(obj);
   });
 });

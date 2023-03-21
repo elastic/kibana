@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('lens metric chart', async () => {
-      await PageObjects.lens.switchToVisualization('lnsMetric');
+      await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
       await a11y.testAppSnapshot();
     });
 
@@ -157,6 +157,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'median',
         field: 'bytes',
       });
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens XY chart with reference line layer', async () => {
+      await PageObjects.lens.createLayer('referenceLine');
+      await a11y.testAppSnapshot();
+    });
+
+    it('lens XY chart with annotations layer', async () => {
+      await PageObjects.lens.createLayer('annotations');
       await a11y.testAppSnapshot();
     });
 

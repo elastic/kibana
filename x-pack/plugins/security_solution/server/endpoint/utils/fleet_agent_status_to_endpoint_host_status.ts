@@ -17,7 +17,6 @@ const STATUS_MAPPING: ReadonlyMap<AgentStatus, HostStatus> = new Map([
   ['unenrolling', HostStatus.UPDATING],
   ['enrolling', HostStatus.UPDATING],
   ['updating', HostStatus.UPDATING],
-  ['warning', HostStatus.UNHEALTHY],
   ['error', HostStatus.UNHEALTHY],
   ['degraded', HostStatus.UNHEALTHY],
 ]);

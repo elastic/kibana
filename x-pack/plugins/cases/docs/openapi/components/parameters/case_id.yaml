@@ -4,4 +4,4 @@ description: The identifier for the case. To retrieve case IDs, use the find cas
 required: true
 schema:
   type: string
-  example: '9c235210-6834-11ea-a78c-6ffb38a34414'
+  example: 9c235210-6834-11ea-a78c-6ffb38a34414

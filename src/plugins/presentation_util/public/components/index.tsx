@@ -8,7 +8,6 @@
 
 import React, { Suspense, ComponentType, ReactElement, Ref } from 'react';
 import { EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
-import { ReduxEmbeddableWrapperType } from './redux_embeddables/redux_embeddable_wrapper';
 
 /**
  * A HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors.
@@ -39,13 +38,11 @@ export const LazySavedObjectSaveModalDashboard = React.lazy(
   () => import('./saved_object_save_modal_dashboard')
 );
 
-export const LazyReduxEmbeddableWrapper = React.lazy(
-  () => import('./redux_embeddables/redux_embeddable_wrapper')
-) as ReduxEmbeddableWrapperType; // Lazy component needs to be casted due to generic type props
-
 export const LazyDataViewPicker = React.lazy(() => import('./data_view_picker/data_view_picker'));
 
 export const LazyFieldPicker = React.lazy(() => import('./field_picker/field_picker'));
+
+export { FloatingActions } from './floating_actions/floating_actions';
 
 /**
  * A lazily-loaded ExpressionInput component.

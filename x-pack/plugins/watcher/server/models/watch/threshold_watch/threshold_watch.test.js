@@ -137,7 +137,7 @@ describe('ThresholdWatch', () => {
     beforeEach(() => {
       upstreamJson = {
         id: 'id',
-        watchStatusJson: {},
+        watchStatusJson: { state: { active: true } },
         watchJson: {
           foo: { bar: 'baz' },
           metadata: {

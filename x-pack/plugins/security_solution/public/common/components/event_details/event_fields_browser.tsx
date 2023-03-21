@@ -8,7 +8,6 @@
 import { getOr, noop, sortBy } from 'lodash/fp';
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { rgba } from 'polished';
 import styled from 'styled-components';
 import {
@@ -19,8 +18,11 @@ import {
   onKeyDownFocusHandler,
 } from '@kbn/timelines-plugin/public';
 
+import { isInTableScope, isTimelineScope } from '../../../helpers';
+import { tableDefaults } from '../../store/data_table/defaults';
+import { dataTableSelectors } from '../../store/data_table';
 import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineSelectors } from '../../../timelines/store/timeline';
 import type { BrowserFields } from '../../containers/source';
 import { getAllFieldsByName } from '../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
@@ -29,14 +31,14 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { getColumns } from './columns';
 import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import type { ColumnHeaderOptions, TimelineTabs } from '../../../../common/types/timeline';
+import type { TimelineTabs } from '../../../../common/types/timeline';
 
 interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   eventId: string;
   isDraggable?: boolean;
-  timelineId: string;
+  scopeId: string;
   timelineTabType: TimelineTabs | 'flyout';
   isReadOnly?: boolean;
 }
@@ -89,30 +91,22 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
     font: ${({ theme }) => theme.eui.euiFont};
   } */
 
+  .inlineActions {
+    opacity: 0;
+  }
+
   .eventFieldsTable__tableRow {
     font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
     font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 
-    .hoverActions-active {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
-        opacity: 1;
-      }
+    .inlineActions-popoverOpen {
+      opacity: 1;
     }
 
     &:hover {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
+      .inlineActions {
         opacity: 1;
       }
-    }
-    .timelines__hoverActionButton,
-    .securitySolution__hoverActionButton {
-      // TODO: Using this logic from discover
-      /* @include euiBreakpoint('m', 'l', 'xl') {
-        opacity: 0;
-      } */
-      opacity: 0;
     }
   }
 
@@ -166,10 +160,21 @@ const useFieldBrowserPagination = () => {
 
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
-  ({ browserFields, data, eventId, isDraggable, timelineTabType, timelineId, isReadOnly }) => {
+  ({ browserFields, data, eventId, isDraggable, timelineTabType, scopeId, isReadOnly }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
-    const dispatch = useDispatch();
-    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const getScope = useMemo(() => {
+      if (isTimelineScope(scopeId)) {
+        return timelineSelectors.getTimelineByIdSelector();
+      } else if (isInTableScope(scopeId)) {
+        return dataTableSelectors.getTableByIdSelector();
+      }
+    }, [scopeId]);
+    const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
+    const columnHeaders = useDeepEqualSelector((state) => {
+      const { columns } = (getScope && getScope(state, scopeId)) ?? defaults;
+      return getColumnHeaders(columns, browserFields);
+    });
+
     const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
     const items = useMemo(
       () =>
@@ -181,11 +186,6 @@ export const EventFieldsBrowser = React.memo<Props>(
         })),
       [data, fieldsByName]
     );
-
-    const columnHeaders = useDeepEqualSelector((state) => {
-      const { columns } = getTimeline(state, timelineId) ?? timelineDefaults;
-      return getColumnHeaders(columns, browserFields);
-    });
 
     const getLinkValue = useCallback(
       (field: string) => {
@@ -200,28 +200,6 @@ export const EventFieldsBrowser = React.memo<Props>(
       [data, columnHeaders]
     );
 
-    const toggleColumn = useCallback(
-      (column: ColumnHeaderOptions) => {
-        if (columnHeaders.some((c) => c.id === column.id)) {
-          dispatch(
-            timelineActions.removeColumn({
-              columnId: column.id,
-              id: timelineId,
-            })
-          );
-        } else {
-          dispatch(
-            timelineActions.upsertColumn({
-              column,
-              id: timelineId,
-              index: 1,
-            })
-          );
-        }
-      },
-      [columnHeaders, dispatch, timelineId]
-    );
-
     const onSetRowProps = useCallback(({ ariaRowindex, field }: TimelineEventsDetailsItem) => {
       const rowIndex = ariaRowindex != null ? { 'data-rowindex': ariaRowindex } : {};
       return {
@@ -231,37 +209,18 @@ export const EventFieldsBrowser = React.memo<Props>(
       };
     }, []);
 
-    const onUpdateColumns = useCallback(
-      (columns) => dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
-      [dispatch, timelineId]
-    );
-
     const columns = useMemo(
       () =>
         getColumns({
           browserFields,
-          columnHeaders,
           eventId,
-          onUpdateColumns,
-          contextId: `event-fields-browser-for-${timelineId}-${timelineTabType}`,
-          timelineId,
-          toggleColumn,
+          contextId: `event-fields-browser-for-${scopeId}-${timelineTabType}`,
+          scopeId,
           getLinkValue,
           isDraggable,
           isReadOnly,
         }),
-      [
-        browserFields,
-        columnHeaders,
-        eventId,
-        onUpdateColumns,
-        timelineId,
-        timelineTabType,
-        toggleColumn,
-        getLinkValue,
-        isDraggable,
-        isReadOnly,
-      ]
+      [browserFields, eventId, scopeId, timelineTabType, getLinkValue, isDraggable, isReadOnly]
     );
 
     const focusSearchInput = useCallback(() => {

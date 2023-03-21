@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { Request } from '@hapi/hapi';
-
 import type {
   Capabilities,
   CapabilitiesStart,
+  FakeRawRequest,
   IBasePath,
   IClusterClient,
   KibanaRequest,
@@ -166,7 +165,7 @@ export class AnonymousAccessService {
    * anonymous service account credentials.
    */
   private createFakeAnonymousRequest({ authenticateRequest }: { authenticateRequest: boolean }) {
-    return CoreKibanaRequest.from({
+    const fakeRawRequest: FakeRawRequest = {
       headers:
         authenticateRequest && this.httpAuthorizationHeader
           ? { authorization: this.httpAuthorizationHeader.toString() }
@@ -175,9 +174,7 @@ export class AnonymousAccessService {
       // it should perform a privileges check or automatically disable all capabilities.
       auth: { isAuthenticated: authenticateRequest },
       path: '/',
-      route: { settings: {} },
-      url: { href: '/' },
-      raw: { req: { url: '/' } },
-    } as unknown as Request);
+    };
+    return CoreKibanaRequest.from(fakeRawRequest);
   }
 }

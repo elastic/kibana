@@ -8,13 +8,23 @@
 import React, { useMemo, useCallback, useState } from 'react';
 import moment, { Duration } from 'moment';
 import { padStart, chunk } from 'lodash';
-import { EuiHealth, EuiBasicTable, EuiToolTip } from '@elastic/eui';
+import { EuiBasicTable, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
+import { AlertStatus, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { Pagination } from '../../../../types';
-import { AlertListItemStatus, AlertListItem } from './types';
+import { AlertListItem } from './types';
 import { AlertMutedSwitch } from './alert_muted_switch';
+import { AlertLifecycleStatusBadge } from '../../../components/alert_lifecycle_status_badge';
+
+export const getConvertedAlertStatus = (status: AlertStatusValues): AlertStatus => {
+  if (status === 'Active') {
+    return ALERT_STATUS_ACTIVE;
+  }
+  return ALERT_STATUS_RECOVERED;
+};
 
 const durationAsString = (duration: Duration): string => {
   return [duration.hours(), duration.minutes(), duration.seconds()]
@@ -49,13 +59,9 @@ const alertsTableColumns = (
       defaultMessage: 'Status',
     }),
     width: '15%',
-    render: (value: AlertListItemStatus) => {
-      return (
-        <EuiHealth color={value.healthColor} className="alertsList__health">
-          {value.label}
-          {value.actionGroup ? ` (${value.actionGroup})` : ``}
-        </EuiHealth>
-      );
+    render: (value: AlertStatusValues, alert: AlertListItem) => {
+      const convertedStatus = getConvertedAlertStatus(value);
+      return <AlertLifecycleStatusBadge alertStatus={convertedStatus} flapping={alert.flapping} />;
     },
     sortable: false,
     'data-test-subj': 'alertsTableCell-status',

@@ -84,12 +84,14 @@ describe('telemetry_application_usage', () => {
     expect(savedObjectClient.find).toHaveBeenCalledWith(
       expect.objectContaining({
         type: SAVED_OBJECTS_TOTAL_TYPE,
-      })
+      }),
+      undefined // internalOptions
     );
     expect(savedObjectClient.find).toHaveBeenCalledWith(
       expect.objectContaining({
         type: SAVED_OBJECTS_DAILY_TYPE,
-      })
+      }),
+      undefined // internalOptions
     );
   });
 

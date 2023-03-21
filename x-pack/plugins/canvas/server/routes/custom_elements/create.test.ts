@@ -10,7 +10,12 @@ import { AwaitedProperties } from '@kbn/utility-types';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeCreateCustomElementRoute } from './create';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import {
+  kibanaResponseFactory,
+  RequestHandlerContext,
+  RequestHandler,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = {
@@ -25,7 +30,9 @@ const mockedUUID = '123abc';
 const now = new Date();
 const nowIso = now.toISOString();
 
-jest.mock('uuid/v4', () => jest.fn().mockReturnValue('123abc'));
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('123abc'),
+}));
 
 describe('POST custom element', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -84,7 +91,7 @@ describe('POST custom element', () => {
     });
 
     (mockRouteContext.core.savedObjects.client.create as jest.Mock).mockImplementation(() => {
-      throw mockRouteContext.core.savedObjects.client.errors.createBadRequestError('bad request');
+      throw SavedObjectsErrorHelpers.createBadRequestError('bad request');
     });
 
     const response = await routeHandler(

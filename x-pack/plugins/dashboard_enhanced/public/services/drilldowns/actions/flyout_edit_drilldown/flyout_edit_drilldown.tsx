@@ -9,7 +9,7 @@ import React from 'react';
 import { distinctUntilChanged, filter, map, skip, take, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { Action } from '@kbn/ui-actions-plugin/public';
-import { reactToUiComponent, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { EmbeddableContext, ViewMode, CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   isEnhancedEmbeddable,
@@ -43,7 +43,7 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
     return 'list';
   }
 
-  MenuItem = reactToUiComponent(MenuItem);
+  public readonly MenuItem = MenuItem as any;
 
   public async isCompatible({ embeddable }: EmbeddableContext) {
     if (embeddable.getInput().viewMode !== ViewMode.EDIT) return false;
@@ -67,6 +67,10 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
       closed$.next(true);
       handle.close();
     };
+    const closeFlyout = () => {
+      close();
+    };
+
     const handle = core.overlays.openFlyout(
       toMountPoint(
         <plugins.uiActionsEnhanced.DrilldownManager
@@ -76,7 +80,8 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
           placeContext={{ embeddable }}
           templates={templates}
           onClose={close}
-        />
+        />,
+        { theme$: core.theme.theme$ }
       ),
       {
         ownFocus: true,
@@ -85,11 +90,11 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
     );
 
     // Close flyout on application change.
-    core.application.currentAppId$.pipe(takeUntil(closed$), skip(1), take(1)).subscribe(() => {
-      close();
-    });
+    core.application.currentAppId$
+      .pipe(takeUntil(closed$), skip(1), take(1))
+      .subscribe(closeFlyout);
 
-    // Close flyout on dashboard switch to "view" mode.
+    // Close flyout on dashboard switch to "view" mode or on embeddable destroy.
     embeddable
       .getInput$()
       .pipe(
@@ -99,8 +104,6 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
         filter((mode) => mode !== ViewMode.EDIT),
         take(1)
       )
-      .subscribe(() => {
-        close();
-      });
+      .subscribe({ next: closeFlyout, complete: closeFlyout });
   }
 }

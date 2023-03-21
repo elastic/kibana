@@ -12,36 +12,41 @@ jobs:
       - uses: octokit/graphql-action@v2.x
         id: add_to_project
         with:
-          headers: '{"GraphQL-Features": "projects_next_graphql"}'
           query: |
             mutation add_to_project($projectid:ID!,$contentid:ID!) {
-              addProjectNextItem(input:{projectId:$projectid contentId:$contentid}) {
-                projectNextItem {
-                  id
+              addProjectV2ItemById(input:{projectId:$projectid contentId:$contentid}) {
+                item {
+                  ... on ProjectV2Item {
+                    id
+                  }
                 }
               }
             }
           projectid: ${{ env.PROJECT_ID }}
           contentid: ${{ github.event.issue.node_id }}
         env:
-          PROJECT_ID: "PN_kwDOAGc3Zs0VSg"
+          PROJECT_ID: "PVT_kwDOAGc3Zs0VSg"
           GITHUB_TOKEN: ${{ secrets.APM_TECH_KIBANA_USER_TOKEN }}
       - uses: octokit/graphql-action@v2.x
         id: label_team
         with:
-          headers: '{"GraphQL-Features": "projects_next_graphql"}'
           query: |
             mutation label_team($projectid:ID!,$itemid:ID!,$fieldid:ID!,$value:String!) {
-              updateProjectNextItemField(input: { projectId:$projectid itemId:$itemid fieldId:$fieldid value:$value }) {
-                projectNextItem {
+              updateProjectV2ItemFieldValue(input: { projectId:$projectid itemId:$itemid fieldId:$fieldid value:{singleSelectOptionId: $value} }) {
+                projectV2Item {
                   id
+                  content {
+                    ... on Issue {
+                      number
+                    }
+                  }
                 }
               }
             }
           projectid: ${{ env.PROJECT_ID }}
-          itemid: ${{ fromJSON(steps.add_to_project.outputs.data).addProjectNextItem.projectNextItem.id }}
-          fieldid: "MDE2OlByb2plY3ROZXh0RmllbGQ0NDE0Ng=="
+          itemid: ${{ fromJSON(steps.add_to_project.outputs.data).addProjectV2ItemById.item.id }}
+          fieldid: "PVTSSF_lADOAGc3Zs0VSs2scg"
           value: "c33f5c54"
         env:
-          PROJECT_ID: "PN_kwDOAGc3Zs0VSg"
+          PROJECT_ID: "PVT_kwDOAGc3Zs0VSg"
           GITHUB_TOKEN: ${{ secrets.APM_TECH_KIBANA_USER_TOKEN }}

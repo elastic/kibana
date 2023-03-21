@@ -19,7 +19,7 @@ export function MachineLearningJobManagementProvider(
 
   return {
     async navigateToNewJobSourceSelection() {
-      await testSubjects.clickWhenNotDisabled('mlCreateNewJobButton');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlCreateNewJobButton');
       await testSubjects.existOrFail('mlPageSourceSelection');
     },
 

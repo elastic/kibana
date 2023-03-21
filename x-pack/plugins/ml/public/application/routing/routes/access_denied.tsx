@@ -7,7 +7,8 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { MlRoute, PageLoader, PageProps } from '../router';
+import { ML_PAGES } from '../../../locator';
+import { createPath, MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
 import { Page } from '../../access_denied';
 
@@ -20,7 +21,7 @@ const breadcrumbs = [
 ];
 
 export const accessDeniedRouteFactory = (): MlRoute => ({
-  path: '/access-denied',
+  path: createPath(ML_PAGES.ACCESS_DENIED),
   title: i18n.translate('xpack.ml.accessDeniedLabel', {
     defaultMessage: 'Access denied',
   }),
@@ -29,7 +30,14 @@ export const accessDeniedRouteFactory = (): MlRoute => ({
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {});
+  const { context } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    deps.getSavedSearchDeps,
+    {}
+  );
 
   return (
     <PageLoader context={context}>

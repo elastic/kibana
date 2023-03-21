@@ -27,6 +27,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await ml.api.stopAllTrainedModelDeploymentsES();
+      await ml.api.deleteAllTrainedModelsES();
       await ml.api.cleanMlIndices();
     });
 
@@ -91,17 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertPipelinesTabContent(false);
       });
 
-      for (const model of trainedModels) {
-        it(`renders expanded row content correctly for imported tiny model ${model.id} without pipelines`, async () => {
-          await ml.trainedModelsTable.ensureRowIsExpanded(model.id);
-          await ml.trainedModelsTable.assertDetailsTabContent();
-          await ml.trainedModelsTable.assertInferenceConfigTabContent();
-          await ml.trainedModelsTable.assertStatsTabContent();
-          await ml.trainedModelsTable.assertPipelinesTabContent(false);
-        });
-      }
-
-      it('displays the built-in model and no actions are enabled', async () => {
+      it('displays the built-in model with only Test action enabled', async () => {
         await ml.testExecution.logTestStep('should display the model in the table');
         await ml.trainedModelsTable.filterWithSearchString(builtInModelData.modelId, 1);
 
@@ -128,6 +120,21 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertModelDeleteActionButtonExists(
           builtInModelData.modelId,
           false
+        );
+
+        await ml.testExecution.logTestStep('should have enabled the button that opens Test flyout');
+        await ml.trainedModelsTable.assertModelTestButtonExists(builtInModelData.modelId, true);
+
+        await ml.trainedModelsTable.testModel(
+          'lang_ident',
+          builtInModelData.modelId,
+          {
+            inputText: 'Goedemorgen! Ik ben een appel.',
+          },
+          {
+            title: 'This looks like Dutch,Flemish',
+            topLang: { code: 'nl', minProbability: 0.9 },
+          }
         );
       });
 
@@ -185,6 +192,34 @@ export default function ({ getService }: FtrProviderContext) {
           modelWithoutPipelineData.modelId,
           false
         );
+      });
+
+      describe('with imported models', function () {
+        for (const model of trainedModels) {
+          it(`renders expanded row content correctly for imported tiny model ${model.id} without pipelines`, async () => {
+            await ml.trainedModelsTable.ensureRowIsExpanded(model.id);
+            await ml.trainedModelsTable.assertDetailsTabContent();
+            await ml.trainedModelsTable.assertInferenceConfigTabContent();
+            await ml.trainedModelsTable.assertStatsTabContent();
+            await ml.trainedModelsTable.assertPipelinesTabContent(false);
+          });
+
+          it(`starts deployment of the imported model ${model.id}`, async () => {
+            await ml.trainedModelsTable.startDeploymentWithParams(model.id, {
+              priority: 'normal',
+              numOfAllocations: 1,
+              threadsPerAllocation: 2,
+            });
+          });
+
+          it(`stops deployment of the imported model ${model.id}`, async () => {
+            await ml.trainedModelsTable.stopDeployment(model.id);
+          });
+
+          it(`deletes the imported model ${model.id}`, async () => {
+            await ml.trainedModelsTable.deleteModel(model.id);
+          });
+        }
       });
     });
 

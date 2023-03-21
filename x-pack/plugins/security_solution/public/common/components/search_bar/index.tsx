@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux';
@@ -36,14 +36,14 @@ import {
 } from './selectors';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
-import { usersActions } from '../../../users/store';
-import { hostsActions } from '../../../hosts/store';
-import { networkActions } from '../../../network/store';
+import { usersActions } from '../../../explore/users/store';
+import { hostsActions } from '../../../explore/hosts/store';
+import { networkActions } from '../../../explore/network/store';
 import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_search_bar_url_param';
 import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timerange_url_param';
 
 interface SiemSearchBarProps {
-  id: InputsModelId;
+  id: InputsModelId.global | InputsModelId.timeline;
   indexPattern: DataViewBase;
   pollForSignalIndex?: () => void;
   timelineId?: string;
@@ -311,7 +311,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           savedQuery={savedQuery}
           showFilterBar={!hideFilterBar}
           showDatePicker={true}
-          showQueryBar={true}
           showQueryInput={!hideQueryInput}
           showSaveQuery={true}
           dataTestSubj={dataTestSubj}
@@ -363,7 +362,7 @@ const makeMapStateToProps = () => {
 SearchBarComponent.displayName = 'SiemSearchBar';
 
 interface UpdateReduxSearchBar extends OnTimeChangeProps {
-  id: InputsModelId;
+  id: InputsModelId.global | InputsModelId.timeline;
   filters?: Filter[];
   filterManager: FilterManager;
   query?: Query;

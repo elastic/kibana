@@ -10,12 +10,13 @@ import type { LensAttributes } from '../../types';
 export const kpiUniqueFlowIdsLensAttributes: LensAttributes = {
   title: '[Network] Unique flow IDs',
   description: '',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
   state: {
     visualization: {
       layerId: '5d46d48f-6ce8-46be-a797-17ad50642564',
       accessor: 'a27f3503-9c73-4fc1-86bb-12461dae4b70',
       layerType: 'data',
+      autoScaleMetricAlignment: 'left',
     },
     query: {
       query: 'source.ip: * or destination.ip: * ',
@@ -56,7 +57,7 @@ export const kpiUniqueFlowIdsLensAttributes: LensAttributes = {
       },
     ],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           '5d46d48f-6ce8-46be-a797-17ad50642564': {
             columns: {

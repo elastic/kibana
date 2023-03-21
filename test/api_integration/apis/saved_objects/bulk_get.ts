@@ -8,7 +8,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -30,10 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('_bulk_get', () => {
-    let KIBANA_VERSION: string;
-
     before(async () => {
-      KIBANA_VERSION = await getKibanaVersion(getService);
       await kibanaServer.importExport.load(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
@@ -54,6 +50,8 @@ export default function ({ getService }: FtrProviderContext) {
           const mockDate = '2015-01-01T00:00:00.000Z';
           resp.body.saved_objects[0].updated_at = mockDate;
           resp.body.saved_objects[2].updated_at = mockDate;
+          resp.body.saved_objects[0].created_at = mockDate;
+          resp.body.saved_objects[2].created_at = mockDate;
 
           expect(resp.body).to.eql({
             saved_objects: [
@@ -61,6 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
                 id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                 type: 'visualization',
                 updated_at: '2015-01-01T00:00:00.000Z',
+                created_at: '2015-01-01T00:00:00.000Z',
                 version: resp.body.saved_objects[0].version,
                 attributes: {
                   title: 'Count of requests',
@@ -73,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
                     resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
                 },
                 migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                coreMigrationVersion: KIBANA_VERSION,
+                coreMigrationVersion: '7.14.0',
                 namespaces: ['default'],
                 references: [
                   {
@@ -96,6 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
                 id: '7.0.0-alpha1',
                 type: 'config',
                 updated_at: '2015-01-01T00:00:00.000Z',
+                created_at: '2015-01-01T00:00:00.000Z',
                 version: resp.body.saved_objects[2].version,
                 attributes: {
                   buildNum: 8467,
@@ -103,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 namespaces: ['default'],
                 migrationVersion: resp.body.saved_objects[2].migrationVersion,
-                coreMigrationVersion: KIBANA_VERSION,
+                coreMigrationVersion: '7.14.0',
                 references: [],
               },
             ],

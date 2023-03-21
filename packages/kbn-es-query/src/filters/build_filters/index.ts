@@ -14,6 +14,7 @@ export * from './exists_filter';
 export * from './get_filter_field';
 export * from './get_filter_params';
 export * from './match_all_filter';
+export * from './combined_filter';
 export * from './phrase_filter';
 export * from './phrases_filter';
 export * from './query_string_filter';

@@ -14,27 +14,27 @@ import {
   EQL_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
+  NEW_TERMS_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
-import type { FieldMap } from '@kbn/rule-registry-plugin/common/field_map';
-import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
-import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
 
+import { siemGuideId, siemGuideConfig } from '../common/guided_onboarding/siem_guide_config';
 import {
   createEqlAlertType,
   createIndicatorMatchAlertType,
   createMlAlertType,
+  createNewTermsAlertType,
   createQueryAlertType,
-  createSavedQueryAlertType,
   createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
@@ -53,9 +53,9 @@ import {
   DEFAULT_ALERTS_INDEX,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
-import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
+import { registerEndpointSuggestionsRoutes } from './endpoint/routes/suggestions';
 import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from './endpoint/types';
@@ -69,20 +69,23 @@ import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
-import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
-import {
-  registerEventLogProvider,
-  ruleExecutionLogForExecutorsFactory,
-} from './lib/detection_engine/rule_execution_log';
+import { createRuleExecutionLogService } from './lib/detection_engine/rule_monitoring';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
-import type { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
+import type {
+  CreateRuleOptions,
+  CreateQueryRuleAdditionalOptions,
+} from './lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
-import { legacyRulesNotificationAlertType } from './lib/detection_engine/notifications/legacy_rules_notification_alert_type';
-// eslint-disable-next-line no-restricted-imports
-import { legacyIsNotificationAlertExecutor } from './lib/detection_engine/notifications/legacy_types';
-import { createSecurityRuleTypeWrapper } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
+import {
+  legacyRulesNotificationAlertType,
+  legacyIsNotificationAlertExecutor,
+} from './lib/detection_engine/rule_actions_legacy';
+import {
+  createSecurityRuleTypeWrapper,
+  securityRuleTypeFieldMap,
+} from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 
 import { RequestContextFactory } from './request_context_factory';
 
@@ -96,9 +99,12 @@ import type {
   SecuritySolutionPluginStart,
   PluginInitializerContext,
 } from './plugin_contract';
-import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
+import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
+import { artifactService } from './lib/telemetry/artifact';
+import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
+import { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../common/endpoint/constants';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -149,8 +155,13 @@ export class Plugin implements ISecuritySolutionPlugin {
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings, experimentalFeatures);
 
-    const eventLogService = plugins.eventLog;
-    registerEventLogProvider(eventLogService);
+    const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
+    ruleExecutionLogService.registerEventLogProvider();
+
+    const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
+      licensing: plugins.licensing,
+      osqueryCreateAction: plugins.osquery.osqueryCreateAction,
+    };
 
     const requestContextFactory = new RequestContextFactory({
       config,
@@ -158,6 +169,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       plugins,
       endpointAppContextService: this.endpointAppContextService,
+      ruleExecutionLogService,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      kibanaBranch: pluginContext.env.packageInfo.branch,
     });
 
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
@@ -179,7 +193,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     initUsageCollectors({
       core,
-      eventLogIndex: eventLogService.getIndexPattern(),
+      eventLogIndex: plugins.eventLog.getIndexPattern(),
       signalsIndex: DEFAULT_ALERTS_INDEX,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
@@ -201,14 +215,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       version: pluginContext.env.packageInfo.version,
     };
 
-    const aliasesFieldMap: FieldMap = {};
-    Object.entries(aadFieldConversion).forEach(([key, value]) => {
-      aliasesFieldMap[key] = {
-        type: 'alias',
-        path: value,
-      };
-    });
-
     const ruleDataServiceOptions = {
       feature: SERVER_APP_ID,
       registrationContext: 'security',
@@ -217,10 +223,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       componentTemplates: [
         {
           name: 'mappings',
-          mappings: mappingFromFieldMap(
-            { ...technicalRuleFieldMap, ...alertsFieldMap, ...rulesFieldMap, ...aliasesFieldMap },
-            false
-          ),
+          mappings: mappingFromFieldMap(securityRuleTypeFieldMap, false),
         },
       ],
       secondaryAlias: config.signalsIndex,
@@ -241,21 +244,39 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger: this.logger,
       config: this.config,
       ruleDataClient,
-      eventLogService,
-      ruleExecutionLoggerFactory: ruleExecutionLogForExecutorsFactory,
+      ruleExecutionLoggerFactory: ruleExecutionLogService.createClientForExecutors,
       version: pluginContext.env.packageInfo.version,
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
 
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
-    plugins.alerting.registerType(securityRuleTypeWrapper(createSavedQueryAlertType(ruleOptions)));
+    plugins.alerting.registerType(
+      securityRuleTypeWrapper(
+        createQueryAlertType({
+          ...ruleOptions,
+          ...queryRuleAdditionalOptions,
+          id: SAVED_QUERY_RULE_TYPE_ID,
+          name: 'Saved Query Rule',
+        })
+      )
+    );
     plugins.alerting.registerType(
       securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
-    plugins.alerting.registerType(securityRuleTypeWrapper(createQueryAlertType(ruleOptions)));
+    plugins.alerting.registerType(
+      securityRuleTypeWrapper(
+        createQueryAlertType({
+          ...ruleOptions,
+          ...queryRuleAdditionalOptions,
+          id: QUERY_RULE_TYPE_ID,
+          name: 'Custom Query Rule',
+        })
+      )
+    );
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
+    plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType(ruleOptions)));
 
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
@@ -274,9 +295,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       previewRuleDataClient,
       this.telemetryReceiver
     );
+
     registerEndpointRoutes(router, endpointContext);
+    registerEndpointSuggestionsRoutes(
+      router,
+      plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
+      endpointContext
+    );
     registerLimitedConcurrencyRoutes(core);
-    registerResolverRoutes(router);
     registerPolicyRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
 
@@ -288,9 +314,12 @@ export class Plugin implements ISecuritySolutionPlugin {
       QUERY_RULE_TYPE_ID,
       SAVED_QUERY_RULE_TYPE_ID,
       THRESHOLD_RULE_TYPE_ID,
+      NEW_TERMS_RULE_TYPE_ID,
     ];
 
-    plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
+    plugins.features.registerKibanaFeature(
+      getKibanaPrivilegesFeaturePrivileges(ruleTypes, experimentalFeatures)
+    );
     plugins.features.registerKibanaFeature(getCasesKibanaFeature());
 
     if (plugins.alerting != null) {
@@ -318,12 +347,24 @@ export class Plugin implements ISecuritySolutionPlugin {
       appClientFactory.setup({
         getSpaceId: depsStart.spaces?.spacesService?.getSpaceId,
         config,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+        kibanaBranch: pluginContext.env.packageInfo.branch,
       });
+
+      const endpointFieldsStrategy = endpointFieldsProvider(
+        this.endpointAppContextService,
+        depsStart.data.indexPatterns
+      );
+      plugins.data.search.registerSearchStrategy(
+        ENDPOINT_FIELDS_SEARCH_STRATEGY,
+        endpointFieldsStrategy
+      );
 
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
         endpointContext,
-        depsStart.spaces?.spacesService?.getSpaceId
+        depsStart.spaces?.spacesService?.getSpaceId,
+        ruleDataClient
       );
 
       plugins.data.search.registerSearchStrategy(
@@ -331,6 +372,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         securitySolutionSearchStrategy
       );
     });
+
+    setIsElasticCloudDeployment(plugins.cloud.isCloudEnabled ?? false);
 
     this.telemetryEventsSender.setup(
       this.telemetryReceiver,
@@ -347,6 +390,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     featureUsageService.setup(plugins.licensing);
+
+    /**
+     * Register a config for the security guide
+     */
+    plugins.guidedOnboarding.registerGuideConfig(siemGuideId, siemGuideConfig);
 
     return {};
   }
@@ -422,10 +470,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.endpointAppContextService.start({
       fleetAuthzService: authz,
-      agentService,
-      packageService,
-      packagePolicyService,
-      agentPolicyService,
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
         agentPolicyService,
@@ -452,6 +496,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,
+      experimentalFeatures: config.experimentalFeatures,
+      messageSigningService: plugins.fleet?.messageSigningService,
     });
 
     this.telemetryReceiver.start(
@@ -460,8 +506,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.kibanaIndex!,
       DEFAULT_ALERTS_INDEX,
       this.endpointAppContextService,
-      exceptionListClient
+      exceptionListClient,
+      packageService
     );
+
+    artifactService.start(this.telemetryReceiver);
 
     this.telemetryEventsSender.start(
       plugins.telemetry,
@@ -469,11 +518,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver
     );
 
-    if (plugins.taskManager) {
-      this.checkMetadataTransformsTask?.start({
-        taskManager: plugins.taskManager,
-      });
-    }
+    plugins.fleet?.fleetSetupCompleted().then(() => {
+      if (plugins.taskManager) {
+        this.checkMetadataTransformsTask?.start({
+          taskManager: plugins.taskManager,
+        });
+      }
+    });
 
     return {};
   }

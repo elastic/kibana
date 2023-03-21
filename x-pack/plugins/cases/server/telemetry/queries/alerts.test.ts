@@ -103,14 +103,12 @@ describe('alerts', () => {
             {
               type: 'literal',
               value: 'cases-comments.attributes.type',
+              isQuoted: false,
             },
             {
               type: 'literal',
               value: 'alert',
-            },
-            {
-              type: 'literal',
-              value: false,
+              isQuoted: false,
             },
           ],
           function: 'is',

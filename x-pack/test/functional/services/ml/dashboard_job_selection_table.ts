@@ -65,7 +65,7 @@ export function MachineLearningDashboardJobSelectionTableProvider({
       const subj = this.rowSelector(jobId, `${jobId}-checkbox`);
       if ((await this.getRowCheckboxCheckedState(jobId)) !== expectCheckedState) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(subj);
+          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
           await this.assertRowCheckboxCheckedState(jobId, expectCheckedState);
         });
       }
@@ -79,7 +79,7 @@ export function MachineLearningDashboardJobSelectionTableProvider({
 
     async applyJobSelection() {
       const subj = 'mlFlyoutJobSelectorButtonApply';
-      await testSubjects.clickWhenNotDisabled(subj);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
       await this.assertJobSelectionTableNotExists();
     },
   };

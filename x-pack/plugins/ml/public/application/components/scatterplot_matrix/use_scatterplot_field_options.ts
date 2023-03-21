@@ -47,5 +47,6 @@ export const useScatterplotFieldOptions = (
     return Array.isArray(excludes) && excludes.length > 0
       ? fields.filter((f) => !excludes.includes(f))
       : fields;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern, includes, excludes]);
 };

@@ -26,9 +26,16 @@ export function MachineLearningAlertingProvider(
 
   return {
     async selectAnomalyDetectionAlertType() {
-      await testSubjects.click('xpack.ml.anomaly_detection_alert-SelectOption');
       await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail(`mlAnomalyAlertForm`);
+        await testSubjects.click('xpack.ml.anomaly_detection_alert-SelectOption');
+        await testSubjects.existOrFail(`mlAnomalyAlertForm`, { timeout: 1000 });
+      });
+    },
+
+    async selectAnomalyDetectionJobHealthAlertType() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('xpack.ml.anomaly_detection_jobs_health-SelectOption');
+        await testSubjects.existOrFail(`mlJobsHealthAlertingRuleForm`, { timeout: 1000 });
       });
     },
 
@@ -50,8 +57,14 @@ export function MachineLearningAlertingProvider(
     },
 
     async selectResultType(resultType: string) {
-      await testSubjects.click(`mlAnomalyAlertResult_${resultType}`);
-      await this.assertResultTypeSelection(resultType);
+      if (
+        (await testSubjects.exists(`mlAnomalyAlertResult_${resultType}_selected`, {
+          timeout: 1000,
+        })) === false
+      ) {
+        await testSubjects.click(`mlAnomalyAlertResult_${resultType}`);
+        await this.assertResultTypeSelection(resultType);
+      }
     },
 
     async assertResultTypeSelection(resultType: string) {
@@ -167,6 +180,65 @@ export function MachineLearningAlertingProvider(
           .set('kbn-xsrf', 'foo');
         mlApi.assertResponseStatusCode(204, status, body);
       }
+    },
+
+    async openNotifySelection() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('notifyWhenSelect');
+        await testSubjects.existOrFail('onActionGroupChange', { timeout: 1000 });
+      });
+    },
+
+    async setRuleName(rulename: string) {
+      await testSubjects.setValue('ruleNameInput', rulename);
+    },
+
+    async scrollRuleNameIntoView() {
+      await testSubjects.scrollIntoView('ruleNameInput');
+    },
+
+    async selectSlackConnectorType() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
+        await testSubjects.existOrFail('createActionConnectorButton-0', { timeout: 1000 });
+      });
+    },
+
+    async clickCreateConnectorButton() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('createActionConnectorButton-0');
+        await testSubjects.existOrFail('connectorAddModal', { timeout: 1000 });
+      });
+    },
+
+    async setConnectorName(connectorname: string) {
+      await testSubjects.setValue('nameInput', connectorname);
+    },
+
+    async setWebhookUrl(webhookurl: string) {
+      await testSubjects.setValue('slackWebhookUrlInput', webhookurl);
+    },
+
+    async clickSaveActionButton() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('saveActionButtonModal');
+        await testSubjects.existOrFail('addNewActionConnectorActionGroup-0', { timeout: 1000 });
+      });
+    },
+
+    async clickCancelSaveRuleButton() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('cancelSaveRuleButton');
+        await testSubjects.existOrFail('confirmModalTitleText', { timeout: 1000 });
+        await testSubjects.click('confirmModalConfirmButton');
+      });
+    },
+
+    async openAddRuleVariable() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('messageAddVariableButton');
+        await testSubjects.existOrFail('variableMenuButton-alert.actionGroup', { timeout: 1000 });
+      });
     },
   };
 }

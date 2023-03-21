@@ -1,0 +1,84 @@
+{
+  "id": "@kbn/core-chrome-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-mocks",
+        "id": "def-common.chromeServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "chromeServiceMock",
+        "description": [],
+        "path": "packages/core/chrome/core-chrome-browser-mocks/src/chrome_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-mocks",
+            "id": "def-common.chromeServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<ChromeServiceContract>"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser-mocks/src/chrome_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-mocks",
+            "id": "def-common.chromeServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/utility-types-jest",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesJestPluginApi",
+                "section": "def-common.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
+              },
+              "<",
+              "InternalChromeStart",
+              ">"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser-mocks/src/chrome_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

@@ -15,7 +15,7 @@ import { FleetServerMissingPrivileges } from '../components/fleet_server_callout
 
 import { Loading } from '../components';
 
-import { FleetServerInstructions } from '../../../components';
+import { AddFleetServerLanding } from '../../../components';
 
 import { CloudInstructions, EnrollmentRecommendation } from './components';
 
@@ -78,7 +78,7 @@ export const FleetServerRequirementPage: React.FunctionComponent<
           ) : showEnrollmentRecommendation ? (
             <EnrollmentRecommendation showStandaloneTab={showStandaloneTab} />
           ) : (
-            <FleetServerInstructions />
+            <AddFleetServerLanding />
           )}
         </FlexItemWithMinWidth>
       </ContentWrapper>

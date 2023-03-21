@@ -57,6 +57,11 @@ export const CRAWLER_DOMAIN_CONFIG_FROM_SERVER: DomainConfigFromServer = {
 };
 
 export const CRAWLER_DOMAIN_FROM_SERVER: CrawlerDomainFromServer = {
+  auth: {
+    type: 'basic',
+    username: 'username',
+    password: 'password',
+  },
   available_deduplication_fields: ['title', 'url'],
   crawl_rules: [CRAWL_RULE],
   created_on: '1657234422',
@@ -64,6 +69,7 @@ export const CRAWLER_DOMAIN_FROM_SERVER: CrawlerDomainFromServer = {
   deduplication_fields: ['url'],
   document_count: 400,
   entry_points: [ENTRY_POINT],
+  extraction_rules: [],
   id: '123abc',
   name: 'https://www.elastic.co',
   sitemaps: [SITEMAP],
@@ -84,6 +90,11 @@ export const CRAWLER_DOMAIN_CONFIG: DomainConfig = {
 };
 
 export const CRAWLER_DOMAIN: CrawlerDomain = {
+  auth: {
+    type: 'basic',
+    username: 'username',
+    password: 'password',
+  },
   availableDeduplicationFields: ['title', 'url'],
   crawlRules: [CRAWL_RULE],
   createdOn: '1657234422',
@@ -91,6 +102,7 @@ export const CRAWLER_DOMAIN: CrawlerDomain = {
   deduplicationFields: ['url'],
   documentCount: 400,
   entryPoints: [ENTRY_POINT],
+  extractionRules: [],
   id: '123abc',
   sitemaps: [SITEMAP],
   url: 'https://www.elastic.co',

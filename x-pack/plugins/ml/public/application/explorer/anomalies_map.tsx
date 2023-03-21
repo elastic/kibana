@@ -25,8 +25,8 @@ import {
   VectorLayerDescriptor,
 } from '@kbn/maps-plugin/common';
 import { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
+import { isDefined } from '@kbn/ml-is-defined';
 import { useMlKibana } from '../contexts/kibana';
-import { isDefined } from '../../../common/types/guards';
 import { MlEmbeddedMapComponent } from '../components/ml_embedded_map';
 import { AnomaliesTableRecord } from '../../../common/types/anomalies';
 
@@ -186,6 +186,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
     );
 
     setEMSSuggestions(suggestions.filter(isDefined));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...jobIds]);
 
   useEffect(
@@ -194,6 +195,7 @@ export const AnomaliesMap: FC<Props> = ({ anomalies, jobIds }) => {
         getEMSTermSuggestions();
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [...jobIds]
   );
 

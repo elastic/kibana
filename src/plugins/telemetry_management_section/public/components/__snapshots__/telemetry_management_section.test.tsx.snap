@@ -24,23 +24,21 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
           color="primary"
           iconType="spacesApp"
           title={
-            <p>
-              <FormattedMessage
-                defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
-                id="telemetry.callout.appliesSettingTitle"
-                values={
-                  Object {
-                    "allOfKibanaText": <strong>
-                      <FormattedMessage
-                        defaultMessage="all of Kibana"
-                        id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
-                        values={Object {}}
-                      />
-                    </strong>,
-                  }
+            <FormattedMessage
+              defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
+              id="telemetry.callout.appliesSettingTitle"
+              values={
+                Object {
+                  "allOfKibanaText": <strong>
+                    <FormattedMessage
+                      defaultMessage="all of Kibana"
+                      id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
+                      values={Object {}}
+                    />
+                  </strong>,
                 }
-              />
-            </p>
+              }
+            />
           }
         />
         <EuiSpacer

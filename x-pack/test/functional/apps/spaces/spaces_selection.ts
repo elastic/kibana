@@ -22,6 +22,7 @@ export default function spaceSelectorFunctionalTests({
   ]);
   const spacesService = getService('spaces');
 
+  // Failing: See https://github.com/elastic/kibana/issues/142155
   describe('Spaces', function () {
     const testSpacesIds = ['another-space', ...Array.from('123456789', (idx) => `space-${idx}`)];
     before(async () => {
@@ -36,34 +37,61 @@ export default function spaceSelectorFunctionalTests({
     });
 
     this.tags('includeFirefox');
-    describe('Space Selector', () => {
+    describe('Login Space Selector', () => {
       before(async () => {
         await PageObjects.security.forceLogout();
       });
 
-      afterEach(async () => {
+      after(async () => {
         // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
       });
 
-      it('allows user to navigate to different spaces', async () => {
+      it('allows user to select initial space', async () => {
         const spaceId = 'another-space';
 
         await PageObjects.security.login(undefined, undefined, {
           expectSpaceSelector: true,
         });
 
+        // select space with card after login
         await PageObjects.spaceSelector.clickSpaceCard(spaceId);
-
         await PageObjects.spaceSelector.expectHomePage(spaceId);
+      });
+    });
+
+    describe('Space Navigation Menu', () => {
+      before(async () => {
+        await PageObjects.security.forceLogout();
+        await PageObjects.security.login(undefined, undefined, {
+          expectSpaceSelector: true,
+        });
+      });
+
+      after(async () => {
+        await PageObjects.security.forceLogout();
+      });
+
+      it('allows user to navigate to different spaces', async () => {
+        const anotherSpaceId = 'another-space';
+        const defaultSpaceId = 'default';
+        const space5Id = 'space-5';
+
+        await PageObjects.spaceSelector.clickSpaceCard(defaultSpaceId);
+        await PageObjects.spaceSelector.expectHomePage(defaultSpaceId);
+
+        // change spaces with nav menu
+        await PageObjects.spaceSelector.openSpacesNav();
+        await PageObjects.spaceSelector.goToSpecificSpace(space5Id);
+        await PageObjects.spaceSelector.expectHomePage(space5Id);
 
         await PageObjects.spaceSelector.openSpacesNav();
+        await PageObjects.spaceSelector.goToSpecificSpace(anotherSpaceId);
+        await PageObjects.spaceSelector.expectHomePage(anotherSpaceId);
 
-        // change spaces
-
-        await PageObjects.spaceSelector.clickSpaceAvatar('default');
-
-        await PageObjects.spaceSelector.expectHomePage('default');
+        await PageObjects.spaceSelector.openSpacesNav();
+        await PageObjects.spaceSelector.goToSpecificSpace(defaultSpaceId);
+        await PageObjects.spaceSelector.expectHomePage(defaultSpaceId);
       });
     });
 

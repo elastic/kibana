@@ -15,6 +15,7 @@ import {
   EMPTY_FEATURE_COLLECTION,
   FEATURE_VISIBLE_PROPERTY_NAME,
   LAYER_TYPE,
+  SOURCE_BOUNDS_DATA_REQUEST_ID,
 } from '../../../../../common/constants';
 import {
   StyleMetaDescriptor,
@@ -59,11 +60,11 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     return layerDescriptor;
   }
 
-  async getBounds(syncContext: DataRequestContext) {
+  async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
     const isStaticLayer = !this.getSource().isBoundsAware();
     return isStaticLayer || this.hasJoins()
       ? getFeatureCollectionBounds(this._getSourceFeatureCollection(), this.hasJoins())
-      : super.getBounds(syncContext);
+      : super.getBounds(getDataRequestContext);
   }
 
   getLayerIcon(isTocIcon: boolean): LayerIcon {
@@ -211,6 +212,11 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     await this._syncData(syncContext, this.getSource(), this.getCurrentStyle());
   }
 
+  _isLoadingBounds() {
+    const boundsDataRequest = this.getDataRequest(SOURCE_BOUNDS_DATA_REQUEST_ID);
+    return !!boundsDataRequest && boundsDataRequest.isLoading();
+  }
+
   // TLDR: Do not call getSource or getCurrentStyle in syncData flow. Use 'source' and 'style' arguments instead.
   //
   // 1) State is contained in the redux store. Layer instance state is readonly.
@@ -222,7 +228,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
   // Given 2 above, which source/style to use can not be pulled from data request state.
   // Therefore, source and style are provided as arugments and must be used instead of calling getSource or getCurrentStyle.
   async _syncData(syncContext: DataRequestContext, source: IVectorSource, style: IVectorStyle) {
-    if (this.isLoadingBounds()) {
+    if (this._isLoadingBounds()) {
       return;
     }
 

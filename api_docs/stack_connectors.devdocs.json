@@ -1,0 +1,83 @@
+{
+  "id": "stackConnectors",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "stackConnectors",
+        "id": "def-common.AdditionalEmailServices",
+        "type": "Enum",
+        "tags": [],
+        "label": "AdditionalEmailServices",
+        "description": [],
+        "path": "x-pack/plugins/stack_connectors/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "stackConnectors",
+        "id": "def-common.OpsgenieSubActions",
+        "type": "Enum",
+        "tags": [],
+        "label": "OpsgenieSubActions",
+        "description": [],
+        "path": "x-pack/plugins/stack_connectors/common/opsgenie/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "stackConnectors",
+        "id": "def-common.INTERNAL_BASE_STACK_CONNECTORS_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_BASE_STACK_CONNECTORS_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/internal/stack_connectors\""
+        ],
+        "path": "x-pack/plugins/stack_connectors/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "stackConnectors",
+        "id": "def-common.OpsgenieConnectorTypeId",
+        "type": "string",
+        "tags": [],
+        "label": "OpsgenieConnectorTypeId",
+        "description": [],
+        "signature": [
+          "\".opsgenie\""
+        ],
+        "path": "x-pack/plugins/stack_connectors/common/opsgenie/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

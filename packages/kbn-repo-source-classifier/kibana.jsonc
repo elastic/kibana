@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/repo-source-classifier",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations"
+}

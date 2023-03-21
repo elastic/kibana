@@ -8,7 +8,13 @@
 import React from 'react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { OpenTelemetryInstructions } from './opentelemetry_instructions';
-import { getApmAgentCommands } from './commands/get_apm_agent_commands';
+import {
+  getApmAgentCommands,
+  getApmAgentVariables,
+  getApmAgentLineNumbers,
+  getApmAgentHighlightLang,
+} from './commands/get_apm_agent_commands';
+import { AgentConfigurationTable } from './agent_config_table';
 
 export function AgentConfigInstructions({
   variantId,
@@ -19,6 +25,11 @@ export function AgentConfigInstructions({
   apmServerUrl?: string;
   secretToken?: string;
 }) {
+  const defaultValues = {
+    apmServiceName: 'my-service-name',
+    apmEnvironment: 'my-environment',
+  };
+
   if (variantId === 'openTelemetry') {
     return (
       <>
@@ -37,12 +48,28 @@ export function AgentConfigInstructions({
       apmServerUrl,
       secretToken,
     },
+    defaultValues,
   });
+
+  const variables = getApmAgentVariables(variantId);
+  const lineNumbers = getApmAgentLineNumbers(variantId);
+  const highlightLang = getApmAgentHighlightLang(variantId);
 
   return (
     <>
       <EuiSpacer />
-      <EuiCodeBlock isCopyable language="bash" data-test-subj="commands">
+      <AgentConfigurationTable
+        variables={variables}
+        data={{ apmServerUrl, secretToken, ...defaultValues }}
+      />
+      <EuiSpacer />
+
+      <EuiCodeBlock
+        isCopyable
+        language={highlightLang || 'bash'}
+        data-test-subj="commands"
+        lineNumbers={lineNumbers}
+      >
         {commands}
       </EuiCodeBlock>
     </>

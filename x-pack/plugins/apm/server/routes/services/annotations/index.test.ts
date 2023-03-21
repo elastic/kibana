@@ -10,11 +10,11 @@ import {
 } from '@kbn/observability-plugin/server';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getServiceAnnotations } from '.';
-import { Setup } from '../../../lib/helpers/setup_request';
 import * as GetDerivedServiceAnnotations from './get_derived_service_annotations';
 import * as GetStoredAnnotations from './get_stored_annotations';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { errors } from '@elastic/elasticsearch';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 describe('getServiceAnnotations', () => {
   const storedAnnotations = [
@@ -60,7 +60,7 @@ describe('getServiceAnnotations', () => {
       client: {} as ElasticsearchClient,
       logger: {} as Logger,
       annotationsClient: {} as ScopedAnnotationsClient,
-      setup: {} as Setup,
+      apmEventClient: {} as APMEventClient,
     });
     expect(annotations).toEqual({
       annotations: storedAnnotations,
@@ -96,7 +96,7 @@ describe('getServiceAnnotations', () => {
       client: {} as ElasticsearchClient,
       logger: {} as Logger,
       annotationsClient: {} as ScopedAnnotationsClient,
-      setup: {} as Setup,
+      apmEventClient: {} as APMEventClient,
     });
     expect(annotations).toEqual({
       annotations: storedAnnotations,
@@ -133,7 +133,7 @@ describe('getServiceAnnotations', () => {
         client: {} as ElasticsearchClient,
         logger: {} as Logger,
         annotationsClient: {} as ScopedAnnotationsClient,
-        setup: {} as Setup,
+        apmEventClient: {} as APMEventClient,
       })
     ).rejects.toThrow('BOOM');
   });
@@ -171,7 +171,7 @@ describe('getServiceAnnotations', () => {
       client: {} as ElasticsearchClient,
       logger: {} as Logger,
       annotationsClient: {} as ScopedAnnotationsClient,
-      setup: {} as Setup,
+      apmEventClient: {} as APMEventClient,
     });
     expect(annotations).toEqual({ annotations: [] });
   });
@@ -206,7 +206,7 @@ describe('getServiceAnnotations', () => {
         client: {} as ElasticsearchClient,
         logger: {} as Logger,
         annotationsClient: {} as ScopedAnnotationsClient,
-        setup: {} as Setup,
+        apmEventClient: {} as APMEventClient,
       })
     ).rejects.toThrow('BOOM');
   });
@@ -217,21 +217,17 @@ describe('getServiceAnnotations', () => {
       .mockImplementation(
         () =>
           new Promise((resolve, reject) => {
-            setTimeout(() => {
-              reject(
-                new WrappedElasticsearchClientError(
-                  new errors.RequestAbortedError('foo')
-                )
-              );
-            }, 20);
+            reject(
+              new WrappedElasticsearchClientError(
+                new errors.RequestAbortedError('foo')
+              )
+            );
           })
       );
     jest.spyOn(GetStoredAnnotations, 'getStoredAnnotations').mockImplementation(
       async () =>
         new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(storedAnnotations);
-          }, 10);
+          resolve(storedAnnotations);
         })
     );
 
@@ -244,7 +240,7 @@ describe('getServiceAnnotations', () => {
       client: {} as ElasticsearchClient,
       logger: {} as Logger,
       annotationsClient: {} as ScopedAnnotationsClient,
-      setup: {} as Setup,
+      apmEventClient: {} as APMEventClient,
     });
     expect(annotations).toEqual({
       annotations: storedAnnotations,

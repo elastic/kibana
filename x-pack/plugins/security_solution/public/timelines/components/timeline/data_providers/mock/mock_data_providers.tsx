@@ -29,9 +29,6 @@ const mockSourceNameToEventCount: NameToEventCount<number> = {
   'Provider 10': 863,
 };
 
-/** Returns a collection of mock data provider names */
-export const mockDataProviderNames = (): string[] => Object.keys(mockSourceNameToEventCount);
-
 /** Returns a count of the events for a mock data provider */
 export const getEventCount = (dataProviderName: string): number =>
   mockSourceNameToEventCount[dataProviderName] || 0;

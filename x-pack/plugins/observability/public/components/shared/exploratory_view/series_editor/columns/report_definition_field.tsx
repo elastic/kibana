@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
-import { ESFilter } from '@kbn/core/types/elasticsearch';
+import type { ESFilter } from '@kbn/es-types';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
 import { ALL_VALUES_SELECTED } from '../../configurations/constants/url_constants';
 import FieldValueSuggestions from '../../../field_value_suggestions';

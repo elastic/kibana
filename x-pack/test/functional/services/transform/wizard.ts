@@ -19,6 +19,7 @@ export type HistogramCharts = Array<{
 
 export function TransformWizardProvider({ getService, getPageObjects }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
+  const browser = getService('browser');
   const canvasElement = getService('canvasElement');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
@@ -26,7 +27,9 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
   const retry = getService('retry');
   const find = getService('find');
   const ml = getService('ml');
-  const PageObjects = getPageObjects(['discover', 'timePicker', 'unifiedSearch']);
+  const toasts = getService('toasts');
+
+  const pageObjects = getPageObjects(['discover', 'timePicker']);
 
   return {
     async clickNextButton() {
@@ -75,6 +78,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         selector = `~${selector}`;
       }
       await testSubjects.existOrFail(selector);
+    },
+
+    async assertIndexPreviewEmpty() {
+      await this.assertIndexPreviewExists('empty');
     },
 
     async assertIndexPreviewLoaded() {
@@ -371,6 +378,17 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await this.assertSelectedTransformFunction(transformFunction);
     },
 
+    async assertFieldStatsFlyoutContentFromUniqueKeysInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number'
+    ) {
+      await ml.commonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'transformWizardUniqueKeysSelector',
+        fieldName,
+        fieldType
+      );
+    },
+
     async assertUniqueKeysInputExists() {
       await testSubjects.existOrFail('transformWizardUniqueKeysSelector > comboBoxInput');
     },
@@ -398,6 +416,17 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       ]);
     },
 
+    async assertFieldStatFlyoutContentFromSortFieldInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number'
+    ) {
+      await ml.commonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'transformWizardSortFieldSelector',
+        fieldName,
+        fieldType
+      );
+    },
+
     async assertSortFieldInputExists() {
       await testSubjects.existOrFail('transformWizardSortFieldSelector > comboBoxInput');
     },
@@ -417,6 +446,17 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async setSortFieldValue(identificator: string, label: string) {
       await comboBox.set('transformWizardSortFieldSelector > comboBoxInput', identificator);
       await this.assertSortFieldInputValue(identificator);
+    },
+
+    async assertFieldStatFlyoutContentFromGroupByInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number'
+    ) {
+      await ml.commonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'transformGroupBySelection',
+        fieldName,
+        fieldType
+      );
     },
 
     async assertGroupByInputExists() {
@@ -476,6 +516,17 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       return `${parentSelector && `${parentSelector} > `}${
         parentSelector ? 'transformSubAggregationSelection' : 'transformAggregationSelection'
       } > comboBoxInput`;
+    },
+
+    async assertFieldStatFlyoutContentFromAggInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number'
+    ) {
+      await ml.commonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'transformAggregationSelection',
+        fieldName,
+        fieldType
+      );
     },
 
     async assertAggregationInputExists(parentSelector?: string) {
@@ -992,20 +1043,14 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async redirectToDiscover() {
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.click('transformWizardCardDiscover');
-        await PageObjects.discover.isDiscoverAppOnScreen();
+        await pageObjects.discover.isDiscoverAppOnScreen();
       });
-      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
-    },
-
-    async setDiscoverTimeRange(fromTime: string, toTime: string) {
-      await PageObjects.discover.isDiscoverAppOnScreen();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     },
 
     async assertDiscoverContainField(field: string) {
-      await PageObjects.discover.isDiscoverAppOnScreen();
+      await pageObjects.discover.isDiscoverAppOnScreen();
       await retry.tryForTime(60 * 1000, async () => {
-        const allFields = await PageObjects.discover.getAllFieldNames();
+        const allFields = await pageObjects.discover.getAllFieldNames();
         if (Array.isArray(allFields)) {
           // For some reasons, Discover returns fields with dot (e.g '.avg') with extra space
           const fields = allFields.map((n) => n.replace('.​', '.'));
@@ -1049,6 +1094,34 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         await this.assertStartButtonEnabled(false);
         await this.assertProgressbarExists();
       });
+    },
+
+    async assertAggregationEntryEditPopoverValid(aggName: string) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click(`transformAggregationEntryEditButton_${aggName}`);
+
+        await testSubjects.existOrFail(`transformAggPopoverForm_${aggName}`);
+        const isApplyAggChangeEnabled = await testSubjects.isEnabled(
+          `~transformAggPopoverForm_${aggName} > ~transformApplyAggChanges`
+        );
+
+        expect(isApplyAggChangeEnabled).to.eql(
+          true,
+          'Expected Transform aggregation entry `Apply` to be enabled'
+        );
+        // escape popover
+        await browser.pressKeys(browser.keys.ESCAPE);
+      });
+    },
+
+    async assertErrorToastsNotExist() {
+      const toastCount = await toasts.getToastCount();
+      // Toast element index starts at 1, not 0
+      for (let toastIdx = 1; toastIdx < toastCount + 1; toastIdx++) {
+        const toast = await toasts.getToastElement(toastIdx);
+        const isErrorToast = await toast.elementHasClass('euiToast--danger');
+        expect(isErrorToast).to.eql(false, `Expected toast message to be successful, got error.`);
+      }
     },
   };
 }

@@ -6,7 +6,7 @@
  */
 
 import { AttachmentTypeRegistry } from '../../../common/registry';
-import { PersistableStateAttachmentType } from './types';
+import type { PersistableStateAttachmentType } from './types';
 
 export class PersistableStateAttachmentTypeRegistry extends AttachmentTypeRegistry<PersistableStateAttachmentType> {
   constructor() {

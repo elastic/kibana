@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CasesMetricsResponse } from '../../../common/api';
+import type { CasesMetricsResponse } from '../../../common/api';
 import { BaseHandler } from './base_handler';
-import { AllCasesBaseHandlerCommonOptions } from './types';
+import type { AllCasesBaseHandlerCommonOptions } from './types';
 
 export abstract class AllCasesBaseHandler extends BaseHandler<CasesMetricsResponse> {
   protected readonly owner?: string | string[];

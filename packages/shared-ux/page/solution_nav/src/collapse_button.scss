@@ -35,11 +35,11 @@
   opacity: 1 !important;
   transition-delay: 0s !important;
   left: 0 !important;
-  right: 0;
+  right: auto;
   top: 0;
   bottom: 0;
   height: 100%;
-  width: 100%;
+  width: $euiSizeXXL;
   border-radius: 0;
   // Keep the icon at the top instead of it getting shifted to the center of the page
   padding-top: $euiSizeL + $euiSizeS;

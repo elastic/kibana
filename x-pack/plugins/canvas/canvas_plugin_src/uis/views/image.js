@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getElasticLogo, resolveFromArgs } from '@kbn/presentation-util-plugin/common/lib';
+import { getElasticLogo, resolveFromArgs } from '@kbn/presentation-util-plugin/common';
 import { ViewStrings } from '../../../i18n';
 
 const { Image: strings } = ViewStrings;

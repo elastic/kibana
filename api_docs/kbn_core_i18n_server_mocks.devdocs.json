@@ -1,0 +1,82 @@
+{
+  "id": "@kbn/core-i18n-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-i18n-server-mocks",
+        "id": "def-common.i18nServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "i18nServiceMock",
+        "description": [],
+        "path": "packages/core/i18n/core-i18n-server-mocks/src/i18n_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-i18n-server-mocks",
+            "id": "def-common.i18nServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<I18nServiceContract>"
+            ],
+            "path": "packages/core/i18n/core-i18n-server-mocks/src/i18n_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-i18n-server-mocks",
+            "id": "def-common.i18nServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              {
+                "pluginId": "@kbn/core-i18n-server",
+                "scope": "common",
+                "docId": "kibKbnCoreI18nServerPluginApi",
+                "section": "def-common.I18nServiceSetup",
+                "text": "I18nServiceSetup"
+              },
+              ">"
+            ],
+            "path": "packages/core/i18n/core-i18n-server-mocks/src/i18n_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

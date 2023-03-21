@@ -42,6 +42,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": false,
   },
 }
 `;
@@ -93,6 +94,7 @@ Object {
       },
     },
     "size": 0,
+    "track_total_hits": false,
   },
 }
 `;

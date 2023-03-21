@@ -26,7 +26,7 @@ const getHighLightedItems = (query: string, filters: string[]) => {
 
 describe('WaterfallChartWrapper', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   it('renders the correct sidebar items', () => {

@@ -23,14 +23,13 @@ import {
 } from '../types';
 import { defaultConfig } from '../synthetics_policy_create_extension';
 
-describe('useBarChartsHooks', () => {
+describe('useUpdatePolicy', () => {
   const newPolicy: NewPackagePolicy = {
     name: '',
     description: '',
     namespace: 'default',
     policy_id: 'ae774160-8e49-11eb-aba5-99269d21ba6e',
     enabled: true,
-    output_id: '',
     inputs: [
       {
         type: 'synthetics/http',
@@ -434,6 +433,9 @@ describe('useBarChartsHooks', () => {
       ...initialProps,
       config: {
         ...defaultConfig[DataStream.HTTP],
+        [ConfigKey.METADATA]: {
+          is_tls_enabled: true,
+        },
         [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: ['test'],
         [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: ['test'],
         [ConfigKey.RESPONSE_STATUS_CHECK]: ['test'],

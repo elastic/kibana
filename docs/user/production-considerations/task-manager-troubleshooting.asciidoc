@@ -1002,7 +1002,7 @@ Task Manager has run out of Available Workers:
 server log [12:41:33.672] [info][plugins][taskManager][taskManager] [Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.
 --------------------------------------------------
 
-This log message tells us that Task Manager is not managing to keep up with the sheer amount of work it has been tasked with completing. This might mean that Rules are not running at the frequency that was expected (instead of running every 5 minutes, it runs every 7-8 minutes, just as an example).
+This log message tells us that Task Manager is not managing to keep up with the sheer amount of work it has been tasked with completing. This might mean that rules are not running at the frequency that was expected (instead of running every 5 minutes, it runs every 7-8 minutes, just as an example).
 
 By default Task Manager is limited to 10 tasks and this can be bumped up by setting a higher number in the kibana.yml file using the `xpack.task_manager.max_workers` configuration. It is important to keep in mind that a higher number of tasks running at any given time means more load on both Kibana and Elasticsearch, so only change this setting if increasing load in your environment makes sense.
 

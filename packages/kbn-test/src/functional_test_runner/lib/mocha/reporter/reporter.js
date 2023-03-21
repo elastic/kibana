@@ -47,6 +47,7 @@ export function MochaReporterProvider({ getService }) {
       if (config.get('junit.enabled') && config.get('junit.reportName')) {
         setupJUnitReportGeneration(runner, {
           reportName: config.get('junit.reportName'),
+          metadata: config.get('junit.metadata'),
         });
       }
 

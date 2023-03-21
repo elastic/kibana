@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
 import { toElasticsearchQuery, fromKueryExpression, Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
 import { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import {
@@ -95,11 +95,21 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
     fetchPattern();
   }, [currentDatasource, indexPatternProvider, onIndexPatternChange]);
 
-  const kibana = useKibana<IDataPluginServices>();
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { services, overlays } = kibana;
-  const { savedObjects, uiSettings } = services;
+  const {
+    uiSettings,
+    appName,
+    unifiedSearch,
+    data,
+    dataViews,
+    storage,
+    notifications,
+    http,
+    docLinks,
+    savedObjectsManagement,
+  } = services;
   if (!overlays) return null;
-
   return (
     <form
       onSubmit={(e) => {
@@ -122,7 +132,10 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
               onClick={() => {
                 confirmWipeWorkspace(
                   () =>
-                    openSourceModal({ overlays, savedObjects, uiSettings }, onIndexPatternSelected),
+                    openSourceModal(
+                      { overlays, http, uiSettings, savedObjectsManagement },
+                      onIndexPatternSelected
+                    ),
                   i18n.translate('xpack.graph.clearWorkspace.confirmText', {
                     defaultMessage:
                       'If you change data sources, your current fields and vertices will be reset.',
@@ -153,6 +166,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
         </EuiFlexItem>
         <EuiFlexItem>
           <QueryStringInput
+            timeRangeForSuggestionsOverride={false} // to don't filter suggestions by the global time range
             disableAutoFocus
             bubbleSubmitEvent
             indexPatterns={currentIndexPattern ? [currentIndexPattern] : []}
@@ -161,6 +175,17 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
             })}
             query={query}
             onChange={setQuery}
+            appName={appName}
+            deps={{
+              unifiedSearch,
+              data,
+              dataViews,
+              storage,
+              notifications,
+              http,
+              docLinks,
+              uiSettings,
+            }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

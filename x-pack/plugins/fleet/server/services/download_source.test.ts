@@ -33,7 +33,7 @@ function mockDownloadSourceSO(id: string, attributes: any = {}) {
   };
 }
 
-function getMockedSoClient(options: { defaultDownloadSourceId?: string } = {}) {
+function getMockedSoClient(options: { defaultDownloadSourceId?: string; sameName?: boolean } = {}) {
   const soClient = savedObjectsClientMock.create();
 
   soClient.get.mockImplementation(async (type: string, id: string) => {
@@ -95,6 +95,25 @@ function getMockedSoClient(options: { defaultDownloadSourceId?: string } = {}) {
       };
     }
 
+    if (
+      options.sameName &&
+      findOptions.searchFields &&
+      findOptions.searchFields.includes('name') &&
+      findOptions
+    ) {
+      return {
+        page: 1,
+        per_page: 10,
+        saved_objects: [
+          {
+            score: 0,
+            ...(await soClient.get(DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE, 'download-source-test')),
+          },
+        ],
+        total: 1,
+      };
+    }
+
     return {
       page: 1,
       per_page: 10,
@@ -102,12 +121,13 @@ function getMockedSoClient(options: { defaultDownloadSourceId?: string } = {}) {
       total: 0,
     };
   });
+
   mockedAppContextService.getInternalUserSOClient.mockReturnValue(soClient);
 
   return soClient;
 }
 
-describe('Download Service Service', () => {
+describe('Download Service', () => {
   beforeEach(() => {
     mockedAgentPolicyService.list.mockClear();
     mockedAgentPolicyService.hasAPMIntegration.mockClear();
@@ -254,6 +274,26 @@ describe('Download Service Service', () => {
       const defaultId = await downloadSourceService.getDefaultDownloadSourceId(soClient);
 
       expect(defaultId).toEqual('existing-default-download-source');
+    });
+  });
+
+  describe('requireUniqueName', () => {
+    it('throws an error if the name already exists', () => {
+      const soClient = getMockedSoClient({
+        defaultDownloadSourceId: 'download-source-test',
+        sameName: true,
+      });
+      expect(
+        async () => await downloadSourceService.requireUniqueName(soClient, { name: 'Test' })
+      ).rejects.toThrow(`Download Source 'download-source-test' already exists with name 'Test'`);
+    });
+    it('does not throw if the name is unique', () => {
+      const soClient = getMockedSoClient({
+        defaultDownloadSourceId: 'download-source-test',
+      });
+      expect(
+        async () => await downloadSourceService.requireUniqueName(soClient, { name: 'Test' })
+      ).not.toThrow();
     });
   });
 });

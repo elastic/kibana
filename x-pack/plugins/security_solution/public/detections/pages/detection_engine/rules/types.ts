@@ -9,14 +9,14 @@ import type { List } from '@kbn/securitysolution-io-ts-list-types';
 
 import type {
   RiskScoreMapping,
+  Severity,
+  SeverityMapping,
   ThreatIndex,
   ThreatMapping,
   Threats,
   Type,
-  SeverityMapping,
-  Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { Filter } from '@kbn/es-query';
+import type { DataViewBase, Filter } from '@kbn/es-query';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
@@ -25,17 +25,21 @@ import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import type { FieldValueTimeline } from '../../../components/rules/pick_timeline';
 import type { FieldValueThreshold } from '../../../components/rules/threshold_input';
 import type {
-  Author,
   BuildingBlockType,
-  License,
   RelatedIntegrationArray,
   RequiredFieldArray,
+  RuleAuthorArray,
+  RuleLicense,
   RuleNameOverride,
-  SortOrder,
   SetupGuide,
   TimestampOverride,
-} from '../../../../../common/detection_engine/schemas/common';
+} from '../../../../../common/detection_engine/rule_schema';
+import type { SortOrder } from '../../../../../common/detection_engine/schemas/common';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type {
+  RuleResponseAction,
+  ResponseAction,
+} from '../../../../../common/detection_engine/rule_response_actions/schemas';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -58,6 +62,7 @@ export enum RuleStep {
   scheduleRule = 'schedule-rule',
   ruleActions = 'rule-actions',
 }
+
 export type RuleStepsOrder = [
   RuleStep.defineRule,
   RuleStep.aboutRule,
@@ -133,6 +138,16 @@ export interface AboutStepRiskScore {
   isMappingChecked: boolean;
 }
 
+export enum DataSourceType {
+  IndexPatterns = 'indexPatterns',
+  DataView = 'dataView',
+}
+
+export enum GroupByOptions {
+  PerRuleExecution = 'per-rule-execution',
+  PerTimePeriod = 'per-time-period',
+}
+
 /**
  * add / update data source types to show XOR relationship between 'index' and 'dataViewId' fields
  * Maybe something with io-ts?
@@ -140,6 +155,7 @@ export interface AboutStepRiskScore {
 export interface DefineStepRule {
   anomalyThreshold: number;
   index: string[];
+  indexPattern?: DataViewBase;
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
   dataViewId?: string;
@@ -153,6 +169,18 @@ export interface DefineStepRule {
   threatQueryBar: FieldValueQueryBar;
   threatMapping: ThreatMapping;
   eqlOptions: EqlOptionsSelected;
+  dataSourceType: DataSourceType;
+  newTermsFields: string[];
+  historyWindowSize: string;
+  shouldLoadQueryDynamically: boolean;
+  groupByFields: string[];
+  groupByRadioSelection: GroupByOptions;
+  groupByDuration: Duration;
+}
+
+export interface Duration {
+  value: number;
+  unit: string;
 }
 
 export interface ScheduleStepRule {
@@ -163,6 +191,7 @@ export interface ScheduleStepRule {
 
 export interface ActionsStepRule {
   actions: RuleAction[];
+  responseActions?: RuleResponseAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
   throttle?: string | null;
@@ -199,12 +228,12 @@ export interface DefineStepRuleJson {
 }
 
 export interface AboutStepRuleJson {
-  author: Author;
+  author: RuleAuthorArray;
   building_block_type?: BuildingBlockType;
   exceptions_list?: List[];
   name: string;
   description: string;
-  license: License;
+  license: RuleLicense;
   severity: string;
   severity_mapping: SeverityMapping;
   risk_score: number;
@@ -229,7 +258,15 @@ export interface ScheduleStepRuleJson {
 
 export interface ActionsStepRuleJson {
   actions: RuleAlertAction[];
+  response_actions?: ResponseAction[];
   enabled: boolean;
   throttle?: string | null;
   meta?: unknown;
+}
+
+export interface TimeframePreviewOptions {
+  timeframeStart: moment.Moment;
+  timeframeEnd: moment.Moment;
+  interval: string;
+  lookback: string;
 }

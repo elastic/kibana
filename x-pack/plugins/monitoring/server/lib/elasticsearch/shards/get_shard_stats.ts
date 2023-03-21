@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { ElasticsearchModifiedSource, ElasticsearchResponse } from '../../../../common/types/es';
 import { Globals } from '../../../static_globals';
 import { LegacyRequest } from '../../../types';
-import { getNewIndexPatterns } from '../../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
 import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';
 import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
@@ -66,7 +66,7 @@ export function getShardStats(
   const dataset = 'shard'; // data_stream.dataset
   const type = 'shards'; // legacy
   const moduleType = 'elasticsearch';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     moduleType,
@@ -114,7 +114,7 @@ export function getShardStats(
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         type,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getElasticsearchDataset(dataset),
         metricset: dataset,
         clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         metric,

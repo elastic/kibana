@@ -12,9 +12,9 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import classNames from 'classnames';
 
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
-import { ControlGroupInput } from '../types';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { ControlFrame, ControlFrameProps } from './control_frame_component';
+import { ControlGroupReduxState } from '../types';
 import { ControlGroupStrings } from '../control_group_strings';
 
 interface DragInfo {
@@ -41,13 +41,16 @@ export const SortableControl = (frameProps: SortableControlProps) => {
       disabled: !isEditable,
     });
 
-  frameProps.dragInfo = { ...frameProps.dragInfo, isOver: over?.id === embeddableId, isDragging };
+  const sortableFrameProps = {
+    ...frameProps,
+    dragInfo: { ...frameProps.dragInfo, isOver: over?.id === embeddableId, isDragging },
+  };
 
   return (
     <SortableControlInner
       key={embeddableId}
       ref={setNodeRef}
-      {...frameProps}
+      {...sortableFrameProps}
       {...attributes}
       {...listeners}
       style={{
@@ -67,8 +70,8 @@ const SortableControlInner = forwardRef<
     dragHandleRef
   ) => {
     const { isOver, isDragging, draggingIndex, index } = dragInfo;
-    const { useEmbeddableSelector } = useReduxContainerContext<ControlGroupInput>();
-    const { panels } = useEmbeddableSelector((state) => state);
+    const { useEmbeddableSelector } = useReduxEmbeddableContext<ControlGroupReduxState>();
+    const panels = useEmbeddableSelector((state) => state.explicitInput.panels);
 
     const grow = panels[embeddableId].grow;
     const width = panels[embeddableId].width;
@@ -119,8 +122,9 @@ const SortableControlInner = forwardRef<
  * can be quite cumbersome.
  */
 export const ControlClone = ({ draggingId }: { draggingId: string }) => {
-  const { useEmbeddableSelector } = useReduxContainerContext<ControlGroupInput>();
-  const { panels, controlStyle } = useEmbeddableSelector((state) => state);
+  const { useEmbeddableSelector: select } = useReduxEmbeddableContext<ControlGroupReduxState>();
+  const panels = select((state) => state.explicitInput.panels);
+  const controlStyle = select((state) => state.explicitInput.controlStyle);
 
   const width = panels[draggingId].width;
   const title = panels[draggingId].explicitInput.title;

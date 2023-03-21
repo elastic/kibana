@@ -1,11 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": ["public/**/*", "server/**/*"],
-  "references": [{ "path": "../../src/core/tsconfig.json" }]
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/core-http-browser",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
 }

@@ -14,23 +14,24 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { SavedDashboardPanel730ToLatest } from '../../common';
-import {
-  injectReferences,
-  SavedObjectAttributesAndReferences,
-} from '../../common/saved_dashboard_references';
 import {
   controlsCollectorFactory,
   collectPanelsByType,
   getEmptyDashboardData,
   DashboardCollectorData,
 } from './dashboard_telemetry';
+import { injectReferences, SavedDashboardPanel } from '../../common';
 
 // This task is responsible for running daily and aggregating all the Dashboard telemerty data
 // into a single document. This is an effort to make sure the load of fetching/parsing all of the
 // dashboards will only occur once per day
 const TELEMETRY_TASK_TYPE = 'dashboard_telemetry';
 export const TASK_ID = `Dashboard-${TELEMETRY_TASK_TYPE}`;
+
+interface SavedObjectAttributesAndReferences {
+  attributes: SavedObjectAttributes;
+  references: SavedObjectReference[];
+}
 
 export interface DashboardTelemetryTaskState {
   runs: number;
@@ -102,7 +103,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
             try {
               const panels = JSON.parse(
                 attributes.panelsJSON as string
-              ) as unknown as SavedDashboardPanel730ToLatest[];
+              ) as unknown as SavedDashboardPanel[];
 
               collectPanelsByType(panels, dashboardData, embeddable);
             } catch (e) {

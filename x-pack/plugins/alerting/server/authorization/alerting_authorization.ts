@@ -31,8 +31,11 @@ export enum ReadOperations {
   GetRuleState = 'getRuleState',
   GetAlertSummary = 'getAlertSummary',
   GetExecutionLog = 'getExecutionLog',
+  GetActionErrorLog = 'getActionErrorLog',
   Find = 'find',
   GetAuthorizedAlertsIndices = 'getAuthorizedAlertsIndices',
+  RunSoon = 'runSoon',
+  GetRuleExecutionKPI = 'getRuleExecutionKPI',
 }
 
 export enum WriteOperations {
@@ -48,6 +51,9 @@ export enum WriteOperations {
   UnmuteAlert = 'unmuteAlert',
   Snooze = 'snooze',
   BulkEdit = 'bulkEdit',
+  BulkDelete = 'bulkDelete',
+  BulkEnable = 'bulkEnable',
+  BulkDisable = 'bulkDisable',
   Unsnooze = 'unsnooze',
 }
 
@@ -65,6 +71,7 @@ interface HasPrivileges {
 type AuthorizedConsumers = Record<string, HasPrivileges>;
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: AuthorizedConsumers;
+  hasGetSummarizedAlerts?: boolean;
 }
 
 type IsAuthorizedAtProducerLevel = boolean;

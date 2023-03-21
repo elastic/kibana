@@ -1,0 +1,194 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`metric visualization dimension groups configuration primary layer generates configuration 1`] = `
+Object {
+  "groups": Array [
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "metric-col-id",
+          "palette": Array [],
+          "triggerIconType": "colorBy",
+        },
+      ],
+      "dataTestSubj": "lnsMetric_primaryMetricDimensionPanel",
+      "enableDimensionEditor": true,
+      "enableFormatSelector": true,
+      "filterOperations": [Function],
+      "formatSelectorOptions": Object {
+        "disableExtraOptions": true,
+      },
+      "groupId": "metric",
+      "groupLabel": "Primary metric",
+      "isMetricDimension": true,
+      "paramEditorCustomProps": Object {
+        "headingLabel": "Value",
+      },
+      "requiredMinDimensionCount": 1,
+      "supportsMoreColumns": false,
+    },
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "secondary-metric-col-id",
+        },
+      ],
+      "dataTestSubj": "lnsMetric_secondaryMetricDimensionPanel",
+      "enableDimensionEditor": true,
+      "enableFormatSelector": true,
+      "filterOperations": [Function],
+      "formatSelectorOptions": Object {
+        "disableExtraOptions": true,
+      },
+      "groupId": "secondaryMetric",
+      "groupLabel": "Secondary metric",
+      "isMetricDimension": true,
+      "paramEditorCustomProps": Object {
+        "headingLabel": "Value",
+      },
+      "supportsMoreColumns": false,
+    },
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "max-metric-col-id",
+        },
+      ],
+      "dataTestSubj": "lnsMetric_maxDimensionPanel",
+      "enableDimensionEditor": true,
+      "enableFormatSelector": false,
+      "filterOperations": [Function],
+      "formatSelectorOptions": Object {
+        "disableExtraOptions": true,
+      },
+      "groupId": "max",
+      "groupLabel": "Maximum value",
+      "groupTooltip": "If the maximum value is specified, the minimum value is fixed at zero.",
+      "paramEditorCustomProps": Object {
+        "headingLabel": "Value",
+      },
+      "prioritizedOperation": "max",
+      "supportStaticValue": true,
+      "supportsMoreColumns": false,
+    },
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "breakdown-col-id",
+          "triggerIconType": "aggregate",
+        },
+      ],
+      "dataTestSubj": "lnsMetric_breakdownByDimensionPanel",
+      "enableDimensionEditor": true,
+      "enableFormatSelector": true,
+      "filterOperations": [Function],
+      "formatSelectorOptions": Object {
+        "disableExtraOptions": true,
+      },
+      "groupId": "breakdownBy",
+      "groupLabel": "Break down by",
+      "supportsMoreColumns": false,
+    },
+  ],
+}
+`;
+
+exports[`metric visualization dimension groups configuration primary layer operation filtering breakdownBy supports correct operations 1`] = `
+Array [
+  Object {
+    "dataType": "number",
+    "isBucketed": true,
+  },
+  Object {
+    "dataType": "string",
+    "isBucketed": true,
+  },
+]
+`;
+
+exports[`metric visualization dimension groups configuration primary layer operation filtering max supports correct operations 1`] = `
+Array [
+  Object {
+    "dataType": "number",
+    "isBucketed": false,
+  },
+]
+`;
+
+exports[`metric visualization dimension groups configuration primary layer operation filtering metric supports correct operations 1`] = `
+Array [
+  Object {
+    "dataType": "number",
+    "isBucketed": false,
+  },
+]
+`;
+
+exports[`metric visualization dimension groups configuration primary layer operation filtering secondaryMetric supports correct operations 1`] = `
+Array [
+  Object {
+    "dataType": "number",
+    "isBucketed": false,
+  },
+]
+`;
+
+exports[`metric visualization dimension groups configuration trendline layer generates configuration 1`] = `
+Object {
+  "groups": Array [
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "trendline-metric-col-id",
+        },
+      ],
+      "filterOperations": [Function],
+      "groupId": "trendMetric",
+      "groupLabel": "Primary metric",
+      "hideGrouping": true,
+      "nestingOrder": 3,
+      "supportsMoreColumns": false,
+    },
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "trendline-secondary-metric-col-id",
+        },
+      ],
+      "filterOperations": [Function],
+      "groupId": "trendSecondaryMetric",
+      "groupLabel": "Secondary metric",
+      "hideGrouping": true,
+      "nestingOrder": 2,
+      "supportsMoreColumns": false,
+    },
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "trendline-time-col-id",
+        },
+      ],
+      "filterOperations": [Function],
+      "groupId": "trendTime",
+      "groupLabel": "Time field",
+      "hideGrouping": true,
+      "nestingOrder": 1,
+      "supportsMoreColumns": false,
+    },
+    Object {
+      "accessors": Array [
+        Object {
+          "columnId": "trendline-breakdown-col-id",
+        },
+      ],
+      "filterOperations": [Function],
+      "groupId": "trendBreakdownBy",
+      "groupLabel": "Break down by",
+      "hideGrouping": true,
+      "nestingOrder": 0,
+      "supportsMoreColumns": false,
+    },
+  ],
+  "hidden": true,
+}
+`;

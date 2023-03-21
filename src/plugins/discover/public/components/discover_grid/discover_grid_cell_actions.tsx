@@ -10,6 +10,7 @@ import React, { useContext } from 'react';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
+import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { DiscoverGridContext, GridContext } from './discover_grid_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { copyValueToClipboard } from '../../utils/copy_value_to_clipboard';
@@ -22,9 +23,9 @@ function onFilterCell(
 ) {
   const row = context.rows[rowIndex];
   const value = row.flattened[columnId];
-  const field = context.indexPattern.fields.getByName(columnId);
+  const field = context.dataView.fields.getByName(columnId);
 
-  if (field) {
+  if (field && context.onFilter) {
     context.onFilter(field, value, mode);
   }
 }
@@ -87,7 +88,7 @@ export const FilterOutBtn = ({
 
 export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) => {
   const { valueToStringConverter } = useContext(DiscoverGridContext);
-  const services = useDiscoverServices();
+  const { toastNotifications } = useDiscoverServices();
 
   const buttonTitle = i18n.translate('discover.grid.copyClipboardButtonTitle', {
     defaultMessage: 'Copy value of {column}',
@@ -100,7 +101,7 @@ export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCell
         copyValueToClipboard({
           rowIndex,
           columnId,
-          services,
+          toastNotifications,
           valueToStringConverter,
         });
       }}
@@ -109,19 +110,13 @@ export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCell
       title={buttonTitle}
       data-test-subj="copyClipboardButton"
     >
-      {i18n.translate('discover.grid.copyClipboardButton', {
-        defaultMessage: 'Copy to clipboard',
+      {i18n.translate('discover.grid.copyCellValueButton', {
+        defaultMessage: 'Copy value',
       })}
     </Component>
   );
 };
 
-export function buildCellActions(field: DataViewField) {
-  if (field?.type === '_source') {
-    return [CopyBtn];
-  } else if (!field.filterable) {
-    return undefined;
-  }
-
-  return [FilterInBtn, FilterOutBtn];
+export function buildCellActions(field: DataViewField, onFilter?: DocViewFilterFn) {
+  return [...(onFilter && field.filterable ? [FilterInBtn, FilterOutBtn] : []), CopyBtn];
 }

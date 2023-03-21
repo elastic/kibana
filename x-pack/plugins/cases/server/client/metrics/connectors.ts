@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SingleCaseMetricsResponse } from '../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { SingleCaseBaseHandler } from './single_case_base_handler';
-import { SingleCaseBaseHandlerCommonOptions } from './types';
+import type { SingleCaseBaseHandlerCommonOptions } from './types';
 
 export class Connectors extends SingleCaseBaseHandler {
   constructor(options: SingleCaseBaseHandlerCommonOptions) {
@@ -17,15 +17,17 @@ export class Connectors extends SingleCaseBaseHandler {
   }
 
   public async compute(): Promise<SingleCaseMetricsResponse> {
-    const { unsecuredSavedObjectsClient, authorization, userActionService, logger } =
-      this.options.clientArgs;
+    const {
+      authorization,
+      services: { userActionService },
+      logger,
+    } = this.options.clientArgs;
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
       Operations.getUserActionMetrics
     );
 
     const uniqueConnectors = await userActionService.getUniqueConnectors({
-      unsecuredSavedObjectsClient,
       caseId: this.caseId,
       filter: authorizationFilter,
     });

@@ -42,6 +42,21 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
         },
       ]
     }
+    spacesApiUi={
+      Object {
+        "components": Object {
+          "getCopyToSpaceFlyout": [Function],
+          "getEmbeddableLegacyUrlConflict": [Function],
+          "getLegacyUrlConflict": [Function],
+          "getShareToSpaceFlyout": [Function],
+          "getSpaceAvatar": [Function],
+          "getSpaceList": [Function],
+          "getSpacesContextProvider": [Function],
+        },
+        "redirectLegacyUrl": [Function],
+        "useSpaces": [Function],
+      }
+    }
     uiCapabilities={
       Object {
         "catalogue": Object {},

@@ -8,19 +8,25 @@
 /* eslint-disable import/no-default-export */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { default as createTestConfig } from './config';
 
-export default async function (context: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+  const baseIntegrationTestsConfig = await readConfigFile(require.resolve('./config.ts'));
   // security APIs should function the same under a basic or trial license
-  return createTestConfig(context).then((config) => {
-    config.esTestCluster.license = 'basic';
-    config.esTestCluster.serverArgs = [
-      'xpack.license.self_generated.type=basic',
-      'xpack.security.enabled=true',
-      'xpack.security.authc.api_key.enabled=true',
-    ];
-    config.testFiles = [require.resolve('./apis/security/security_basic')];
-    config.junit.reportName = 'X-Pack API Integration Tests (Security Basic)';
-    return config;
-  });
+  return {
+    ...baseIntegrationTestsConfig.getAll(),
+    testFiles: [require.resolve('./apis/security/security_basic')],
+    esTestCluster: {
+      ...baseIntegrationTestsConfig.get('esTestCluster'),
+      license: 'basic',
+      serverArgs: [
+        ...baseIntegrationTestsConfig.get('esTestCluster.serverArgs'),
+        'xpack.license.self_generated.type=basic',
+        'xpack.security.enabled=true',
+        'xpack.security.authc.api_key.enabled=true',
+      ],
+    },
+    junit: {
+      reportName: 'X-Pack API Integration Tests (Security Basic)',
+    },
+  };
 }

@@ -8,11 +8,7 @@ import { of } from 'rxjs';
 import { merge } from 'lodash';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import {
-  ruleRegistrySearchStrategyProvider,
-  EMPTY_RESPONSE,
-  RULE_SEARCH_STRATEGY_NAME,
-} from './search_strategy';
+import { ruleRegistrySearchStrategyProvider, EMPTY_RESPONSE } from './search_strategy';
 import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { SearchStrategyDependencies } from '@kbn/data-plugin/server';
@@ -385,48 +381,6 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     ).toStrictEqual([{ test: { order: 'desc' } }]);
   });
 
-  it('should reject, to the best of our ability, public requests', async () => {
-    (getIsKibanaRequest as jest.Mock).mockImplementation(() => {
-      return false;
-    });
-    const request: RuleRegistrySearchRequest = {
-      featureIds: [AlertConsumers.LOGS],
-      sort: [
-        {
-          test: {
-            order: 'desc',
-          },
-        },
-      ],
-    };
-    const options = {};
-    const deps = {
-      request: {},
-    };
-
-    const strategy = ruleRegistrySearchStrategyProvider(
-      data,
-      ruleDataService,
-      alerting,
-      logger,
-      security,
-      spaces
-    );
-
-    let err = null;
-    try {
-      await strategy
-        .search(request, options, deps as unknown as SearchStrategyDependencies)
-        .toPromise();
-    } catch (e) {
-      err = e;
-    }
-    expect(err).not.toBeNull();
-    expect(err.message).toBe(
-      `The ${RULE_SEARCH_STRATEGY_NAME} search strategy is currently only available for internal use.`
-    );
-  });
-
   it('passes the query ids if provided', async () => {
     const request: RuleRegistrySearchRequest = {
       featureIds: [AlertConsumers.SIEM],
@@ -454,6 +408,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     expect(searchStrategySearch).toHaveBeenCalledWith(
       {
         params: {
+          allow_no_indices: true,
           body: {
             _source: false,
             fields: [
@@ -471,6 +426,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
             size: 1000,
             sort: [],
           },
+          ignore_unavailable: true,
           index: ['test-testSpace*'],
         },
       },
@@ -507,6 +463,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
     expect(searchStrategySearch).toHaveBeenCalledWith(
       {
         params: {
+          allow_no_indices: true,
           body: {
             _source: false,
             fields: [{ field: '@timestamp', include_unmapped: true }],
@@ -519,6 +476,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
             size: 1000,
             sort: [],
           },
+          ignore_unavailable: true,
           index: ['test-testSpace*'],
         },
       },

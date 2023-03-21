@@ -19,8 +19,8 @@ const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
 describe('Build a column button to copy to clipboard', () => {
   it('should copy a column name to clipboard on click', () => {
     const { label, iconType, onClick } = buildCopyColumnNameButton({
-      columnId: 'test-field-name',
-      services: discoverServiceMock,
+      columnDisplayName: 'test-field-name',
+      toastNotifications: discoverServiceMock.toastNotifications,
     });
     execCommandMock.mockImplementationOnce(() => true);
 
@@ -30,7 +30,7 @@ describe('Build a column button to copy to clipboard', () => {
       </EuiButton>
     );
 
-    wrapper.find(EuiButton).simulate('click');
+    wrapper.find('button').simulate('click');
 
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(warn).not.toHaveBeenCalled();
@@ -48,7 +48,8 @@ describe('Build a column button to copy to clipboard', () => {
 
     const { label, iconType, onClick } = buildCopyColumnValuesButton({
       columnId: 'extension',
-      services: discoverServiceMock,
+      columnDisplayName: 'custom_extension',
+      toastNotifications: discoverServiceMock.toastNotifications,
       rowsCount: 3,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
     });
@@ -59,10 +60,10 @@ describe('Build a column button to copy to clipboard', () => {
       </EuiButton>
     );
 
-    await wrapper.find(EuiButton).simulate('click');
+    await wrapper.find('button').simulate('click');
 
     // first row out of 3 rows does not have a value
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('extension\n\njpg\ngif');
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('"custom_extension"\n\njpg\ngif');
 
     const {
       label: labelSource,
@@ -70,7 +71,8 @@ describe('Build a column button to copy to clipboard', () => {
       onClick: onClickSource,
     } = buildCopyColumnValuesButton({
       columnId: '_source',
-      services: discoverServiceMock,
+      columnDisplayName: 'Document',
+      toastNotifications: discoverServiceMock.toastNotifications,
       valueToStringConverter: discoverGridContextMock.valueToStringConverter,
       rowsCount: 3,
     });
@@ -81,12 +83,12 @@ describe('Build a column button to copy to clipboard', () => {
       </EuiButton>
     );
 
-    await wrapperSource.find(EuiButton).simulate('click');
+    await wrapperSource.find('button').simulate('click');
 
     // first row out of 3 rows does not have a value
     expect(navigator.clipboard.writeText).toHaveBeenNthCalledWith(
       2,
-      '"_source"\n{"bytes":20,"date":"2020-20-01T12:12:12.123","message":"test1","_index":"i","_score":1}\n' +
+      'Document\n{"bytes":20,"date":"2020-20-01T12:12:12.123","message":"test1","_index":"i","_score":1}\n' +
         '{"date":"2020-20-01T12:12:12.124","extension":"jpg","name":"test2","_index":"i","_score":1}\n' +
         '{"bytes":50,"date":"2020-20-01T12:12:12.124","extension":"gif","name":"test3","_index":"i","_score":1}'
     );
@@ -98,8 +100,8 @@ describe('Build a column button to copy to clipboard', () => {
 
   it('should not copy to clipboard on click', () => {
     const { label, iconType, onClick } = buildCopyColumnNameButton({
-      columnId: 'test-field-name',
-      services: discoverServiceMock,
+      columnDisplayName: 'test-field-name',
+      toastNotifications: discoverServiceMock.toastNotifications,
     });
     execCommandMock.mockImplementationOnce(() => false);
 
@@ -109,7 +111,7 @@ describe('Build a column button to copy to clipboard', () => {
       </EuiButton>
     );
 
-    wrapper.find(EuiButton).simulate('click');
+    wrapper.find('button').simulate('click');
 
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(warn).toHaveBeenCalledWith('Unable to copy to clipboard.');

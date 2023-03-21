@@ -7,8 +7,14 @@
  */
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
-import { EventAnnotationConfig, RangeEventAnnotationConfig } from '../../common';
+import {
+  EventAnnotationConfig,
+  RangeEventAnnotationConfig,
+  PointInTimeEventAnnotationConfig,
+  QueryPointEventAnnotationConfig,
+} from '../../common';
 export const defaultAnnotationColor = euiLightVars.euiColorAccent;
+// Do not compute it live as dependencies will add tens of Kbs to the plugin
 export const defaultAnnotationRangeColor = `#F04E981A`; // defaultAnnotationColor with opacity 0.1
 
 export const defaultAnnotationLabel = i18n.translate(
@@ -18,8 +24,20 @@ export const defaultAnnotationLabel = i18n.translate(
   }
 );
 
-export const isRangeAnnotation = (
+export const isRangeAnnotationConfig = (
   annotation?: EventAnnotationConfig
 ): annotation is RangeEventAnnotationConfig => {
   return Boolean(annotation && annotation?.key.type === 'range');
+};
+
+export const isManualPointAnnotationConfig = (
+  annotation?: EventAnnotationConfig
+): annotation is PointInTimeEventAnnotationConfig => {
+  return Boolean(annotation && 'timestamp' in annotation?.key);
+};
+
+export const isQueryAnnotationConfig = (
+  annotation?: EventAnnotationConfig
+): annotation is QueryPointEventAnnotationConfig => {
+  return Boolean(annotation && annotation.type === 'query');
 };

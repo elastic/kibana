@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": <%- json(pkg.id) %>,
+  "owner": <%- json(pkg.owner) %><% if (pkg.dev) { %>,
+  "devOnly": true<% } %>
+}

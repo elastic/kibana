@@ -12,7 +12,7 @@ export const fieldMappings = {
     fields: {
       keyword: {
         type: 'keyword',
-        ignore_above: 256,
+        time_series_dimension: true,
       },
     },
   },
@@ -120,18 +120,26 @@ export const fieldMappings = {
   ip_range: {
     type: 'ip_range',
   },
-  timestamp: {
+  '@timestamp': {
     type: 'date',
   },
-  '@timestamp': {
+  timestamp: {
     type: 'alias',
-    path: 'timestamp',
+    path: '@timestamp',
   },
   timestamp_range: {
     type: 'date_range',
   },
   phpmemory: {
     type: 'long',
+  },
+  bytes_counter: {
+    type: 'long',
+    time_series_metric: 'counter',
+  },
+  bytes_gauge: {
+    type: 'long',
+    time_series_metric: 'gauge',
   },
   memory: {
     type: 'double',

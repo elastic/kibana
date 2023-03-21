@@ -14,12 +14,12 @@ describe('convertValueToString', () => {
   it('should convert a keyword value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'keyword_key',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -29,27 +29,42 @@ describe('convertValueToString', () => {
   it('should convert a text value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'text_message',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
     expect(result.formattedString).toBe('"Hi there! I am a sample string."');
   });
 
+  it('should convert a text value to text (not for CSV)', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextComplexMock.rows,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
+      columnId: 'text_message',
+      rowIndex: 0,
+      options: {
+        compatibleWithCSV: false,
+      },
+    });
+
+    expect(result.formattedString).toBe('Hi there! I am a sample string.');
+  });
+
   it('should convert a multiline text value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'text_message',
       rowIndex: 1,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -60,12 +75,12 @@ describe('convertValueToString', () => {
   it('should convert a number value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'number_price',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -75,12 +90,12 @@ describe('convertValueToString', () => {
   it('should convert a date value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'date',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -90,27 +105,42 @@ describe('convertValueToString', () => {
   it('should convert a date nanos value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'date_nanos',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
     expect(result.formattedString).toBe('"2022-01-01T12:10:30.123456789Z"');
   });
 
+  it('should convert a date nanos value to text (not for CSV)', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextComplexMock.rows,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
+      columnId: 'date_nanos',
+      rowIndex: 0,
+      options: {
+        compatibleWithCSV: false,
+      },
+    });
+
+    expect(result.formattedString).toBe('2022-01-01T12:10:30.123456789Z');
+  });
+
   it('should convert a boolean value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'bool_enabled',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -120,27 +150,42 @@ describe('convertValueToString', () => {
   it('should convert a binary value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'binary_blob',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
     expect(result.formattedString).toBe('"U29tZSBiaW5hcnkgYmxvYg=="');
   });
 
+  it('should convert a binary value to text (not for CSV)', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextComplexMock.rows,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
+      columnId: 'binary_blob',
+      rowIndex: 0,
+      options: {
+        compatibleWithCSV: false,
+      },
+    });
+
+    expect(result.formattedString).toBe('U29tZSBiaW5hcnkgYmxvYg==');
+  });
+
   it('should convert an object value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'object_user.first',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -150,12 +195,12 @@ describe('convertValueToString', () => {
   it('should convert a nested value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'nested_user',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -167,12 +212,12 @@ describe('convertValueToString', () => {
   it('should convert a flattened value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'flattened_labels',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -182,12 +227,12 @@ describe('convertValueToString', () => {
   it('should convert a range value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'range_time_frame',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -199,12 +244,12 @@ describe('convertValueToString', () => {
   it('should convert a rank features value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'rank_features',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -214,12 +259,12 @@ describe('convertValueToString', () => {
   it('should convert a histogram value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'histogram',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -229,42 +274,72 @@ describe('convertValueToString', () => {
   it('should convert a IP value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'ip_addr',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
     expect(result.formattedString).toBe('"192.168.1.1"');
   });
 
+  it('should convert a IP value to text (not for CSV)', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextComplexMock.rows,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
+      columnId: 'ip_addr',
+      rowIndex: 0,
+      options: {
+        compatibleWithCSV: false,
+      },
+    });
+
+    expect(result.formattedString).toBe('192.168.1.1');
+  });
+
   it('should convert a version value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'version',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
     expect(result.formattedString).toBe('"1.2.3"');
   });
 
+  it('should convert a version value to text (not for CSV)', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextComplexMock.rows,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
+      columnId: 'version',
+      rowIndex: 0,
+      options: {
+        compatibleWithCSV: false,
+      },
+    });
+
+    expect(result.formattedString).toBe('1.2.3');
+  });
+
   it('should convert a vector value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'vector',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -274,12 +349,12 @@ describe('convertValueToString', () => {
   it('should convert a geo point value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'geo_point',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -289,12 +364,12 @@ describe('convertValueToString', () => {
   it('should convert a geo point object value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'geo_point',
       rowIndex: 1,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -304,12 +379,12 @@ describe('convertValueToString', () => {
   it('should convert an array value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'array_tags',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -319,12 +394,12 @@ describe('convertValueToString', () => {
   it('should convert a shape value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'geometry',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -336,12 +411,12 @@ describe('convertValueToString', () => {
   it('should convert a runtime value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'runtime_number',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -351,27 +426,42 @@ describe('convertValueToString', () => {
   it('should convert a scripted value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'scripted_string',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
     expect(result.formattedString).toBe('"hi there"');
   });
 
+  it('should convert a scripted value to text (not for CSV)', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextComplexMock.rows,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
+      columnId: 'scripted_string',
+      rowIndex: 0,
+      options: {
+        compatibleWithCSV: false,
+      },
+    });
+
+    expect(result.formattedString).toBe('hi there');
+  });
+
   it('should return an empty string and not fail', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'unknown',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -381,12 +471,12 @@ describe('convertValueToString', () => {
   it('should return an empty string when rowIndex is out of range', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'unknown',
       rowIndex: -1,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -396,12 +486,12 @@ describe('convertValueToString', () => {
   it('should return _source value', () => {
     const result = convertValueToString({
       rows: discoverGridContextMock.rows,
-      dataView: discoverGridContextMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: '_source',
       rowIndex: 0,
       options: {
-        disableMultiline: false,
+        compatibleWithCSV: false,
       },
     });
 
@@ -419,12 +509,12 @@ describe('convertValueToString', () => {
   it('should return a formatted _source value', () => {
     const result = convertValueToString({
       rows: discoverGridContextMock.rows,
-      dataView: discoverGridContextMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: '_source',
       rowIndex: 0,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -436,12 +526,12 @@ describe('convertValueToString', () => {
   it('should escape formula', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'array_tags',
       rowIndex: 1,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
@@ -450,17 +540,33 @@ describe('convertValueToString', () => {
 
     const result2 = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
-      dataView: discoverGridContextComplexMock.indexPattern,
-      services: discoverServiceMock,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
       columnId: 'scripted_string',
       rowIndex: 1,
       options: {
-        disableMultiline: true,
+        compatibleWithCSV: true,
       },
     });
 
     expect(result2.formattedString).toBe('"\'=1+2"";=1+2"');
     expect(result2.withFormula).toBe(true);
+  });
+
+  it('should not escape formulas when not for CSV', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextComplexMock.rows,
+      dataView: discoverGridContextComplexMock.dataView,
+      fieldFormats: discoverServiceMock.fieldFormats,
+      columnId: 'array_tags',
+      rowIndex: 1,
+      options: {
+        compatibleWithCSV: false,
+      },
+    });
+
+    expect(result.formattedString).toBe('=1+2\'" ;,=1+2');
+    expect(result.withFormula).toBe(true);
   });
 
   it('should return a formatted name', () => {

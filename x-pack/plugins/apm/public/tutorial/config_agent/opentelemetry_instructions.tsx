@@ -40,7 +40,7 @@ export function OpenTelemetryInstructions({
     {
       setting: 'OTEL_METRICS_EXPORTER',
       value: 'otlp',
-      notes: 'Enable metrics when supported by your OpenTelemtry client.',
+      notes: 'Enable metrics when supported by your OpenTelemetry client.',
     },
     {
       setting: 'OTEL_LOGS_EXPORTER',
@@ -72,7 +72,11 @@ export function OpenTelemetryInstructions({
           defaultMessage: 'Configuration value',
         }
       ),
-      render: (_, { value }) => <EuiText color="accent">{value}</EuiText>,
+      render: (_, { value }) => (
+        <EuiText size="s" color="accent">
+          {value}
+        </EuiText>
+      ),
     },
     {
       field: 'notes',

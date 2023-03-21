@@ -21,7 +21,7 @@ addons.setConfig({
   showPanel: false,
   isFullscreen: false,
   panelPosition: 'bottom',
-  isToolshown: true,
+  showToolbar: true,
 });
 
 registerThemeSwitcherAddon();

@@ -268,8 +268,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     for (const testData of testDataList) {
-      // FLAKY: https://github.com/elastic/kibana/issues/132399
-      describe.skip(`${testData.suiteTitle}`, function () {
+      describe(`${testData.suiteTitle}`, function () {
         before(async () => {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
@@ -290,6 +289,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should display the feature importance decision path', async () => {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
+          await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+          await ml.dataFrameAnalyticsResults.openFeatureImportancePopover();
+          await ml.dataFrameAnalyticsResults.assertFeatureImportancePopoverContent();
+        });
+
+        it('should display the feature importance decision path after changing page', async () => {
+          await ml.dataFrameAnalyticsResults.selectResultsTablePage(3);
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
           await ml.dataFrameAnalyticsResults.openFeatureImportancePopover();
           await ml.dataFrameAnalyticsResults.assertFeatureImportancePopoverContent();
@@ -322,6 +328,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('shows all and hides all columns');
           await ml.dataFrameAnalyticsResults.showAllResultsTableColumns();
           await ml.dataFrameAnalyticsResults.hideAllResultsTableColumns();
+        });
+
+        it('should link to custom visualization UI from scatterplot charts', async () => {
+          await ml.dataFrameAnalyticsResults.assertOpensExploreInCustomVisualization();
         });
       });
     }

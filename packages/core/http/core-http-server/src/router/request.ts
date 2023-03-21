@@ -19,6 +19,7 @@ import type { Headers } from './headers';
  */
 export interface KibanaRouteOptions extends RouteOptionsApp {
   xsrfRequired: boolean;
+  access: 'internal' | 'public';
 }
 
 /**
@@ -126,6 +127,12 @@ export interface KibanaRequest<
    * Can be set on the client using the `HttpFetchOptions#asSystemRequest` option.
    */
   readonly isSystemRequest: boolean;
+
+  /**
+   * Allows identifying requests that were created using a {@link FakeRawRequest}
+   * Even if the API facade is the same, fake requests have some stubbed functionalities.
+   */
+  readonly isFakeRequest: boolean;
 
   /**
    * The socket associated with this request.

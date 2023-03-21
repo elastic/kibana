@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
-import { CaseStatuses, CaseUserActionResponse } from '../../../../common/api';
+import type { SavedObject } from '@kbn/core/server';
+import type { CaseStatuses, CaseUserActionInjectedAttributes } from '../../../../common/api';
 
 export function createStatusChangeSavedObject(
   status: CaseStatuses,
   createdAt: Date
-): SavedObject<CaseUserActionResponse> {
+): SavedObject<CaseUserActionInjectedAttributes> {
   return {
     references: [],
     id: '',
@@ -29,8 +29,6 @@ export function createStatusChangeSavedObject(
         status,
       },
       type: 'status',
-      action_id: '',
-      case_id: '',
       comment_id: null,
     },
   };

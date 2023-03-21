@@ -45,7 +45,7 @@ const createTestCases = (spaceId: string) => {
     { ...CASES.DOES_NOT_EXIST, ...fail404() },
   ];
   const hiddenType = [{ ...CASES.HIDDEN, ...fail404() }];
-  const allTypes = normalTypes.concat(hiddenType);
+  const normalAndHidden = normalTypes.concat(hiddenType);
   // an "object namespace" string can be specified for individual objects (to bulkUpdate across namespaces)
   const withObjectNamespaces = [
     { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, namespace: DEFAULT_SPACE_ID },
@@ -58,7 +58,7 @@ const createTestCases = (spaceId: string) => {
     CASES.NAMESPACE_AGNOSTIC, // any namespace would work and would make no difference
     { ...CASES.DOES_NOT_EXIST, ...fail404() },
   ];
-  return { normalTypes, hiddenType, allTypes, withObjectNamespaces };
+  return { normalTypes, hiddenType, normalAndHidden, withObjectNamespaces };
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -68,32 +68,26 @@ export default function ({ getService }: FtrProviderContext) {
   const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
     bulkUpdateTestSuiteFactory(esArchiver, supertest);
   const createTests = (spaceId: string) => {
-    const { normalTypes, hiddenType, allTypes, withObjectNamespaces } = createTestCases(spaceId);
+    const { normalTypes, hiddenType, normalAndHidden, withObjectNamespaces } =
+      createTestCases(spaceId);
     // use singleRequest to reduce execution time and/or test combined cases
-    const authorizedCommon = [
-      createTestDefinitions(normalTypes, false, { singleRequest: true }),
-      createTestDefinitions(hiddenType, true),
-      createTestDefinitions(allTypes, true, {
-        singleRequest: true,
-        responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
-      }),
-    ].flat();
+    const singleRequest = true;
     return {
       unauthorized: [
-        createTestDefinitions(allTypes, true),
-        createTestDefinitions(withObjectNamespaces, true, { singleRequest: true }),
+        createTestDefinitions(normalTypes, true),
+        createTestDefinitions(hiddenType, false, { singleRequest }), // validation for hidden type returns 404 Not Found before authZ check
+        createTestDefinitions(withObjectNamespaces, true, { singleRequest }),
       ].flat(),
       authorizedAtSpace: [
-        authorizedCommon,
-        createTestDefinitions(withObjectNamespaces, true, { singleRequest: true }),
+        createTestDefinitions(normalAndHidden, false, { singleRequest }), // validation for hidden type returns 404 Not Found before authZ check
+        createTestDefinitions(withObjectNamespaces, true, {
+          singleRequest,
+          responseBodyOverride: expectSavedObjectForbidden(['isolatedtype,sharedtype']), // 'dashboard' and 'globaltype' are not in the error message because this user *is* authorized to update those object types in that space
+        }),
       ].flat(),
       authorizedAllSpaces: [
-        authorizedCommon,
-        createTestDefinitions(withObjectNamespaces, false, { singleRequest: true }),
-      ].flat(),
-      superuser: [
-        createTestDefinitions(allTypes, false, { singleRequest: true }),
-        createTestDefinitions(withObjectNamespaces, false, { singleRequest: true }),
+        createTestDefinitions(normalAndHidden, false, { singleRequest }), // validation for hidden type returns 404 Not Found before authZ check
+        createTestDefinitions(withObjectNamespaces, false, { singleRequest }),
       ].flat(),
     };
   };
@@ -101,8 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('_bulk_update', () => {
     getTestScenarios().securityAndSpaces.forEach(({ spaceId, users }) => {
       const suffix = ` within the ${spaceId} space`;
-      const { unauthorized, authorizedAtSpace, authorizedAllSpaces, superuser } =
-        createTests(spaceId);
+      const { unauthorized, authorizedAtSpace, authorizedAllSpaces } = createTests(spaceId);
       const _addTests = (user: TestUser, tests: BulkUpdateTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, spaceId, tests });
       };
@@ -120,10 +113,9 @@ export default function ({ getService }: FtrProviderContext) {
       [users.allAtSpace].forEach((user) => {
         _addTests(user, authorizedAtSpace);
       });
-      [users.dualAll, users.allGlobally].forEach((user) => {
+      [users.dualAll, users.allGlobally, users.superuser].forEach((user) => {
         _addTests(user, authorizedAllSpaces);
       });
-      _addTests(users.superuser, superuser);
     });
   });
 }

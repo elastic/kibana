@@ -37,6 +37,12 @@ describe('EditUserPage', () => {
     coreStart.http.post.mockClear();
     coreStart.notifications.toasts.addDanger.mockClear();
     coreStart.notifications.toasts.addSuccess.mockClear();
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      users: {
+        save: true,
+      },
+    };
   });
 
   it('warns when viewing deactivated user', async () => {
@@ -124,5 +130,30 @@ describe('EditUserPage', () => {
     );
 
     await findByText(/Role .deprecated_role. is deprecated. Use .new_role. instead/i);
+  });
+
+  it('disables form when viewing with readonly privileges', async () => {
+    coreStart.http.get.mockResolvedValueOnce(userMock);
+    coreStart.http.get.mockResolvedValueOnce([]);
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      users: {
+        save: false,
+      },
+    };
+
+    const { findByRole, findAllByRole } = render(
+      <Providers services={coreStart} theme$={theme$} authc={authc} history={history}>
+        <EditUserPage username={userMock.username} />
+      </Providers>
+    );
+
+    await findByRole('button', { name: 'Back to users' });
+
+    const fields = await findAllByRole('textbox');
+    expect(fields.length).toBeGreaterThanOrEqual(1);
+    fields.forEach((field) => {
+      expect(field).toHaveProperty('disabled', true);
+    });
   });
 });

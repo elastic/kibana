@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Filter,
@@ -35,6 +36,7 @@ interface FindListOptions {
   sortOrder: SortOrderOrUndefined;
   esClient: ElasticsearchClient;
   listIndex: string;
+  runtimeMappings: MappingRuntimeFields | undefined;
 }
 
 export const findList = async ({
@@ -47,6 +49,7 @@ export const findList = async ({
   sortField,
   listIndex,
   sortOrder,
+  runtimeMappings,
 }: FindListOptions): Promise<FoundListSchema> => {
   const query = getQueryFilter({ filter });
 
@@ -58,6 +61,7 @@ export const findList = async ({
     index: listIndex,
     page,
     perPage,
+    runtimeMappings,
     searchAfter,
     sortField,
     sortOrder,

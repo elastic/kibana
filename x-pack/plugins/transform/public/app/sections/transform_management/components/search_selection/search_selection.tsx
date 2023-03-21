@@ -19,7 +19,7 @@ interface SearchSelectionProps {
 const fixedPageSize: number = 8;
 
 export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) => {
-  const { uiSettings, savedObjects } = useAppDependencies();
+  const { uiSettings, http } = useAppDependencies();
 
   return (
     <>
@@ -67,11 +67,12 @@ export const SearchSelection: FC<SearchSelectionProps> = ({ onSearchSelected }) 
                   defaultMessage: 'Data view',
                 }
               ),
+              defaultSearchField: 'name',
             },
           ]}
           fixedPageSize={fixedPageSize}
           uiSettings={uiSettings}
-          savedObjects={savedObjects}
+          http={http}
         />
       </EuiModalBody>
     </>

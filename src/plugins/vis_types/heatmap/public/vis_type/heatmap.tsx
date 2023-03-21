@@ -16,11 +16,11 @@ import { HeatmapTypeProps, HeatmapVisParams, AxisType, ScaleType } from '../type
 import { toExpressionAst } from '../to_ast';
 import { getHeatmapOptions } from '../editor/components';
 import { SplitTooltip } from './split_tooltip';
+import { convertToLens } from '../convert_to_lens';
 
 export const getHeatmapVisTypeDefinition = ({
   showElasticChartsOptions = false,
   palettes,
-  trackUiMetric,
 }: HeatmapTypeProps): VisTypeDefinition<HeatmapVisParams> => ({
   name: 'heatmap',
   title: i18n.translate('visTypeHeatmap.heatmap.heatmapTitle', { defaultMessage: 'Heat map' }),
@@ -68,7 +68,6 @@ export const getHeatmapVisTypeDefinition = ({
     optionsTemplate: getHeatmapOptions({
       showElasticChartsOptions,
       palettes,
-      trackUiMetric,
     }),
     schemas: [
       {
@@ -156,4 +155,10 @@ export const getHeatmapVisTypeDefinition = ({
     ],
   },
   requiresSearch: true,
+  navigateToLens: async (vis, timefilter) => (vis ? convertToLens(vis, timefilter) : null),
+  getExpressionVariables: async (vis, timeFilter) => {
+    return {
+      canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
+    };
+  },
 });

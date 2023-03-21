@@ -47,7 +47,6 @@ Object {
     ],
   },
   "count": 1,
-  "customLabel": undefined,
   "esTypes": Array [
     "keyword",
   ],
@@ -57,7 +56,6 @@ Object {
       "pattern": "$0,0.[00]",
     },
   },
-  "isMapped": undefined,
   "lang": "java",
   "name": "name",
   "readFromDocValues": false,
@@ -70,7 +68,6 @@ Object {
   "script": "script",
   "scripted": true,
   "searchable": true,
-  "shortDotsEnable": undefined,
   "subType": Object {
     "multi": Object {
       "parent": "parent",

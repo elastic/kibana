@@ -7,7 +7,11 @@
 
 import React from 'react';
 
-import { ActionCell } from './action_cell';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../cell_actions';
 import { FieldValueCell } from './field_value_cell';
 import type { AlertSummaryRow } from '../helpers';
 import { hasHoverOrRowActions } from '../helpers';
@@ -21,7 +25,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
   fieldFromBrowserField,
   isDraggable,
   linkValue,
-  timelineId,
+  scopeId,
   values,
   isReadOnly,
 }) => {
@@ -30,7 +34,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
   return (
     <>
       <FieldValueCell
-        contextId={timelineId}
+        contextId={scopeId}
         data={data}
         eventId={eventId}
         fieldFromBrowserField={fieldFromBrowserField}
@@ -39,17 +43,18 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
         style={style}
         values={values}
       />
-      {timelineId !== TimelineId.active && !isReadOnly && hoverActionsEnabled && (
-        <ActionCell
-          contextId={timelineId}
-          data={data}
-          eventId={eventId}
-          fieldFromBrowserField={fieldFromBrowserField}
-          linkValue={linkValue}
-          timelineId={timelineId}
-          values={values}
-          applyWidthAndPadding={false}
-          hideAddToTimeline={false}
+      {scopeId !== TimelineId.active && !isReadOnly && hoverActionsEnabled && (
+        <SecurityCellActions
+          field={{
+            name: data.field,
+            value: values && values.length > 0 ? values[0] : '',
+            type: data.type,
+            aggregatable: fieldFromBrowserField?.aggregatable,
+          }}
+          triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
+          mode={CellActionsMode.INLINE}
+          visibleCellActions={3}
+          metadata={{ scopeId }}
         />
       )}
     </>

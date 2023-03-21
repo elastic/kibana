@@ -10,7 +10,7 @@ import { EuiText, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { useStyles } from './styles';
 import type { IndexPattern, GlobalFilter } from '../../types';
 import { addCommasToNumber } from '../../utils/add_commas_to_number';
-import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
+import { addTimerangeAndDefaultFilterToQuery } from '../../utils/add_timerange_and_default_filter_to_query';
 import { useFetchCountWidgetData } from './hooks';
 import { addResourceTypeToFilterQuery, numberFormatter } from './helpers';
 import { COUNT_WIDGET_KEY_PODS } from '../../../common/constants';
@@ -42,7 +42,11 @@ export const CountWidget = ({
     if (widgetKey === COUNT_WIDGET_KEY_PODS) {
       globalFilterModified = addResourceTypeToFilterQuery(globalFilter.filterQuery, 'pod');
     }
-    return addTimerangeToQuery(globalFilterModified, globalFilter.startDate, globalFilter.endDate);
+    return addTimerangeAndDefaultFilterToQuery(
+      globalFilterModified,
+      globalFilter.startDate,
+      globalFilter.endDate
+    );
   }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate, widgetKey]);
 
   const { data, isLoading } = useFetchCountWidgetData(

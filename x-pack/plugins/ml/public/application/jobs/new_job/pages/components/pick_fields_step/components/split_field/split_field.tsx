@@ -23,12 +23,14 @@ export const SplitFieldSelector: FC = () => {
   const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const jobCreator = jc as MultiMetricJobCreator | RareJobCreator;
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
   const allCategoryFields = useMemo(
     () =>
       [...newJobCapsService.categoryFields, ...runtimeCategoryFields].sort((a, b) =>
         a.name.localeCompare(b.name)
       ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   const categoryFields = useFilteredCategoryFields(
@@ -45,10 +47,12 @@ export const SplitFieldSelector: FC = () => {
       jobCreator.addInfluencer(splitField.name);
     }
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [splitField]);
 
   useEffect(() => {
     setSplitField(jobCreator.splitField);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return (
@@ -58,7 +62,7 @@ export const SplitFieldSelector: FC = () => {
         changeHandler={setSplitField}
         selectedField={splitField}
         isClearable={true}
-        testSubject="mlMultiMetricSplitFieldSelect"
+        testSubject="mlSplitFieldSelect"
       />
     </Description>
   );
@@ -84,6 +88,7 @@ function useFilteredCategoryFields(
         setFields(allCategoryFields);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return fields;

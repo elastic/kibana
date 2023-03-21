@@ -32,6 +32,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
   const editCalendarMatch = useRouteMatch('/settings/calendars_list/edit_calendar/:calendarId');
   const editFilterMatch = useRouteMatch('/settings/filter_lists/edit_filter_list/:filterId');
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const routesMap = useMemo(() => keyBy(routesList, 'path'), []);
 
   const activeRoute = useMemo(() => {
@@ -44,6 +45,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
     // Remove trailing slash from the pathname
     const pathnameKey = pathname.replace(/\/$/, '');
     return routesMap[pathnameKey];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   const bannerId = useRef<string | undefined>();
@@ -94,6 +96,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
     name: PLUGIN_ID,
     type: 'application',
     page: activeRoute?.path ?? '/overview',
+    id: activeRoute?.path,
   });
 
   return activeRoute ?? routesMap['/overview'];

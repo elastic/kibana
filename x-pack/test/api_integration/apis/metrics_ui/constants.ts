@@ -23,6 +23,10 @@ export const DATES = {
       min: new Date('2022-01-20T17:09:55.124Z').getTime(),
       max: new Date('2022-01-20T17:14:57.378Z').getTime(),
     },
+    hosts_and_netowrk: {
+      min: new Date('2022-11-23T14:13:19.534Z').getTime(),
+      max: new Date('2022-11-25T14:13:19.534Z').getTime(),
+    },
     hosts_only: {
       min: new Date('2022-01-18T19:57:47.534Z').getTime(),
       max: new Date('2022-01-18T20:02:50.043Z').getTime(),

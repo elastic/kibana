@@ -6,7 +6,7 @@
  */
 
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
-import { CasesTelemetry, CollectTelemetryDataParams } from '../types';
+import type { CasesTelemetry, CollectTelemetryDataParams } from '../types';
 import { getCountsAndMaxData } from './utils';
 
 export const getUserActionsTelemetryData = async ({

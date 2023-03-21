@@ -9,10 +9,10 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { Props, StylePropEditor } from '../style_prop_editor';
-// @ts-expect-error
 import { DynamicColorForm } from './dynamic_color_form';
-// @ts-expect-error
 import { StaticColorForm } from './static_color_form';
+import { DynamicColorProperty } from '../../properties/dynamic_color_property';
+import { StaticColorProperty } from '../../properties/static_color_property';
 import { ColorDynamicOptions, ColorStaticOptions } from '../../../../../../common/descriptor_types';
 
 type ColorEditorProps = Omit<Props<ColorStaticOptions, ColorDynamicOptions>, 'children'> & {
@@ -21,9 +21,9 @@ type ColorEditorProps = Omit<Props<ColorStaticOptions, ColorDynamicOptions>, 'ch
 
 export function VectorStyleColorEditor(props: ColorEditorProps) {
   const colorForm = props.styleProperty.isDynamic() ? (
-    <DynamicColorForm {...props} />
+    <DynamicColorForm {...props} styleProperty={props.styleProperty as DynamicColorProperty} />
   ) : (
-    <StaticColorForm {...props} />
+    <StaticColorForm {...props} styleProperty={props.styleProperty as StaticColorProperty} />
   );
 
   return (

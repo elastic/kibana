@@ -12,7 +12,7 @@ import type { Query } from '@kbn/es-query';
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
 import {
@@ -20,7 +20,6 @@ import {
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
-  SOURCE_BOUNDS_DATA_REQUEST_ID,
   SOURCE_DATA_REQUEST_ID,
 } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
@@ -41,7 +40,9 @@ import { LICENSED_FEATURES } from '../../licensed_features';
 import { IESSource } from '../sources/es_source';
 
 export interface ILayer {
-  getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null>;
+  getBounds(
+    getDataRequestContext: (layerId: string) => DataRequestContext
+  ): Promise<MapExtent | null>;
   getDataRequest(id: string): DataRequest | undefined;
   getDisplayName(source?: ISource): Promise<string>;
   getId(): string;
@@ -68,7 +69,6 @@ export interface ILayer {
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   isLayerLoading(): boolean;
-  isLoadingBounds(): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
@@ -92,7 +92,7 @@ export interface ILayer {
   getQueryableIndexPatternIds(): string[];
   getType(): LAYER_TYPE;
   isVisible(): boolean;
-  cloneDescriptor(): Promise<LayerDescriptor>;
+  cloneDescriptor(): Promise<LayerDescriptor[]>;
   renderStyleEditor(
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
     onCustomIconsChange: (customIcons: CustomIcon[]) => void
@@ -117,6 +117,7 @@ export interface ILayer {
   getGeoFieldNames(): string[];
   getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null>;
   isBasemap(order: number): boolean;
+  getParent(): string | undefined;
 }
 
 export type LayerIcon = {
@@ -140,7 +141,7 @@ export class AbstractLayer implements ILayer {
       ...options,
       sourceDescriptor: options.sourceDescriptor ? options.sourceDescriptor : null,
       __dataRequests: _.get(options, '__dataRequests', []),
-      id: _.get(options, 'id', uuid()),
+      id: _.get(options, 'id', uuidv4()),
       label: options.label && options.label.length > 0 ? options.label : null,
       minZoom: _.get(options, 'minZoom', MIN_ZOOM),
       maxZoom: _.get(options, 'maxZoom', MAX_ZOOM),
@@ -174,14 +175,14 @@ export class AbstractLayer implements ILayer {
     return this._descriptor;
   }
 
-  async cloneDescriptor(): Promise<LayerDescriptor> {
+  async cloneDescriptor(): Promise<LayerDescriptor[]> {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // layer id is uuid used to track styles/layers in mapbox
-    clonedDescriptor.id = uuid();
+    clonedDescriptor.id = uuidv4();
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
     clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
-    return clonedDescriptor;
+    return [clonedDescriptor];
   }
 
   makeMbLayerId(layerNameSuffix: string): string {
@@ -383,11 +384,6 @@ export class AbstractLayer implements ILayer {
     return areTilesLoading || this._dataRequests.some((dataRequest) => dataRequest.isLoading());
   }
 
-  isLoadingBounds() {
-    const boundsDataRequest = this.getDataRequest(SOURCE_BOUNDS_DATA_REQUEST_ID);
-    return !!boundsDataRequest && boundsDataRequest.isLoading();
-  }
-
   hasErrors(): boolean {
     return _.get(this._descriptor, '__isInErrorState', false);
   }
@@ -427,7 +423,9 @@ export class AbstractLayer implements ILayer {
     return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }
 
-  async getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null> {
+  async getBounds(
+    getDataRequestContext: (layerId: string) => DataRequestContext
+  ): Promise<MapExtent | null> {
     return null;
   }
 
@@ -486,6 +484,10 @@ export class AbstractLayer implements ILayer {
 
   isBasemap(order: number): boolean {
     return false;
+  }
+
+  getParent(): string | undefined {
+    return this._descriptor.parent;
   }
 
   _getMetaFromTiles(): TileMetaFeature[] {

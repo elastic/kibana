@@ -13,7 +13,7 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageHeader,
   EuiSpacer,
   EuiSwitch,
@@ -40,6 +40,7 @@ interface Props {
   notifications: NotificationsStart;
   history: ScopedHistory;
   navigateToApp: ApplicationStart['navigateToApp'];
+  readOnly?: boolean;
 }
 
 interface State {
@@ -55,6 +56,10 @@ interface State {
 }
 
 export class UsersGridPage extends Component<Props, State> {
+  static defaultProps: Partial<Props> = {
+    readOnly: false,
+  };
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -231,19 +236,23 @@ export class UsersGridPage extends Component<Props, State> {
               defaultMessage="Users"
             />
           }
-          rightSideItems={[
-            <EuiButton
-              data-test-subj="createUserButton"
-              {...reactRouterNavigate(this.props.history, `/create`)}
-              fill
-              iconType="plusInCircleFilled"
-            >
-              <FormattedMessage
-                id="xpack.security.management.users.createNewUserButtonLabel"
-                defaultMessage="Create user"
-              />
-            </EuiButton>,
-          ]}
+          rightSideItems={
+            this.props.readOnly
+              ? undefined
+              : [
+                  <EuiButton
+                    data-test-subj="createUserButton"
+                    {...reactRouterNavigate(this.props.history, `/create`)}
+                    fill
+                    iconType="plusInCircleFilled"
+                  >
+                    <FormattedMessage
+                      id="xpack.security.management.users.createNewUserButtonLabel"
+                      defaultMessage="Create user"
+                    />
+                  </EuiButton>,
+                ]
+          }
         />
 
         <EuiSpacer size="l" />
@@ -266,7 +275,7 @@ export class UsersGridPage extends Component<Props, State> {
             })}
             rowHeader="username"
             columns={columns}
-            selection={selectionConfig}
+            selection={this.props.readOnly ? undefined : selectionConfig}
             pagination={pagination}
             items={this.state.visibleUsers}
             loading={this.state.isTableLoading}

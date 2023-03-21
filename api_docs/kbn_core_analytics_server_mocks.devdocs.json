@@ -14,20 +14,29 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-analytics-server-mocks",
-        "id": "def-server.analyticsServiceMock",
+        "id": "def-common.analyticsServiceMock",
         "type": "Object",
         "tags": [],
         "label": "analyticsServiceMock",
         "description": [],
         "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-server-mocks",
-            "id": "def-server.analyticsServiceMock.create",
+            "id": "def-common.analyticsServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -37,57 +46,79 @@
             ],
             "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
           {
             "parentPluginId": "@kbn/core-analytics-server-mocks",
-            "id": "def-server.analyticsServiceMock.createAnalyticsServicePreboot",
+            "id": "def-common.analyticsServiceMock.createAnalyticsServicePreboot",
             "type": "Function",
             "tags": [],
             "label": "createAnalyticsServicePreboot",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "AnalyticsServicePreboot",
+              {
+                "pluginId": "@kbn/core-analytics-server",
+                "scope": "common",
+                "docId": "kibKbnCoreAnalyticsServerPluginApi",
+                "section": "def-common.AnalyticsServicePreboot",
+                "text": "AnalyticsServicePreboot"
+              },
               ">"
             ],
             "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
           {
             "parentPluginId": "@kbn/core-analytics-server-mocks",
-            "id": "def-server.analyticsServiceMock.createAnalyticsServiceSetup",
+            "id": "def-common.analyticsServiceMock.createAnalyticsServiceSetup",
             "type": "Function",
             "tags": [],
             "label": "createAnalyticsServiceSetup",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "AnalyticsServiceSetup",
+              {
+                "pluginId": "@kbn/core-analytics-server",
+                "scope": "common",
+                "docId": "kibKbnCoreAnalyticsServerPluginApi",
+                "section": "def-common.AnalyticsServiceSetup",
+                "text": "AnalyticsServiceSetup"
+              },
               ">"
             ],
             "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
           {
             "parentPluginId": "@kbn/core-analytics-server-mocks",
-            "id": "def-server.analyticsServiceMock.createAnalyticsServiceStart",
+            "id": "def-common.analyticsServiceMock.createAnalyticsServiceStart",
             "type": "Function",
             "tags": [],
             "label": "createAnalyticsServiceStart",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "AnalyticsServiceStart",
+              {
+                "pluginId": "@kbn/core-analytics-server",
+                "scope": "common",
+                "docId": "kibKbnCoreAnalyticsServerPluginApi",
+                "section": "def-common.AnalyticsServiceStart",
+                "text": "AnalyticsServiceStart"
+              },
               ">"
             ],
             "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -95,13 +126,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

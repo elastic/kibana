@@ -9,5 +9,4 @@
 import { ExpressionsStart, ExpressionRenderHandler } from '@kbn/expressions-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/public';
 
-export type { ExpressionsStart, Adapters };
-export { ExpressionRenderHandler };
+export type { ExpressionsStart, ExpressionRenderHandler, Adapters };

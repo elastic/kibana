@@ -27,7 +27,9 @@ import {
   MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
   SOURCE_TYPES,
+  STYLE_TYPE,
   VECTOR_SHAPE_TYPE,
+  VECTOR_STYLES,
 } from '../../../../common/constants';
 import { encodeMvtResponseBody } from '../../../../common/mvt_request_body';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
@@ -42,13 +44,16 @@ import { GetFeatureActionsArgs, GeoJsonWithMeta, IMvtVectorSource } from '../vec
 import {
   ESGeoGridSourceDescriptor,
   MapExtent,
+  SizeDynamicOptions,
   TooltipFeatureAction,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { ImmutableSourceProperty, OnSourceChangeArgs, SourceEditorArgs } from '../source';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { makePublicExecutionContext } from '../../../util';
 import { isMvt } from './is_mvt';
+import { VectorStyle } from '../../styles/vector/vector_style';
+import { getIconSize } from './get_icon_size';
 
 type ESGeoGridSourceSyncMeta = Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'>;
 
@@ -88,12 +93,40 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> {
+    async function onChange(...sourceChanges: OnSourceChangeArgs[]) {
+      sourceEditorArgs.onChange(...sourceChanges);
+      const resolutionPropChange = sourceChanges.find((sourceChange) => {
+        return sourceChange.propName === 'resolution';
+      });
+      if (resolutionPropChange && 'getPropertiesDescriptor' in sourceEditorArgs.style) {
+        const propertiesDescriptor = (
+          sourceEditorArgs.style as VectorStyle
+        ).getPropertiesDescriptor();
+        if (propertiesDescriptor[VECTOR_STYLES.ICON_SIZE].type === STYLE_TYPE.DYNAMIC) {
+          propertiesDescriptor[VECTOR_STYLES.ICON_SIZE] = {
+            ...propertiesDescriptor[VECTOR_STYLES.ICON_SIZE],
+            options: {
+              ...propertiesDescriptor[VECTOR_STYLES.ICON_SIZE].options,
+              ...getIconSize(resolutionPropChange.value as GRID_RESOLUTION),
+            },
+          } as {
+            type: STYLE_TYPE.DYNAMIC;
+            options: SizeDynamicOptions;
+          };
+          const vectorStyleDescriptor = VectorStyle.createDescriptor(
+            propertiesDescriptor,
+            (sourceEditorArgs.style as VectorStyle).isTimeAware()
+          );
+          sourceEditorArgs.onStyleDescriptorChange(vectorStyleDescriptor);
+        }
+      }
+    }
     return (
       <UpdateSourceEditor
         currentLayerType={sourceEditorArgs.currentLayerType}
         geoFieldName={this.getGeoFieldName()}
         indexPatternId={this.getIndexPatternId()}
-        onChange={sourceEditorArgs.onChange}
+        onChange={onChange}
         metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
         resolution={this._descriptor.resolution}
@@ -109,14 +142,6 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
-    let indexPatternName = this.getIndexPatternId();
-    try {
-      const indexPattern = await this.getIndexPattern();
-      indexPatternName = indexPattern.title;
-    } catch (error) {
-      // ignore error, title will just default to id
-    }
-
     return [
       {
         label: getDataSourceLabel(),
@@ -124,7 +149,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       },
       {
         label: getDataViewLabel(),
-        value: indexPatternName,
+        value: await this.getDisplayName(),
       },
       {
         label: i18n.translate('xpack.maps.source.esGrid.geospatialFieldLabel', {
@@ -477,11 +502,12 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
   async getTileUrl(
     searchFilters: VectorSourceRequestMeta,
     refreshToken: string,
-    hasLabels: boolean
+    hasLabels: boolean,
+    buffer: number
   ): Promise<string> {
-    const indexPattern = await this.getIndexPattern();
+    const dataView = await this.getIndexPattern();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
-    searchSource.setField('aggs', this.getValueAggsDsl(indexPattern));
+    searchSource.setField('aggs', this.getValueAggsDsl(dataView));
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
@@ -489,9 +515,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 
     return `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
-&index=${indexPattern.title}\
+&index=${dataView.getIndexPattern()}\
 &gridPrecision=${this._getGeoGridPrecisionResolutionDelta()}\
 &hasLabels=${hasLabels}\
+&buffer=${buffer}\
 &requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
 &renderAs=${this._descriptor.requestType}\
 &token=${refreshToken}`;

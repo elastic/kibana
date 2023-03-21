@@ -36,7 +36,6 @@ import {
   services,
   LegacyServicesProvider,
   CanvasPluginServices,
-  pluginServices as canvasServices,
 } from './services';
 import { initFunctions } from './functions';
 // @ts-expect-error untyped local
@@ -154,11 +153,7 @@ export const initializeCanvas = async (
       ReactDOM.render(
         <KibanaThemeProvider theme$={coreStart.theme.theme$}>
           <Provider store={canvasStore}>
-            <HelpMenu
-              functionRegistry={expressions.getFunctions()}
-              notifyService={canvasServices.getServices().notify}
-              hideHelpMenu={hideHelpMenu}
-            />
+            <HelpMenu hideHelpMenu={hideHelpMenu} />
           </Provider>
         </KibanaThemeProvider>,
         domNode

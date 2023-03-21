@@ -83,7 +83,9 @@ security is enabled, <<xpack-security-encryptionKey, `xpack.security.encryptionK
 Specifies the {time-units}[time] that the reporting poller waits between polling the index for any pending Reporting jobs. Can be specified as number of milliseconds. Defaults to `3s`.
 
 [[xpack-reporting-q-timeout]] `xpack.reporting.queue.timeout` {ess-icon}::
-{time-units}[How long] each worker has to produce a report. If your machine is slow or under heavy load, you might need to increase this timeout. If a Reporting job execution goes over this time limit, the job is marked as a failure and no download will be available. Can be specified as number of milliseconds. Defaults to `2m`.
+{time-units}[How long] each worker has to produce a report. If your machine is slow or under heavy load, you
+might need to increase this timeout. If a Reporting job execution goes over this time limit, the job is marked
+as a failure and no download will be available. Can be specified as number of milliseconds. Defaults to `4m`.
 
 [float]
 [[reporting-capture-settings]]
@@ -92,13 +94,19 @@ Specifies the {time-units}[time] that the reporting poller waits between polling
 Reporting uses an internal "screenshotting" plugin to capture screenshots from {kib}. The following settings control the capturing process.
 
 `xpack.screenshotting.capture.timeouts.openUrl` {ess-icon}::
-Specify the {time-units}[time] to allow the Reporting browser to wait for the "Loading..." screen to dismiss and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
+Specify the {time-units}[time] to allow the Reporting browser to wait for the "Loading..." screen to dismiss
+and find the initial data for the page. If the time is exceeded, a screenshot is captured showing the current
+page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
 
 `xpack.screenshotting.capture.timeouts.waitForElements` {ess-icon}::
- Specify the {time-units}[time] to allow the Reporting browser to wait for all visualization panels to load on the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `30s`.
+Specify the {time-units}[time] to allow the Reporting browser to wait for all visualization panels to load on
+the page. If the time is exceeded, a screenshot is captured showing the current page, and the download link
+shows a warning message. Can be specified as number of milliseconds. Defaults to `1m`.
 
 `xpack.screenshotting.capture.timeouts.renderComplete` {ess-icon}::
- Specify the {time-units}[time] to allow the Reporting browser to wait for all visualizations to fetch and render the data. If the time is exceeded, a screenshot is captured showing the current page, and the download link shows a warning message. Can be specified as number of milliseconds. Defaults to `30s`.
+Specify the {time-units}[time] to allow the Reporting browser to wait for all visualizations to fetch and
+render the data. If the time is exceeded, a screenshot is captured showing the current page, and the download
+link shows a warning message. Can be specified as number of milliseconds. Defaults to `2m`.
 
 NOTE: If any timeouts from `xpack.screenshotting.capture.timeouts.*` settings occur when
 running a report job, Reporting will log the error and try to continue
@@ -106,7 +114,7 @@ capturing the page with a screenshot. As a result, a download will be
 available, but there will likely be errors in the visualizations in the report.
 
 `xpack.screenshotting.capture.loadDelay`::
-deprecated:[8.0.0,This setting has no effect.] Specify the {time-units}[amount of time] before taking a screenshot when visualizations are not evented. All visualizations that ship with {kib} are evented, so this setting should not have much effect. If you are seeing empty images instead of visualizations, try increasing this value. Defaults to `3s`. *NOTE*: This setting exists for backwards compatibility, but is unused and therefore does not have an affect on reporting performance.
+deprecated:[8.0.0,This setting has no effect.] Specify the {time-units}[amount of time] before taking a screenshot when visualizations are not evented. All visualizations that ship with {kib} are evented, so this setting should not have much effect. If you are seeing empty images instead of visualizations, try increasing this value. *NOTE*: This setting exists for backwards compatibility, but is unused and therefore does not have an affect on reporting performance.
 
 [float]
 [[reporting-chromium-settings]]
@@ -115,7 +123,7 @@ deprecated:[8.0.0,This setting has no effect.] Specify the {time-units}[amount o
 For PDF and PNG reports, Reporting spawns a headless Chromium browser process on the server to load and capture a screenshot of the {kib} app. When installing {kib} on Linux and Windows platforms, the Chromium binary comes bundled with the {kib} download. For Mac platforms, the Chromium binary is downloaded the first time {kib} is started.
 
 `xpack.screenshotting.browser.chromium.disableSandbox`::
-It is recommended that you research the feasibility of enabling unprivileged user namespaces. An exception is if you are running {kib} in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters. For more information, refer to <<reporting-chromium-sandbox>>. Defaults to `false` for all operating systems except Debian and Red Hat Linux, which use `true`.
+It is recommended that you research the feasibility of enabling unprivileged user namespaces. An exception is if you are running {kib} in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters. For more information, refer to <<reporting-chromium-sandbox>>. Defaults to `false` for all operating systems except CentOS, Debian, and Red Hat Linux, which use `true`.
 
 `xpack.screenshotting.browser.chromium.proxy.enabled`::
 Enables the proxy for Chromium to use. When set to `true`, you must also specify the `xpack.screenshotting.browser.chromium.proxy.server` setting. Defaults to `false`.

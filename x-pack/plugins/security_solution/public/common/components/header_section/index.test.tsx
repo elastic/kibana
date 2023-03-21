@@ -11,8 +11,28 @@ import React from 'react';
 
 import { TestProviders } from '../../mock';
 import { getHeaderAlignment, HeaderSection } from '.';
+import { ModalInspectQuery } from '../inspect/modal';
+
+jest.mock('../inspect/modal', () => {
+  const actual = jest.requireActual('../inspect/modal');
+  return {
+    ...actual,
+    ModalInspectQuery: jest.fn().mockReturnValue(null),
+  };
+});
+
+jest.mock('../inspect/use_inspect', () => ({
+  useInspect: () => ({
+    isShowingModal: true,
+    handleClick: jest.fn(),
+    request: 'fake request',
+    response: 'fake response',
+  }),
+}));
 
 describe('HeaderSection', () => {
+  beforeEach(() => jest.clearAllMocks());
+
   test('it renders', () => {
     const wrapper = shallow(<HeaderSection title="Test title" />);
 
@@ -110,10 +130,10 @@ describe('HeaderSection', () => {
 
     expect(
       wrapper
-        .find('.euiFlexItem--flexGrowZero[data-test-subj="header-section-supplements"]')
-        .first()
-        .exists()
-    ).toBe(false);
+        .find('.euiFlexItem[data-test-subj="header-section-supplements"]')
+        .last()
+        .prop('className')
+    ).not.toContain('growZero');
   });
 
   test('it DOES NOT split the title and supplement areas evenly when split is false', () => {
@@ -127,10 +147,10 @@ describe('HeaderSection', () => {
 
     expect(
       wrapper
-        .find('.euiFlexItem--flexGrowZero[data-test-subj="header-section-supplements"]')
-        .first()
-        .exists()
-    ).toBe(true);
+        .find('.euiFlexItem[data-test-subj="header-section-supplements"]')
+        .last()
+        .prop('className')
+    ).toContain('growZero');
   });
 
   test('it renders an inspect button when an `id` is provided', () => {
@@ -181,6 +201,35 @@ describe('HeaderSection', () => {
     expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toBe(false);
   });
 
+  test('it defaults to using `title` for the inspect modal when `inspectTitle` is NOT provided', () => {
+    const title = 'Use this by default';
+
+    mount(
+      <TestProviders>
+        <HeaderSection id="abcd" title={title}>
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect((ModalInspectQuery as jest.Mock).mock.calls[0][0].title).toEqual(title);
+  });
+
+  test('it uses `inspectTitle` instead of `title` for the inspect modal when `inspectTitle` is provided', () => {
+    const title = `Don't use this`;
+    const inspectTitle = 'Use this instead';
+
+    mount(
+      <TestProviders>
+        <HeaderSection id="abcd" inspectTitle={inspectTitle} title={title}>
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect((ModalInspectQuery as jest.Mock).mock.calls[0][0].title).toEqual(inspectTitle);
+  });
+
   test('it does not render query-toggle-header when no arguments provided', () => {
     const wrapper = mount(
       <TestProviders>
@@ -215,8 +264,8 @@ describe('HeaderSection', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="headerSectionOuterFlexGroup"]').first().getDOMNode()
-    ).not.toHaveClass('euiFlexGroup--alignItemsFlexStart');
+      wrapper.find('[data-test-subj="headerSectionOuterFlexGroup"]').last().getDOMNode().className
+    ).not.toContain('flexStart-flexStart');
   });
 
   test(`it uses the 'column' direction in the outer flex group by default`, () => {
@@ -229,8 +278,8 @@ describe('HeaderSection', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="headerSectionOuterFlexGroup"]').first().getDOMNode()
-    ).toHaveClass('euiFlexGroup--directionColumn');
+      wrapper.find('[data-test-subj="headerSectionOuterFlexGroup"]').last().getDOMNode().className
+    ).toContain('column');
   });
 
   test('it uses the `outerDirection` prop to specify the direction of the outer flex group when it is provided', () => {
@@ -243,8 +292,8 @@ describe('HeaderSection', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="headerSectionOuterFlexGroup"]').first().getDOMNode()
-    ).toHaveClass('euiFlexGroup--directionRow');
+      wrapper.find('[data-test-subj="headerSectionOuterFlexGroup"]').last().getDOMNode().className
+    ).toContain('row');
   });
 
   test('it defaults to center alignment in the inner flex group', () => {
@@ -257,8 +306,8 @@ describe('HeaderSection', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').first().getDOMNode()
-    ).toHaveClass('euiFlexGroup--alignItemsCenter');
+      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').last().getDOMNode().className
+    ).toContain('center');
   });
 
   test('it aligns items using the value of the `alignHeader` prop in the inner flex group when specified', () => {
@@ -271,8 +320,8 @@ describe('HeaderSection', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').first().getDOMNode()
-    ).toHaveClass('euiFlexGroup--alignItemsFlexEnd');
+      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').last().getDOMNode().className
+    ).toContain('flexEnd');
   });
 
   test('it does NOT default to center alignment in the inner flex group when the `stackHeader` prop is true', () => {
@@ -285,8 +334,8 @@ describe('HeaderSection', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').first().getDOMNode()
-    ).not.toHaveClass('euiFlexGroup--alignItemsCenter');
+      wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').last().getDOMNode().className
+    ).not.toContain('center');
   });
 
   test('it does render everything but title when toggleStatus = true', () => {

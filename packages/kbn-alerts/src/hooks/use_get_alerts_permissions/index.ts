@@ -9,7 +9,7 @@
 import { useEffect, useState } from 'react';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
-// import { Capabilities } from 'kibana/public';
+// import { Capabilities } from '@kbn/core/public';
 type Capabilities = any;
 export interface UseGetUserAlertsPermissionsProps {
   crud: boolean;

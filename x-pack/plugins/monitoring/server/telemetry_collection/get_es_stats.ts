@@ -52,7 +52,6 @@ export async function fetchElasticsearchStats(
 ) {
   const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_ELASTICSEARCH,
-    size: maxBucketSize,
     ignore_unavailable: true,
     filter_path: [
       'hits.hits._source.cluster_uuid',
@@ -63,6 +62,7 @@ export async function fetchElasticsearchStats(
       'hits.hits._source.stack_stats',
     ],
     body: {
+      size: maxBucketSize,
       query: {
         bool: {
           filter: [

@@ -20,8 +20,7 @@ describe('CreateCrawlerIndexApiLogic', () => {
     it('calls correct api', async () => {
       const indexName = 'elastic-co-crawler';
       const language = 'Universal';
-      const promise = Promise.resolve({ created: true });
-      http.post.mockReturnValue(promise);
+      http.post.mockReturnValue(Promise.resolve({ created: indexName }));
 
       const result = createCrawlerIndex({ indexName, language });
       await nextTick();
@@ -29,7 +28,7 @@ describe('CreateCrawlerIndexApiLogic', () => {
       expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/crawler', {
         body: JSON.stringify({ index_name: indexName, language }),
       });
-      await expect(result).resolves.toEqual({ created: true });
+      await expect(result).resolves.toEqual({ created: indexName });
     });
   });
 });

@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/third-party-vis-lens-example-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "plugin": {
+    "id": "thirdPartyVisLensExample",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "third_part_vis_lens_example"
+    ],
+    "requiredPlugins": [
+      "lens",
+      "dataViews",
+      "embeddable",
+      "developerExamples",
+      "expressions",
+      "fieldFormats"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

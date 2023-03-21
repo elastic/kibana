@@ -7,10 +7,6 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-export interface IndexMappingsResponse {
-  [indexName: string]: { mappings: { _meta: { version: number } } };
-}
-
 export interface IndexVersionsByIndex {
   [indexName: string]: number | undefined;
 }

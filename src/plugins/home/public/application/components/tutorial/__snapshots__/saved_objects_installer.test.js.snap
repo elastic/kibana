@@ -8,10 +8,10 @@ Array [
     Load Kibana objects
   </h2>,
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-center-row"
   >
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <div
         class="euiText emotion-euiText-m"
@@ -22,18 +22,18 @@ Array [
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton euiButton--primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
         data-test-subj="loadSavedObjects"
         type="button"
       >
         <span
-          class="euiButtonContent euiButton__content"
+          class="emotion-euiButtonDisplayContent"
         >
           <span
-            class="euiButton__text"
+            class="eui-textTruncate"
           >
             Load Kibana objects
           </span>
@@ -65,10 +65,10 @@ Array [
     Load Kibana objects
   </h2>,
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-spaceBetween-center-row"
   >
     <div
-      class="euiFlexItem"
+      class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <div
         class="euiText emotion-euiText-m"
@@ -79,18 +79,18 @@ Array [
       </div>
     </div>
     <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
+      class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiButton euiButton--primary"
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
         data-test-subj="loadSavedObjects"
         type="button"
       >
         <span
-          class="euiButtonContent euiButton__content"
+          class="emotion-euiButtonDisplayContent"
         >
           <span
-            class="euiButton__text"
+            class="eui-textTruncate"
           >
             Load Kibana objects
           </span>
@@ -138,9 +138,11 @@ exports[`renders 1`] = `
       grow={false}
     >
       <EuiButton
+        color="primary"
         data-test-subj="loadSavedObjects"
         isLoading={false}
         onClick={[Function]}
+        size="m"
       >
         Load Kibana objects
       </EuiButton>

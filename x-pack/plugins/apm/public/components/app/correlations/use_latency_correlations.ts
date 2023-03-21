@@ -23,6 +23,7 @@ import type {
   LatencyCorrelation,
   LatencyCorrelationsResponse,
 } from '../../../../common/correlations/latency_correlations/types';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
@@ -71,7 +72,7 @@ export function useLatencyCorrelations() {
       latencyCorrelations: undefined,
       percentileThresholdValue: undefined,
       overallHistogram: undefined,
-      fieldStats: undefined,
+      totalDocCount: undefined,
     });
     setResponse.flush();
 
@@ -84,7 +85,13 @@ export function useLatencyCorrelations() {
       };
 
       // Initial call to fetch the overall distribution for the log-log plot.
-      const { overallHistogram, percentileThresholdValue } = await callApmApi(
+      const {
+        overallHistogram,
+        totalDocCount,
+        percentileThresholdValue,
+        durationMin,
+        durationMax,
+      } = await callApmApi(
         'POST /internal/apm/latency/overall_distribution/transactions',
         {
           signal: abortCtrl.current.signal,
@@ -92,11 +99,13 @@ export function useLatencyCorrelations() {
             body: {
               ...fetchParams,
               percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+              chartType: LatencyDistributionChartType.latencyCorrelations,
             },
           },
         }
       );
       responseUpdate.overallHistogram = overallHistogram;
+      responseUpdate.totalDocCount = totalDocCount;
       responseUpdate.percentileThresholdValue = percentileThresholdValue;
 
       if (abortCtrl.current.signal.aborted) {
@@ -187,7 +196,12 @@ export function useLatencyCorrelations() {
           {
             signal: abortCtrl.current.signal,
             params: {
-              body: { ...fetchParams, fieldValuePairs: fieldValuePairChunk },
+              body: {
+                ...fetchParams,
+                durationMin,
+                durationMax,
+                fieldValuePairs: fieldValuePairChunk,
+              },
             },
           }
         );
@@ -242,20 +256,6 @@ export function useLatencyCorrelations() {
       }
       setResponse.flush();
 
-      const { stats } = await callApmApi(
-        'POST /internal/apm/correlations/field_stats/transactions',
-        {
-          signal: abortCtrl.current.signal,
-          params: {
-            body: {
-              ...fetchParams,
-              fieldsToSample: [...fieldsToSample],
-            },
-          },
-        }
-      );
-
-      responseUpdate.fieldStats = stats;
       setResponse({
         ...responseUpdate,
         loaded: LOADED_DONE,

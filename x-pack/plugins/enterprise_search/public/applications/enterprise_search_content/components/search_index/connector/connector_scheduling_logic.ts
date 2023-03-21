@@ -7,24 +7,17 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import { ConnectorScheduling } from '../../../../../../common/types/connectors';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import {
-  clearFlashMessages,
-  flashAPIErrors,
-  flashSuccessToast,
-} from '../../../../shared/flash_messages';
 
 import {
   UpdateConnectorSchedulingApiLogic,
   UpdateConnectorSchedulingArgs,
-} from '../../../api/connector_package/update_connector_scheduling_api_logic';
+} from '../../../api/connector/update_connector_scheduling_api_logic';
 
 type ConnectorSchedulingActions = Pick<
   Actions<UpdateConnectorSchedulingArgs, ConnectorScheduling>,
-  'apiError' | 'apiSuccess' | 'makeRequest'
+  'apiSuccess'
 > & { setHasChanges: (hasChanges: boolean) => { hasChanges: boolean } };
 
 interface ConnectorSchedulingValues {
@@ -38,18 +31,7 @@ export const ConnectorSchedulingLogic = kea<
     setHasChanges: (hasChanges) => ({ hasChanges }),
   },
   connect: {
-    actions: [UpdateConnectorSchedulingApiLogic, ['apiError', 'apiSuccess', 'makeRequest']],
-  },
-  listeners: {
-    apiError: (error) => flashAPIErrors(error),
-    apiSuccess: () =>
-      flashSuccessToast(
-        i18n.translate(
-          'xpack.enterpriseSearch.content.indices.configurationConnector.scheduling.successToast.title',
-          { defaultMessage: 'Scheduling successfully updated' }
-        )
-      ),
-    makeRequest: () => clearFlashMessages(),
+    actions: [UpdateConnectorSchedulingApiLogic, ['apiSuccess']],
   },
   reducers: {
     hasChanges: [

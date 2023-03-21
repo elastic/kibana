@@ -5,18 +5,37 @@
  * 2.0.
  */
 
+import { CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { Actions, ActionTypes } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import { UserActionParameters, BuilderReturnValue } from '../types';
+import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
 
 export class StatusUserActionBuilder extends UserActionBuilder {
-  build(args: UserActionParameters<'status'>): BuilderReturnValue {
-    return this.buildCommonUserAction({
+  build(args: UserActionParameters<'status'>): UserActionEvent {
+    const action = Actions.update;
+
+    const parameters = this.buildCommonUserAction({
       ...args,
-      action: Actions.update,
+      action,
       valueKey: 'status',
       value: args.payload.status,
       type: ActionTypes.status,
     });
+
+    const getMessage = (id?: string) =>
+      `User updated the status for case id: ${args.caseId} - user action id: ${id}`;
+
+    const eventDetails: EventDetails = {
+      getMessage,
+      action,
+      descriptiveAction: 'case_user_action_update_case_status',
+      savedObjectId: args.caseId,
+      savedObjectType: CASE_SAVED_OBJECT,
+    };
+
+    return {
+      parameters,
+      eventDetails,
+    };
   }
 }

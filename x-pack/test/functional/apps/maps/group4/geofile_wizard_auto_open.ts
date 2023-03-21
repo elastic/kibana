@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const geoFileCard = await find.byCssSelector(
         '[data-test-subj="integration-card:ui_link:ingest_geojson"]'
       );
-      geoFileCard.click();
+      await geoFileCard.click();
     });
 
     it('should navigate to maps app with url params', async () => {

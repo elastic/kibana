@@ -13,7 +13,10 @@ import { METRIC_TYPES } from './metric_agg_types';
 
 describe('AggTypeMetricStandardDeviationProvider class', () => {
   const typesRegistry = mockAggTypesRegistry();
-  const getAggConfigs = (customLabel?: string) => {
+  const getAggConfigs = ({
+    customLabel,
+    showBounds,
+  }: { customLabel?: string; showBounds?: boolean } = {}) => {
     const field = {
       name: 'memory',
     };
@@ -38,6 +41,7 @@ describe('AggTypeMetricStandardDeviationProvider class', () => {
               displayName: 'memory',
             },
             customLabel,
+            ...(showBounds != null ? { showBounds } : {}),
           },
         },
       ],
@@ -47,7 +51,7 @@ describe('AggTypeMetricStandardDeviationProvider class', () => {
   };
 
   it('uses the custom label if it is set', () => {
-    const aggConfigs = getAggConfigs('custom label');
+    const aggConfigs = getAggConfigs({ customLabel: 'custom label' });
     const responseAggs: any = getStdDeviationMetricAgg().getResponseAggs(
       aggConfigs.aggs[0] as IStdDevAggConfig
     );
@@ -101,5 +105,13 @@ describe('AggTypeMetricStandardDeviationProvider class', () => {
         "type": "expression",
       }
     `);
+  });
+
+  it('returns null without throwing if no "extended_stats" is returned', () => {
+    const aggConfigs = getAggConfigs({ showBounds: false });
+
+    expect(() =>
+      getStdDeviationMetricAgg().getValue(aggConfigs.aggs[0] as IStdDevAggConfig, {})
+    ).not.toThrow();
   });
 });

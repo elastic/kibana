@@ -9,7 +9,7 @@ import AbortController from 'abort-controller';
 import fetch from 'node-fetch';
 
 import { KibanaRequest, Logger } from '@kbn/core/server';
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { ConfigType } from '..';
 import { isVersionMismatch } from '../../common/is_version_mismatch';
@@ -87,6 +87,7 @@ export const callEnterpriseSearchConfigAPI = async ({
       kibanaVersion: kibanaPackageJson.version,
       access: {
         hasAppSearchAccess: !!data?.current_user?.access?.app_search,
+        hasSearchEnginesAccess: !!data?.current_user?.access?.search_engines,
         hasWorkplaceSearchAccess: !!data?.current_user?.access?.workplace_search,
       },
       publicUrl: stripTrailingSlash(data?.settings?.external_url),

@@ -10,7 +10,6 @@ import { ApmPlugin, ApmPluginSetup, ApmPluginStart } from './plugin';
 
 export interface ConfigSchema {
   serviceMapEnabled: boolean;
-  profilingEnabled: boolean;
   ui: {
     enabled: boolean;
   };

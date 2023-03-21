@@ -53,6 +53,7 @@ Object {
       "shape": "arc",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -105,6 +106,7 @@ Object {
       "shape": "arc",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -155,6 +157,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -205,6 +208,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -255,6 +259,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "bands",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -307,6 +312,7 @@ Object {
       "shape": "circle",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -359,6 +365,7 @@ Object {
       "shape": "circle",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -409,6 +416,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -459,6 +467,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "hidden",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -509,6 +518,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -559,6 +569,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -609,6 +620,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -659,6 +671,7 @@ Object {
       "shape": "horizontalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {
@@ -709,6 +722,7 @@ Object {
       "shape": "verticalBullet",
       "ticksPosition": "auto",
     },
+    "canNavigateToLens": false,
     "data": Object {
       "columns": Array [
         Object {

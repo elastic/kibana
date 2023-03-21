@@ -43,7 +43,7 @@ const PackDetailsPageComponent = () => {
 
   const { data } = usePack({ packId });
   const { data: agentIds } = useAgentPolicyAgentIds({
-    agentPolicyId: data?.policy_id,
+    agentPolicyId: data?.policy_ids?.[0],
     skip: !data,
   });
 
@@ -51,7 +51,6 @@ const PackDetailsPageComponent = () => {
 
   const queriesArray = useMemo(
     () =>
-      // @ts-expect-error update types
       (data?.queries && Object.entries(data.queries).map(([id, query]) => ({ ...query, id }))) ??
       [],
     [data]
@@ -108,10 +107,7 @@ const PackDetailsPageComponent = () => {
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription className="eui-textNoWrap">
-              {
-                // @ts-expect-error update types
-                <AgentPoliciesPopover agentPolicyIds={data?.policy_ids} />
-              }
+              <AgentPoliciesPopover agentPolicyIds={data?.policy_ids} />
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>
@@ -133,7 +129,6 @@ const PackDetailsPageComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    // @ts-expect-error update types
     [data?.policy_ids, editQueryLinkProps, permissions]
   );
 

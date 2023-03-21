@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { History } from 'history';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -20,7 +20,7 @@ import { KibanaThemeProvider } from '../theme';
 const ReactMarkdown = React.lazy(() => import('react-markdown'));
 const ErrorRenderer = (props: { children: string }) => (
   <React.Suspense fallback={<EuiLoadingSpinner />}>
-    <ReactMarkdown renderers={{ root: Fragment }} {...props} />
+    <ReactMarkdown {...props} />
   </React.Suspense>
 );
 

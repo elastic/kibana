@@ -54,7 +54,7 @@ describe('<IndexManagementHome />', () => {
         const { find } = testBed;
 
         const indexManagementContainer = find('indexManagementHeaderContent');
-        const tabListContainer = indexManagementContainer.find('.euiTabs');
+        const tabListContainer = indexManagementContainer.find('div.euiTabs');
         const allTabs = tabListContainer.children();
         const allTabsLabels = ['Indices', 'Data Streams', 'Index Templates', 'Component Templates'];
 

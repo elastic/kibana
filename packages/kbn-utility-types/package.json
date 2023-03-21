@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "main": "target_node/index.js",
-  "kibana": {
-    "devOnly": false
-  },
   "scripts": {
     "test": "../../node_modules/.bin/tsd src/tsd_tests"
   }

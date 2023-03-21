@@ -13,3 +13,9 @@ export enum SearchSessionStatus {
   CANCELLED = 'cancelled',
   EXPIRED = 'expired',
 }
+
+export enum SearchStatus {
+  IN_PROGRESS = 'in_progress',
+  ERROR = 'error',
+  COMPLETE = 'complete',
+}

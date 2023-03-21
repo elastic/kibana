@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { CasesClientArgs } from './types';
-import { CasesSubClient, createCasesSubClient } from './cases/client';
-import { AttachmentsSubClient, createAttachmentsSubClient } from './attachments/client';
-import { UserActionsSubClient, createUserActionsSubClient } from './user_actions/client';
-import { CasesClientInternal, createCasesClientInternal } from './client_internal';
-import { ConfigureSubClient, createConfigurationSubClient } from './configure/client';
-import { createMetricsSubClient, MetricsSubClient } from './metrics/client';
+import type { CasesClientArgs } from './types';
+import type { CasesSubClient } from './cases/client';
+import { createCasesSubClient } from './cases/client';
+import type { AttachmentsSubClient } from './attachments/client';
+import { createAttachmentsSubClient } from './attachments/client';
+import type { UserActionsSubClient } from './user_actions/client';
+import { createUserActionsSubClient } from './user_actions/client';
+import type { CasesClientInternal } from './client_internal';
+import { createCasesClientInternal } from './client_internal';
+import type { ConfigureSubClient } from './configure/client';
+import { createConfigurationSubClient } from './configure/client';
+import type { MetricsSubClient } from './metrics/client';
+import { createMetricsSubClient } from './metrics/client';
 
 /**
  * Client wrapper that contains accessor methods for individual entities within the cases system.
@@ -28,7 +34,7 @@ export class CasesClient {
     this._casesClientInternal = createCasesClientInternal(args);
     this._cases = createCasesSubClient(args, this, this._casesClientInternal);
     this._attachments = createAttachmentsSubClient(args, this, this._casesClientInternal);
-    this._userActions = createUserActionsSubClient(args);
+    this._userActions = createUserActionsSubClient(args, this);
     this._configure = createConfigurationSubClient(args, this._casesClientInternal);
     this._metrics = createMetricsSubClient(args, this);
   }

@@ -2,16 +2,16 @@
 
 exports[`Intro component renders correctly 1`] = `
 <header
-  class="euiPageHeader euiPageHeader--bottomBorder euiPageHeader--responsive euiPageHeader--center"
+  class="euiPageHeader emotion-euiPageHeader"
 >
   <div
-    class="euiPageHeaderContent"
+    class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+      class="euiFlexGroup euiPageHeaderContent__top emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
     >
       <div
-        class="euiFlexItem"
+        class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <h1
           class="euiTitle emotion-euiTitle-l"
@@ -20,57 +20,47 @@ exports[`Intro component renders correctly 1`] = `
         </h1>
       </div>
       <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--wrap euiPageHeaderContent__rightSideItems"
+          class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-rowReverse"
         >
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <a
-              class="euiButton euiButton--primary euiButton--small"
+              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-primary"
               data-test-subj="savedObjectEditViewInApp"
               href="/some-url"
               rel="noreferrer"
             >
               <span
-                class="euiButtonContent euiButton__content"
+                class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent__icon"
                   color="inherit"
                   data-euiicon-type="eye"
                 />
-                <span
-                  class="euiButton__text"
-                >
-                  View saved object
-                </span>
+                View saved object
               </span>
             </a>
           </div>
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
+            class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <button
-              class="euiButton euiButton--danger euiButton--small"
+              class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-s-base-danger"
               data-test-subj="savedObjectEditDelete"
               type="button"
             >
               <span
-                class="euiButtonContent euiButton__content"
+                class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent__icon"
                   color="inherit"
                   data-euiicon-type="trash"
                 />
-                <span
-                  class="euiButton__text"
-                >
-                  Delete
-                </span>
+                Delete
               </span>
             </button>
           </div>

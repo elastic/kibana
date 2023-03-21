@@ -9,7 +9,7 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
   }
 >
   <EuiPageBody>
-    <EuiPageContent
+    <EuiPageContent_Deprecated
       horizontalPosition="center"
       verticalPosition="center"
     >
@@ -21,6 +21,7 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
               data-test-subj="clearSession"
               fill={true}
               onClick={[Function]}
+              size="m"
             >
               <FormattedMessage
                 defaultMessage="Clear your session"
@@ -93,7 +94,7 @@ Error: bar
   stack...bar.js:1:1
         </EuiCodeBlock>
       </EuiCallOut>
-    </EuiPageContent>
+    </EuiPageContent_Deprecated>
   </EuiPageBody>
 </EuiPage>
 `;

@@ -7,7 +7,7 @@
  */
 
 import { get } from 'lodash';
-import type { Datatable } from '@kbn/expressions-plugin';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { TabbedAggResponseWriter } from './response_writer';
 import { TabifyBuckets } from './buckets';
 import type { TabbedResponseWriterOptions } from './types';
@@ -147,7 +147,9 @@ export function tabifyAggResponse(
 
   const write = new TabbedAggResponseWriter(aggConfigs, respOpts || {});
   const topLevelBucket: AggResponseBucket = {
-    ...esResponse.aggregations,
+    ...(aggConfigs.isSamplingEnabled()
+      ? esResponse.aggregations?.sampling
+      : esResponse.aggregations),
     doc_count: esResponse.aggregations?.doc_count || esResponse.hits?.total,
   };
 

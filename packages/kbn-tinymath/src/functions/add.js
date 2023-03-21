@@ -17,8 +17,6 @@
  * add([1, 2], 3, [4, 5], 6) // returns [(1 + 3 + 4 + 6), (2 + 3 + 5 + 6)] = [14, 16]
  */
 
-module.exports = { add };
-
 function add(...args) {
   if (args.length === 1) {
     if (Array.isArray(args[0])) return args[0].reduce((result, current) => result + current);
@@ -35,3 +33,4 @@ function add(...args) {
     return result + current;
   });
 }
+module.exports = { add };

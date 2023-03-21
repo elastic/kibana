@@ -50,13 +50,14 @@ describe('esaggs expression function - public', () => {
     metricsAtAllLevels: true,
     partialRows: false,
     timeFields: ['@timestamp', 'utc_time'],
+    probability: 1,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockHandlers = {
       abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
-      getSearchContext: jest.fn(),
+      getSearchContext: jest.fn().mockReturnValue({}),
       getSearchSessionId: jest.fn().mockReturnValue('abc123'),
       getExecutionContext: jest.fn(),
       inspectorAdapters: jest.fn(),
@@ -88,7 +89,7 @@ describe('esaggs expression function - public', () => {
     expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith(
       {},
       args.aggs.map((agg) => agg.value),
-      { hierarchical: true, partialRows: false }
+      { hierarchical: true, partialRows: false, probability: 1, samplerSeed: undefined }
     );
   });
 
@@ -98,6 +99,8 @@ describe('esaggs expression function - public', () => {
     expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith({}, [], {
       hierarchical: true,
       partialRows: false,
+      probability: 1,
+      samplerSeed: undefined,
     });
   });
 
@@ -123,6 +126,7 @@ describe('esaggs expression function - public', () => {
       searchSessionId: 'abc123',
       searchSourceService: startDependencies.searchSource,
       timeFields: args.timeFields,
+      disableShardWarnings: false,
       timeRange: undefined,
       getNow: undefined,
     });

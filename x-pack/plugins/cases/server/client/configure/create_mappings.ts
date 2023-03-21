@@ -6,17 +6,21 @@
  */
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { ConnectorMappingsAttributes } from '../../../common/api';
+import type { ConnectorMappingsAttributes } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import { CasesClientArgs } from '..';
-import { CreateMappingsArgs } from './types';
+import type { CasesClientArgs } from '..';
+import type { CreateMappingsArgs } from './types';
 import { casesConnectors } from '../../connectors';
 
 export const createMappings = async (
   { connector, owner, refresh }: CreateMappingsArgs,
   clientArgs: CasesClientArgs
 ): Promise<ConnectorMappingsAttributes[]> => {
-  const { unsecuredSavedObjectsClient, connectorMappingsService, logger } = clientArgs;
+  const {
+    unsecuredSavedObjectsClient,
+    services: { connectorMappingsService },
+    logger,
+  } = clientArgs;
 
   try {
     const mappings = casesConnectors.get(connector.type)?.getMapping() ?? [];

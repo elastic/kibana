@@ -10,16 +10,15 @@ import { EuiListGroupItemProps } from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { DiscoverServices } from '../../build_services';
 import { getFieldCapabilities } from '../../utils/get_field_capabilities';
 
 export const buildEditFieldButton = ({
-  services,
+  hasEditDataViewPermission,
   dataView,
   field,
   editField,
 }: {
-  services: DiscoverServices;
+  hasEditDataViewPermission: () => boolean;
   dataView: DataView;
   field: DataViewField;
   editField: (fieldName: string) => void;
@@ -29,7 +28,7 @@ export const buildEditFieldButton = ({
   }
 
   const { canEdit: canEditField } = getFieldCapabilities(dataView, field);
-  const canEditDataView = Boolean(services.dataViewEditor?.userPermissions?.editDataView());
+  const canEditDataView = hasEditDataViewPermission() || !dataView.isPersisted();
 
   if (!canEditField || !canEditDataView) {
     return null;

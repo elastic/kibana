@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-export interface AlertsStackByOption {
-  text: AlertsStackByField;
-  value: AlertsStackByField;
-}
-
 export type AlertsStackByField =
   | 'kibana.alert.risk_score'
   | 'kibana.alert.severity'
@@ -25,3 +20,9 @@ export type AlertsStackByField =
   | 'process.name'
   | 'file.name'
   | 'hash.sha256';
+
+export interface AddFilterProps {
+  field: string;
+  value: string | number | null;
+  negate?: boolean;
+}

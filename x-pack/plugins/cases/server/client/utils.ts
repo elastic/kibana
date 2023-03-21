@@ -6,35 +6,48 @@
  */
 
 import { badRequest } from '@hapi/boom';
-import { get, isPlainObject } from 'lodash';
+import { get, isPlainObject, differenceWith, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { validate as uuidValidate } from 'uuid';
 
-import { nodeBuilder, fromKueryExpression, KueryNode, escapeKuery } from '@kbn/es-query';
-import {
-  isCommentRequestTypeExternalReference,
-  isCommentRequestTypePersistableState,
-} from '../../common/utils/attachments';
-import { CASE_SAVED_OBJECT } from '../../common/constants';
+import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
+import type { KueryNode } from '@kbn/es-query';
+
+import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
+import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
+
+import type {
+  CaseStatuses,
+  CommentRequest,
+  CaseSeverity,
+  CommentRequestExternalReferenceType,
+  CasesFindRequest,
+} from '../../common/api';
+import type { SavedObjectFindOptionsKueryNode } from '../common/types';
+import type { CasesFindQueryParams } from './types';
+
 import {
   OWNER_FIELD,
   AlertCommentRequestRt,
   ActionsCommentRequestRt,
-  CaseStatuses,
-  CommentRequest,
   ContextTypeUserRt,
   excess,
   throwErrors,
-  CaseSeverity,
   ExternalReferenceStorageType,
   ExternalReferenceSORt,
-  CommentRequestExternalReferenceType,
   ExternalReferenceNoSORt,
   PersistableStateAttachmentRt,
 } from '../../common/api';
+import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+import {
+  isCommentRequestTypeExternalReference,
+  isCommentRequestTypePersistableState,
+} from '../../common/utils/attachments';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
+import { SEVERITY_EXTERNAL_TO_ESMODEL, STATUS_EXTERNAL_TO_ESMODEL } from '../common/constants';
 import {
   getIDsAndIndicesAsArrays,
   isCommentRequestTypeAlert,
@@ -42,9 +55,12 @@ import {
   isCommentRequestTypeActions,
   assertUnreachable,
 } from '../common/utils';
-import { SavedObjectFindOptionsKueryNode } from '../common/types';
+import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 
-export const decodeCommentRequest = (comment: CommentRequest) => {
+export const decodeCommentRequest = (
+  comment: CommentRequest,
+  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
+) => {
   if (isCommentRequestTypeUser(comment)) {
     pipe(excess(ContextTypeUserRt).decode(comment), fold(throwErrors(badRequest), identity));
   } else if (isCommentRequestTypeActions(comment)) {
@@ -94,7 +110,7 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
       );
     }
   } else if (isCommentRequestTypeExternalReference(comment)) {
-    decodeExternalReferenceAttachment(comment);
+    decodeExternalReferenceAttachment(comment, externalRefRegistry);
   } else if (isCommentRequestTypePersistableState(comment)) {
     pipe(
       excess(PersistableStateAttachmentRt).decode(comment),
@@ -110,7 +126,10 @@ export const decodeCommentRequest = (comment: CommentRequest) => {
   }
 };
 
-const decodeExternalReferenceAttachment = (attachment: CommentRequestExternalReferenceType) => {
+const decodeExternalReferenceAttachment = (
+  attachment: CommentRequestExternalReferenceType,
+  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
+) => {
   if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
     pipe(excess(ExternalReferenceSORt).decode(attachment), fold(throwErrors(badRequest), identity));
   } else {
@@ -118,6 +137,13 @@ const decodeExternalReferenceAttachment = (attachment: CommentRequestExternalRef
       excess(ExternalReferenceNoSORt).decode(attachment),
       fold(throwErrors(badRequest), identity)
     );
+  }
+
+  const metadata = attachment.externalReferenceMetadata;
+  if (externalRefRegistry.has(attachment.externalReferenceAttachmentTypeId)) {
+    const attachmentType = externalRefRegistry.get(attachment.externalReferenceAttachmentTypeId);
+
+    attachmentType.schemaValidator?.(metadata);
   }
 };
 
@@ -141,7 +167,9 @@ export const addStatusFilter = ({
   type?: string;
 }): KueryNode => {
   const filters: KueryNode[] = [];
-  filters.push(nodeBuilder.is(`${type}.attributes.status`, status));
+  filters.push(
+    nodeBuilder.is(`${type}.attributes.status`, `${STATUS_EXTERNAL_TO_ESMODEL[status]}`)
+  );
 
   if (appendFilter) {
     filters.push(appendFilter);
@@ -160,7 +188,10 @@ export const addSeverityFilter = ({
   type?: string;
 }): KueryNode => {
   const filters: KueryNode[] = [];
-  filters.push(nodeBuilder.is(`${type}.attributes.severity`, severity));
+
+  filters.push(
+    nodeBuilder.is(`${type}.attributes.severity`, `${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}`)
+  );
 
   if (appendFilter) {
     filters.push(appendFilter);
@@ -169,11 +200,22 @@ export const addSeverityFilter = ({
   return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
 };
 
+export const NodeBuilderOperators = {
+  and: 'and',
+  or: 'or',
+} as const;
+
+type NodeBuilderOperatorsType = keyof typeof NodeBuilderOperators;
+
 interface FilterField {
   filters?: string | string[];
   field: string;
-  operator: 'and' | 'or';
+  operator: NodeBuilderOperatorsType;
   type?: string;
+}
+
+interface NestedFilterField extends FilterField {
+  nestedField: string;
 }
 
 export const buildFilter = ({
@@ -193,7 +235,48 @@ export const buildFilter = ({
   }
 
   return nodeBuilder[operator](
-    filtersAsArray.map((filter) => nodeBuilder.is(`${type}.attributes.${field}`, filter))
+    filtersAsArray.map((filter) =>
+      nodeBuilder.is(`${escapeKuery(type)}.attributes.${escapeKuery(field)}`, escapeKuery(filter))
+    )
+  );
+};
+
+/**
+ * Creates a KueryNode filter for the Saved Object find API's filter field. This handles constructing a filter for
+ * a nested field.
+ *
+ * @param filters is a string or array of strings that defines the values to search for
+ * @param field is the location to search for
+ * @param nestedField is the field in the saved object that has a type of 'nested'
+ * @param operator whether to 'or'/'and' the created filters together
+ * @type the type of saved object being searched
+ * @returns a constructed KueryNode representing the filter or undefined if one could not be built
+ */
+export const buildNestedFilter = ({
+  filters,
+  field,
+  nestedField,
+  operator,
+  type = CASE_SAVED_OBJECT,
+}: NestedFilterField): KueryNode | undefined => {
+  if (filters === undefined) {
+    return;
+  }
+
+  const filtersAsArray = Array.isArray(filters) ? filters : [filters];
+
+  if (filtersAsArray.length === 0) {
+    return;
+  }
+
+  return nodeBuilder[operator](
+    filtersAsArray.map((filter) =>
+      fromKueryExpression(
+        `${escapeKuery(type)}.attributes.${escapeKuery(nestedField)}:{ ${escapeKuery(
+          field
+        )}: ${escapeKuery(filter)} }`
+      )
+    )
   );
 };
 
@@ -217,14 +300,17 @@ export const combineAuthorizedAndOwnerFilter = (
 
 /**
  * Combines Kuery nodes and accepts an array with a mixture of undefined and KueryNodes. This will filter out the undefined
- * filters and return a KueryNode with the filters and'd together.
+ * filters and return a KueryNode with the filters combined using the specified operator which defaults to and if not defined.
  */
-export function combineFilters(nodes: Array<KueryNode | undefined>): KueryNode | undefined {
+export function combineFilters(
+  nodes: Array<KueryNode | undefined>,
+  operator: NodeBuilderOperatorsType = NodeBuilderOperators.and
+): KueryNode | undefined {
   const filters = nodes.filter((node): node is KueryNode => node !== undefined);
   if (filters.length <= 0) {
     return;
   }
-  return nodeBuilder.and(filters);
+  return nodeBuilder[operator](filters);
 }
 
 /**
@@ -273,6 +359,43 @@ export const buildRangeFilter = ({
   }
 };
 
+export const buildAssigneesFilter = ({
+  assignees,
+}: {
+  assignees: CasesFindQueryParams['assignees'];
+}): KueryNode | undefined => {
+  if (assignees === undefined) {
+    return;
+  }
+
+  const assigneesAsArray = Array.isArray(assignees) ? assignees : [assignees];
+
+  if (assigneesAsArray.length === 0) {
+    return;
+  }
+
+  const assigneesWithoutNone = assigneesAsArray.filter(
+    (assignee) => assignee !== NO_ASSIGNEES_FILTERING_KEYWORD
+  );
+  const hasNoneAssignee = assigneesAsArray.some(
+    (assignee) => assignee === NO_ASSIGNEES_FILTERING_KEYWORD
+  );
+
+  const assigneesFilter = assigneesWithoutNone.map((filter) =>
+    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, escapeKuery(filter))
+  );
+
+  if (!hasNoneAssignee) {
+    return nodeBuilder.or(assigneesFilter);
+  }
+
+  const filterCasesWithoutAssigneesKueryNode = fromKueryExpression(
+    `not ${CASE_SAVED_OBJECT}.attributes.assignees.uid: *`
+  );
+
+  return nodeBuilder.or([...assigneesFilter, filterCasesWithoutAssigneesKueryNode]);
+};
+
 export const constructQueryOptions = ({
   tags,
   reporters,
@@ -283,92 +406,81 @@ export const constructQueryOptions = ({
   authorizationFilter,
   from,
   to,
-}: {
-  tags?: string | string[];
-  reporters?: string | string[];
-  status?: CaseStatuses;
-  severity?: CaseSeverity;
-  sortByField?: string;
-  owner?: string | string[];
-  authorizationFilter?: KueryNode;
-  from?: string;
-  to?: string;
-}): SavedObjectFindOptionsKueryNode => {
-  const kueryNodeExists = (filter: KueryNode | null | undefined): filter is KueryNode =>
-    filter != null;
-
-  const tagsFilter = buildFilter({ filters: tags ?? [], field: 'tags', operator: 'or' });
-  const reportersFilter = buildFilter({
-    filters: reporters ?? [],
-    field: 'created_by.username',
-    operator: 'or',
-  });
-  const sortField = sortToSnake(sortByField);
-  const ownerFilter = buildFilter({ filters: owner ?? [], field: OWNER_FIELD, operator: 'or' });
+  assignees,
+}: CasesFindQueryParams): SavedObjectFindOptionsKueryNode => {
+  const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
+  const reportersFilter = createReportersFilter(reporters);
+  const sortField = convertSortField(sortByField);
+  const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
 
   const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
   const severityFilter = severity != null ? addSeverityFilter({ severity }) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
+  const assigneesFilter = buildAssigneesFilter({ assignees });
 
-  const filters: KueryNode[] = [
+  const filters = combineFilters([
     statusFilter,
     severityFilter,
     tagsFilter,
     reportersFilter,
     rangeFilter,
     ownerFilter,
-  ].filter(kueryNodeExists);
-
-  const caseFilters = filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
+    assigneesFilter,
+  ]);
 
   return {
-    filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
+    filter: combineFilterWithAuthorizationFilter(filters, authorizationFilter),
     sortField,
   };
 };
 
-interface CompareArrays {
-  addedItems: string[];
-  deletedItems: string[];
-}
-export const compareArrays = ({
-  originalValue,
-  updatedValue,
-}: {
-  originalValue: string[];
-  updatedValue: string[];
-}): CompareArrays => {
-  const result: CompareArrays = {
-    addedItems: [],
-    deletedItems: [],
-  };
-  originalValue.forEach((origVal) => {
-    if (!updatedValue.includes(origVal)) {
-      result.deletedItems = [...result.deletedItems, origVal];
-    }
-  });
-  updatedValue.forEach((updatedVal) => {
-    if (!originalValue.includes(updatedVal)) {
-      result.addedItems = [...result.addedItems, updatedVal];
-    }
+const createReportersFilter = (reporters?: string | string[]): KueryNode | undefined => {
+  const reportersFilter = buildFilter({
+    filters: reporters,
+    field: 'created_by.username',
+    operator: 'or',
   });
 
-  return result;
+  const reportersProfileUidFilter = buildFilter({
+    filters: reporters,
+    field: 'created_by.profile_uid',
+    operator: 'or',
+  });
+
+  const filters = [reportersFilter, reportersProfileUidFilter].filter(
+    (filter): filter is KueryNode => filter != null
+  );
+
+  if (filters.length <= 0) {
+    return;
+  }
+
+  return nodeBuilder.or(filters);
 };
 
-export const isTwoArraysDifference = (
-  originalValue: unknown,
-  updatedValue: unknown
-): CompareArrays | null => {
+interface CompareArrays<T> {
+  addedItems: T[];
+  deletedItems: T[];
+}
+
+export const arraysDifference = <T>(
+  originalValue: T[] | undefined | null,
+  updatedValue: T[] | undefined | null
+): CompareArrays<T> | null => {
   if (
     originalValue != null &&
     updatedValue != null &&
     Array.isArray(updatedValue) &&
     Array.isArray(originalValue)
   ) {
-    const compObj = compareArrays({ originalValue, updatedValue });
-    if (compObj.addedItems.length > 0 || compObj.deletedItems.length > 0) {
-      return compObj;
+    const addedItems = differenceWith(updatedValue, originalValue, isEqual);
+    const deletedItems = differenceWith(originalValue, updatedValue, isEqual);
+
+    if (addedItems.length > 0 || deletedItems.length > 0) {
+      return {
+        addedItems,
+        deletedItems,
+      };
     }
   }
   return null;
@@ -388,7 +500,7 @@ export const getCaseToUpdate = (
     (acc, [key, value]) => {
       const currentValue = get(currentCase, key);
       if (Array.isArray(currentValue) && Array.isArray(value)) {
-        if (isTwoArraysDifference(value, currentValue)) {
+        if (arraysDifference(value, currentValue)) {
           return {
             ...acc,
             [key]: value,
@@ -419,9 +531,12 @@ enum SortFieldCase {
   closedAt = 'closed_at',
   createdAt = 'created_at',
   status = 'status',
+  title = 'title.keyword',
+  severity = 'severity',
+  updatedAt = 'updated_at',
 }
 
-export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
+export const convertSortField = (sortField: string | undefined): SortFieldCase => {
   switch (sortField) {
     case 'status':
       return SortFieldCase.status;
@@ -431,7 +546,39 @@ export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
     case 'closedAt':
     case 'closed_at':
       return SortFieldCase.closedAt;
+    case 'title':
+      return SortFieldCase.title;
+    case 'severity':
+      return SortFieldCase.severity;
+    case 'updatedAt':
+    case 'updated_at':
+      return SortFieldCase.updatedAt;
     default:
       return SortFieldCase.createdAt;
   }
+};
+
+export const constructSearch = (
+  search: string | undefined,
+  spaceId: string,
+  savedObjectsSerializer: ISavedObjectsSerializer
+): Pick<CasesFindRequest, 'search' | 'rootSearchFields'> | undefined => {
+  if (!search) {
+    return undefined;
+  }
+
+  if (uuidValidate(search)) {
+    const rawId = savedObjectsSerializer.generateRawId(
+      spaceIdToNamespace(spaceId),
+      CASE_SAVED_OBJECT,
+      search
+    );
+
+    return {
+      search: `"${search}" "${rawId}"`,
+      rootSearchFields: ['_id'],
+    };
+  }
+
+  return { search };
 };

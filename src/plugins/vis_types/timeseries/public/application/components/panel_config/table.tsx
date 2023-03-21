@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { get } from 'lodash';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import {
   htmlIdGenerator,
   EuiTabs,
@@ -30,9 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { FieldSelect } from '../aggs/field_select';
-// @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
-// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
 import { YesNo } from '../yes_no';
 
@@ -57,7 +55,7 @@ export class TablePanelConfig extends Component<
   UNSAFE_componentWillMount() {
     const { model } = this.props;
     if (!model.bar_color_rules || !model.bar_color_rules.length) {
-      this.props.onChange({ bar_color_rules: [{ id: uuid.v1() }] });
+      this.props.onChange({ bar_color_rules: [{ id: uuidv1() }] });
     }
   }
 

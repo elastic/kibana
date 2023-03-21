@@ -5,18 +5,14 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-
-import type { SetEventsDeleted, SetEventsLoading } from '@kbn/timelines-plugin/common';
-import { StatefulEventContext } from '@kbn/timelines-plugin/public';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import type {
   ColumnHeaderOptions,
   CellValueElementProps,
-  ControlColumnProps,
   RowRenderer,
-  TimelineExpandedDetailType,
 } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import type {
@@ -40,6 +36,13 @@ import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { useGetMappedNonEcsValue } from '../data_driven_columns';
+import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
+import type {
+  ControlColumnProps,
+  ExpandedDetailType,
+  SetEventsDeleted,
+  SetEventsLoading,
+} from '../../../../../../common/types';
 
 interface Props {
   actionsColumnWidth: number;
@@ -160,7 +163,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   );
 
   const hasRowRenderers: boolean = useMemo(
-    () => getRowRenderer(event.ecs, rowRenderers) != null,
+    () => getRowRenderer({ data: event.ecs, rowRenderers }) != null,
     [event.ecs, rowRenderers]
   );
 
@@ -187,7 +190,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const indexName = event._index!;
 
-    const updatedExpandedDetail: TimelineExpandedDetailType = {
+    const updatedExpandedDetail: ExpandedDetailType = {
       panelView: 'eventDetail',
       params: {
         eventId,
@@ -200,7 +203,7 @@ const StatefulEventComponent: React.FC<Props> = ({
       timelineActions.toggleDetailPanel({
         ...updatedExpandedDetail,
         tabType,
-        timelineId,
+        id: timelineId,
       })
     );
 
@@ -280,6 +283,7 @@ const StatefulEventComponent: React.FC<Props> = ({
           <EventsTrSupplement
             className="siemEventsTable__trSupplement--notes"
             data-test-subj="event-notes-flex-item"
+            $display="block"
           >
             <NoteCards
               ariaRowindex={ariaRowindex}
@@ -291,16 +295,20 @@ const StatefulEventComponent: React.FC<Props> = ({
             />
           </EventsTrSupplement>
 
-          <EventsTrSupplement>
-            <StatefulRowRenderer
-              ariaRowindex={ariaRowindex}
-              containerRef={containerRef}
-              event={event}
-              lastFocusedAriaColindex={lastFocusedAriaColindex}
-              rowRenderers={rowRenderers}
-              timelineId={timelineId}
-            />
-          </EventsTrSupplement>
+          <EuiFlexGroup gutterSize="none" justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EventsTrSupplement>
+                <StatefulRowRenderer
+                  ariaRowindex={ariaRowindex}
+                  containerRef={containerRef}
+                  event={event}
+                  lastFocusedAriaColindex={lastFocusedAriaColindex}
+                  rowRenderers={rowRenderers}
+                  timelineId={timelineId}
+                />
+              </EventsTrSupplement>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EventsTrSupplementContainerWrapper>
       </EventsTrGroup>
     </StatefulEventContext.Provider>

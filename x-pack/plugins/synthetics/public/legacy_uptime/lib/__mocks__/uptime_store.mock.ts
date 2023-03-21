@@ -128,4 +128,6 @@ export const mockState: AppState = {
     hitCount: [],
   },
   testNowRuns: {},
+  agentPolicies: { loading: false, data: null, error: null },
+  deleteMonitor: {},
 };

@@ -15,7 +15,7 @@ import { DonutChart } from './donutchart';
 import { DraggableLegend } from './draggable_legend';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');
@@ -31,14 +31,9 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
-jest.mock('uuid', () => {
-  const actual = jest.requireActual('uuid');
-
-  return {
-    ...actual,
-    v4: jest.fn().mockReturnValue('test-uuid'),
-  };
-});
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('test-uuid'),
+}));
 
 jest.mock('../../../overview/components/detection_response/alerts_by_status/chart_label', () => {
   return {
@@ -75,13 +70,12 @@ describe('DonutChart', () => {
   const props: DonutChartProps = {
     data: parsedMockAlertsData?.open?.severities,
     label: 'Open',
-    link: null,
     title: <ChartLabel count={parsedMockAlertsData?.open?.total} />,
     fillColor: jest.fn(() => '#ccc'),
     totalCount: parsedMockAlertsData?.open?.total,
     legendItems: (['critical', 'high', 'medium', 'low'] as Severity[]).map((d) => ({
       color: testColors[d],
-      dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuid.v4()}-${d}`),
+      dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuidv4()}-${d}`),
       timelineId: undefined,
       field: 'kibana.alert.severity',
       value: d,
@@ -183,5 +177,11 @@ describe('DonutChart', () => {
     };
     const { container } = render(<DonutChart {...testProps} />);
     expect(container.querySelector(`[data-test-subj="legend"]`)).not.toBeInTheDocument();
+  });
+
+  test('should render label within a tooltip', () => {
+    const { container } = render(<DonutChart {...props} />);
+    const tooltip = container.getElementsByClassName('euiToolTipAnchor')[0];
+    expect(tooltip.textContent).toBe(props.label);
   });
 });

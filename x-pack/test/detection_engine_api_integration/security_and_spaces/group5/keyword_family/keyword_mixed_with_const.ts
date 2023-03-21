@@ -7,16 +7,16 @@
 
 import expect from '@kbn/expect';
 import {
-  EqlCreateSchema,
-  ThresholdCreateSchema,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+  EqlRuleCreateProps,
+  ThresholdRuleCreateProps,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { ALERT_THRESHOLD_RESULT } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getEqlRuleForSignalTesting,
   getRuleForSignalTesting,
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     describe('"kql" rule type', () => {
@@ -91,7 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('"eql" rule type', () => {
       it('should detect the "dataset_name_1" from "event.dataset" and have 8 signals, 4 from each index', async () => {
-        const rule: EqlCreateSchema = {
+        const rule: EqlRuleCreateProps = {
           ...getEqlRuleForSignalTesting(['keyword', 'const_keyword']),
           query: 'any where event.dataset=="dataset_name_1"',
         };
@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should copy the "dataset_name_1" from "event.dataset"', async () => {
-        const rule: EqlCreateSchema = {
+        const rule: EqlRuleCreateProps = {
           ...getEqlRuleForSignalTesting(['keyword', 'const_keyword']),
           query: 'any where event.dataset=="dataset_name_1"',
         };
@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('"threshold" rule type', async () => {
       it('should detect the "dataset_name_1" from "event.dataset"', async () => {
-        const rule: ThresholdCreateSchema = {
+        const rule: ThresholdRuleCreateProps = {
           ...getRuleForSignalTesting(['keyword', 'const_keyword']),
           rule_id: 'threshold-rule',
           type: 'threshold',

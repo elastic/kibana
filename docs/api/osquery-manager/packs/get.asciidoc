@@ -1,0 +1,82 @@
+[[osquery-manager-packs-api-get]]
+=== Get pack API
+++++
+<titleabbrev>Get pack</titleabbrev>
+++++
+
+experimental[] Retrieve a single pack by ID.
+
+
+[[osquery-manager-packs-api-get-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/osquery/packs/<id>`
+
+`GET <kibana host>:<port>/s/<space_id>/api/osquery/packs/<id>`
+
+
+[[osquery-manager-packs-api-get-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
+
+`id`::
+(Required, string) The ID of the pack you want to retrieve.
+
+
+[[osquery-manager-packs-api-get-codes]]
+==== Response code
+
+`200`::
+Indicates a successful call.
+
+`404`::
+The specified pack and ID doesn't exist.
+
+
+[[osquery-manager-packs-api-get-example]]
+==== Example
+
+Retrieve the pack object with the `bbe5b070-0c51-11ed-b0f8-ad31b008e832` ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/osquery/packs/bbe5b070-0c51-11ed-b0f8-ad31b008e832
+--------------------------------------------------
+// KIBANA
+
+The API returns the pack object:
+
+[source,sh]
+--------------------------------------------------
+{
+  "data": {
+    "id": "bbe5b070-0c51-11ed-b0f8-ad31b008e832",
+    "type": "osquery-pack",
+    "namespaces": [
+      "default"
+    ],
+    "updated_at": "2022-07-25T20:12:01.455Z",
+    "name": "test_pack",
+    "queries": {
+      "uptime": {
+        "interval": 3600,
+        "query": "select * from uptime",
+        "ecs_mapping": {
+          "message": {
+            "field": "days"
+          }
+        }
+      }
+    },
+    "enabled": true,
+    "created_at": "2022-07-25T19:41:10.263Z",
+    "created_by": "elastic",
+    "updated_by": "elastic",
+    "description": "",
+    "policy_ids": [],
+    "read_only": false # true for prebuilt packs
+  }
+}
+--------------------------------------------------

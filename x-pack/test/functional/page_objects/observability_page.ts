@@ -11,8 +11,13 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function ObservabilityPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const textValue = 'Foobar';
 
   return {
+    async clickSolutionNavigationEntry(appId: string, navId: string) {
+      await testSubjects.click(`observability-nav-${appId}-${navId}`);
+    },
+
     async expectCreateCaseButtonEnabled() {
       const button = await testSubjects.find('createNewCaseBtn', 20000);
       const disabledAttr = await button.getAttribute('disabled');
@@ -40,6 +45,7 @@ export function ObservabilityPageProvider({ getService, getPageObjects }: FtrPro
     },
 
     async expectAddCommentButton() {
+      await testSubjects.setValue('add-comment', textValue);
       const button = await testSubjects.find('submit-comment', 20000);
       const disabledAttr = await button.getAttribute('disabled');
       expect(disabledAttr).to.be(null);
@@ -53,6 +59,11 @@ export function ObservabilityPageProvider({ getService, getPageObjects }: FtrPro
       const h2 = await testSubjects.find('noFeaturePermissions', 20000);
       const text = await h2.getVisibleText();
       expect(text).to.contain('Kibana feature privileges required');
+    },
+
+    async getDatePickerRangeText() {
+      const datePickerButton = await testSubjects.find('superDatePickerShowDatesButton');
+      return await datePickerButton.getVisibleText();
     },
   };
 }

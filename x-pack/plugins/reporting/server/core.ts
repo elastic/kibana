@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import Hapi from '@hapi/hapi';
 import type {
+  DocLinksServiceSetup,
+  FakeRawRequest,
+  Headers,
   IBasePath,
   IClusterClient,
+  KibanaRequest,
   Logger,
   PackageInfo,
   PluginInitializerContext,
@@ -17,8 +20,9 @@ import type {
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import { KibanaRequest, CoreKibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
+import { CoreKibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -57,6 +61,7 @@ export interface ReportingInternalSetup {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   status: StatusServiceSetup;
+  docLinks: DocLinksServiceSetup;
 }
 
 export interface ReportingInternalStart {
@@ -65,6 +70,7 @@ export interface ReportingInternalStart {
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
   data: DataPluginStart;
+  discover: DiscoverServerPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   logger: Logger;
@@ -321,14 +327,16 @@ export class ReportingCore {
     }
   }
 
-  public getFakeRequest(baseRequest: object, spaceId: string | undefined, logger = this.logger) {
-    const fakeRequest = CoreKibanaRequest.from({
+  public getFakeRequest(
+    headers: Headers,
+    spaceId: string | undefined,
+    logger = this.logger
+  ): KibanaRequest {
+    const rawRequest: FakeRawRequest = {
+      headers,
       path: '/',
-      route: { settings: {} },
-      url: { href: '/' },
-      raw: { req: { url: '/' } },
-      ...baseRequest,
-    } as Hapi.Request);
+    };
+    const fakeRequest = CoreKibanaRequest.from(rawRequest);
 
     const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
     if (spacesService) {

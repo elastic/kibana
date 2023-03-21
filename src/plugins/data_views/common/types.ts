@@ -6,31 +6,31 @@
  * Side Public License, v 1.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SavedObject,
+  SavedObjectsCreateOptions,
+  SavedObjectsUpdateOptions,
+} from '@kbn/core/public';
+import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
 import type { DataViewFieldBase } from '@kbn/es-query';
-import { ToastInputFields, ErrorToastOptions } from '@kbn/core/public/notifications';
-// eslint-disable-next-line
-import type { SavedObject } from 'src/core/server';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { RUNTIME_FIELD_TYPES } from './constants';
 
 export type { QueryDslQueryContainer };
+export type { SavedObject };
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 /**
- * Runtime field - type of value returned
- * @public
+ * Runtime field types
  */
-
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
 /**
- * Primitive runtime field types
- * @public
+ * Runtime field primitive types - excluding composite
  */
-
-export type RuntimeTypeExceptComposite = Exclude<RuntimeType, 'composite'>;
+export type RuntimePrimitiveTypes = Exclude<RuntimeType, 'composite'>;
 
 /**
  * Runtime field definition
@@ -57,11 +57,14 @@ export type RuntimeFieldBase = {
  * The RuntimeField that will be sent in the ES Query "runtime_mappings" object
  */
 export type RuntimeFieldSpec = RuntimeFieldBase & {
+  /**
+   * Composite subfields
+   */
   fields?: Record<
     string,
     {
       // It is not recursive, we can't create a composite inside a composite.
-      type: RuntimeTypeExceptComposite;
+      type: RuntimePrimitiveTypes;
     }
   >;
 };
@@ -94,18 +97,18 @@ export interface RuntimeField extends RuntimeFieldBase, FieldConfiguration {
   /**
    * Subfields of composite field
    */
-  fields?: Record<string, RuntimeFieldSubField>;
+  fields?: RuntimeFieldSubFields;
 }
+
+export type RuntimeFieldSubFields = Record<string, RuntimeFieldSubField>;
 
 /**
  * Runtime field composite subfield
  * @public
  */
 export interface RuntimeFieldSubField extends FieldConfiguration {
-  /**
-   * Type of runtime field, can only be primitive type
-   */
-  type: RuntimeTypeExceptComposite;
+  // It is not recursive, we can't create a composite inside a composite.
+  type: RuntimePrimitiveTypes;
 }
 
 /**
@@ -210,7 +213,7 @@ export interface UiSettingsCommon {
    * Get a setting value
    * @param key name of value
    */
-  get: <T = any>(key: string) => Promise<T>;
+  get: <T = unknown>(key: string) => Promise<T | undefined>;
   /**
    * Get all settings values
    */
@@ -220,7 +223,7 @@ export interface UiSettingsCommon {
    * @param key name of value
    * @param value value to set
    */
-  set: <T = any>(key: string, value: T) => Promise<void>;
+  set: <T = unknown>(key: string, value: T) => Promise<void>;
   /**
    * Remove a setting value
    * @param key name of value
@@ -281,8 +284,8 @@ export interface SavedObjectsClientCommon {
   update: (
     type: string,
     id: string,
-    attributes: Record<string, any>,
-    options: Record<string, any>
+    attributes: DataViewAttributes,
+    options: SavedObjectsUpdateOptions
   ) => Promise<SavedObject>;
   /**
    * Create a saved object
@@ -292,8 +295,8 @@ export interface SavedObjectsClientCommon {
    */
   create: (
     type: string,
-    attributes: Record<string, any>,
-    options: Record<string, any>
+    attributes: DataViewAttributes,
+    options: SavedObjectsCreateOptions
   ) => Promise<SavedObject>;
   /**
    * Delete a saved object by id
@@ -310,15 +313,23 @@ export interface GetFieldsOptions {
   metaFields?: string[];
   rollupIndex?: string;
   allowNoIndex?: boolean;
-  filter?: QueryDslQueryContainer;
+  indexFilter?: QueryDslQueryContainer;
+  includeUnmapped?: boolean;
+  fields?: string[];
+}
+
+/**
+ * FieldsForWildcard response
+ */
+export interface FieldsForWildcardResponse {
+  fields: FieldSpec[];
+  indices: string[];
 }
 
 export interface IDataViewsApiClient {
-  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
-  hasUserIndexPattern: () => Promise<boolean>;
+  getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldsForWildcardResponse>;
+  hasUserDataView: () => Promise<boolean>;
 }
-
-export type { SavedObject };
 
 export type AggregationRestrictions = Record<
   string,
@@ -408,6 +419,26 @@ export type FieldSpec = DataViewFieldBase & {
    */
   runtimeField?: RuntimeFieldSpec;
 
+  /**
+   * list of allowed field intervals for the field
+   */
+  fixedInterval?: string[];
+
+  /**
+   * List of allowed timezones for the field
+   */
+  timeZone?: string[];
+
+  /**
+   * set to true if field is a TSDB dimension field
+   */
+  timeSeriesDimension?: boolean;
+
+  /**
+   * set if field is a TSDB metric field
+   */
+  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
+
   // not persisted
 
   /**
@@ -418,6 +449,10 @@ export type FieldSpec = DataViewFieldBase & {
    * Is this field in the mapping? False if a scripted or runtime field defined on the data view.
    */
   isMapped?: boolean;
+  /**
+   * Name of parent field for composite runtime field subfields.
+   */
+  parentName?: string;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;

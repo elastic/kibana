@@ -8,40 +8,39 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
-import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 
 import { HelpMenu } from '../../common/components/help_menu';
-import { UseUrlState } from '../../common/components/url_state';
-import { navTabs } from './home_navigations';
 import {
   useInitSourcerer,
   getScopeFromPath,
   useSourcererDataView,
 } from '../../common/containers/sourcerer';
-import { useUpgradeSecurityPackages } from '../../common/hooks/use_upgrade_security_packages';
 import { GlobalHeader } from './global_header';
-import { SecuritySolutionTemplateWrapper } from './template_wrapper';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
+
+import { TourContextProvider } from '../../common/components/guided_onboarding_tour';
+
 import { useUrlState } from '../../common/hooks/use_url_state';
+import { useUpdateBrowserTitle } from '../../common/hooks/use_update_browser_title';
+import { useUpgradeSecurityPackages } from '../../detection_engine/rule_management/logic/use_upgrade_security_packages';
+import { useUpdateExecutionContext } from '../../common/hooks/use_update_execution_context';
 
 interface HomePageProps {
   children: React.ReactNode;
-  onAppLeave: (handler: AppLeaveHandler) => void;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-const HomePageComponent: React.FC<HomePageProps> = ({
-  children,
-  onAppLeave,
-  setHeaderActionMenu,
-}) => {
+const HomePageComponent: React.FC<HomePageProps> = ({ children, setHeaderActionMenu }) => {
   const { pathname } = useLocation();
   useInitSourcerer(getScopeFromPath(pathname));
   useUrlState();
+  useUpdateBrowserTitle();
+  useUpdateExecutionContext();
 
-  const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
+  const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
   // side effect: this will attempt to upgrade the endpoint package if it is not up to date
   // this will run when a user navigates to the Security Solution app and when they navigate between
   // tabs in the app. This is useful for keeping the endpoint package as up to date as possible until
@@ -50,16 +49,17 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   useUpgradeSecurityPackages();
 
   return (
-    <SecuritySolutionAppWrapper className="kbnAppWrapper">
+    <SecuritySolutionAppWrapper id="security-solution-app" className="kbnAppWrapper">
       <ConsoleManager>
-        <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
-        <DragDropContextWrapper browserFields={browserFields}>
-          <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-          <SecuritySolutionTemplateWrapper onAppLeave={onAppLeave}>
-            {children}
-          </SecuritySolutionTemplateWrapper>
-        </DragDropContextWrapper>
-        <HelpMenu />
+        <TourContextProvider>
+          <>
+            <GlobalHeader setHeaderActionMenu={setHeaderActionMenu} />
+            <DragDropContextWrapper browserFields={browserFields}>
+              {children}
+            </DragDropContextWrapper>
+            <HelpMenu />
+          </>
+        </TourContextProvider>
       </ConsoleManager>
     </SecuritySolutionAppWrapper>
   );

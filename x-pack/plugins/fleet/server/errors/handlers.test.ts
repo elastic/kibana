@@ -12,14 +12,14 @@ import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';
 
 import {
-  IngestManagerError,
+  FleetError,
   RegistryError,
   PackageNotFoundError,
   PackageUnsupportedMediaTypeError,
-  defaultIngestErrorHandler,
+  defaultFleetErrorHandler,
 } from '.';
 
-describe('defaultIngestErrorHandler', () => {
+describe('defaultFleetErrorHandler', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
   beforeEach(async () => {
     // prevents `Logger not set.` and other appContext errors
@@ -32,12 +32,12 @@ describe('defaultIngestErrorHandler', () => {
     appContextService.stop();
   });
 
-  describe('IngestManagerError', () => {
+  describe('FleetError', () => {
     it('502: RegistryError', async () => {
       const error = new RegistryError('xyz');
       const response = httpServerMock.createResponseFactory();
 
-      await defaultIngestErrorHandler({ error, response });
+      await defaultFleetErrorHandler({ error, response });
 
       // response
       expect(response.ok).toHaveBeenCalledTimes(0);
@@ -56,7 +56,7 @@ describe('defaultIngestErrorHandler', () => {
       const error = new PackageUnsupportedMediaTypeError('123');
       const response = httpServerMock.createResponseFactory();
 
-      await defaultIngestErrorHandler({ error, response });
+      await defaultFleetErrorHandler({ error, response });
 
       // response
       expect(response.ok).toHaveBeenCalledTimes(0);
@@ -75,7 +75,7 @@ describe('defaultIngestErrorHandler', () => {
       const error = new PackageNotFoundError('123');
       const response = httpServerMock.createResponseFactory();
 
-      await defaultIngestErrorHandler({ error, response });
+      await defaultFleetErrorHandler({ error, response });
 
       // response
       expect(response.ok).toHaveBeenCalledTimes(0);
@@ -90,11 +90,11 @@ describe('defaultIngestErrorHandler', () => {
       expect(mockContract.logger?.error).toHaveBeenCalledWith(error.message);
     });
 
-    it('400: IngestManagerError', async () => {
-      const error = new IngestManagerError('123');
+    it('400: FleetError', async () => {
+      const error = new FleetError('123');
       const response = httpServerMock.createResponseFactory();
 
-      await defaultIngestErrorHandler({ error, response });
+      await defaultFleetErrorHandler({ error, response });
 
       // response
       expect(response.ok).toHaveBeenCalledTimes(0);
@@ -115,7 +115,7 @@ describe('defaultIngestErrorHandler', () => {
       const error = new Boom.Boom('bam');
       const response = httpServerMock.createResponseFactory();
 
-      await defaultIngestErrorHandler({ error, response });
+      await defaultFleetErrorHandler({ error, response });
 
       // response
       expect(response.ok).toHaveBeenCalledTimes(0);
@@ -136,7 +136,7 @@ describe('defaultIngestErrorHandler', () => {
       });
       const response = httpServerMock.createResponseFactory();
 
-      await defaultIngestErrorHandler({ error, response });
+      await defaultFleetErrorHandler({ error, response });
 
       // response
       expect(response.ok).toHaveBeenCalledTimes(0);
@@ -155,7 +155,7 @@ describe('defaultIngestErrorHandler', () => {
       const error = Boom.badRequest('nope');
       const response = httpServerMock.createResponseFactory();
 
-      await defaultIngestErrorHandler({ error, response });
+      await defaultFleetErrorHandler({ error, response });
 
       // response
       expect(response.ok).toHaveBeenCalledTimes(0);
@@ -174,7 +174,7 @@ describe('defaultIngestErrorHandler', () => {
       const error = Boom.notFound('sorry');
       const response = httpServerMock.createResponseFactory();
 
-      await defaultIngestErrorHandler({ error, response });
+      await defaultFleetErrorHandler({ error, response });
 
       // response
       expect(response.ok).toHaveBeenCalledTimes(0);
@@ -195,7 +195,7 @@ describe('defaultIngestErrorHandler', () => {
       const error = new Error('something');
       const response = httpServerMock.createResponseFactory();
 
-      await defaultIngestErrorHandler({ error, response });
+      await defaultFleetErrorHandler({ error, response });
 
       // response
       expect(response.ok).toHaveBeenCalledTimes(0);

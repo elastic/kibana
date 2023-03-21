@@ -23,7 +23,7 @@ export class BannersPlugin implements Plugin<{}, {}, {}, BannerPluginStartDepend
     { chrome, uiSettings, http }: CoreStart,
     { screenshotMode }: BannerPluginStartDependencies
   ) {
-    if (!screenshotMode.isScreenshotMode()) {
+    if (!(screenshotMode?.isScreenshotMode() ?? false)) {
       getBannerInfo(http).then(
         ({ allowed, banner }) => {
           if (allowed && banner.placement === 'top') {

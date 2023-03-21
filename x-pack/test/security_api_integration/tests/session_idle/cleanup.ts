@@ -10,7 +10,10 @@ import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
 import type { AuthenticationProvider } from '@kbn/security-plugin/common';
-import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
+import {
+  getSAMLRequestId,
+  getSAMLResponse,
+} from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -96,6 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       const sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, { type: 'basic', name: 'basic1' });
@@ -138,6 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       const basicSessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(basicSessionCookie, basicUsername, {
@@ -189,6 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       let sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, { type: 'basic', name: 'basic1' });

@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ftr-screenshot-filename",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}

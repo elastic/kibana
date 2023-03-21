@@ -10,21 +10,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function MapsHelper({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['maps', 'common']);
   const testSubjects = getService('testSubjects');
-  const log = getService('log');
 
   return {
-    async toggleLayerVisibility(layerName: string) {
-      log.debug('Inside toggleLayerVisibility');
-      await PageObjects.maps.openLayerTocActionsPanel(layerName);
-      await testSubjects.click('layerVisibilityToggleButton');
-      await PageObjects.common.sleep(3000);
-      const isTooltipOpen = await testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
-      if (isTooltipOpen) {
-        await testSubjects.click(`layerTocTooltip`);
-        await PageObjects.common.sleep(1000);
-      }
-    },
-
     // In v7.16, e-commerce sample data was re-worked so that geo.src field to match country code of geo.coordinates
     // https://github.com/elastic/kibana/pull/110885
     // Maps created before this change will have a layer called "Total Requests by Country"

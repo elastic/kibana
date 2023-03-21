@@ -22,10 +22,12 @@ export const TimeField: FC = () => {
   useEffect(() => {
     jobCreator.timeFieldName = timeFieldName;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeFieldName]);
 
   useEffect(() => {
     setTimeFieldName(jobCreator.timeFieldName);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return (

@@ -142,7 +142,11 @@ export const DFAnalyticsJobIdLink = ({ jobId }: { jobId: string }) => {
     pageState: { jobId },
   });
 
-  return <EuiLink href={href}>{jobId}</EuiLink>;
+  return (
+    <EuiLink href={href} css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }} title={jobId}>
+      {jobId}
+    </EuiLink>
+  );
 };
 
 export const useColumns = (
@@ -194,7 +198,7 @@ export const useColumns = (
                   values: { analyticsId: item.config.id },
                 })
           }
-          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowUp' : 'arrowDown'}
+          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowDown' : 'arrowRight'}
         />
       ),
       'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',

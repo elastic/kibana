@@ -8,8 +8,11 @@
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import type { ControlColumnProps, ActionProps } from '@kbn/timelines-plugin/common';
-import { getActionsColumnWidth, DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
+import {
+  DEFAULT_ACTION_BUTTON_WIDTH,
+  getActionsColumnWidth,
+} from '../../../../common/components/header_actions';
+import type { ActionProps, ControlColumnProps } from '../../../../../common/types';
 import * as i18n from './translations';
 
 const EventsTdContent = styled.div.attrs(({ className }) => ({

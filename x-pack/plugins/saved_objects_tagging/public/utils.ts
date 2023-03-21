@@ -16,7 +16,10 @@ export {
   replaceTagReferences as updateTagsReferences,
 } from '../common/references';
 
-export const getObjectTags = (object: SavedObject, allTags: Tag[]) => {
+export const getObjectTags = (
+  object: { references: SavedObject['references'] },
+  allTags: Tag[]
+) => {
   return getTagsFromReferences(object.references, allTags);
 };
 

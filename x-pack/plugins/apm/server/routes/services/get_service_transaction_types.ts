@@ -6,36 +6,32 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../lib/helpers/setup_request';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
 
 export async function getServiceTransactionTypes({
-  setup,
+  apmEventClient,
   serviceName,
   searchAggregatedTransactions,
   start,
   end,
 }: {
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
 }) {
-  const { apmEventClient } = setup;
-
   const params = {
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {

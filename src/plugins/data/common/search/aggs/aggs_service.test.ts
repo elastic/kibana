@@ -69,6 +69,7 @@ describe('Aggs service', () => {
           "geotile_grid",
           "sampler",
           "diversified_sampler",
+          "time_series",
           "foo",
         ]
       `);
@@ -84,8 +85,10 @@ describe('Aggs service', () => {
           "max",
           "std_dev",
           "cardinality",
+          "value_count",
           "percentiles",
           "percentile_ranks",
+          "rate",
           "top_hits",
           "top_metrics",
           "derivative",
@@ -122,6 +125,7 @@ describe('Aggs service', () => {
           "geotile_grid",
           "sampler",
           "diversified_sampler",
+          "time_series",
         ]
       `);
       expect(bStart.types.getAll().metrics.map((t) => t.name)).toMatchInlineSnapshot(`
@@ -136,8 +140,10 @@ describe('Aggs service', () => {
           "max",
           "std_dev",
           "cardinality",
+          "value_count",
           "percentiles",
           "percentile_ranks",
+          "rate",
           "top_hits",
           "top_metrics",
           "derivative",

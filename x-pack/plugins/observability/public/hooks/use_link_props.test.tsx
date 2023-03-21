@@ -9,9 +9,9 @@ import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
 import React, { PropsWithChildren } from 'react';
 import { Router } from 'react-router-dom';
-import { encode } from 'rison-node';
+import { encode } from '@kbn/rison';
 import { coreMock } from '@kbn/core/public/mocks';
-import { ScopedHistory } from '@kbn/core/public';
+import { CoreScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { LinkDescriptor, useLinkProps } from './use_link_props';
 
@@ -27,7 +27,7 @@ const INTERNAL_APP = 'metrics';
 
 const history = createMemoryHistory();
 history.push(`${PREFIX}${INTERNAL_APP}`);
-const scopedHistory = new ScopedHistory(history, `${PREFIX}${INTERNAL_APP}`);
+const scopedHistory = new CoreScopedHistory(history, `${PREFIX}${INTERNAL_APP}`);
 
 function ProviderWrapper({ children }: PropsWithChildren<{}>) {
   return (

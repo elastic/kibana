@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { mapValues } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
+import { UnreachableError } from '../../common/lib';
 import { UserAtSpaceScenarios } from '../scenarios';
 
 export default function catalogueTests({ getService }: FtrProviderContext) {
@@ -64,9 +65,11 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'monitoring',
               'enterpriseSearch',
               'enterpriseSearchContent',
+              'enterpriseSearchAnalytics',
               'elasticsearch',
               'appSearch',
               'workplaceSearch',
+              'searchExperiences',
               'spaces',
               ...esFeatureExceptions,
             ];
@@ -89,9 +92,11 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'monitoring',
               'enterpriseSearch',
               'enterpriseSearchContent',
+              'enterpriseSearchAnalytics',
               'elasticsearch',
               'appSearch',
               'workplaceSearch',
+              'searchExperiences',
               'spaces',
               ...esFeatureExceptions,
             ];

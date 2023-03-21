@@ -5,29 +5,40 @@
  * 2.0.
  */
 
-import { CommentResponseExternalReferenceType } from '../../../../common/api';
-import { UserActionBuilder, UserActionBuilderArgs } from '../types';
-import { SnakeToCamelCase } from '../../../../common/types';
+import type { CommentResponseExternalReferenceType } from '../../../../common/api';
+import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
+import type { SnakeToCamelCase } from '../../../../common/types';
 import { createRegisteredAttachmentUserActionBuilder } from './registered_attachments';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
-  'userAction' | 'externalReferenceAttachmentTypeRegistry' | 'caseData'
+  | 'userAction'
+  | 'externalReferenceAttachmentTypeRegistry'
+  | 'caseData'
+  | 'handleDeleteComment'
+  | 'userProfiles'
 > & {
   comment: SnakeToCamelCase<CommentResponseExternalReferenceType>;
+  isLoading: boolean;
 };
 
 export const createExternalReferenceAttachmentUserActionBuilder = ({
   userAction,
+  userProfiles,
   comment,
   externalReferenceAttachmentTypeRegistry,
   caseData,
+  isLoading,
+  handleDeleteComment,
 }: BuilderArgs): ReturnType<UserActionBuilder> => {
   return createRegisteredAttachmentUserActionBuilder({
     userAction,
+    userProfiles,
     comment,
     registry: externalReferenceAttachmentTypeRegistry,
     caseData,
+    handleDeleteComment,
+    isLoading,
     getId: () => comment.externalReferenceAttachmentTypeId,
     getAttachmentViewProps: () => ({
       externalReferenceId: comment.externalReferenceId,

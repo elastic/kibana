@@ -75,7 +75,7 @@ describe('callout', () => {
         <CallOut message={message} onDismiss={onDismiss} />
       </TestProviders>
     );
-    wrapper.find('[data-test-subj="callout-dismiss-btn"]').first().simulate('click');
+    wrapper.find('button[data-test-subj="callout-dismiss-btn"]').first().simulate('click');
     expect(onDismiss).toBeCalledWith(message);
   });
 

@@ -27,6 +27,7 @@
         ],
         "path": "src/plugins/vis_types/gauge/public/vis_type/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeGauge",
@@ -40,6 +41,7 @@
             ],
             "path": "src/plugins/vis_types/gauge/public/vis_type/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -70,6 +72,7 @@
         ],
         "path": "src/plugins/vis_types/gauge/public/vis_type/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeGauge",
@@ -83,6 +86,7 @@
             ],
             "path": "src/plugins/vis_types/gauge/public/vis_type/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -100,6 +104,7 @@
         "description": [],
         "path": "src/plugins/vis_types/gauge/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       },
@@ -112,6 +117,7 @@
         "description": [],
         "path": "src/plugins/vis_types/gauge/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       }
@@ -146,6 +152,7 @@
         ],
         "path": "src/plugins/vis_types/gauge/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

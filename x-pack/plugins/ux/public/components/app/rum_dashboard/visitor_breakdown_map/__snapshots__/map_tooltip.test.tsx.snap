@@ -3,7 +3,7 @@
 exports[`Map Tooltip it renders 1`] = `
 Array [
   <div
-    class="euiPopoverTitle"
+    class="euiPopoverTitle emotion-euiPopoverTitle-l-l"
   />,
   .c1.c1.c1 {
   width: 25%;
@@ -14,16 +14,17 @@ Array [
 }
 
 <dl
-    class="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+    class="euiDescriptionList emotion-euiDescriptionList-column-left"
+    data-type="column"
     style="width:300px"
   >
     <dt
-      class="euiDescriptionList__title c0 eui-textNoWrap"
+      class="euiDescriptionList__title c0 eui-textNoWrap emotion-euiDescriptionList__title-column-m-reverse"
     >
       Average page load duration
     </dt>
     <dd
-      class="euiDescriptionList__description c1"
+      class="euiDescriptionList__description c1 emotion-euiDescriptionList__description-column-compressed-m"
     />
   </dl>,
 ]

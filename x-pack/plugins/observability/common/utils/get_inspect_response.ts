@@ -6,9 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { KibanaRequest } from '@kbn/core/server';
-import type { RequestStatistics, RequestStatus } from '@kbn/inspector-plugin';
+import type { RequestStatistics, RequestStatus } from '@kbn/inspector-plugin/common';
 import { InspectResponse } from '../../typings/common';
 import { WrappedElasticsearchClientError } from './unwrap_es_response';
 
@@ -151,7 +150,7 @@ export function getInspectResponse({
 
   return {
     id,
-    json: esRequestParams.body,
+    json: esRequestParams.body ?? esRequestParams,
     name: id,
     response: {
       json: esError ? esError.originalError : esResponse,

@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { DashboardConstants } from '@kbn/dashboard-plugin/public';
+import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { DashboardItem } from './use_dashboards_table';
 import { useMlKibana } from '../../contexts/kibana';
 import { useDashboardService } from '../../services/dashboard_service';
@@ -39,7 +39,7 @@ export function useAddToDashboardActions<
 
       const dashboardPath = await dashboardService.getDashboardEditUrl(selectedDashboardId);
 
-      await stateTransfer.navigateToWithEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, {
+      await stateTransfer.navigateToWithEmbeddablePackage(DASHBOARD_APP_ID, {
         path: dashboardPath,
         state: {
           type,
@@ -47,6 +47,7 @@ export function useAddToDashboardActions<
         },
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [getEmbeddableInput]
   );
 

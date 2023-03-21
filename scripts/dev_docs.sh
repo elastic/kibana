@@ -1,6 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
+# Increment this number to cause everyone's docs project to be reset on their next run
+# This is so that we can somewhat automatically fix people's projects when the upstream docs project has a breaking change that requires resetting the project
+RESET_VERSION=1
+
 KIBANA_DIR=$(cd "$(dirname "$0")"/.. && pwd)
 WORKSPACE=$(cd "$KIBANA_DIR/.." && pwd)/kibana-docs
 export NVM_DIR="$WORKSPACE/.nvm"
@@ -21,6 +25,8 @@ fi
 
 mkdir -p "$WORKSPACE"
 cd "$WORKSPACE"
+touch "$WORKSPACE/.version"
+RESET_VERSION_FROM_FILE=$(cat "$WORKSPACE/.version")
 
 if [[ ! -d "$NVM_DIR" ]]; then
   echo "Installing a separate copy of nvm"
@@ -37,6 +43,10 @@ if [[ ! -d "$DOCS_DIR" ]]; then
 else
   cd "$DOCS_DIR"
   git pull
+  if [[ "$RESET_VERSION" != "$RESET_VERSION_FROM_FILE" ]]; then
+    echo "Resetting docs.elastic.dev repo..."
+    git clean -fdxq
+  fi
   cd "$WORKSPACE"
 fi
 
@@ -59,23 +69,33 @@ else
 fi
 
 # The minimum sources required to build kibana docs
-cat << EOF > "$DOCS_DIR/sources-dev.json"
-{
-  "sources": [
-    {
-      "type": "file",
-      "location": "$KIBANA_DIR"
-    },
-    {
-      "type": "file",
-      "location": "$DEV_DIR"
-    },
-    {
-      "type": "file",
-      "location": "$TEAM_DIR"
+cat << EOF > "$DOCS_DIR/config/content-dev.js"
+module.exports = {
+  "content": {
+    "sources": [
+      {
+        "type": "file",
+        "location": "$KIBANA_DIR"
+      },
+      {
+        "type": "file",
+        "location": "$DEV_DIR"
+      },
+      {
+        "type": "file",
+        "location": "$TEAM_DIR"
+      }
+    ],
+    "nav": {
+      "structure": [
+        "nav-elastic-developer-guide",
+        "nav-kibana-team",
+        "nav-kibana-dev"
+      ],
+      "default": "nav-kibana-dev"
     }
-  ]
-}
+  }
+};
 EOF
 
 cd "$DOCS_DIR"
@@ -95,6 +115,8 @@ echo ""
 echo "The docs.elastic.dev project is located at:"
 echo "$DOCS_DIR"
 echo ""
+
+echo $RESET_VERSION > "$WORKSPACE/.version"
 
 if [[ "${1:-}" ]]; then
   yarn "$@"

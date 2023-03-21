@@ -1,0 +1,26 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+
+SRCS = glob(
+  [
+    "fp/**/*",
+    "lodash/**/*",
+    "index.js",
+    "set.js",
+    "setWith.js",
+  ],
+  exclude = [
+    "**/*.d.ts"
+  ],
+)
+
+DEPS = [
+  "@npm//lodash",
+]
+
+js_library(
+  name = "kbn-safer-lodash-set",
+  package_name = "@kbn/safer-lodash-set",
+  srcs = ["package.json"] + SRCS,
+  deps = DEPS,
+  visibility = ["//visibility:public"],
+)

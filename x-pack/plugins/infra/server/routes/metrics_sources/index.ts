@@ -13,9 +13,9 @@ import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';
 import { AnomalyThresholdRangeError } from '../../lib/sources/errors';
 import {
-  partialMetricsSourceConfigurationPropertiesRT,
   metricsSourceConfigurationResponseRT,
   MetricsSourceStatus,
+  partialMetricsSourceConfigurationReqPayloadRT,
 } from '../../../common/metrics_sources';
 
 export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => {
@@ -35,24 +35,33 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       const { sourceId } = request.params;
       const soClient = (await requestContext.core).savedObjects.client;
 
-      const [source, metricIndicesExist, indexFields] = await Promise.all([
-        libs.sources.getSourceConfiguration(soClient, sourceId),
-        libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
-        libs.fields.getFields(requestContext, sourceId, 'METRICS'),
-      ]);
+      try {
+        const [source, metricIndicesExist, indexFields] = await Promise.all([
+          libs.sources.getSourceConfiguration(soClient, sourceId),
+          libs.sourceStatus.hasMetricIndices(requestContext, sourceId),
+          libs.fields.getFields(requestContext, sourceId, 'METRICS'),
+        ]);
 
-      if (!source) {
-        return response.notFound();
+        if (!source) {
+          return response.notFound();
+        }
+
+        const status: MetricsSourceStatus = {
+          metricIndicesExist,
+          indexFields,
+        };
+
+        return response.ok({
+          body: metricsSourceConfigurationResponseRT.encode({ source: { ...source, status } }),
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: error.statusCode ?? 500,
+          body: {
+            message: error.message ?? 'An unexpected error occurred',
+          },
+        });
       }
-
-      const status: MetricsSourceStatus = {
-        metricIndicesExist,
-        indexFields,
-      };
-
-      return response.ok({
-        body: metricsSourceConfigurationResponseRT.encode({ source: { ...source, status } }),
-      });
     }
   );
 
@@ -64,13 +73,13 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         params: schema.object({
           sourceId: schema.string(),
         }),
-        body: createValidationFunction(partialMetricsSourceConfigurationPropertiesRT),
+        body: createValidationFunction(partialMetricsSourceConfigurationReqPayloadRT),
       },
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const { sources } = libs;
       const { sourceId } = request.params;
-      const patchedSourceConfigurationProperties = request.body;
+      const sourceConfigurationPayload = request.body;
 
       try {
         const soClient = (await requestContext.core).savedObjects.client;
@@ -84,18 +93,8 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
 
         const sourceConfigurationExists = sourceConfiguration.origin === 'stored';
         const patchedSourceConfiguration = await (sourceConfigurationExists
-          ? sources.updateSourceConfiguration(
-              soClient,
-              sourceId,
-              // @ts-ignore
-              patchedSourceConfigurationProperties
-            )
-          : sources.createSourceConfiguration(
-              soClient,
-              sourceId,
-              // @ts-ignore
-              patchedSourceConfigurationProperties
-            ));
+          ? sources.updateSourceConfiguration(soClient, sourceId, sourceConfigurationPayload)
+          : sources.createSourceConfiguration(soClient, sourceId, sourceConfigurationPayload));
 
         const [metricIndicesExist, indexFields] = await Promise.all([
           libs.sourceStatus.hasMetricIndices(requestContext, sourceId),

@@ -12,7 +12,9 @@ type RenameActionToConnector<K extends string> = K extends `actionTypeId`
   : K;
 
 export type AsApiContract<T> = {
-  [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: T[K];
+  [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: K extends 'frequency'
+    ? AsApiContract<T[K]>
+    : T[K];
 };
 
 export type RewriteRequestCase<T> = (requested: AsApiContract<T>) => T;

@@ -52,8 +52,10 @@ export function ResultLinks({ jobs }) {
   const { createLinkWithUserDefaults } = useCreateADLinks();
   const timeSeriesExplorerLink = useMemo(
     () => createLinkWithUserDefaults('timeseriesexplorer', jobs),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobs]
   );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const anomalyExplorerLink = useMemo(() => createLinkWithUserDefaults('explorer', jobs), [jobs]);
 
   return (
@@ -75,7 +77,6 @@ export function ResultLinks({ jobs }) {
               href={timeSeriesExplorerLink}
               iconType="visLine"
               aria-label={openJobsInSingleMetricViewerText}
-              className="results-button"
               isDisabled={singleMetricEnabled === false || jobActionsDisabled === true}
               data-test-subj="mlOpenJobsInSingleMetricViewerButton"
             />
@@ -88,7 +89,6 @@ export function ResultLinks({ jobs }) {
             href={anomalyExplorerLink}
             iconType="visTable"
             aria-label={openJobsInAnomalyExplorerText}
-            className="results-button"
             isDisabled={jobActionsDisabled === true}
             data-test-subj="mlOpenJobsInAnomalyExplorerButton"
           />

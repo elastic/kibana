@@ -34,13 +34,6 @@ import {
 
 const APM_INDEX_LABELS = [
   {
-    configurationName: 'sourcemap',
-    label: i18n.translate(
-      'xpack.apm.settings.apmIndices.sourcemapIndicesLabel',
-      { defaultMessage: 'Sourcemap Indices' }
-    ),
-  },
-  {
     configurationName: 'error',
     label: i18n.translate('xpack.apm.settings.apmIndices.errorIndicesLabel', {
       defaultMessage: 'Error Indices',
@@ -105,14 +98,9 @@ export function ApmIndices() {
   const [apmIndices, setApmIndices] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  const { data = INITIAL_STATE, refetch } = useFetcher(
-    (_callApmApi) => {
-      if (canSave) {
-        return _callApmApi(`GET /internal/apm/settings/apm-index-settings`);
-      }
-    },
-    [canSave]
-  );
+  const { data = INITIAL_STATE, refetch } = useFetcher((_callApmApi) => {
+    return _callApmApi(`GET /internal/apm/settings/apm-index-settings`);
+  }, []);
 
   const { data: space } = useFetcher(() => {
     return services.spaces?.getActiveSpace();
@@ -209,15 +197,13 @@ export function ApmIndices() {
                 color="primary"
                 iconType="spacesApp"
                 title={
-                  <EuiText size="s">
-                    <FormattedMessage
-                      id="xpack.apm.settings.apmIndices.spaceDescription"
-                      defaultMessage="The index settings apply to the {spaceName} space."
-                      values={{
-                        spaceName: <strong>{space?.name}</strong>,
-                      }}
-                    />
-                  </EuiText>
+                  <FormattedMessage
+                    id="xpack.apm.settings.apmIndices.spaceDescription"
+                    defaultMessage="The index settings apply to the {spaceName} space."
+                    values={{
+                      spaceName: <strong>{space?.name}</strong>,
+                    }}
+                  />
                 }
               />
             </EuiFlexItem>

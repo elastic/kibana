@@ -49,6 +49,7 @@ describe('Security UsageCollector', () => {
     sessionIdleTimeoutInMinutes: 480,
     sessionLifespanInMinutes: 43200,
     sessionCleanupInMinutes: 60,
+    sessionConcurrentSessionsMaxSessions: 0,
     anonymousCredentialType: undefined,
   };
 
@@ -110,6 +111,7 @@ describe('Security UsageCollector', () => {
       sessionIdleTimeoutInMinutes: 0,
       sessionLifespanInMinutes: 0,
       sessionCleanupInMinutes: 0,
+      sessionConcurrentSessionsMaxSessions: 0,
       anonymousCredentialType: undefined,
     });
   });
@@ -200,6 +202,37 @@ describe('Security UsageCollector', () => {
   });
 
   describe('access agreement', () => {
+    it('reports if the global access agreement message is configured', async () => {
+      const config = createSecurityConfig(
+        ConfigSchema.validate({
+          accessAgreement: { message: 'Bar' },
+          authc: {
+            providers: {
+              saml: {
+                saml1: {
+                  realm: 'foo',
+                  order: 1,
+                },
+              },
+            },
+          },
+        })
+      );
+      const usageCollection = usageCollectionPluginMock.createSetupContract();
+      const license = createSecurityLicense({ isLicenseAvailable: true });
+      registerSecurityUsageCollector({ usageCollection, config, license });
+
+      const usage = await usageCollection
+        .getCollectorByType('security')
+        ?.fetch(collectorFetchContext);
+
+      expect(usage).toEqual({
+        ...DEFAULT_USAGE,
+        accessAgreementEnabled: true,
+        enabledAuthProviders: ['saml'],
+      });
+    });
+
     it('reports if the access agreement message is configured for any provider', async () => {
       const config = createSecurityConfig(
         ConfigSchema.validate({
@@ -445,10 +478,15 @@ describe('Security UsageCollector', () => {
 
   describe('session', () => {
     // Note: can't easily test deprecated 'sessionTimeout' value here because of the way that config deprecation renaming works
-    it('reports customized session idleTimeout, lifespan, and cleanupInterval', async () => {
+    it('reports customized session idleTimeout, lifespan, cleanupInterval, and max concurrent sessions', async () => {
       const config = createSecurityConfig(
         ConfigSchema.validate({
-          session: { idleTimeout: '123m', lifespan: '456m', cleanupInterval: '789m' },
+          session: {
+            idleTimeout: '123m',
+            lifespan: '456m',
+            cleanupInterval: '789m',
+            concurrentSessions: { maxSessions: 321 },
+          },
         })
       );
       const usageCollection = usageCollectionPluginMock.createSetupContract();
@@ -464,6 +502,7 @@ describe('Security UsageCollector', () => {
         sessionIdleTimeoutInMinutes: 123,
         sessionLifespanInMinutes: 456,
         sessionCleanupInMinutes: 789,
+        sessionConcurrentSessionsMaxSessions: 321,
       });
     });
   });

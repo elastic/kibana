@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-injected-metadata-browser-internal",
+  "owner": "@elastic/kibana-core"
+}

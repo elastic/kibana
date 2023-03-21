@@ -18,13 +18,22 @@ import {
   CLOUD_PROVIDER,
   CONTAINER_ID,
   HOST_NAME,
-  POD_NAME,
+  SERVICE_VERSION,
   SERVICE_NODE_NAME,
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
-  SERVICE_VERSION,
-} from '../../../../../common/elasticsearch_fieldnames';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+  KUBERNETES_POD_NAME,
+  KUBERNETES_POD_UID,
+} from '../../../../../common/es_fields/apm';
+
+import {
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_NAMESPACE,
+  KUBERNETES_REPLICASET_NAME,
+  KUBERNETES_DEPLOYMENT_NAME,
+} from '../../../../../common/es_fields/infra_metrics';
+
+import { isPending } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getAgentIcon } from '../../../shared/agent_icon/get_agent_icon';
@@ -42,8 +51,20 @@ interface Props {
   kuery: string;
 }
 
-function toKeyValuePairs(keys: string[], data: ServiceInstanceDetails) {
-  return keys.map((key) => ({ key, value: get(data, key) }));
+function toKeyValuePairs({
+  keys,
+  data,
+  isFilterable = true,
+}: {
+  keys: string[];
+  data: ServiceInstanceDetails;
+  isFilterable?: boolean;
+}) {
+  return keys.map((key) => ({
+    key,
+    value: get(data, key),
+    isFilterable,
+  }));
 }
 
 const serviceDetailsKeys = [
@@ -52,7 +73,18 @@ const serviceDetailsKeys = [
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
 ];
-const containerDetailsKeys = [CONTAINER_ID, HOST_NAME, POD_NAME];
+const containerDetailsKeys = [
+  CONTAINER_ID,
+  HOST_NAME,
+  KUBERNETES_POD_UID,
+  KUBERNETES_POD_NAME,
+];
+const metricsKubernetesDetailsKeys = [
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_NAMESPACE,
+  KUBERNETES_REPLICASET_NAME,
+  KUBERNETES_DEPLOYMENT_NAME,
+];
 const cloudDetailsKeys = [
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_INSTANCE_ID,
@@ -74,10 +106,7 @@ export function InstanceDetails({
     serviceNodeName,
   });
 
-  if (
-    status === FETCH_STATUS.LOADING ||
-    status === FETCH_STATUS.NOT_INITIATED
-  ) {
+  if (isPending(status)) {
     return (
       <div style={{ width: '50%' }}>
         <EuiLoadingContent data-test-subj="loadingSpinner" />
@@ -93,12 +122,23 @@ export function InstanceDetails({
     pushNewItemToKueryBar({ kuery, history, key, value });
   };
 
-  const serviceDetailsKeyValuePairs = toKeyValuePairs(serviceDetailsKeys, data);
-  const containerDetailsKeyValuePairs = toKeyValuePairs(
-    containerDetailsKeys,
-    data
-  );
-  const cloudDetailsKeyValuePairs = toKeyValuePairs(cloudDetailsKeys, data);
+  const serviceDetailsKeyValuePairs = toKeyValuePairs({
+    keys: serviceDetailsKeys,
+    data,
+  });
+  const containerDetailsKeyValuePairs = toKeyValuePairs({
+    keys: containerDetailsKeys,
+    data,
+  });
+  const metricsKubernetesKeyValuePairs = toKeyValuePairs({
+    keys: metricsKubernetesDetailsKeys,
+    data,
+    isFilterable: false,
+  });
+  const cloudDetailsKeyValuePairs = toKeyValuePairs({
+    keys: cloudDetailsKeys,
+    data,
+  });
 
   const containerType = data.kubernetes?.pod?.name ? 'Kubernetes' : 'Docker';
   return (
@@ -122,7 +162,10 @@ export function InstanceDetails({
             { defaultMessage: 'Container' }
           )}
           icon={getContainerIcon(containerType)}
-          keyValueList={containerDetailsKeyValuePairs}
+          keyValueList={[
+            ...containerDetailsKeyValuePairs,
+            ...metricsKubernetesKeyValuePairs,
+          ]}
           onClickFilter={addKueryBarFilter}
         />
       </EuiFlexItem>

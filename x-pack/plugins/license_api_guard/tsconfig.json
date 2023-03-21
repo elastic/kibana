@@ -1,16 +1,17 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
-    "declarationMap": true
+    "outDir": "target/types",
   },
   "include": [
     "server/**/*"
   ],
-  "references": [
-    { "path": "../licensing/tsconfig.json" },
-    { "path": "../../../src/core/tsconfig.json" }
+  "kbn_references": [
+    "@kbn/licensing-plugin",
+    "@kbn/core",
+    "@kbn/i18n",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

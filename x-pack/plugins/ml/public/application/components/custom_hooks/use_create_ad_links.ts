@@ -33,6 +33,7 @@ export const useCreateADLinks = () => {
       );
       return `${basePath.get()}/app/ml/${resultsUrl}`;
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [basePath]
   );
   return { createLinkWithUserDefaults };

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
+import { FormulaIndexPatternColumn, FormulaPublicApi } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 export function getDistributionInPercentageColumn({
@@ -13,19 +13,24 @@ export function getDistributionInPercentageColumn({
   dataView,
   columnFilter,
   lensFormulaHelper,
+  formula,
+  format,
 }: {
   label?: string;
   columnFilter?: string;
   layerId: string;
   lensFormulaHelper: FormulaPublicApi;
   dataView: DataView;
+  formula?: string;
+  format?: string;
 }) {
   const yAxisColId = `y-axis-column-${layerId}`;
 
-  let lensFormula = 'count() / overall_sum(count())';
+  let lensFormula = formula ?? 'count() / overall_sum(count())';
 
   if (columnFilter) {
-    lensFormula = `count(kql='${columnFilter}') / overall_sum(count(kql='${columnFilter}'))`;
+    lensFormula =
+      formula ?? `count(kql='${columnFilter}') / overall_sum(count(kql='${columnFilter}'))`;
   }
 
   const { columns } = lensFormulaHelper?.insertOrReplaceFormulaColumn(
@@ -33,12 +38,15 @@ export function getDistributionInPercentageColumn({
     {
       formula: lensFormula,
       label,
-      format: {
-        id: 'percent',
-        params: {
-          decimals: 0,
-        },
-      },
+      format:
+        format === 'percent' || !format
+          ? {
+              id: 'percent',
+              params: {
+                decimals: 0,
+              },
+            }
+          : undefined,
     },
     {
       columns: {},
@@ -49,5 +57,5 @@ export function getDistributionInPercentageColumn({
 
   const { [yAxisColId]: main, ...supportingColumns } = columns;
 
-  return { main: columns[yAxisColId], supportingColumns };
+  return { main: columns[yAxisColId] as FormulaIndexPatternColumn, supportingColumns };
 }

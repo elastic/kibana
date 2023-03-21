@@ -1,0 +1,127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 1`] = `
+<li
+  class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
+>
+  <span
+    aria-current="page"
+    class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-isTruncatedLast-onlyChild-euiTextColor-default"
+    data-test-subj="breadcrumb first last"
+    title="First"
+  >
+    First
+  </span>
+</li>
+`;
+
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 2`] = `
+<li
+  class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
+>
+  <span
+    aria-current="page"
+    class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-isTruncatedLast-onlyChild-euiTextColor-default"
+    data-test-subj="breadcrumb first last"
+    title="First"
+  >
+    First
+  </span>
+</li>
+`;
+
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 3`] = `
+<li
+  class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
+>
+  <span
+    class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-isTruncated-firstChild-euiTextColor-subdued"
+    data-test-subj="breadcrumb first"
+    title="First"
+  >
+    First
+  </span>
+</li>
+`;
+
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 4`] = `
+<li
+  class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
+>
+  <span
+    class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-isTruncated-firstChild-euiTextColor-subdued"
+    data-test-subj="breadcrumb first"
+    title="First"
+  >
+    First
+  </span>
+</li>
+`;
+
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 5`] = `
+<li
+  class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
+>
+  <span
+    aria-current="page"
+    class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-isTruncatedLast-lastChild-euiTextColor-default"
+    data-test-subj="breadcrumb last"
+    title="Second"
+  >
+    Second
+  </span>
+</li>
+`;
+
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 6`] = `
+<li
+  class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
+>
+  <span
+    aria-current="page"
+    class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-isTruncatedLast-lastChild-euiTextColor-default"
+    data-test-subj="breadcrumb last"
+    title="Second"
+  >
+    Second
+  </span>
+</li>
+`;
+
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 7`] = `
+<li
+  class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
+>
+  <span
+    aria-current="page"
+    class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-isTruncatedLast-onlyChild-euiTextColor-default"
+    data-test-subj="breadcrumb first"
+    title="First"
+  >
+    Kibana
+  </span>
+</li>
+`;
+
+exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 8`] = `
+<li
+  class="euiBreadcrumb emotion-euiBreadcrumb-application-isTruncated"
+  data-test-subj="euiBreadcrumb"
+>
+  <span
+    aria-current="page"
+    class="euiBreadcrumb__content emotion-euiBreadcrumb__content-application-isTruncatedLast-onlyChild-euiTextColor-default"
+    data-test-subj="breadcrumb first"
+    title="First"
+  >
+    Kibana
+  </span>
+</li>
+`;

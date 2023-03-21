@@ -29,11 +29,17 @@ describe('fetchConnectors lib', () => {
   describe('fetch connector by id', () => {
     it('should fetch connector by id', async () => {
       mockClient.asCurrentUser.get.mockImplementationOnce(() =>
-        Promise.resolve({ _id: 'connectorId', _source: { source: 'source' } })
+        Promise.resolve({
+          _id: 'connectorId',
+          _primary_term: 'primaryTerm',
+          _seq_no: 5,
+          _source: { source: 'source' },
+        })
       );
       await expect(fetchConnectorById(mockClient as any, 'id')).resolves.toEqual({
-        id: 'connectorId',
-        source: 'source',
+        primaryTerm: 'primaryTerm',
+        seqNo: 5,
+        value: { id: 'connectorId', source: 'source' },
       });
       expect(mockClient.asCurrentUser.get).toHaveBeenCalledWith({
         id: 'id',
@@ -92,7 +98,7 @@ describe('fetchConnectors lib', () => {
         index: CONNECTORS_INDEX,
         query: {
           term: {
-            ['index_name.keyword']: 'id',
+            ['index_name']: 'id',
           },
         },
       });
@@ -112,7 +118,7 @@ describe('fetchConnectors lib', () => {
         index: CONNECTORS_INDEX,
         query: {
           term: {
-            ['index_name.keyword']: 'id',
+            ['index_name']: 'id',
           },
         },
       });
@@ -135,7 +141,7 @@ describe('fetchConnectors lib', () => {
         index: CONNECTORS_INDEX,
         query: {
           term: {
-            ['index_name.keyword']: 'id',
+            ['index_name']: 'id',
           },
         },
       });

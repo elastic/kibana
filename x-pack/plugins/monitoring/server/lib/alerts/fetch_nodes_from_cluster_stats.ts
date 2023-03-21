@@ -10,7 +10,7 @@ import { ElasticsearchSource } from '../../../common/types/es';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 
 function formatNode(
   nodes: NonNullable<NonNullable<ElasticsearchSource['cluster_state']>['nodes']> | undefined
@@ -32,7 +32,7 @@ export async function fetchNodesFromClusterStats(
   clusters: AlertCluster[],
   filterQuery?: string
 ): Promise<AlertClusterStatsNodes[]> {
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'cluster_stats',
@@ -54,7 +54,11 @@ export async function fetchNodesFromClusterStats(
       query: {
         bool: {
           filter: [
-            createDatasetFilter('cluster_stats', 'cluster_stats', 'elasticsearch.cluster_stats'),
+            createDatasetFilter(
+              'cluster_stats',
+              'cluster_stats',
+              getElasticsearchDataset('cluster_stats')
+            ),
             {
               range: {
                 timestamp: {

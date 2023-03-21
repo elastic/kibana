@@ -6,7 +6,7 @@ NOTE: The Logging service is only available server side.
 
 [source,typescript]
 ----
-import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from 'kibana/server';
+import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
 
 export class MyPlugin implements Plugin {
   private readonly logger: Logger;

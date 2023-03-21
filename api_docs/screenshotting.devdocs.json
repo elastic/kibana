@@ -19,15 +19,28 @@
           "{ id?: Id | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
           "> | undefined; zoom?: number | undefined; } extends ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           " ? ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           " & { id?: Id | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
           "> | undefined; zoom?: number | undefined; } : never"
         ],
         "path": "x-pack/plugins/screenshotting/common/layout.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -59,6 +72,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "screenshotting",
@@ -73,7 +87,8 @@
               "\"pdf\""
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "screenshotting",
@@ -88,7 +103,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "screenshotting",
@@ -103,7 +119,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "screenshotting",
@@ -128,7 +145,8 @@
               "> | undefined; zoom?: number | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -144,6 +162,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "screenshotting",
@@ -158,7 +177,8 @@
               "PdfScreenshotMetrics"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "screenshotting",
@@ -173,7 +193,8 @@
               "Buffer"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "screenshotting",
@@ -188,7 +209,8 @@
               "Error[]"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "screenshotting",
@@ -203,7 +225,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -230,6 +253,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/server/formats/png.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "screenshotting",
@@ -246,7 +270,8 @@
               "\"png\" | undefined"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/png.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "screenshotting",
@@ -261,7 +286,8 @@
               "> | undefined; zoom?: number | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/screenshotting/server/formats/png.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -283,6 +309,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/server/formats/png.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -311,6 +338,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -333,6 +361,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/server/screenshots/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -348,6 +377,7 @@
       ],
       "path": "x-pack/plugins/screenshotting/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "screenshotting",
@@ -365,6 +395,7 @@
           ],
           "path": "x-pack/plugins/screenshotting/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [
             "Observable with output messages."
           ],
@@ -380,7 +411,8 @@
                 "string[]"
               ],
               "path": "x-pack/plugins/screenshotting/server/browsers/chromium/driver_factory/index.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         },
@@ -445,7 +477,8 @@
             ">; }"
           ],
           "path": "x-pack/plugins/screenshotting/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -471,15 +504,28 @@
           "{ id?: Id | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
           "> | undefined; zoom?: number | undefined; } extends ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           " ? ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           " & { id?: Id | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
           "> | undefined; zoom?: number | undefined; } : never"
         ],
         "path": "x-pack/plugins/screenshotting/common/layout.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -496,6 +542,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/common/layout.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -510,6 +557,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -524,6 +572,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/common/expression.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -538,6 +587,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/common/expression.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -552,6 +602,7 @@
         ],
         "path": "x-pack/plugins/screenshotting/common/expression.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

@@ -7,7 +7,7 @@
  */
 
 import * as t from 'io-ts';
-import { either } from 'fp-ts/lib/Either';
+import { either, isRight } from 'fp-ts/lib/Either';
 import { difference, isPlainObject, forEach } from 'lodash';
 import { MergeType } from '../merge_rt';
 
@@ -62,7 +62,7 @@ function getHandlingTypes(type: t.Mixed, key: string, value: object): t.Mixed[] 
       return getHandlingTypes(type.type, key, value);
 
     case 'UnionType':
-      const matched = type.types.find((m) => m.is(value));
+      const matched = type.types.find((m) => isRight(m.decode(value)));
       return matched ? getHandlingTypes(matched, key, value) : [];
   }
 }

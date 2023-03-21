@@ -27,6 +27,7 @@
         ],
         "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "usageCollection",
@@ -50,6 +51,7 @@
             ],
             "path": "src/plugins/usage_collection/public/components/track_application_view/track_application_view.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -69,6 +71,7 @@
         ],
         "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "usageCollection",
@@ -80,7 +83,8 @@
               "\nThe name of the view to be tracked. The appId will be obtained automatically."
             ],
             "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -95,7 +99,8 @@
               "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -115,6 +120,7 @@
       ],
       "path": "src/plugins/usage_collection/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "usageCollection",
@@ -129,7 +135,8 @@
             "{ ApplicationUsageTrackingProvider: React.FC<{}>; }"
           ],
           "path": "src/plugins/usage_collection/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "usageCollection",
@@ -145,6 +152,7 @@
           ],
           "path": "src/plugins/usage_collection/public/plugin.tsx",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "usageCollection",
@@ -158,6 +166,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -172,6 +181,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -186,6 +196,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -200,6 +211,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": false
             }
           ],
@@ -220,6 +232,7 @@
       ],
       "path": "src/plugins/usage_collection/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "usageCollection",
@@ -235,6 +248,7 @@
           ],
           "path": "src/plugins/usage_collection/public/plugin.tsx",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "usageCollection",
@@ -248,6 +262,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -262,6 +277,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -276,6 +292,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -290,6 +307,7 @@
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": false
             }
           ],
@@ -315,6 +333,7 @@
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "usageCollection",
@@ -326,7 +345,111 @@
               "\nRequest-scoped Elasticsearch client"
             ],
             "signature": [
-              "{ eql: ",
+              "{ create: { <TDocument = unknown>(this: That, params: ",
+              "CreateRequest",
+              "<TDocument> | ",
+              "CreateRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; <TDocument = unknown>(this: That, params: ",
+              "CreateRequest",
+              "<TDocument> | ",
+              "CreateRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "WriteResponseBase",
+              ", unknown>>; <TDocument = unknown>(this: That, params: ",
+              "CreateRequest",
+              "<TDocument> | ",
+              "CreateRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument> | ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "UpdateResponse",
+              "<TDocumentR>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument> | ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "UpdateResponse",
+              "<TDocumentR>, unknown>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument> | ",
+              "UpdateRequest",
+              "<TDocument, TPartialDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "UpdateResponse",
+              "<TDocumentR>>; }; get: { <TDocument = unknown>(this: That, params: ",
+              "GetRequest",
+              " | ",
+              "GetRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "GetResponse",
+              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
+              "GetRequest",
+              " | ",
+              "GetRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "GetResponse",
+              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
+              "GetRequest",
+              " | ",
+              "GetRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "GetResponse",
+              "<TDocument>>; }; delete: { (this: That, params: ",
+              "DeleteRequest",
+              " | ",
+              "DeleteRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; (this: That, params: ",
+              "DeleteRequest",
+              " | ",
+              "DeleteRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "WriteResponseBase",
+              ", unknown>>; (this: That, params: ",
+              "DeleteRequest",
+              " | ",
+              "DeleteRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; }; helpers: ",
               "default",
               "; search: { <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
@@ -360,175 +483,85 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
-              "CreateRequest",
-              "<TDocument> | ",
-              "CreateRequest",
-              "<TDocument>, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "WriteResponseBase",
-              ">; <TDocument = unknown>(this: That, params: ",
-              "CreateRequest",
-              "<TDocument> | ",
-              "CreateRequest",
-              "<TDocument>, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "WriteResponseBase",
-              ", unknown>>; <TDocument = unknown>(this: That, params: ",
-              "CreateRequest",
-              "<TDocument> | ",
-              "CreateRequest",
-              "<TDocument>, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "WriteResponseBase",
-              ">; }; monitoring: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
               "default",
-              "; security: ",
+              "; count: { (this: That, params?: ",
+              "CountRequest",
+              " | ",
+              "CountRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "CountResponse",
+              ">; (this: That, params?: ",
+              "CountRequest",
+              " | ",
+              "CountRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "CountResponse",
+              ", unknown>>; (this: That, params?: ",
+              "CountRequest",
+              " | ",
+              "CountRequest",
+              " | undefined, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "CountResponse",
+              ">; }; exists: { (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<boolean>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<boolean, unknown>>; (this: That, params: ",
+              "ExistsRequest",
+              " | ",
+              "ExistsRequest",
+              ", options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<boolean>; }; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
-              "IndexRequest",
-              "<TDocument> | ",
-              "IndexRequest",
-              "<TDocument>, options?: ",
+              "; ping: { (this: That, params?: ",
+              "PingRequest",
+              " | ",
+              "PingRequest",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "WriteResponseBase",
-              ">; <TDocument = unknown>(this: That, params: ",
-              "IndexRequest",
-              "<TDocument> | ",
-              "IndexRequest",
-              "<TDocument>, options?: ",
+              " | undefined): Promise<boolean>; (this: That, params?: ",
+              "PingRequest",
+              " | ",
+              "PingRequest",
+              " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
-              "<",
-              "WriteResponseBase",
-              ", unknown>>; <TDocument = unknown>(this: That, params: ",
-              "IndexRequest",
-              "<TDocument> | ",
-              "IndexRequest",
-              "<TDocument>, options?: ",
+              "<boolean, unknown>>; (this: That, params?: ",
+              "PingRequest",
+              " | ",
+              "PingRequest",
+              " | undefined, options?: ",
               "TransportRequestOptions",
-              " | undefined): Promise<",
-              "WriteResponseBase",
-              ">; }; delete: { (this: That, params: ",
-              "DeleteRequest",
-              " | ",
-              "DeleteRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "WriteResponseBase",
-              ">; (this: That, params: ",
-              "DeleteRequest",
-              " | ",
-              "DeleteRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "WriteResponseBase",
-              ", unknown>>; (this: That, params: ",
-              "DeleteRequest",
-              " | ",
-              "DeleteRequest",
-              ", options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "WriteResponseBase",
-              ">; }; get: { <TDocument = unknown>(this: That, params: ",
-              "GetRequest",
-              " | ",
-              "GetRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "GetResponse",
-              "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-              "GetRequest",
-              " | ",
-              "GetRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "GetResponse",
-              "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-              "GetRequest",
-              " | ",
-              "GetRequest",
-              ", options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "GetResponse",
-              "<TDocument>>; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-              "UpdateRequest",
-              "<TDocument, TPartialDocument> | ",
-              "UpdateRequest",
-              "<TDocument, TPartialDocument>, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "UpdateResponse",
-              "<TDocumentR>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-              "UpdateRequest",
-              "<TDocument, TPartialDocument> | ",
-              "UpdateRequest",
-              "<TDocument, TPartialDocument>, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "UpdateResponse",
-              "<TDocumentR>, unknown>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-              "UpdateRequest",
-              "<TDocument, TPartialDocument> | ",
-              "UpdateRequest",
-              "<TDocument, TPartialDocument>, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "UpdateResponse",
-              "<TDocumentR>>; }; closePointInTime: { (this: That, params: ",
-              "ClosePointInTimeRequest",
-              " | ",
-              "ClosePointInTimeRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<",
-              "ClosePointInTimeResponse",
-              ">; (this: That, params: ",
-              "ClosePointInTimeRequest",
-              " | ",
-              "ClosePointInTimeRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<",
-              "ClosePointInTimeResponse",
-              ", unknown>>; (this: That, params: ",
-              "ClosePointInTimeRequest",
-              " | ",
-              "ClosePointInTimeRequest",
-              ", options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<",
-              "ClosePointInTimeResponse",
-              ">; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              " | undefined): Promise<boolean>; }; nodes: ",
               "default",
-              "; helpers: ",
+              "; indices: ",
+              "default",
+              "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
               ") => ",
-              "default",
-              "; Internal: ",
               "default",
               "; asyncSearch: ",
               "default",
@@ -590,35 +623,35 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClearScrollResponse",
-              ">; }; cluster: ",
-              "default",
-              "; count: { (this: That, params?: ",
-              "CountRequest",
+              ">; }; closePointInTime: { (this: That, params: ",
+              "ClosePointInTimeRequest",
               " | ",
-              "CountRequest",
-              " | undefined, options?: ",
+              "ClosePointInTimeRequest",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "CountResponse",
-              ">; (this: That, params?: ",
-              "CountRequest",
+              "ClosePointInTimeResponse",
+              ">; (this: That, params: ",
+              "ClosePointInTimeRequest",
               " | ",
-              "CountRequest",
-              " | undefined, options?: ",
+              "ClosePointInTimeRequest",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "CountResponse",
-              ", unknown>>; (this: That, params?: ",
-              "CountRequest",
+              "ClosePointInTimeResponse",
+              ", unknown>>; (this: That, params: ",
+              "ClosePointInTimeRequest",
               " | ",
-              "CountRequest",
-              " | undefined, options?: ",
+              "ClosePointInTimeRequest",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "CountResponse",
-              ">; }; danglingIndices: ",
+              "ClosePointInTimeResponse",
+              ">; }; cluster: ",
+              "default",
+              "; danglingIndices: ",
               "default",
               "; deleteByQuery: { (this: That, params: ",
               "DeleteByQueryRequest",
@@ -700,27 +733,9 @@
               "AcknowledgedResponseBase",
               ">; }; enrich: ",
               "default",
-              "; exists: { (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<boolean>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<boolean, unknown>>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
-              "ExistsRequest",
-              ", options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
+              "; eql: ",
+              "default",
+              "; existsSource: { (this: That, params: ",
               "ExistsSourceRequest",
               " | ",
               "ExistsSourceRequest",
@@ -898,9 +913,33 @@
               "default",
               "; ilm: ",
               "default",
-              "; indices: ",
-              "default",
-              "; info: { (this: That, params?: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
+              "IndexRequest",
+              "<TDocument> | ",
+              "IndexRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithOutMeta",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; <TDocument = unknown>(this: That, params: ",
+              "IndexRequest",
+              "<TDocument> | ",
+              "IndexRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptionsWithMeta",
+              " | undefined): Promise<",
+              "TransportResult",
+              "<",
+              "WriteResponseBase",
+              ", unknown>>; <TDocument = unknown>(this: That, params: ",
+              "IndexRequest",
+              "<TDocument> | ",
+              "IndexRequest",
+              "<TDocument>, options?: ",
+              "TransportRequestOptions",
+              " | undefined): Promise<",
+              "WriteResponseBase",
+              ">; }; info: { (this: That, params?: ",
               "InfoRequest",
               " | ",
               "InfoRequest",
@@ -1078,9 +1117,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "MtermvectorsResponse",
-              ">; }; nodes: ",
-              "default",
-              "; openPointInTime: { (this: That, params: ",
+              ">; }; openPointInTime: { (this: That, params: ",
               "OpenPointInTimeRequest",
               " | ",
               "OpenPointInTimeRequest",
@@ -1106,27 +1143,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "OpenPointInTimeResponse",
-              ">; }; ping: { (this: That, params?: ",
-              "PingRequest",
-              " | ",
-              "PingRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithOutMeta",
-              " | undefined): Promise<boolean>; (this: That, params?: ",
-              "PingRequest",
-              " | ",
-              "PingRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptionsWithMeta",
-              " | undefined): Promise<",
-              "TransportResult",
-              "<boolean, unknown>>; (this: That, params?: ",
-              "PingRequest",
-              " | ",
-              "PingRequest",
-              " | undefined, options?: ",
-              "TransportRequestOptions",
-              " | undefined): Promise<boolean>; }; putScript: { (this: That, params: ",
+              ">; }; putScript: { (this: That, params: ",
               "PutScriptRequest",
               " | ",
               "PutScriptRequest",
@@ -1517,7 +1534,8 @@
               "; }"
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -1529,334 +1547,17 @@
               "\nRequest-scoped Saved Objects client"
             ],
             "signature": [
-              "{ create: <T = unknown>(type: string, attributes: T, options?: ",
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreateOptions",
-                "text": "SavedObjectsCreateOptions"
-              },
-              " | undefined) => Promise<",
-              "SavedObject",
-              "<T>>; bulkCreate: <T = unknown>(objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkCreateObject",
-                "text": "SavedObjectsBulkCreateObject"
-              },
-              "<T>[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreateOptions",
-                "text": "SavedObjectsCreateOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResponse",
-                "text": "SavedObjectsBulkResponse"
-              },
-              "<T>>; checkConflicts: (objects?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCheckConflictsObject",
-                "text": "SavedObjectsCheckConflictsObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCheckConflictsResponse",
-                "text": "SavedObjectsCheckConflictsResponse"
-              },
-              ">; delete: (type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsDeleteOptions",
-                "text": "SavedObjectsDeleteOptions"
-              },
-              ") => Promise<{}>; find: <T = unknown, A = unknown>(options: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindResponse",
-                "text": "SavedObjectsFindResponse"
-              },
-              "<T, A>>; bulkGet: <T = unknown>(objects?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkGetObject",
-                "text": "SavedObjectsBulkGetObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResponse",
-                "text": "SavedObjectsBulkResponse"
-              },
-              "<T>>; bulkResolve: <T = unknown>(objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResolveObject",
-                "text": "SavedObjectsBulkResolveObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkResolveResponse",
-                "text": "SavedObjectsBulkResolveResponse"
-              },
-              "<T>>; get: <T = unknown>(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              "SavedObject",
-              "<T>>; resolve: <T = unknown>(type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsResolveResponse",
-                "text": "SavedObjectsResolveResponse"
-              },
-              "<T>>; update: <T = unknown>(type: string, id: string, attributes: Partial<T>, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateOptions",
-                "text": "SavedObjectsUpdateOptions"
-              },
-              "<T>) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateResponse",
-                "text": "SavedObjectsUpdateResponse"
-              },
-              "<T>>; collectMultiNamespaceReferences: (objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesObject",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesObject"
-              },
-              "[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesOptions",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
-                "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
-              },
-              ">; updateObjectsSpaces: (objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesObject",
-                "text": "SavedObjectsUpdateObjectsSpacesObject"
-              },
-              "[], spacesToAdd: string[], spacesToRemove: string[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesOptions",
-                "text": "SavedObjectsUpdateObjectsSpacesOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsUpdateObjectsSpacesResponse",
-                "text": "SavedObjectsUpdateObjectsSpacesResponse"
-              },
-              ">; bulkUpdate: <T = unknown>(objects: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateObject",
-                "text": "SavedObjectsBulkUpdateObject"
-              },
-              "<T>[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateOptions",
-                "text": "SavedObjectsBulkUpdateOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBulkUpdateResponse",
-                "text": "SavedObjectsBulkUpdateResponse"
-              },
-              "<T>>; removeReferencesTo: (type: string, id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRemoveReferencesToOptions",
-                "text": "SavedObjectsRemoveReferencesToOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRemoveReferencesToResponse",
-                "text": "SavedObjectsRemoveReferencesToResponse"
-              },
-              ">; openPointInTimeForType: (type: string | string[], options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsOpenPointInTimeOptions",
-                "text": "SavedObjectsOpenPointInTimeOptions"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsOpenPointInTimeResponse",
-                "text": "SavedObjectsOpenPointInTimeResponse"
-              },
-              ">; closePointInTime: (id: string, options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
-                "text": "SavedObjectsBaseOptions"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClosePointInTimeResponse",
-                "text": "SavedObjectsClosePointInTimeResponse"
-              },
-              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
-                "text": "SavedObjectsCreatePointInTimeFinderOptions"
-              },
-              ", dependencies?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
-                "text": "SavedObjectsCreatePointInTimeFinderDependencies"
-              },
-              " | undefined) => ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.ISavedObjectsPointInTimeFinder",
-                "text": "ISavedObjectsPointInTimeFinder"
-              },
-              "<T, A>; errors: typeof ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsErrorHelpers",
-                "text": "SavedObjectsErrorHelpers"
-              },
-              "; }"
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1882,6 +1583,7 @@
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "usageCollection",
@@ -1893,10 +1595,17 @@
               "Logger"
             ],
             "signature": [
-              "Logger"
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -1908,7 +1617,8 @@
               "The registered type (aka name) of the collector"
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -1940,6 +1650,7 @@
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1959,7 +1670,8 @@
                   }
                 ],
                 "path": "src/plugins/usage_collection/server/collector/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1977,65 +1689,9 @@
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "usageCollection",
-        "id": "def-server.IncrementCounterParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "IncrementCounterParams",
-        "description": [
-          "\nDetails about the counter to be incremented"
-        ],
-        "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "usageCollection",
-            "id": "def-server.IncrementCounterParams.counterName",
-            "type": "string",
-            "tags": [],
-            "label": "counterName",
-            "description": [
-              "The name of the counter"
-            ],
-            "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "usageCollection",
-            "id": "def-server.IncrementCounterParams.counterType",
-            "type": "string",
-            "tags": [],
-            "label": "counterType",
-            "description": [
-              "The counter type (\"count\" by default)"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "usageCollection",
-            "id": "def-server.IncrementCounterParams.incrementBy",
-            "type": "number",
-            "tags": [],
-            "label": "incrementBy",
-            "description": [
-              "Increment the counter by this number (1 if not specified)"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -2051,6 +1707,7 @@
         ],
         "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "usageCollection",
@@ -2063,17 +1720,12 @@
             ],
             "signature": [
               "(params: ",
-              {
-                "pluginId": "usageCollection",
-                "scope": "server",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.IncrementCounterParams",
-                "text": "IncrementCounterParams"
-              },
+              "IncrementCounterParams",
               ") => void"
             ],
             "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "usageCollection",
@@ -2085,16 +1737,11 @@
                   "{@link IncrementCounterParams }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "usageCollection",
-                    "scope": "server",
-                    "docId": "kibUsageCollectionPluginApi",
-                    "section": "def-server.IncrementCounterParams",
-                    "text": "IncrementCounterParams"
-                  }
+                  "IncrementCounterParams"
                 ],
                 "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2112,19 +1759,9 @@
         "description": [
           "\nThe attributes stored in the UsageCounters' SavedObjects"
         ],
-        "signature": [
-          {
-            "pluginId": "usageCollection",
-            "scope": "server",
-            "docId": "kibUsageCollectionPluginApi",
-            "section": "def-server.UsageCountersSavedObjectAttributes",
-            "text": "UsageCountersSavedObjectAttributes"
-          },
-          " extends ",
-          "SavedObjectAttributes"
-        ],
         "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "usageCollection",
@@ -2136,7 +1773,8 @@
               "The domain ID registered in the Usage Counter"
             ],
             "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -2148,7 +1786,8 @@
               "The counter name"
             ],
             "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -2160,7 +1799,8 @@
               "The counter type"
             ],
             "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "usageCollection",
@@ -2172,7 +1812,8 @@
               "Number of times the event has occurred"
             ],
             "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2190,10 +1831,11 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
+          "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
         ],
-        "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
+        "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2203,7 +1845,7 @@
         "tags": [],
         "label": "CollectorFetchMethod",
         "description": [
-          "\nThe fetch method has the context of the Collector itself\n(this has access to all the properties of the collector like the logger)\nand the the first parameter is {@link CollectorFetchContext}."
+          "\nThe fetch method has the context of the Collector itself\n(this has access to all the properties of the collector like the logger)\nand the first parameter is {@link CollectorFetchContext}."
         ],
         "signature": [
           "(this: ",
@@ -2226,6 +1868,7 @@
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -2245,7 +1888,8 @@
               }
             ],
             "path": "src/plugins/usage_collection/server/collector/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2280,6 +1924,19 @@
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "usageCollection",
+        "id": "def-server.IncrementCounterParams",
+        "type": "Type",
+        "tags": [],
+        "label": "IncrementCounterParams",
+        "description": [],
+        "path": "src/plugins/usage_collection/server/usage_counters/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2300,6 +1957,7 @@
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2316,6 +1974,7 @@
         ],
         "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2364,6 +2023,7 @@
         ],
         "path": "src/plugins/usage_collection/server/collector/usage_collector.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2376,7 +2036,13 @@
           "\nThe structure of the SavedObjects of type \"usage-counters\""
         ],
         "signature": [
-          "SavedObject",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
           "<",
           {
             "pluginId": "usageCollection",
@@ -2389,6 +2055,7 @@
         ],
         "path": "src/plugins/usage_collection/server/usage_counters/saved_objects.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -2404,6 +2071,7 @@
       ],
       "path": "src/plugins/usage_collection/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "usageCollection",
@@ -2426,6 +2094,7 @@
           ],
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "usageCollection",
@@ -2439,6 +2108,7 @@
               ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2466,6 +2136,7 @@
           ],
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "usageCollection",
@@ -2479,6 +2150,7 @@
               ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2514,6 +2186,7 @@
           ],
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "usageCollection",
@@ -2534,6 +2207,7 @@
               ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2561,6 +2235,7 @@
           ],
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "usageCollection",
@@ -2581,6 +2256,7 @@
               ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -2608,6 +2284,7 @@
           ],
           "path": "src/plugins/usage_collection/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "usageCollection",
@@ -2621,6 +2298,7 @@
               ],
               "path": "src/plugins/usage_collection/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],

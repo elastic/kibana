@@ -9,6 +9,7 @@
 import { of } from 'rxjs';
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { createAnalytics } from '@kbn/analytics-client';
+import { registerPerformanceMetricEventType } from '@kbn/ebt-tools';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type {
   AnalyticsServiceSetup,
@@ -29,6 +30,7 @@ export class AnalyticsService {
     });
 
     this.registerBuildInfoAnalyticsContext(core);
+    registerPerformanceMetricEventType(this.analyticsClient);
   }
 
   public preboot(): AnalyticsServicePreboot {
@@ -63,8 +65,8 @@ export class AnalyticsService {
     };
   }
 
-  public stop() {
-    this.analyticsClient.shutdown();
+  public async stop() {
+    await this.analyticsClient.shutdown();
   }
 
   /**

@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { APP_OWNER } from '../../../common/constants';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { getCasesLazy } from '../../client/ui/get_cases';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 
 import { Wrapper } from '../wrappers';
-import { CasesRoutesProps } from './types';
+import type { CasesRoutesProps } from './types';
 
 export type CasesProps = CasesRoutesProps;
 

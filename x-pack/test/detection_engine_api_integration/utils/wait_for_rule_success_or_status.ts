@@ -8,8 +8,8 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import { waitFor } from './wait_for';
 
 /**
@@ -48,7 +48,7 @@ export const waitForRuleSuccessOrStatus = async (
           log.debug(
             `Did not get an expected status of ${status} while waiting for a rule success or status for rule id ${id} (waitForRuleSuccessOrStatus). Will continue retrying until status is found. body: ${JSON.stringify(
               response.body
-            )}, status: ${JSON.stringify(response.status)}`
+            )}, status: ${JSON.stringify(ruleStatus)}`
           );
         }
         return (

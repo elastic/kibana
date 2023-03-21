@@ -24,8 +24,11 @@ export type {
   PackagePolicyPackage,
   Output,
   DownloadSource,
+  FleetServerHost,
+  FleetProxy,
   DataStream,
   Settings,
+  ActionStatus,
   CurrentUpgrade,
   GetFleetStatusResponse,
   GetAgentPoliciesRequest,
@@ -66,8 +69,8 @@ export type {
   GetAgentIncomingDataRequest,
   IncomingDataList,
   GetAgentIncomingDataResponse,
-  PutAgentReassignRequest,
-  PutAgentReassignResponse,
+  PostAgentReassignRequest,
+  PostAgentReassignResponse,
   PostBulkAgentReassignRequest,
   PostBulkAgentReassignResponse,
   PostNewAgentActionResponse,
@@ -99,6 +102,7 @@ export type {
   RegistryVarsEntry,
   RegistryInput,
   RegistryStream,
+  RegistryStreamWithDataStream,
   RegistryPolicyTemplate,
   PackageList,
   PackageListItem,
@@ -109,6 +113,7 @@ export type {
   ServiceName,
   GetCategoriesRequest,
   GetCategoriesResponse,
+  GetVerificationKeyIdResponse,
   GetPackagesRequest,
   GetPackagesResponse,
   GetLimitedPackagesResponse,
@@ -125,8 +130,16 @@ export type {
   GetDownloadSourceResponse,
   PostDownloadSourceRequest,
   PutDownloadSourceRequest,
-} from '../../common';
-export { entries, ElasticsearchAssetType, KibanaAssetType, InstallStatus } from '../../common';
+  GetAvailableVersionsResponse,
+  PostHealthCheckRequest,
+  PostHealthCheckResponse,
+} from '../../common/types';
+export {
+  entries,
+  ElasticsearchAssetType,
+  KibanaAssetType,
+  InstallStatus,
+} from '../../common/types';
 
 export * from './intra_app_route_state';
 export * from './ui_extensions';

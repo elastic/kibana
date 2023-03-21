@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 
-import { FieldMapping, FieldMappingProps } from './field_mapping';
+import type { FieldMappingProps } from './field_mapping';
+import { FieldMapping } from './field_mapping';
 import { mappings } from './__mock__';
 import { TestProviders } from '../../common/mock';
 import { FieldMappingRowStatic } from './field_mapping_row_static';

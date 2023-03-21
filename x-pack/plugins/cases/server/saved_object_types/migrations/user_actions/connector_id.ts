@@ -7,18 +7,17 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 
-import {
+import type {
   SavedObjectMigrationContext,
   SavedObjectReference,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import type { CaseAttributes, CaseConnector } from '../../../../common/api';
 import {
-  CaseAttributes,
-  CaseConnector,
   CaseConnectorRt,
   CaseExternalServiceBasicRt,
   NONE_CONNECTOR_ID,
@@ -28,7 +27,7 @@ import {
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../../common/constants';
 import { getNoneCaseConnector } from '../../../common/utils';
-import { UserActionVersion800 } from './types';
+import type { UserActionVersion800 } from './types';
 import { logError } from '../utils';
 import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
 

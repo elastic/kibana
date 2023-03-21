@@ -7,7 +7,7 @@
 
 import { AIOPS_ENABLED } from '@kbn/aiops-plugin/common';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('AIOps', function () {

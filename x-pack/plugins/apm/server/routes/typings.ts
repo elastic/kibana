@@ -22,7 +22,6 @@ import {
   APMPluginSetupDependencies,
   APMPluginStartDependencies,
 } from '../types';
-import { UxUIFilters } from '../../common/ux_ui_filter';
 
 export type ApmPluginRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
@@ -48,6 +47,11 @@ export type TelemetryUsageCounter = ReturnType<
   UsageCollectionSetup['createUsageCounter']
 >;
 
+export interface APMCore {
+  setup: CoreSetup;
+  start: () => Promise<CoreStart>;
+}
+
 export interface APMRouteHandlerResources {
   request: KibanaRequest;
   context: ApmPluginRequestHandlerContext;
@@ -56,15 +60,11 @@ export interface APMRouteHandlerResources {
       _inspect: boolean;
       start?: number;
       end?: number;
-      uiFilters?: UxUIFilters;
     };
   };
   config: APMConfig;
   logger: Logger;
-  core: {
-    setup: CoreSetup;
-    start: () => Promise<CoreStart>;
-  };
+  core: APMCore;
   plugins: {
     [key in keyof APMPluginSetupDependencies]: {
       setup: Required<APMPluginSetupDependencies>[key];

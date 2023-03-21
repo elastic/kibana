@@ -11,16 +11,11 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import {
-  CasesMetricsRequest,
-  CasesMetricsRequestRt,
-  CasesMetricsResponse,
-  CasesMetricsResponseRt,
-  throwErrors,
-} from '../../../common/api';
+import type { CasesMetricsRequest, CasesMetricsResponse } from '../../../common/api';
+import { CasesMetricsRequestRt, CasesMetricsResponseRt, throwErrors } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import { CasesClient } from '../client';
-import { CasesClientArgs } from '../types';
+import type { CasesClient } from '../client';
+import type { CasesClientArgs } from '../types';
 import { buildHandlers } from './utils';
 
 export const getCasesMetrics = async (

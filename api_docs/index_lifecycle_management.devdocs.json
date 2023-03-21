@@ -20,10 +20,17 @@
             "text": "IlmLocatorParams"
           },
           " extends ",
-          "SerializableRecord"
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
         ],
         "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "indexLifecycleManagement",
@@ -36,7 +43,8 @@
               "\"policies_list\" | \"policy_edit\" | \"policy_create\""
             ],
             "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "indexLifecycleManagement",
@@ -49,7 +57,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -69,6 +78,7 @@
         ],
         "path": "x-pack/plugins/index_lifecycle_management/public/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

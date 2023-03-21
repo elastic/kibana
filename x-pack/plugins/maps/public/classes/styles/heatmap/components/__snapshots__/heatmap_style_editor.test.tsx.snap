@@ -4,7 +4,6 @@ exports[`HeatmapStyleEditor is rendered 1`] = `
 <EuiFormRow
   describedByIds={Array []}
   display="rowCompressed"
-  fullWidth={false}
   hasChildLabel={true}
   hasEmptyLabelSpace={false}
   label="Color range"

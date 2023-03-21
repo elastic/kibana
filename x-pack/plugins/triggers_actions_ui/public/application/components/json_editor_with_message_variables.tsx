@@ -34,15 +34,18 @@ const NO_EDITOR_ERROR_MESSAGE = i18n.translate(
 );
 
 interface Props {
+  buttonTitle?: string;
   messageVariables?: ActionVariable[];
   paramsProperty: string;
-  inputTargetValue?: string;
+  inputTargetValue?: string | null;
   label: string;
   errors?: string[];
   areaLabel?: string;
   onDocumentsChange: (data: string) => void;
   helpText?: JSX.Element;
   onBlur?: () => void;
+  showButtonTitle?: boolean;
+  euiCodeEditorProps?: { [key: string]: any };
 }
 
 const { useXJsonMode } = XJson;
@@ -53,6 +56,7 @@ const { useXJsonMode } = XJson;
 const EDITOR_SOURCE = 'json-editor-with-message-variables';
 
 export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
+  buttonTitle,
   messageVariables,
   paramsProperty,
   inputTargetValue,
@@ -62,12 +66,21 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   onDocumentsChange,
   helpText,
   onBlur,
+  showButtonTitle,
+  euiCodeEditorProps = {},
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorDisposables = useRef<monaco.IDisposable[]>([]);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
 
   const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
+
+  useEffect(() => {
+    if (!xJson && inputTargetValue) {
+      setXJson(inputTargetValue);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputTargetValue]);
 
   const onSelectMessageVariable = (variable: ActionVariable) => {
     const editor = editorRef.current;
@@ -142,15 +155,18 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
 
   return (
     <EuiFormRow
+      data-test-subj="actionJsonEditor"
       fullWidth
       error={errors}
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       label={label}
       labelAppend={
         <AddMessageVariables
+          buttonTitle={buttonTitle}
           messageVariables={messageVariables}
           onSelectEventHandler={onSelectMessageVariable}
           paramsProperty={paramsProperty}
+          showButtonTitle={showButtonTitle}
         />
       }
       helpText={helpText}
@@ -177,6 +193,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
           height="200px"
           data-test-subj={`${paramsProperty}JsonEditor`}
           aria-label={areaLabel}
+          {...euiCodeEditorProps}
           editorDidMount={onEditorMount}
           onChange={(xjson: string) => {
             setXJson(xjson);

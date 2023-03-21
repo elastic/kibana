@@ -49,7 +49,6 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText="Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character"
@@ -157,7 +156,6 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
         "Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character",
       ]
     }
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     isInvalid={true}

@@ -218,6 +218,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
 
     setIsTrainingFilter(isTraining);
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(searchQuery)]);
 
   return (
@@ -236,15 +237,16 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             target="_blank"
             iconType="help"
             iconSide="left"
+            size="xs"
             color="primary"
             href={docLink}
           >
-            {i18n.translate(
-              'xpack.ml.dataframe.analytics.regressionExploration.regressionDocsLink',
-              {
-                defaultMessage: 'Regression evaluation docs ',
-              }
-            )}
+            <EuiText size="xs" color="primary">
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.regressionExploration.regressionDocsLink"
+                defaultMessage="Regression evaluation docs "
+              />
+            </EuiText>
           </EuiButtonEmpty>
         }
         headerItems={

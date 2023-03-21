@@ -1,0 +1,311 @@
+{
+  "id": "@kbn/shared-ux-prompt-no-data-views-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+        "id": "def-common.StorybookMock",
+        "type": "Class",
+        "tags": [],
+        "label": "StorybookMock",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+            "scope": "common",
+            "docId": "kibKbnSharedUxPromptNoDataViewsMocksPluginApi",
+            "section": "def-common.StorybookMock",
+            "text": "StorybookMock"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/shared-ux-storybook-mock",
+            "scope": "common",
+            "docId": "kibKbnSharedUxStorybookMockPluginApi",
+            "section": "def-common.AbstractStorybookMock",
+            "text": "AbstractStorybookMock"
+          },
+          "<",
+          "NoDataViewsPromptProps",
+          ", ",
+          "NoDataViewsPromptServices",
+          ", {}, ServiceArguments>"
+        ],
+        "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+            "id": "def-common.StorybookMock.propArguments",
+            "type": "Object",
+            "tags": [],
+            "label": "propArguments",
+            "description": [],
+            "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+            "id": "def-common.StorybookMock.serviceArguments",
+            "type": "Object",
+            "tags": [],
+            "label": "serviceArguments",
+            "description": [],
+            "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                "id": "def-common.StorybookMock.serviceArguments.canCreateNewDataView",
+                "type": "Object",
+                "tags": [],
+                "label": "canCreateNewDataView",
+                "description": [],
+                "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-common.StorybookMock.serviceArguments.canCreateNewDataView.control",
+                    "type": "string",
+                    "tags": [],
+                    "label": "control",
+                    "description": [],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-common.StorybookMock.serviceArguments.canCreateNewDataView.defaultValue",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "defaultValue",
+                    "description": [],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                "id": "def-common.StorybookMock.serviceArguments.dataViewsDocLink",
+                "type": "Object",
+                "tags": [],
+                "label": "dataViewsDocLink",
+                "description": [],
+                "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-common.StorybookMock.serviceArguments.dataViewsDocLink.options",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "options",
+                    "description": [],
+                    "signature": [
+                      "(string | undefined)[]"
+                    ],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "id": "def-common.StorybookMock.serviceArguments.dataViewsDocLink.control",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "control",
+                    "description": [],
+                    "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                        "id": "def-common.StorybookMock.serviceArguments.dataViewsDocLink.control.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+            "id": "def-common.StorybookMock.dependencies",
+            "type": "Array",
+            "tags": [],
+            "label": "dependencies",
+            "description": [],
+            "signature": [
+              "never[]"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+            "id": "def-common.StorybookMock.getProps",
+            "type": "Function",
+            "tags": [],
+            "label": "getProps",
+            "description": [],
+            "signature": [
+              "() => { onDataViewCreated: ",
+              "HandlerFunction",
+              "; }"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+            "id": "def-common.StorybookMock.getServices",
+            "type": "Function",
+            "tags": [],
+            "label": "getServices",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                "scope": "common",
+                "docId": "kibKbnSharedUxPromptNoDataViewsMocksPluginApi",
+                "section": "def-common.Params",
+                "text": "Params"
+              },
+              ") => ",
+              "NoDataViewsPromptServices"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                "id": "def-common.StorybookMock.getServices.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxPromptNoDataViewsMocksPluginApi",
+                    "section": "def-common.Params",
+                    "text": "Params"
+                  }
+                ],
+                "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+        "id": "def-common.getNoDataViewsPromptServicesMock",
+        "type": "Function",
+        "tags": [],
+        "label": "getNoDataViewsPromptServicesMock",
+        "description": [
+          "\nReturns the Jest-compatible service abstractions for the `NoDataViewsPrompt` Provider."
+        ],
+        "signature": [
+          "(params?: Partial<",
+          "NoDataViewsPromptServices",
+          ">) => ",
+          "NoDataViewsPromptServices"
+        ],
+        "path": "packages/shared-ux/prompt/no_data_views/mocks/src/jest.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+            "id": "def-common.getNoDataViewsPromptServicesMock.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "NoDataViewsPromptServices",
+              ">"
+            ],
+            "path": "packages/shared-ux/prompt/no_data_views/mocks/src/jest.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views-mocks",
+        "id": "def-common.Params",
+        "type": "Type",
+        "tags": [],
+        "label": "Params",
+        "description": [],
+        "signature": [
+          "{ canCreateNewDataView: any; dataViewsDocLink: any; }"
+        ],
+        "path": "packages/shared-ux/prompt/no_data_views/mocks/src/storybook.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

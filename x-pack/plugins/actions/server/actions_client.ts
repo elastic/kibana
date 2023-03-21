@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import url from 'url';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -23,9 +24,23 @@ import {
 } from '@kbn/core/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
-import { ActionType } from '../common';
+import { IEventLogClient } from '@kbn/event-log-plugin/server';
+import { KueryNode } from '@kbn/es-query';
+import {
+  ActionType,
+  GetGlobalExecutionKPIParams,
+  GetGlobalExecutionLogParams,
+  IExecutionLogResult,
+} from '../common';
 import { ActionTypeRegistry } from './action_type_registry';
-import { validateConfig, validateSecrets, ActionExecutorContract, validateConnector } from './lib';
+import {
+  validateConfig,
+  validateSecrets,
+  ActionExecutorContract,
+  validateConnector,
+  ActionExecutionSource,
+  parseDate,
+} from './lib';
 import {
   ActionResult,
   FindActionResult,
@@ -39,15 +54,17 @@ import { ExecuteOptions } from './lib/action_executor';
 import {
   ExecutionEnqueuer,
   ExecuteOptions as EnqueueExecutionOptions,
+  BulkExecutionEnqueuer,
 } from './create_execute_function';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import {
   getAuthorizationModeBySource,
+  getBulkAuthorizationModeBySource,
   AuthorizationMode,
 } from './authorization/get_authorization_mode_by_source';
 import { connectorAuditEvent, ConnectorAuditAction } from './lib/audit_events';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
-import { isConnectorDeprecated } from './lib/is_conector_deprecated';
+import { isConnectorDeprecated } from './lib/is_connector_deprecated';
 import { ActionsConfigurationUtilities } from './actions_config';
 import {
   OAuthClientCredentialsParams,
@@ -58,19 +75,26 @@ import {
   getOAuthJwtAccessToken,
   GetOAuthJwtConfig,
   GetOAuthJwtSecrets,
-} from './builtin_action_types/lib/get_oauth_jwt_access_token';
+} from './lib/get_oauth_jwt_access_token';
 import {
   getOAuthClientCredentialsAccessToken,
   GetOAuthClientCredentialsConfig,
   GetOAuthClientCredentialsSecrets,
-} from './builtin_action_types/lib/get_oauth_client_credentials_access_token';
+} from './lib/get_oauth_client_credentials_access_token';
+import {
+  ACTION_FILTER,
+  formatExecutionKPIResult,
+  formatExecutionLogResult,
+  getExecutionKPIAggregation,
+  getExecutionLogAggregation,
+} from './lib/get_execution_log_aggregation';
 
 // We are assuming there won't be many actions. This is why we will load
 // all the actions in advance and assume the total count to not go over 10000.
 // We'll set this max setting assuming it's never reached.
 export const MAX_ACTIONS_RETURNED = 10000;
 
-interface ActionUpdate extends SavedObjectAttributes {
+interface ActionUpdate {
   name: string;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
@@ -94,11 +118,13 @@ interface ConstructorOptions {
   actionExecutor: ActionExecutorContract;
   executionEnqueuer: ExecutionEnqueuer<void>;
   ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
+  bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
   request: KibanaRequest;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
   connectorTokenClient: ConnectorTokenClientContract;
+  getEventLogClient: () => Promise<IEventLogClient>;
 }
 
 export interface UpdateOptions {
@@ -118,9 +144,11 @@ export class ActionsClient {
   private readonly authorization: ActionsAuthorization;
   private readonly executionEnqueuer: ExecutionEnqueuer<void>;
   private readonly ephemeralExecutionEnqueuer: ExecutionEnqueuer<RunNowResult>;
+  private readonly bulkExecutionEnqueuer: BulkExecutionEnqueuer<void>;
   private readonly auditLogger?: AuditLogger;
   private readonly usageCounter?: UsageCounter;
   private readonly connectorTokenClient: ConnectorTokenClientContract;
+  private readonly getEventLogClient: () => Promise<IEventLogClient>;
 
   constructor({
     logger,
@@ -132,11 +160,13 @@ export class ActionsClient {
     actionExecutor,
     executionEnqueuer,
     ephemeralExecutionEnqueuer,
+    bulkExecutionEnqueuer,
     request,
     authorization,
     auditLogger,
     usageCounter,
     connectorTokenClient,
+    getEventLogClient,
   }: ConstructorOptions) {
     this.logger = logger;
     this.actionTypeRegistry = actionTypeRegistry;
@@ -147,11 +177,13 @@ export class ActionsClient {
     this.actionExecutor = actionExecutor;
     this.executionEnqueuer = executionEnqueuer;
     this.ephemeralExecutionEnqueuer = ephemeralExecutionEnqueuer;
+    this.bulkExecutionEnqueuer = bulkExecutionEnqueuer;
     this.request = request;
     this.authorization = authorization;
     this.auditLogger = auditLogger;
     this.usageCounter = usageCounter;
     this.connectorTokenClient = connectorTokenClient;
+    this.getEventLogClient = getEventLogClient;
   }
 
   /**
@@ -176,8 +208,13 @@ export class ActionsClient {
     }
 
     const actionType = this.actionTypeRegistry.get(actionTypeId);
-    const validatedActionTypeConfig = validateConfig(actionType, config);
-    const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+    const configurationUtilities = this.actionTypeRegistry.getUtils();
+    const validatedActionTypeConfig = validateConfig(actionType, config, {
+      configurationUtilities,
+    });
+    const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
+      configurationUtilities,
+    });
     if (actionType.validate?.connector) {
       validateConnector(actionType, { config, secrets });
     }
@@ -250,8 +287,13 @@ export class ActionsClient {
     const { actionTypeId } = attributes;
     const { name, config, secrets } = action;
     const actionType = this.actionTypeRegistry.get(actionTypeId);
-    const validatedActionTypeConfig = validateConfig(actionType, config);
-    const validatedActionTypeSecrets = validateSecrets(actionType, secrets);
+    const configurationUtilities = this.actionTypeRegistry.getUtils();
+    const validatedActionTypeConfig = validateConfig(actionType, config, {
+      configurationUtilities,
+    });
+    const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
+      configurationUtilities,
+    });
     if (actionType.validate?.connector) {
       validateConnector(actionType, { config, secrets });
     }
@@ -625,7 +667,9 @@ export class ActionsClient {
     params,
     source,
     relatedSavedObjects,
-  }: Omit<ExecuteOptions, 'request'>): Promise<ActionTypeExecutorResult<unknown>> {
+  }: Omit<ExecuteOptions, 'request' | 'actionExecutionId'>): Promise<
+    ActionTypeExecutorResult<unknown>
+  > {
     if (
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
@@ -634,12 +678,14 @@ export class ActionsClient {
     } else {
       trackLegacyRBACExemption('execute', this.usageCounter);
     }
+
     return this.actionExecutor.execute({
       actionId,
       params,
       source,
       request: this.request,
       relatedSavedObjects,
+      actionExecutionId: uuidv4(),
     });
   }
 
@@ -656,6 +702,30 @@ export class ActionsClient {
     return this.executionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
+  public async bulkEnqueueExecution(options: EnqueueExecutionOptions[]): Promise<void> {
+    const sources: Array<ActionExecutionSource<unknown>> = [];
+    options.forEach((option) => {
+      if (option.source) {
+        sources.push(option.source);
+      }
+    });
+    const authCounts = await getBulkAuthorizationModeBySource(
+      this.unsecuredSavedObjectsClient,
+      sources
+    );
+    if (authCounts[AuthorizationMode.RBAC] > 0) {
+      await this.authorization.ensureAuthorized('execute');
+    }
+    if (authCounts[AuthorizationMode.Legacy] > 0) {
+      trackLegacyRBACExemption(
+        'bulkEnqueueExecution',
+        this.usageCounter,
+        authCounts[AuthorizationMode.Legacy]
+      );
+    }
+    return this.bulkExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
+  }
+
   public async ephemeralEnqueuedExecution(options: EnqueueExecutionOptions): Promise<RunNowResult> {
     const { source } = options;
     if (
@@ -669,8 +739,8 @@ export class ActionsClient {
     return this.ephemeralExecutionEnqueuer(this.unsecuredSavedObjectsClient, options);
   }
 
-  public async listTypes(): Promise<ActionType[]> {
-    return this.actionTypeRegistry.list();
+  public async listTypes(featureId?: string): Promise<ActionType[]> {
+    return this.actionTypeRegistry.list(featureId);
   }
 
   public isActionTypeEnabled(
@@ -682,6 +752,126 @@ export class ActionsClient {
 
   public isPreconfigured(connectorId: string): boolean {
     return !!this.preconfiguredActions.find((preconfigured) => preconfigured.id === connectorId);
+  }
+
+  public async getGlobalExecutionLogWithAuth({
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+    namespaces,
+  }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
+    this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
+
+    const authorizationTuple = {} as KueryNode;
+    try {
+      await this.authorization.ensureAuthorized('get');
+    } catch (error) {
+      this.auditLogger?.log(
+        connectorAuditEvent({
+          action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_LOG,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_LOG,
+      })
+    );
+
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
+        'action',
+        authorizationTuple,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          aggs: getExecutionLogAggregation({
+            filter: filter ? `${filter} AND (${ACTION_FILTER})` : ACTION_FILTER,
+            page,
+            perPage,
+            sort,
+          }),
+        },
+        namespaces,
+        true
+      );
+
+      return formatExecutionLogResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `actionsClient.getGlobalExecutionLogWithAuth(): error searching global event log: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async getGlobalExecutionKpiWithAuth({
+    dateStart,
+    dateEnd,
+    filter,
+    namespaces,
+  }: GetGlobalExecutionKPIParams) {
+    this.logger.debug(`getGlobalExecutionKpiWithAuth(): getting global execution KPI`);
+
+    const authorizationTuple = {} as KueryNode;
+    try {
+      await this.authorization.ensureAuthorized('get');
+    } catch (error) {
+      this.auditLogger?.log(
+        connectorAuditEvent({
+          action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_KPI,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      connectorAuditEvent({
+        action: ConnectorAuditAction.GET_GLOBAL_EXECUTION_KPI,
+      })
+    );
+
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
+        'action',
+        authorizationTuple,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          aggs: getExecutionKPIAggregation(
+            filter ? `${filter} AND (${ACTION_FILTER})` : ACTION_FILTER
+          ),
+        },
+        namespaces,
+        true
+      );
+
+      return formatExecutionKPIResult(aggResult);
+    } catch (err) {
+      this.logger.debug(
+        `actionsClient.getGlobalExecutionKpiWithAuth(): error searching global execution KPI: ${err.message}`
+      );
+      throw err;
+    }
   }
 }
 

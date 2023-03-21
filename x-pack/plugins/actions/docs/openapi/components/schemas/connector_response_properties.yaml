@@ -1,0 +1,22 @@
+title: Connector response properties
+description: The properties vary depending on the connector type.        
+oneOf:
+  - $ref: 'connector_response_properties_cases_webhook.yaml'
+  - $ref: 'connector_response_properties_email.yaml'
+  - $ref: 'connector_response_properties_index.yaml'  
+  - $ref: 'connector_response_properties_jira.yaml'
+  - $ref: 'connector_response_properties_opsgenie.yaml'
+  - $ref: 'connector_response_properties_pagerduty.yaml'
+  - $ref: 'connector_response_properties_resilient.yaml'
+  - $ref: 'connector_response_properties_serverlog.yaml'
+  - $ref: 'connector_response_properties_servicenow.yaml'
+  - $ref: 'connector_response_properties_servicenow_itom.yaml'
+  - $ref: 'connector_response_properties_servicenow_sir.yaml'
+  - $ref: 'connector_response_properties_slack.yaml'
+  - $ref: 'connector_response_properties_swimlane.yaml'
+  - $ref: 'connector_response_properties_teams.yaml'
+  - $ref: 'connector_response_properties_tines.yaml'
+  - $ref: 'connector_response_properties_webhook.yaml'
+  - $ref: 'connector_response_properties_xmatters.yaml'
+discriminator:
+  propertyName: connector_type_id

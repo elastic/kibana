@@ -13,4 +13,5 @@ export default createTestConfig('basic', {
   license: 'basic',
   ssl: true,
   enableActionsProxy: false,
+  useDedicatedTaskRunner: true,
 });

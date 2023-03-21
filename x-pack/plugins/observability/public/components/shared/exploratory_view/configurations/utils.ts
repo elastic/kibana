@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import rison, { RisonValue } from 'rison-node';
+import rison from '@kbn/rison';
 import {
   buildQueryFilter,
   PhraseFilter,
@@ -17,7 +17,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
 import type { ReportViewType, UrlFilter } from '../types';
 import type { AllSeries, AllShortSeries } from '../hooks/use_series_storage';
-import { convertToShortUrl } from './exploratory_view_url';
+import { convertToShortUrl, encodeUriIfNeeded } from './exploratory_view_url';
 
 export function createExploratoryViewRoutePath({
   reportType,
@@ -28,8 +28,8 @@ export function createExploratoryViewRoutePath({
 }) {
   const allShortSeries: AllShortSeries = allSeries.map((series) => convertToShortUrl(series));
 
-  return `/exploratory-view/#?reportType=${reportType}&sr=${rison.encode(
-    allShortSeries as unknown as RisonValue
+  return `/exploratory-view/#?reportType=${reportType}&sr=${encodeUriIfNeeded(
+    rison.encode(allShortSeries)
   )}`;
 }
 
@@ -61,7 +61,11 @@ export function getQueryFilter(field: string, value: string[], dataView?: DataVi
   return [];
 }
 
-export function buildPhrasesFilter(field: string, value: string[], dataView?: DataView) {
+export function buildPhrasesFilter(
+  field: string,
+  value: Array<string | number>,
+  dataView?: DataView
+) {
   const fieldMeta = dataView?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta && dataView) {
     if (value.length === 1) {

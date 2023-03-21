@@ -89,7 +89,7 @@ describe('ConfirmDeleteModal', () => {
     );
 
     await act(async () => {
-      wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+      wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
       await spacesManager.deleteSpace.mock.results[0];
     });
 

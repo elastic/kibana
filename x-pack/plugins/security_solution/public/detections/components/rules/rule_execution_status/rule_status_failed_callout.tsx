@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
 
 import * as i18n from './translations';
 
@@ -32,18 +32,17 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
   return (
     <EuiCallOut
       title={
-        <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
-          <EuiFlexItem grow={false}>{title}</EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <FormattedDate value={date} fieldName="execution_summary.last_execution.date" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <>
+          {title} <FormattedDate value={date} fieldName="execution_summary.last_execution.date" />
+        </>
       }
       color={color}
       iconType="alert"
       data-test-subj="ruleStatusFailedCallOut"
     >
-      <p>{message}</p>
+      {message.split('\n').map((line) => (
+        <p>{line}</p>
+      ))}
     </EuiCallOut>
   );
 };

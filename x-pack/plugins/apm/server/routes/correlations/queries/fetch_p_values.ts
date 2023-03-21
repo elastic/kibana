@@ -9,42 +9,50 @@ import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/con
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
-import { ProcessorEvent } from '../../../../common/processor_event';
-import { Setup } from '../../../lib/helpers/setup_request';
-import { splitAllSettledPromises } from '../utils';
+import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { splitAllSettledPromises, getEventType } from '../utils';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchFailedEventsCorrelationPValues } from './fetch_failed_events_correlation_p_values';
 
 export const fetchPValues = async ({
-  setup,
-  eventType,
+  apmEventClient,
   start,
   end,
   environment,
   kuery,
   query,
+  durationMin,
+  durationMax,
   fieldCandidates,
 }: CommonCorrelationsQueryParams & {
-  setup: Setup;
-  eventType: ProcessorEvent;
+  apmEventClient: APMEventClient;
+  durationMin?: number;
+  durationMax?: number;
   fieldCandidates: string[];
 }) => {
-  const rangeSteps = await fetchDurationHistogramRangeSteps({
-    setup,
-    eventType,
+  const chartType = LatencyDistributionChartType.failedTransactionsCorrelations;
+  const searchMetrics = false; // failed transactions correlations does not search metrics documents
+  const eventType = getEventType(chartType, searchMetrics);
+
+  const { rangeSteps } = await fetchDurationHistogramRangeSteps({
+    apmEventClient,
+    chartType,
     start,
     end,
     environment,
     kuery,
     query,
+    searchMetrics,
+    durationMinOverride: durationMin,
+    durationMaxOverride: durationMax,
   });
 
   const { fulfilled, rejected } = splitAllSettledPromises(
     await Promise.allSettled(
       fieldCandidates.map((fieldName) =>
         fetchFailedEventsCorrelationPValues({
-          setup,
-          eventType,
+          apmEventClient,
           start,
           end,
           environment,
@@ -88,7 +96,8 @@ export const fetchPValues = async ({
     }
   });
 
-  const index = setup.indices[eventType as keyof typeof setup.indices];
+  const index =
+    apmEventClient.indices[eventType as keyof typeof apmEventClient.indices];
 
   const ccsWarning = rejected.length > 0 && index.includes(':');
 

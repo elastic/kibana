@@ -10,27 +10,26 @@ import Path from 'path';
 import Fs from 'fs';
 
 import { REPO_ROOT } from './paths.mjs';
+import External from './external_packages.js';
 
 /**
- * Attempt to load the synthetic package map, if bootstrap hasn't run successfully
+ * Attempt to load the package map, if bootstrap hasn't run successfully
  * this might fail.
  * @param {import('@kbn/some-dev-log').SomeDevLog} log
- * @returns {Promise<import('@kbn/synthetic-package-map').PackageMap>}
+ * @returns {Promise<import('@kbn/repo-packages').PackageMap>}
  */
-async function tryToGetSyntheticPackageMap(log) {
+async function tryToGetPackageMap(log) {
   try {
-    const { readPackageMap } = await import('@kbn/synthetic-package-map');
+    const { readPackageMap } = External['@kbn/repo-packages']();
     return readPackageMap();
   } catch (error) {
-    log.warning(
-      'unable to load synthetic package map, unable to clean target directories in synthetic packages'
-    );
+    log.warning('unable to load package map, unable to clean target directories in packages');
     return new Map();
   }
 }
 
 /**
- * @param {*} packageDir
+ * @param {string} packageDir
  * @returns {string[]}
  */
 export function readCleanPatterns(packageDir) {
@@ -67,7 +66,7 @@ export function readCleanPatterns(packageDir) {
  * @returns {Promise<string[]>}
  */
 export async function findPluginCleanPaths(log) {
-  const packageMap = await tryToGetSyntheticPackageMap(log);
+  const packageMap = await tryToGetPackageMap(log);
   return [...packageMap.values()].flatMap((repoRelativePath) => {
     const pkgDir = Path.resolve(REPO_ROOT, repoRelativePath);
     return [Path.resolve(pkgDir, 'target'), ...readCleanPatterns(pkgDir)];

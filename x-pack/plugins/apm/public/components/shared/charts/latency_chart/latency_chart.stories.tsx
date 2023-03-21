@@ -20,6 +20,7 @@ import {
   createCallApmApi,
 } from '../../../../services/rest/create_call_apm_api';
 import { LatencyChart } from '.';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 interface Args {
   latencyChartResponse: APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
@@ -83,8 +84,10 @@ const stories: Meta<Args> = {
                   value={{
                     serviceName,
                     transactionType,
+                    transactionTypeStatus: FETCH_STATUS.SUCCESS,
                     transactionTypes: [],
                     fallbackToTransactions: false,
+                    serviceAgentStatus: FETCH_STATUS.SUCCESS,
                   }}
                 >
                   <ChartPointerEventContextProvider>

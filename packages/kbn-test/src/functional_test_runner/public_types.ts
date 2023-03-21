@@ -105,6 +105,11 @@ export interface GenericFtrProviderContext<
    * @param path
    */
   loadTestFile(path: string): void;
+
+  /**
+   * Did the user request that baselines get updated?
+   */
+  updateBaselines: boolean;
 }
 
 export class GenericFtrService<ProviderContext extends GenericFtrProviderContext<any, any>> {
@@ -116,5 +121,7 @@ export interface FtrConfigProviderContext {
   esVersion: EsVersion;
   readConfigFile(path: string): Promise<Config>;
 }
+
+export type FtrConfigProvider = <T>(ctx: FtrConfigProviderContext) => T | Promise<T>;
 
 export type { Test, Suite };

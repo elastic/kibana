@@ -25,7 +25,7 @@ export const getRenderErrors = async (
 
   let errorsFound: undefined | string[];
   try {
-    errorsFound = await browser.evaluate(
+    errorsFound = await browser.evaluate<string[], string[]>(
       {
         fn: (errorSelector, errorAttribute) => {
           const visualizations: Element[] = Array.from(document.querySelectorAll(errorSelector));

@@ -9,16 +9,17 @@ import { History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Route, Router, Switch } from 'react-router-dom';
+import { Router, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import '../index.scss';
-import { NotFoundPage } from '../pages/404';
 import { LinkToLogsPage } from '../pages/link_to/link_to_logs';
 import { LogsPage } from '../pages/logs';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
+import { KbnUrlStateStorageFromRouterProvider } from '../utils/kbn_url_state_context';
 
 export const renderApp = (
   core: CoreStart,
@@ -69,11 +70,15 @@ const LogsApp: React.FC<{
         triggersActionsUI={plugins.triggersActionsUi}
       >
         <Router history={history}>
-          <Switch>
-            <Route path="/link-to" component={LinkToLogsPage} />
-            {uiCapabilities?.logs?.show && <Route path="/" component={LogsPage} />}
-            <Route component={NotFoundPage} />
-          </Switch>
+          <KbnUrlStateStorageFromRouterProvider
+            history={history}
+            toastsService={core.notifications.toasts}
+          >
+            <Switch>
+              <Route path="/link-to" component={LinkToLogsPage} />
+              {uiCapabilities?.logs?.show && <Route path="/" component={LogsPage} />}
+            </Switch>
+          </KbnUrlStateStorageFromRouterProvider>
         </Router>
       </CommonInfraProviders>
     </CoreProviders>

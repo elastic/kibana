@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/stdio-dev-helpers",
-        "id": "def-server.observeLines",
+        "id": "def-common.observeLines",
         "type": "Function",
         "tags": [
           "return"
@@ -31,10 +39,11 @@
         ],
         "path": "packages/kbn-stdio-dev-helpers/src/observe_lines.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/stdio-dev-helpers",
-            "id": "def-server.observeLines.$1",
+            "id": "def-common.observeLines.$1",
             "type": "Object",
             "tags": [],
             "label": "readable",
@@ -44,6 +53,7 @@
             ],
             "path": "packages/kbn-stdio-dev-helpers/src/observe_lines.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -52,7 +62,7 @@
       },
       {
         "parentPluginId": "@kbn/stdio-dev-helpers",
-        "id": "def-server.observeReadable",
+        "id": "def-common.observeReadable",
         "type": "Function",
         "tags": [],
         "label": "observeReadable",
@@ -68,10 +78,11 @@
         ],
         "path": "packages/kbn-stdio-dev-helpers/src/observe_readable.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/stdio-dev-helpers",
-            "id": "def-server.observeReadable.$1",
+            "id": "def-common.observeReadable.$1",
             "type": "Object",
             "tags": [],
             "label": "readable",
@@ -81,6 +92,7 @@
             ],
             "path": "packages/kbn-stdio-dev-helpers/src/observe_readable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -88,14 +100,6 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

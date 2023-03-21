@@ -8,8 +8,8 @@
 import {
   isScreenshotBlockDoc,
   ScreenshotRefImageData,
-} from '../../../../common/runtime_types/ping/synthetics';
-import { ScreenshotBlockCache } from '../../state/reducers/synthetics';
+  ScreenshotBlockCache,
+} from '../../../../common/runtime_types';
 
 /**
  * Draws image fragments on a canvas.

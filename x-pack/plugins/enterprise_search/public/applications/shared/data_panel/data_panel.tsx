@@ -14,7 +14,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiIconProps,
-  EuiPanel,
+  EuiSplitPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -31,7 +31,7 @@ type Props = Omit<_EuiPanelDivlike, 'title'> & {
   subtitle?: React.ReactNode;
   iconType?: EuiIconProps['type'];
   action?: React.ReactNode;
-  responsive?: boolean;
+  footerDocLink?: React.ReactNode;
   filled?: boolean;
   isLoading?: boolean;
   className?: string;
@@ -43,9 +43,9 @@ export const DataPanel: React.FC<Props> = ({
   subtitle,
   iconType,
   action,
-  responsive = false,
   filled,
   isLoading,
+  footerDocLink,
   className,
   children,
   ...props // e.g., data-test-subj
@@ -55,43 +55,54 @@ export const DataPanel: React.FC<Props> = ({
   });
 
   return (
-    <EuiPanel
+    <EuiSplitPanel.Outer
       color={filled ? 'subdued' : 'plain'}
       className={classes}
       hasShadow={false}
+      hasBorder={!filled}
       aria-busy={isLoading}
       {...props}
     >
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" responsive={responsive}>
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            {iconType && (
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={iconType} />
+      <EuiSplitPanel.Inner>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow>
+            <EuiFlexGroup
+              className="eui-textNoWrap"
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+            >
+              {iconType && (
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={iconType} />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem>
+                <EuiTitle size={titleSize}>{title}</EuiTitle>
               </EuiFlexItem>
-            )}
-            <EuiFlexItem>
-              <EuiTitle size={titleSize}>{title}</EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {subtitle && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiText size="s" color="subdued">
-                <p>{subtitle}</p>
-              </EuiText>
-            </>
-          )}
-        </EuiFlexItem>
-        {action && <EuiFlexItem grow={false}>{action}</EuiFlexItem>}
-      </EuiFlexGroup>
-      {children && (
-        <>
-          <EuiSpacer size={filled || subtitle ? 'l' : 's'} />
-          {children}
-        </>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {action && <EuiFlexItem grow={false}>{action}</EuiFlexItem>}
+        </EuiFlexGroup>
+        {subtitle && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              <p>{subtitle}</p>
+            </EuiText>
+          </>
+        )}
+        {children && (
+          <>
+            <EuiSpacer size={filled || subtitle ? 'l' : 's'} />
+            {children}
+          </>
+        )}
+        {isLoading && <LoadingOverlay />}
+      </EuiSplitPanel.Inner>
+      {!!footerDocLink && (
+        <EuiSplitPanel.Inner color="subdued">{footerDocLink}</EuiSplitPanel.Inner>
       )}
-      {isLoading && <LoadingOverlay />}
-    </EuiPanel>
+    </EuiSplitPanel.Outer>
   );
 };

@@ -44,7 +44,7 @@ elasticsearch.username: kibana_system
 elasticsearch.password: changeme
 ```
 
-Documentation for [Synthtrace](https://github.com/elastic/kibana/blob/main/packages/elastic-apm-synthtrace/README.md)
+Documentation for [Synthtrace](https://github.com/elastic/kibana/blob/main/packages/kbn-apm-synthtrace/README.md)
 
 ## 2. Cloud-based ES Cluster (internal devs only)
 

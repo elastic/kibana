@@ -10,7 +10,7 @@ import { ElasticsearchAssetType } from '../../../../types';
 import type { RegistryDataStream } from '../../../../types';
 import { getPathParts } from '../../archive';
 
-import { getPipelineNameForDatastream } from '../../../../../common';
+import { getPipelineNameForDatastream } from '../../../../../common/services';
 
 import type { PipelineInstall, RewriteSubstitution } from './types';
 

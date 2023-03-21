@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-import { from } from '../from';
+import { From } from '../from';
 
 /**
  * Types the DefaultFromString as:
@@ -21,7 +21,7 @@ export const DefaultFromString = new t.Type<string, string | undefined, unknown>
     if (input == null) {
       return t.success('now-6m');
     }
-    return from.validate(input, context);
+    return From.validate(input, context);
   },
   t.identity
 );

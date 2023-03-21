@@ -11,7 +11,7 @@ WARNING: When you delete a space, all saved objects that belong to the space are
 [[spaces-api-delete-request]]
 ==== Request
 
-`DELETE <kibana host>:<port>/api/spaces/space/marketing`
+`DELETE <kibana host>:<port>/api/spaces/space/<space_name>`
 
 [[spaces-api-delete-errors-codes]]
 ==== Response codes

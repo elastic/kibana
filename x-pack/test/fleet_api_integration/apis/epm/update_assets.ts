@@ -217,6 +217,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(resPackage.body.component_templates[0].component_template.template.settings).eql({
         index: {
           codec: 'best_compression',
+          default_pipeline: 'logs-all_assets.test_logs-0.2.0',
           lifecycle: {
             name: 'reference2',
           },
@@ -514,6 +515,7 @@ export default function (providerContext: FtrProviderContext) {
         install_source: 'registry',
         install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
         verification_status: 'unknown',
+        verification_key_id: null,
       });
     });
   });

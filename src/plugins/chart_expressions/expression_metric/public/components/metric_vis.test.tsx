@@ -9,15 +9,35 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import MetricVis, { MetricVisComponentProps } from './metric_vis';
-import { LayoutDirection, Metric, MetricWProgress, Settings } from '@elastic/charts';
+import { MetricVis, MetricVisComponentProps } from './metric_vis';
+import {
+  LayoutDirection,
+  Metric,
+  MetricElementEvent,
+  MetricWNumber,
+  MetricWProgress,
+  MetricWTrend,
+  Settings,
+} from '@elastic/charts';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import numeral from '@elastic/numeral';
+import { HtmlAttributes } from 'csstype';
+import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
+import { DimensionsVisParam } from '../../common';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
+import faker from 'faker';
 
-const mockDeserialize = jest.fn(() => ({
-  getConverterFor: jest.fn(() => () => 'formatted duration'),
-}));
+const mockDeserialize = jest.fn((params) => {
+  const converter =
+    params.id === 'terms'
+      ? (val: string) => (val === '__other__' ? 'Other' : val)
+      : params.id === 'string'
+      ? (val: string) => (val === '' ? '(empty)' : val)
+      : () => 'formatted duration';
+  return { getConverterFor: jest.fn(() => converter) };
+});
 
 const mockGetColorForValue = jest.fn<undefined | string, any>(() => undefined);
 
@@ -186,14 +206,25 @@ const table: Datatable = {
       [minPriceColumnId]: 13.34375,
     },
     {
-      [dayOfWeekColumnId]: 'Monday',
+      [dayOfWeekColumnId]: '__other__',
       [basePriceColumnId]: 24.984375,
       [minPriceColumnId]: 13.242513020833334,
     },
   ],
 };
 
+const defaultProps = {
+  renderComplete: () => {},
+  fireEvent: () => {},
+  filterable: true,
+  renderMode: 'view',
+} as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable' | 'renderMode'>;
+
 describe('MetricVisComponent', function () {
+  afterEach(() => {
+    mockDeserialize.mockClear();
+  });
+
   describe('single metric', () => {
     const config: Props['config'] = {
       metric: {
@@ -206,9 +237,7 @@ describe('MetricVisComponent', function () {
     };
 
     it('should render a single metric value', () => {
-      const component = shallow(
-        <MetricVis config={config} data={table} renderComplete={() => {}} />
-      );
+      const component = shallow(<MetricVis config={config} data={table} {...defaultProps} />);
 
       const { data } = component.find(Metric).props();
 
@@ -219,7 +248,7 @@ describe('MetricVisComponent', function () {
 
       expect(visConfig).toMatchInlineSnapshot(`
         Object {
-          "color": "#343741",
+          "color": "#f5f7fa",
           "extra": <span />,
           "subtitle": undefined,
           "title": "Median products.base_price",
@@ -228,62 +257,62 @@ describe('MetricVisComponent', function () {
         }
       `);
     });
-    it('should display subtitle and extra text', () => {
+    it('should display subtitle', () => {
       const component = shallow(
         <MetricVis
           config={{
             ...config,
-            metric: { ...config.metric, subtitle: 'subtitle', extraText: 'extra text' },
+            metric: { ...config.metric, subtitle: 'subtitle' },
           }}
           data={table}
-          renderComplete={() => {}}
+          {...defaultProps}
         />
       );
 
       const [[visConfig]] = component.find(Metric).props().data!;
 
       expect(visConfig!.subtitle).toBe('subtitle');
-      expect(visConfig!.extra).toEqual(<span>extra text</span>);
-
-      expect(visConfig).toMatchInlineSnapshot(`
-        Object {
-          "color": "#343741",
-          "extra": <span>
-            extra text
-          </span>,
-          "subtitle": "subtitle",
-          "title": "Median products.base_price",
-          "value": 28.984375,
-          "valueFormatter": [Function],
-        }
-      `);
     });
     it('should display secondary metric', () => {
-      const component = shallow(
-        <MetricVis
-          config={{
-            ...config,
-            metric: { ...config.metric, subtitle: 'subtitle', extraText: 'extra text' },
-            dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-          }}
-          data={table}
-          renderComplete={() => {}}
-        />
+      const getMetricConfig = (localConfig: MetricVisComponentProps['config']) =>
+        shallow(<MetricVis config={localConfig} data={table} {...defaultProps} />)
+          .find(Metric)
+          .props().data![0][0]!;
+
+      const configNoPrefix = getMetricConfig({
+        ...config,
+        metric: { ...config.metric, subtitle: 'subtitle', secondaryPrefix: undefined },
+        dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
+      });
+
+      expect(configNoPrefix!.extra).toEqual(
+        <span>
+          {table.columns.find((col) => col.id === minPriceColumnId)!.name}
+          {' ' + 13.63}
+        </span>
       );
 
-      const [[visConfig]] = component.find(Metric).props().data!;
+      const configWithPrefix = getMetricConfig({
+        ...config,
+        metric: { ...config.metric, subtitle: 'subtitle', secondaryPrefix: 'secondary prefix' },
+        dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
+      });
 
-      // overrides subtitle and extra text
-      expect(visConfig!.subtitle).toBe(table.columns[2].name);
-      expect(visConfig!.extra).toEqual(<span>13.63</span>);
+      expect(configWithPrefix!.extra).toEqual(
+        <span>
+          {'secondary prefix'}
+          {' ' + 13.63}
+        </span>
+      );
 
-      expect(visConfig).toMatchInlineSnapshot(`
+      expect(configWithPrefix).toMatchInlineSnapshot(`
         Object {
-          "color": "#343741",
+          "color": "#f5f7fa",
           "extra": <span>
-            13.63
+            secondary prefix
+             13.63
           </span>,
-          "subtitle": "Median products.min_price",
+          "subtitle": "subtitle",
           "title": "Median products.base_price",
           "value": 28.984375,
           "valueFormatter": [Function],
@@ -303,11 +332,11 @@ describe('MetricVisComponent', function () {
               },
               dimensions: {
                 ...config.dimensions,
-                progressMax: max,
+                max,
               },
             }}
             data={table}
-            renderComplete={() => {}}
+            {...defaultProps}
           />
         )
           .find(Metric)
@@ -326,7 +355,7 @@ describe('MetricVisComponent', function () {
 
       expect(configWithProgress).toMatchInlineSnapshot(`
         Object {
-          "color": "#343741",
+          "color": "#f5f7fa",
           "domainMax": 28.984375,
           "extra": <span />,
           "progressBarDirection": "vertical",
@@ -342,54 +371,38 @@ describe('MetricVisComponent', function () {
       ).toBe('horizontal');
     });
 
-    it('should fetch color from palette if provided', () => {
-      const colorFromPalette = 'color-from-palette';
+    it('should configure trendline if provided', () => {
+      const trends = {
+        [DEFAULT_TRENDLINE_NAME]: [
+          { x: 1, y: 2 },
+          { x: 3, y: 4 },
+          { x: 5, y: 6 },
+          { x: 7, y: 8 },
+        ],
+      };
 
-      mockGetColorForValue.mockReturnValue(colorFromPalette);
-
-      const component = shallow(
+      const tileConfig = shallow(
         <MetricVis
           config={{
             ...config,
             metric: {
               ...config.metric,
-              palette: {
-                colors: [],
-                gradient: true,
-                stops: [],
-                range: 'number',
-                rangeMin: 2,
-                rangeMax: 10,
-              },
+              trends,
+            },
+            dimensions: {
+              ...config.dimensions,
+              breakdownBy: undefined,
             },
           }}
           data={table}
-          renderComplete={() => {}}
+          {...defaultProps}
         />
-      );
+      )
+        .find(Metric)
+        .props().data![0][0]! as MetricWTrend;
 
-      const [[datum]] = component.find(Metric).props().data!;
-
-      expect(datum!.color).toBe(colorFromPalette);
-      expect(mockGetColorForValue.mock.calls).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            28.984375,
-            Object {
-              "colors": Array [],
-              "gradient": true,
-              "range": "number",
-              "rangeMax": 10,
-              "rangeMin": 2,
-              "stops": Array [],
-            },
-            Object {
-              "max": 10,
-              "min": 2,
-            },
-          ],
-        ]
-      `);
+      expect(tileConfig.trend).toEqual(trends[DEFAULT_TRENDLINE_NAME]);
+      expect(tileConfig.trendShape).toEqual('area');
     });
   });
 
@@ -406,9 +419,7 @@ describe('MetricVisComponent', function () {
     };
 
     it('should render a grid if breakdownBy dimension supplied', () => {
-      const component = shallow(
-        <MetricVis config={config} data={table} renderComplete={() => {}} />
-      );
+      const component = shallow(<MetricVis config={config} data={table} {...defaultProps} />);
 
       const { data } = component.find(Metric).props();
 
@@ -420,7 +431,7 @@ describe('MetricVisComponent', function () {
       expect(visConfig).toMatchInlineSnapshot(`
         Array [
           Object {
-            "color": "#343741",
+            "color": "#f5f7fa",
             "extra": <span />,
             "subtitle": "Median products.base_price",
             "title": "Friday",
@@ -428,7 +439,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#343741",
+            "color": "#f5f7fa",
             "extra": <span />,
             "subtitle": "Median products.base_price",
             "title": "Wednesday",
@@ -436,7 +447,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#343741",
+            "color": "#f5f7fa",
             "extra": <span />,
             "subtitle": "Median products.base_price",
             "title": "Saturday",
@@ -444,7 +455,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#343741",
+            "color": "#f5f7fa",
             "extra": <span />,
             "subtitle": "Median products.base_price",
             "title": "Sunday",
@@ -452,7 +463,7 @@ describe('MetricVisComponent', function () {
             "valueFormatter": [Function],
           },
           Object {
-            "color": "#343741",
+            "color": "#f5f7fa",
             "extra": <span />,
             "subtitle": "Median products.base_price",
             "title": "Thursday",
@@ -463,17 +474,17 @@ describe('MetricVisComponent', function () {
       `);
     });
 
-    it('should display extra text or secondary metric', () => {
+    it('should display secondary prefix or secondary metric', () => {
       const componentWithSecondaryDimension = shallow(
         <MetricVis
           config={{
             ...config,
             dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-            // extra text included to make sure it's overridden
-            metric: { ...config.metric, extraText: 'howdy' },
+            // secondary prefix included to make sure it's overridden
+            metric: { ...config.metric, secondaryPrefix: 'howdy' },
           }}
           data={table}
-          renderComplete={() => {}}
+          {...defaultProps}
         />
       );
 
@@ -485,19 +496,24 @@ describe('MetricVisComponent', function () {
       ).toMatchInlineSnapshot(`
         Array [
           <span>
-            13.63
+            howdy
+             13.63
           </span>,
           <span>
-            13.64
+            howdy
+             13.64
           </span>,
           <span>
-            13.34
+            howdy
+             13.34
           </span>,
           <span>
-            13.49
+            howdy
+             13.49
           </span>,
           <span>
-            13.34
+            howdy
+             13.34
           </span>,
         ]
       `);
@@ -506,10 +522,10 @@ describe('MetricVisComponent', function () {
         <MetricVis
           config={{
             ...config,
-            metric: { ...config.metric, extraText: 'howdy' },
+            metric: { ...config.metric, secondaryPrefix: 'howdy' },
           }}
           data={table}
-          renderComplete={() => {}}
+          {...defaultProps}
         />
       );
 
@@ -552,7 +568,7 @@ describe('MetricVisComponent', function () {
               },
             }}
             data={table}
-            renderComplete={() => {}}
+            {...defaultProps}
           />
         )
           .find(Metric)
@@ -575,7 +591,7 @@ describe('MetricVisComponent', function () {
         Array [
           Array [
             Object {
-              "color": "#343741",
+              "color": "#f5f7fa",
               "extra": <span />,
               "subtitle": "Median products.base_price",
               "title": "Friday",
@@ -583,7 +599,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#f5f7fa",
               "extra": <span />,
               "subtitle": "Median products.base_price",
               "title": "Wednesday",
@@ -591,7 +607,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#f5f7fa",
               "extra": <span />,
               "subtitle": "Median products.base_price",
               "title": "Saturday",
@@ -599,7 +615,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#f5f7fa",
               "extra": <span />,
               "subtitle": "Median products.base_price",
               "title": "Sunday",
@@ -607,7 +623,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#f5f7fa",
               "extra": <span />,
               "subtitle": "Median products.base_price",
               "title": "Thursday",
@@ -617,10 +633,10 @@ describe('MetricVisComponent', function () {
           ],
           Array [
             Object {
-              "color": "#343741",
+              "color": "#f5f7fa",
               "extra": <span />,
               "subtitle": "Median products.base_price",
-              "title": "Monday",
+              "title": "Other",
               "value": 24.984375,
               "valueFormatter": [Function],
             },
@@ -644,11 +660,11 @@ describe('MetricVisComponent', function () {
               },
               dimensions: {
                 ...config.dimensions,
-                progressMax: basePriceColumnId,
+                max: basePriceColumnId,
               },
             }}
             data={table}
-            renderComplete={() => {}}
+            {...defaultProps}
           />
         )
           .find(Metric)
@@ -657,7 +673,7 @@ describe('MetricVisComponent', function () {
         Array [
           Array [
             Object {
-              "color": "#343741",
+              "color": "#f5f7fa",
               "domainMax": 28.984375,
               "extra": <span />,
               "progressBarDirection": "vertical",
@@ -667,7 +683,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#f5f7fa",
               "domainMax": 28.984375,
               "extra": <span />,
               "progressBarDirection": "vertical",
@@ -677,7 +693,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#f5f7fa",
               "domainMax": 25.984375,
               "extra": <span />,
               "progressBarDirection": "vertical",
@@ -687,7 +703,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#f5f7fa",
               "domainMax": 25.784375,
               "extra": <span />,
               "progressBarDirection": "vertical",
@@ -697,7 +713,7 @@ describe('MetricVisComponent', function () {
               "valueFormatter": [Function],
             },
             Object {
-              "color": "#343741",
+              "color": "#f5f7fa",
               "domainMax": 25.348011363636363,
               "extra": <span />,
               "progressBarDirection": "vertical",
@@ -709,12 +725,12 @@ describe('MetricVisComponent', function () {
           ],
           Array [
             Object {
-              "color": "#343741",
+              "color": "#f5f7fa",
               "domainMax": 24.984375,
               "extra": <span />,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
-              "title": "Monday",
+              "title": "Other",
               "value": 24.984375,
               "valueFormatter": [Function],
             },
@@ -722,6 +738,223 @@ describe('MetricVisComponent', function () {
         ]
       `);
     });
+    it('should configure trendlines if provided', () => {
+      const trends: Record<string, MetricWTrend['trend']> = {
+        Friday: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        Wednesday: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        Saturday: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        Sunday: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        Thursday: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        Other: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+        // this one shouldn't show up!
+        [DEFAULT_TRENDLINE_NAME]: [
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+          { x: faker.random.number(), y: faker.random.number() },
+        ],
+      };
+
+      const data = shallow(
+        <MetricVis
+          config={{
+            ...config,
+            metric: {
+              ...config.metric,
+              trends,
+            },
+          }}
+          data={table}
+          {...defaultProps}
+        />
+      )
+        .find(Metric)
+        .props().data![0] as MetricWTrend[];
+
+      data?.forEach((tileConfig) => {
+        expect(tileConfig.trend).toEqual(trends[tileConfig.title!]);
+        expect(tileConfig.trendShape).toEqual('area');
+      });
+    });
+
+    it('renders with no data', () => {
+      const component = shallow(
+        <MetricVis
+          config={{ ...config, metric: { ...config.metric, minTiles: 6 } }}
+          data={{ type: 'datatable', rows: [], columns: table.columns }}
+          {...defaultProps}
+        />
+      );
+
+      const { data } = component.find(Metric).props();
+
+      expect(data).toBeDefined();
+      expect(data).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+          ],
+          Array [
+            undefined,
+          ],
+        ]
+      `);
+    });
+  });
+
+  describe('rendering with no data', () => {});
+
+  it('should constrain dimensions in edit mode', () => {
+    const getContainerStyles = (editMode: boolean, multipleTiles: boolean) =>
+      (
+        shallow(
+          <MetricVis
+            data={table}
+            config={{
+              metric: {
+                progressDirection: 'vertical',
+                maxCols: 5,
+              },
+              dimensions: {
+                metric: basePriceColumnId,
+                breakdownBy: multipleTiles ? dayOfWeekColumnId : undefined,
+              },
+            }}
+            {...defaultProps}
+            renderMode={editMode ? 'edit' : 'view'}
+          />
+        )
+          .find('div')
+          .at(0)
+          .props() as HtmlAttributes & { css: { styles: string } }
+      ).css.styles;
+
+    expect(getContainerStyles(false, false)).toMatchInlineSnapshot(`
+      "
+              height: 100%;
+              width: 100%;
+              max-height: 100%;
+              max-width: 100%;
+              overflow-y: auto;
+              scrollbar-width: thin;
+
+          &::-webkit-scrollbar {
+            inline-size: 16px;
+            block-size: 16px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: rgba(105,112,125,0.5);
+            background-clip: content-box;
+            border-radius: 16px;
+            border: calc(8px * 0.75) solid transparent;
+          }
+
+          &::-webkit-scrollbar-corner,
+          &::-webkit-scrollbar-track {
+            background-color: transparent;
+          }
+
+          scrollbar-color: rgba(105,112,125,0.5) transparent;
+        
+            "
+    `);
+
+    expect(getContainerStyles(true, false)).toMatchInlineSnapshot(`
+      "
+              height: 300px;
+              width: 300px;
+              max-height: 100%;
+              max-width: 100%;
+              overflow-y: auto;
+              scrollbar-width: thin;
+
+          &::-webkit-scrollbar {
+            inline-size: 16px;
+            block-size: 16px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: rgba(105,112,125,0.5);
+            background-clip: content-box;
+            border-radius: 16px;
+            border: calc(8px * 0.75) solid transparent;
+          }
+
+          &::-webkit-scrollbar-corner,
+          &::-webkit-scrollbar-track {
+            background-color: transparent;
+          }
+
+          scrollbar-color: rgba(105,112,125,0.5) transparent;
+        
+            "
+    `);
+
+    expect(getContainerStyles(true, true)).toMatchInlineSnapshot(`
+      "
+              height: 400px;
+              width: 1000px;
+              max-height: 100%;
+              max-width: 100%;
+              overflow-y: auto;
+              scrollbar-width: thin;
+
+          &::-webkit-scrollbar {
+            inline-size: 16px;
+            block-size: 16px;
+          }
+
+          &::-webkit-scrollbar-thumb {
+            background-color: rgba(105,112,125,0.5);
+            background-clip: content-box;
+            border-radius: 16px;
+            border: calc(8px * 0.75) solid transparent;
+          }
+
+          &::-webkit-scrollbar-corner,
+          &::-webkit-scrollbar-track {
+            background-color: transparent;
+          }
+
+          scrollbar-color: rgba(105,112,125,0.5) transparent;
+        
+            "
+    `);
   });
 
   it('should report render complete', () => {
@@ -738,6 +971,7 @@ describe('MetricVisComponent', function () {
           },
         }}
         data={table}
+        {...defaultProps}
         renderComplete={renderCompleteSpy}
       />
     );
@@ -750,10 +984,315 @@ describe('MetricVisComponent', function () {
     expect(renderCompleteSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('should convert null values to NaN', () => {
+    const metricId = faker.random.word();
+
+    const tableWNull: Datatable = {
+      type: 'datatable',
+      columns: [
+        {
+          id: metricId,
+          name: metricId,
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      rows: [{ [metricId]: null }],
+    };
+
+    const metricConfig = shallow(
+      <MetricVis
+        config={{
+          metric: {
+            progressDirection: 'vertical',
+            maxCols: 5,
+          },
+          dimensions: {
+            metric: metricId,
+          },
+        }}
+        data={tableWNull}
+        {...defaultProps}
+      />
+    )
+      .find(Metric)
+      .props().data![0][0]! as MetricWNumber;
+
+    expect(metricConfig.value).toBeNaN();
+  });
+
+  describe('filter events', () => {
+    const fireEventSpy = jest.fn();
+
+    afterEach(() => fireEventSpy.mockClear());
+
+    const fireFilter = (event: MetricElementEvent, filterable: boolean, breakdown?: boolean) => {
+      const component = shallow(
+        <MetricVis
+          config={{
+            metric: {
+              progressDirection: 'vertical',
+              maxCols: 5,
+            },
+            dimensions: {
+              metric: basePriceColumnId,
+              breakdownBy: breakdown ? dayOfWeekColumnId : undefined,
+            },
+          }}
+          data={table}
+          {...defaultProps}
+          filterable={filterable}
+          fireEvent={fireEventSpy}
+        />
+      );
+
+      component.find(Settings).props().onElementClick!([event]);
+    };
+
+    test('without breakdown', () => {
+      const event: MetricElementEvent = {
+        type: 'metricElementEvent',
+        rowIndex: 0,
+        columnIndex: 0,
+      };
+
+      fireFilter(event, true, false);
+
+      expect(fireEventSpy).toHaveBeenCalledTimes(1);
+      expect(fireEventSpy).toHaveBeenCalledWith({
+        name: 'filter',
+        data: {
+          data: [
+            {
+              table,
+              column: 1,
+              row: 0,
+              value: 28.984375,
+            },
+          ],
+        },
+      });
+    });
+
+    test('with breakdown', () => {
+      const event: MetricElementEvent = {
+        type: 'metricElementEvent',
+        rowIndex: 1,
+        columnIndex: 0,
+      };
+
+      fireFilter(event, true, true);
+
+      expect(fireEventSpy).toHaveBeenCalledTimes(1);
+      expect(fireEventSpy).toHaveBeenCalledWith({
+        name: 'filter',
+        data: {
+          data: [
+            {
+              table,
+              column: 0,
+              row: 5,
+              value: '__other__',
+            },
+          ],
+        },
+      });
+    });
+
+    it('should do nothing if primary metric is not filterable', () => {
+      const event: MetricElementEvent = {
+        type: 'metricElementEvent',
+        rowIndex: 1,
+        columnIndex: 0,
+      };
+
+      fireFilter(event, false, true);
+
+      expect(fireEventSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('coloring', () => {
+    afterEach(() => mockGetColorForValue.mockClear());
+
+    describe('by palette', () => {
+      const colorFromPalette = 'color-from-palette';
+      mockGetColorForValue.mockReturnValue(colorFromPalette);
+
+      it('should fetch color from palette if provided', () => {
+        const component = shallow(
+          <MetricVis
+            config={{
+              dimensions: {
+                metric: basePriceColumnId,
+              },
+              metric: {
+                progressDirection: 'vertical',
+                maxCols: 5,
+                // should be overridden
+                color: 'static-color',
+                palette: {
+                  colors: [],
+                  gradient: true,
+                  stops: [],
+                  range: 'number',
+                  rangeMin: 2,
+                  rangeMax: 10,
+                },
+              },
+            }}
+            data={table}
+            {...defaultProps}
+          />
+        );
+
+        const [[datum]] = component.find(Metric).props().data!;
+
+        expect(datum!.color).toBe(colorFromPalette);
+        expect(mockGetColorForValue.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              28.984375,
+              Object {
+                "colors": Array [],
+                "gradient": true,
+                "range": "number",
+                "rangeMax": 10,
+                "rangeMin": 2,
+                "stops": Array [],
+              },
+              Object {
+                "max": 57.96875,
+                "min": 0,
+              },
+            ],
+          ]
+        `);
+      });
+
+      describe('percent-based', () => {
+        const renderWithPalette = (
+          palette: CustomPaletteState,
+          dimensions: MetricVisComponentProps['config']['dimensions']
+        ) =>
+          shallow(
+            <MetricVis
+              config={{
+                dimensions,
+                metric: {
+                  palette,
+                  progressDirection: 'vertical',
+                  maxCols: 5,
+                },
+              }}
+              data={table}
+              {...defaultProps}
+            />
+          );
+
+        const dimensionsAndExpectedBounds = [
+          [
+            'breakdown-by and max',
+            {
+              metric: minPriceColumnId,
+              max: basePriceColumnId,
+              breakdownBy: dayOfWeekColumnId,
+            },
+          ],
+          ['just breakdown-by', { metric: minPriceColumnId, breakdownBy: dayOfWeekColumnId }],
+          ['just max', { metric: minPriceColumnId, max: basePriceColumnId }],
+        ];
+
+        it.each(dimensionsAndExpectedBounds)(
+          'should set correct data bounds with %s dimension',
+          // @ts-expect-error
+          (label, dimensions) => {
+            mockGetColorForValue.mockClear();
+
+            renderWithPalette(
+              {
+                range: 'percent',
+                // the rest of these params don't matter
+                colors: [],
+                gradient: false,
+                stops: [],
+                rangeMin: 2,
+                rangeMax: 10,
+              },
+              dimensions as DimensionsVisParam
+            );
+
+            expect(
+              mockGetColorForValue.mock.calls.map(([value, _palette, bounds]) => ({
+                value,
+                ...bounds,
+              }))
+            ).toMatchSnapshot();
+          }
+        );
+      });
+    });
+
+    describe('by static color', () => {
+      it('uses static color if no palette', () => {
+        const staticColor = 'static-color';
+
+        const component = shallow(
+          <MetricVis
+            config={{
+              dimensions: {
+                metric: basePriceColumnId,
+              },
+              metric: {
+                progressDirection: 'vertical',
+                maxCols: 5,
+                color: staticColor,
+                palette: undefined,
+              },
+            }}
+            data={table}
+            {...defaultProps}
+          />
+        );
+
+        const [[datum]] = component.find(Metric).props().data!;
+
+        expect(datum!.color).toBe(staticColor);
+        expect(mockGetColorForValue).not.toHaveBeenCalled();
+      });
+
+      it('defaults if no static color', () => {
+        const component = shallow(
+          <MetricVis
+            config={{
+              dimensions: {
+                metric: basePriceColumnId,
+              },
+              metric: {
+                progressDirection: 'vertical',
+                maxCols: 5,
+                color: undefined,
+                palette: undefined,
+              },
+            }}
+            data={table}
+            {...defaultProps}
+          />
+        );
+
+        const [[datum]] = component.find(Metric).props().data!;
+
+        expect(datum!.color).toBe(euiThemeVars.euiColorLightestShade);
+        expect(mockGetColorForValue).not.toHaveBeenCalled();
+      });
+    });
+  });
+
   describe('metric value formatting', () => {
     const getFormattedMetrics = (
-      value: number,
-      secondaryValue: number,
+      value: number | string,
+      secondaryValue: number | string,
       fieldFormatter: SerializedFieldFormat<SerializableRecord>
     ) => {
       const config: Props['config'] = {
@@ -786,7 +1325,7 @@ describe('MetricVisComponent', function () {
             ],
             rows: [{ '1': value, '2': secondaryValue }],
           }}
-          renderComplete={() => {}}
+          {...defaultProps}
         />
       );
 
@@ -794,15 +1333,21 @@ describe('MetricVisComponent', function () {
         value: primaryMetric,
         valueFormatter,
         extra,
-      } = component.find(Metric).props().data?.[0][0]!;
+      } = component.find(Metric).props().data?.[0][0]! as MetricWNumber;
 
-      return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children };
+      return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children[1] };
     };
 
     it('correctly formats plain numbers', () => {
       const { primary, secondary } = getFormattedMetrics(394.2393, 983123.984, { id: 'number' });
       expect(primary).toBe('394.24');
       expect(secondary).toBe('983.12K');
+    });
+
+    it('correctly formats strings', () => {
+      const { primary, secondary } = getFormattedMetrics('', '', { id: 'string' });
+      expect(primary).toBe('(empty)');
+      expect(secondary).toBe('(empty)');
     });
 
     it('correctly formats currency', () => {
@@ -879,6 +1424,17 @@ describe('MetricVisComponent', function () {
           useShortSuffix: true,
         },
       });
+    });
+
+    it('ignores suffix formatting', () => {
+      const { primary, secondary } = getFormattedMetrics(0.23939, 11.2, {
+        id: 'suffix',
+        params: {
+          id: 'percent',
+        },
+      });
+      expect(primary).toBe('23.94%');
+      expect(secondary).toBe('1.12K%');
     });
   });
 });

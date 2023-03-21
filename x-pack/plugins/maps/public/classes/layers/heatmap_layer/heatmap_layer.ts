@@ -87,6 +87,7 @@ export class HeatmapLayer extends AbstractLayer {
 
   async syncData(syncContext: DataRequestContext) {
     await syncMvtSourceData({
+      buffer: 0,
       hasLabels: false,
       layerId: this.getId(),
       layerName: await this.getDisplayName(),
@@ -200,10 +201,10 @@ export class HeatmapLayer extends AbstractLayer {
     return this.getCurrentStyle().renderLegendDetails(metricFields[0]);
   }
 
-  async getBounds(syncContext: DataRequestContext) {
+  async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
     return await syncBoundsData({
       layerId: this.getId(),
-      syncContext,
+      syncContext: getDataRequestContext(this.getId()),
       source: this.getSource(),
       sourceQuery: this.getQuery(),
     });

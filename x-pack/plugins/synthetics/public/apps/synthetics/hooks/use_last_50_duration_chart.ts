@@ -13,8 +13,10 @@ const fields = ['monitor.duration.us'];
 export function useLast50DurationChart({
   monitorId,
   locationId,
+  timestamp,
 }: {
   monitorId: string;
+  timestamp?: string;
   locationId: string;
 }) {
   const { hits, loading } = useLastXChecks<{
@@ -24,6 +26,7 @@ export function useLast50DurationChart({
     locationId,
     fields,
     size: 50,
+    timestamp,
   });
   const { data, averageDuration } = useMemo(() => {
     if (loading) {
@@ -37,7 +40,7 @@ export function useLast50DurationChart({
     const coords = hits
       .reverse() // results are returned in desc order by timestamp. Reverse to ensure the data is in asc order by timestamp
       .map((hit, index) => {
-        const duration = hit['monitor.duration.us']?.[0];
+        const duration = hit?.['monitor.duration.us']?.[0];
         totalDuration += duration || 0;
         if (duration === undefined) {
           return null;

@@ -24,10 +24,11 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
-import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
@@ -44,13 +45,14 @@ export interface DependencyCache {
   savedObjectsClient: SavedObjectsClientContract | null;
   application: ApplicationStart | null;
   http: HttpStart | null;
-  security: SecurityPluginSetup | undefined | null;
+  security: SecurityPluginStart | undefined | null;
   i18n: I18nStart | null;
   dashboard: DashboardStart | null;
   maps: MapsStartApi | null;
   dataVisualizer: DataVisualizerPluginStart | null;
-  aiops: AiopsPluginStart | null;
   dataViews: DataViewsContract | null;
+  share: SharePluginStart | null;
+  lens: LensPublicStart | null;
 }
 
 const cache: DependencyCache = {
@@ -73,8 +75,9 @@ const cache: DependencyCache = {
   dashboard: null,
   maps: null,
   dataVisualizer: null,
-  aiops: null,
   dataViews: null,
+  share: null,
+  lens: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -96,8 +99,9 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.i18n = deps.i18n || null;
   cache.dashboard = deps.dashboard || null;
   cache.dataVisualizer = deps.dataVisualizer || null;
-  cache.aiops = deps.aiops || null;
   cache.dataViews = deps.dataViews || null;
+  cache.share = deps.share || null;
+  cache.lens = deps.lens || null;
 }
 
 export function getTimefilter() {
@@ -232,15 +236,29 @@ export function getDataViews() {
   return cache.dataViews;
 }
 
-export function clearCache() {
-  Object.keys(cache).forEach((k) => {
-    cache[k as keyof DependencyCache] = null;
-  });
-}
-
 export function getFileDataVisualizer() {
   if (cache.dataVisualizer === null) {
     throw new Error("dataVisualizer hasn't been initialized");
   }
   return cache.dataVisualizer;
+}
+
+export function getShare() {
+  if (cache.share === null) {
+    throw new Error("share hasn't been initialized");
+  }
+  return cache.share;
+}
+
+export function getLens() {
+  if (cache.lens === null) {
+    throw new Error("lens hasn't been initialized");
+  }
+  return cache.lens;
+}
+
+export function clearCache() {
+  Object.keys(cache).forEach((k) => {
+    cache[k as keyof DependencyCache] = null;
+  });
 }

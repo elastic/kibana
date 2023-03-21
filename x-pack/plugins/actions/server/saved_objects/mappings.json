@@ -25,6 +25,7 @@
     }
   },
   "action_task_params": {
+    "dynamic": false,
     "properties": {
       "actionId": {
         "type": "keyword"

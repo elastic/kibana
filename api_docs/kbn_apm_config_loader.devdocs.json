@@ -9,20 +9,29 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/apm-config-loader",
-        "id": "def-server.ApmConfiguration",
+        "id": "def-common.ApmConfiguration",
         "type": "Class",
         "tags": [],
         "label": "ApmConfiguration",
         "description": [],
         "path": "packages/kbn-apm-config-loader/src/config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.ApmConfiguration.Unnamed",
+            "id": "def-common.ApmConfiguration.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -32,10 +41,11 @@
             ],
             "path": "packages/kbn-apm-config-loader/src/config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/apm-config-loader",
-                "id": "def-server.ApmConfiguration.Unnamed.$1",
+                "id": "def-common.ApmConfiguration.Unnamed.$1",
                 "type": "string",
                 "tags": [],
                 "label": "rootDir",
@@ -45,11 +55,12 @@
                 ],
                 "path": "packages/kbn-apm-config-loader/src/config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/apm-config-loader",
-                "id": "def-server.ApmConfiguration.Unnamed.$2",
+                "id": "def-common.ApmConfiguration.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "rawKibanaConfig",
@@ -59,11 +70,12 @@
                 ],
                 "path": "packages/kbn-apm-config-loader/src/config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/apm-config-loader",
-                "id": "def-server.ApmConfiguration.Unnamed.$3",
+                "id": "def-common.ApmConfiguration.Unnamed.$3",
                 "type": "boolean",
                 "tags": [],
                 "label": "isDistributable",
@@ -73,6 +85,7 @@
                 ],
                 "path": "packages/kbn-apm-config-loader/src/config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -80,7 +93,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.ApmConfiguration.getConfig",
+            "id": "def-common.ApmConfiguration.getConfig",
             "type": "Function",
             "tags": [],
             "label": "getConfig",
@@ -91,10 +104,11 @@
             ],
             "path": "packages/kbn-apm-config-loader/src/config.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/apm-config-loader",
-                "id": "def-server.ApmConfiguration.getConfig.$1",
+                "id": "def-common.ApmConfiguration.getConfig.$1",
                 "type": "string",
                 "tags": [],
                 "label": "serviceName",
@@ -104,6 +118,7 @@
                 ],
                 "path": "packages/kbn-apm-config-loader/src/config.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -116,7 +131,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/apm-config-loader",
-        "id": "def-server.getConfiguration",
+        "id": "def-common.getConfiguration",
         "type": "Function",
         "tags": [],
         "label": "getConfiguration",
@@ -128,10 +143,11 @@
         ],
         "path": "packages/kbn-apm-config-loader/src/config_loader.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.getConfiguration.$1",
+            "id": "def-common.getConfiguration.$1",
             "type": "string",
             "tags": [],
             "label": "serviceName",
@@ -141,6 +157,7 @@
             ],
             "path": "packages/kbn-apm-config-loader/src/config_loader.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -149,7 +166,7 @@
       },
       {
         "parentPluginId": "@kbn/apm-config-loader",
-        "id": "def-server.initApm",
+        "id": "def-common.initApm",
         "type": "Function",
         "tags": [],
         "label": "initApm",
@@ -159,10 +176,11 @@
         ],
         "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.initApm.$1",
+            "id": "def-common.initApm.$1",
             "type": "Array",
             "tags": [],
             "label": "argv",
@@ -172,11 +190,12 @@
             ],
             "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.initApm.$2",
+            "id": "def-common.initApm.$2",
             "type": "string",
             "tags": [],
             "label": "rootDir",
@@ -186,11 +205,12 @@
             ],
             "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.initApm.$3",
+            "id": "def-common.initApm.$3",
             "type": "boolean",
             "tags": [],
             "label": "isDistributable",
@@ -200,11 +220,12 @@
             ],
             "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.initApm.$4",
+            "id": "def-common.initApm.$4",
             "type": "string",
             "tags": [],
             "label": "serviceName",
@@ -214,6 +235,7 @@
             ],
             "path": "packages/kbn-apm-config-loader/src/init_apm.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -222,7 +244,7 @@
       },
       {
         "parentPluginId": "@kbn/apm-config-loader",
-        "id": "def-server.shouldInstrumentClient",
+        "id": "def-common.shouldInstrumentClient",
         "type": "Function",
         "tags": [],
         "label": "shouldInstrumentClient",
@@ -234,10 +256,11 @@
         ],
         "path": "packages/kbn-apm-config-loader/src/rum_agent_configuration.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.shouldInstrumentClient.$1",
+            "id": "def-common.shouldInstrumentClient.$1",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -248,6 +271,7 @@
             ],
             "path": "packages/kbn-apm-config-loader/src/rum_agent_configuration.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -258,14 +282,61 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/apm-config-loader",
+        "id": "def-common.apmConfigSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "apmConfigSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ active: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean | undefined>; serverUrl: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; secretToken: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; globalLabels: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{}>; }>"
+        ],
+        "path": "packages/kbn-apm-config-loader/src/apm_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

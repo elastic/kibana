@@ -18,14 +18,14 @@ import { useNavigation } from '../../../lib/kibana/hooks';
 import type { NavTab } from '../types';
 import { SecurityNavGroupKey } from '../types';
 import { SecurityPageName } from '../../../../../common/constants';
-import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useGlobalQueryString } from '../../../utils/global_query_string';
+import { useUserPrivileges } from '../../user_privileges';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../lib/telemetry';
 
 export const usePrimaryNavigationItems = ({
   navTabs,
   selectedTabId,
-  ...urlStateProps
 }: PrimaryNavigationItemsProps): Array<EuiSideNavItemType<{}>> => {
   const { navigateTo, getAppUrl } = useNavigation();
   const globalQueryString = useGlobalQueryString();
@@ -34,10 +34,11 @@ export const usePrimaryNavigationItems = ({
     (tab: NavTab) => {
       const { id, name, disabled } = tab;
       const isSelected = selectedTabId === id;
-      const urlSearch = getSearch(tab, urlStateProps, globalQueryString);
+      const urlSearch = getSearch(tab.id as SecurityPageName, globalQueryString);
 
       const handleClick = (ev: React.MouseEvent) => {
         ev.preventDefault();
+        track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.LEGACY_NAVIGATION}${id}`);
         navigateTo({ deepLinkId: id, path: urlSearch });
       };
 
@@ -54,7 +55,7 @@ export const usePrimaryNavigationItems = ({
         onClick: handleClick,
       };
     },
-    [getAppUrl, navigateTo, selectedTabId, urlStateProps, globalQueryString]
+    [getAppUrl, navigateTo, selectedTabId, globalQueryString]
   );
 
   const navItemsToDisplay = usePrimaryNavigationItemsToDisplay(navTabs);
@@ -71,8 +72,10 @@ export const usePrimaryNavigationItems = ({
 
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions().read;
-  const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
+  const { canReadActionsLogManagement, canReadHostIsolationExceptions } =
+    useUserPrivileges().endpointPrivileges;
   const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
+
   const uiCapabilities = useKibana().services.application.capabilities;
   return useMemo(
     () =>
@@ -88,6 +91,9 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
               items: [
                 navTabs[SecurityPageName.overview],
                 navTabs[SecurityPageName.detectionAndResponse],
+                navTabs[SecurityPageName.cloudSecurityPostureDashboard],
+                navTabs[SecurityPageName.entityAnalytics],
+                navTabs[SecurityPageName.dataQuality],
                 ...(navTabs[SecurityPageName.kubernetes] != null
                   ? [navTabs[SecurityPageName.kubernetes]]
                   : []),
@@ -102,6 +108,10 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
               ],
             },
             {
+              ...securityNavGroup[SecurityNavGroupKey.findings],
+              items: [navTabs[SecurityPageName.cloudSecurityPostureFindings]],
+            },
+            {
               ...securityNavGroup[SecurityNavGroupKey.explore],
               items: [
                 navTabs[SecurityPageName.hosts],
@@ -112,6 +122,10 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
               ],
             },
             {
+              ...securityNavGroup[SecurityNavGroupKey.intelligence],
+              items: [navTabs[SecurityPageName.threatIntelligenceIndicators]],
+            },
+            {
               ...securityNavGroup[SecurityNavGroupKey.investigate],
               items: hasCasesReadPermissions
                 ? [navTabs[SecurityPageName.timelines], navTabs[SecurityPageName.case]]
@@ -120,14 +134,19 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
             {
               ...securityNavGroup[SecurityNavGroupKey.manage],
               items: [
+                // TODO: also hide other management pages based on authz privileges
                 navTabs[SecurityPageName.endpoints],
                 ...(isPolicyListEnabled ? [navTabs[SecurityPageName.policies]] : []),
                 navTabs[SecurityPageName.trustedApps],
                 navTabs[SecurityPageName.eventFilters],
-                ...(canSeeHostIsolationExceptions
+                ...(canReadHostIsolationExceptions
                   ? [navTabs[SecurityPageName.hostIsolationExceptions]]
                   : []),
                 navTabs[SecurityPageName.blocklist],
+                ...(canReadActionsLogManagement
+                  ? [navTabs[SecurityPageName.responseActionsHistory]]
+                  : []),
+                navTabs[SecurityPageName.cloudSecurityPostureBenchmarks],
               ],
             },
           ]
@@ -143,7 +162,8 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
       uiCapabilities.siem.show,
       navTabs,
       hasCasesReadPermissions,
-      canSeeHostIsolationExceptions,
+      canReadHostIsolationExceptions,
+      canReadActionsLogManagement,
       isPolicyListEnabled,
     ]
   );

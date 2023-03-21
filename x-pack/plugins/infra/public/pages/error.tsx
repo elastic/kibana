@@ -9,7 +9,7 @@ import {
   EuiCallOut,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,

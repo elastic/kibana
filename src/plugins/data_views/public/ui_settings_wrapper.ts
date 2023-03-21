@@ -14,15 +14,17 @@ export class UiSettingsPublicToCommon implements UiSettingsCommon {
   constructor(uiSettings: IUiSettingsClient) {
     this.uiSettings = uiSettings;
   }
-  get<T = any>(key: string): Promise<T> {
+  get<T = unknown>(key: string): Promise<T | undefined> {
     return Promise.resolve(this.uiSettings.get(key));
   }
 
-  getAll<T = any>(): Promise<Record<string, PublicUiSettingsParams & UserProvidedValues<T>>> {
+  getAll<T = unknown>(): Promise<
+    Record<string, (PublicUiSettingsParams & UserProvidedValues<T>) | undefined>
+  > {
     return Promise.resolve(this.uiSettings.getAll());
   }
 
-  set(key: string, value: any) {
+  set(key: string, value: unknown) {
     this.uiSettings.set(key, value);
     return Promise.resolve();
   }

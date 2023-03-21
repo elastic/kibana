@@ -12,7 +12,7 @@ import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../../../../../common/l
 import { ZIP } from '../../../../../../i18n/constants';
 
 import { usePlatformService, useNotifyService, useWorkpadService } from '../../../../../services';
-import { CanvasRenderedWorkpad } from '../../../../../../shareable_runtime/types';
+import type { CanvasRenderedWorkpad } from '../../../../../../shareable_runtime/types';
 
 const strings = {
   getDownloadRuntimeFailureErrorMessage: () =>

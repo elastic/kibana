@@ -346,13 +346,12 @@ describe('Fleet - packageToPackagePolicy', () => {
 
   describe('packageToPackagePolicy', () => {
     it('returns package policy with default name', () => {
-      expect(packageToPackagePolicy(mockPackage, '1', '2')).toEqual({
+      expect(packageToPackagePolicy(mockPackage, '1')).toEqual({
         policy_id: '1',
         namespace: '',
         enabled: true,
         inputs: [],
         name: 'mock-package-1',
-        output_id: '2',
         package: {
           name: 'mock-package',
           title: 'Mock package',
@@ -361,14 +360,57 @@ describe('Fleet - packageToPackagePolicy', () => {
       });
     });
 
+    it('returns package policy with experimental datastream features', () => {
+      expect(
+        packageToPackagePolicy(
+          {
+            ...mockPackage,
+            savedObject: {
+              attributes: {
+                experimental_data_stream_features: [
+                  {
+                    data_stream: 'metrics-test.testdataset',
+                    features: {
+                      synthetic_source: true,
+                      tsdb: true,
+                    },
+                  },
+                ],
+              },
+            } as any,
+          },
+          '1'
+        )
+      ).toEqual({
+        policy_id: '1',
+        namespace: '',
+        enabled: true,
+        inputs: [],
+        name: 'mock-package-1',
+        package: {
+          name: 'mock-package',
+          title: 'Mock package',
+          version: '0.0.0',
+          experimental_data_stream_features: [
+            {
+              data_stream: 'metrics-test.testdataset',
+              features: {
+                synthetic_source: true,
+                tsdb: true,
+              },
+            },
+          ],
+        },
+      });
+    });
+
     it('returns package policy with custom name', () => {
-      expect(packageToPackagePolicy(mockPackage, '1', '2', 'default', 'pkgPolicy-1')).toEqual({
+      expect(packageToPackagePolicy(mockPackage, '1', 'default', 'pkgPolicy-1')).toEqual({
         policy_id: '1',
         namespace: 'default',
         enabled: true,
         inputs: [],
         name: 'pkgPolicy-1',
-        output_id: '2',
         package: {
           name: 'mock-package',
           title: 'Mock package',
@@ -382,7 +424,6 @@ describe('Fleet - packageToPackagePolicy', () => {
         packageToPackagePolicy(
           mockPackage,
           '1',
-          '2',
           'mock-namespace',
           'pkgPolicy-1',
           'Test description'
@@ -394,7 +435,6 @@ describe('Fleet - packageToPackagePolicy', () => {
         name: 'pkgPolicy-1',
         namespace: 'mock-namespace',
         description: 'Test description',
-        output_id: '2',
         package: {
           name: 'mock-package',
           title: 'Mock package',
@@ -410,14 +450,13 @@ describe('Fleet - packageToPackagePolicy', () => {
       } as unknown as PackageInfo;
 
       expect(
-        packageToPackagePolicy(mockPackageWithPolicyTemplates, '1', '2', 'default', 'pkgPolicy-1')
+        packageToPackagePolicy(mockPackageWithPolicyTemplates, '1', 'default', 'pkgPolicy-1')
       ).toEqual({
         policy_id: '1',
         namespace: 'default',
         enabled: true,
         inputs: [{ type: 'foo', enabled: true, streams: [] }],
         name: 'pkgPolicy-1',
-        output_id: '2',
         package: {
           name: 'mock-package',
           title: 'Mock package',
@@ -431,7 +470,6 @@ describe('Fleet - packageToPackagePolicy', () => {
         packageToPackagePolicy(
           AWS_PACKAGE as unknown as PackageInfo,
           'some-agent-policy-id',
-          'some-output-id',
           'default',
           'aws-1'
         )

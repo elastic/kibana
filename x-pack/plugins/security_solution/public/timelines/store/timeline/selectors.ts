@@ -6,8 +6,6 @@
  */
 
 import { createSelector } from 'reselect';
-
-export { getManageTimelineById } from '@kbn/timelines-plugin/public';
 import type { State } from '../../../common/store/types';
 
 import type { TimelineModel } from './model';
@@ -38,8 +36,6 @@ export const getShowCallOutUnauthorizedMsg = () =>
     selectCallOutUnauthorizedMsg,
     (showCallOutUnauthorizedMsg) => showCallOutUnauthorizedMsg
   );
-
-export const getTimelines = () => timelineByIdSelector;
 
 export const getTimelineByIdSelector = () => createSelector(selectTimeline, (timeline) => timeline);
 

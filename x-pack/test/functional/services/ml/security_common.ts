@@ -24,7 +24,9 @@ export enum USER {
 }
 
 export function MachineLearningSecurityCommonProvider({ getService }: FtrProviderContext) {
+  const config = getService('config');
   const security = getService('security');
+  const remoteEsRoles: undefined | Record<string, any> = config.get('security.remoteEsRoles');
 
   const roles = [
     {
@@ -153,6 +155,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
             savedObjectsManagement: ['all'],
             advancedSettings: ['all'],
             indexPatterns: ['all'],
+            generalCases: ['all'],
           },
           spaces: ['*'],
         },
@@ -171,6 +174,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
         'ft_ml_source',
         'ft_ml_dest',
         'ft_ml_ui_extras',
+        ...(remoteEsRoles ? Object.keys(remoteEsRoles) : []),
       ],
     },
     {

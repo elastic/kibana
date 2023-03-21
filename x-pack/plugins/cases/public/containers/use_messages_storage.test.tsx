@@ -6,7 +6,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useMessagesStorage, UseMessagesStorage } from './use_messages_storage';
+import type { UseMessagesStorage } from './use_messages_storage';
+import { useMessagesStorage } from './use_messages_storage';
 
 describe('useLocalStorage', () => {
   beforeEach(() => {

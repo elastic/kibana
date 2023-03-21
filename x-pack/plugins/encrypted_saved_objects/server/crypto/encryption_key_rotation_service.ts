@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENCRYPTION_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
   ISavedObjectTypeRegistry,
   KibanaRequest,
@@ -107,7 +108,7 @@ export class EncryptionKeyRotationService {
     const user = this.options.security?.authc.getCurrentUser(request) ?? undefined;
     const retrieveClient = savedObjects.getScopedClient(request, {
       includedHiddenTypes: registeredHiddenSavedObjectTypes,
-      excludedWrappers: ['encryptedSavedObjects'],
+      excludedExtensions: [ENCRYPTION_EXTENSION_ID],
     });
     const updateClient = savedObjects.getScopedClient(request, {
       includedHiddenTypes: registeredHiddenSavedObjectTypes,

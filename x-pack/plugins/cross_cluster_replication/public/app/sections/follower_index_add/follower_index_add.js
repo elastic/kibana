@@ -8,7 +8,10 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageContentBody, EuiPageContent } from '@elastic/eui';
+import {
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+} from '@elastic/eui';
 
 import { setBreadcrumbs, listBreadcrumb, addBreadcrumb } from '../../services/breadcrumbs';
 import {

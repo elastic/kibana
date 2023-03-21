@@ -7,19 +7,16 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
-import { spawnSync } from 'child_process';
+import Fsp from 'fs/promises';
 
+import { run } from '../../lib/spawn.mjs';
 import { isFile } from '../../lib/fs.mjs';
 import { dedent } from '../../lib/indent.mjs';
 import { REPO_ROOT } from '../../lib/paths.mjs';
 
-function isElasticCommitter() {
+async function isElasticCommitter() {
   try {
-    const { stdout: email } = spawnSync('git', ['config', 'user.email'], {
-      encoding: 'utf8',
-    });
-
+    const email = await run('git', ['config', 'user.email']);
     return email.trim().endsWith('@elastic.co');
   } catch {
     return false;
@@ -31,23 +28,23 @@ function isElasticCommitter() {
  * @param {string} settingsPath
  * @returns
  */
-function upToDate(settingsPath) {
-  if (!isFile(settingsPath)) {
+async function upToDate(settingsPath) {
+  if (!(await isFile(settingsPath))) {
     return false;
   }
 
-  const readSettingsFile = Fs.readFileSync(settingsPath, 'utf8');
+  const readSettingsFile = await Fsp.readFile(settingsPath, 'utf8');
   return readSettingsFile.startsWith('# V2 ');
 }
 
 /**
  * @param {import('@kbn/some-dev-log').SomeDevLog} log
  */
-export function setupRemoteCache(log) {
+export async function setupRemoteCache(log) {
   // The remote cache is only for Elastic employees working locally (CI cache settings are handled elsewhere)
   if (
     process.env.FORCE_BOOTSTRAP_REMOTE_CACHE !== 'true' &&
-    (process.env.CI || !isElasticCommitter())
+    (process.env.CI || !(await isElasticCommitter()))
   ) {
     return;
   }
@@ -57,7 +54,7 @@ export function setupRemoteCache(log) {
   const settingsPath = Path.resolve(REPO_ROOT, '.bazelrc.cache');
 
   // Checks if we should upgrade or install the config file
-  if (upToDate(settingsPath)) {
+  if (await upToDate(settingsPath)) {
     log.debug(`remote cache config already exists and is up-to-date, skipping`);
     return;
   }
@@ -70,6 +67,6 @@ export function setupRemoteCache(log) {
     build --incompatible_remote_results_ignore_disk
   `;
 
-  Fs.writeFileSync(settingsPath, contents);
+  await Fsp.writeFile(settingsPath, contents);
   log.info(`remote cache settings written to ${settingsPath}`);
 }

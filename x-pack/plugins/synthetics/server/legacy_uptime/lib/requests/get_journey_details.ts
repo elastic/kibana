@@ -40,7 +40,10 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
     size: 1,
   };
 
-  const { body: thisJourney } = await uptimeEsClient.search({ body: baseParams });
+  const { body: thisJourney } = await uptimeEsClient.search(
+    { body: baseParams },
+    'getJourneyDetailsCurrentJourney'
+  );
 
   if (thisJourney.hits.hits.length > 0) {
     const { _id, _source } = thisJourney.hits.hits[0];
@@ -105,8 +108,14 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
       sort: [{ '@timestamp': { order: 'asc' as const } }],
     };
 
-    const { body: previousJourneyResult } = await uptimeEsClient.search({ body: previousParams });
-    const { body: nextJourneyResult } = await uptimeEsClient.search({ body: nextParams });
+    const { body: previousJourneyResult } = await uptimeEsClient.search(
+      { body: previousParams },
+      'getJourneyDetailsNextJourney'
+    );
+    const { body: nextJourneyResult } = await uptimeEsClient.search(
+      { body: nextParams },
+      'getJourneyDetailsPreviousJourney'
+    );
     const previousJourney: any =
       previousJourneyResult?.hits?.hits.length > 0 ? previousJourneyResult?.hits?.hits[0] : null;
     const nextJourney: any =

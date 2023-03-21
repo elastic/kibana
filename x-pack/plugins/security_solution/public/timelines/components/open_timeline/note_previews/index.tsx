@@ -53,7 +53,7 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
       timelineActions.toggleDetailPanel({
         panelView: 'eventDetail',
         tabType: TimelineTabs.notes,
-        timelineId,
+        id: timelineId,
         params: {
           eventId,
           indexName: selectedPatterns.join(','),
@@ -107,7 +107,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
                   getEmptyValue()
                 ),
                 children: <EuiText size="s">{timeline.description}</EuiText>,
-                timelineIcon: (
+                timelineAvatar: (
                   <EuiAvatar
                     data-test-subj="avatar"
                     name={timeline.updatedBy != null ? timeline.updatedBy : '?'}
@@ -152,7 +152,7 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
               eventId && timelineId ? (
                 <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
               ) : null,
-            timelineIcon: (
+            timelineAvatar: (
               <EuiAvatar
                 data-test-subj="avatar"
                 name={note.updatedBy != null ? note.updatedBy : '?'}

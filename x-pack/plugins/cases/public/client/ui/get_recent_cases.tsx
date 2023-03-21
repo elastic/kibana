@@ -7,8 +7,9 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
-import { CasesProvider, CasesContextProps } from '../../components/cases_context';
-import { RecentCasesProps } from '../../components/recent_cases';
+import type { CasesContextProps } from '../../components/cases_context';
+import { CasesProvider } from '../../components/cases_context';
+import type { RecentCasesProps } from '../../components/recent_cases';
 
 type GetRecentCasesPropsInternal = RecentCasesProps & CasesContextProps;
 export type GetRecentCasesProps = Omit<

@@ -12,6 +12,7 @@ import { contextMock } from './es/context.mock';
 import { merge } from 'lodash';
 import moment from 'moment';
 import { IClusterClientAdapter } from './es/cluster_client_adapter';
+import { fromKueryExpression } from '@kbn/es-query';
 
 const expectedSavedObject = {
   id: 'saved-object-id',
@@ -237,6 +238,45 @@ describe('EventLogStart', () => {
           ],
         },
         legacyIds: undefined,
+      });
+    });
+  });
+  describe('aggregateEventsWithAuthFilter', () => {
+    const testAuthFilter = fromKueryExpression('test:test');
+    test('throws when no aggregation is defined in options', async () => {
+      savedObjectGetter.mockResolvedValueOnce(expectedSavedObject);
+      await expect(
+        eventLogClient.aggregateEventsWithAuthFilter('saved-object-type', testAuthFilter)
+      ).rejects.toMatchInlineSnapshot(`[Error: No aggregation defined!]`);
+    });
+    test('calls aggregateEventsWithAuthFilter with given aggregation', async () => {
+      savedObjectGetter.mockResolvedValueOnce(expectedSavedObject);
+      await eventLogClient.aggregateEventsWithAuthFilter(
+        'saved-object-type',
+        testAuthFilter,
+        {
+          aggs: { myAgg: {} },
+        },
+        undefined,
+        true
+      );
+      expect(esContext.esAdapter.aggregateEventsWithAuthFilter).toHaveBeenCalledWith({
+        index: esContext.esNames.indexPattern,
+        namespaces: [undefined],
+        type: 'saved-object-type',
+        authFilter: testAuthFilter,
+        aggregateOptions: {
+          aggs: { myAgg: {} },
+          page: 1,
+          per_page: 10,
+          sort: [
+            {
+              sort_field: '@timestamp',
+              sort_order: 'asc',
+            },
+          ],
+        },
+        includeSpaceAgnostic: true,
       });
     });
   });

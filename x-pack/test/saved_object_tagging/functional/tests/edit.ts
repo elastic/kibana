@@ -142,5 +142,40 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(uneditedTag).not.to.be(undefined);
       expect(newTag).to.be(undefined);
     });
+
+    describe('Disabling save button', () => {
+      const tag3Unmodified = {
+        name: 'tag-3',
+        description: 'Last but not least',
+        color: '#000000',
+      };
+      it('should disable save button if no property is changed', async () => {
+        await tagModal.openEdit('tag-3');
+
+        await tagModal.fillForm(tag3Unmodified, { submit: false });
+        expect(await tagModal.isConfirmDisabled()).to.be(true);
+      });
+      it('should enable save button if name is changed', async () => {
+        await tagModal.openEdit('tag-3');
+
+        await tagModal.fillForm({ ...tag3Unmodified, name: 'changed name' }, { submit: false });
+        expect(await tagModal.isConfirmDisabled()).to.be(false);
+      });
+      it('should enable save button if description is changed', async () => {
+        await tagModal.openEdit('tag-3');
+
+        await tagModal.fillForm(
+          { ...tag3Unmodified, description: 'changed description' },
+          { submit: false }
+        );
+        expect(await tagModal.isConfirmDisabled()).to.be(false);
+      });
+      it('should enable save button if color is changed', async () => {
+        await tagModal.openEdit('tag-3');
+
+        await tagModal.fillForm({ ...tag3Unmodified, color: '#FF0000' }, { submit: false });
+        expect(await tagModal.isConfirmDisabled()).to.be(false);
+      });
+    });
   });
 }

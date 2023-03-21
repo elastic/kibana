@@ -9,6 +9,7 @@ import {
   isIosAgentName,
   isRumAgentName,
   isJavaAgentName,
+  isAndroidAgentName,
   OPEN_TELEMETRY_AGENT_NAMES,
 } from '../../../../common/agent_name';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
@@ -19,7 +20,6 @@ import goIcon from './icons/go.svg';
 import iosIcon from './icons/ios.svg';
 import darkIosIcon from './icons/ios_dark.svg';
 import javaIcon from './icons/java.svg';
-import lambdaIcon from './icons/lambda.svg';
 import nodeJsIcon from './icons/nodejs.svg';
 import ocamlIcon from './icons/ocaml.svg';
 import openTelemetryIcon from './icons/opentelemetry.svg';
@@ -31,6 +31,7 @@ import darkPhpIcon from './icons/php_dark.svg';
 import darkRumJsIcon from './icons/rumjs_dark.svg';
 import rustIcon from './icons/rust.svg';
 import darkRustIcon from './icons/rust_dark.svg';
+import androidIcon from './icons/android.svg';
 
 const agentIcons: { [key: string]: string } = {
   dotnet: dotNetIcon,
@@ -38,7 +39,6 @@ const agentIcons: { [key: string]: string } = {
   go: goIcon,
   ios: iosIcon,
   java: javaIcon,
-  lambda: lambdaIcon,
   nodejs: nodeJsIcon,
   ocaml: ocamlIcon,
   opentelemetry: openTelemetryIcon,
@@ -47,6 +47,7 @@ const agentIcons: { [key: string]: string } = {
   ruby: rubyIcon,
   rum: rumJsIcon,
   rust: rustIcon,
+  android: androidIcon,
 };
 
 const darkAgentIcons: { [key: string]: string } = {
@@ -75,6 +76,10 @@ export function getAgentIconKey(agentName: string) {
 
   if (isIosAgentName(lowercasedAgentName)) {
     return 'ios';
+  }
+
+  if (isAndroidAgentName(lowercasedAgentName)) {
+    return 'android';
   }
 
   // Remove "opentelemetry/" prefix

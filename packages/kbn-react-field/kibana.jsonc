@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/react-field",
+  "owner": "@elastic/kibana-data-discovery"
+}

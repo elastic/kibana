@@ -171,7 +171,7 @@ describe('SetupModeRenderer', () => {
   it('should use a new product found in the api response', () => {
     const newProduct = { id: 1 };
 
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     jest.doMock('../../lib/setup_mode', () => ({
       getSetupModeState: () => ({
         supported: true,

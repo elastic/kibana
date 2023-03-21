@@ -6,9 +6,10 @@
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiInMemoryTable, Pagination, Direction, useEuiTheme } from '@elastic/eui';
-import { getFieldColumns, getFieldItems, isActionsColumn } from '../field_items';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { getFieldColumns, getFieldItemsData, isActionsColumn } from '../field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from '../../helpers';
-import type { BrowserFields, FieldBrowserProps, GetFieldTableColumns } from '../../types';
+import type { FieldBrowserProps, GetFieldTableColumns } from '../../types';
 import { FieldTableHeader } from './field_table_header';
 import { styles } from './field_table.styles';
 
@@ -49,11 +50,11 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   filteredBrowserFields,
   filterSelectedEnabled,
   getFieldTableColumns,
+  onFilterSelectedChange,
+  onHide,
+  onToggleColumn,
   searchInput,
   selectedCategoryIds,
-  onFilterSelectedChange,
-  onToggleColumn,
-  onHide,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
@@ -62,9 +63,9 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   const [sortField, setSortField] = useState<string>(DEFAULT_SORTING.field);
   const [sortDirection, setSortDirection] = useState<Direction>(DEFAULT_SORTING.direction);
 
-  const fieldItems = useMemo(
+  const { fieldItems, showDescriptionColumn } = useMemo(
     () =>
-      getFieldItems({
+      getFieldItemsData({
         browserFields: filteredBrowserFields,
         selectedCategoryIds,
         columnIds,
@@ -118,8 +119,15 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
    * Process columns
    */
   const columns = useMemo(
-    () => getFieldColumns({ highlight: searchInput, onToggleColumn, getFieldTableColumns, onHide }),
-    [onToggleColumn, searchInput, getFieldTableColumns, onHide]
+    () =>
+      getFieldColumns({
+        getFieldTableColumns,
+        highlight: searchInput,
+        onHide,
+        onToggleColumn,
+        showDescriptionColumn,
+      }),
+    [getFieldTableColumns, searchInput, onHide, onToggleColumn, showDescriptionColumn]
   );
   const hasActions = useMemo(() => columns.some((column) => isActionsColumn(column)), [columns]);
 

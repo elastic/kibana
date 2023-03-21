@@ -17,7 +17,3 @@ export const requestContextFactoryMock = {
     }),
   }),
 };
-
-export const RequestContextFactoryMock = jest
-  .fn<jest.Mocked<IRequestContextFactory>, []>()
-  .mockImplementation(requestContextFactoryMock.create);

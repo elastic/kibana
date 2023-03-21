@@ -53,6 +53,18 @@ export const axisExtentConfigFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Upper bound',
       }),
     },
+    enforce: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.axisExtentConfig.enforce.help', {
+        defaultMessage: 'Enforce extent params.',
+      }),
+    },
+    niceValues: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.axisExtentConfig.niceValues.help', {
+        defaultMessage: 'Enable axis extents value rounding',
+      }),
+    },
   },
   fn(input, args) {
     if (args.mode === AxisExtentModes.CUSTOM) {

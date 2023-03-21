@@ -32,6 +32,7 @@
         "description": [],
         "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-browser-mocks",
@@ -42,13 +43,26 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "PublicMethodsOf",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
               "<",
-              "DeprecationsService",
+              {
+                "pluginId": "@kbn/core-deprecations-browser-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsBrowserInternalPluginApi",
+                "section": "def-common.DeprecationsService",
+                "text": "DeprecationsService"
+              },
               ">>"
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -64,6 +78,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -76,11 +91,18 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              "DeprecationsServiceStart",
+              {
+                "pluginId": "@kbn/core-deprecations-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
+                "section": "def-common.DeprecationsServiceStart",
+                "text": "DeprecationsServiceStart"
+              },
               ">"
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-mocks/src/deprecations_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }

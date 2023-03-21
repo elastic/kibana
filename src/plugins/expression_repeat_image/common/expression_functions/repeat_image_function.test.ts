@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ExecutionContext } from '@kbn/expressions-plugin';
-import {
-  getElasticLogo,
-  getElasticOutline,
-  functionWrapper,
-} from '@kbn/presentation-util-plugin/common/lib';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import { getElasticLogo, getElasticOutline } from '@kbn/presentation-util-plugin/common';
+import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { repeatImageFunction } from './repeat_image_function';
 
 describe('repeatImage', () => {

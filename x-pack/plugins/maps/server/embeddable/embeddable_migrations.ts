@@ -8,6 +8,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { moveAttribution } from '../../common/migrations/move_attribution';
+import { migrateOtherCategoryColor } from '../../common/migrations/migrate_other_category_color';
 import { setEmsTmsDefaultModes } from '../../common/migrations/set_ems_tms_default_modes';
 import { renameLayerTypes } from '../../common/migrations/rename_layer_types';
 import { extractReferences } from '../../common/migrations/references';
@@ -62,6 +63,18 @@ export const embeddableMigrations = {
       return {
         ...state,
         attributes: renameLayerTypes(state as { attributes: MapSavedObjectAttributes }),
+      } as SerializableRecord;
+    } catch (e) {
+      // Do not fail migration
+      // Maps application can display error when viewed
+      return state;
+    }
+  },
+  '8.4.0': (state: SerializableRecord) => {
+    try {
+      return {
+        ...state,
+        attributes: migrateOtherCategoryColor(state as { attributes: MapSavedObjectAttributes }),
       } as SerializableRecord;
     } catch (e) {
       // Do not fail migration

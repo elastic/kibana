@@ -8,6 +8,7 @@
 import type { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import type { CloudStart } from '@kbn/cloud-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -57,16 +58,11 @@ import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
-import type { UserProfileServiceStart } from './user_profile';
+import type { UserProfileServiceStart, UserProfileServiceStartInternal } from './user_profile';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
   'getSpaceId' | 'namespaceToSpaceId'
->;
-
-export type FeaturesService = Pick<
-  FeaturesPluginSetup,
-  'getKibanaFeatures' | 'getElasticsearchFeatures'
 >;
 
 /**
@@ -93,12 +89,6 @@ export interface SecurityPluginSetup {
    * Exposes services to access kibana roles per feature id with the GetDeprecationsContext
    */
   privilegeDeprecationsService: PrivilegeDeprecationsService;
-
-  /**
-   * Sets the flag to indicate that Kibana is running inside an Elastic Cloud deployment. This flag is supposed to be
-   * set by the Cloud plugin and can be only once.
-   */
-  setIsElasticCloudDeployment: () => void;
 }
 
 /**
@@ -113,6 +103,10 @@ export interface SecurityPluginStart {
    * Authorization services to manage and access the permissions a particular user has.
    */
   authz: AuthorizationServiceSetup;
+  /**
+   * User profiles services to retrieve user profiles.
+   */
+  userProfiles: UserProfileServiceStart;
 }
 
 export interface PluginSetupDependencies {
@@ -124,6 +118,7 @@ export interface PluginSetupDependencies {
 }
 
 export interface PluginStartDependencies {
+  cloud?: CloudStart;
   features: FeaturesPluginStart;
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
@@ -199,27 +194,12 @@ export class SecurityPlugin
   };
 
   private readonly userProfileService: UserProfileService;
-  private userProfileStart?: UserProfileServiceStart;
+  private userProfileStart?: UserProfileServiceStartInternal;
   private readonly getUserProfileService = () => {
     if (!this.userProfileStart) {
       throw new Error(`userProfileStart is not registered!`);
     }
     return this.userProfileStart;
-  };
-
-  /**
-   * Indicates whether Kibana is running inside an Elastic Cloud deployment. Since circular plugin dependencies are
-   * forbidden, this flag is supposed to be set by the Cloud plugin that already depends on the Security plugin.
-   * @private
-   */
-  private isElasticCloudDeployment?: boolean;
-  private readonly getIsElasticCloudDeployment = () => this.isElasticCloudDeployment === true;
-  private readonly setIsElasticCloudDeployment = () => {
-    if (this.isElasticCloudDeployment !== undefined) {
-      throw new Error(`The Elastic Cloud deployment flag has been set already!`);
-    }
-
-    this.isElasticCloudDeployment = true;
   };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -287,6 +267,7 @@ export class SecurityPlugin
       config,
       license,
       buildNumber: this.initializerContext.env.packageInfo.buildNum,
+      customBranding: core.customBranding,
     });
 
     registerSecurityUsageCollector({ usageCollection, config, license });
@@ -317,7 +298,10 @@ export class SecurityPlugin
       getSpacesService: () => spaces?.spacesService,
       features,
       getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
+      customBranding: core.customBranding,
     });
+
+    this.userProfileService.setup({ authz: this.authorizationSetup, license });
 
     setupSpacesClient({
       spaces,
@@ -329,7 +313,6 @@ export class SecurityPlugin
       audit: this.auditSetup,
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
-      getSpacesService: () => spaces?.spacesService,
     });
 
     this.registerDeprecations(core, license);
@@ -373,13 +356,12 @@ export class SecurityPlugin
         license,
         logger: this.logger.get('deprecations'),
       }),
-      setIsElasticCloudDeployment: this.setIsElasticCloudDeployment,
     });
   }
 
   public start(
     core: CoreStart,
-    { features, licensing, taskManager, spaces }: PluginStartDependencies
+    { cloud, features, licensing, taskManager, spaces }: PluginStartDependencies
   ) {
     this.logger.debug('Starting plugin');
 
@@ -390,7 +372,7 @@ export class SecurityPlugin
     const clusterClient = core.elasticsearch.client;
     const { watchOnlineStatus$ } = this.elasticsearchService.start();
     const { session } = this.sessionManagementService.start({
-      auditLogger: this.auditSetup!.withoutRequest,
+      audit: this.auditSetup!,
       elasticsearchClient: clusterClient.asInternalUser,
       kibanaIndexName: this.getKibanaIndexName(),
       online$: watchOnlineStatus$(),
@@ -398,7 +380,7 @@ export class SecurityPlugin
     });
     this.session = session;
 
-    this.userProfileStart = this.userProfileService.start({ clusterClient });
+    this.userProfileStart = this.userProfileService.start({ clusterClient, session });
 
     const config = this.getConfig();
     this.authenticationStart = this.authenticationService.start({
@@ -412,7 +394,7 @@ export class SecurityPlugin
       session,
       applicationName: this.authorizationSetup!.applicationName,
       kibanaFeatures: features.getKibanaFeatures(),
-      isElasticCloudDeployment: this.getIsElasticCloudDeployment,
+      isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
     });
 
     this.authorizationService.start({
@@ -441,6 +423,11 @@ export class SecurityPlugin
         checkSavedObjectsPrivilegesWithRequest:
           this.authorizationSetup!.checkSavedObjectsPrivilegesWithRequest,
         mode: this.authorizationSetup!.mode,
+      },
+      userProfiles: {
+        getCurrent: this.userProfileStart.getCurrent,
+        bulkGet: this.userProfileStart.bulkGet,
+        suggest: this.userProfileStart.suggest,
       },
     });
   }

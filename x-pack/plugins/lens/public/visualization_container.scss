@@ -11,6 +11,8 @@
   height: 100%;
   display: flex;
   overflow: auto;
+  // important for visualizations with no padding
+  border-radius: $euiBorderRadius;
 
   .lnsExpressionRenderer__component {
     position: static; // Let the progress indicator position itself against the outer parent
@@ -23,8 +25,4 @@
   align-items: center;
   justify-content: center;
   overflow: auto;
-}
-
-.lnsSelectableErrorMessage {
-  user-select: text;
 }

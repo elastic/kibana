@@ -41,6 +41,11 @@ export const useStyles = (depth: number) => {
     const loadMoreTextLeft: CSSObject = {
       marginLeft: size.s,
     };
+    const leafNodeButton: CSSObject = {
+      marginLeft: size.l,
+      width: `calc(100% - ${size.l})`,
+      paddingLeft: 0,
+    };
     const labelIcon: CSSObject = {
       marginRight: size.s,
       marginLeft: size.s,
@@ -54,6 +59,13 @@ export const useStyles = (depth: number) => {
       '.euiTreeView__node--expanded': {
         maxHeight: '100%',
       },
+      '.euiTreeView__nodeInner .euiToolTipAnchor': {
+        maxWidth: '100%',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        wordWrap: 'normal',
+      },
     });
 
     return {
@@ -61,6 +73,7 @@ export const useStyles = (depth: number) => {
       loadMoreButtonWrapper,
       loadMoreText,
       loadMoreTextLeft,
+      leafNodeButton,
       labelIcon,
       treeViewWrapper,
     };

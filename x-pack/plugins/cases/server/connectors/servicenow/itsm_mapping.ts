@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ServiceNowITSMGetMapping } from './types';
+import type { ServiceNowITSMGetMapping } from './types';
 
 export const getMapping: ServiceNowITSMGetMapping = () => {
   return [

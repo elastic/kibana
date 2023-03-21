@@ -1,12 +1,7 @@
 {
-  "extends": "<%- relativePathTo("tsconfig.bazel.json") %>",
+  "extends": "<%- relativePathTo("tsconfig.base.json") %>",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "rootDir": "src",
-    "stripInternal": false,
+    "outDir": "target/types",
     "types": [
     <%_ if (pkg.web) { _%>
       "jest",
@@ -19,6 +14,13 @@
     ]
   },
   "include": [
-    "src/**/*"
-  ]
+    "**/*.ts",
+    <%_ if (pkg.web) { _%>
+      "**/*.tsx",
+    <%_ } _%>
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": []
 }

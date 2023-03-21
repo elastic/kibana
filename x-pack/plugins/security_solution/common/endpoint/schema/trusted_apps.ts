@@ -10,18 +10,6 @@ import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-util
 import type { TrustedAppConditionEntry } from '../types';
 import { getDuplicateFields, isValidHash } from '../service/artifacts/validations';
 
-export const DeleteTrustedAppsRequestSchema = {
-  params: schema.object({
-    id: schema.string(),
-  }),
-};
-
-export const GetOneTrustedAppRequestSchema = {
-  params: schema.object({
-    id: schema.string(),
-  }),
-};
-
 export const GetTrustedAppsRequestSchema = {
   query: schema.object({
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),

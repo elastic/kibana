@@ -35,8 +35,10 @@ interface OnChildChangedProps {
 interface ChainingSystem {
   getContainerSettings: (
     initialInput: ControlGroupInput
-  ) => EmbeddableContainerSettings | undefined;
-  getPrecedingFilters: (props: GetPrecedingFiltersProps) => Filter[] | undefined;
+  ) => EmbeddableContainerSettings<ControlGroupInput> | undefined;
+  getPrecedingFilters: (
+    props: GetPrecedingFiltersProps
+  ) => { filters: Filter[]; timeslice?: [number, number] } | undefined;
   onChildChange: (props: OnChildChangedProps) => void;
 }
 
@@ -84,14 +86,19 @@ export const ControlGroupChainingSystems: {
     }),
     getPrecedingFilters: ({ id, childOrder, getChild }) => {
       let filters: Filter[] = [];
+      let timeslice;
       const order = childOrder.IdsToOrder?.[id];
-      if (!order || order === 0) return filters;
+      if (!order || order === 0) return { filters, timeslice };
       for (let i = 0; i < order; i++) {
         const embeddable = getChild(childOrder.idsInOrder[i]);
-        if (!embeddable || isErrorEmbeddable(embeddable)) return filters;
-        filters = [...filters, ...(embeddable.getOutput().filters ?? [])];
+        if (!embeddable || isErrorEmbeddable(embeddable)) return { filters, timeslice };
+        const embeddableOutput = embeddable.getOutput();
+        if (embeddableOutput.timeslice) {
+          timeslice = embeddableOutput.timeslice;
+        }
+        filters = [...filters, ...(embeddableOutput.filters ?? [])];
       }
-      return filters;
+      return { filters, timeslice };
     },
     onChildChange: ({ childOutputChangedId, childOrder, recalculateFilters$, getChild }) => {
       if (childOutputChangedId === childOrder.lastChildId) {
@@ -100,13 +107,28 @@ export const ControlGroupChainingSystems: {
         return;
       }
 
-      // when output changes on a child which isn't the last - make the next embeddable updateInputFromParent
-      const nextOrder = childOrder.IdsToOrder[childOutputChangedId] + 1;
-      if (nextOrder >= childOrder.idsInOrder.length) return;
-      setTimeout(
-        () => getChild(childOrder.idsInOrder[nextOrder])?.refreshInputFromParent(),
-        1 // run on next tick
-      );
+      // when output changes on a child which isn't the last
+      let nextOrder = childOrder.IdsToOrder[childOutputChangedId] + 1;
+      while (nextOrder < childOrder.idsInOrder.length) {
+        const nextControl = getChild(childOrder.idsInOrder[nextOrder]);
+
+        // make the next chained embeddable updateInputFromParent
+        if (nextControl?.isChained?.()) {
+          setTimeout(
+            () => nextControl.refreshInputFromParent(),
+            1 // run on next tick
+          );
+          return;
+        }
+
+        // recalculate filters when there are no chained controls to the right of the updated control
+        if (nextControl.id === childOrder.lastChildId) {
+          recalculateFilters$.next(null);
+          return;
+        }
+
+        nextOrder += 1;
+      }
     },
   },
   NONE: {

@@ -39,10 +39,37 @@ export type SearchSessionSavedObjectAttributesPre$7$14$0 = Omit<
  * from using `urlGeneratorId` to `locatorId`.
  */
 export type SearchSessionSavedObjectAttributesPre$8$0$0 = Omit<
-  SearchSessionSavedObjectAttributesLatest,
+  SearchSessionSavedObjectAttributesPre$8$6$0,
   'locatorId'
 > & {
   urlGeneratorId?: string;
+};
+
+/**
+ * In 8.6.0 with search session refactoring and moving away from using task manager we are no longer track of:
+ *  - `completed` - when session was completed
+ *  - `persisted` - if session was saved
+ *  - `touched` - when session was last updated (touched by the user)
+ *  - `status` - status is no longer persisted. Except 'canceled' which was moved to `isCanceled`
+ *  - `status` and `error` in idMapping (search info)
+ */
+export type SearchSessionSavedObjectAttributesPre$8$6$0 = Omit<
+  SearchSessionSavedObjectAttributesLatest,
+  'idMapping' | 'isCanceled'
+> & {
+  completed?: string | null;
+  persisted: boolean;
+  touched: string;
+  status: SearchSessionStatus;
+  idMapping: Record<
+    string,
+    {
+      id: string;
+      strategy: string;
+      status: string;
+      error?: string;
+    }
+  >;
 };
 
 function getLocatorId(urlGeneratorId?: string) {
@@ -87,6 +114,29 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
     } = doc;
     const locatorId = getLocatorId(urlGeneratorId);
     const attributes = { ...otherAttrs, locatorId };
+    return { ...doc, attributes };
+  },
+  '8.6.0': (
+    doc: SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$8$6$0>
+  ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest> => {
+    const {
+      attributes: { touched, completed, persisted, idMapping, status, ...otherAttrs },
+    } = doc;
+
+    const attributes: SearchSessionSavedObjectAttributesLatest = {
+      ...otherAttrs,
+      idMapping: Object.entries(idMapping).reduce<
+        SearchSessionSavedObjectAttributesLatest['idMapping']
+      >((res, [searchHash, { status: searchStatus, error, ...otherSearchAttrs }]) => {
+        res[searchHash] = otherSearchAttrs;
+        return res;
+      }, {}),
+    };
+
+    if (status === SearchSessionStatus.CANCELLED) {
+      attributes.isCanceled = true;
+    }
+
     return { ...doc, attributes };
   },
 };

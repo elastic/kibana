@@ -282,7 +282,7 @@ export function getLensAttributes(
     ],
     state: {
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             layer1: {
               columnOrder: ['col1', 'col2'],

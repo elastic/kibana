@@ -7,6 +7,7 @@
 
 import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { appContextService } from '../app_context';
 import { setupFleet } from '../setup';
@@ -105,7 +106,7 @@ async function _deletePreconfigurationDeleteRecord(
         soClient
           .delete(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, savedObject.id)
           .catch((err) => {
-            if (soClient.errors.isNotFoundError(err)) {
+            if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
               return undefined;
             }
             throw err;
@@ -153,7 +154,7 @@ async function _deleteExistingData(
   }
 
   // unenroll all the agents enroled in this policies
-  const { agents } = await getAgentsByKuery(esClient, {
+  const { agents } = await getAgentsByKuery(esClient, soClient, {
     showInactive: false,
     perPage: SO_SEARCH_LIMIT,
     kuery: existingPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
@@ -162,7 +163,7 @@ async function _deleteExistingData(
   // Delete
   if (agents.length > 0) {
     logger.info(`Force unenrolling ${agents.length} agents`);
-    await pMap(agents, (agent) => forceUnenrollAgent(soClient, esClient, agent.id), {
+    await pMap(agents, (agent) => forceUnenrollAgent(esClient, soClient, agent.id), {
       concurrency: 20,
     });
   }

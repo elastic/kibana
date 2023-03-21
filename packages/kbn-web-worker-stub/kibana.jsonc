@@ -1,0 +1,6 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/web-worker-stub",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}

@@ -8,83 +8,99 @@
 
 import { filterFieldToList } from '.';
 
-import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getListResponseMock } from '../list_schema/index.mock';
 import { DataViewFieldBase } from '@kbn/es-query';
+import { AutocompleteListsData } from '../field_value_lists';
+
+const emptyListData: AutocompleteListsData = { smallLists: [], largeLists: [] };
 
 describe('#filterFieldToList', () => {
-  test('it returns empty array if given a undefined for field', () => {
-    const filter = filterFieldToList([], undefined);
-    expect(filter).toEqual([]);
+  test('it returns empty list data object if given a undefined for field', () => {
+    const filter = filterFieldToList(emptyListData, undefined);
+    expect(filter).toEqual(emptyListData);
   });
 
-  test('it returns empty array if filed does not contain esTypes', () => {
+  test('it returns empty list data object if filed does not contain esTypes', () => {
     const field: DataViewFieldBase = {
       name: 'some-name',
       type: 'some-type',
     };
-    const filter = filterFieldToList([], field);
-    expect(filter).toEqual([]);
+    const filter = filterFieldToList(emptyListData, field);
+    expect(filter).toEqual(emptyListData);
   });
 
-  test('it returns single filtered list of ip_range -> ip', () => {
+  test('it returns filtered lists of ip_range -> ip', () => {
     const field: DataViewFieldBase & { esTypes: string[] } = {
       esTypes: ['ip'],
       name: 'some-name',
       type: 'ip',
     };
-    const listItem: ListSchema = { ...getListResponseMock(), type: 'ip_range' };
-    const filter = filterFieldToList([listItem], field);
-    const expected: ListSchema[] = [listItem];
+    const listData: AutocompleteListsData = {
+      smallLists: [{ ...getListResponseMock(), type: 'ip_range' }],
+      largeLists: [],
+    };
+    const filter = filterFieldToList(listData, field);
+    const expected = listData;
     expect(filter).toEqual(expected);
   });
 
-  test('it returns single filtered list of ip -> ip', () => {
+  test('it returns filtered lists of ip -> ip', () => {
     const field: DataViewFieldBase & { esTypes: string[] } = {
       esTypes: ['ip'],
       name: 'some-name',
       type: 'ip',
     };
-    const listItem: ListSchema = { ...getListResponseMock(), type: 'ip' };
-    const filter = filterFieldToList([listItem], field);
-    const expected: ListSchema[] = [listItem];
+    const listData: AutocompleteListsData = {
+      smallLists: [{ ...getListResponseMock(), type: 'ip' }],
+      largeLists: [],
+    };
+    const filter = filterFieldToList(listData, field);
+    const expected = listData;
     expect(filter).toEqual(expected);
   });
 
-  test('it returns single filtered list of keyword -> keyword', () => {
+  test('it returns filtered lists of keyword -> keyword', () => {
     const field: DataViewFieldBase & { esTypes: string[] } = {
       esTypes: ['keyword'],
       name: 'some-name',
       type: 'keyword',
     };
-    const listItem: ListSchema = { ...getListResponseMock(), type: 'keyword' };
-    const filter = filterFieldToList([listItem], field);
-    const expected: ListSchema[] = [listItem];
+    const listData: AutocompleteListsData = {
+      smallLists: [{ ...getListResponseMock(), type: 'keyword' }],
+      largeLists: [],
+    };
+    const filter = filterFieldToList(listData, field);
+    const expected = listData;
     expect(filter).toEqual(expected);
   });
 
-  test('it returns single filtered list of text -> text', () => {
+  test('it returns filtered lists of text -> text', () => {
     const field: DataViewFieldBase & { esTypes: string[] } = {
       esTypes: ['text'],
       name: 'some-name',
       type: 'text',
     };
-    const listItem: ListSchema = { ...getListResponseMock(), type: 'text' };
-    const filter = filterFieldToList([listItem], field);
-    const expected: ListSchema[] = [listItem];
+    const listData: AutocompleteListsData = {
+      smallLists: [{ ...getListResponseMock(), type: 'text' }],
+      largeLists: [],
+    };
+    const filter = filterFieldToList(listData, field);
+    const expected = listData;
     expect(filter).toEqual(expected);
   });
 
-  test('it returns 2 filtered lists of ip_range -> ip', () => {
+  test('it returns small and large filtered lists of ip_range -> ip', () => {
     const field: DataViewFieldBase & { esTypes: string[] } = {
       esTypes: ['ip'],
       name: 'some-name',
       type: 'ip',
     };
-    const listItem1: ListSchema = { ...getListResponseMock(), type: 'ip_range' };
-    const listItem2: ListSchema = { ...getListResponseMock(), type: 'ip_range' };
-    const filter = filterFieldToList([listItem1, listItem2], field);
-    const expected: ListSchema[] = [listItem1, listItem2];
+    const listData: AutocompleteListsData = {
+      smallLists: [{ ...getListResponseMock(), type: 'ip_range' }],
+      largeLists: [{ ...getListResponseMock(), type: 'ip_range' }],
+    };
+    const filter = filterFieldToList(listData, field);
+    const expected = listData;
     expect(filter).toEqual(expected);
   });
 
@@ -94,10 +110,15 @@ describe('#filterFieldToList', () => {
       name: 'some-name',
       type: 'ip',
     };
-    const listItem1: ListSchema = { ...getListResponseMock(), type: 'ip_range' };
-    const listItem2: ListSchema = { ...getListResponseMock(), type: 'text' };
-    const filter = filterFieldToList([listItem1, listItem2], field);
-    const expected: ListSchema[] = [listItem1];
+    const listData: AutocompleteListsData = {
+      smallLists: [{ ...getListResponseMock(), type: 'ip_range' }],
+      largeLists: [{ ...getListResponseMock(), type: 'text' }],
+    };
+    const filter = filterFieldToList(listData, field);
+    const expected: AutocompleteListsData = {
+      smallLists: [{ ...getListResponseMock(), type: 'ip_range' }],
+      largeLists: [],
+    };
     expect(filter).toEqual(expected);
   });
 });

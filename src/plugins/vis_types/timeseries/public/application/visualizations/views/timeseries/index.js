@@ -73,6 +73,7 @@ export const TimeSeries = ({
   annotations,
   syncColors,
   syncTooltips,
+  syncCursor,
   palettesService,
   interval,
   isLastBucketDropped,
@@ -100,7 +101,7 @@ export const TimeSeries = ({
   const onRenderChange = useCallback(
     (isRendered) => {
       if (isRendered) {
-        initialRender();
+        initialRender?.();
       }
     },
     [initialRender]
@@ -179,7 +180,8 @@ export const TimeSeries = ({
         onBrushEnd={onBrushEndListener}
         onElementClick={(args) => handleElementClick(args)}
         animateData={false}
-        onPointerUpdate={handleCursorUpdate}
+        onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
+        pointerUpdateDebounce={0}
         theme={[
           {
             crosshair: {
@@ -357,7 +359,7 @@ export const TimeSeries = ({
         tickFormat={xAxisFormatter}
         gridLine={gridLineStyle}
         style={shouldUseNewTimeAxis ? MULTILAYER_TIME_AXIS_STYLE : undefined}
-        timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
+        timeAxisLayerCount={shouldUseNewTimeAxis ? 2 : 0}
       />
     </Chart>
   );

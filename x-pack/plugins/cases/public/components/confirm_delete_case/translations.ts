@@ -14,12 +14,6 @@ export const DELETE_TITLE = (caseTitle: string) =>
     defaultMessage: 'Delete "{caseTitle}"',
   });
 
-export const DELETE_SELECTED_CASES = (quantity: number, title: string) =>
-  i18n.translate('xpack.cases.confirmDeleteCase.selectedCases', {
-    values: { quantity, title },
-    defaultMessage: 'Delete "{quantity, plural, =1 {{title}} other {Selected {quantity} cases}}"',
-  });
-
 export const CONFIRM_QUESTION = (quantity: number) =>
   i18n.translate('xpack.cases.confirmDeleteCase.confirmQuestion', {
     values: { quantity },

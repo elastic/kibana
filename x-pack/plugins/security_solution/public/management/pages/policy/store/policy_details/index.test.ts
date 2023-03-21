@@ -38,7 +38,6 @@ describe('policy details: ', () => {
       updated_by: '',
       policy_id: '',
       enabled: true,
-      output_id: '',
       inputs: [
         {
           type: 'endpoint',
@@ -259,7 +258,6 @@ describe('policy details: ', () => {
         description: '',
         policy_id: '',
         enabled: true,
-        output_id: '',
         inputs: [
           {
             type: 'endpoint',
@@ -273,6 +271,7 @@ describe('policy details: ', () => {
                 value: {
                   windows: {
                     events: {
+                      credential_access: true,
                       dll_and_driver_load: true,
                       dns: false,
                       file: true,
@@ -285,6 +284,11 @@ describe('policy details: ', () => {
                     memory_protection: { mode: 'off', supported: false },
                     behavior_protection: { mode: 'off', supported: false },
                     ransomware: { mode: 'off', supported: false },
+                    attack_surface_reduction: {
+                      credential_hardening: {
+                        enabled: false,
+                      },
+                    },
                     popup: {
                       malware: {
                         enabled: true,
@@ -328,9 +332,19 @@ describe('policy details: ', () => {
                       },
                     },
                     logging: { file: 'info' },
+                    advanced: {
+                      capture_env_vars:
+                        'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
+                    },
                   },
                   linux: {
-                    events: { process: true, file: true, network: true, session_data: false },
+                    events: {
+                      process: true,
+                      file: true,
+                      network: true,
+                      session_data: false,
+                      tty_io: false,
+                    },
                     logging: { file: 'info' },
                     malware: { mode: 'prevent', blocklist: true },
                     behavior_protection: { mode: 'off', supported: false },
@@ -348,6 +362,9 @@ describe('policy details: ', () => {
                         enabled: false,
                         message: '',
                       },
+                    },
+                    advanced: {
+                      capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
                     },
                   },
                 },

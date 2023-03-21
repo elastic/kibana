@@ -11,7 +11,7 @@ import { SeriesUrl, UrlFilter } from '../types';
 
 export interface UpdateFilter {
   field: string;
-  value: string | string[];
+  value: string | Array<string | number>;
   negate?: boolean;
   wildcards?: string[];
   isWildcard?: boolean;
@@ -30,8 +30,8 @@ export const useSeriesFilters = ({ seriesId, series }: { seriesId: number; serie
     notWildcards,
   }: {
     field: string;
-    values: string[];
-    notValues: string[];
+    values: Array<string | number>;
+    notValues: Array<string | number>;
     wildcards?: string[];
     notWildcards?: string[];
   }) => {

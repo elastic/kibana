@@ -4,8 +4,9 @@ exports[`getFullAgentPolicy should support a different data output 1`] = `
 Object {
   "agent": Object {
     "download": Object {
-      "source_uri": "http://default-registry.co",
+      "sourceURI": "http://default-registry.co",
     },
+    "features": Object {},
     "monitoring": Object {
       "enabled": true,
       "logs": false,
@@ -13,6 +14,11 @@ Object {
       "namespace": "default",
       "use_output": "default",
     },
+    "protection": Object {
+      "enabled": false,
+      "signing_key": "",
+      "uninstall_token_hash": "",
+    },
   },
   "fleet": Object {
     "hosts": Array [
@@ -62,6 +68,10 @@ Object {
     },
   },
   "revision": 1,
+  "signed": Object {
+    "data": "",
+    "signature": "",
+  },
 }
 `;
 
@@ -69,14 +79,20 @@ exports[`getFullAgentPolicy should support a different monitoring output 1`] = `
 Object {
   "agent": Object {
     "download": Object {
-      "source_uri": "http://default-registry.co",
+      "sourceURI": "http://default-registry.co",
     },
+    "features": Object {},
     "monitoring": Object {
       "enabled": true,
       "logs": false,
       "metrics": true,
       "namespace": "default",
       "use_output": "monitoring-output-id",
+    },
+    "protection": Object {
+      "enabled": false,
+      "signing_key": "",
+      "uninstall_token_hash": "",
     },
   },
   "fleet": Object {
@@ -127,6 +143,10 @@ Object {
     },
   },
   "revision": 1,
+  "signed": Object {
+    "data": "",
+    "signature": "",
+  },
 }
 `;
 
@@ -134,14 +154,20 @@ exports[`getFullAgentPolicy should support both different outputs for data and m
 Object {
   "agent": Object {
     "download": Object {
-      "source_uri": "http://default-registry.co",
+      "sourceURI": "http://default-registry.co",
     },
+    "features": Object {},
     "monitoring": Object {
       "enabled": true,
       "logs": false,
       "metrics": true,
       "namespace": "default",
       "use_output": "monitoring-output-id",
+    },
+    "protection": Object {
+      "enabled": false,
+      "signing_key": "",
+      "uninstall_token_hash": "",
     },
   },
   "fleet": Object {
@@ -192,5 +218,9 @@ Object {
     },
   },
   "revision": 1,
+  "signed": Object {
+    "data": "",
+    "signature": "",
+  },
 }
 `;

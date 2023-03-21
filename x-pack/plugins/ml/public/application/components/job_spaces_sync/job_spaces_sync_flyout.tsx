@@ -61,6 +61,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
 
   useEffect(() => {
     loadSyncList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function sync() {

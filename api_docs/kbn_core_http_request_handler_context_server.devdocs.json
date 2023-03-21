@@ -1,0 +1,325 @@
+{
+  "id": "@kbn/core-http-request-handler-context-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-http-request-handler-context-server",
+        "id": "def-common.CoreRequestHandlerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreRequestHandlerContext",
+        "description": [
+          "\nThe `core` context provided to route handler.\n\nProvides the following clients and services:\n   - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client\n     which uses the credentials of the incoming request\n   - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing\n     all the registered types.\n   - {@link IScopedClusterClient | elasticsearch.client} - Elasticsearch\n     data client which uses the credentials of the incoming request\n   - {@link IUiSettingsClient | uiSettings.client} - uiSettings client\n     which uses the credentials of the incoming request"
+        ],
+        "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-request-handler-context-server",
+            "id": "def-common.CoreRequestHandlerContext.savedObjects",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjects",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsRequestHandlerContext",
+                "text": "SavedObjectsRequestHandlerContext"
+              }
+            ],
+            "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-request-handler-context-server",
+            "id": "def-common.CoreRequestHandlerContext.elasticsearch",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchRequestHandlerContext",
+                "text": "ElasticsearchRequestHandlerContext"
+              }
+            ],
+            "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-request-handler-context-server",
+            "id": "def-common.CoreRequestHandlerContext.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-common.UiSettingsRequestHandlerContext",
+                "text": "UiSettingsRequestHandlerContext"
+              }
+            ],
+            "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-request-handler-context-server",
+            "id": "def-common.CoreRequestHandlerContext.deprecations",
+            "type": "Object",
+            "tags": [],
+            "label": "deprecations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-deprecations-server",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsServerPluginApi",
+                "section": "def-common.DeprecationsRequestHandlerContext",
+                "text": "DeprecationsRequestHandlerContext"
+              }
+            ],
+            "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-request-handler-context-server",
+        "id": "def-common.PrebootCoreRequestHandlerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrebootCoreRequestHandlerContext",
+        "description": [],
+        "path": "packages/core/http/core-http-request-handler-context-server/src/preboot_request_handler_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-request-handler-context-server",
+            "id": "def-common.PrebootCoreRequestHandlerContext.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-common.PrebootUiSettingsRequestHandlerContext",
+                "text": "PrebootUiSettingsRequestHandlerContext"
+              }
+            ],
+            "path": "packages/core/http/core-http-request-handler-context-server/src/preboot_request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-request-handler-context-server",
+        "id": "def-common.PrebootRequestHandlerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrebootRequestHandlerContext",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-request-handler-context-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+            "section": "def-common.PrebootRequestHandlerContext",
+            "text": "PrebootRequestHandlerContext"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
+          }
+        ],
+        "path": "packages/core/http/core-http-request-handler-context-server/src/preboot_request_handler_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-request-handler-context-server",
+            "id": "def-common.PrebootRequestHandlerContext.core",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              "Promise<",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-common.PrebootCoreRequestHandlerContext",
+                "text": "PrebootCoreRequestHandlerContext"
+              },
+              ">"
+            ],
+            "path": "packages/core/http/core-http-request-handler-context-server/src/preboot_request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-request-handler-context-server",
+        "id": "def-common.PrebootUiSettingsRequestHandlerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrebootUiSettingsRequestHandlerContext",
+        "description": [],
+        "path": "packages/core/http/core-http-request-handler-context-server/src/preboot_request_handler_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-request-handler-context-server",
+            "id": "def-common.PrebootUiSettingsRequestHandlerContext.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsServerPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/http/core-http-request-handler-context-server/src/preboot_request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-request-handler-context-server",
+        "id": "def-common.RequestHandlerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "RequestHandlerContext",
+        "description": [
+          "\nBase context passed to a route handler, containing the `core` context part.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-request-handler-context-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+            "section": "def-common.RequestHandlerContext",
+            "text": "RequestHandlerContext"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.RequestHandlerContextBase",
+            "text": "RequestHandlerContextBase"
+          }
+        ],
+        "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-request-handler-context-server",
+            "id": "def-common.RequestHandlerContext.core",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              "Promise<",
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-common.CoreRequestHandlerContext",
+                "text": "CoreRequestHandlerContext"
+              },
+              ">"
+            ],
+            "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-http-request-handler-context-server",
+        "id": "def-common.CustomRequestHandlerContext",
+        "type": "Type",
+        "tags": [],
+        "label": "CustomRequestHandlerContext",
+        "description": [
+          "\nMixin allowing plugins to define their own request handler contexts.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-http-request-handler-context-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+            "section": "def-common.RequestHandlerContext",
+            "text": "RequestHandlerContext"
+          },
+          " & { [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>; }"
+        ],
+        "path": "packages/core/http/core-http-request-handler-context-server/src/request_handler_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -12,7 +12,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
@@ -21,13 +21,13 @@ import {
   getProcessorEventForTransactions,
 } from '../helpers/transactions';
 import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
-import { Setup } from '../helpers/setup_request';
 import {
   calculateTransactionColdstartRate,
   getColdstartAggregation,
   getTransactionColdstartRateTimeSeries,
 } from '../helpers/transaction_coldstart_rate';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../helpers/create_es_client/create_apm_event_client';
 
 export async function getColdstartRate({
   environment,
@@ -35,7 +35,7 @@ export async function getColdstartRate({
   serviceName,
   transactionType,
   transactionName,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   start,
   end,
@@ -46,7 +46,7 @@ export async function getColdstartRate({
   serviceName: string;
   transactionType?: string;
   transactionName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
@@ -55,8 +55,6 @@ export async function getColdstartRate({
   transactionColdstartRate: Coordinate[];
   average: number | null;
 }> {
-  const { apmEventClient } = setup;
-
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
@@ -81,6 +79,7 @@ export async function getColdstartRate({
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: { bool: { filter } },
       aggs: {
@@ -130,7 +129,7 @@ export async function getColdstartRatePeriods({
   serviceName,
   transactionType,
   transactionName = '',
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   start,
   end,
@@ -141,7 +140,7 @@ export async function getColdstartRatePeriods({
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
@@ -153,7 +152,7 @@ export async function getColdstartRatePeriods({
     serviceName,
     transactionType,
     transactionName,
-    setup,
+    apmEventClient,
     searchAggregatedTransactions,
   };
 

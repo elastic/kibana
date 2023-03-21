@@ -5,17 +5,47 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import {
+  serviceNameHint,
+  secretTokenHint,
+  serverUrlHint,
+  serviceEnvironmentHint,
+} from './shared_hints';
+
+export const railsVariables = {
+  apmServiceName: 'service_name',
+  secretToken: 'secret_token',
+  apmServerUrl: 'server_url',
+  apmEnvironment: 'environment',
+};
+
+export const railsHighlightLang = 'rb';
+
+const railsServiceNameHint = i18n.translate(
+  'xpack.apm.tutorial.railsClient.createConfig.commands.defaultServiceName',
+  {
+    defaultMessage: 'Defaults to the name of your Rails app.',
+  }
+);
+
+export const railsLineNumbers = {
+  start: 1,
+  highlight: '3, 5, 7, 9',
+  annotations: {
+    3: `${serviceNameHint} ${railsServiceNameHint}`,
+    5: secretTokenHint,
+    7: serverUrlHint,
+    9: serviceEnvironmentHint,
+  },
+};
+
 export const rails = `# config/elastic_apm.yml:
 
-# Set the service name - allowed characters: a-z, A-Z, 0-9, -, _ and space
-# Defaults to the name of your Rails app
-service_name: 'my-service'
+${railsVariables.apmServiceName}: '{{{apmServiceName}}}'
 
-# Use if APM Server requires a secret token
-secret_token: '{{{secretToken}}}'
+${railsVariables.secretToken}: '{{{secretToken}}}'
 
-# Set the custom APM Server URL (default: http://localhost:8200)
-server_url: '{{{apmServerUrl}}}'
+${railsVariables.apmServerUrl}: '{{{apmServerUrl}}}'
 
-# Set the service environment
-environment: 'production'`;
+${railsVariables.apmEnvironment}: '{{{apmEnvironment}}}'`;

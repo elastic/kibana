@@ -5,53 +5,86 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { UMServerLibs } from '../../legacy_uptime/lib/lib';
-import { ProjectBrowserMonitor, Locations } from '../../../common/runtime_types';
+import { i18n } from '@kbn/i18n';
+import { ProjectMonitor } from '../../../common/runtime_types';
 
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
-import { getServiceLocations } from '../../synthetics_service/get_service_locations';
-import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor_formatter';
+import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor/project_monitor_formatter';
 
-export const addSyntheticsProjectMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+const MAX_PAYLOAD_SIZE = 1048576 * 20; // 20MiB
+
+export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
-  path: API_URLS.SYNTHETICS_MONITORS_PROJECT,
+  path: API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE,
   validate: {
+    params: schema.object({
+      projectName: schema.string(),
+    }),
     body: schema.object({
-      project: schema.string(),
-      keep_stale: schema.boolean(),
       monitors: schema.arrayOf(schema.any()),
     }),
   },
-  handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
-    const monitors = (request.body?.monitors as ProjectBrowserMonitor[]) || [];
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
-    const { keep_stale: keepStale, project: projectId } = request.body || {};
-    const locations: Locations = (await getServiceLocations(server)).locations;
-    const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
+  options: {
+    body: {
+      maxBytes: MAX_PAYLOAD_SIZE,
+    },
+  },
+  handler: async ({
+    context,
+    request,
+    response,
+    savedObjectsClient,
+    server,
+    syntheticsMonitorClient,
+  }): Promise<any> => {
+    const { projectName } = request.params;
+    const decodedProjectName = decodeURI(projectName);
+    const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
 
-    const pushMonitorFormatter = new ProjectMonitorFormatter({
-      projectId,
-      spaceId,
-      keepStale,
-      locations,
-      encryptedSavedObjectsClient,
-      savedObjectsClient,
-      monitors,
-      server,
-    });
+    if (monitors.length > 250) {
+      return response.badRequest({
+        body: {
+          message: REQUEST_TOO_LARGE,
+        },
+      });
+    }
 
-    await pushMonitorFormatter.configureAllProjectMonitors();
+    try {
+      const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
+      const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
-    return response.ok({
-      body: {
+      const pushMonitorFormatter = new ProjectMonitorFormatter({
+        projectId: decodedProjectName,
+        spaceId,
+        encryptedSavedObjectsClient,
+        savedObjectsClient,
+        monitors,
+        server,
+        syntheticsMonitorClient,
+        request,
+      });
+
+      await pushMonitorFormatter.configureAllProjectMonitors();
+
+      return {
         createdMonitors: pushMonitorFormatter.createdMonitors,
         updatedMonitors: pushMonitorFormatter.updatedMonitors,
-        staleMonitors: pushMonitorFormatter.staleMonitors,
-        deletedMonitors: pushMonitorFormatter.deletedMonitors,
         failedMonitors: pushMonitorFormatter.failedMonitors,
-        failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
-      },
-    });
+      };
+    } catch (error) {
+      server.logger.error(`Error adding monitors to project ${decodedProjectName}`);
+      if (error.output.statusCode === 404) {
+        const spaceId = server.spaces.spacesService.getSpaceId(request);
+        return response.notFound({ body: { message: `Kibana space '${spaceId}' does not exist` } });
+      }
+
+      throw error;
+    }
   },
+});
+
+export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project.delete.toolarge', {
+  defaultMessage:
+    'Delete request payload is too large. Please send a max of 250 monitors to delete per request',
 });

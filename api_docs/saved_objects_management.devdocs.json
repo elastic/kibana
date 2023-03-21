@@ -11,6 +11,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -24,6 +25,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -35,7 +37,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -80,7 +83,8 @@
               ") => any) | undefined; }"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -93,7 +97,8 @@
               "(() => { type: string; id: string; }[]) | undefined"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -106,7 +111,8 @@
               "ActionContext | null"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -126,7 +132,8 @@
               " | null"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -140,6 +147,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -153,6 +161,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -170,6 +179,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -183,6 +193,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -208,6 +219,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -227,6 +239,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -244,6 +257,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/action.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -259,6 +273,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -268,7 +283,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -278,25 +294,7 @@
             "label": "euiColumn",
             "description": [],
             "signature": [
-              "{ children?: React.ReactNode; color?: string | undefined; className?: string | undefined; title?: string | undefined; onChange?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; id?: string | undefined; description?: string | undefined; security?: string | undefined; name: React.ReactNode; field: (string & {}) | keyof ",
-              {
-                "pluginId": "savedObjectsManagement",
-                "scope": "public",
-                "docId": "kibSavedObjectsManagementPluginApi",
-                "section": "def-public.SavedObjectsManagementRecord",
-                "text": "SavedObjectsManagementRecord"
-              },
-              "; defaultValue?: string | number | readonly string[] | undefined; hidden?: boolean | undefined; lang?: string | undefined; onError?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; defaultChecked?: boolean | undefined; suppressContentEditableWarning?: boolean | undefined; suppressHydrationWarning?: boolean | undefined; accessKey?: string | undefined; contentEditable?: Booleanish | \"inherit\" | undefined; contextMenu?: string | undefined; dir?: string | undefined; draggable?: Booleanish | undefined; placeholder?: string | undefined; slot?: string | undefined; spellCheck?: Booleanish | undefined; style?: React.CSSProperties | undefined; tabIndex?: number | undefined; translate?: \"yes\" | \"no\" | undefined; radioGroup?: string | undefined; role?: React.AriaRole | undefined; about?: string | undefined; datatype?: string | undefined; inlist?: any; prefix?: string | undefined; property?: string | undefined; resource?: string | undefined; typeof?: string | undefined; vocab?: string | undefined; autoCapitalize?: string | undefined; autoCorrect?: string | undefined; autoSave?: string | undefined; itemProp?: string | undefined; itemScope?: boolean | undefined; itemType?: string | undefined; itemID?: string | undefined; itemRef?: string | undefined; results?: number | undefined; unselectable?: \"on\" | \"off\" | undefined; inputMode?: \"none\" | \"email\" | \"search\" | \"text\" | \"tel\" | \"url\" | \"numeric\" | \"decimal\" | undefined; is?: string | undefined; 'aria-activedescendant'?: string | undefined; 'aria-atomic'?: boolean | \"true\" | \"false\" | undefined; 'aria-autocomplete'?: \"none\" | \"list\" | \"inline\" | \"both\" | undefined; 'aria-busy'?: boolean | \"true\" | \"false\" | undefined; 'aria-checked'?: boolean | \"mixed\" | \"true\" | \"false\" | undefined; 'aria-colcount'?: number | undefined; 'aria-colindex'?: number | undefined; 'aria-colspan'?: number | undefined; 'aria-controls'?: string | undefined; 'aria-current'?: boolean | \"date\" | \"page\" | \"time\" | \"true\" | \"false\" | \"step\" | \"location\" | undefined; 'aria-describedby'?: string | undefined; 'aria-details'?: string | undefined; 'aria-disabled'?: boolean | \"true\" | \"false\" | undefined; 'aria-dropeffect'?: \"none\" | \"copy\" | \"link\" | \"execute\" | \"move\" | \"popup\" | undefined; 'aria-errormessage'?: string | undefined; 'aria-expanded'?: boolean | \"true\" | \"false\" | undefined; 'aria-flowto'?: string | undefined; 'aria-grabbed'?: boolean | \"true\" | \"false\" | undefined; 'aria-haspopup'?: boolean | \"grid\" | \"menu\" | \"true\" | \"false\" | \"dialog\" | \"listbox\" | \"tree\" | undefined; 'aria-hidden'?: boolean | \"true\" | \"false\" | undefined; 'aria-invalid'?: boolean | \"true\" | \"false\" | \"grammar\" | \"spelling\" | undefined; 'aria-keyshortcuts'?: string | undefined; 'aria-label'?: string | undefined; 'aria-labelledby'?: string | undefined; 'aria-level'?: number | undefined; 'aria-live'?: \"off\" | \"assertive\" | \"polite\" | undefined; 'aria-modal'?: boolean | \"true\" | \"false\" | undefined; 'aria-multiline'?: boolean | \"true\" | \"false\" | undefined; 'aria-multiselectable'?: boolean | \"true\" | \"false\" | undefined; 'aria-orientation'?: \"horizontal\" | \"vertical\" | undefined; 'aria-owns'?: string | undefined; 'aria-placeholder'?: string | undefined; 'aria-posinset'?: number | undefined; 'aria-pressed'?: boolean | \"mixed\" | \"true\" | \"false\" | undefined; 'aria-readonly'?: boolean | \"true\" | \"false\" | undefined; 'aria-relevant'?: \"all\" | \"text\" | \"additions\" | \"additions removals\" | \"additions text\" | \"removals\" | \"removals additions\" | \"removals text\" | \"text additions\" | \"text removals\" | undefined; 'aria-required'?: boolean | \"true\" | \"false\" | undefined; 'aria-roledescription'?: string | undefined; 'aria-rowcount'?: number | undefined; 'aria-rowindex'?: number | undefined; 'aria-rowspan'?: number | undefined; 'aria-selected'?: boolean | \"true\" | \"false\" | undefined; 'aria-setsize'?: number | undefined; 'aria-sort'?: \"none\" | \"other\" | \"ascending\" | \"descending\" | undefined; 'aria-valuemax'?: number | undefined; 'aria-valuemin'?: number | undefined; 'aria-valuenow'?: number | undefined; 'aria-valuetext'?: string | undefined; dangerouslySetInnerHTML?: { __html: string; } | undefined; onCopy?: React.ClipboardEventHandler<HTMLTableDataCellElement> | undefined; onCopyCapture?: React.ClipboardEventHandler<HTMLTableDataCellElement> | undefined; onCut?: React.ClipboardEventHandler<HTMLTableDataCellElement> | undefined; onCutCapture?: React.ClipboardEventHandler<HTMLTableDataCellElement> | undefined; onPaste?: React.ClipboardEventHandler<HTMLTableDataCellElement> | undefined; onPasteCapture?: React.ClipboardEventHandler<HTMLTableDataCellElement> | undefined; onCompositionEnd?: React.CompositionEventHandler<HTMLTableDataCellElement> | undefined; onCompositionEndCapture?: React.CompositionEventHandler<HTMLTableDataCellElement> | undefined; onCompositionStart?: React.CompositionEventHandler<HTMLTableDataCellElement> | undefined; onCompositionStartCapture?: React.CompositionEventHandler<HTMLTableDataCellElement> | undefined; onCompositionUpdate?: React.CompositionEventHandler<HTMLTableDataCellElement> | undefined; onCompositionUpdateCapture?: React.CompositionEventHandler<HTMLTableDataCellElement> | undefined; onFocus?: React.FocusEventHandler<HTMLTableDataCellElement> | undefined; onFocusCapture?: React.FocusEventHandler<HTMLTableDataCellElement> | undefined; onBlur?: React.FocusEventHandler<HTMLTableDataCellElement> | undefined; onBlurCapture?: React.FocusEventHandler<HTMLTableDataCellElement> | undefined; onChangeCapture?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onBeforeInput?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onBeforeInputCapture?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onInput?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onInputCapture?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onReset?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onResetCapture?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onSubmit?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onSubmitCapture?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onInvalid?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onInvalidCapture?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onLoad?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onLoadCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onErrorCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onKeyDownCapture?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onKeyPress?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onKeyPressCapture?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onKeyUp?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onKeyUpCapture?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onAbort?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onAbortCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onCanPlay?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onCanPlayCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onCanPlayThrough?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onCanPlayThroughCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onDurationChange?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onDurationChangeCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onEmptied?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onEmptiedCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onEncrypted?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onEncryptedCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onEnded?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onEndedCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onLoadedData?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onLoadedDataCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onLoadedMetadata?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onLoadedMetadataCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onLoadStart?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onLoadStartCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onPause?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onPauseCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onPlay?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onPlayCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onPlaying?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onPlayingCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onProgress?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onProgressCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onRateChange?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onRateChangeCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onSeeked?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onSeekedCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onSeeking?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onSeekingCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onStalled?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onStalledCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onSuspend?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onSuspendCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onTimeUpdate?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onTimeUpdateCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onVolumeChange?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onVolumeChangeCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onWaiting?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onWaitingCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onAuxClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onAuxClickCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onClickCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onContextMenu?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onContextMenuCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onDoubleClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onDoubleClickCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onDrag?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragEnd?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragEndCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragEnter?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragEnterCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragExit?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragExitCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragLeave?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragLeaveCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragOver?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragOverCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragStart?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragStartCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDrop?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDropCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onMouseDown?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseDownCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseEnter?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseLeave?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseMove?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseMoveCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseOut?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseOutCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseOver?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseOverCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseUp?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseUpCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onSelect?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onSelectCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onTouchCancel?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onTouchCancelCapture?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onTouchEnd?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onTouchEndCapture?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onTouchMove?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onTouchMoveCapture?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onTouchStart?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onTouchStartCapture?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onPointerDown?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerDownCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerMove?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerMoveCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerUp?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerUpCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerCancel?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerCancelCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerEnter?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerEnterCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerLeave?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerLeaveCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerOver?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerOverCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerOut?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerOutCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onGotPointerCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onGotPointerCaptureCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onLostPointerCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onLostPointerCaptureCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onScroll?: React.UIEventHandler<HTMLTableDataCellElement> | undefined; onScrollCapture?: React.UIEventHandler<HTMLTableDataCellElement> | undefined; onWheel?: React.WheelEventHandler<HTMLTableDataCellElement> | undefined; onWheelCapture?: React.WheelEventHandler<HTMLTableDataCellElement> | undefined; onAnimationStart?: React.AnimationEventHandler<HTMLTableDataCellElement> | undefined; onAnimationStartCapture?: React.AnimationEventHandler<HTMLTableDataCellElement> | undefined; onAnimationEnd?: React.AnimationEventHandler<HTMLTableDataCellElement> | undefined; onAnimationEndCapture?: React.AnimationEventHandler<HTMLTableDataCellElement> | undefined; onAnimationIteration?: React.AnimationEventHandler<HTMLTableDataCellElement> | undefined; onAnimationIterationCapture?: React.AnimationEventHandler<HTMLTableDataCellElement> | undefined; onTransitionEnd?: React.TransitionEventHandler<HTMLTableDataCellElement> | undefined; onTransitionEndCapture?: React.TransitionEventHandler<HTMLTableDataCellElement> | undefined; 'data-test-subj'?: string | undefined; render?: ((value: any, record: ",
-              {
-                "pluginId": "savedObjectsManagement",
-                "scope": "public",
-                "docId": "kibSavedObjectsManagementPluginApi",
-                "section": "def-public.SavedObjectsManagementRecord",
-                "text": "SavedObjectsManagementRecord"
-              },
-              ") => React.ReactNode) | undefined; height?: string | number | undefined; width?: string | undefined; readOnly?: boolean | undefined; align?: ",
-              "HorizontalAlignment",
-              " | undefined; abbr?: string | undefined; footer?: string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | ((props: ",
+              "{ prefix?: string | undefined; scope?: string | undefined; id?: string | undefined; defaultValue?: string | number | readonly string[] | undefined; name: React.ReactNode; children?: React.ReactNode; description?: string | undefined; is?: string | undefined; title?: string | undefined; abbr?: string | undefined; footer?: string | React.ReactElement<any, string | React.JSXElementConstructor<any>> | ((props: ",
               "EuiTableFooterProps",
               "<",
               {
@@ -306,7 +304,29 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ">) => React.ReactNode) | undefined; colSpan?: number | undefined; headers?: string | undefined; rowSpan?: number | undefined; scope?: string | undefined; valign?: \"top\" | \"bottom\" | \"middle\" | \"baseline\" | undefined; dataType?: ",
+              ">) => React.ReactNode) | undefined; slot?: string | undefined; style?: React.CSSProperties | undefined; className?: string | undefined; 'aria-label'?: string | undefined; 'data-test-subj'?: string | undefined; css?: ",
+              "Interpolation",
+              "<",
+              "Theme",
+              ">; defaultChecked?: boolean | undefined; suppressContentEditableWarning?: boolean | undefined; suppressHydrationWarning?: boolean | undefined; accessKey?: string | undefined; contentEditable?: Booleanish | \"inherit\" | undefined; contextMenu?: string | undefined; dir?: string | undefined; draggable?: Booleanish | undefined; hidden?: boolean | undefined; lang?: string | undefined; placeholder?: string | undefined; spellCheck?: Booleanish | undefined; tabIndex?: number | undefined; translate?: \"yes\" | \"no\" | undefined; radioGroup?: string | undefined; role?: React.AriaRole | undefined; about?: string | undefined; datatype?: string | undefined; inlist?: any; property?: string | undefined; resource?: string | undefined; typeof?: string | undefined; vocab?: string | undefined; autoCapitalize?: string | undefined; autoCorrect?: string | undefined; autoSave?: string | undefined; color?: string | undefined; itemProp?: string | undefined; itemScope?: boolean | undefined; itemType?: string | undefined; itemID?: string | undefined; itemRef?: string | undefined; results?: number | undefined; security?: string | undefined; unselectable?: \"on\" | \"off\" | undefined; inputMode?: \"search\" | \"none\" | \"text\" | \"tel\" | \"url\" | \"email\" | \"numeric\" | \"decimal\" | undefined; 'aria-activedescendant'?: string | undefined; 'aria-atomic'?: Booleanish | undefined; 'aria-autocomplete'?: \"none\" | \"list\" | \"inline\" | \"both\" | undefined; 'aria-busy'?: Booleanish | undefined; 'aria-checked'?: boolean | \"true\" | \"false\" | \"mixed\" | undefined; 'aria-colcount'?: number | undefined; 'aria-colindex'?: number | undefined; 'aria-colspan'?: number | undefined; 'aria-controls'?: string | undefined; 'aria-current'?: boolean | \"page\" | \"date\" | \"time\" | \"true\" | \"false\" | \"step\" | \"location\" | undefined; 'aria-describedby'?: string | undefined; 'aria-details'?: string | undefined; 'aria-disabled'?: Booleanish | undefined; 'aria-dropeffect'?: \"execute\" | \"link\" | \"none\" | \"copy\" | \"move\" | \"popup\" | undefined; 'aria-errormessage'?: string | undefined; 'aria-expanded'?: Booleanish | undefined; 'aria-flowto'?: string | undefined; 'aria-grabbed'?: Booleanish | undefined; 'aria-haspopup'?: boolean | \"dialog\" | \"menu\" | \"true\" | \"false\" | \"grid\" | \"listbox\" | \"tree\" | undefined; 'aria-hidden'?: Booleanish | undefined; 'aria-invalid'?: boolean | \"true\" | \"false\" | \"grammar\" | \"spelling\" | undefined; 'aria-keyshortcuts'?: string | undefined; 'aria-labelledby'?: string | undefined; 'aria-level'?: number | undefined; 'aria-live'?: \"off\" | \"assertive\" | \"polite\" | undefined; 'aria-modal'?: Booleanish | undefined; 'aria-multiline'?: Booleanish | undefined; 'aria-multiselectable'?: Booleanish | undefined; 'aria-orientation'?: \"horizontal\" | \"vertical\" | undefined; 'aria-owns'?: string | undefined; 'aria-placeholder'?: string | undefined; 'aria-posinset'?: number | undefined; 'aria-pressed'?: boolean | \"true\" | \"false\" | \"mixed\" | undefined; 'aria-readonly'?: Booleanish | undefined; 'aria-relevant'?: \"text\" | \"all\" | \"additions\" | \"additions removals\" | \"additions text\" | \"removals\" | \"removals additions\" | \"removals text\" | \"text additions\" | \"text removals\" | undefined; 'aria-required'?: Booleanish | undefined; 'aria-roledescription'?: string | undefined; 'aria-rowcount'?: number | undefined; 'aria-rowindex'?: number | undefined; 'aria-rowspan'?: number | undefined; 'aria-selected'?: Booleanish | undefined; 'aria-setsize'?: number | undefined; 'aria-sort'?: \"none\" | \"ascending\" | \"descending\" | \"other\" | undefined; 'aria-valuemax'?: number | undefined; 'aria-valuemin'?: number | undefined; 'aria-valuenow'?: number | undefined; 'aria-valuetext'?: string | undefined; dangerouslySetInnerHTML?: { __html: string; } | undefined; onCopy?: React.ClipboardEventHandler<HTMLTableDataCellElement> | undefined; onCopyCapture?: React.ClipboardEventHandler<HTMLTableDataCellElement> | undefined; onCut?: React.ClipboardEventHandler<HTMLTableDataCellElement> | undefined; onCutCapture?: React.ClipboardEventHandler<HTMLTableDataCellElement> | undefined; onPaste?: React.ClipboardEventHandler<HTMLTableDataCellElement> | undefined; onPasteCapture?: React.ClipboardEventHandler<HTMLTableDataCellElement> | undefined; onCompositionEnd?: React.CompositionEventHandler<HTMLTableDataCellElement> | undefined; onCompositionEndCapture?: React.CompositionEventHandler<HTMLTableDataCellElement> | undefined; onCompositionStart?: React.CompositionEventHandler<HTMLTableDataCellElement> | undefined; onCompositionStartCapture?: React.CompositionEventHandler<HTMLTableDataCellElement> | undefined; onCompositionUpdate?: React.CompositionEventHandler<HTMLTableDataCellElement> | undefined; onCompositionUpdateCapture?: React.CompositionEventHandler<HTMLTableDataCellElement> | undefined; onFocus?: React.FocusEventHandler<HTMLTableDataCellElement> | undefined; onFocusCapture?: React.FocusEventHandler<HTMLTableDataCellElement> | undefined; onBlur?: React.FocusEventHandler<HTMLTableDataCellElement> | undefined; onBlurCapture?: React.FocusEventHandler<HTMLTableDataCellElement> | undefined; onChange?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onChangeCapture?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onBeforeInput?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onBeforeInputCapture?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onInput?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onInputCapture?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onReset?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onResetCapture?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onSubmit?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onSubmitCapture?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onInvalid?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onInvalidCapture?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; onLoad?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onLoadCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onError?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onErrorCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onKeyDownCapture?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onKeyPress?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onKeyPressCapture?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onKeyUp?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onKeyUpCapture?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; onAbort?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onAbortCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onCanPlay?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onCanPlayCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onCanPlayThrough?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onCanPlayThroughCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onDurationChange?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onDurationChangeCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onEmptied?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onEmptiedCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onEncrypted?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onEncryptedCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onEnded?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onEndedCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onLoadedData?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onLoadedDataCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onLoadedMetadata?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onLoadedMetadataCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onLoadStart?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onLoadStartCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onPause?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onPauseCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onPlay?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onPlayCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onPlaying?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onPlayingCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onProgress?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onProgressCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onRateChange?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onRateChangeCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onSeeked?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onSeekedCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onSeeking?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onSeekingCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onStalled?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onStalledCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onSuspend?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onSuspendCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onTimeUpdate?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onTimeUpdateCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onVolumeChange?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onVolumeChangeCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onWaiting?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onWaitingCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onAuxClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onAuxClickCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onClickCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onContextMenu?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onContextMenuCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onDoubleClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onDoubleClickCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onDrag?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragEnd?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragEndCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragEnter?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragEnterCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragExit?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragExitCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragLeave?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragLeaveCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragOver?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragOverCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragStart?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDragStartCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDrop?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onDropCapture?: React.DragEventHandler<HTMLTableDataCellElement> | undefined; onMouseDown?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseDownCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseEnter?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseLeave?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseMove?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseMoveCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseOut?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseOutCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseOver?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseOverCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseUp?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onMouseUpCapture?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onSelect?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onSelectCapture?: React.ReactEventHandler<HTMLTableDataCellElement> | undefined; onTouchCancel?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onTouchCancelCapture?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onTouchEnd?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onTouchEndCapture?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onTouchMove?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onTouchMoveCapture?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onTouchStart?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onTouchStartCapture?: React.TouchEventHandler<HTMLTableDataCellElement> | undefined; onPointerDown?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerDownCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerMove?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerMoveCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerUp?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerUpCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerCancel?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerCancelCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerEnter?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerEnterCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerLeave?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerLeaveCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerOver?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerOverCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerOut?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onPointerOutCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onGotPointerCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onGotPointerCaptureCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onLostPointerCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onLostPointerCaptureCapture?: React.PointerEventHandler<HTMLTableDataCellElement> | undefined; onScroll?: React.UIEventHandler<HTMLTableDataCellElement> | undefined; onScrollCapture?: React.UIEventHandler<HTMLTableDataCellElement> | undefined; onWheel?: React.WheelEventHandler<HTMLTableDataCellElement> | undefined; onWheelCapture?: React.WheelEventHandler<HTMLTableDataCellElement> | undefined; onAnimationStart?: React.AnimationEventHandler<HTMLTableDataCellElement> | undefined; onAnimationStartCapture?: React.AnimationEventHandler<HTMLTableDataCellElement> | undefined; onAnimationEnd?: React.AnimationEventHandler<HTMLTableDataCellElement> | undefined; onAnimationEndCapture?: React.AnimationEventHandler<HTMLTableDataCellElement> | undefined; onAnimationIteration?: React.AnimationEventHandler<HTMLTableDataCellElement> | undefined; onAnimationIterationCapture?: React.AnimationEventHandler<HTMLTableDataCellElement> | undefined; onTransitionEnd?: React.TransitionEventHandler<HTMLTableDataCellElement> | undefined; onTransitionEndCapture?: React.TransitionEventHandler<HTMLTableDataCellElement> | undefined; field: (string & {}) | keyof ",
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
+                "text": "SavedObjectsManagementRecord"
+              },
+              "; width?: string | undefined; headers?: string | undefined; height?: string | number | undefined; readOnly?: boolean | undefined; render?: ((value: any, record: ",
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementRecord",
+                "text": "SavedObjectsManagementRecord"
+              },
+              ") => React.ReactNode) | undefined; align?: ",
+              "HorizontalAlignment",
+              " | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"middle\" | \"baseline\" | undefined; dataType?: ",
               "EuiTableDataType",
               " | undefined; isExpander?: boolean | undefined; textOnly?: boolean | undefined; truncateText?: boolean | undefined; mobileOptions?: (Omit<",
               "EuiTableRowCellMobileOptionsShape",
@@ -321,7 +341,8 @@
               ") => React.ReactNode) | undefined; }) | undefined; }"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -334,7 +355,8 @@
               "(() => { type: string; id: string; }[]) | undefined"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -347,7 +369,8 @@
               "ColumnContext | null"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -361,6 +384,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -374,6 +398,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -391,6 +416,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -404,6 +430,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -421,6 +448,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/column.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -439,10 +467,10 @@
         "signature": [
           "(response: ",
           {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsImportResponse",
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectsImportResponse",
             "text": "SavedObjectsImportResponse"
           },
           ") => ",
@@ -456,6 +484,7 @@
         ],
         "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -466,15 +495,16 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportResponse",
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportResponse",
                 "text": "SavedObjectsImportResponse"
               }
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -492,6 +522,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -501,10 +532,11 @@
             "label": "obj",
             "description": [],
             "signature": [
-              "{ id: string; type: string; meta: { title?: string | undefined; icon?: string | undefined; }; overwrite?: boolean | undefined; }"
+              "{ type: string; id: string; meta: { title?: string | undefined; icon?: string | undefined; }; overwrite?: boolean | undefined; }"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -515,47 +547,48 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportConflictError",
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportConflictError",
                 "text": "SavedObjectsImportConflictError"
               },
               " | ",
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportAmbiguousConflictError",
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportAmbiguousConflictError",
                 "text": "SavedObjectsImportAmbiguousConflictError"
               },
               " | ",
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportUnsupportedTypeError",
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportUnsupportedTypeError",
                 "text": "SavedObjectsImportUnsupportedTypeError"
               },
               " | ",
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportMissingReferencesError",
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportMissingReferencesError",
                 "text": "SavedObjectsImportMissingReferencesError"
               },
               " | ",
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportUnknownError",
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportUnknownError",
                 "text": "SavedObjectsImportUnknownError"
               }
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -569,6 +602,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -588,7 +622,8 @@
               "[]"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -599,16 +634,17 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportSuccess",
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportSuccess",
                 "text": "SavedObjectsImportSuccess"
               },
               "[]"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -621,7 +657,8 @@
               "UnmatchedReference[]"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -634,7 +671,8 @@
               "\"success\" | \"idle\""
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -644,7 +682,8 @@
             "label": "importCount",
             "description": [],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -655,16 +694,17 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImportWarning",
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportWarning",
                 "text": "SavedObjectsImportWarning"
               },
               "[]"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -676,8 +716,9 @@
         "tags": [],
         "label": "SavedObjectManagementTypeInfo",
         "description": [],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -686,8 +727,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -697,10 +739,11 @@
             "label": "namespaceType",
             "description": [],
             "signature": [
-              "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\""
+              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -709,8 +752,9 @@
             "tags": [],
             "label": "hidden",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -719,8 +763,9 @@
             "tags": [],
             "label": "displayName",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -732,10 +777,11 @@
         "tags": [],
         "label": "SavedObjectMetadata",
         "description": [
-          "\nThe metadata injected into a {@link SavedObject | saved object} when returning\n{@link SavedObjectWithMetadata | enhanced objects} from the plugin API endpoints."
+          "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n{@link SavedObjectWithMetadata}."
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -747,8 +793,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -760,8 +807,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -773,8 +821,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -786,8 +835,9 @@
             "signature": [
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -798,16 +848,17 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsNamespaceType",
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsNamespaceType",
                 "text": "SavedObjectsNamespaceType"
               },
               " | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -819,8 +870,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -832,10 +884,11 @@
         "tags": [],
         "label": "SavedObjectRelation",
         "description": [
-          "\nRepresents a relation between two {@link SavedObject | saved object}"
+          "\nRepresents a relation between two {@link SavedObjectWithMetadata | saved objects}."
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -844,8 +897,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -854,8 +908,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -865,10 +920,11 @@
             "label": "relationship",
             "description": [],
             "signature": [
-              "\"parent\" | \"child\""
+              "\"child\" | \"parent\""
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -886,8 +942,9 @@
                 "text": "SavedObjectMetadata"
               }
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -901,6 +958,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -924,6 +982,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -943,6 +1002,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -960,6 +1020,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -975,6 +1036,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -988,6 +1050,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1015,6 +1078,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/action_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1030,6 +1094,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1053,6 +1118,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "savedObjectsManagement",
@@ -1072,6 +1138,7 @@
                 ],
                 "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1089,6 +1156,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1112,6 +1180,7 @@
             ],
             "path": "src/plugins/saved_objects_management/public/services/column_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1127,6 +1196,7 @@
         "description": [],
         "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1136,7 +1206,8 @@
             "label": "type",
             "description": [],
             "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1146,7 +1217,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1158,16 +1230,17 @@
             "signature": [
               "{ icon: string; title: string; namespaceType: ",
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsNamespaceType",
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsNamespaceType",
                 "text": "SavedObjectsNamespaceType"
               },
               "; hiddenType: boolean; }"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1177,11 +1250,18 @@
             "label": "references",
             "description": [],
             "signature": [
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
               "[]"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1194,40 +1274,177 @@
               "string[] | undefined"
             ],
             "path": "src/plugins/saved_objects_management/public/services/types/record.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsManagement",
+        "id": "def-public.SavedObjectWithMetadata",
+        "type": "Interface",
+        "tags": [
+          "note"
+        ],
+        "label": "SavedObjectWithMetadata",
+        "description": [
+          "\nA saved object.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "common",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-common.SavedObjectWithMetadata",
+            "text": "SavedObjectWithMetadata"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "common",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-common.SavedObjectMetadata",
+                "text": "SavedObjectMetadata"
+              }
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.updated_at",
+            "type": "string",
+            "tags": [],
+            "label": "updated_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.attributes",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-public.SavedObjectWithMetadata.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "savedObjectsManagement",
-        "id": "def-public.SavedObjectWithMetadata",
-        "type": "Type",
-        "tags": [],
-        "label": "SavedObjectWithMetadata",
-        "description": [
-          "\nA {@link SavedObject | saved object} enhanced with meta properties used by the client-side plugin."
-        ],
-        "signature": [
-          "SavedObject",
-          "<T> & { meta: ",
-          {
-            "pluginId": "savedObjectsManagement",
-            "scope": "common",
-            "docId": "kibSavedObjectsManagementPluginApi",
-            "section": "def-common.SavedObjectMetadata",
-            "text": "SavedObjectMetadata"
-          },
-          "; }"
-        ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "savedObjectsManagement",
@@ -1238,6 +1455,7 @@
       "description": [],
       "path": "src/plugins/saved_objects_management/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "savedObjectsManagement",
@@ -1256,7 +1474,8 @@
             }
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "savedObjectsManagement",
@@ -1275,7 +1494,8 @@
             }
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -1290,6 +1510,7 @@
       "description": [],
       "path": "src/plugins/saved_objects_management/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "savedObjectsManagement",
@@ -1308,7 +1529,8 @@
             }
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "savedObjectsManagement",
@@ -1327,7 +1549,8 @@
             }
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "savedObjectsManagement",
@@ -1349,6 +1572,7 @@
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [],
           "returnComment": []
         },
@@ -1361,17 +1585,12 @@
           "description": [],
           "signature": [
             "(type: string, id: string, savedObjectTypes: string[]) => Promise<",
-            {
-              "pluginId": "savedObjectsManagement",
-              "scope": "common",
-              "docId": "kibSavedObjectsManagementPluginApi",
-              "section": "def-common.SavedObjectGetRelationshipsResponse",
-              "text": "SavedObjectGetRelationshipsResponse"
-            },
+            "RelationshipsResponseHTTP",
             ">"
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "savedObjectsManagement",
@@ -1385,6 +1604,7 @@
               ],
               "path": "src/plugins/saved_objects_management/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -1399,6 +1619,7 @@
               ],
               "path": "src/plugins/saved_objects_management/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             },
             {
@@ -1413,6 +1634,7 @@
               ],
               "path": "src/plugins/saved_objects_management/public/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -1438,6 +1660,7 @@
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -1448,7 +1671,8 @@
               "label": "type",
               "description": [],
               "path": "src/plugins/saved_objects_management/public/lib/get_saved_object_label.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             },
             {
               "parentPluginId": "savedObjectsManagement",
@@ -1468,7 +1692,8 @@
                 "[]"
               ],
               "path": "src/plugins/saved_objects_management/public/lib/get_saved_object_label.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         },
@@ -1484,6 +1709,7 @@
           ],
           "path": "src/plugins/saved_objects_management/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -1497,7 +1723,125 @@
                 "{ id: string; type: string; }"
               ],
               "path": "src/plugins/saved_objects_management/public/lib/get_default_title.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "savedObjectsManagement",
+          "id": "def-public.SavedObjectsManagementPluginStart.parseQuery",
+          "type": "Function",
+          "tags": [],
+          "label": "parseQuery",
+          "description": [],
+          "signature": [
+            "(query: ",
+            "Query",
+            ", types: ",
+            {
+              "pluginId": "savedObjectsManagement",
+              "scope": "common",
+              "docId": "kibSavedObjectsManagementPluginApi",
+              "section": "def-common.SavedObjectManagementTypeInfo",
+              "text": "SavedObjectManagementTypeInfo"
+            },
+            "[]) => ParsedQuery"
+          ],
+          "path": "src/plugins/saved_objects_management/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "savedObjectsManagement",
+              "id": "def-public.SavedObjectsManagementPluginStart.parseQuery.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "query",
+              "description": [],
+              "signature": [
+                "Query"
+              ],
+              "path": "src/plugins/saved_objects_management/public/lib/parse_query.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "savedObjectsManagement",
+              "id": "def-public.SavedObjectsManagementPluginStart.parseQuery.$2",
+              "type": "Array",
+              "tags": [],
+              "label": "types",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "savedObjectsManagement",
+                  "scope": "common",
+                  "docId": "kibSavedObjectsManagementPluginApi",
+                  "section": "def-common.SavedObjectManagementTypeInfo",
+                  "text": "SavedObjectManagementTypeInfo"
+                },
+                "[]"
+              ],
+              "path": "src/plugins/saved_objects_management/public/lib/parse_query.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "savedObjectsManagement",
+          "id": "def-public.SavedObjectsManagementPluginStart.getTagFindReferences",
+          "type": "Function",
+          "tags": [],
+          "label": "getTagFindReferences",
+          "description": [],
+          "signature": [
+            "({ selectedTags, taggingApi, }: { selectedTags?: string[] | undefined; taggingApi?: ",
+            {
+              "pluginId": "savedObjectsTaggingOss",
+              "scope": "public",
+              "docId": "kibSavedObjectsTaggingOssPluginApi",
+              "section": "def-public.SavedObjectsTaggingApi",
+              "text": "SavedObjectsTaggingApi"
+            },
+            " | undefined; }) => ",
+            {
+              "pluginId": "@kbn/core-saved-objects-api-server",
+              "scope": "common",
+              "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+              "section": "def-common.SavedObjectsFindOptionsReference",
+              "text": "SavedObjectsFindOptionsReference"
+            },
+            "[] | undefined"
+          ],
+          "path": "src/plugins/saved_objects_management/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "savedObjectsManagement",
+              "id": "def-public.SavedObjectsManagementPluginStart.getTagFindReferences.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "__0",
+              "description": [],
+              "signature": [
+                "{ selectedTags?: string[] | undefined; taggingApi?: ",
+                {
+                  "pluginId": "savedObjectsTaggingOss",
+                  "scope": "public",
+                  "docId": "kibSavedObjectsTaggingOssPluginApi",
+                  "section": "def-public.SavedObjectsTaggingApi",
+                  "text": "SavedObjectsTaggingApi"
+                },
+                " | undefined; }"
+              ],
+              "path": "src/plugins/saved_objects_management/public/lib/get_tag_references.ts",
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         }
@@ -1517,10 +1861,11 @@
         "tags": [],
         "label": "SavedObjectMetadata",
         "description": [
-          "\nThe metadata injected into a {@link SavedObject | saved object} when returning\n{@link SavedObjectWithMetadata | enhanced objects} from the plugin API endpoints."
+          "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n{@link SavedObjectWithMetadata}."
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1532,8 +1877,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1545,8 +1891,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1558,8 +1905,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1571,8 +1919,9 @@
             "signature": [
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1583,16 +1932,17 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsNamespaceType",
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsNamespaceType",
                 "text": "SavedObjectsNamespaceType"
               },
               " | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1604,41 +1954,178 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsManagement",
+        "id": "def-server.SavedObjectWithMetadata",
+        "type": "Interface",
+        "tags": [
+          "note"
+        ],
+        "label": "SavedObjectWithMetadata",
+        "description": [
+          "\nA saved object.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "common",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-common.SavedObjectWithMetadata",
+            "text": "SavedObjectWithMetadata"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "common",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-common.SavedObjectMetadata",
+                "text": "SavedObjectMetadata"
+              }
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.updated_at",
+            "type": "string",
+            "tags": [],
+            "label": "updated_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.attributes",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-server.SavedObjectWithMetadata.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "savedObjectsManagement",
-        "id": "def-server.SavedObjectWithMetadata",
-        "type": "Type",
-        "tags": [],
-        "label": "SavedObjectWithMetadata",
-        "description": [
-          "\nA {@link SavedObject | saved object} enhanced with meta properties used by the client-side plugin."
-        ],
-        "signature": [
-          "SavedObject",
-          "<T> & { meta: ",
-          {
-            "pluginId": "savedObjectsManagement",
-            "scope": "common",
-            "docId": "kibSavedObjectsManagementPluginApi",
-            "section": "def-common.SavedObjectMetadata",
-            "text": "SavedObjectMetadata"
-          },
-          "; }"
-        ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "savedObjectsManagement",
@@ -1649,6 +2136,7 @@
       "description": [],
       "path": "src/plugins/saved_objects_management/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1662,6 +2150,7 @@
       "description": [],
       "path": "src/plugins/saved_objects_management/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1673,66 +2162,16 @@
     "interfaces": [
       {
         "parentPluginId": "savedObjectsManagement",
-        "id": "def-common.SavedObjectGetRelationshipsResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectGetRelationshipsResponse",
-        "description": [],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "savedObjectsManagement",
-            "id": "def-common.SavedObjectGetRelationshipsResponse.relations",
-            "type": "Array",
-            "tags": [],
-            "label": "relations",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "savedObjectsManagement",
-                "scope": "common",
-                "docId": "kibSavedObjectsManagementPluginApi",
-                "section": "def-common.SavedObjectRelation",
-                "text": "SavedObjectRelation"
-              },
-              "[]"
-            ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "savedObjectsManagement",
-            "id": "def-common.SavedObjectGetRelationshipsResponse.invalidRelations",
-            "type": "Array",
-            "tags": [],
-            "label": "invalidRelations",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "savedObjectsManagement",
-                "scope": "common",
-                "docId": "kibSavedObjectsManagementPluginApi",
-                "section": "def-common.SavedObjectInvalidRelation",
-                "text": "SavedObjectInvalidRelation"
-              },
-              "[]"
-            ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedObjectsManagement",
         "id": "def-common.SavedObjectInvalidRelation",
         "type": "Interface",
         "tags": [],
         "label": "SavedObjectInvalidRelation",
-        "description": [],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "description": [
+          "\nRepresents a relation between two {@link SavedObjectWithMetadata | saved objects}."
+        ],
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1741,8 +2180,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1751,8 +2191,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1762,10 +2203,11 @@
             "label": "relationship",
             "description": [],
             "signature": [
-              "\"parent\" | \"child\""
+              "\"child\" | \"parent\""
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1774,8 +2216,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1787,8 +2230,9 @@
         "tags": [],
         "label": "SavedObjectManagementTypeInfo",
         "description": [],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1797,8 +2241,9 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1808,10 +2253,11 @@
             "label": "namespaceType",
             "description": [],
             "signature": [
-              "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\""
+              "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1820,8 +2266,9 @@
             "tags": [],
             "label": "hidden",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1830,8 +2277,9 @@
             "tags": [],
             "label": "displayName",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1843,10 +2291,11 @@
         "tags": [],
         "label": "SavedObjectMetadata",
         "description": [
-          "\nThe metadata injected into a {@link SavedObject | saved object} when returning\n{@link SavedObjectWithMetadata | enhanced objects} from the plugin API endpoints."
+          "Domain interfaces\n\nSaved Object Management metadata associated with a saved object. See\n{@link SavedObjectWithMetadata}."
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1858,8 +2307,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1871,8 +2321,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1884,8 +2335,9 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1897,8 +2349,9 @@
             "signature": [
               "{ path: string; uiCapabilitiesPath: string; } | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1909,16 +2362,17 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsNamespaceType",
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsNamespaceType",
                 "text": "SavedObjectsNamespaceType"
               },
               " | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1930,8 +2384,9 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1943,10 +2398,11 @@
         "tags": [],
         "label": "SavedObjectRelation",
         "description": [
-          "\nRepresents a relation between two {@link SavedObject | saved object}"
+          "\nRepresents a relation between two {@link SavedObjectWithMetadata | saved objects}."
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1955,8 +2411,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1965,8 +2422,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1976,10 +2434,11 @@
             "label": "relationship",
             "description": [],
             "signature": [
-              "\"parent\" | \"child\""
+              "\"child\" | \"parent\""
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "savedObjectsManagement",
@@ -1997,8 +2456,171 @@
                 "text": "SavedObjectMetadata"
               }
             ],
-            "path": "src/plugins/saved_objects_management/common/types.ts",
-            "deprecated": false
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsManagement",
+        "id": "def-common.SavedObjectWithMetadata",
+        "type": "Interface",
+        "tags": [
+          "note"
+        ],
+        "label": "SavedObjectWithMetadata",
+        "description": [
+          "\nA saved object.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "savedObjectsManagement",
+            "scope": "common",
+            "docId": "kibSavedObjectsManagementPluginApi",
+            "section": "def-common.SavedObjectWithMetadata",
+            "text": "SavedObjectWithMetadata"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "common",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-common.SavedObjectMetadata",
+                "text": "SavedObjectMetadata"
+              }
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.updated_at",
+            "type": "string",
+            "tags": [],
+            "label": "updated_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.attributes",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsManagement",
+            "id": "def-common.SavedObjectWithMetadata.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[]"
+            ],
+            "path": "src/plugins/saved_objects_management/common/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2014,35 +2636,11 @@
         "label": "SavedObjectRelationKind",
         "description": [],
         "signature": [
-          "\"parent\" | \"child\""
+          "\"child\" | \"parent\""
         ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
+        "path": "src/plugins/saved_objects_management/common/types/v1.ts",
         "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedObjectsManagement",
-        "id": "def-common.SavedObjectWithMetadata",
-        "type": "Type",
-        "tags": [],
-        "label": "SavedObjectWithMetadata",
-        "description": [
-          "\nA {@link SavedObject | saved object} enhanced with meta properties used by the client-side plugin."
-        ],
-        "signature": [
-          "SavedObject",
-          "<T> & { meta: ",
-          {
-            "pluginId": "savedObjectsManagement",
-            "scope": "common",
-            "docId": "kibSavedObjectsManagementPluginApi",
-            "section": "def-common.SavedObjectMetadata",
-            "text": "SavedObjectMetadata"
-          },
-          "; }"
-        ],
-        "path": "src/plugins/saved_objects_management/common/types.ts",
-        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

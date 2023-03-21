@@ -54,6 +54,10 @@ export type DataViewFieldBase = {
    */
   lang?: estypes.ScriptLanguage;
   scripted?: boolean;
+  /**
+   * ES field types as strings array.
+   */
+  esTypes?: string[];
 };
 
 /**

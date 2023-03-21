@@ -6,7 +6,7 @@
  */
 
 import { TOASTER } from '../screens/alerts_detection_rules';
-import { KQL_INPUT, REFRESH_BUTTON } from '../screens/security_header';
+import { KQL_INPUT, openNavigationPanelFor, REFRESH_BUTTON } from '../screens/security_header';
 
 export const clearSearchBar = () => {
   cy.get(KQL_INPUT).clear().type('{enter}');
@@ -18,6 +18,7 @@ export const kqlSearch = (search: string) => {
 };
 
 export const navigateFromHeaderTo = (page: string) => {
+  openNavigationPanelFor(page);
   cy.get(page).click({ force: true });
 };
 

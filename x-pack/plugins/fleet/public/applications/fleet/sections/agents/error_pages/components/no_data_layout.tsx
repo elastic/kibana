@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPageContent } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageContent_Deprecated as EuiPageContent,
+} from '@elastic/eui';
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 

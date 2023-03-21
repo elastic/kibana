@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -43,6 +46,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ...commonQuery,
             kuery: `service.name : "${serviceName}" and processor.event : "${processorEvent}"`,
             probability: 1,
+            ...(processorEvent === ProcessorEvent.metric
+              ? {
+                  documentType: ApmDocumentType.TransactionMetric,
+                  rollupInterval: RollupInterval.OneMinute,
+                }
+              : {
+                  documentType: ApmDocumentType.TransactionEvent,
+                  rollupInterval: RollupInterval.None,
+                }),
           },
         },
       }),
@@ -69,74 +81,70 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let throughputMetricValues: Awaited<ReturnType<typeof getThroughputValues>>;
   let throughputTransactionValues: Awaited<ReturnType<typeof getThroughputValues>>;
 
-  registry.when(
-    'Service maps APIs',
-    { config: 'trial', archives: ['apm_mappings_only_8.0.0'] },
-    () => {
-      describe('when data is loaded ', () => {
-        const GO_PROD_RATE = 80;
-        const GO_DEV_RATE = 20;
-        before(async () => {
-          const serviceGoProdInstance = apm
-            .service(serviceName, 'production', 'go')
-            .instance('instance-a');
-          const serviceGoDevInstance = apm
-            .service(serviceName, 'development', 'go')
-            .instance('instance-b');
+  registry.when('Service maps APIs', { config: 'trial', archives: [] }, () => {
+    describe('when data is loaded ', () => {
+      const GO_PROD_RATE = 80;
+      const GO_DEV_RATE = 20;
+      before(async () => {
+        const serviceGoProdInstance = apm
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
+          .instance('instance-a');
+        const serviceGoDevInstance = apm
+          .service({ name: serviceName, environment: 'development', agentName: 'go' })
+          .instance('instance-b');
 
-          await synthtraceEsClient.index([
-            timerange(start, end)
-              .interval('1m')
-              .rate(GO_PROD_RATE)
-              .generator((timestamp) =>
-                serviceGoProdInstance
-                  .transaction('GET /apple 🍎 ', 'Worker')
-                  .duration(1000)
-                  .timestamp(timestamp)
-              ),
-            timerange(start, end)
-              .interval('1m')
-              .rate(GO_DEV_RATE)
-              .generator((timestamp) =>
-                serviceGoDevInstance
-                  .transaction('GET /apple 🍎 ')
-                  .duration(1000)
-                  .timestamp(timestamp)
-              ),
+        await synthtraceEsClient.index([
+          timerange(start, end)
+            .interval('1m')
+            .rate(GO_PROD_RATE)
+            .generator((timestamp) =>
+              serviceGoProdInstance
+                .transaction({ transactionName: 'GET /apple 🍎 ', transactionType: 'Worker' })
+                .duration(1000)
+                .timestamp(timestamp)
+            ),
+          timerange(start, end)
+            .interval('1m')
+            .rate(GO_DEV_RATE)
+            .generator((timestamp) =>
+              serviceGoDevInstance
+                .transaction({ transactionName: 'GET /apple 🍎 ' })
+                .duration(1000)
+                .timestamp(timestamp)
+            ),
+        ]);
+      });
+
+      after(() => synthtraceEsClient.clean());
+
+      describe('compare throughput value between service inventory and service maps', () => {
+        before(async () => {
+          [throughputTransactionValues, throughputMetricValues] = await Promise.all([
+            getThroughputValues('transaction'),
+            getThroughputValues('metric'),
           ]);
         });
 
-        after(() => synthtraceEsClient.clean());
-
-        describe('compare throughput value between service inventory and service maps', () => {
-          before(async () => {
-            [throughputTransactionValues, throughputMetricValues] = await Promise.all([
-              getThroughputValues('transaction'),
-              getThroughputValues('metric'),
-            ]);
-          });
-
-          it('returns same throughput value for Transaction-based and Metric-based data', () => {
-            [
-              ...Object.values(throughputTransactionValues),
-              ...Object.values(throughputMetricValues),
-            ].forEach((value) => expect(roundNumber(value)).to.be.equal(GO_DEV_RATE));
-          });
-        });
-
-        describe('when calling service maps transactions stats api', () => {
-          let serviceMapsNodeThroughput: number | null | undefined;
-          before(async () => {
-            const response = await callApi();
-            serviceMapsNodeThroughput =
-              response.body.currentPeriod.transactionStats?.throughput?.value;
-          });
-
-          it('returns expected throughput value', () => {
-            expect(roundNumber(serviceMapsNodeThroughput)).to.be.equal(GO_DEV_RATE);
-          });
+        it('returns same throughput value for Transaction-based and Metric-based data', () => {
+          [
+            ...Object.values(throughputTransactionValues),
+            ...Object.values(throughputMetricValues),
+          ].forEach((value) => expect(roundNumber(value)).to.be.equal(GO_DEV_RATE));
         });
       });
-    }
-  );
+
+      describe('when calling service maps transactions stats api', () => {
+        let serviceMapsNodeThroughput: number | null | undefined;
+        before(async () => {
+          const response = await callApi();
+          serviceMapsNodeThroughput =
+            response.body.currentPeriod.transactionStats?.throughput?.value;
+        });
+
+        it('returns expected throughput value', () => {
+          expect(roundNumber(serviceMapsNodeThroughput)).to.be.equal(GO_DEV_RATE);
+        });
+      });
+    });
+  });
 }

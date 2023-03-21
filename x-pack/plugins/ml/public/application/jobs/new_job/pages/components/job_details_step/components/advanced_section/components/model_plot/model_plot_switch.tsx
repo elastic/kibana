@@ -22,6 +22,7 @@ export const ModelPlotSwitch: FC = () => {
   useEffect(() => {
     jobCreator.modelPlot = modelPlotEnabled;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelPlotEnabled]);
 
   useEffect(() => {
@@ -32,6 +33,7 @@ export const ModelPlotSwitch: FC = () => {
       isCategorizationJobCreator(jobCreator) &&
       jobCreator.aggregations.some((agg) => aggs.includes(agg.id));
     setEnabled(isRareCategoryJob === false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   function toggleModelPlot() {

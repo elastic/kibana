@@ -6,7 +6,6 @@
  */
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { SavedObjectAttributes } from '@kbn/core/public';
 import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
@@ -41,10 +40,10 @@ export interface StartDependencies {
   uiActionsEnhanced: AdvancedUiActionsStart;
 }
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupContract {}
 
-// eslint-disable-next-line
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartContract {}
 
 export class EmbeddableEnhancedPlugin
@@ -77,7 +76,7 @@ export class EmbeddableEnhancedPlugin
         I extends EmbeddableInput = EmbeddableInput,
         O extends EmbeddableOutput = EmbeddableOutput,
         E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-        T extends SavedObjectAttributes = SavedObjectAttributes
+        T = unknown
       >(
         def: EmbeddableFactoryDefinition<I, O, E, T>
       ): EmbeddableFactory<I, O, E, T> => {
@@ -126,7 +125,7 @@ export class EmbeddableEnhancedPlugin
     });
 
     dynamicActions.start().catch((error) => {
-      /* eslint-disable */
+      /* eslint-disable no-console */
 
       console.log('Failed to start embeddable dynamic actions', embeddable);
       console.error(error);
@@ -135,7 +134,7 @@ export class EmbeddableEnhancedPlugin
 
     const stop = () => {
       dynamicActions.stop().catch((error) => {
-        /* eslint-disable */
+        /* eslint-disable no-console */
 
         console.log('Failed to stop embeddable dynamic actions', embeddable);
         console.error(error);

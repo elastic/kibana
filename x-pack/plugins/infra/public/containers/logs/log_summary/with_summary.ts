@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { useContext } from 'react';
+import { useSelector } from '@xstate/react';
+import stringify from 'json-stable-stringify';
 import useThrottle from 'react-use/lib/useThrottle';
 import { useLogViewContext } from '../../../hooks/use_log_view';
+import { useLogStreamPageStateContext } from '../../../observability_logs/log_stream_page/state';
 import { RendererFunction } from '../../../utils/typed_react';
-import { LogFilterState } from '../log_filter';
-import { LogPositionState } from '../log_position';
+import { useLogPositionStateContext } from '../log_position';
 import { LogSummaryBuckets, useLogSummary } from './log_summary';
 
 const FETCH_THROTTLE_INTERVAL = 3000;
@@ -25,8 +26,12 @@ export const WithSummary = ({
   }>;
 }) => {
   const { logViewId } = useLogViewContext();
-  const { filterQuery } = useContext(LogFilterState.Context);
-  const { startTimestamp, endTimestamp } = useContext(LogPositionState.Context);
+  const serializedParsedQuery = useSelector(useLogStreamPageStateContext(), (logStreamPageState) =>
+    logStreamPageState.matches({ hasLogViewIndices: 'initialized' })
+      ? stringify(logStreamPageState.context.parsedQuery)
+      : null
+  );
+  const { startTimestamp, endTimestamp } = useLogPositionStateContext();
 
   // Keep it reasonably updated for the `now` case, but don't reload all the time when the user scrolls
   const throttledStartTimestamp = useThrottle(startTimestamp, FETCH_THROTTLE_INTERVAL);
@@ -36,7 +41,7 @@ export const WithSummary = ({
     logViewId,
     throttledStartTimestamp,
     throttledEndTimestamp,
-    filterQuery?.serializedQuery ?? null
+    serializedParsedQuery
   );
 
   return children({ buckets, start, end });

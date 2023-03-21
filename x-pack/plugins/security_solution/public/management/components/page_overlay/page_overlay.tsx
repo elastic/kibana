@@ -13,12 +13,17 @@ import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
 import type { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { TIMELINE_OVERRIDES_CSS_STYLESHEET } from '../../../common/components/page';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
+import {
+  FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET,
+  TIMELINE_EUI_POPOVER_PANEL_ZINDEX,
+  TIMELINE_OVERRIDES_CSS_STYLESHEET,
+} from '../../../common/components/page';
 import {
   SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME,
   TIMELINE_EUI_THEME_ZINDEX_LEVEL,
 } from '../../../timelines/components/timeline/styles';
-import { useIsMounted } from '../../hooks/use_is_mounted';
 
 const OverlayRootContainer = styled.div`
   border: none;
@@ -62,14 +67,21 @@ const OverlayRootContainer = styled.div`
     padding: ${({ theme: { eui } }) => eui.euiSizeXL};
   }
 
+  &.fullScreen {
+    top: 0;
+    height: 100%;
+  }
+
   .fullHeight {
     height: 100%;
   }
 `;
 
 const PAGE_OVERLAY_CSS_CLASSNAME = 'securitySolution-pageOverlay';
-const PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-isVisible`;
-const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-lock`;
+export const PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-isVisible`;
+export const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-lock`;
+export const PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-fullScreen`;
+export const PAGE_OVERLAY_DOCUMENT_BODY_OVER_PAGE_WRAPPER_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-overSecuritySolutionPageWrapper`;
 
 const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   body.${PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME} {
@@ -77,7 +89,30 @@ const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   }
 
   //-------------------------------------------------------------------------------------------
+  // Style overrides for when Page Overlay is shown over SecuritySolutionPageWrapper component
+  //-------------------------------------------------------------------------------------------
+  // That page wrapper includes several global EUI styles that can conflict with content shown
+  // from inside of this Page Overlay component.
+  //-------------------------------------------------------------------------------------------
+  // Eui Confirm Dialog mask overlay should be displayed above any other popovers
+  //-------------------------------------------------------------------------------------------
+  body.${PAGE_OVERLAY_DOCUMENT_BODY_OVER_PAGE_WRAPPER_CLASSNAME} .euiOverlayMask[data-relative-to-header="above"] {
+    z-index: ${TIMELINE_EUI_POPOVER_PANEL_ZINDEX};
+  }
+
+  //-------------------------------------------------------------------------------------------
+  // Style overrides for when Page Overlay is in full screen mode
+  //-------------------------------------------------------------------------------------------
+  // Needs to override some position of EUI components to ensure they are displayed correctly
+  // when the top Kibana header is not visible
+  //-------------------------------------------------------------------------------------------
+  body.${PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME} {
+    ${FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET}
+  }
+
+  //-------------------------------------------------------------------------------------------
   // TIMELINE SPECIFIC STYLES
+  //-------------------------------------------------------------------------------------------
   // The timeline overlay uses a custom z-index, which causes issues with any other content that
   // is normally appended to the 'document.body' directly (like popups, masks, flyouts, etc).
   // The styles below will be applied anytime the timeline is opened/visible and attempts to
@@ -89,6 +124,11 @@ const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
     .euiOverlayMask,
     .euiFlyout {
       z-index: ${({ theme: { eui } }) => eui[TIMELINE_EUI_THEME_ZINDEX_LEVEL]};
+    }
+
+    // Confirm Dialog mask overlay should be displayed above any other popover
+    .euiOverlayMask[data-relative-to-header="above"] {
+      z-index: ${TIMELINE_EUI_POPOVER_PANEL_ZINDEX};
     }
 
     // Other Timeline overrides from AppGlobalStyle:
@@ -113,6 +153,22 @@ const unSetDocumentBodyLock = () => {
   document.body.classList.remove(PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME);
 };
 
+const setDocumentBodyFullScreen = () => {
+  document.body.classList.add(PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME);
+};
+
+const unSetDocumentBodyFullScreen = () => {
+  document.body.classList.remove(PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME);
+};
+
+const setDocumentBodyOverPageWrapper = () => {
+  document.body.classList.add(PAGE_OVERLAY_DOCUMENT_BODY_OVER_PAGE_WRAPPER_CLASSNAME);
+};
+
+const unSetDocumentBodyOverPageWrapper = () => {
+  document.body.classList.remove(PAGE_OVERLAY_DOCUMENT_BODY_OVER_PAGE_WRAPPER_CLASSNAME);
+};
+
 export interface PageOverlayProps {
   children: ReactNode;
 
@@ -125,7 +181,7 @@ export interface PageOverlayProps {
   isHidden?: boolean;
 
   /**
-   * Setting this to `true` (defualt) will enable scrolling inside of the overlay
+   * Setting this to `true` (default) will enable scrolling inside of the overlay
    */
   enableScrolling?: boolean;
 
@@ -165,7 +221,8 @@ export interface PageOverlayProps {
 
 /**
  * A generic component for taking over the entire Kibana UI main content area (everything below the
- * top header that includes the breadcrumbs).
+ * top header that includes the breadcrumbs). This component adds nothing more than a blank page - its up
+ * to the `children` pass to actually display any type of intractable UI for the user.
  */
 export const PageOverlay = memo<PageOverlayProps>(
   ({
@@ -182,6 +239,7 @@ export const PageOverlay = memo<PageOverlayProps>(
   }) => {
     const { pathname } = useLocation();
     const isMounted = useIsMounted();
+    const showInFullScreen = useHasFullScreenContent();
     const [openedOnPathName, setOpenedOnPathName] = useState<null | string>(null);
     const portalEleRef = useRef<Node>();
 
@@ -204,6 +262,7 @@ export const PageOverlay = memo<PageOverlayProps>(
         [PAGE_OVERLAY_CSS_CLASSNAME]: true,
         scrolling: enableScrolling,
         hidden: isHidden,
+        fullScreen: showInFullScreen,
         'eui-scrollBar': enableScrolling,
         'padding-xs': paddingSize === 'xs',
         'padding-s': paddingSize === 's',
@@ -211,11 +270,11 @@ export const PageOverlay = memo<PageOverlayProps>(
         'padding-l': paddingSize === 'l',
         'padding-xl': paddingSize === 'xl',
       });
-    }, [enableScrolling, isHidden, paddingSize]);
+    }, [enableScrolling, isHidden, paddingSize, showInFullScreen]);
 
     // Capture the URL `pathname` that the overlay was opened for
     useEffect(() => {
-      if (isMounted) {
+      if (isMounted()) {
         setOpenedOnPathName((prevState) => {
           if (isHidden) {
             return null;
@@ -239,7 +298,7 @@ export const PageOverlay = memo<PageOverlayProps>(
     // If `hideOnUrlPathNameChange` is true, then determine if the pathname changed and if so, call `onHide()`
     useEffect(() => {
       if (
-        isMounted &&
+        isMounted() &&
         onHide &&
         hideOnUrlPathnameChange &&
         !isHidden &&
@@ -252,15 +311,29 @@ export const PageOverlay = memo<PageOverlayProps>(
 
     // Handle adding class names to the `document.body` DOM element
     useEffect(() => {
-      if (isMounted) {
+      if (isMounted()) {
+        const isOverSecuritySolutionPageWrapper = Boolean(
+          document.querySelector('.securitySolutionWrapper')
+        );
+
         if (isHidden) {
           unSetDocumentBodyOverlayIsVisible();
           unSetDocumentBodyLock();
+          unSetDocumentBodyFullScreen();
+          unSetDocumentBodyOverPageWrapper();
         } else {
           setDocumentBodyOverlayIsVisible();
 
           if (lockDocumentBody) {
             setDocumentBodyLock();
+          }
+
+          if (showInFullScreen) {
+            setDocumentBodyFullScreen();
+          }
+
+          if (isOverSecuritySolutionPageWrapper) {
+            setDocumentBodyOverPageWrapper();
           }
         }
       }
@@ -268,8 +341,10 @@ export const PageOverlay = memo<PageOverlayProps>(
       return () => {
         unSetDocumentBodyLock();
         unSetDocumentBodyOverlayIsVisible();
+        unSetDocumentBodyFullScreen();
+        unSetDocumentBodyOverPageWrapper();
       };
-    }, [isHidden, isMounted, lockDocumentBody]);
+    }, [isHidden, isMounted, lockDocumentBody, showInFullScreen]);
 
     return (
       <EuiPortal portalRef={setPortalEleRef}>

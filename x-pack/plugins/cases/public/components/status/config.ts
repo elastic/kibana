@@ -4,10 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { getStatusConfiguration } from '@kbn/cases-components';
 import { StatusAll } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
 import * as i18n from './translations';
-import { AllCaseStatus, Statuses } from './types';
+import type { AllCaseStatus, Statuses } from './types';
+
+const statusConfiguration = getStatusConfiguration();
 
 export const allCaseStatus: AllCaseStatus = {
   [StatusAll]: { color: 'hollow', label: i18n.ALL },
@@ -15,13 +18,8 @@ export const allCaseStatus: AllCaseStatus = {
 
 export const statuses: Statuses = {
   [CaseStatuses.open]: {
-    color: 'primary',
-    label: i18n.OPEN,
-    icon: 'folderOpen' as const,
+    ...statusConfiguration[CaseStatuses.open],
     actions: {
-      bulk: {
-        title: i18n.BULK_ACTION_OPEN_SELECTED,
-      },
       single: {
         title: i18n.OPEN_CASE,
       },
@@ -37,13 +35,8 @@ export const statuses: Statuses = {
     },
   },
   [CaseStatuses['in-progress']]: {
-    color: 'warning',
-    label: i18n.IN_PROGRESS,
-    icon: 'folderExclamation' as const,
+    ...statusConfiguration[CaseStatuses['in-progress']],
     actions: {
-      bulk: {
-        title: i18n.BULK_ACTION_MARK_IN_PROGRESS,
-      },
       single: {
         title: i18n.MARK_CASE_IN_PROGRESS,
       },
@@ -59,13 +52,8 @@ export const statuses: Statuses = {
     },
   },
   [CaseStatuses.closed]: {
-    color: 'default',
-    label: i18n.CLOSED,
-    icon: 'folderCheck' as const,
+    ...statusConfiguration[CaseStatuses.closed],
     actions: {
-      bulk: {
-        title: i18n.BULK_ACTION_CLOSE_SELECTED,
-      },
       single: {
         title: i18n.CLOSE_CASE,
       },

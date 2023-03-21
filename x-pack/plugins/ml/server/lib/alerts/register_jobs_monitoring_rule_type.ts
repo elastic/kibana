@@ -142,7 +142,10 @@ export function registerJobsMonitoringRuleType({
     isExportable: true,
     doesSetRecoveryContext: true,
     async executor(options) {
-      const { services, name } = options;
+      const {
+        services,
+        rule: { name },
+      } = options;
 
       const fakeRequest = {} as KibanaRequest;
       const { getTestsResults } = mlServicesProviders.jobsHealthServiceProvider(
@@ -176,6 +179,8 @@ export function registerJobsMonitoringRuleType({
           recoveredAlert.setContext(testResult.context);
         }
       }
+
+      return { state: {} };
     },
   });
 }

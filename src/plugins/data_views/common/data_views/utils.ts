@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { RuntimeField, RuntimeFieldSpec, RuntimeTypeExceptComposite } from '../types';
+import type { RuntimeField, RuntimeFieldSpec, RuntimePrimitiveTypes } from '../types';
 
 export const removeFieldAttrs = (runtimeField: RuntimeField): RuntimeFieldSpec => {
   const { type, script, fields } = runtimeField;
@@ -14,7 +14,7 @@ export const removeFieldAttrs = (runtimeField: RuntimeField): RuntimeFieldSpec =
     fields: Object.entries(fields).reduce((col, [fieldName, field]) => {
       col[fieldName] = { type: field.type };
       return col;
-    }, {} as Record<string, { type: RuntimeTypeExceptComposite }>),
+    }, {} as Record<string, { type: RuntimePrimitiveTypes }>),
   };
 
   return {

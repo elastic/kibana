@@ -9,7 +9,7 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
   Style,
-} from '@kbn/expressions-plugin';
+} from '@kbn/expressions-plugin/common';
 
 export type Input = number | string | null;
 

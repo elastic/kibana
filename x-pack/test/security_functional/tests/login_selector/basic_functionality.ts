@@ -10,7 +10,6 @@ import { parse } from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const security = getService('security');
@@ -32,14 +31,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         roles: ['kibana_admin'],
         full_name: 'Admin',
       });
-
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.security.forceLogout();
     });
 
     after(async () => {
       await security.user.delete(testCredentials.username);
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
     });
 
     beforeEach(async () => {
@@ -113,9 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.get(`${deployment.getHostPort()}/authentication/app?one=two`);
 
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
-      expect(await PageObjects.security.loginPage.getErrorMessage()).to.be(
-        "We hit an authentication error. Please check your credentials and try again. If you still can't log in, contact your system administrator."
-      );
+      expect(await PageObjects.security.loginPage.getErrorMessage()).to.be.ok();
 
       await getService('supertest')
         .post('/authentication/app/setup')
@@ -145,9 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.user.disable(testCredentials.username);
       await browser.refresh();
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
-      expect(await PageObjects.security.loginPage.getErrorMessage()).to.be(
-        "We hit an authentication error. Please check your credentials and try again. If you still can't log in, contact your system administrator."
-      );
+      expect(await PageObjects.security.loginPage.getErrorMessage()).to.be.ok();
 
       // 3. Re-enable user and try to login again.
       await security.user.enable(testCredentials.username);

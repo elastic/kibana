@@ -14,7 +14,6 @@ import { HttpSetup } from '@kbn/core/public';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { stubWebWorker } from '@kbn/test-jest-helpers';
 
-/* eslint-disable-next-line @kbn/eslint/no-restricted-paths */
 import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { uiMetricService, apiService } from '../../../services';
 import { Props } from '..';
@@ -99,6 +98,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async clickProcessorOutputTab() {
       await act(async () => {
         find('outputTab').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     },
@@ -113,6 +113,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async clickRunPipelineButton() {
       await act(async () => {
         find('runPipelineButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     },
@@ -120,6 +121,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async toggleVerboseSwitch() {
       await act(async () => {
         form.toggleEuiSwitch('verboseOutputToggle');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     },
@@ -128,6 +130,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       find('documentsEditor').simulate('change', {
         jsonString,
       });
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     },
 
     clickDocumentsDropdown() {
@@ -182,6 +185,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async clickAddDocumentButton() {
       await act(async () => {
         find('addDocumentButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
       component.update();
     },

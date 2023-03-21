@@ -8,7 +8,7 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { AlertsFlyout } from './alerts_flyout';
-import { AlertsField } from '../../../../types';
+import { Alert, AlertsField } from '../../../../types';
 
 const onClose = jest.fn();
 const onPaginate = jest.fn();
@@ -18,9 +18,10 @@ const props = {
     [AlertsField.reason]: ['two'],
     _id: '0123456789',
     _index: '.alerts-default',
-  },
+  } as unknown as Alert,
   alertsTableConfiguration: {
     id: 'test',
+    casesFeatureId: 'testCases',
     columns: [
       {
         id: AlertsField.name,
@@ -133,7 +134,7 @@ describe('AlertsFlyout', () => {
       await nextTick();
       wrapper.update();
     });
-    wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
+    wrapper.find('[data-test-subj="pagination-button-next"]').last().simulate('click');
     expect(onPaginate).toHaveBeenCalledWith(1);
   });
 
@@ -147,7 +148,7 @@ describe('AlertsFlyout', () => {
       await nextTick();
       wrapper.update();
     });
-    wrapper.find('[data-test-subj="pagination-button-previous"]').first().simulate('click');
+    wrapper.find('[data-test-subj="pagination-button-previous"]').last().simulate('click');
     expect(onPaginate).toHaveBeenCalledWith(0);
   });
 });

@@ -6,22 +6,36 @@
  */
 
 import React, { memo, useCallback } from 'react';
+import styled from 'styled-components';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 import { useWithSidePanel } from '../hooks/state_selectors/use_with_side_panel';
 import type { ConsoleProps } from '..';
 
-const HELP_LABEL = i18n.translate('xpack.securitySolution.console.layoutHeader.helpButtonLabel', {
+export const HELP_LABEL = i18n.translate(
+  'xpack.securitySolution.console.layoutHeader.helpButtonTitle',
+  { defaultMessage: 'Help' }
+);
+
+const HELP_TOOLTIP = i18n.translate('xpack.securitySolution.console.layoutHeader.helpButtonLabel', {
   defaultMessage: 'Show help',
 });
+
+const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
+  margin-left: auto;
+  height: inherit;
+`;
 
 export type ConsoleHeaderProps = Pick<ConsoleProps, 'TitleComponent'>;
 
 export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
   const dispatch = useConsoleStateDispatch();
   const panelCurrentlyShowing = useWithSidePanel().show;
+  const getTestId = useTestIdGenerator(useDataTestSubj('header'));
   const isHelpOpen = panelCurrentlyShowing === 'help';
 
   const handleHelpButtonOnClick = useCallback(() => {
@@ -38,24 +52,29 @@ export const ConsoleHeader = memo<ConsoleHeaderProps>(({ TitleComponent }) => {
       justifyContent="spaceBetween"
       responsive={false}
     >
-      <EuiFlexItem grow={1} className="eui-textTruncate">
+      <EuiFlexItem
+        grow={1}
+        className="eui-textTruncate noThemeOverrides"
+        data-test-subj={getTestId('titleComponentContainer')}
+      >
         {TitleComponent ? <TitleComponent /> : ''}
       </EuiFlexItem>
       {!isHelpOpen && (
         <EuiFlexItem grow={1}>
-          <EuiButtonEmpty
+          <StyledEuiButtonEmpty
             style={{ marginLeft: 'auto' }}
             onClick={handleHelpButtonOnClick}
             iconType="help"
-            title={HELP_LABEL}
-            aria-label={HELP_LABEL}
+            title={HELP_TOOLTIP}
+            aria-label={HELP_TOOLTIP}
             isSelected={isHelpOpen}
+            data-test-subj={getTestId('helpButton')}
           >
             <FormattedMessage
               id="xpack.securitySolution.console.layoutHeader.helpButtonTitle"
               defaultMessage="Help"
             />
-          </EuiButtonEmpty>
+          </StyledEuiButtonEmpty>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

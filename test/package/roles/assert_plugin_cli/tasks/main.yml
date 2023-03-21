@@ -1,0 +1,14 @@
+- name: "list"
+  become: true
+  command:
+    cmd: /usr/share/kibana/bin/kibana-plugin list
+  register: kibana_plugin_list
+
+- debug:
+    msg: "{{ kibana_plugin_list }}"
+
+- name: assert kibana-plugin lists installed plugins
+  assert:
+    that:
+      - kibana_plugin_list.failed == false
+      - kibana_plugin_list.stdout == "No plugins installed."

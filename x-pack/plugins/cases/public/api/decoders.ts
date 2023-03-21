@@ -11,12 +11,14 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { createToasterPlainError } from '../containers/utils';
 import { throwErrors } from '../../common';
-import {
+import type {
   CasesFindResponse,
-  CasesFindResponseRt,
   CasesStatusResponse,
-  CasesStatusResponseRt,
   CasesMetricsResponse,
+} from '../../common/api';
+import {
+  CasesFindResponseRt,
+  CasesStatusResponseRt,
   CasesMetricsResponseRt,
 } from '../../common/api';
 

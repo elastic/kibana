@@ -6,11 +6,11 @@
  */
 
 import { incidentTypes, severity } from '../../mock';
-import { Props } from '../api';
-import { ResilientIncidentTypes, ResilientSeverity } from '../types';
+import type { Props } from '../api';
+import type { ResilientIncidentTypes, ResilientSeverity } from '../types';
 
 export const getIncidentTypes = async (props: Props): Promise<{ data: ResilientIncidentTypes }> =>
-  Promise.resolve({ data: incidentTypes });
+  Promise.resolve({ data: incidentTypes, actionId: '1' });
 
 export const getSeverity = async (props: Props): Promise<{ data: ResilientSeverity }> =>
-  Promise.resolve({ data: severity });
+  Promise.resolve({ data: severity, actionId: '1' });

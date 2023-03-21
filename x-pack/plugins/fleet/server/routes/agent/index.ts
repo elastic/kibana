@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import type { FleetAuthz } from '../../../common';
+
+import { getRouteRequiredAuthz, type FleetAuthzRouter } from '../../services/security';
+
 import { AGENT_API_ROUTES } from '../../constants';
 import {
   GetAgentsRequestSchema,
+  GetTagsRequestSchema,
   GetOneAgentRequestSchema,
   UpdateAgentRequestSchema,
   DeleteAgentRequestSchema,
@@ -16,39 +21,52 @@ import {
   GetAgentStatusRequestSchema,
   GetAgentDataRequestSchema,
   PostNewAgentActionRequestSchema,
-  PutAgentReassignRequestSchema,
+  PutAgentReassignRequestSchemaDeprecated,
+  PostAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostAgentUpgradeRequestSchema,
   PostBulkAgentUpgradeRequestSchema,
   PostCancelActionRequestSchema,
+  GetActionStatusRequestSchema,
+  PostRequestDiagnosticsActionRequestSchema,
+  PostBulkRequestDiagnosticsActionRequestSchema,
+  ListAgentUploadsRequestSchema,
+  GetAgentUploadFileRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
-import type { FleetAuthzRouter } from '../security';
 
 import { PostBulkUpdateAgentTagsRequestSchema } from '../../types/rest_spec/agent';
 
+import { calculateRouteAuthz } from '../../services/security/security';
+
 import {
   getAgentsHandler,
+  getAgentTagsHandler,
   getAgentHandler,
   updateAgentHandler,
   deleteAgentHandler,
   getAgentStatusForAgentPolicyHandler,
-  putAgentsReassignHandler,
+  putAgentsReassignHandlerDeprecated,
   postBulkAgentsReassignHandler,
   getAgentDataHandler,
   bulkUpdateAgentTagsHandler,
+  getAvailableVersionsHandler,
+  getActionStatusHandler,
+  getAgentUploadsHandler,
+  getAgentUploadFileHandler,
+  postAgentsReassignHandler,
 } from './handlers';
 import {
   postNewAgentActionHandlerBuilder,
   postCancelActionHandlerBuilder,
 } from './actions_handlers';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
+import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 import {
-  getCurrentUpgradesHandler,
-  postAgentUpgradeHandler,
-  postBulkAgentsUpgradeHandler,
-} from './upgrade_handler';
+  bulkRequestDiagnosticsHandler,
+  requestDiagnosticsHandler,
+} from './request_diagnostics_handler';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   // Get one
@@ -106,6 +124,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     },
     getAgentsHandler
   );
+  // List Agent Tags
+  router.get(
+    {
+      path: AGENT_API_ROUTES.LIST_TAGS_PATTERN,
+      validate: GetTagsRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getAgentTagsHandler
+  );
 
   // Agent actions
   router.post(
@@ -120,6 +149,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       getAgent: AgentService.getAgentById,
       cancelAgentAction: AgentService.cancelAgentAction,
       createAgentAction: AgentService.createAgentAction,
+      getAgentActions: AgentService.getAgentActions,
     })
   );
 
@@ -135,6 +165,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       getAgent: AgentService.getAgentById,
       cancelAgentAction: AgentService.cancelAgentAction,
       createAgentAction: AgentService.createAgentAction,
+      getAgentActions: AgentService.getAgentActions,
     })
   );
 
@@ -149,15 +180,71 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     postAgentUnenrollHandler
   );
 
+  // mark as deprecated
   router.put(
     {
       path: AGENT_API_ROUTES.REASSIGN_PATTERN,
-      validate: PutAgentReassignRequestSchema,
+      validate: PutAgentReassignRequestSchemaDeprecated,
       fleetAuthz: {
         fleet: { all: true },
       },
     },
-    putAgentsReassignHandler
+    putAgentsReassignHandlerDeprecated
+  );
+
+  router.post(
+    {
+      path: AGENT_API_ROUTES.REASSIGN_PATTERN,
+      validate: PostAgentReassignRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    postAgentsReassignHandler
+  );
+
+  router.post(
+    {
+      path: AGENT_API_ROUTES.REQUEST_DIAGNOSTICS_PATTERN,
+      validate: PostRequestDiagnosticsActionRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    requestDiagnosticsHandler
+  );
+
+  router.post(
+    {
+      path: AGENT_API_ROUTES.BULK_REQUEST_DIAGNOSTICS_PATTERN,
+      validate: PostBulkRequestDiagnosticsActionRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    bulkRequestDiagnosticsHandler
+  );
+
+  router.get(
+    {
+      path: AGENT_API_ROUTES.LIST_UPLOADS_PATTERN,
+      validate: ListAgentUploadsRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getAgentUploadsHandler
+  );
+
+  router.get(
+    {
+      path: AGENT_API_ROUTES.GET_UPLOAD_FILE_PATTERN,
+      validate: GetAgentUploadFileRequestSchema,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getAgentUploadFileHandler
   );
 
   // Get agent status for policy
@@ -165,9 +252,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     {
       path: AGENT_API_ROUTES.STATUS_PATTERN,
       validate: GetAgentStatusRequestSchema,
-      fleetAuthz: {
-        fleet: { all: true },
-      },
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(
+          fleetAuthz,
+          getRouteRequiredAuthz('get', AGENT_API_ROUTES.STATUS_PATTERN)
+        ).granted,
     },
     getAgentStatusForAgentPolicyHandler
   );
@@ -215,16 +304,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     },
     postBulkAgentsUpgradeHandler
   );
-  // Current upgrades
+
+  // Current actions
   router.get(
     {
-      path: AGENT_API_ROUTES.CURRENT_UPGRADES_PATTERN,
-      validate: false,
+      path: AGENT_API_ROUTES.ACTION_STATUS_PATTERN,
+      validate: GetActionStatusRequestSchema,
       fleetAuthz: {
         fleet: { all: true },
       },
     },
-    getCurrentUpgradesHandler
+    getActionStatusHandler
   );
 
   // Bulk reassign
@@ -249,5 +339,17 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
       },
     },
     postBulkAgentsUnenrollHandler
+  );
+
+  // Available versions for upgrades
+  router.get(
+    {
+      path: AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
+      validate: false,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    getAvailableVersionsHandler
   );
 };

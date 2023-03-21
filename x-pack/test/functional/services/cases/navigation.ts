@@ -14,12 +14,16 @@ export function CasesNavigationProvider({ getPageObject, getService }: FtrProvid
   return {
     async navigateToApp(app: string = 'cases', appSelector: string = 'cases-app') {
       await common.navigateToApp(app);
-      await testSubjects.existOrFail(appSelector, { timeout: 2000 });
+      await testSubjects.existOrFail(appSelector);
     },
 
-    async navigateToConfigurationPage() {
-      await this.navigateToApp();
+    async navigateToConfigurationPage(app: string = 'cases', appSelector: string = 'cases-app') {
+      await this.navigateToApp(app, appSelector);
       await common.clickAndValidate('configure-case-button', 'case-configure-title');
+    },
+
+    async navigateToSingleCase(app: string = 'cases', caseId: string) {
+      await common.navigateToUrlWithBrowserHistory(app, caseId);
     },
   };
 }

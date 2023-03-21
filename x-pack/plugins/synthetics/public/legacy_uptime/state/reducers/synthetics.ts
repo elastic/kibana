@@ -9,19 +9,8 @@ import { createAction, handleActions, Action } from 'redux-actions';
 import {
   isScreenshotBlockDoc,
   ScreenshotBlockDoc,
+  ScreenshotBlockCache,
 } from '../../../../common/runtime_types/ping/synthetics';
-
-export interface PendingBlock {
-  status: 'pending' | 'loading';
-}
-
-export function isPendingBlock(data: unknown): data is PendingBlock {
-  return ['pending', 'loading'].some((s) => s === (data as PendingBlock)?.status);
-}
-export type StoreScreenshotBlock = ScreenshotBlockDoc | PendingBlock;
-export interface ScreenshotBlockCache {
-  [hash: string]: StoreScreenshotBlock;
-}
 
 export interface CacheHitCount {
   hash: string;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual, isUndefined, keyBy, pick } from 'lodash/fp';
+import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
@@ -15,7 +15,6 @@ import { Subscription } from 'rxjs';
 import type {
   BrowserField,
   BrowserFields,
-  DocValueFields,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -26,7 +25,7 @@ import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { getDataViewStateFromIndexFields } from './use_data_view';
 
-export type { BrowserField, BrowserFields, DocValueFields };
+export type { BrowserField, BrowserFields };
 
 export function getAllBrowserFields(browserFields: BrowserFields): Array<Partial<BrowserField>> {
   const result: Array<Partial<BrowserField>> = [];
@@ -44,16 +43,30 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[]): DataViewBase =>
+  (title: string, fields: IndexField[], _includeUnmapped: boolean = false): DataViewBase =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
-            pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
+            pick(
+              [
+                'name',
+                'searchable',
+                'type',
+                'aggregatable',
+                'esTypes',
+                'subType',
+                'conflictDescriptions',
+              ],
+              field
+            )
           ),
           title,
         }
       : { fields: [], title },
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
+  (newArgs, lastArgs) =>
+    newArgs[0] === lastArgs[0] &&
+    newArgs[1].length === lastArgs[1].length &&
+    newArgs[2] === lastArgs[2]
 );
 
 /**
@@ -84,35 +97,10 @@ export const getBrowserFields = memoizeOne(
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
-export const getDocValueFields = memoizeOne(
-  (_title: string, fields: IndexField[]): DocValueFields[] =>
-    fields && fields.length > 0
-      ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
-          if (field.readFromDocValues && accumulator.length < 100) {
-            return [
-              ...accumulator,
-              {
-                field: field.name,
-              },
-            ];
-          }
-          return accumulator;
-        }, [])
-      : [],
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
-);
-
-export const indicesExistOrDataTemporarilyUnavailable = (
-  indicesExist: boolean | null | undefined
-) => indicesExist || isUndefined(indicesExist);
-
 const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
-const DEFAULT_DOC_VALUE_FIELDS: DocValueFields[] = [];
-
 interface FetchIndexReturn {
   browserFields: BrowserFields;
-  docValueFields: DocValueFields[];
   indexes: string[];
   indexExists: boolean;
   indexPatterns: DataViewBase;
@@ -124,7 +112,9 @@ interface FetchIndexReturn {
  */
 export const useFetchIndex = (
   indexNames: string[],
-  onlyCheckIfIndicesExist: boolean = false
+  onlyCheckIfIndicesExist: boolean = false,
+  strategy: string = 'indexFields',
+  includeUnmapped: boolean = false
 ): [boolean, FetchIndexReturn] => {
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
@@ -134,7 +124,6 @@ export const useFetchIndex = (
 
   const [state, setState] = useState<FetchIndexReturn>({
     browserFields: DEFAULT_BROWSER_FIELDS,
-    docValueFields: DEFAULT_DOC_VALUE_FIELDS,
     indexes: indexNames,
     indexExists: true,
     indexPatterns: DEFAULT_INDEX_PATTERNS,
@@ -148,10 +137,10 @@ export const useFetchIndex = (
         setLoading(true);
         searchSubscription$.current = data.search
           .search<IndexFieldsStrategyRequest<'indices'>, IndexFieldsStrategyResponse>(
-            { indices: iNames, onlyCheckIfIndicesExist },
+            { indices: iNames, onlyCheckIfIndicesExist, includeUnmapped },
             {
               abortSignal: abortCtrl.current.signal,
-              strategy: 'indexFields',
+              strategy,
             }
           )
           .subscribe({
@@ -162,17 +151,21 @@ export const useFetchIndex = (
                     const stringifyIndices = response.indicesExist.sort().join();
 
                     previousIndexesName.current = response.indicesExist;
-                    const { browserFields, docValueFields } = getDataViewStateFromIndexFields(
+                    const { browserFields } = getDataViewStateFromIndexFields(
                       stringifyIndices,
-                      response.indexFields
+                      response.indexFields,
+                      includeUnmapped
                     );
                     setLoading(false);
                     setState({
                       browserFields,
-                      docValueFields,
                       indexes: response.indicesExist,
                       indexExists: response.indicesExist.length > 0,
-                      indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
+                      indexPatterns: getIndexFields(
+                        stringifyIndices,
+                        response.indexFields,
+                        includeUnmapped
+                      ),
                     });
 
                     searchSubscription$.current.unsubscribe();
@@ -197,7 +190,16 @@ export const useFetchIndex = (
       abortCtrl.current.abort();
       asyncSearch();
     },
-    [data.search, addError, addWarning, onlyCheckIfIndicesExist, setLoading, setState]
+    [
+      data.search,
+      addError,
+      addWarning,
+      onlyCheckIfIndicesExist,
+      includeUnmapped,
+      setLoading,
+      setState,
+      strategy,
+    ]
   );
 
   useEffect(() => {

@@ -1,0 +1,21 @@
+title: Action response properties
+description: The properties vary depending on the action type.        
+type: object
+properties:
+  actionTypeId:
+    type: string
+  config:
+    type: object
+  id:
+    type: string
+  isDeprecated:
+    type: boolean
+    description: Indicates whether the action type is deprecated.
+  isMissingSecrets:
+    type: boolean
+    description: Indicates whether secrets are missing for the action.
+  isPreconfigured:
+    type: boolean
+    description: Indicates whether it is a preconfigured action.
+  name:
+    type: string

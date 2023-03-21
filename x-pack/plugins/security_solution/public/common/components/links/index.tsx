@@ -8,8 +8,11 @@
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 import type { SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { isArray, isNil } from 'lodash/fp';
+import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
+import { AlertsCasesTourSteps, SecurityStepId } from '../guided_onboarding_tour/tour_config';
+import { useTourContext } from '../guided_onboarding_tour';
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
@@ -38,8 +41,8 @@ import {
   LinkButton,
   ReputationLinksOverflow,
 } from './helpers';
-import type { HostsTableType } from '../../../hosts/store/model';
-import type { UsersTableType } from '../../../users/store/model';
+import type { HostsTableType } from '../../../explore/hosts/store/model';
+import type { UsersTableType } from '../../../explore/users/store/model';
 
 export { LinkButton, LinkAnchor } from './helpers';
 
@@ -47,6 +50,9 @@ export const DEFAULT_NUMBER_OF_LINK = 5;
 
 /** The default max-height of the Reputation Links popover used to show "+n More" items (e.g. `+9 More`) */
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
+
+const isModified = (event: MouseEvent) =>
+  event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
 
 // Internal Links
 const UserDetailsLinkComponent: React.FC<{
@@ -213,32 +219,24 @@ const NetworkDetailsLinkComponent: React.FC<{
   onClick?: (e: SyntheticEvent) => void | undefined;
   title?: string;
 }> = ({ Component, children, ip, flowTarget = FlowTarget.source, isButton, onClick, title }) => {
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.network);
-  const { navigateToApp } = useKibana().services.application;
-  const goToNetworkDetails = useCallback(
-    (ev, cIp: string) => {
-      ev.preventDefault();
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.network,
-        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)), flowTarget, search),
-      });
-    },
-    [flowTarget, navigateToApp, search]
-  );
-  const getHref = useCallback(
-    (cIp: string) => formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)))),
-    [formatUrl]
-  );
+  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
   const getLink = useCallback(
-    (cIp: string, i: number) =>
-      isButton ? (
+    (cIp: string, i: number) => {
+      const { onClick: onClickNavigation, href } = getSecuritySolutionLinkProps({
+        deepLinkId: SecurityPageName.network,
+        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)), flowTarget),
+      });
+
+      const onLinkClick = onClick ?? ((e: SyntheticEvent) => onClickNavigation(e as MouseEvent));
+
+      return isButton ? (
         <GenericLinkButton
           Component={Component}
           key={`${cIp}-${i}`}
           dataTestSubj="data-grid-network-details"
-          onClick={onClick ?? ((e: SyntheticEvent) => goToNetworkDetails(e, cIp))}
-          href={getHref(cIp)}
+          onClick={onLinkClick}
+          href={href}
           title={title ?? cIp}
         >
           {children}
@@ -246,14 +244,15 @@ const NetworkDetailsLinkComponent: React.FC<{
       ) : (
         <LinkAnchor
           key={`${cIp}-${i}`}
-          onClick={onClick ?? ((e: SyntheticEvent) => goToNetworkDetails(e, cIp))}
-          href={getHref(cIp)}
+          onClick={onLinkClick}
+          href={href}
           data-test-subj="network-details"
         >
           {children ? children : cIp}
         </LinkAnchor>
-      ),
-    [Component, children, getHref, goToNetworkDetails, isButton, onClick, title]
+      );
+    },
+    [children, Component, flowTarget, getSecuritySolutionLinkProps, onClick, isButton, title]
   );
   return isArray(ip) ? <>{ip.map(getLink)}</> : getLink(ip, 0);
 };
@@ -264,12 +263,22 @@ const CaseDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   detailName: string;
   title?: string;
-}> = ({ children, detailName, title }) => {
+  index?: number;
+}> = ({ index, children, detailName, title }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
+  const { activeStep, isTourShown } = useTourContext();
+  const isTourStepActive = useMemo(
+    () =>
+      activeStep === AlertsCasesTourSteps.viewCase &&
+      isTourShown(SecurityStepId.alertsCases) &&
+      index === 0,
+    [activeStep, index, isTourShown]
+  );
+
   const goToCaseDetails = useCallback(
-    async (ev) => {
-      ev.preventDefault();
+    async (ev?) => {
+      if (ev) ev.preventDefault();
       return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         path: getCaseDetailsUrl({ id: detailName, search }),
@@ -278,15 +287,27 @@ const CaseDetailsLinkComponent: React.FC<{
     [detailName, navigateToApp, search]
   );
 
+  useEffect(() => {
+    if (isTourStepActive)
+      document.querySelector(`[tour-step="RelatedCases-accordion"]`)?.scrollIntoView();
+  }, [isTourStepActive]);
+
   return (
-    <LinkAnchor
+    <GuidedOnboardingTourStep
       onClick={goToCaseDetails}
-      href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
-      data-test-subj="case-details-link"
-      aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
+      isTourAnchor={isTourStepActive}
+      step={AlertsCasesTourSteps.viewCase}
+      tourId={SecurityStepId.alertsCases}
     >
-      {children ? children : detailName}
-    </LinkAnchor>
+      <LinkAnchor
+        onClick={goToCaseDetails}
+        href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
+        data-test-subj="case-details-link"
+        aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
+      >
+        {children ? children : detailName}
+      </LinkAnchor>
+    </GuidedOnboardingTourStep>
   );
 };
 export const CaseDetailsLink = React.memo(CaseDetailsLinkComponent);
@@ -550,6 +571,10 @@ export const useGetSecuritySolutionLinkProps = (): GetSecuritySolutionProps => {
       return {
         href: url,
         onClick: (ev: MouseEvent) => {
+          if (isModified(ev)) {
+            return;
+          }
+
           ev.preventDefault();
           navigateTo({ url });
           if (onClickProps) {

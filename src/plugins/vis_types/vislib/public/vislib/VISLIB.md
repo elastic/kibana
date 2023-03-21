@@ -1,6 +1,6 @@
 # Charts supported
 
-Vislib supports the gauge/goal charts from the aggregation-based visualizations. It also contains the legacy implemementation of the pie and heatmap chart (enabled by the visualization:visualize:legacyPieChartsLibrary and visualization:visualize:legacyHeatmapChartsLibrary advanced setting respectively).
+Vislib supports the gauge/goal charts from the aggregation-based visualizations. It also contains the legacy implemementation of the heatmap chart (enabled by the visualization:visualize:legacyHeatmapChartsLibrary advanced setting).
 
 # General overview
 
@@ -12,11 +12,10 @@ Vislib supports the gauge/goal charts from the aggregation-based visualizations.
 
 ## Visualizations
 
-Each base vis type (`lib/types`) can have a different layout defined (`lib/layout`) and different building blocks (pie charts dont have axes for example)
+Each base vis type (`lib/types`) can have a different layout defined (`lib/layout`) and different building blocks
 
 All base visualizations extend from `visualizations/_chart`
 
-### Pie chart
 
 ### Map
 

@@ -6,6 +6,9 @@ Access agreement is a https://www.elastic.co/subscriptions[subscription feature]
 agreement before accessing {kib}. The agreement text supports Markdown format and can be specified using the
 `xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message` setting.
 
+You can specify a default access agreement  using the `xpack.security.accessAgreement.message` setting. 
+This message will be used for each provider who doesn't specify an access agreement.
+
 [NOTE]
 ============================================================================
 You need to acknowledge the access agreement only once per session, and {kib} reports the acknowledgement in the audit logs.

@@ -25,14 +25,17 @@ export const ModelMemoryLimitInput: FC = () => {
   useEffect(() => {
     jobCreator.modelMemoryLimit = modelMemoryLimit === '' ? null : modelMemoryLimit;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelMemoryLimit]);
 
   useEffect(() => {
     setModelMemoryLimit(jobCreator.modelMemoryLimit === null ? '' : jobCreator.modelMemoryLimit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
     setValidation(jobValidator.modelMemoryLimit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   return (

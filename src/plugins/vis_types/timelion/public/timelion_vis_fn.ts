@@ -22,6 +22,7 @@ export interface TimelionRenderValue {
   visType: 'timelion';
   visParams: TimelionVisParams;
   syncTooltips: boolean;
+  syncCursor: boolean;
 }
 
 export interface TimelionVisParams {
@@ -75,6 +76,7 @@ export const getTimelionVisualizationConfig = (
       variables,
       abortSignal: expressionAbortSignal,
       isSyncTooltipsEnabled,
+      isSyncCursorEnabled,
     }
   ) {
     const { getTimelionRequestHandler } = await import('./async_services');
@@ -114,6 +116,7 @@ export const getTimelionVisualizationConfig = (
         visType: TIMELION_VIS_NAME,
         visData,
         syncTooltips: isSyncTooltipsEnabled?.() ?? false,
+        syncCursor: isSyncTooltipsEnabled?.() ?? true,
       },
     };
   },

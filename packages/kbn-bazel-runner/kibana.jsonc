@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/bazel-runner",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations"
+}

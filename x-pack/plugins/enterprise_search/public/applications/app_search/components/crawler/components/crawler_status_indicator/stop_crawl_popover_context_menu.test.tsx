@@ -9,7 +9,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import {
-  EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
@@ -33,7 +32,7 @@ describe('StopCrawlsPopoverContextMenu', () => {
   it('can be opened to stop crawls', () => {
     const wrapper = mountWithIntl(<StopCrawlPopoverContextMenu stopCrawl={stopCrawl} />);
 
-    wrapper.find(EuiButton).simulate('click');
+    wrapper.find('button').simulate('click');
 
     expect(wrapper.find(EuiPopover).prop('isOpen')).toEqual(true);
 

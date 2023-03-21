@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ebtServerHelper = getService('kibana_ebt_server');
 
   describe('Core Context Providers', () => {
-    let event: Event;
+    let event: Event<Record<string, unknown>>;
     before(async () => {
       let i = 2;
       do {

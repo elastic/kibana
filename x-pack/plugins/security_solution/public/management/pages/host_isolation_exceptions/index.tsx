@@ -6,7 +6,7 @@
  */
 
 import { Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
 import React, { memo } from 'react';
 import { ENDPOINTS_PATH, SecurityPageName } from '../../../../common/constants';
 import { useLinkExists } from '../../../common/links/links';
@@ -18,6 +18,7 @@ import { HostIsolationExceptionsList } from './view/host_isolation_exceptions_li
  * Provides the routing container for the hosts related views
  */
 export const HostIsolationExceptionsContainer = memo(() => {
+  // TODO: Probably should not silently redirect here
   const canAccessHostIsolationExceptionsLink = useLinkExists(
     SecurityPageName.hostIsolationExceptions
   );

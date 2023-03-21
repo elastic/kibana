@@ -6,25 +6,22 @@
  * Side Public License, v 1.
  */
 import { useMemo, useEffect, useState, useCallback } from 'react';
-import { isEqual } from 'lodash';
 import { History } from 'history';
-import { getState } from '../services/discover_state';
-import { getStateDefaults } from '../utils/get_state_defaults';
-import { DiscoverServices } from '../../../build_services';
-import { SavedSearch, getSavedSearch } from '../../../services/saved_searches';
-import { loadIndexPattern } from '../utils/resolve_index_pattern';
-import { useSavedSearch as useSavedSearchData } from './use_saved_search';
-import {
-  MODIFY_COLUMNS_ON_SWITCH,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SEARCH_ON_PAGE_LOAD_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '../../../../common';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
+import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
+import { buildStateSubscribe } from './utils/build_state_subscribe';
+import { changeDataView } from './utils/change_data_view';
 import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
-import { getSwitchIndexPatternAppState } from '../utils/get_switch_index_pattern_app_state';
-import { SortPairArr } from '../../../components/doc_table/utils/get_sort';
+import { useTextBasedQueryLanguage } from './use_text_based_query_language';
+import { useUrlTracking } from './use_url_tracking';
+import { getDiscoverStateContainer } from '../services/discover_state';
+import { getStateDefaults } from '../utils/get_state_defaults';
+import { DiscoverServices } from '../../../build_services';
 import { DataTableRecord } from '../../../types';
+import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
+import { useAdHocDataViews } from './use_adhoc_data_views';
 
 export function useDiscoverState({
   services,
@@ -37,66 +34,80 @@ export function useDiscoverState({
   history: History;
   setExpandedDoc: (doc?: DataTableRecord) => void;
 }) {
-  const { uiSettings: config, data, filterManager, indexPatterns, storage } = services;
-  const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
-  const { timefilter } = data.query.timefilter;
+  const { data, filterManager, dataViews, toastNotifications, trackUiMetric } = services;
 
-  const indexPattern = savedSearch.searchSource.getField('index')!;
+  const dataView = savedSearch.searchSource.getField('index')!;
 
   const searchSource = useMemo(() => {
-    savedSearch.searchSource.setField('index', indexPattern);
+    savedSearch.searchSource.setField('index', dataView);
     return savedSearch.searchSource.createChild();
-  }, [savedSearch, indexPattern]);
+  }, [savedSearch, dataView]);
 
-  const stateContainer = useMemo(
-    () =>
-      getState({
-        getStateDefaults: () =>
-          getStateDefaults({
-            config,
-            data,
-            savedSearch,
-            storage,
-          }),
-        storeInSessionStorage: config.get('state:storeInSessionStorage'),
-        history,
-        toasts: services.core.notifications.toasts,
-        uiSettings: config,
-      }),
-    [config, data, history, savedSearch, services.core.notifications.toasts, storage]
-  );
+  const stateContainer = useMemo(() => {
+    const container = getDiscoverStateContainer({
+      history,
+      savedSearch,
+      services,
+    });
+    const nextDataView = savedSearch.searchSource.getField('index')!;
+    container.actions.setDataView(nextDataView);
+    if (!nextDataView.isPersisted()) {
+      container.actions.appendAdHocDataViews(nextDataView);
+    }
+    return container;
+  }, [history, savedSearch, services]);
 
-  const { appStateContainer } = stateContainer;
+  const { setUrlTracking } = useUrlTracking(savedSearch, dataView);
 
-  const [state, setState] = useState(appStateContainer.getState());
+  const { appState, searchSessionManager } = stateContainer;
+
+  const [state, setState] = useState(appState.getState());
 
   /**
    * Search session logic
    */
-  const searchSessionManager = useSearchSession({ services, history, stateContainer, savedSearch });
+  useSearchSession({ services, stateContainer, savedSearch });
 
-  const initialFetchStatus: FetchStatus = useMemo(() => {
-    // A saved search is created on every page load, so we check the ID to see if we're loading a
-    // previously saved search or if it is just transient
-    const shouldSearchOnPageLoad =
-      config.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      savedSearch.id !== undefined ||
-      timefilter.getRefreshInterval().pause === false ||
-      searchSessionManager.hasSearchSessionIdInURL();
-    return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
-  }, [config, savedSearch.id, searchSessionManager, timefilter]);
+  /**
+   * Adhoc data views functionality
+   */
+  const isTextBasedMode = state?.query && isOfAggregateQueryType(state?.query);
+  const { persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
+    dataView,
+    dataViews,
+    stateContainer,
+    savedSearch,
+    setUrlTracking,
+    filterManager,
+    toastNotifications,
+    trackUiMetric,
+    isTextBasedMode,
+  });
+
+  /**
+   * Updates data views selector state
+   */
+  const updateDataViewList = useCallback(
+    async (newAdHocDataViews: DataView[]) => {
+      await stateContainer.actions.loadDataViewList();
+      stateContainer.actions.setAdHocDataViews(newAdHocDataViews);
+    },
+    [stateContainer.actions]
+  );
 
   /**
    * Data fetching logic
    */
-  const { data$, refetch$, reset, inspectorAdapters } = useSavedSearchData({
-    initialFetchStatus,
-    searchSessionManager,
-    savedSearch,
-    searchSource,
-    services,
+  const { data$, refetch$, reset, inspectorAdapters, initialFetchStatus } =
+    stateContainer.dataState;
+  /**
+   * State changes (data view, columns), when a text base query result is returned
+   */
+  useTextBasedQueryLanguage({
+    documents$: data$.documents$,
+    dataViews,
     stateContainer,
-    useNewFieldsApi,
+    savedSearch,
   });
 
   /**
@@ -109,54 +120,40 @@ export function useDiscoverState({
    * or dataView / savedSearch switch
    */
   useEffect(() => {
-    const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
-    setState(stateContainer.appStateContainer.getState());
+    const stopSync = stateContainer.actions.initializeAndSync(dataView, filterManager, data);
+    setState(stateContainer.appState.getState());
 
     return () => stopSync();
-  }, [stateContainer, filterManager, data, indexPattern]);
+  }, [stateContainer, filterManager, data, dataView]);
+
+  /**
+   * Data store subscribing to trigger fetching
+   */
+  useEffect(() => {
+    const stopSync = stateContainer.dataState.subscribe();
+    return () => stopSync();
+  }, [stateContainer]);
 
   /**
    * Track state changes that should trigger a fetch
    */
   useEffect(() => {
-    const unsubscribe = appStateContainer.subscribe(async (nextState) => {
-      const { hideChart, interval, sort, index } = state;
-      // chart was hidden, now it should be displayed, so data is needed
-      const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
-      const chartIntervalChanged = nextState.interval !== interval;
-      const docTableSortChanged = !isEqual(nextState.sort, sort);
-      const indexPatternChanged = !isEqual(nextState.index, index);
-      // NOTE: this is also called when navigating from discover app to context app
-      if (nextState.index && indexPatternChanged) {
-        /**
-         *  Without resetting the fetch state, e.g. a time column would be displayed when switching
-         *  from a index pattern without to a index pattern with time filter for a brief moment
-         *  That's because appState is updated before savedSearchData$
-         *  The following line of code catches this, but should be improved
-         */
-        const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns, config);
-        savedSearch.searchSource.setField('index', nextIndexPattern.loaded);
-
-        reset();
-      }
-
-      if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
-        refetch$.next(undefined);
-      }
-      setState(nextState);
-    });
+    const unsubscribe = appState.subscribe(
+      buildStateSubscribe({ stateContainer, savedSearch, setState })
+    );
     return () => unsubscribe();
-  }, [
-    config,
-    indexPatterns,
-    appStateContainer,
-    setState,
-    state,
-    refetch$,
-    data$,
-    reset,
-    savedSearch.searchSource,
-  ]);
+  }, [appState, savedSearch, services, stateContainer]);
+
+  /**
+   * Function triggered when user changes data view in the sidebar
+   */
+  const onChangeDataView = useCallback(
+    async (id: string) => {
+      await changeDataView(id, { services, discoverState: stateContainer, setUrlTracking });
+      setExpandedDoc(undefined);
+    },
+    [services, setExpandedDoc, setUrlTracking, stateContainer]
+  );
 
   /**
    * function to revert any changes to a given saved search
@@ -167,43 +164,27 @@ export function useDiscoverState({
         search: services.data.search,
         savedObjectsClient: services.core.savedObjects.client,
         spaces: services.spaces,
+        savedObjectsTagging: services.savedObjectsTagging,
       });
 
-      const newIndexPattern = newSavedSearch.searchSource.getField('index') || indexPattern;
-      newSavedSearch.searchSource.setField('index', newIndexPattern);
+      const newDataView = newSavedSearch.searchSource.getField('index') || dataView;
+      newSavedSearch.searchSource.setField('index', newDataView);
       const newAppState = getStateDefaults({
-        config,
-        data,
         savedSearch: newSavedSearch,
-        storage,
+        services,
       });
-      await stateContainer.replaceUrlAppState(newAppState);
+
+      restoreStateFromSavedSearch({
+        savedSearch: newSavedSearch,
+        timefilter: services.timefilter,
+      });
+
+      await stateContainer.appState.update(newAppState, true);
       setState(newAppState);
     },
-    [services, indexPattern, config, data, storage, stateContainer]
+    [services, dataView, stateContainer]
   );
 
-  /**
-   * Function triggered when user changes index pattern in the sidebar
-   */
-  const onChangeIndexPattern = useCallback(
-    async (id: string) => {
-      const nextIndexPattern = await indexPatterns.get(id);
-      if (nextIndexPattern && indexPattern) {
-        const nextAppState = getSwitchIndexPatternAppState(
-          indexPattern,
-          nextIndexPattern,
-          state.columns || [],
-          (state.sort || []) as SortPairArr[],
-          config.get(MODIFY_COLUMNS_ON_SWITCH),
-          config.get(SORT_DEFAULT_ORDER_SETTING)
-        );
-        stateContainer.setAppState(nextAppState);
-      }
-      setExpandedDoc(undefined);
-    },
-    [config, indexPattern, indexPatterns, setExpandedDoc, state.columns, state.sort, stateContainer]
-  );
   /**
    * Function triggered when the user changes the query in the search bar
    */
@@ -218,25 +199,33 @@ export function useDiscoverState({
   );
 
   /**
-   * Trigger data fetching on indexPattern or savedSearch changes
+   * Trigger data fetching on dataView or savedSearch changes
    */
   useEffect(() => {
-    if (indexPattern) {
+    if (dataView && initialFetchStatus === FetchStatus.LOADING) {
       refetch$.next(undefined);
     }
-  }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
+  }, [initialFetchStatus, refetch$, dataView, savedSearch.id]);
+
+  /**
+   * We need to make sure the auto refresh interval is disabled for
+   * non-time series data or rollups since we don't show the date picker
+   */
+  useEffect(() => {
+    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
+      stateContainer.actions.pauseAutoRefreshInterval();
+    }
+  }, [dataView, stateContainer]);
 
   return {
-    data$,
-    indexPattern,
     inspectorAdapters,
-    refetch$,
     resetSavedSearch,
-    onChangeIndexPattern,
+    onChangeDataView,
     onUpdateQuery,
     searchSource,
-    setState,
-    state,
     stateContainer,
+    persistDataView,
+    updateAdHocDataViewId,
+    updateDataViewList,
   };
 }

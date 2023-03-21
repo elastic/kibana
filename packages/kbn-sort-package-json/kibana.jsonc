@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/sort-package-json",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations"
+}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { isEmpty } from 'lodash/fp';
-import { BrowserField, BrowserFields } from './types';
 
 export const FIELD_BROWSER_WIDTH = 925;
 export const TABLE_HEIGHT = 260;

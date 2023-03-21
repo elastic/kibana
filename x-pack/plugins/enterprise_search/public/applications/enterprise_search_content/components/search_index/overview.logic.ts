@@ -8,11 +8,18 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
+import { KibanaLogic } from '../../../shared/kibana';
 
 import { GenerateApiKeyLogic } from '../../api/generate_api_key/generate_api_key_logic';
-import { FetchIndexApiLogic, IndexData } from '../../api/index/fetch_index_api_logic';
+import {
+  CachedFetchIndexApiLogic,
+  CachedFetchIndexApiLogicActions,
+} from '../../api/index/cached_fetch_index_api_logic';
+
+import { SEARCH_INDICES_PATH } from '../../routes';
 
 interface OverviewLogicActions {
+  apiError: CachedFetchIndexApiLogicActions['apiError'];
   apiReset: typeof GenerateApiKeyLogic.actions.apiReset;
   closeGenerateModal: void;
   openGenerateModal: void;
@@ -24,14 +31,13 @@ interface OverviewLogicValues {
   apiKey: string;
   apiKeyData: typeof GenerateApiKeyLogic.values.data;
   apiKeyStatus: typeof GenerateApiKeyLogic.values.status;
-  data: typeof FetchIndexApiLogic.values.data;
-  indexData: IndexData;
+  indexData: typeof CachedFetchIndexApiLogic.values.indexData;
   isClientsPopoverOpen: boolean;
+  isError: boolean;
   isGenerateModalOpen: boolean;
   isLoading: boolean;
   isManageKeysPopoverOpen: boolean;
-  isSuccess: boolean;
-  status: typeof FetchIndexApiLogic.values.status;
+  status: typeof CachedFetchIndexApiLogic.values.status;
 }
 
 export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogicActions>>({
@@ -42,15 +48,20 @@ export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogi
     toggleManageApiKeyPopover: true,
   },
   connect: {
-    actions: [GenerateApiKeyLogic, ['apiReset']],
+    actions: [CachedFetchIndexApiLogic, ['apiError'], GenerateApiKeyLogic, ['apiReset']],
     values: [
-      FetchIndexApiLogic,
-      ['data', 'status'],
+      CachedFetchIndexApiLogic,
+      ['indexData', 'status'],
       GenerateApiKeyLogic,
       ['data as apiKeyData', 'status as apiKeyStatus'],
     ],
   },
   listeners: ({ actions }) => ({
+    apiError: async (_, breakpoint) => {
+      // show error for a second before navigating away
+      await breakpoint(1000);
+      KibanaLogic.values.navigateToUrl(SEARCH_INDICES_PATH);
+    },
     openGenerateModal: () => {
       actions.apiReset();
     },
@@ -82,10 +93,13 @@ export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogi
     apiKey: [
       () => [selectors.apiKeyStatus, selectors.apiKeyData],
       (apiKeyStatus, apiKeyData) =>
-        apiKeyStatus === Status.SUCCESS ? apiKeyData.apiKey.api_key : '',
+        apiKeyStatus === Status.SUCCESS ? apiKeyData.apiKey.encoded : '',
     ],
-    indexData: [() => [selectors.data], (data) => data],
-    isLoading: [() => [selectors.status], (status) => status === Status.LOADING],
-    isSuccess: [() => [selectors.status], (status) => status === Status.SUCCESS],
+    isError: [() => [selectors.status], (status) => status === Status.ERROR],
+    isLoading: [
+      () => [selectors.status, selectors.indexData],
+      (status, data) =>
+        status === Status.IDLE || (typeof data === 'undefined' && status === Status.LOADING),
+    ],
   }),
 });

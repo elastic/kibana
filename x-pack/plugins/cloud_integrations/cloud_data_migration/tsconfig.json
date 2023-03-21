@@ -1,0 +1,26 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    // required plugins
+    "@kbn/cloud-plugin",
+    "@kbn/management-plugin",
+    "@kbn/features-plugin",
+    // required bundles
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

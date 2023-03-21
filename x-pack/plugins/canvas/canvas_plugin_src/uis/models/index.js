@@ -11,5 +11,14 @@ import { tagcloud } from './tagcloud';
 import { metricVis } from './metric_vis';
 import { heatmapLegend } from './heatmap_legend';
 import { heatmapGrid } from './heatmap_grid';
+import { partitionLabels } from './partition_labels';
 
-export const modelSpecs = [pointseries, math, tagcloud, metricVis, heatmapLegend, heatmapGrid];
+export const modelSpecs = [
+  pointseries,
+  math,
+  tagcloud,
+  metricVis,
+  heatmapLegend,
+  heatmapGrid,
+  partitionLabels,
+];

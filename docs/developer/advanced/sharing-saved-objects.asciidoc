@@ -4,6 +4,9 @@
 This guide describes the "Sharing saved objects" effort, and the breaking changes that plugin developers need to be aware of for the planned
 8.0 release of {kib}. It also describes how developers can take advantage of this feature.
 
+From 8.7.0, as a step towards _zero downtime upgrades_, plugins are no longer allowed to update existing single space saved object types to become shareable.
+Note that new saved object types can still be defined as `'multiple'` or `'multiple-isolated'`.
+
 [[sharing-saved-objects-overview]]
 === Overview
 
@@ -284,10 +287,10 @@ const getLegacyUrlConflictCallout = () => {
 return (
   <EuiPage>
     <EuiPageBody>
-      <EuiPageContent>
+      <EuiPageSection>
         {/* If we have a legacy URL conflict callout to display, show it at the top of the page */}
         {getLegacyUrlConflictCallout()}
-        <EuiPageContentHeader>
+        <EuiPageHeader>
 ...
 );
 ```

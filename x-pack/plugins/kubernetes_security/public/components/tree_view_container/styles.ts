@@ -16,15 +16,11 @@ export const useStyles = () => {
     const { border } = euiTheme;
 
     const outerPanel: CSSObject = {
-      minHeight: '500px',
+      minHeight: '262px',
     };
 
     const navPanel: CSSObject = {
       borderRight: border.thin,
-    };
-
-    const treeViewNav: CSSObject = {
-      width: '316px',
     };
 
     const sessionsPanel: CSSObject = {
@@ -34,7 +30,6 @@ export const useStyles = () => {
     return {
       outerPanel,
       navPanel,
-      treeViewNav,
       sessionsPanel,
     };
   }, [euiTheme]);

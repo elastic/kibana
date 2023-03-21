@@ -17,6 +17,7 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { TimelineHeader } from '.';
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { waitFor } from '@testing-library/react';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
@@ -25,6 +26,11 @@ jest.mock('../../../../common/lib/kibana');
 describe('Header', () => {
   const indexPattern = mockIndexPattern;
   const mount = useMountAppended();
+  const getWrapper = async (childrenComponent: JSX.Element) => {
+    const wrapper = mount(childrenComponent);
+    await waitFor(() => wrapper.find('[data-test-subj="timelineCallOutUnauthorized"]').exists());
+    return wrapper;
+  };
   const props = {
     browserFields: {},
     dataProviders: mockDataProviders,
@@ -48,9 +54,9 @@ describe('Header', () => {
       expect(wrapper).toMatchSnapshot();
     });
 
-    test('it renders the data providers when show is true', () => {
+    test('it renders the data providers when show is true', async () => {
       const testProps = { ...props, show: true };
-      const wrapper = mount(
+      const wrapper = await getWrapper(
         <TestProviders>
           <TimelineHeader {...testProps} />
         </TestProviders>
@@ -59,14 +65,14 @@ describe('Header', () => {
       expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toEqual(true);
     });
 
-    test('it renders the unauthorized call out providers', () => {
+    test('it renders the unauthorized call out providers', async () => {
       const testProps = {
         ...props,
         filterManager: new FilterManager(mockUiSettingsForFilterManager),
         showCallOutUnauthorizedMsg: true,
       };
 
-      const wrapper = mount(
+      const wrapper = await getWrapper(
         <TestProviders>
           <TimelineHeader {...testProps} />
         </TestProviders>
@@ -75,14 +81,14 @@ describe('Header', () => {
       expect(wrapper.find('[data-test-subj="timelineCallOutUnauthorized"]').exists()).toEqual(true);
     });
 
-    test('it renders the unauthorized call out with correct icon', () => {
+    test('it renders the unauthorized call out with correct icon', async () => {
       const testProps = {
         ...props,
         filterManager: new FilterManager(mockUiSettingsForFilterManager),
         showCallOutUnauthorizedMsg: true,
       };
 
-      const wrapper = mount(
+      const wrapper = await getWrapper(
         <TestProviders>
           <TimelineHeader {...testProps} />
         </TestProviders>
@@ -93,14 +99,14 @@ describe('Header', () => {
       ).toEqual('alert');
     });
 
-    test('it renders the unauthorized call out with correct message', () => {
+    test('it renders the unauthorized call out with correct message', async () => {
       const testProps = {
         ...props,
         filterManager: new FilterManager(mockUiSettingsForFilterManager),
         showCallOutUnauthorizedMsg: true,
       };
 
-      const wrapper = mount(
+      const wrapper = await getWrapper(
         <TestProviders>
           <TimelineHeader {...testProps} />
         </TestProviders>
@@ -113,7 +119,7 @@ describe('Header', () => {
       );
     });
 
-    test('it renders the immutable timeline call out providers', () => {
+    test('it renders the immutable timeline call out providers', async () => {
       const testProps = {
         ...props,
         filterManager: new FilterManager(mockUiSettingsForFilterManager),
@@ -121,7 +127,7 @@ describe('Header', () => {
         status: TimelineStatus.immutable,
       };
 
-      const wrapper = mount(
+      const wrapper = await getWrapper(
         <TestProviders>
           <TimelineHeader {...testProps} />
         </TestProviders>
@@ -130,7 +136,7 @@ describe('Header', () => {
       expect(wrapper.find('[data-test-subj="timelineImmutableCallOut"]').exists()).toEqual(true);
     });
 
-    test('it renders the immutable timeline call out with correct icon', () => {
+    test('it renders the immutable timeline call out with correct icon', async () => {
       const testProps = {
         ...props,
         filterManager: new FilterManager(mockUiSettingsForFilterManager),
@@ -138,7 +144,7 @@ describe('Header', () => {
         status: TimelineStatus.immutable,
       };
 
-      const wrapper = mount(
+      const wrapper = await getWrapper(
         <TestProviders>
           <TimelineHeader {...testProps} />
         </TestProviders>
@@ -149,7 +155,7 @@ describe('Header', () => {
       ).toEqual('alert');
     });
 
-    test('it renders the immutable timeline call out with correct message', () => {
+    test('it renders the immutable timeline call out with correct message', async () => {
       const testProps = {
         ...props,
         filterManager: new FilterManager(mockUiSettingsForFilterManager),
@@ -157,7 +163,7 @@ describe('Header', () => {
         status: TimelineStatus.immutable,
       };
 
-      const wrapper = mount(
+      const wrapper = await getWrapper(
         <TestProviders>
           <TimelineHeader {...testProps} />
         </TestProviders>

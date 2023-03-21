@@ -35,11 +35,11 @@ export function useClientMetricsQuery() {
   );
 
   const data = useMemo(() => {
-    if (!esQueryResponse) return {};
+    if (!esQueryResponse?.aggregations) return {};
 
     const {
       hasFetchStartField: { backEnd, totalPageLoadDuration },
-    } = esQueryResponse.aggregations!;
+    } = esQueryResponse.aggregations;
 
     const pkey = percentile.toFixed(1);
 
@@ -48,7 +48,7 @@ export function useClientMetricsQuery() {
     const backendValue = backEnd.values[pkey] ?? 0;
 
     return {
-      pageViews: { value: (esQueryResponse.hits.total as any as number) ?? 0 },
+      pageViews: { value: esQueryResponse.hits.total.value ?? 0 },
       totalPageLoadDuration: { value: totalPageLoadDurationValueMs },
       backEnd: { value: backendValue },
       frontEnd: { value: totalPageLoadDurationValueMs - backendValue },

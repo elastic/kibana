@@ -11,9 +11,29 @@ import {
   savedQuerySavedObjectType,
   packSavedObjectType,
   packAssetSavedObjectType,
+  usageMetricSavedObjectType,
 } from '../../../common/types';
 
+export const usageMetricSavedObjectMappings: SavedObjectsType['mappings'] = {
+  properties: {
+    count: {
+      type: 'long',
+    },
+    errors: {
+      type: 'long',
+    },
+  },
+};
+
+export const usageMetricType: SavedObjectsType = {
+  name: usageMetricSavedObjectType,
+  hidden: false,
+  namespaceType: 'agnostic',
+  mappings: usageMetricSavedObjectMappings,
+};
+
 export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
   properties: {
     description: {
       type: 'text',
@@ -46,8 +66,8 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'keyword',
     },
     ecs_mapping: {
-      type: 'object',
-      enabled: false,
+      dynamic: false,
+      properties: {},
     },
   },
 };
@@ -103,10 +123,15 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     enabled: {
       type: 'boolean',
     },
+    shards: {
+      dynamic: false,
+      properties: {},
+    },
     version: {
       type: 'long',
     },
     queries: {
+      dynamic: false,
       properties: {
         id: {
           type: 'keyword',
@@ -124,8 +149,8 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
           type: 'keyword',
         },
         ecs_mapping: {
-          type: 'object',
-          enabled: false,
+          dynamic: false,
+          properties: {},
         },
       },
     },
@@ -174,7 +199,12 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
     version: {
       type: 'long',
     },
+    shards: {
+      dynamic: false,
+      properties: {},
+    },
     queries: {
+      dynamic: false,
       properties: {
         id: {
           type: 'keyword',
@@ -192,8 +222,8 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
           type: 'keyword',
         },
         ecs_mapping: {
-          type: 'object',
-          enabled: false,
+          dynamic: false,
+          properties: {},
         },
       },
     },

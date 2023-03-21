@@ -29,9 +29,11 @@ import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
   NO_DATA_ACTIONS,
+  WARNING_ACTIONS,
 } from './metric_threshold_executor';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 
@@ -54,8 +56,20 @@ const initialRuleState: TestRuleState = {
   groups: [],
 };
 
+const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) => {};
+
+const logger = {
+  trace: fakeLogger,
+  debug: fakeLogger,
+  info: fakeLogger,
+  warn: fakeLogger,
+  error: fakeLogger,
+  fatal: fakeLogger,
+  log: () => void 0,
+  get: () => logger,
+} as unknown as Logger;
+
 const mockOptions = {
-  alertId: '',
   executionId: '',
   startedAt: new Date(),
   previousStartedAt: null,
@@ -66,20 +80,24 @@ const mockOptions = {
         alertId: 'TEST_ALERT_0',
         alertUuid: 'TEST_ALERT_0_UUID',
         started: '2020-01-01T12:00:00.000Z',
+        flappingHistory: [],
+        flapping: false,
+        pendingRecoveredCount: 0,
       },
       TEST_ALERT_1: {
         alertId: 'TEST_ALERT_1',
         alertUuid: 'TEST_ALERT_1_UUID',
         started: '2020-01-02T12:00:00.000Z',
+        flappingHistory: [],
+        flapping: false,
+        pendingRecoveredCount: 0,
       },
     },
+    trackedAlertsRecovered: {},
   },
   spaceId: '',
-  name: '',
-  tags: [],
-  createdBy: null,
-  updatedBy: null,
   rule: {
+    id: '',
     name: '',
     tags: [],
     consumer: '',
@@ -97,7 +115,11 @@ const mockOptions = {
     producer: '',
     ruleTypeId: '',
     ruleTypeName: '',
+    muteAll: false,
+    snoozeSchedule: [],
   },
+  logger,
+  flappingSettings: DEFAULT_FLAPPING_SETTINGS,
 };
 
 const setEvaluationResults = (response: Array<Record<string, Evaluation>>) => {
@@ -142,6 +164,7 @@ describe('The metric threshold alert type', () => {
             shouldFire,
             shouldWarn,
             isNoData,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -251,6 +274,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -262,6 +286,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -282,6 +307,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -293,6 +319,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -313,6 +340,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -324,6 +352,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -344,6 +373,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -355,6 +385,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -375,6 +406,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -386,6 +418,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
           c: {
             ...baseNonCountCriterion,
@@ -397,10 +430,16 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'c' },
           },
         },
       ]);
-      const stateResult1 = await execute(Comparator.GT, [0.75], ['something'], 'test.metric.2');
+      const { state: stateResult1 } = await execute(
+        Comparator.GT,
+        [0.75],
+        ['something'],
+        'test.metric.2'
+      );
       expect(stateResult1.missingGroups).toEqual(expect.arrayContaining([]));
       setEvaluationResults([
         {
@@ -414,6 +453,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -425,6 +465,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
           c: {
             ...baseNonCountCriterion,
@@ -436,17 +477,20 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: 'c' },
           },
         },
       ]);
-      const stateResult2 = await execute(
+      const { state: stateResult2 } = await execute(
         Comparator.GT,
         [0.75],
         ['something'],
         'test.metric.1',
         stateResult1
       );
-      expect(stateResult2.missingGroups).toEqual(expect.arrayContaining(['c']));
+      expect(stateResult2.missingGroups).toEqual(
+        expect.arrayContaining([{ key: 'c', bucketKey: { groupBy0: 'c' } }])
+      );
       setEvaluationResults([
         {
           a: {
@@ -459,6 +503,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -470,10 +515,11 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
-      const stateResult3 = await execute(
+      const { state: stateResult3 } = await execute(
         Comparator.GT,
         [0.75],
         ['something', 'something-else'],
@@ -520,6 +566,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -531,6 +578,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
           c: {
             ...baseNonCountCriterion,
@@ -542,10 +590,11 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'c' },
           },
         },
       ]);
-      const stateResult1 = await executeWithFilter(
+      const { state: stateResult1 } = await executeWithFilter(
         Comparator.GT,
         [0.75],
         JSON.stringify({ query: 'q' }),
@@ -564,6 +613,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -575,6 +625,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
           c: {
             ...baseNonCountCriterion,
@@ -586,17 +637,20 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: 'c' },
           },
         },
       ]);
-      const stateResult2 = await executeWithFilter(
+      const { state: stateResult2 } = await executeWithFilter(
         Comparator.GT,
         [0.75],
         JSON.stringify({ query: 'q' }),
         'test.metric.1',
         stateResult1
       );
-      expect(stateResult2.missingGroups).toEqual(expect.arrayContaining(['c']));
+      expect(stateResult2.missingGroups).toEqual(
+        expect.arrayContaining([{ key: 'c', bucketKey: { groupBy0: 'c' } }])
+      );
       setEvaluationResults([
         {
           a: {
@@ -609,6 +663,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -620,10 +675,11 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
-      const stateResult3 = await executeWithFilter(
+      const { state: stateResult3 } = await executeWithFilter(
         Comparator.GT,
         [0.75],
         JSON.stringify({ query: 'different' }),
@@ -631,6 +687,143 @@ describe('The metric threshold alert type', () => {
         stateResult2
       );
       expect(stateResult3.groups).toEqual(expect.arrayContaining([]));
+    });
+  });
+
+  describe('querying with a groupBy parameter host.name and rule tags', () => {
+    afterAll(() => clearInstances());
+    const execute = (
+      comparator: Comparator,
+      threshold: number[],
+      groupBy: string[] = ['host.name'],
+      metric?: string,
+      state?: any
+    ) =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          groupBy,
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+              comparator,
+              threshold,
+              metric: metric ?? baseNonCountCriterion.metric,
+            },
+          ],
+        },
+        state: state ?? mockOptions.state.wrapped,
+        rule: {
+          ...mockOptions.rule,
+          tags: ['ruleTag1', 'ruleTag2'],
+        },
+      });
+    const instanceIdA = 'host-01';
+    const instanceIdB = 'host-02';
+
+    test('rule tags and source tags are combined in alert context', async () => {
+      setEvaluationResults([
+        {
+          'host-01': {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: 'host-01' },
+            context: {
+              tags: ['host-01_tag1', 'host-01_tag2'],
+            },
+          },
+          'host-02': {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: 3,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: 'host-02' },
+            context: {
+              tags: ['host-02_tag1', 'host-02_tag2'],
+            },
+          },
+        },
+      ]);
+      await execute(Comparator.GT, [0.75]);
+      expect(mostRecentAction(instanceIdA).action.tags).toStrictEqual([
+        'host-01_tag1',
+        'host-01_tag2',
+        'ruleTag1',
+        'ruleTag2',
+      ]);
+      expect(mostRecentAction(instanceIdB).action.tags).toStrictEqual([
+        'host-02_tag1',
+        'host-02_tag2',
+        'ruleTag1',
+        'ruleTag2',
+      ]);
+    });
+  });
+
+  describe('querying without a groupBy parameter and rule tags', () => {
+    afterAll(() => clearInstances());
+    const execute = (
+      comparator: Comparator,
+      threshold: number[],
+      groupBy: string = '',
+      metric?: string,
+      state?: any
+    ) =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          groupBy,
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+              comparator,
+              threshold,
+              metric: metric ?? baseNonCountCriterion.metric,
+            },
+          ],
+        },
+        state: state ?? mockOptions.state.wrapped,
+        rule: {
+          ...mockOptions.rule,
+          tags: ['ruleTag1', 'ruleTag2'],
+        },
+      });
+
+    test('rule tags are added in alert context', async () => {
+      setEvaluationResults([
+        {
+          '*': {
+            ...baseNonCountCriterion,
+            comparator: Comparator.GT,
+            threshold: [0.75],
+            metric: 'test.metric.1',
+            currentValue: 1.0,
+            timestamp: new Date().toISOString(),
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            bucketKey: { groupBy0: '*' },
+          },
+        },
+      ]);
+
+      const instanceID = '*';
+      await execute(Comparator.GT, [0.75]);
+      expect(mostRecentAction(instanceID).action.tags).toStrictEqual(['ruleTag1', 'ruleTag2']);
     });
   });
 
@@ -677,6 +870,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
         {
@@ -690,6 +884,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -710,6 +905,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
         {},
@@ -731,6 +927,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -742,6 +939,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
         {
@@ -755,6 +953,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -766,6 +965,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -788,6 +988,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
         {
@@ -801,6 +1002,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -817,8 +1019,6 @@ describe('The metric threshold alert type', () => {
       expect(reasons[1]).toContain('Alert when >= 3');
       expect(reasons[0]).toContain('in the last 1 min');
       expect(reasons[1]).toContain('in the last 1 min');
-      expect(reasons[0]).toContain('for all hosts');
-      expect(reasons[1]).toContain('for all hosts');
     });
   });
   describe('querying with the count aggregator', () => {
@@ -852,6 +1052,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
         },
       ]);
@@ -869,6 +1070,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
         },
       ]);
@@ -914,6 +1116,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: false,
               shouldWarn: false,
               isNoData: false,
+              bucketKey: { groupBy0: 'a' },
             },
             b: {
               ...baseCountCriterion,
@@ -925,6 +1128,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: false,
               shouldWarn: false,
               isNoData: false,
+              bucketKey: { groupBy0: 'b' },
             },
           },
         ]);
@@ -943,6 +1147,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: true,
               shouldWarn: false,
               isNoData: false,
+              bucketKey: { groupBy0: 'a' },
             },
             b: {
               ...baseCountCriterion,
@@ -954,6 +1159,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: true,
               shouldWarn: false,
               isNoData: false,
+              bucketKey: { groupBy0: 'b' },
             },
           },
         ]);
@@ -995,6 +1201,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1012,6 +1219,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1052,6 +1260,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1069,6 +1278,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1109,6 +1319,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1128,6 +1339,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1185,6 +1397,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1202,6 +1415,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: '*' },
           },
         },
       ]);
@@ -1219,6 +1433,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -1230,6 +1445,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -1255,6 +1471,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -1266,6 +1483,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: false,
             shouldWarn: false,
             isNoData: true,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -1287,6 +1505,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -1298,6 +1517,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
           c: {
             ...baseNonCountCriterion,
@@ -1309,6 +1529,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'c' },
           },
         },
       ]);
@@ -1329,6 +1550,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'a' },
           },
           b: {
             ...baseNonCountCriterion,
@@ -1340,6 +1562,7 @@ describe('The metric threshold alert type', () => {
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
+            bucketKey: { groupBy0: 'b' },
           },
         },
       ]);
@@ -1390,6 +1613,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: false,
               shouldWarn: false,
               isNoData: true,
+              bucketKey: { groupBy0: '*' },
             },
           },
         ]);
@@ -1407,6 +1631,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: false,
               shouldWarn: false,
               isNoData: true,
+              bucketKey: { groupBy0: '*' },
             },
           },
         ]);
@@ -1424,6 +1649,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: true,
               shouldWarn: false,
               isNoData: false,
+              bucketKey: { groupBy0: 'a' },
             },
             b: {
               ...baseNonCountCriterion,
@@ -1435,6 +1661,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: true,
               shouldWarn: false,
               isNoData: false,
+              bucketKey: { groupBy0: 'b' },
             },
           },
         ]);
@@ -1458,6 +1685,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: false,
               shouldWarn: false,
               isNoData: true,
+              bucketKey: { groupBy0: 'a' },
             },
             b: {
               ...baseNonCountCriterion,
@@ -1469,6 +1697,7 @@ describe('The metric threshold alert type', () => {
               shouldFire: false,
               shouldWarn: false,
               isNoData: true,
+              bucketKey: { groupBy0: 'b' },
             },
           },
         ]);
@@ -1504,6 +1733,88 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction(instanceID)).toBeErrorAction();
     });
   });
+
+  describe('querying the entire infrastructure with warning threshold', () => {
+    afterAll(() => clearInstances());
+    const instanceID = '*';
+
+    const execute = () =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          sourceId: 'default',
+          criteria: [
+            {
+              ...baseNonCountCriterion,
+              comparator: Comparator.GT,
+              threshold: [9999],
+            },
+          ],
+        },
+      });
+
+    const setResults = ({
+      comparator = Comparator.GT,
+      threshold = [9999],
+      warningComparator = Comparator.GT,
+      warningThreshold = [2.49],
+      metric = 'test.metric.1',
+      currentValue = 7.59,
+      shouldWarn = false,
+    }) =>
+      setEvaluationResults([
+        {
+          '*': {
+            ...baseNonCountCriterion,
+            comparator,
+            threshold,
+            warningComparator,
+            warningThreshold,
+            metric,
+            currentValue,
+            timestamp: new Date().toISOString(),
+            shouldFire: false,
+            shouldWarn,
+            isNoData: false,
+            bucketKey: { groupBy0: '*' },
+          },
+        },
+      ]);
+
+    test('warns as expected with the > comparator', async () => {
+      setResults({ warningThreshold: [2.49], currentValue: 2.5, shouldWarn: true });
+      await execute();
+      expect(mostRecentAction(instanceID)).toBeWarnAction();
+
+      setResults({ warningThreshold: [2.49], currentValue: 1.23, shouldWarn: false });
+      await execute();
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+    });
+
+    test('reports expected warning values to the action context', async () => {
+      setResults({ warningThreshold: [2.49], currentValue: 2.5, shouldWarn: true });
+      await execute();
+
+      const { action } = mostRecentAction(instanceID);
+      expect(action.group).toBe('*');
+      expect(action.reason).toBe('test.metric.1 is 2.5 in the last 1 min. Alert when > 2.49.');
+    });
+
+    test('reports expected warning values to the action context for percentage metric', async () => {
+      setResults({
+        warningThreshold: [0.81],
+        currentValue: 0.82,
+        shouldWarn: true,
+        metric: 'system.cpu.user.pct',
+      });
+      await execute();
+
+      const { action } = mostRecentAction(instanceID);
+      expect(action.group).toBe('*');
+      expect(action.reason).toBe('system.cpu.user.pct is 82% in the last 1 min. Alert when > 81%.');
+    });
+  });
 });
 
 const createMockStaticConfiguration = (sources: any) => ({
@@ -1520,19 +1831,6 @@ const createMockStaticConfiguration = (sources: any) => ({
   },
   sources,
 });
-
-const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) => {};
-
-const logger = {
-  trace: fakeLogger,
-  debug: fakeLogger,
-  info: fakeLogger,
-  warn: fakeLogger,
-  error: fakeLogger,
-  fatal: fakeLogger,
-  log: () => void 0,
-  get: () => logger,
-} as unknown as Logger;
 
 const mockLibs: any = {
   sources: new InfraSources({
@@ -1622,6 +1920,14 @@ expect.extend({
       pass,
     };
   },
+  toBeWarnAction(action?: Action) {
+    const pass = action?.id === WARNING_ACTIONS.id && action?.action.alertState === 'WARNING';
+    const message = () => `expected ${JSON.stringify(action)} to be an WARNING action`;
+    return {
+      message,
+      pass,
+    };
+  },
   toBeNoDataAction(action?: Action) {
     const pass = action?.id === NO_DATA_ACTIONS.id && action?.action.alertState === 'NO DATA';
     const message = () => `expected ${action} to be a NO DATA action`;
@@ -1645,26 +1951,26 @@ declare global {
   namespace jest {
     interface Matchers<R> {
       toBeAlertAction(action?: Action): R;
-
+      toBeWarnAction(action?: Action): R;
       toBeNoDataAction(action?: Action): R;
-
       toBeErrorAction(action?: Action): R;
     }
   }
 }
 
-const baseNonCountCriterion: Pick<
-  NonCountMetricExpressionParams,
-  'aggType' | 'metric' | 'timeSize' | 'timeUnit'
-> = {
+const baseNonCountCriterion = {
   aggType: Aggregators.AVERAGE,
   metric: 'test.metric.1',
   timeSize: 1,
   timeUnit: 'm',
-};
+  threshold: [0],
+  comparator: Comparator.GT,
+} as NonCountMetricExpressionParams;
 
-const baseCountCriterion: Pick<CountMetricExpressionParams, 'aggType' | 'timeSize' | 'timeUnit'> = {
+const baseCountCriterion = {
   aggType: Aggregators.COUNT,
   timeSize: 1,
   timeUnit: 'm',
-};
+  threshold: [0],
+  comparator: Comparator.GT,
+} as CountMetricExpressionParams;

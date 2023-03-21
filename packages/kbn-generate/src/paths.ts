@@ -8,7 +8,7 @@
 
 import Path from 'path';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 export const ROOT_PKG_DIR = Path.resolve(REPO_ROOT, 'packages');
 export const TEMPLATE_DIR = Path.resolve(__dirname, '../templates');

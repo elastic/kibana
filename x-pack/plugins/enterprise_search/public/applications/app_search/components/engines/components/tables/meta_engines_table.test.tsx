@@ -84,9 +84,10 @@ describe('MetaEnginesTable', () => {
     it('is hidden by default', () => {
       const wrapper = shallow(<MetaEnginesTable {...props} />);
       const table = wrapper.find(EuiBasicTable).dive();
+      const tableBody = table.find('RenderWithEuiTheme').renderProp('children')();
 
-      expect(table.find(MetaEnginesTableNameColumnContent)).toHaveLength(1);
-      expect(table.find(MetaEnginesTableExpandedRow)).toHaveLength(0);
+      expect(tableBody.find(MetaEnginesTableNameColumnContent)).toHaveLength(1);
+      expect(tableBody.find(MetaEnginesTableExpandedRow)).toHaveLength(0);
     });
 
     it('is visible when the row has been expanded', () => {
@@ -95,8 +96,10 @@ describe('MetaEnginesTable', () => {
         expandedSourceEngines: { 'test-engine': true },
       });
       const wrapper = shallow(<MetaEnginesTable {...props} />);
-      const table = wrapper.find(EuiBasicTable);
-      expect(table.dive().find(MetaEnginesTableExpandedRow)).toHaveLength(1);
+      const table = wrapper.find(EuiBasicTable).dive();
+      const tableBody = table.find('RenderWithEuiTheme').renderProp('children')();
+
+      expect(tableBody.find(MetaEnginesTableExpandedRow)).toHaveLength(1);
     });
   });
 });

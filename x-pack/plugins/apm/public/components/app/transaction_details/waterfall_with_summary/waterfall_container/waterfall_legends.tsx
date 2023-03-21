@@ -37,7 +37,7 @@ const LEGEND_LABELS = {
 };
 export function WaterfallLegends({ legends, type }: Props) {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m">
+    <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
       <EuiFlexItem grow={false}>
         <EuiTitle size="xxxs">
           <span>{LEGEND_LABELS[type]}</span>

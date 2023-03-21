@@ -7,9 +7,7 @@
 
 import moment from 'moment';
 import _ from 'lodash';
-// @ts-ignore
 import { createQuery } from '../create_query';
-// @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 import {
   ElasticsearchResponse,
@@ -17,7 +15,7 @@ import {
   ElasticsearchResponseHit,
 } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 /**
@@ -95,7 +93,7 @@ export async function getLastRecovery(req: LegacyRequest, size: number) {
 
   const dataset = 'index_recovery';
   const moduleType = 'elasticsearch';
-  const indexPattern = getNewIndexPatterns({
+  const indexPattern = getIndexPatterns({
     config: Globals.app.config,
     moduleType,
     dataset,
@@ -120,7 +118,7 @@ export async function getLastRecovery(req: LegacyRequest, size: number) {
     },
   };
 
-  const indexPatternEcs = getNewIndexPatterns({
+  const indexPatternEcs = getIndexPatterns({
     config: Globals.app.config,
     moduleType,
     dataset,
@@ -136,7 +134,7 @@ export async function getLastRecovery(req: LegacyRequest, size: number) {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         type: dataset,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getElasticsearchDataset(dataset),
         metricset: dataset,
         start,
         end,

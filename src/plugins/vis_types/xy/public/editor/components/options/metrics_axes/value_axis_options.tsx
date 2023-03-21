@@ -97,6 +97,7 @@ export function ValueAxisOptions({
         label={i18n.translate('visTypeXy.controls.pointSeries.valueAxes.positionLabel', {
           defaultMessage: 'Position',
         })}
+        data-test-subj={`valueAxisPosition-${axis.id}`}
         options={collections.positions}
         paramName="position"
         value={axis.position}

@@ -7,9 +7,10 @@
 
 import { APP_ID, FEATURE_ID } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
-import { CasesPermissions } from '../../containers/types';
+import type { CasesPermissions } from '../../containers/types';
+import { allCasePermissions } from '../../utils/permissions';
 
-type Capability = Omit<keyof CasesPermissions, 'all'>;
+type Capability = Exclude<keyof CasesPermissions, 'all'>;
 
 /**
  *
@@ -18,17 +19,17 @@ type Capability = Omit<keyof CasesPermissions, 'all'>;
  **/
 
 export const useAvailableCasesOwners = (
-  capabilities: Capability[] = ['create', 'read', 'update', 'delete', 'push']
+  capabilities: Capability[] = allCasePermissions
 ): string[] => {
   const { capabilities: kibanaCapabilities } = useKibana().services.application;
 
   return Object.entries(kibanaCapabilities).reduce(
-    (availableOwners: string[], [featureId, kibananCapability]) => {
+    (availableOwners: string[], [featureId, kibanaCapability]) => {
       if (!featureId.endsWith('Cases')) {
         return availableOwners;
       }
       for (const cap of capabilities) {
-        const hasCapability = !!kibananCapability[`${cap}_cases`];
+        const hasCapability = !!kibanaCapability[`${cap}_cases`];
         if (!hasCapability) {
           return availableOwners;
         }

@@ -52,14 +52,9 @@ export class CreateSourceEditor extends Component {
   };
 
   _onGeoFieldSelect = (geoFieldName) => {
-    const geoField =
-      this.state.indexPattern && geoFieldName
-        ? this.state.indexPattern.fields.getByName(geoFieldName)
-        : undefined;
     this.setState(
       {
         geoField: geoFieldName,
-        geoFieldType: geoField ? geoField.type : undefined,
       },
       this.previewLayer
     );
@@ -115,11 +110,7 @@ export class CreateSourceEditor extends Component {
     }
 
     return (
-      <RenderAsSelect
-        geoFieldType={this.state.geoFieldType}
-        renderAs={this.state.requestType}
-        onChange={this._onRequestTypeSelect}
-      />
+      <RenderAsSelect renderAs={this.state.requestType} onChange={this._onRequestTypeSelect} />
     );
   }
 

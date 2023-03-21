@@ -6,6 +6,12 @@
 
 Updates one or more cases.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+====
+
 === {api-request-title}
 
 `PATCH <kibana host>:<port>/api/cases`
@@ -25,6 +31,7 @@ You must have `all` privileges for the *Cases* feature in the *Management*,
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
+[role="child_attributes"]
 === {api-request-body-title}
 
 `cases`::
@@ -33,6 +40,19 @@ default space is used.
 .Properties of `cases` objects
 [%collapsible%open]
 ====
+
+`assignees`::
+(Optional, array of objects) Array containing users that are assigned to the case.
++
+.Properties of assignee objects
+[%collapsible%open]
+=====
+`uid`::
+(Required, string) A unique identifier for the user profile. These identifiers
+can be found by using the
+{ref}/security-api-suggest-user-profile.html[suggest user profile API].
+=====
+
 `connector`::
 (Optional, object) An object that contains the connector configuration.
 +
@@ -40,19 +60,20 @@ default space is used.
 [%collapsible%open]
 =====
 `fields`::
-(Required, object) An object containing the connector fields.
+(Required, object) An object containing the connector fields. To remove the
+connector, specify `null`. If you want to omit any individual field, specify
+`null` as its value.
 +
---
-To remove the connector, specify `null`. If you want to omit any individual
-field, specify `null` as its value.
-
+.Properties of `fields`
+[%collapsible%open]
+=======
 For {ibm-r} connectors, specify:
 
 `issueTypes`:::
-(Required, array of numbers) The issue types of the issue.
+(Required, array of strings) The issue types of the issue.
 
 `severityCode`:::
-(Required, number) The severity code of the issue.
+(Required, string) The severity code of the issue.
 
 For {jira} connectors, specify:
 
@@ -110,7 +131,9 @@ For {swimlane} connectors, specify:
 
 `caseId`:::
 (Required, string) The identifier for the case.
---
+
+For {webhook-cm} connectors, specify `null`.
+=======
 
 `id`::
 (Required, string) The identifier for the connector. To remove the connector,
@@ -121,9 +144,9 @@ use `none`. To retrieve connector IDs, use <<cases-api-find-connectors>>).
 `none`.
 
 `type`::
-(Required, string) The type of the connector. Valid values are: `.jira`, `.none`,
-`.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`. To remove the
-connector, use `.none`.
+(Required, string) The type of the connector. Valid values are: `.cases-webhook`,
+`.jira`, `.none`, `.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
+To remove the connector, use `.none`.
 
 =====
 
@@ -193,6 +216,7 @@ PATCH api/cases
       },
       "description": "A new description.",
       "tags": [ "tag-1", "tag-2" ],
+      "assignees": [],
       "settings": {
         "syncAlerts": true
       }

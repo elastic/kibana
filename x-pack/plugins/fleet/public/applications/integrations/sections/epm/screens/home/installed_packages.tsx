@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import semverLt from 'semver/functions/lt';
 import { i18n } from '@kbn/i18n';
@@ -14,17 +14,28 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { pagePathGetters } from '../../../../constants';
-import { useBreadcrumbs, useLink, useStartServices, useFleetStatus } from '../../../../hooks';
+import {
+  useBreadcrumbs,
+  useLink,
+  useStartServices,
+  useGetPackageVerificationKeyId,
+} from '../../../../hooks';
 import { PackageListGrid } from '../../components/package_list_grid';
 
 import type { PackageListItem } from '../../../../types';
 
-import type { CategoryFacet } from './category_facets';
+import type { IntegrationsURLParameters } from './hooks/use_available_packages';
+
+import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 import { CategoryFacets } from './category_facets';
 
 import type { CategoryParams } from '.';
 import { getParams, categoryExists, mapToCard } from '.';
-import { INSTALLED_CATEGORY } from './category_facets';
+import {
+  ALL_INSTALLED_CATEGORY,
+  UPDATES_AVAILABLE,
+  UPDATES_AVAILABLE_CATEGORY,
+} from './category_facets';
 
 const AnnouncementLink = () => {
   const { docLinks } = useStartServices();
@@ -38,7 +49,7 @@ const AnnouncementLink = () => {
   );
 };
 
-const InstalledIntegrationsInfoCallout = () => (
+const InstalledIntegrationsInfoCallout: React.FC = () => (
   <EuiCallOut
     title={i18n.translate('xpack.fleet.epmList.availableCalloutTitle', {
       defaultMessage: 'Only installed Elastic Agent Integrations are displayed.',
@@ -57,61 +68,104 @@ const InstalledIntegrationsInfoCallout = () => (
   </EuiCallOut>
 );
 
-const VerificationWarningCallout = () => (
+const UpdatesAvailableCallout: React.FC<{ count: number }> = ({ count }) => (
   <EuiCallOut
-    title={i18n.translate('xpack.fleet.epmList.verificationWarningCalloutTitle', {
-      defaultMessage: 'Integrations not verified',
+    title={i18n.translate('xpack.fleet.epmList.updatesAvailableCalloutTitle', {
+      defaultMessage:
+        '{count, number} of your installed integrations {count, plural, one {has an update} other {have updates}} available.',
+      values: {
+        count,
+      },
     })}
     iconType="alert"
     color="warning"
   >
     <p>
       <FormattedMessage
-        id="xpack.fleet.epmList.verificationWarningCalloutIntroText"
-        defaultMessage="One or more of the installed integrations contain an unsigned package of unknown authenticity."
-        // TODO: add documentation link
+        id="xpack.fleet.epmList.updatesAvailableCalloutText"
+        defaultMessage="Update your integrations to get the latest features."
       />
     </p>
   </EuiCallOut>
 );
 
-// TODO: clintandrewhall - this component is hard to test due to the hooks, particularly those that use `http`
-// or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
+const VerificationWarningCallout: React.FC = () => {
+  const { docLinks } = useStartServices();
+
+  return (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.epmList.verificationWarningCalloutTitle', {
+        defaultMessage: 'Integrations not verified',
+      })}
+      iconType="alert"
+      color="warning"
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.fleet.epmList.verificationWarningCalloutIntroText"
+          defaultMessage="One or more of the installed integrations contain an unsigned package of unknown authenticity. Learn more about {learnMoreLink}."
+          values={{
+            learnMoreLink: (
+              <EuiLink target="_blank" external href={docLinks.links.fleet.packageSignatures}>
+                <FormattedMessage
+                  id="xpack.fleet.ConfirmForceInstallModal.learnMoreLink"
+                  defaultMessage="package signatures"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    </EuiCallOut>
+  );
+};
+
 export const InstalledPackages: React.FC<{
   installedPackages: PackageListItem[];
   isLoading: boolean;
 }> = ({ installedPackages, isLoading }) => {
   useBreadcrumbs('integrations_installed');
 
-  const { packageVerificationKeyId } = useFleetStatus();
+  const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
 
   const { getHref, getAbsolutePath } = useLink();
 
-  const { selectedCategory, searchParam } = getParams(
+  const { selectedCategory: initialSelectedCategory, searchParam } = getParams(
     useParams<CategoryParams>(),
     useLocation().search
   );
+  const [selectedCategory, setCategory] = useState(initialSelectedCategory);
+  const [searchTerm, setSearchTerm] = useState(searchParam || '');
+
+  const { http } = useStartServices();
+  const addBasePath = http.basePath.prepend;
 
   const history = useHistory();
 
-  function setSelectedCategory(categoryId: string) {
+  const buildUrl = ({ searchString, categoryId, subCategoryId }: IntegrationsURLParameters) => {
     const url = pagePathGetters.integrations_installed({
-      category: categoryId,
-      searchTerm: searchParam,
+      category: categoryId ? categoryId : '',
+      query: searchString ? searchString : '',
     })[1];
+    return url;
+  };
 
+  const setUrlandPushHistory = ({ searchString, categoryId }: IntegrationsURLParameters) => {
+    const url = buildUrl({
+      categoryId,
+      searchString,
+    });
     history.push(url);
-  }
+  };
 
-  function setSearchTerm(search: string) {
+  const setUrlandReplaceHistory = ({ searchString, categoryId }: IntegrationsURLParameters) => {
+    const url = buildUrl({
+      categoryId,
+      searchString,
+    });
     // Use .replace so the browser's back button is not tied to single keystroke
-    history.replace(
-      pagePathGetters.integrations_installed({
-        category: selectedCategory,
-        searchTerm: search,
-      })[1]
-    );
-  }
+    history.replace(url);
+  };
 
   const updatablePackages = useMemo(
     () =>
@@ -125,25 +179,19 @@ export const InstalledPackages: React.FC<{
   const categories: CategoryFacet[] = useMemo(
     () => [
       {
-        ...INSTALLED_CATEGORY,
+        ...ALL_INSTALLED_CATEGORY,
         count: installedPackages.length,
       },
       {
-        id: 'updates_available',
+        ...UPDATES_AVAILABLE_CATEGORY,
         count: updatablePackages.length,
-        title: i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
-          defaultMessage: 'Updates available',
-        }),
       },
     ],
     [installedPackages.length, updatablePackages.length]
   );
 
   if (!categoryExists(selectedCategory, categories)) {
-    history.replace(
-      pagePathGetters.integrations_installed({ category: '', searchTerm: searchParam })[1]
-    );
-
+    setUrlandReplaceHistory({ searchString: searchTerm, categoryId: '' });
     return null;
   }
 
@@ -151,33 +199,47 @@ export const InstalledPackages: React.FC<{
     <CategoryFacets
       categories={categories}
       selectedCategory={selectedCategory}
-      onCategoryChange={({ id }: CategoryFacet) => setSelectedCategory(id)}
+      onCategoryChange={({ id }: CategoryFacet) => {
+        setCategory(id as ExtendedIntegrationCategory);
+        setSearchTerm('');
+        setUrlandPushHistory({ searchString: '', categoryId: id });
+      }}
     />
   );
 
   const cards = (
-    selectedCategory === 'updates_available' ? updatablePackages : installedPackages
+    selectedCategory === UPDATES_AVAILABLE ? updatablePackages : installedPackages
   ).map((item) =>
     mapToCard({
       getAbsolutePath,
       getHref,
+      addBasePath,
       item,
       selectedCategory: selectedCategory || 'installed',
       packageVerificationKeyId,
     })
   );
 
-  const CalloutComponent = cards.some((c) => c.isUnverified)
-    ? VerificationWarningCallout
-    : InstalledIntegrationsInfoCallout;
-  const callout =
-    selectedCategory === 'updates_available' || isLoading ? null : <CalloutComponent />;
+  let CalloutComponent = <InstalledIntegrationsInfoCallout />;
+
+  const unverifiedCount = cards.filter((c) => c.isUnverified).length;
+  const updateAvailableCount = cards.filter((c) => c.isUpdateAvailable).length;
+  if (unverifiedCount) {
+    CalloutComponent = <VerificationWarningCallout />;
+  } else if (updateAvailableCount) {
+    CalloutComponent = <UpdatesAvailableCallout count={updateAvailableCount} />;
+  }
+  const callout = selectedCategory === UPDATES_AVAILABLE || isLoading ? null : CalloutComponent;
 
   return (
     <PackageListGrid
-      {...{ isLoading, controls, setSelectedCategory, callout }}
-      onSearchChange={setSearchTerm}
-      initialSearch={searchParam}
+      {...{ isLoading, controls, callout, categories }}
+      selectedCategory={selectedCategory}
+      setCategory={setCategory}
+      setUrlandPushHistory={setUrlandPushHistory}
+      setUrlandReplaceHistory={setUrlandReplaceHistory}
+      searchTerm={searchTerm}
+      setSearchTerm={setSearchTerm}
       list={cards}
     />
   );

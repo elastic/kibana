@@ -19,7 +19,7 @@ import { useMlApiContext } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 
 interface Props {
-  spacesApi: SpacesPluginStart;
+  spacesApi: SpacesPluginStart; // this component is only ever used when spaces is enabled
   spaceIds: string[];
   id: string;
   mlSavedObjectType: MlSavedObjectType;
@@ -86,7 +86,9 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
     });
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const LazySpaceList = useCallback(spacesApi.ui.components.getSpaceList, [spacesApi]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const LazyShareToSpaceFlyout = useCallback(spacesApi.ui.components.getShareToSpaceFlyout, [
     spacesApi,
   ]);

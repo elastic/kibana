@@ -16,6 +16,9 @@
       "retryAt": {
         "type": "date"
       },
+      "enabled": {
+        "type": "boolean"
+      },
       "schedule": {
         "properties": {
           "interval": {

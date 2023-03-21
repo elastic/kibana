@@ -9,17 +9,15 @@
 import Path from 'path';
 import { format } from 'url';
 import del from 'del';
-import Uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import globby from 'globby';
 import createArchiver from 'archiver';
 import Fs from 'fs';
 import { pipeline } from 'stream/promises';
-import type { ChildProcess } from 'child_process';
-// @ts-expect-error in js
 import { Cluster } from '@kbn/es';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
@@ -37,23 +35,9 @@ interface TestEsClusterNodesOptions {
   dataArchive?: string;
 }
 
-interface Node {
-  installSource: (opts: Record<string, unknown>) => Promise<{ installPath: string }>;
-  installSnapshot: (opts: Record<string, unknown>) => Promise<{ installPath: string }>;
-  extractDataDirectory: (
-    installPath: string,
-    archivePath: string,
-    extractDirName?: string
-  ) => Promise<{ insallPath: string }>;
-  start: (installPath: string, opts: Record<string, unknown>) => Promise<void>;
-  stop: () => Promise<void>;
-  kill: () => Promise<void>;
-  _process?: ChildProcess;
-}
-
 export interface ICluster {
   ports: number[];
-  nodes: Node[];
+  nodes: Cluster[];
   getStartTimeout: () => number;
   start: () => Promise<void>;
   stop: () => Promise<void>;
@@ -95,6 +79,7 @@ export interface CreateTestEsClusterOptions {
    */
   license?: 'basic' | 'gold' | 'trial'; // | 'oss'
   log: ToolingLog;
+  writeLogsToPath?: string;
   /**
    * Node-specific configuration if you wish to run a multi-node
    * cluster. One node will be added for each item in the array.
@@ -168,6 +153,7 @@ export function createTestEsCluster<
     password = 'changeme',
     license = 'basic',
     log,
+    writeLogsToPath,
     basePath = Path.resolve(REPO_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
     dataArchive,
@@ -205,7 +191,7 @@ export function createTestEsCluster<
 
   return new (class TestCluster {
     ports: number[] = [];
-    nodes: Node[] = [];
+    nodes: Cluster[] = [];
 
     constructor() {
       for (let i = 0; i < nodes.length; i++) {
@@ -272,6 +258,7 @@ export function createTestEsCluster<
             skipNativeRealmSetup: this.nodes.length > 1 && i < this.nodes.length - 1,
             skipReadyCheck: this.nodes.length > 1 && i < this.nodes.length - 1,
             onEarlyExit,
+            writeLogsToPath,
           });
         });
       }
@@ -320,7 +307,7 @@ export function createTestEsCluster<
         return;
       }
 
-      const uuid = Uuid.v4();
+      const uuid = uuidv4();
       const debugPath = Path.resolve(REPO_ROOT, `data/es_debug_${uuid}.tar.gz`);
       log.error(`[es] debug files found, archiving install to ${debugPath}`);
       const archiver = createArchiver('tar', { gzip: true });

@@ -7,4 +7,20 @@ date: 2022-05-19
 tags: ['kibana', 'dev', 'contributor', 'operations', 'test', 'subj', 'selector']
 ---
 
-Converts a string from a test subject syntax into a css selectors composed by `data-test-subj`.
+Converts a testSubject selector into a CSS selector.
+
+testSubject selector syntax rules:
+
+  - `data-test-subj` values can include spaces
+
+  - prefixing a value with `~` will allow matching a single word in a `data-test-subj` that uses several space delimited list words
+    - example: `~foo`
+    - css equivalent: `[data-test-subj~="foo"]`
+
+  - the `>` character is used between two values to indicate that the value on the right must match an element inside an element matched by the value on the left
+    - example: `foo > bar`
+    - css equivalent: `[data-test-subj=foo] [data-test-subj=bar]`
+
+  - the `&` character is used between two values to indicate that the value on both sides must both match the element
+    - example: `foo & bar`
+    - css equivalent: `[data-test-subj=foo][data-test-subj=bar]`

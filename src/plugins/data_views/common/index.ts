@@ -27,9 +27,11 @@ export {
 export type {
   FieldFormatMap,
   RuntimeType,
+  RuntimePrimitiveTypes,
   RuntimeField,
   RuntimeFieldSpec,
   RuntimeFieldSubField,
+  RuntimeFieldSubFields,
   DataViewAttributes,
   OnNotification,
   OnError,
@@ -46,7 +48,6 @@ export type {
   DataViewSpec,
   SourceFilter,
   HasDataService,
-  RuntimeTypeExceptComposite,
   RuntimeFieldBase,
   FieldConfiguration,
   SavedObjectsClientCommonFindArgs,
@@ -55,7 +56,11 @@ export type {
 } from './types';
 export { DataViewType } from './types';
 
-export type { DataViewsContract, DataViewsServiceDeps } from './data_views';
+export type {
+  DataViewsContract,
+  DataViewsServiceDeps,
+  DataViewSavedObjectAttrs,
+} from './data_views';
 export { DataViewsService, DataViewPersistableStateService } from './data_views';
 export type {
   DataViewListItem,
@@ -74,3 +79,4 @@ export type {
   IndexPatternLoadExpressionFunctionDefinition,
 } from './expressions';
 export { getIndexPatternLoadMeta } from './expressions';
+export { DataViewMissingIndices } from './lib/errors';

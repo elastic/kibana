@@ -30,7 +30,9 @@ export function RelatedEventsFetcher(
     const indices = selectors.eventIndices(state);
 
     const oldParams = last;
-    const timeRangeFilters = selectors.timeRangeFilters(state);
+    const detectedBounds = selectors.detectedBounds(state);
+    const timeRangeFilters =
+      detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state);
     // Update this each time before fetching data (or even if we don't fetch data) so that subsequent actions that call this (concurrently) will have up to date info.
     last = newParams;
 

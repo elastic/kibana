@@ -13,31 +13,37 @@ import {
 
 import { HttpError } from '../../../../../../common/types/api';
 
+import { CreateCrawlerIndexApiLogic } from '../../../api/crawler/create_crawler_index_api_logic';
+
 import { MethodCrawlerLogic } from './method_crawler_logic';
 
-// Failing https://github.com/elastic/kibana/issues/135440
-describe.skip('MethodCrawlerLogic', () => {
+describe('MethodCrawlerLogic', () => {
   const { mount } = new LogicMounter(MethodCrawlerLogic);
+  const { mount: apiLogicMount } = new LogicMounter(CreateCrawlerIndexApiLogic);
   const { clearFlashMessages, flashAPIErrors } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    apiLogicMount();
     mount();
   });
 
   describe('listeners', () => {
     describe('apiSuccess', () => {
       it('navigates user to index detail view', () => {
-        MethodCrawlerLogic.actions.apiSuccess({ created: 'my-index' });
+        CreateCrawlerIndexApiLogic.actions.apiSuccess({ created: 'my-index' });
 
-        expect(navigateToUrl).toHaveBeenCalledWith('/search_indices/my-index');
+        expect(navigateToUrl).toHaveBeenCalledWith('/search_indices/my-index/domain_management');
       });
     });
 
     describe('makeRequest', () => {
       it('clears any displayed errors', () => {
-        MethodCrawlerLogic.actions.makeRequest({ indexName: 'my-index', language: 'Universal' });
+        CreateCrawlerIndexApiLogic.actions.makeRequest({
+          indexName: 'my-index',
+          language: 'Universal',
+        });
 
         expect(clearFlashMessages).toHaveBeenCalled();
       });
@@ -47,7 +53,7 @@ describe.skip('MethodCrawlerLogic', () => {
       it('displays the error to the user', () => {
         const error = {} as HttpError;
 
-        MethodCrawlerLogic.actions.apiError(error);
+        CreateCrawlerIndexApiLogic.actions.apiError(error);
 
         expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });

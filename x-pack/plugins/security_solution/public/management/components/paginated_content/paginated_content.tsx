@@ -79,7 +79,7 @@ const RootContainer = styled.div`
   padding-top: ${({ theme }) => theme.eui.euiSizeXS};
 
   .body {
-    min-height: ${({ theme }) => theme.eui.gutterTypes.gutterExtraLarge};
+    min-height: ${({ theme }) => theme.eui.euiSizeXXL};
 
     &-content {
       position: relative;
@@ -188,6 +188,9 @@ export const PaginatedContent = memo(
 
     const generatedBodyItemContent = useMemo(() => {
       if (error) {
+        if (error instanceof Error) {
+          return <ErrorMessage message={error.message} data-test-subj={getTestId('error')} />;
+        }
         return 'string' === typeof error ? (
           <ErrorMessage message={error} data-test-subj={getTestId('error')} />
         ) : (

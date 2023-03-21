@@ -7,7 +7,7 @@
 
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { inferTimeField } from './utils';
+import { inferTimeField, renewIDs } from './utils';
 
 const datatableUtilities = createDatatableUtilitiesMock();
 
@@ -117,6 +117,44 @@ describe('utils', () => {
           ],
         })
       ).toEqual(undefined);
+    });
+  });
+
+  describe('renewIDs', () => {
+    test('should renew ids for multiple cases', () => {
+      expect(
+        renewIDs(
+          {
+            r1: {
+              a: [
+                'r2',
+                'b',
+                {
+                  b: 'r3',
+                  r3: 'test',
+                },
+              ],
+            },
+            r2: 'r3',
+          },
+          ['r1', 'r2', 'r3'],
+          (i) => i + '_test'
+        )
+      ).toMatchInlineSnapshot(`
+        Object {
+          "r1_test": Object {
+            "a": Array [
+              "r2_test",
+              "b",
+              Object {
+                "b": "r3_test",
+                "r3_test": "test",
+              },
+            ],
+          },
+          "r2_test": "r3_test",
+        }
+      `);
     });
   });
 });

@@ -24,6 +24,7 @@ import {
   EuiButton,
   EuiSpacer,
   EuiCallOut,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,6 +37,7 @@ export interface DeleteConfirmModalProps {
   onCancel: () => void;
   selectedObjects: SavedObjectWithMetadata[];
   allowedTypes: SavedObjectManagementTypeInfo[];
+  showPlainSpinner?: boolean;
 }
 
 export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
@@ -44,6 +46,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
   onCancel,
   selectedObjects,
   allowedTypes,
+  showPlainSpinner,
 }) => {
   const undeletableObjects = useMemo(() => {
     return selectedObjects.filter((obj) => obj.meta.hiddenType);
@@ -64,7 +67,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
   if (isDeleting) {
     return (
       <EuiOverlayMask>
-        <EuiLoadingElastic size="xl" />
+        {showPlainSpinner ? <EuiLoadingSpinner size="xl" /> : <EuiLoadingElastic size="xl" />}
       </EuiOverlayMask>
     );
   }

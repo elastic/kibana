@@ -9,7 +9,7 @@ import {
   contextServiceMock,
   executionContextServiceMock,
 } from '@kbn/core/server/mocks';
-import { createHttpServer } from '@kbn/core/server/test_utils';
+import { createHttpServer } from '@kbn/core-http-server-mocks';
 import supertest from 'supertest';
 import { APMEventClient } from '.';
 
@@ -54,6 +54,7 @@ describe('APMEventClient', () => {
           indices: {} as any,
           options: {
             includeFrozen: false,
+            forceSyntheticSource: false,
           },
         });
 
@@ -61,7 +62,7 @@ describe('APMEventClient', () => {
           apm: {
             events: [],
           },
-          body: { size: 0 },
+          body: { size: 0, track_total_hits: false },
         });
 
         return res.ok({ body: 'ok' });

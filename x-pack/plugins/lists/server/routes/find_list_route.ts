@@ -63,6 +63,7 @@ export const findListRoute = (router: ListsPluginRouter): void => {
             filter,
             page,
             perPage,
+            runtimeMappings: undefined,
             searchAfter,
             sortField,
             sortOrder,

@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { resolveCopyToSpaceConflictsSuite } from '../../common/suites/resolve_copy_to_space_conflicts';
 
 // eslint-disable-next-line import/no-default-export
-export default function resolveCopyToSpaceConflictsTestSuite({ getService }: FtrProviderContext) {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const supertestWithAuth = getService('supertest');
-  const esArchiver = getService('esArchiver');
-
+export default function resolveCopyToSpaceConflictsTestSuite(context: FtrProviderContext) {
   const {
     resolveCopyToSpaceConflictsTest,
     createExpectNonOverriddenResponseWithReferences,
@@ -23,7 +19,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Ftr
     createMultiNamespaceTestCases,
     NON_EXISTENT_SPACE_ID,
     originSpaces,
-  } = resolveCopyToSpaceConflictsSuite(esArchiver, supertestWithAuth, supertestWithoutAuth);
+  } = resolveCopyToSpaceConflictsSuite(context);
 
   describe('resolve copy to spaces conflicts', () => {
     originSpaces.forEach((spaceId) => {

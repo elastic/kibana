@@ -12,6 +12,8 @@ export type {
   AgentStatus,
   AgentType,
   AgentAction,
+  ActionStatus,
+  ActionErrorResult,
   CurrentUpgrade,
   PackagePolicy,
   PackagePolicyInput,
@@ -29,12 +31,19 @@ export type {
   PreconfiguredAgentPolicy,
   AgentPolicyStatus,
   DataStream,
+  ShipperOutput,
   Output,
   NewOutput,
   OutputSOAttributes,
   OutputType,
   EnrollmentAPIKey,
   EnrollmentAPIKeySOAttributes,
+  NewFleetServerHost,
+  FleetServerHost,
+  FleetServerHostSOAttributes,
+  NewFleetProxy,
+  FleetProxy,
+  FleetProxySOAttributes,
   Installation,
   EpmPackageInstallStatus,
   InstallationStatus,
@@ -80,13 +89,10 @@ export type {
   PackageVerificationStatus,
   BulkInstallPackageInfo,
   PackageAssetReference,
-} from '../../common';
-export {
-  ElasticsearchAssetType,
-  KibanaAssetType,
-  KibanaSavedObjectType,
-  dataTypes,
-} from '../../common';
+  ExperimentalDataStreamFeature,
+} from '../../common/types';
+export { ElasticsearchAssetType, KibanaAssetType, KibanaSavedObjectType } from '../../common/types';
+export { dataTypes } from '../../common/constants';
 
 export type AgentPolicyUpdateHandler = (
   action: 'created' | 'updated' | 'deleted',
@@ -99,7 +105,7 @@ export interface BulkActionResult {
   error?: Error;
 }
 
-import type { PackageVerificationStatus } from '../../common';
+import type { PackageVerificationStatus } from '../../common/types';
 export interface PackageVerificationResult {
   verificationKeyId?: string;
   verificationStatus: PackageVerificationStatus;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { flatten } from 'lodash';
 
 import {
@@ -31,6 +31,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useChartTheme } from '@kbn/observability-plugin/public';
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import type { HistogramItem } from '../../../../../common/correlations/types';
 import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
@@ -39,7 +40,6 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 
 import { ChartContainer } from '../chart_container';
-import { ProcessorEvent } from '../../../../../common/processor_event';
 
 const NUMBER_OF_TRANSACTIONS_LABEL = i18n.translate(
   'xpack.apm.durationDistribution.chart.numberOfTransactionsLabel',
@@ -83,18 +83,21 @@ const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
   },
 });
 
-// TODO Revisit this approach since it actually manipulates the numbers
-// showing in the chart and its tooltips.
-const CHART_PLACEHOLDER_VALUE = 0.0001;
+// With a log based y axis in combination with the `CURVE_STEP_AFTER` style,
+// the line of an area would not go down to 0 but end on the y axis at the last value >0.
+// By replacing the 0s with a small value >0 the line will be drawn as intended.
+// This is just to visually fix the line, for tooltips, that number will be again rounded down to 0.
+// Note this workaround is only safe to use for this type of chart because it works with
+// count based values and not a float based metric for example on the y axis.
+const Y_AXIS_MIN_DOMAIN = 0.5;
+const Y_AXIS_MIN_VALUE = 0.0001;
 
-// Elastic charts will show any lone bin (i.e. a populated bin followed by empty bin)
-// as a circular marker instead of a bar
-// This provides a workaround by making the next bin not empty
-// TODO Find a way to get rid of this workaround since it alters original values of the data.
-export const replaceHistogramDotsWithBars = (histogramItems: HistogramItem[]) =>
+export const replaceHistogramZerosWithMinimumDomainValue = (
+  histogramItems: HistogramItem[]
+) =>
   histogramItems.reduce((histogramItem, _, i) => {
     if (histogramItem[i].doc_count === 0) {
-      histogramItem[i].doc_count = CHART_PLACEHOLDER_VALUE;
+      histogramItem[i].doc_count = Y_AXIS_MIN_VALUE;
     }
     return histogramItem;
   }, histogramItems);
@@ -140,9 +143,10 @@ export function DurationDistributionChart({
       ...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)
     ) ?? 0;
   const yTicks = Math.max(1, Math.ceil(Math.log10(yMax)));
+  const yAxisMaxDomain = Math.pow(10, yTicks);
   const yAxisDomain = {
-    min: 0.5,
-    max: Math.pow(10, yTicks),
+    min: Y_AXIS_MIN_DOMAIN,
+    max: yAxisMaxDomain,
   };
 
   const selectionAnnotation =
@@ -153,12 +157,21 @@ export function DurationDistributionChart({
               x0: selection[0],
               x1: selection[1],
               y0: 0,
-              y1: 100000,
+              y1: yAxisMaxDomain,
             },
             details: 'selection',
           },
         ]
       : undefined;
+
+  const chartData = useMemo(
+    () =>
+      data.map((d) => ({
+        ...d,
+        histogram: replaceHistogramZerosWithMinimumDomainValue(d.histogram),
+      })),
+    [data]
+  );
 
   return (
     <div
@@ -177,6 +190,10 @@ export function DurationDistributionChart({
                 areaSeriesStyle: {
                   line: {
                     visible: true,
+                  },
+                  point: {
+                    visible: false,
+                    radius: 0,
                   },
                 },
                 axes: {
@@ -266,26 +283,28 @@ export function DurationDistributionChart({
             ticks={yTicks}
             gridLine={{ visible: true }}
           />
-          {data.map((d, i) => (
+          {chartData.map((d) => (
             <AreaSeries
               key={d.id}
               id={d.id}
               xScaleType={ScaleType.Log}
               yScaleType={ScaleType.Log}
-              data={replaceHistogramDotsWithBars(d.histogram)}
+              data={d.histogram}
               curve={CurveType.CURVE_STEP_AFTER}
               xAccessor="key"
               yAccessors={['doc_count']}
               color={d.areaSeriesColor}
-              fit="lookahead"
-              // To make the area appear without the orphaned points technique,
-              // we changed the original data to replace values of 0 with 0.0001.
+              fit="linear"
+              areaSeriesStyle={{
+                fit: {
+                  line: { visible: true },
+                },
+              }}
+              // To make the area appear with a continuous line,
+              // we changed the original data to replace values of 0 with Y_AXIS_MIN_DOMAIN.
               // To show the correct values again in tooltips, we use a custom tickFormat to round values.
               // We can safely do this because all duration values above 0 are without decimal points anyway.
-              // An update for Elastic Charts is in the works to be able to customize the above "fit"
-              // attribute. Once that is available we can get rid of the full workaround.
-              // Elastic Charts issue: https://github.com/elastic/elastic-charts/issues/1489
-              tickFormat={(p) => `${Math.round(p)}`}
+              tickFormat={(p) => `${Math.floor(p)}`}
             />
           ))}
         </Chart>

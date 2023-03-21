@@ -46,6 +46,7 @@ describe('useExpViewTimeRange', function () {
       infra_logs: mockDataView,
       infra_metrics: mockDataView,
       synthetics: mockDataView,
+      alerts: mockDataView,
     },
   });
   jest.spyOn(theme, 'useTheme').mockReturnValue({
@@ -71,7 +72,6 @@ describe('useExpViewTimeRange', function () {
       <ExploratoryViewContextProvider
         reportTypes={reportTypesList}
         dataTypes={dataTypes}
-        dataViews={{}}
         reportConfigMap={obsvReportConfigMap}
         setHeaderActionMenu={jest.fn()}
         theme$={themeServiceMock.createTheme$()}

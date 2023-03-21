@@ -21,14 +21,14 @@ exports[`Storyshots renderers/TimeFilter default 1`] = `
           className="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
         >
           <div
-            className="euiPopover euiPopover--anchorDownLeft"
+            className="euiPopover emotion-euiPopover"
           >
             <div
-              className="euiPopover__anchor euiQuickSelectPopover__anchor"
+              className="euiPopover__anchor euiQuickSelectPopover__anchor css-16vtueo-render"
             >
               <button
                 aria-label="Date quick select"
-                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
+                className="euiButtonEmpty euiButtonEmpty--xSmall euiFormControlLayout__prepend css-9t7nyf-empty-primary"
                 data-test-subj="superDatePickerToggleQuickMenuButton"
                 disabled={false}
                 onClick={[Function]}
@@ -75,13 +75,13 @@ exports[`Storyshots renderers/TimeFilter default 1`] = `
             </div>
           </div>
           <div
-            className="euiPopover euiPopover--anchorDownCenter"
+            className="euiPopover emotion-euiPopover"
           >
             <div
-              className="euiPopover__anchor"
+              className="euiPopover__anchor css-16vtueo-render"
             >
               <button
-                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiAutoRefreshButton euiFormControlLayout__append euiFormControlLayout__append"
+                className="euiButtonEmpty euiButtonEmpty--small euiAutoRefreshButton euiFormControlLayout__append euiFormControlLayout__append css-wvaqcf-empty-text"
                 disabled={false}
                 onClick={[Function]}
                 title="Auto refresh is on and set to 1 second"
@@ -135,14 +135,14 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
           className="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
         >
           <div
-            className="euiPopover euiPopover--anchorDownLeft"
+            className="euiPopover emotion-euiPopover"
           >
             <div
-              className="euiPopover__anchor euiQuickSelectPopover__anchor"
+              className="euiPopover__anchor euiQuickSelectPopover__anchor css-16vtueo-render"
             >
               <button
                 aria-label="Date quick select"
-                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
+                className="euiButtonEmpty euiButtonEmpty--xSmall euiFormControlLayout__prepend css-9t7nyf-empty-primary"
                 data-test-subj="superDatePickerToggleQuickMenuButton"
                 disabled={false}
                 onClick={[Function]}
@@ -179,10 +179,10 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
               className="euiDatePickerRange euiDatePickerRange--inGroup"
             >
               <div
-                className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiSuperDatePicker__startPopoverButton"
+                className="euiPopover euiSuperDatePicker__startPopoverButton emotion-euiPopover"
               >
                 <div
-                  className="euiPopover__anchor"
+                  className="euiPopover__anchor css-zih94u-render"
                 >
                   <button
                     className="euiDatePopoverButton euiDatePopoverButton--start"
@@ -206,10 +206,10 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
                 </span>
               </span>
               <div
-                className="euiPopover euiPopover--anchorDownRight euiPopover--displayBlock"
+                className="euiPopover emotion-euiPopover"
               >
                 <div
-                  className="euiPopover__anchor"
+                  className="euiPopover__anchor css-zih94u-render"
                 >
                   <button
                     className="euiDatePopoverButton euiDatePopoverButton--end"
@@ -225,13 +225,13 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
             </div>
           </div>
           <div
-            className="euiPopover euiPopover--anchorDownCenter"
+            className="euiPopover emotion-euiPopover"
           >
             <div
-              className="euiPopover__anchor"
+              className="euiPopover__anchor css-16vtueo-render"
             >
               <button
-                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiAutoRefreshButton euiFormControlLayout__append euiFormControlLayout__append"
+                className="euiButtonEmpty euiButtonEmpty--small euiAutoRefreshButton euiFormControlLayout__append euiFormControlLayout__append css-wvaqcf-empty-text"
                 disabled={false}
                 onClick={[Function]}
                 title="Auto refresh is on and set to 1 second"
@@ -285,14 +285,14 @@ exports[`Storyshots renderers/TimeFilter with commonlyUsedRanges 1`] = `
           className="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
         >
           <div
-            className="euiPopover euiPopover--anchorDownLeft"
+            className="euiPopover emotion-euiPopover"
           >
             <div
-              className="euiPopover__anchor euiQuickSelectPopover__anchor"
+              className="euiPopover__anchor euiQuickSelectPopover__anchor css-16vtueo-render"
             >
               <button
                 aria-label="Date quick select"
-                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
+                className="euiButtonEmpty euiButtonEmpty--xSmall euiFormControlLayout__prepend css-9t7nyf-empty-primary"
                 data-test-subj="superDatePickerToggleQuickMenuButton"
                 disabled={false}
                 onClick={[Function]}
@@ -339,13 +339,13 @@ exports[`Storyshots renderers/TimeFilter with commonlyUsedRanges 1`] = `
             </div>
           </div>
           <div
-            className="euiPopover euiPopover--anchorDownCenter"
+            className="euiPopover emotion-euiPopover"
           >
             <div
-              className="euiPopover__anchor"
+              className="euiPopover__anchor css-16vtueo-render"
             >
               <button
-                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiAutoRefreshButton euiFormControlLayout__append euiFormControlLayout__append"
+                className="euiButtonEmpty euiButtonEmpty--small euiAutoRefreshButton euiFormControlLayout__append euiFormControlLayout__append css-wvaqcf-empty-text"
                 disabled={false}
                 onClick={[Function]}
                 title="Auto refresh is on and set to 1 second"
@@ -399,14 +399,14 @@ exports[`Storyshots renderers/TimeFilter with dateFormat 1`] = `
           className="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
         >
           <div
-            className="euiPopover euiPopover--anchorDownLeft"
+            className="euiPopover emotion-euiPopover"
           >
             <div
-              className="euiPopover__anchor euiQuickSelectPopover__anchor"
+              className="euiPopover__anchor euiQuickSelectPopover__anchor css-16vtueo-render"
             >
               <button
                 aria-label="Date quick select"
-                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
+                className="euiButtonEmpty euiButtonEmpty--xSmall euiFormControlLayout__prepend css-9t7nyf-empty-primary"
                 data-test-subj="superDatePickerToggleQuickMenuButton"
                 disabled={false}
                 onClick={[Function]}
@@ -453,13 +453,13 @@ exports[`Storyshots renderers/TimeFilter with dateFormat 1`] = `
             </div>
           </div>
           <div
-            className="euiPopover euiPopover--anchorDownCenter"
+            className="euiPopover emotion-euiPopover"
           >
             <div
-              className="euiPopover__anchor"
+              className="euiPopover__anchor css-16vtueo-render"
             >
               <button
-                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiAutoRefreshButton euiFormControlLayout__append euiFormControlLayout__append"
+                className="euiButtonEmpty euiButtonEmpty--small euiAutoRefreshButton euiFormControlLayout__append euiFormControlLayout__append css-wvaqcf-empty-text"
                 disabled={false}
                 onClick={[Function]}
                 title="Auto refresh is on and set to 1 second"
@@ -513,14 +513,14 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
           className="euiFormControlLayout euiFormControlLayout--group euiSuperDatePicker"
         >
           <div
-            className="euiPopover euiPopover--anchorDownLeft"
+            className="euiPopover emotion-euiPopover"
           >
             <div
-              className="euiPopover__anchor euiQuickSelectPopover__anchor"
+              className="euiPopover__anchor euiQuickSelectPopover__anchor css-16vtueo-render"
             >
               <button
                 aria-label="Date quick select"
-                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiFormControlLayout__prepend"
+                className="euiButtonEmpty euiButtonEmpty--xSmall euiFormControlLayout__prepend css-9t7nyf-empty-primary"
                 data-test-subj="superDatePickerToggleQuickMenuButton"
                 disabled={false}
                 onClick={[Function]}
@@ -557,10 +557,10 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
               className="euiDatePickerRange euiDatePickerRange--inGroup"
             >
               <div
-                className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiSuperDatePicker__startPopoverButton"
+                className="euiPopover euiSuperDatePicker__startPopoverButton emotion-euiPopover"
               >
                 <div
-                  className="euiPopover__anchor"
+                  className="euiPopover__anchor css-zih94u-render"
                 >
                   <button
                     className="euiDatePopoverButton euiDatePopoverButton--start"
@@ -584,10 +584,10 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
                 </span>
               </span>
               <div
-                className="euiPopover euiPopover--anchorDownRight euiPopover--displayBlock"
+                className="euiPopover emotion-euiPopover"
               >
                 <div
-                  className="euiPopover__anchor"
+                  className="euiPopover__anchor css-zih94u-render"
                 >
                   <button
                     className="euiDatePopoverButton euiDatePopoverButton--end"
@@ -603,13 +603,13 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
             </div>
           </div>
           <div
-            className="euiPopover euiPopover--anchorDownCenter"
+            className="euiPopover emotion-euiPopover"
           >
             <div
-              className="euiPopover__anchor"
+              className="euiPopover__anchor css-16vtueo-render"
             >
               <button
-                className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiAutoRefreshButton euiFormControlLayout__append euiFormControlLayout__append"
+                className="euiButtonEmpty euiButtonEmpty--small euiAutoRefreshButton euiFormControlLayout__append euiFormControlLayout__append css-wvaqcf-empty-text"
                 disabled={false}
                 onClick={[Function]}
                 title="Auto refresh is on and set to 1 second"

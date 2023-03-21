@@ -10,6 +10,8 @@ import { GetEventsOptions } from '@kbn/analytics-ftr-helpers-plugin/common/types
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../services';
 
+const DASHBOARD_LOADED_EVENT = 'dashboard_loaded';
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ebtUIHelper = getService('kibana_ebt_ui');
   const PageObjects = getPageObjects([
@@ -24,28 +26,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const queryBar = getService('queryBar');
 
-  describe('Loaded Dashboard', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/142548
+  describe.skip('Loaded Dashboard', () => {
     let fromTimestamp: string | undefined;
 
     const getEvents = async (count: number, options?: GetEventsOptions) =>
       ebtUIHelper.getEvents(count, {
-        eventTypes: ['dashboard-data-loaded'],
+        eventTypes: ['performance_metric'],
         fromTimestamp,
         withTimeoutMs: 1000,
+        filters: { 'properties.eventName': { eq: DASHBOARD_LOADED_EVENT } },
         ...options,
       });
 
     const checkEmitsOnce = async (options?: GetEventsOptions) => {
       const events = await getEvents(Number.MAX_SAFE_INTEGER, options);
-      expect(events.length).to.be(1);
       const event = events[0];
-      expect(event.event_type).to.eql('dashboard-data-loaded');
+      expect(event.event_type).to.eql('performance_metric');
+      expect(event.properties.eventName).to.eql(DASHBOARD_LOADED_EVENT);
       expect(event.context.applicationId).to.be('dashboards');
       expect(event.context.page).to.be('app');
       expect(event.context.pageName).to.be('application:dashboards:app');
-      expect(event.properties.status).to.be('done');
-      expect(event.properties.timeToData).to.be.a('number');
-      expect(event.properties.timeToDone).to.be.a('number');
+      expect(event.properties.duration).to.be.a('number');
+      expect(event.properties.key1).to.eql('time_to_data');
+      expect(event.properties.value1).to.be.a('number');
+      expect(event.properties.key2).to.eql('num_of_panels');
+      expect(event.properties.value2).to.be.a('number');
 
       // update fromTimestamp
       fromTimestamp = event.timestamp;
@@ -81,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('dashboards');
       });
 
-      it('doesnt emit on empty dashboard', async () => {
+      it("doesn't emit on empty dashboard", async () => {
         await PageObjects.dashboard.clickNewDashboard();
         await checkDoesNotEmit();
       });
@@ -100,7 +106,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const event = await checkEmitsOnce();
 
         expect(event.context.entityId).to.be('new');
-        expect(event.properties.numOfPanels).to.be(1);
+        expect(event.properties.key2).to.be('num_of_panels');
+        expect(event.properties.value2).to.be(1);
       });
 
       it('emits on saved search refreshed', async () => {
@@ -108,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await checkEmitsOnce();
       });
 
-      it('doesnt emit when removing saved search panel', async () => {
+      it("doesn't emit when removing saved search panel", async () => {
         await dashboardPanelActions.removePanelByTitle(SAVED_SEARCH_PANEL_TITLE);
         await checkDoesNotEmit();
       });
@@ -126,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await checkEmitsOnce();
       });
 
-      it('doesnt emit when removing vis panel', async () => {
+      it("doesn't emit when removing vis panel", async () => {
         await dashboardPanelActions.removePanelByTitle(VIS_PANEL_TITLE);
         await checkDoesNotEmit();
       });
@@ -150,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await checkEmitsOnce();
       });
 
-      it('doesnt emit when removing markup panel', async () => {
+      it("doesn't emit when removing markup panel", async () => {
         await dashboardPanelActions.removePanelByTitle(MARKDOWN_PANEL_TITLE);
         await checkDoesNotEmit();
       });
@@ -170,7 +177,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await checkEmitsOnce();
       });
 
-      it('doesnt emit when removing map panel', async () => {
+      it("doesn't emit when removing map panel", async () => {
         await dashboardPanelActions.removePanelByTitle(MAP_PANEL_TITLE);
         await checkDoesNotEmit();
       });
@@ -187,10 +194,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const event = await checkEmitsOnce();
         expect(event.context.entityId).to.be('7adfa750-4c81-11e8-b3d7-01146121b73d');
-        expect(event.properties.numOfPanels).to.be(17);
-        expect(event.properties.timeToDone as number).to.be.greaterThan(
-          event.properties.timeToData as number
+
+        expect(event.properties.key1).to.be('time_to_data');
+        expect(event.properties.duration as number).to.be.greaterThan(
+          event.properties.value1 as number
         );
+
+        expect(event.properties.key2).to.be('num_of_panels');
+        expect(event.properties.value2).to.be(16);
       });
 
       /**

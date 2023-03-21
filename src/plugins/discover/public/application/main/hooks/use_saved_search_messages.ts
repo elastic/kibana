@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../types';
-import {
-  DataCharts$,
+import type {
   DataDocuments$,
   DataMain$,
+  DataMsg,
   DataTotalHits$,
   SavedSearchData,
-} from './use_saved_search';
-
+} from '../services/discover_data_state_container';
 /**
  * Sends COMPLETE message to the main$ observable with the information
  * that no documents have been found, allowing Discover to show a no
@@ -33,10 +34,12 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
   if (main$.getValue().fetchStatus === FetchStatus.COMPLETE) {
     return;
   }
+  const recordRawType = main$.getValue().recordRawType;
   main$.next({
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments,
     error: undefined,
+    recordRawType,
   });
 }
 
@@ -45,8 +48,10 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
  */
 export function sendPartialMsg(main$: DataMain$) {
   if (main$.getValue().fetchStatus === FetchStatus.LOADING) {
+    const recordRawType = main$.getValue().recordRawType;
     main$.next({
       fetchStatus: FetchStatus.PARTIAL,
+      recordRawType,
     });
   }
 }
@@ -54,47 +59,83 @@ export function sendPartialMsg(main$: DataMain$) {
 /**
  * Send LOADING message via main observable
  */
-export function sendLoadingMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$) {
+export function sendLoadingMsg<T extends DataMsg>(
+  data$: BehaviorSubject<T>,
+  props: Omit<T, 'fetchStatus'>
+) {
   if (data$.getValue().fetchStatus !== FetchStatus.LOADING) {
     data$.next({
+      ...props,
       fetchStatus: FetchStatus.LOADING,
-    });
+    } as T);
   }
 }
 
 /**
  * Send ERROR message
  */
-export function sendErrorMsg(
-  data$: DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$,
-  error: Error
-) {
+export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$, error: Error) {
+  const recordRawType = data$.getValue().recordRawType;
   data$.next({
     fetchStatus: FetchStatus.ERROR,
     error,
+    recordRawType,
   });
 }
 
 /**
  * Sends a RESET message to all data subjects
- * Needed when index pattern is switched or a new runtime field is added
+ * Needed when data view is switched or a new runtime field is added
  */
 export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchStatus) {
+  const recordRawType = data.main$.getValue().recordRawType;
   data.main$.next({
     fetchStatus: initialFetchStatus,
     foundDocuments: undefined,
+    recordRawType,
   });
   data.documents$.next({
     fetchStatus: initialFetchStatus,
     result: [],
-  });
-  data.charts$.next({
-    fetchStatus: initialFetchStatus,
-    chartData: undefined,
-    bucketInterval: undefined,
+    recordRawType,
   });
   data.totalHits$.next({
     fetchStatus: initialFetchStatus,
     result: undefined,
+    recordRawType,
   });
 }
+
+/**
+ * Method to create an error handler that will forward the received error
+ * to the specified subjects. It will ignore AbortErrors and will use the data
+ * plugin to show a toast for the error (e.g. allowing better insights into shard failures).
+ */
+export const sendErrorTo = (
+  data: DataPublicPluginStart,
+  ...errorSubjects: Array<DataMain$ | DataDocuments$>
+) => {
+  return (error: Error) => {
+    if (error instanceof Error && error.name === 'AbortError') {
+      return;
+    }
+
+    data.search.showError(error);
+    errorSubjects.forEach((subject) => sendErrorMsg(subject, error));
+  };
+};
+
+/**
+ * This method checks the passed in hit count and will send a PARTIAL message to main$
+ * if there are results, indicating that we have finished some of the requests that have been
+ * sent. If there are no results we already COMPLETE main$ with no results found, so Discover
+ * can show the "no results" screen. We know at that point, that the other query returning
+ * will neither carry any data, since there are no documents.
+ */
+export const checkHitCount = (main$: DataMain$, hitsCount: number) => {
+  if (hitsCount > 0) {
+    sendPartialMsg(main$);
+  } else {
+    sendNoResultsFoundMsg(main$);
+  }
+};

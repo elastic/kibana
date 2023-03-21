@@ -61,6 +61,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
         }
       ),
       content: <ShardFailureTable failures={failures} />,
+      ['data-test-subj']: 'shardFailuresModalShardButton',
     },
     {
       id: 'json-request',
@@ -69,10 +70,11 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
         description: 'Name of the tab displaying the JSON request',
       }),
       content: (
-        <EuiCodeBlock language="json" isCopyable>
+        <EuiCodeBlock language="json" isCopyable data-test-subj="shardsFailedModalRequestBlock">
           {requestJSON}
         </EuiCodeBlock>
       ),
+      ['data-test-subj']: 'shardFailuresModalRequestButton',
     },
     {
       id: 'json-response',
@@ -81,17 +83,18 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
         description: 'Name of the tab displaying the JSON response',
       }),
       content: (
-        <EuiCodeBlock language="json" isCopyable>
+        <EuiCodeBlock language="json" isCopyable data-test-subj="shardsFailedModalResponseBlock">
           {responseJSON}
         </EuiCodeBlock>
       ),
+      ['data-test-subj']: 'shardFailuresModalResponseButton',
     },
   ];
 
   return (
     <React.Fragment>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle data-test-subj="shardFailureModalTitle">{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
@@ -107,7 +110,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
             </EuiButtonEmpty>
           )}
         </EuiCopy>
-        <EuiButton onClick={() => onClose()} fill data-test-sub="closeShardFailureModal">
+        <EuiButton onClick={() => onClose()} fill data-test-subj="closeShardFailureModal">
           <FormattedMessage
             id="data.search.searchSource.fetch.shardsFailedModal.close"
             defaultMessage="Close"

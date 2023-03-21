@@ -41,6 +41,7 @@
         ],
         "path": "packages/shared-ux/page/solution_nav/src/solution_nav.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-solution-nav",
@@ -62,6 +63,7 @@
             ],
             "path": "packages/shared-ux/page/solution_nav/src/solution_nav.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -76,10 +78,13 @@
         "label": "withSolutionNav",
         "description": [],
         "signature": [
-          "<P extends ComponentProps>(WrappedComponent: React.ComponentType<P>) => { (props: Props<P>): JSX.Element; displayName: string; }"
+          "<P extends ",
+          "TemplateProps",
+          ">(WrappedComponent: React.ComponentType<P>) => { (props: Props<P>): JSX.Element; displayName: string; }"
         ],
         "path": "packages/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-solution-nav",
@@ -93,6 +98,7 @@
             ],
             "path": "packages/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -123,6 +129,7 @@
         ],
         "path": "packages/shared-ux/page/solution_nav/src/solution_nav.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

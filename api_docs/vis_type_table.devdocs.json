@@ -29,6 +29,7 @@
         "description": [],
         "path": "src/plugins/vis_types/table/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "visTypeTable",
@@ -41,7 +42,8 @@
               "number | \"\""
             ],
             "path": "src/plugins/vis_types/table/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeTable",
@@ -51,7 +53,8 @@
             "label": "showPartialRows",
             "description": [],
             "path": "src/plugins/vis_types/table/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeTable",
@@ -61,7 +64,8 @@
             "label": "showMetricsAtAllLevels",
             "description": [],
             "path": "src/plugins/vis_types/table/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeTable",
@@ -71,7 +75,8 @@
             "label": "showToolbar",
             "description": [],
             "path": "src/plugins/vis_types/table/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeTable",
@@ -81,7 +86,8 @@
             "label": "showTotal",
             "description": [],
             "path": "src/plugins/vis_types/table/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeTable",
@@ -100,7 +106,8 @@
               }
             ],
             "path": "src/plugins/vis_types/table/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeTable",
@@ -110,7 +117,8 @@
             "label": "percentageCol",
             "description": [],
             "path": "src/plugins/vis_types/table/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeTable",
@@ -123,7 +131,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/vis_types/table/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "visTypeTable",
@@ -136,7 +145,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/vis_types/table/common/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -152,6 +162,7 @@
         "description": [],
         "path": "src/plugins/vis_types/table/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -168,6 +179,7 @@
         ],
         "path": "src/plugins/vis_types/table/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

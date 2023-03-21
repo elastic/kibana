@@ -5,104 +5,57 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useGetCasesStatus, UseGetCasesStatus } from './use_get_cases_status';
-import { casesStatus } from './mock';
+import { renderHook } from '@testing-library/react-hooks';
+import { useGetCasesStatus } from './use_get_cases_status';
 import * as api from '../api';
-import { TestProviders } from '../common/mock';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer } from '../common/mock';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('../api');
 jest.mock('../common/lib/kibana');
 
-describe('useGetCasesStatus', () => {
+describe('useGetCasesMetrics', () => {
   const abortCtrl = new AbortController();
+  const addSuccess = jest.fn();
+  const addError = jest.fn();
+
+  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+
+  let appMockRender: AppMockRenderer;
+
   beforeEach(() => {
+    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
-  it('init', async () => {
-    const { result } = renderHook<string, UseGetCasesStatus>(() => useGetCasesStatus(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+  it('calls the api when invoked with the correct parameters', async () => {
+    const spy = jest.spyOn(api, 'getCasesStatus');
+    const { waitForNextUpdate } = renderHook(() => useGetCasesStatus(), {
+      wrapper: appMockRender.AppWrapper,
     });
 
-    await act(async () => {
-      expect(result.current).toEqual({
-        countClosedCases: 0,
-        countOpenCases: 0,
-        countInProgressCases: 0,
-        isLoading: true,
-        isError: false,
-        fetchCasesStatus: result.current.fetchCasesStatus,
-      });
+    await waitForNextUpdate();
+
+    expect(spy).toHaveBeenCalledWith({
+      http: expect.anything(),
+      signal: abortCtrl.signal,
+      query: { owner: [SECURITY_SOLUTION_OWNER] },
     });
   });
 
-  it('calls getCasesStatus api', async () => {
-    const spyOnGetCasesStatus = jest.spyOn(api, 'getCasesStatus');
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(
-        () => useGetCasesStatus(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
+  it('shows a toast error when the api return an error', async () => {
+    jest
+      .spyOn(api, 'getCasesStatus')
+      .mockRejectedValue(new Error('useGetCasesMetrics: Test error'));
 
-      await waitForNextUpdate();
-      expect(spyOnGetCasesStatus).toBeCalledWith({
-        http: expect.anything(),
-        signal: abortCtrl.signal,
-        query: { owner: [SECURITY_SOLUTION_OWNER] },
-      });
-    });
-  });
-
-  it('fetch statuses', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(
-        () => useGetCasesStatus(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        countClosedCases: casesStatus.countClosedCases,
-        countOpenCases: casesStatus.countOpenCases,
-        countInProgressCases: casesStatus.countInProgressCases,
-        isLoading: false,
-        isError: false,
-        fetchCasesStatus: result.current.fetchCasesStatus,
-      });
-    });
-  });
-
-  it('unhappy path', async () => {
-    const spyOnGetCasesStatus = jest.spyOn(api, 'getCasesStatus');
-    spyOnGetCasesStatus.mockImplementation(() => {
-      throw new Error('Something went wrong');
+    const { waitForNextUpdate } = renderHook(() => useGetCasesStatus(), {
+      wrapper: appMockRender.AppWrapper,
     });
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(
-        () => useGetCasesStatus(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
+    await waitForNextUpdate();
 
-      expect(result.current).toEqual({
-        countClosedCases: 0,
-        countOpenCases: 0,
-        countInProgressCases: 0,
-        isLoading: false,
-        isError: true,
-        fetchCasesStatus: result.current.fetchCasesStatus,
-      });
-    });
+    expect(addError).toHaveBeenCalled();
   });
 });

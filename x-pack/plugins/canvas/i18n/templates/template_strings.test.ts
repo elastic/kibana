@@ -6,7 +6,7 @@
  */
 
 import { getTemplateStrings } from './template_strings';
-import { loadTemplates } from '../../server/templates'; // eslint-disable-line
+import { loadTemplates } from '../../server/templates';
 
 import { TagStrings } from '../tags';
 

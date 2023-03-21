@@ -9,31 +9,27 @@ import { schema } from '@kbn/config-schema';
 
 import { fetchMapping } from '../../lib/fetch_mapping';
 import { RouteDependencies } from '../../plugin';
+import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 
-export function registerMappingRoute({ router }: RouteDependencies) {
+export function registerMappingRoute({ router, log }: RouteDependencies) {
   router.get(
     {
-      path: '/internal/enterprise_search/{index_name}/mapping',
+      path: '/internal/enterprise_search/mappings/{index_name}',
       validate: {
         params: schema.object({
           index_name: schema.string(),
         }),
       },
     },
-    async (context, request, response) => {
+    elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      try {
-        const mapping = await fetchMapping(client, request.params.index_name);
-        return response.ok({
-          body: mapping,
-          headers: { 'content-type': 'application/json' },
-        });
-      } catch (error) {
-        return response.customError({
-          statusCode: 502,
-          body: 'Error fetching data from Enterprise Search',
-        });
-      }
-    }
+
+      const mapping = await fetchMapping(client, request.params.index_name);
+
+      return response.ok({
+        body: mapping,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
   );
 }

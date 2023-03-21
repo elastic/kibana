@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { CaseConnector, ConnectorTypeFields } from '../../common/api';
+import type { CaseConnector, ConnectorTypeFields } from '../../common/api';
 import { getNoneCaseConnector } from '../common/utils';
-import { ESCaseConnector, ESConnectorFields } from '.';
+import type { ESCaseConnector, ESConnectorFields } from '.';
 
 export function findConnectorIdReference(
   name: string,

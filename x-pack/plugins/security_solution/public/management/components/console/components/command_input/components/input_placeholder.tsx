@@ -19,6 +19,7 @@ const InputPlaceholderContainer = styled(EuiText)`
   padding-left: 0.5em;
   width: 96%;
   color: ${({ theme: { eui } }) => eui.euiFormControlPlaceholderText};
+  user-select: none;
 `;
 
 export const InputPlaceholder = memo(() => {
@@ -26,13 +27,17 @@ export const InputPlaceholder = memo(() => {
   const placeholder = useWithInputPlaceholder();
   const getTestId = useTestIdGenerator(useDataTestSubj());
 
+  if (fullTextEntered.length > 0) {
+    return null;
+  }
+
   return (
     <InputPlaceholderContainer
       size="s"
       className="eui-textTruncate"
       data-test-subj={getTestId('inputPlaceholder')}
     >
-      <div className="eui-textTruncate">{fullTextEntered ? '' : placeholder}</div>
+      <div className="eui-textTruncate">{placeholder}</div>
     </InputPlaceholderContainer>
   );
 });

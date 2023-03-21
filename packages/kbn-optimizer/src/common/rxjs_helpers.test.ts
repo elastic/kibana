@@ -11,7 +11,7 @@ import { fakeSchedulers } from 'rxjs-marbles/jest';
 
 import { pipeClosure, debounceTimeBuffer, maybeMap, maybe } from './rxjs_helpers';
 
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 describe('pipeClosure()', () => {
   it('calls closure on each subscription to setup unique state', async () => {
@@ -70,7 +70,7 @@ describe('maybeMap()', () => {
 
 describe('debounceTimeBuffer()', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterEach(() => {

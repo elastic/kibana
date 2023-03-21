@@ -11,11 +11,12 @@ import { SavedObject, SavedObjectReference } from '@kbn/core/public';
 import {
   SavedObjectsTaggingApiUi,
   SavedObjectsTaggingApiUiComponent,
+  GetTableColumnDefinitionOptions,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { ITagsCache } from '../services';
 import { getTagsFromReferences, byNameTagSorter } from '../utils';
 
-export interface GetTableColumnDefinitionOptions {
+export interface BuildGetTableColumnDefinitionOptions {
   components: SavedObjectsTaggingApiUiComponent;
   cache: ITagsCache;
 }
@@ -23,8 +24,8 @@ export interface GetTableColumnDefinitionOptions {
 export const buildGetTableColumnDefinition = ({
   components,
   cache,
-}: GetTableColumnDefinitionOptions): SavedObjectsTaggingApiUi['getTableColumnDefinition'] => {
-  return () => {
+}: BuildGetTableColumnDefinitionOptions): SavedObjectsTaggingApiUi['getTableColumnDefinition'] => {
+  return ({ serverPaging = false }: GetTableColumnDefinitionOptions = {}) => {
     return {
       field: 'references',
       name: i18n.translate('xpack.savedObjectsTagging.uiApi.table.columnTagsName', {
@@ -33,11 +34,13 @@ export const buildGetTableColumnDefinition = ({
       description: i18n.translate('xpack.savedObjectsTagging.uiApi.table.columnTagsDescription', {
         defaultMessage: 'Tags associated with this saved object',
       }),
-      sortable: (object: SavedObject) => {
-        const { tags } = getTagsFromReferences(object.references, cache.getState());
-        tags.sort(byNameTagSorter);
-        return tags.length ? tags[0].name : undefined;
-      },
+      sortable: serverPaging
+        ? false
+        : (object: SavedObject) => {
+            const { tags } = getTagsFromReferences(object.references, cache.getState());
+            tags.sort(byNameTagSorter);
+            return tags.length ? tags[0].name : undefined;
+          },
       render: (references: SavedObjectReference[], object: SavedObject) => {
         return <components.TagList object={object} />;
       },

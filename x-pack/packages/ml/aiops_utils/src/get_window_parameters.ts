@@ -22,7 +22,7 @@ export interface WindowParameters {
  * 2. The historical time window prior to the click to use as a baseline.
  *
  * The philosophy here is that charts are displayed with different granularities according to their
- * overall time window. We select the change point and historical time windows inline with the
+ * overall time window. We select the log spike and historical time windows inline with the
  * overall time window.
  *
  * The algorithm for doing this is based on the typical granularities that exist in machine data.
@@ -63,5 +63,65 @@ export const getWindowParameters = (
     baselineMax: Math.round(baselineMax),
     deviationMin: Math.round(deviationMin),
     deviationMax: Math.round(deviationMax),
+  };
+};
+
+/**
+ *
+ * Converts window paramaters from the brushes to “snap” the brushes to the chart histogram bar width and ensure timestamps
+ * correspond to bucket timestamps
+ *
+ * @param windowParameters time range definition for baseline and deviation to be used by spike log analysis
+ * @param snapTimestamps time range definition that always corresponds to histogram bucket timestamps
+ * @returns WindowParameters
+ */
+export const getSnappedWindowParameters = (
+  windowParameters: WindowParameters,
+  snapTimestamps: number[]
+): WindowParameters => {
+  const snappedBaselineMin = snapTimestamps.reduce((pts, cts) => {
+    if (
+      Math.abs(cts - windowParameters.baselineMin) < Math.abs(pts - windowParameters.baselineMin)
+    ) {
+      return cts;
+    }
+    return pts;
+  }, snapTimestamps[0]);
+  const baselineMaxTimestamps = snapTimestamps.filter((ts) => ts > snappedBaselineMin);
+
+  const snappedBaselineMax = baselineMaxTimestamps.reduce((pts, cts) => {
+    if (
+      Math.abs(cts - windowParameters.baselineMax) < Math.abs(pts - windowParameters.baselineMax)
+    ) {
+      return cts;
+    }
+    return pts;
+  }, baselineMaxTimestamps[0]);
+  const deviationMinTss = baselineMaxTimestamps.filter((ts) => ts > snappedBaselineMax);
+
+  const snappedDeviationMin = deviationMinTss.reduce((pts, cts) => {
+    if (
+      Math.abs(cts - windowParameters.deviationMin) < Math.abs(pts - windowParameters.deviationMin)
+    ) {
+      return cts;
+    }
+    return pts;
+  }, deviationMinTss[0]);
+  const deviationMaxTss = deviationMinTss.filter((ts) => ts > snappedDeviationMin);
+
+  const snappedDeviationMax = deviationMaxTss.reduce((pts, cts) => {
+    if (
+      Math.abs(cts - windowParameters.deviationMax) < Math.abs(pts - windowParameters.deviationMax)
+    ) {
+      return cts;
+    }
+    return pts;
+  }, deviationMaxTss[0]);
+
+  return {
+    baselineMin: snappedBaselineMin,
+    baselineMax: snappedBaselineMax,
+    deviationMin: snappedDeviationMin,
+    deviationMax: snappedDeviationMax,
   };
 };

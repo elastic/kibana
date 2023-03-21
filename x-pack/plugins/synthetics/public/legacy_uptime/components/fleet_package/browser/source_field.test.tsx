@@ -11,7 +11,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { ConfigKey } from '../../../../../common/runtime_types';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { IPolicyConfigContextProvider } from '../contexts/policy_config_context';
-import { SourceField, defaultValues } from './source_field';
+import { SourceField, Props, defaultValues } from './source_field';
 import { BrowserSimpleFieldsContextProvider, PolicyConfigContextProvider } from '../contexts';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
@@ -34,6 +34,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
       <input
         data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
         data-currentvalue={props.value}
+        id={props.id}
         onChange={(e: any) => {
           props.onChange(e.jsonContent);
         }}
@@ -48,11 +49,12 @@ const onBlur = jest.fn();
 describe('<SourceField />', () => {
   const WrappedComponent = ({
     isZipUrlSourceEnabled,
-  }: Omit<IPolicyConfigContextProvider, 'children'>) => {
+    defaultConfig,
+  }: Omit<IPolicyConfigContextProvider, 'children'> & Partial<Props>) => {
     return (
       <PolicyConfigContextProvider isZipUrlSourceEnabled={isZipUrlSourceEnabled}>
         <BrowserSimpleFieldsContextProvider>
-          <SourceField onChange={onChange} onFieldBlur={onBlur} />
+          <SourceField onChange={onChange} onFieldBlur={onBlur} defaultConfig={defaultConfig} />
         </BrowserSimpleFieldsContextProvider>
       </PolicyConfigContextProvider>
     );
@@ -66,6 +68,9 @@ describe('<SourceField />', () => {
     render(<WrappedComponent />);
     const zipUrl = 'test.zip';
 
+    const zip = screen.getByTestId('syntheticsSourceTab__zipUrl');
+    fireEvent.click(zip);
+
     const zipUrlField = screen.getByTestId('syntheticsBrowserZipUrl');
     fireEvent.change(zipUrlField, { target: { value: zipUrl } });
 
@@ -77,6 +82,9 @@ describe('<SourceField />', () => {
   it('calls onBlur', () => {
     render(<WrappedComponent />);
 
+    const zip = screen.getByTestId('syntheticsSourceTab__zipUrl');
+    fireEvent.click(zip);
+
     const zipUrlField = screen.getByTestId('syntheticsBrowserZipUrl');
     fireEvent.click(zipUrlField);
     fireEvent.blur(zipUrlField);
@@ -84,7 +92,15 @@ describe('<SourceField />', () => {
     expect(onBlur).toBeCalledWith(ConfigKey.SOURCE_ZIP_URL);
   });
 
-  it('shows ZipUrl source type by default', async () => {
+  it('selects inline script by default', () => {
+    render(<WrappedComponent />);
+
+    expect(
+      screen.getByText('Runs Synthetic test scripts that are defined inline.')
+    ).toBeInTheDocument();
+  });
+
+  it('shows zip source type by default', async () => {
     render(<WrappedComponent />);
 
     expect(screen.getByTestId('syntheticsSourceTab__zipUrl')).toBeInTheDocument();
@@ -94,5 +110,33 @@ describe('<SourceField />', () => {
     render(<WrappedComponent isZipUrlSourceEnabled={false} />);
 
     expect(screen.queryByTestId('syntheticsSourceTab__zipUrl')).not.toBeInTheDocument();
+  });
+
+  it('shows params for all source types', async () => {
+    const { getByText, getByTestId } = render(<WrappedComponent />);
+
+    const inlineTab = getByTestId('syntheticsSourceTab__inline');
+    fireEvent.click(inlineTab);
+
+    expect(getByText('Parameters')).toBeInTheDocument();
+
+    const recorder = getByTestId('syntheticsSourceTab__scriptRecorder');
+    fireEvent.click(recorder);
+
+    expect(getByText('Parameters')).toBeInTheDocument();
+
+    const zip = getByTestId('syntheticsSourceTab__zipUrl');
+    fireEvent.click(zip);
+
+    expect(getByText('Parameters')).toBeInTheDocument();
+  });
+
+  it('shows deprecated for zip url', () => {
+    const { getByText, getByTestId } = render(<WrappedComponent />);
+
+    const zip = getByTestId('syntheticsSourceTab__zipUrl');
+    fireEvent.click(zip);
+
+    expect(getByText('Zip URL is deprecated')).toBeInTheDocument();
   });
 });

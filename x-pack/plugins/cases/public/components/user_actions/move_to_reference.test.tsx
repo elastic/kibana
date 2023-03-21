@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { UserActionMoveToReference } from './move_to_reference';
 
 const outlineComment = jest.fn();

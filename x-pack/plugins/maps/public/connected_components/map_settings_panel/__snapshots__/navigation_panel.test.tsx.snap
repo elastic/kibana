@@ -19,7 +19,6 @@ exports[`should render 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -60,7 +59,6 @@ exports[`should render 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Initial map location"
@@ -113,7 +111,6 @@ exports[`should render browser location form when initialLocation is BROWSER_LOC
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -154,7 +151,6 @@ exports[`should render browser location form when initialLocation is BROWSER_LOC
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Initial map location"
@@ -188,7 +184,6 @@ exports[`should render browser location form when initialLocation is BROWSER_LOC
   <EuiFormRow
     describedByIds={Array []}
     display="columnCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Initial zoom"
@@ -227,7 +222,6 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     labelType="label"
@@ -268,7 +262,6 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Initial map location"
@@ -302,7 +295,6 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
   <EuiFormRow
     describedByIds={Array []}
     display="columnCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Initial latitude"
@@ -317,7 +309,6 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
   <EuiFormRow
     describedByIds={Array []}
     display="columnCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Initial longitude"
@@ -332,7 +323,6 @@ exports[`should render fixed location form when initialLocation is FIXED_LOCATIO
   <EuiFormRow
     describedByIds={Array []}
     display="columnCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Initial zoom"

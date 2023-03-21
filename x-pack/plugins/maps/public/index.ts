@@ -34,6 +34,9 @@ export type { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from './e
 
 export type { EMSTermJoinConfig, SampleValuesConfig } from './ems_autosuggest';
 
+export type { ITMSSource } from './classes/sources/tms_source';
+export type { IRasterSource } from './classes/sources/raster_source';
+
 export type {
   GetFeatureActionsArgs,
   IVectorSource,

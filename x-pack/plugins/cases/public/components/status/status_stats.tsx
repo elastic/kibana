@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiDescriptionList, EuiLoadingSpinner } from '@elastic/eui';
-import { CaseStatuses } from '../../../common/api';
+import type { CaseStatuses } from '../../../common/api';
 import { statuses } from './config';
 
 export interface Props {

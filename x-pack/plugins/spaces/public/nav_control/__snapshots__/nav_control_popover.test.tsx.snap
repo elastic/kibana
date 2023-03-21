@@ -6,20 +6,28 @@ exports[`NavControlPopover renders without crashing 1`] = `
   button={
     <EuiHeaderSectionItemButton
       aria-controls="headerSpacesMenuContent"
+      aria-describedby="spacesNavDetails"
       aria-expanded={false}
       aria-haspopup="true"
-      aria-label="loading"
+      aria-label="Spaces navigation"
       data-test-subj="spacesNavSelector"
       onClick={[Function]}
-      title="loading"
+      title="loading spaces navigation"
     >
       <EuiLoadingSpinner
+        className="eui-alignMiddle"
         size="m"
       />
+      <p
+        hidden={true}
+        id="spacesNavDetails"
+      >
+        loading spaces navigation is the currently selected space. Click this button to open a popover that allows you to select the active space.
+      </p>
     </EuiHeaderSectionItemButton>
   }
   closePopover={[Function]}
-  display="inlineBlock"
+  display="inline-block"
   hasArrow={true}
   id="spcMenuPopover"
   isOpen={false}
@@ -39,8 +47,9 @@ exports[`NavControlPopover renders without crashing 1`] = `
       }
     }
     id="headerSpacesMenuContent"
+    isLoading={false}
     navigateToApp={[MockFunction]}
-    onManageSpacesClick={[Function]}
+    toggleSpaceSelector={[Function]}
   />
 </EuiPopover>
 `;

@@ -12,7 +12,7 @@ export const CLOSE = i18n.translate('xpack.securitySolution.topN.closeButtonLabe
 });
 
 export const ALL_EVENTS = i18n.translate('xpack.securitySolution.topN.allEventsSelectLabel', {
-  defaultMessage: 'All events',
+  defaultMessage: 'Alerts and events',
 });
 
 export const RAW_EVENTS = i18n.translate('xpack.securitySolution.topN.rawEventsSelectLabel', {
@@ -20,5 +20,5 @@ export const RAW_EVENTS = i18n.translate('xpack.securitySolution.topN.rawEventsS
 });
 
 export const ALERT_EVENTS = i18n.translate('xpack.securitySolution.topN.alertEventsSelectLabel', {
-  defaultMessage: 'Detection Alerts',
+  defaultMessage: 'Detection alerts',
 });

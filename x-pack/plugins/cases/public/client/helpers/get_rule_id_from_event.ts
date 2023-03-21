@@ -7,7 +7,7 @@
 
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { get } from 'lodash/fp';
-import { Ecs } from '../../../common';
+import type { Ecs } from '../../../common';
 
 type Maybe<T> = T | null;
 interface Event {

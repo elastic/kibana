@@ -62,7 +62,7 @@ describe('Document Explorer Update callout', () => {
   it('should start a tour when the button is clicked', () => {
     const result = mountWithIntl(
       <KibanaContextProvider services={defaultServices}>
-        <DiscoverTourProvider>
+        <DiscoverTourProvider isPlainRecord={false}>
           <DocumentExplorerUpdateCallout />
         </DiscoverTourProvider>
       </KibanaContextProvider>

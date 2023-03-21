@@ -19,7 +19,7 @@ import { Cancelable } from 'lodash';
 import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
 import { useDateFormat } from '../../hooks';
 
-jest.useFakeTimers('modern');
+jest.useFakeTimers();
 
 jest.mock('../../hooks/use_date_format');
 const mockUseDateFormat = useDateFormat as jest.Mock;
@@ -43,6 +43,7 @@ describe('ProcessTreeNode component', () => {
     } as unknown as RefObject<HTMLDivElement>,
     onChangeJumpToEventVisibility: jest.fn(),
     onShowAlertDetails: jest.fn(),
+    onJumpToOutput: jest.fn(),
     showTimestamp: true,
     verboseMode: false,
   };
@@ -252,6 +253,23 @@ describe('ProcessTreeNode component', () => {
         expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeTruthy();
         userEvent.click(renderResult.getByTestId('processTreeNodeAlertButton'));
         expect(renderResult.queryByTestId('sessionView:sessionViewAlertDetails')).toBeFalsy();
+      });
+    });
+
+    describe('Output', () => {
+      it('renders Output button when process has output', async () => {
+        const processMockWithOutput = {
+          ...sessionViewAlertProcessMock,
+          hasOutput: () => true,
+        };
+        renderResult = mockedContext.render(
+          <ProcessTreeNode {...props} process={processMockWithOutput} />
+        );
+
+        expect(renderResult.queryByTestId('processTreeNodeOutpuButton')).toBeTruthy();
+        expect(renderResult.queryByTestId('processTreeNodeOutpuButton')?.textContent).toBe(
+          'Output'
+        );
       });
     });
     describe('Child processes', () => {

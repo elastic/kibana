@@ -15,8 +15,10 @@ import {
   AbstractSourceDescriptor,
   Attribution,
   DataRequestMeta,
+  StyleDescriptor,
   Timeslice,
 } from '../../../common/descriptor_types';
+import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
 
 export type OnSourceChangeArgs = {
@@ -29,6 +31,8 @@ export type SourceEditorArgs = {
   currentLayerType: string;
   numberOfJoins: number;
   onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;
+  onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
+  style: IStyle;
 };
 
 export type ImmutableSourceProperty = {

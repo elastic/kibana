@@ -34,7 +34,7 @@ export const ExpandedRowJsonPane: FC<Props> = ({ json }) => {
             style={{ width: '100%' }}
             isCopyable
           >
-            value={JSON.stringify(json, null, 2)}
+            {JSON.stringify(json, null, 2)}
           </EuiCodeBlock>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>&nbsp;</EuiFlexItem>

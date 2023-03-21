@@ -43,6 +43,9 @@ const rulesSchema = schema.object({
       max: schema.number({ defaultValue: 100000, max: 100000 }),
       connectorTypeOverrides: schema.maybe(schema.arrayOf(connectorTypeSchema)),
     }),
+    alerts: schema.object({
+      max: schema.number({ defaultValue: 1000 }),
+    }),
     ruleTypeOverrides: schema.maybe(schema.arrayOf(ruleTypeSchema)),
   }),
 });
@@ -59,6 +62,7 @@ export const configSchema = schema.object({
   maxEphemeralActionsPerAlert: schema.number({
     defaultValue: DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT,
   }),
+  enableFrameworkAlerts: schema.boolean({ defaultValue: false }),
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
   rules: rulesSchema,
 });

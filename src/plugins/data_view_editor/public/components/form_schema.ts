@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { fieldValidators, ValidationFunc } from '../shared_imports';
-import { INDEX_PATTERN_TYPE } from '../types';
 
 export const singleAstriskValidator = (
   ...args: Parameters<ValidationFunc>
@@ -28,15 +28,11 @@ export const schema = {
       defaultMessage: 'Index pattern',
     }),
     defaultValue: '',
-    helpText: i18n.translate('indexPatternEditor.validations.titleHelpText', {
-      defaultMessage:
-        'Enter an index pattern that matches one or more data sources. Use an asterisk (*) to match multiple characters. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
-    }),
     validations: [
       {
         validator: fieldValidators.emptyField(
           i18n.translate('indexPatternEditor.validations.titleIsRequiredErrorMessage', {
-            defaultMessage: 'An Index pattern is required.',
+            defaultMessage: 'An index pattern is required.',
           })
         ),
       },
@@ -84,7 +80,7 @@ export const schema = {
   },
   isAdHoc: {
     label: i18n.translate('indexPatternEditor.editor.form.IsAdHocLabel', {
-      defaultMessage: 'Creeate AdHoc DataView',
+      defaultMessage: 'Create AdHoc DataView',
     }),
     defaultValue: false,
     type: 'hidden',

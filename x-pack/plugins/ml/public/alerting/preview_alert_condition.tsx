@@ -130,6 +130,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
     []
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const validationErrors = useMemo(() => validators(lookBehindInterval), [lookBehindInterval]);
 
   useEffect(
@@ -153,6 +154,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
       setPreviewResponse(undefined);
       setPreviewError(e.body ?? e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertParams, lookBehindInterval]);
 
   const sampleHits = useMemo(() => {

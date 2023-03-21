@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/eslint-plugin-eslint",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations"
+}

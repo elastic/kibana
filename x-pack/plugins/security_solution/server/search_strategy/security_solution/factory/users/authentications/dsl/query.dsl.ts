@@ -50,7 +50,7 @@ export const buildQuery = ({
             order: [
               { 'successes.doc_count': 'desc' as const },
               { 'failures.doc_count': 'desc' as const },
-            ] as estypes.AggregationsTermsAggregationOrder,
+            ] as estypes.AggregationsAggregateOrder,
           },
           aggs: {
             failures: {

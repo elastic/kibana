@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ObservabilityTour, observTourActiveStorageKey, observTourStepStorageKey } from './tour';
+export { ObservabilityTour, observTourStepStorageKey, useObservabilityTourContext } from './tour';

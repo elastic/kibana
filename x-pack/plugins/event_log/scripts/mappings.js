@@ -50,10 +50,42 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          outcome: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          summary: {
+            properties: {
+              new: {
+                properties: {
+                  count: {
+                    type: 'long',
+                  },
+                },
+              },
+              ongoing: {
+                properties: {
+                  count: {
+                    type: 'long',
+                  },
+                },
+              },
+              recovered: {
+                properties: {
+                  count: {
+                    type: 'long',
+                  },
+                },
+              },
+            },
+          },
         },
       },
       alert: {
         properties: {
+          flapping: {
+            type: 'boolean',
+          },
           rule: {
             properties: {
               consumer: {
@@ -109,6 +141,30 @@ exports.EcsCustomPropertyMappings = {
                       execution_gap_duration_s: {
                         type: 'long',
                       },
+                      rule_type_run_duration_ms: {
+                        type: 'long',
+                      },
+                      process_alerts_duration_ms: {
+                        type: 'long',
+                      },
+                      trigger_actions_duration_ms: {
+                        type: 'long',
+                      },
+                      process_rule_duration_ms: {
+                        type: 'long',
+                      },
+                      claim_to_start_duration_ms: {
+                        type: 'long',
+                      },
+                      prepare_rule_duration_ms: {
+                        type: 'long',
+                      },
+                      total_run_duration_ms: {
+                        type: 'long',
+                      },
+                      total_enrichment_duration_ms: {
+                        type: 'long',
+                      },
                     },
                   },
                 },
@@ -147,6 +203,9 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          space_agnostic: {
+            type: 'boolean',
+          },
         },
       },
       space_ids: {
@@ -155,6 +214,30 @@ exports.EcsCustomPropertyMappings = {
       },
       version: {
         type: 'version',
+      },
+      action: {
+        properties: {
+          name: {
+            ignore_above: 1024,
+            type: 'keyword',
+          },
+          id: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
+          execution: {
+            properties: {
+              source: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+              uuid: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+            },
+          },
+        },
       },
     },
   },

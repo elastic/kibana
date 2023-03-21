@@ -43,7 +43,7 @@ export default function (providerContext: FtrProviderContext) {
     // Use the custom log package to test the fleet final pipeline
     before(async () => {
       const { body: getPackagesRes } = await supertest.get(
-        `/api/fleet/epm/packages?experimental=true`
+        `/api/fleet/epm/packages?prerelease=true`
       );
       const logPackage = getPackagesRes.items.find((p: any) => p.name === 'log');
       if (!logPackage) {
@@ -101,7 +101,7 @@ export default function (providerContext: FtrProviderContext) {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx');
       const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
       expect(pipelineRes).to.have.property(FINAL_PIPELINE_ID);
-      expect(pipelineRes[FINAL_PIPELINE_ID].version).to.be(2);
+      expect(pipelineRes[FINAL_PIPELINE_ID].version).to.be(3);
     });
 
     it('should correctly setup the final pipeline and apply to fleet managed index template', async () => {

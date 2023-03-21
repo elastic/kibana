@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiConfirmModal,
@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent } from '../../../../types';
 import {
-  sendPutAgentReassign,
+  sendPostAgentReassign,
   sendPostBulkAgentReassign,
   useStartServices,
   useGetAgentPolicies,
@@ -44,13 +44,24 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
     perPage: SO_SEARCH_LIMIT,
   });
 
-  const agentPolicies = agentPoliciesRequest.data
-    ? agentPoliciesRequest.data.items.filter((policy) => policy && !policy.is_managed)
-    : [];
+  const agentPolicies = useMemo(
+    () =>
+      agentPoliciesRequest.data
+        ? agentPoliciesRequest.data.items.filter((policy) => policy && !policy.is_managed)
+        : [],
+    [agentPoliciesRequest.data]
+  );
 
   const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<string | undefined>(
-    isSingleAgent ? (agents[0] as Agent).policy_id : agentPolicies[0]?.id ?? undefined
+    isSingleAgent ? (agents[0] as Agent).policy_id : undefined
   );
+
+  // Select the first policy if not policy is selected
+  useEffect(() => {
+    if (!selectedAgentPolicyId && agentPolicies.length) {
+      setSelectedAgentPolicyId(agentPolicies[0]?.id);
+    }
+  }, [selectedAgentPolicyId, agentPolicies]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   async function onSubmit() {
@@ -60,7 +71,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         throw new Error('No selected agent policy id');
       }
       const res = isSingleAgent
-        ? await sendPutAgentReassign((agents[0] as Agent).id, {
+        ? await sendPostAgentReassign((agents[0] as Agent).id, {
             policy_id: selectedAgentPolicyId,
           })
         : await sendPostBulkAgentReassign({
@@ -74,7 +85,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
       const successMessage = i18n.translate(
         'xpack.fleet.agentReassignPolicy.successSingleNotificationTitle',
         {
-          defaultMessage: 'Agent policy reassigned',
+          defaultMessage: 'Reassigning agent policy',
         }
       );
       notifications.toasts.addSuccess(successMessage);
@@ -146,8 +157,13 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-
-      {selectedAgentPolicyId && <AgentPolicyPackageBadges agentPolicyId={selectedAgentPolicyId} />}
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          {selectedAgentPolicyId && (
+            <AgentPolicyPackageBadges agentPolicyId={selectedAgentPolicyId} />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiConfirmModal>
   );
 };

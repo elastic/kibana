@@ -50,7 +50,7 @@ export interface UiSettingsParams<T = unknown> {
   /** used to group the configured setting in the UI */
   category?: string[];
   /** array of permitted values for this setting */
-  options?: string[];
+  options?: string[] | number[];
   /** text labels for 'select' type UI element */
   optionLabels?: Record<string, string>;
   /** a flag indicating whether new value applying requires page reloading */
@@ -87,13 +87,12 @@ export interface UiSettingsParams<T = unknown> {
     type: UiCounterMetricType;
     name: string;
   };
+  /**
+   * Scope of the setting. `Global` denotes a setting globally available across namespaces. `Namespace` denotes a setting
+   * scoped to a namespace. The default value is 'namespace'
+   */
+  scope?: UiSettingsScope;
 }
-
-/**
- * A sub-set of {@link UiSettingsParams} exposed to the client-side.
- * @public
- * */
-export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 
 /**
  * Describes the values explicitly set by user.
@@ -103,3 +102,8 @@ export interface UserProvidedValues<T = any> {
   userValue?: T;
   isOverridden?: boolean;
 }
+
+/**
+ * Denotes the scope of the setting
+ */
+export type UiSettingsScope = 'namespace' | 'global';

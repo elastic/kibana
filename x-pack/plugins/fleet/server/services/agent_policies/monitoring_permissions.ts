@@ -12,9 +12,9 @@ import {
   PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
   AGENT_POLICY_DEFAULT_MONITORING_DATASETS,
 } from '../../constants';
-import type { FullAgentPolicyOutputPermissions } from '../../../common';
+import type { FullAgentPolicyOutputPermissions } from '../../../common/types';
 import { FLEET_ELASTIC_AGENT_PACKAGE } from '../../../common';
-import { dataTypes } from '../../../common';
+import { dataTypes } from '../../../common/constants';
 
 import { getDataStreamPrivileges } from './package_policies_to_agent_permissions';
 

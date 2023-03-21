@@ -7,11 +7,9 @@
  */
 
 import { columnLayout } from './types/column_layout';
-import { pieLayout } from './types/pie_layout';
 import { gaugeLayout } from './types/gauge_layout';
 
 export const layoutTypes = {
-  pie: pieLayout,
   gauge: gaugeLayout,
   goal: gaugeLayout,
   metric: gaugeLayout,

@@ -18,7 +18,7 @@ import {
   EuiCallOut,
   EuiLoadingLogo,
   EuiOverlayMask,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
   EuiSpacer,
   EuiStepsHorizontal,

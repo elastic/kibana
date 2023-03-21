@@ -8,11 +8,12 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useMemo } from 'react';
 import type { Filter, Query } from '@kbn/es-query';
+import { InputsModelId } from '../../store/inputs/constants';
 import { useKibana } from '../../lib/kibana';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/inputs';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
-import { CONSTANTS } from '../../components/url_state/constants';
+import { URL_PARAM_KEY } from '../use_url_state';
 
 export const useInitSearchBarFromUrlParams = () => {
   const dispatch = useDispatch();
@@ -28,7 +29,7 @@ export const useInitSearchBarFromUrlParams = () => {
       if (initialState != null) {
         dispatch(
           inputsActions.setFilterQuery({
-            id: 'global',
+            id: InputsModelId.global,
             query: initialState.query,
             language: initialState.language,
           })
@@ -44,7 +45,7 @@ export const useInitSearchBarFromUrlParams = () => {
         filterManager.setFilters(initialState);
         dispatch(
           inputsActions.setSearchBarFilter({
-            id: 'global',
+            id: InputsModelId.global,
             filters: initialState,
           })
         );
@@ -54,7 +55,7 @@ export const useInitSearchBarFromUrlParams = () => {
 
         dispatch(
           inputsActions.setSearchBarFilter({
-            id: 'global',
+            id: InputsModelId.global,
             filters: filterManager.getFilters(),
           })
         );
@@ -73,25 +74,27 @@ export const useInitSearchBarFromUrlParams = () => {
           filterManager.setFilters(filters);
           dispatch(
             inputsActions.setSearchBarFilter({
-              id: 'global',
+              id: InputsModelId.global,
               filters,
             })
           );
 
           dispatch(
             inputsActions.setFilterQuery({
-              id: 'global',
+              id: InputsModelId.global,
               ...query,
             })
           );
-          dispatch(inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData }));
+          dispatch(
+            inputsActions.setSavedQuery({ id: InputsModelId.global, savedQuery: savedQueryData })
+          );
         });
       }
     },
     [dispatch, filterManager, savedQueries]
   );
 
-  useInitializeUrlParam(CONSTANTS.appQuery, onInitializeAppQueryFromUrlParam);
-  useInitializeUrlParam(CONSTANTS.filters, onInitializeFiltersFromUrlParam);
-  useInitializeUrlParam(CONSTANTS.savedQuery, onInitializeSavedQueryFromUrlParam);
+  useInitializeUrlParam(URL_PARAM_KEY.appQuery, onInitializeAppQueryFromUrlParam);
+  useInitializeUrlParam(URL_PARAM_KEY.filters, onInitializeFiltersFromUrlParam);
+  useInitializeUrlParam(URL_PARAM_KEY.savedQuery, onInitializeSavedQueryFromUrlParam);
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createAssigneesUserActionBuilder } from './assignees';
 import { createCommentUserActionBuilder } from './comment/comment';
 import { createConnectorUserActionBuilder } from './connector';
 import { createDescriptionUserActionBuilder } from './description';
@@ -14,7 +15,7 @@ import { createSeverityUserActionBuilder } from './severity';
 import { createStatusUserActionBuilder } from './status';
 import { createTagsUserActionBuilder } from './tags';
 import { createTitleUserActionBuilder } from './title';
-import { UserActionBuilderMap } from './types';
+import type { UserActionBuilderMap } from './types';
 
 export const builderMap: UserActionBuilderMap = {
   connector: createConnectorUserActionBuilder,
@@ -26,4 +27,5 @@ export const builderMap: UserActionBuilderMap = {
   comment: createCommentUserActionBuilder,
   description: createDescriptionUserActionBuilder,
   settings: createSettingsUserActionBuilder,
+  assignees: createAssigneesUserActionBuilder,
 };

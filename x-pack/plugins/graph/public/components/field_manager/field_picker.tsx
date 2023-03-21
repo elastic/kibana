@@ -49,7 +49,7 @@ export function FieldPicker({
   return (
     <EuiPopover
       id="graphFieldPicker"
-      anchorPosition="downLeft"
+      anchorPosition="downCenter"
       ownFocus
       panelPaddingSize="none"
       button={
@@ -63,7 +63,7 @@ export function FieldPicker({
           aria-disabled={!hasFields}
           onClick={() => {
             if (hasFields) {
-              setOpen(true);
+              setOpen(!open);
             }
           }}
           onClickAriaLabel={badgeDescription}

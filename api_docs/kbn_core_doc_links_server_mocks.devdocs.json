@@ -14,20 +14,29 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-doc-links-server-mocks",
-        "id": "def-server.docLinksServiceMock",
+        "id": "def-common.docLinksServiceMock",
         "type": "Object",
         "tags": [],
         "label": "docLinksServiceMock",
         "description": [],
         "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-doc-links-server-mocks",
-            "id": "def-server.docLinksServiceMock.create",
+            "id": "def-common.docLinksServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -37,38 +46,53 @@
             ],
             "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
           {
             "parentPluginId": "@kbn/core-doc-links-server-mocks",
-            "id": "def-server.docLinksServiceMock.createSetupContract",
+            "id": "def-common.docLinksServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
             "description": [],
             "signature": [
               "() => ",
-              "DocLinksServiceSetup"
+              {
+                "pluginId": "@kbn/core-doc-links-server",
+                "scope": "common",
+                "docId": "kibKbnCoreDocLinksServerPluginApi",
+                "section": "def-common.DocLinksServiceSetup",
+                "text": "DocLinksServiceSetup"
+              }
             ],
             "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
           {
             "parentPluginId": "@kbn/core-doc-links-server-mocks",
-            "id": "def-server.docLinksServiceMock.createStartContract",
+            "id": "def-common.docLinksServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
             "description": [],
             "signature": [
               "() => ",
-              "DocLinksServiceSetup"
+              {
+                "pluginId": "@kbn/core-doc-links-server",
+                "scope": "common",
+                "docId": "kibKbnCoreDocLinksServerPluginApi",
+                "section": "def-common.DocLinksServiceSetup",
+                "text": "DocLinksServiceSetup"
+              }
             ],
             "path": "packages/core/doc-links/core-doc-links-server-mocks/src/doc_links_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           }
@@ -76,13 +100,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

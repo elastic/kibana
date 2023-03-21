@@ -6,9 +6,9 @@
  */
 
 import { get, getOr, isEmpty } from 'lodash/fp';
-import { set } from '@elastic/safer-lodash-set/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
+import { sourceFieldsMap, hostFieldsMap } from '@kbn/securitysolution-ecs';
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
-import { sourceFieldsMap, hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import type {
   AuthenticationsEdges,
   AuthenticationHit,

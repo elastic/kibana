@@ -9,11 +9,11 @@
 import React from 'react';
 import { EuiListGroupItemProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ToastsStart } from '@kbn/core/public';
 import {
   copyColumnValuesToClipboard,
   copyColumnNameToClipboard,
 } from '../../utils/copy_value_to_clipboard';
-import { DiscoverServices } from '../../build_services';
 import type { ValueToStringConverter } from '../../types';
 
 function buildCopyColumnButton({
@@ -38,11 +38,11 @@ function buildCopyColumnButton({
 }
 
 export function buildCopyColumnNameButton({
-  columnId,
-  services,
+  columnDisplayName,
+  toastNotifications,
 }: {
-  columnId: string;
-  services: DiscoverServices;
+  columnDisplayName: string;
+  toastNotifications: ToastsStart;
 }): EuiListGroupItemProps {
   return buildCopyColumnButton({
     label: (
@@ -51,19 +51,21 @@ export function buildCopyColumnNameButton({
         defaultMessage="Copy name"
       />
     ),
-    onCopy: () => copyColumnNameToClipboard({ columnId, services }),
+    onCopy: () => copyColumnNameToClipboard({ columnDisplayName, toastNotifications }),
     dataTestSubj: 'gridCopyColumnNameToClipBoardButton',
   });
 }
 
 export function buildCopyColumnValuesButton({
   columnId,
-  services,
+  columnDisplayName,
+  toastNotifications,
   rowsCount,
   valueToStringConverter,
 }: {
   columnId: string;
-  services: DiscoverServices;
+  columnDisplayName: string;
+  toastNotifications: ToastsStart;
   rowsCount: number;
   valueToStringConverter: ValueToStringConverter;
 }): EuiListGroupItemProps {
@@ -77,7 +79,8 @@ export function buildCopyColumnValuesButton({
     onCopy: () =>
       copyColumnValuesToClipboard({
         columnId,
-        services,
+        columnDisplayName,
+        toastNotifications,
         rowsCount,
         valueToStringConverter,
       }),

@@ -6,3 +6,4 @@
  */
 
 export * from './test_providers';
+export * from './permissions';

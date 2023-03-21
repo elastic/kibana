@@ -15,8 +15,6 @@ import { FilterManager } from '@kbn/data-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import type { QueryBarComponentProps } from '.';
 import { QueryBar } from '.';
-import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
@@ -204,7 +202,6 @@ describe('QueryBar ', () => {
       showAutoRefreshOnly: false,
       showDatePicker: false,
       showFilterBar: true,
-      showQueryBar: true,
       showQueryInput: true,
       showSaveQuery: true,
       showSubmitButton: false,
@@ -275,11 +272,6 @@ describe('QueryBar ', () => {
   });
 
   describe('#onSavedQueryUpdated', () => {
-    beforeEach(() => {
-      const autocompleteStart = unifiedSearchPluginMock.createStartContract();
-      setAutocomplete(autocompleteStart.autocomplete);
-    });
-
     test('is only reference that changed when dataProviders props get updated', async () => {
       await act(async () => {
         const wrapper = await getWrapper(

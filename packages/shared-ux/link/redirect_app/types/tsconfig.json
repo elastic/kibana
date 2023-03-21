@@ -1,0 +1,16 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "rxjs",
+      "@types/react",
+    ]
+  },
+  "include": [
+    "*.d.ts"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import React, { ReactNode, useState, useCallback, useEffect } from 'react';
+import React, {
+  ReactNode,
+  useState,
+  useCallback,
+  useEffect,
+  createContext,
+  useContext,
+} from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -22,6 +29,9 @@ import {
 } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { ApplicationStart } from '@kbn/core/public';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
+import type { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public/types';
 import { observabilityAppId } from '../../../../common';
 import { tourStepsConfig } from './steps_config';
 
@@ -31,9 +41,8 @@ const offset: EuiTourStepProps['offset'] = 30;
 const repositionOnScroll: EuiTourStepProps['repositionOnScroll'] = true;
 
 const overviewPath = '/overview';
-const guidedSetupStep = 6;
+const dataAssistantStep = 6;
 
-export const observTourActiveStorageKey = 'guidedOnboarding.observability.tourActive';
 export const observTourStepStorageKey = 'guidedOnboarding.observability.tourStep';
 
 const getSteps = ({
@@ -94,7 +103,7 @@ const getSteps = ({
 
   return tourStepsConfig.map((stepConfig, index) => {
     const step = index + 1;
-    const { dataTestSubj, content, imageConfig, ...tourStepProps } = stepConfig;
+    const { dataTestSubj, content, offset: stepOffset, imageConfig, ...tourStepProps } = stepConfig;
     return (
       <EuiTourStep
         {...tourStepProps}
@@ -102,7 +111,7 @@ const getSteps = ({
         step={step}
         minWidth={minWidth}
         maxWidth={maxWidth}
-        offset={offset}
+        offset={stepOffset ?? offset}
         repositionOnScroll={repositionOnScroll}
         stepsTotal={tourStepsConfig.length}
         isStepOpen={step === activeStep}
@@ -133,34 +142,15 @@ const getSteps = ({
   });
 };
 
-interface TourState {
-  activeStep: number;
-  isTourActive: boolean;
+export interface ObservabilityTourContextValue {
+  endTour: () => void;
+  isTourVisible: boolean;
 }
 
-const getInitialTourState = ({
-  prevIsTourActive,
-  prevActiveStep,
-}: {
-  prevIsTourActive: string | null;
-  prevActiveStep: string | null;
-}): TourState => {
-  if (prevIsTourActive === null) {
-    return {
-      activeStep: 1,
-      // Tour is inactive by default
-      isTourActive: false,
-    };
-  }
-
-  const isTourActive = prevIsTourActive === 'true';
-  const activeStep = prevActiveStep === null ? 1 : Number(prevActiveStep);
-
-  return {
-    activeStep,
-    isTourActive,
-  };
-};
+const ObservabilityTourContext = createContext<ObservabilityTourContextValue>({
+  endTour: () => {},
+  isTourVisible: false,
+} as ObservabilityTourContextValue);
 
 export function ObservabilityTour({
   children,
@@ -168,22 +158,26 @@ export function ObservabilityTour({
   isPageDataLoaded,
   showTour,
   prependBasePath,
+  guidedOnboardingApi,
 }: {
   children: ({ isTourVisible }: { isTourVisible: boolean }) => ReactNode;
   navigateToApp: ApplicationStart['navigateToApp'];
   isPageDataLoaded: boolean;
   showTour: boolean;
   prependBasePath?: (imageName: string) => string;
+  guidedOnboardingApi?: GuidedOnboardingApi;
 }) {
-  const prevIsTourActive = localStorage.getItem(observTourActiveStorageKey);
   const prevActiveStep = localStorage.getItem(observTourStepStorageKey);
+  const initialActiveStep = prevActiveStep === null ? 1 : Number(prevActiveStep);
 
-  const { activeStep: initialActiveStep, isTourActive: initialIsTourActive } = getInitialTourState({
-    prevIsTourActive,
-    prevActiveStep,
-  });
+  const isGuidedOnboardingActive = useObservable(
+    // if guided onboarding is not available, return false
+    guidedOnboardingApi
+      ? guidedOnboardingApi.isGuideStepActive$('kubernetes', 'tour_observability')
+      : of(false)
+  );
 
-  const [isTourActive, setIsTourActive] = useState(initialIsTourActive);
+  const [isTourActive, setIsTourActive] = useState(false);
   const [activeStep, setActiveStep] = useState(initialActiveStep);
 
   const { pathname: currentPath } = useLocation();
@@ -196,32 +190,37 @@ export function ObservabilityTour({
     setActiveStep((prevState) => prevState + 1);
   }, []);
 
-  const endTour = useCallback(() => {
-    // Reset tour state
-    setIsTourActive(false);
+  const endTour = useCallback(async () => {
+    // Mark the onboarding guide step as complete
+    if (guidedOnboardingApi) {
+      await guidedOnboardingApi.completeGuideStep('kubernetes', 'tour_observability');
+    }
+    // Reset EuiTour step state
     setActiveStep(1);
-  }, []);
+  }, [guidedOnboardingApi]);
 
   /**
    * The tour should only be visible if the following conditions are met:
    * - Only pages with the side nav should show the tour (showTour === true)
-   * - Tour is set to active per localStorage setting (isTourActive === true)
+   * - Tour is set to active per the guided onboarding service (isTourActive === true)
    * - Any page data must be loaded in order for the tour to render correctly
    * - The tour should only render on medium-large screens
    */
   const isTourVisible = showTour && isTourActive && isPageDataLoaded && isSmallBreakpoint === false;
 
-  useEffect(() => {
-    localStorage.setItem(observTourActiveStorageKey, String(isTourActive));
-  }, [isTourActive]);
+  const context: ObservabilityTourContextValue = { endTour, isTourVisible };
 
   useEffect(() => {
     localStorage.setItem(observTourStepStorageKey, String(activeStep));
   }, [activeStep]);
 
   useEffect(() => {
-    // The user must be on the overview page to view the guided setup step in the tour
-    if (isTourActive && isOverviewPage === false && activeStep === guidedSetupStep) {
+    setIsTourActive(Boolean(isGuidedOnboardingActive));
+  }, [isGuidedOnboardingActive]);
+
+  useEffect(() => {
+    // The user must be on the overview page to view the data assistant step in the tour
+    if (isTourActive && isOverviewPage === false && activeStep === dataAssistantStep) {
       navigateToApp(observabilityAppId, {
         path: overviewPath,
       });
@@ -229,9 +228,19 @@ export function ObservabilityTour({
   }, [activeStep, isOverviewPage, isTourActive, navigateToApp]);
 
   return (
-    <>
-      {children({ isTourVisible })}
-      {isTourVisible && getSteps({ activeStep, incrementStep, endTour, prependBasePath })}
-    </>
+    <ObservabilityTourContext.Provider value={context}>
+      <>
+        {children({ isTourVisible })}
+        {isTourVisible && getSteps({ activeStep, incrementStep, endTour, prependBasePath })}
+      </>
+    </ObservabilityTourContext.Provider>
   );
 }
+
+export const useObservabilityTourContext = (): ObservabilityTourContextValue => {
+  const ctx = useContext(ObservabilityTourContext);
+  if (!ctx) {
+    throw new Error('useObservabilityTourContext can only be called inside of TourContext');
+  }
+  return ctx;
+};

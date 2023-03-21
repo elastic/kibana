@@ -123,6 +123,13 @@ export function getPathParts(path: string): AssetParts {
     service = '';
   }
 
+  // To support the LICENSE asset at the root level
+  if (service === 'LICENSE.txt') {
+    file = service;
+    type = 'license';
+    service = '';
+  }
+
   // This is to cover for the fields.yml files inside the "fields" directory
   if (file === undefined) {
     file = type;

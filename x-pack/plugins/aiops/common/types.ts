@@ -5,15 +5,29 @@
  * 2.0.
  */
 
-export interface FieldValuePair {
-  fieldName: string;
-  fieldValue: string;
-  isFallbackResult?: boolean;
+import type { SignificantTerm, FieldValuePair } from '@kbn/ml-agg-utils';
+
+export interface SignificantTermDuplicateGroup {
+  keys: Pick<SignificantTerm, keyof SignificantTerm>;
+  group: SignificantTerm[];
 }
 
-export interface ChangePoint extends FieldValuePair {
+export type FieldValuePairCounts = Record<string, Record<string, number>>;
+
+export interface ItemsetResult {
+  set: Record<FieldValuePair['fieldName'], FieldValuePair['fieldValue']>;
+  size: number;
+  maxPValue: number;
   doc_count: number;
-  bg_count: number;
-  score: number;
+  support: number;
+  total_doc_count: number;
+}
+
+export interface SimpleHierarchicalTreeNode {
+  name: string;
+  set: FieldValuePair[];
+  docCount: number;
   pValue: number | null;
+  children: SimpleHierarchicalTreeNode[];
+  addNode: (node: SimpleHierarchicalTreeNode) => void;
 }

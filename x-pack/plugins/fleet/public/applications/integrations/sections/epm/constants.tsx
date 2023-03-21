@@ -35,6 +35,9 @@ export const AssetTitleMap: Record<DisplayedAssetType, string> = {
   transform: i18n.translate('xpack.fleet.epm.assetTitles.transforms', {
     defaultMessage: 'Transforms',
   }),
+  index: i18n.translate('xpack.fleet.epm.assetTitles.indices', {
+    defaultMessage: 'Indices',
+  }),
   index_pattern: i18n.translate('xpack.fleet.epm.assetTitles.indexPatterns', {
     defaultMessage: 'Index patterns',
   }),

@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-base-server-internal",
-        "id": "def-server.CriticalError",
+        "id": "def-common.CriticalError",
         "type": "Class",
         "tags": [],
         "label": "CriticalError",
@@ -20,19 +28,20 @@
         "signature": [
           {
             "pluginId": "@kbn/core-base-server-internal",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreBaseServerInternalPluginApi",
-            "section": "def-server.CriticalError",
+            "section": "def-common.CriticalError",
             "text": "CriticalError"
           },
           " extends Error"
         ],
         "path": "packages/core/base/core-base-server-internal/src/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-base-server-internal",
-            "id": "def-server.CriticalError.Unnamed",
+            "id": "def-common.CriticalError.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -42,10 +51,11 @@
             ],
             "path": "packages/core/base/core-base-server-internal/src/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-base-server-internal",
-                "id": "def-server.CriticalError.Unnamed.$1",
+                "id": "def-common.CriticalError.Unnamed.$1",
                 "type": "string",
                 "tags": [],
                 "label": "message",
@@ -55,11 +65,12 @@
                 ],
                 "path": "packages/core/base/core-base-server-internal/src/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-base-server-internal",
-                "id": "def-server.CriticalError.Unnamed.$2",
+                "id": "def-common.CriticalError.Unnamed.$2",
                 "type": "string",
                 "tags": [],
                 "label": "code",
@@ -69,11 +80,12 @@
                 ],
                 "path": "packages/core/base/core-base-server-internal/src/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-base-server-internal",
-                "id": "def-server.CriticalError.Unnamed.$3",
+                "id": "def-common.CriticalError.Unnamed.$3",
                 "type": "number",
                 "tags": [],
                 "label": "processExitCode",
@@ -83,11 +95,12 @@
                 ],
                 "path": "packages/core/base/core-base-server-internal/src/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-base-server-internal",
-                "id": "def-server.CriticalError.Unnamed.$4",
+                "id": "def-common.CriticalError.Unnamed.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "cause",
@@ -97,6 +110,7 @@
                 ],
                 "path": "packages/core/base/core-base-server-internal/src/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -113,7 +127,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-base-server-internal",
-        "id": "def-server.uuidRegexp",
+        "id": "def-common.uuidRegexp",
         "type": "Object",
         "tags": [],
         "label": "uuidRegexp",
@@ -123,16 +137,9 @@
         ],
         "path": "packages/core/base/core-base-server-internal/src/regexp.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

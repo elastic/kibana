@@ -23,7 +23,8 @@ The default action for all {stack-monitor-app} rules is to write to {kib} logs
 and display a notification in the UI.
 
 To review and modify existing *{stack-monitor-app}* rules, click *Enter setup mode* on the *Cluster overview* page.
-Alternatively, to manage all rules, including create and delete functionality go to *Stack Management > Rules and Connectors*.
+Alternatively, to manage all rules, including create and delete functionality
+go to *{stack-manage-app} > {rules-ui}*.
 
 [discrete]
 [[kibana-alerts-cpu-threshold]]

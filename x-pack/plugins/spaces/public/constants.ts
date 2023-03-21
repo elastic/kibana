@@ -16,7 +16,6 @@ export const getSpacesFeatureDescription = () => {
         'Organize your dashboards and other saved objects into meaningful categories.',
     });
   }
-
   return spacesFeatureDescription;
 };
 

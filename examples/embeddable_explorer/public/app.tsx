@@ -8,9 +8,9 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 'react-router-dom';
-
-import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
+import { BrowserRouter as Router, withRouter, RouteComponentProps } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+import { EuiPage, EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';

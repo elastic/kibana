@@ -13,6 +13,7 @@ import { AggGroupNames } from '@kbn/data-plugin/public';
 import { MetricVisOptions } from './components';
 import { toExpressionAst } from './to_ast';
 import { VisParams } from './types';
+import { convertToLens } from './convert_to_lens';
 
 export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> => ({
   name: 'metric',
@@ -103,4 +104,10 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
     ],
   },
   requiresSearch: true,
+  navigateToLens: async (vis, timefilter) => (vis ? convertToLens(vis, timefilter) : null),
+  getExpressionVariables: async (vis, timeFilter) => {
+    return {
+      canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
+    };
+  },
 });

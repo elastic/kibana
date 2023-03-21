@@ -8,10 +8,9 @@ import React from 'react';
 import { fireEvent, render, act } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import * as actions from '../actions';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { SendAlertToTimelineActionProps } from '../types';
 import { InvestigateInTimelineAction } from './investigate_in_timeline_action';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
@@ -30,8 +29,25 @@ const ecsRowData: Ecs = {
 };
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/lib/apm/use_start_transaction');
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../actions');
+
+(KibanaServices.get as jest.Mock).mockReturnValue(coreMock.createStart());
+const mockSendAlertToTimeline = jest.spyOn(actions, 'sendAlertToTimelineAction');
+(useKibana as jest.Mock).mockReturnValue({
+  services: {
+    data: {
+      search: {
+        searchStrategyClient: jest.fn(),
+      },
+      query: jest.fn(),
+    },
+  },
+});
+(useAppToasts as jest.Mock).mockReturnValue({
+  addError: jest.fn(),
+});
 
 const props = {
   ecsRowData,
@@ -40,28 +56,8 @@ const props = {
 };
 
 describe('use investigate in timeline hook', () => {
-  let mockSendAlertToTimeline: jest.SpyInstance<Promise<void>, [SendAlertToTimelineActionProps]>;
-
-  beforeEach(() => {
-    const coreStartMock = coreMock.createStart();
-    (KibanaServices.get as jest.Mock).mockReturnValue(coreStartMock);
-    mockSendAlertToTimeline = jest.spyOn(actions, 'sendAlertToTimelineAction');
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        data: {
-          search: {
-            searchStrategyClient: jest.fn(),
-          },
-          query: jest.fn(),
-        },
-      },
-    });
-    (useAppToasts as jest.Mock).mockReturnValue({
-      addError: jest.fn(),
-    });
-  });
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
   test('it creates a component and click handler', () => {
     const wrapper = render(

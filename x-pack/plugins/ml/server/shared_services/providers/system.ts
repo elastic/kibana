@@ -7,15 +7,18 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { MlInfoResponse } from '../../../common/types/ml_server_info';
+import type {
+  MlCapabilitiesResponse,
+  ResolveMlCapabilities,
+} from '../../../common/types/capabilities';
+import type { GetGuards } from '../shared_services';
 import { MlLicense } from '../../../common/license';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
 import { capabilitiesProvider } from '../../lib/capabilities';
-import { MlInfoResponse } from '../../../common/types/ml_server_info';
-import { MlCapabilitiesResponse, ResolveMlCapabilities } from '../../../common/types/capabilities';
-import { GetGuards } from '../shared_services';
 
 export interface MlSystemProvider {
   mlSystemProvider(
@@ -37,46 +40,43 @@ export function getMlSystemProvider(
 ): MlSystemProvider {
   return {
     mlSystemProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
+      const guards = getGuards(request, savedObjectsClient);
       return {
         async mlCapabilities() {
-          return await getGuards(request, savedObjectsClient)
-            .isMinimumLicense()
-            .ok(async ({ mlClient }) => {
-              const { isMlEnabledInSpace } = spacesUtilsProvider(getSpaces, request);
+          return await guards.isMinimumLicense().ok(async ({ mlClient }) => {
+            const { isMlEnabledInSpace } = spacesUtilsProvider(getSpaces, request);
 
-              const mlCapabilities = await resolveMlCapabilities(request);
-              if (mlCapabilities === null) {
-                throw new Error('mlCapabilities is not defined');
-              }
+            const mlCapabilities = await resolveMlCapabilities(request);
+            if (mlCapabilities === null) {
+              throw new Error('mlCapabilities is not defined');
+            }
 
-              const { getCapabilities } = capabilitiesProvider(
-                mlClient,
-                mlCapabilities,
-                mlLicense,
-                isMlEnabledInSpace
-              );
-              return getCapabilities();
-            });
+            const { getCapabilities } = capabilitiesProvider(
+              mlClient,
+              mlCapabilities,
+              mlLicense,
+              isMlEnabledInSpace
+            );
+            return getCapabilities();
+          });
         },
         async mlInfo(): Promise<MlInfoResponse> {
-          return await getGuards(request, savedObjectsClient)
-            .isMinimumLicense()
-            .ok(async ({ mlClient }) => {
-              const info = await mlClient.info();
-              const cloudId = cloud && cloud.cloudId;
-              return {
-                ...info,
-                cloudId,
-              };
-            });
+          return await guards.isMinimumLicense().ok(async ({ mlClient }) => {
+            const info = await mlClient.info();
+            const cloudId = cloud && cloud.cloudId;
+            return {
+              ...info,
+              cloudId,
+            };
+          });
         },
         async mlAnomalySearch<T>(
           searchParams: any,
           jobIds: string[]
         ): Promise<estypes.SearchResponse<T>> {
-          return await getGuards(request, savedObjectsClient)
+          return await guards
             .isFullLicense()
-            .hasMlCapabilities(['canAccessML'])
+            .hasMlCapabilities(['canGetJobs'])
             .ok(async ({ mlClient }) => {
               return await mlClient.anomalySearch<T>(searchParams, jobIds);
             });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InnerJoin } from './inner_join';
+import { createJoinTermSource, InnerJoin } from './inner_join';
 import { SOURCE_TYPES } from '../../../common/constants';
 
 jest.mock('../../kibana_services', () => {});
@@ -15,7 +15,6 @@ const rightSource = {
   type: SOURCE_TYPES.ES_TERM_SOURCE,
   id: 'd3625663-5b34-4d50-a784-0d743f676a0c',
   indexPatternId: '90943e30-9a47-11e8-b64d-95841ca0b247',
-  indexPatternTitle: 'kibana_sample_data_logs',
   term: 'geo.dest',
   metrics: [{ type: 'count' }],
 };
@@ -39,8 +38,56 @@ const leftJoin = new InnerJoin(
 );
 const COUNT_PROPERTY_NAME = '__kbnjoin__count__d3625663-5b34-4d50-a784-0d743f676a0c';
 
+describe('createJoinTermSource', () => {
+  test('Should return undefined when descriptor is not provided', () => {
+    expect(createJoinTermSource(undefined)).toBe(undefined);
+  });
+
+  test('Should return undefined with unmatched source type', () => {
+    expect(
+      createJoinTermSource({
+        type: SOURCE_TYPES.WMS,
+      })
+    ).toBe(undefined);
+  });
+
+  describe('EsTermSource', () => {
+    test('Should return EsTermSource', () => {
+      expect(createJoinTermSource(rightSource).constructor.name).toBe('ESTermSource');
+    });
+
+    test('Should return undefined when indexPatternId is undefined', () => {
+      expect(
+        createJoinTermSource({
+          ...rightSource,
+          indexPatternId: undefined,
+        })
+      ).toBe(undefined);
+    });
+
+    test('Should return undefined when term is undefined', () => {
+      expect(
+        createJoinTermSource({
+          ...rightSource,
+          term: undefined,
+        })
+      ).toBe(undefined);
+    });
+  });
+
+  describe('TableSource', () => {
+    test('Should return TableSource', () => {
+      expect(
+        createJoinTermSource({
+          type: SOURCE_TYPES.TABLE_SOURCE,
+        }).constructor.name
+      ).toBe('TableSource');
+    });
+  });
+});
+
 describe('joinPropertiesToFeature', () => {
-  it('Should add join property to features in feature collection', () => {
+  test('Should add join property to features in feature collection', () => {
     const feature = {
       properties: {
         iso2: 'CN',
@@ -60,7 +107,7 @@ describe('joinPropertiesToFeature', () => {
     });
   });
 
-  it('Should delete previous join property values from feature', () => {
+  test('Should delete previous join property values from feature', () => {
     const feature = {
       properties: {
         iso2: 'CN',
@@ -80,7 +127,7 @@ describe('joinPropertiesToFeature', () => {
     });
   });
 
-  it('Should coerce to string before joining', () => {
+  test('Should coerce to string before joining', () => {
     const leftJoin = new InnerJoin(
       {
         leftField: 'zipcode',
@@ -108,7 +155,7 @@ describe('joinPropertiesToFeature', () => {
     });
   });
 
-  it('Should handle undefined values', () => {
+  test('Should handle undefined values', () => {
     const feature = {
       //this feature does not have the iso2 field
       properties: {
@@ -128,7 +175,7 @@ describe('joinPropertiesToFeature', () => {
     });
   });
 
-  it('Should handle falsy values', () => {
+  test('Should handle falsy values', () => {
     const leftJoin = new InnerJoin(
       {
         leftField: 'code',

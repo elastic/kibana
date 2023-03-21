@@ -83,6 +83,7 @@ function getUniqueProviderSchema<TProperties extends Record<string, Type<any>>>(
 }
 
 type ProvidersConfigType = TypeOf<typeof providersConfigSchema>;
+
 const providersConfigSchema = schema.object(
   {
     basic: getUniqueProviderSchema('basic', {
@@ -225,6 +226,11 @@ export const ConfigSchema = schema.object({
         }
       },
     }),
+    concurrentSessions: schema.maybe(
+      schema.object({
+        maxSessions: schema.number({ min: 1, max: 1000 }),
+      })
+    ),
   }),
   secureCookies: schema.boolean({ defaultValue: false }),
   sameSiteCookies: schema.maybe(
@@ -235,6 +241,7 @@ export const ConfigSchema = schema.object({
     hostname: schema.maybe(schema.string({ hostname: true })),
     port: schema.maybe(schema.number({ min: 0, max: 65535 })),
   }),
+  accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
   authc: schema.object({
     selector: schema.object({ enabled: schema.maybe(schema.boolean()) }),
     providers: schema.oneOf([schema.arrayOf(schema.string()), providersConfigSchema], {
@@ -306,6 +313,7 @@ export function createConfig(
   }
 
   let secureCookies = config.secureCookies;
+
   if (!isTLSEnabled) {
     if (secureCookies) {
       logger.warn(
@@ -322,6 +330,7 @@ export function createConfig(
   }
 
   const isUsingLegacyProvidersFormat = Array.isArray(config.authc.providers);
+
   const providers = (
     isUsingLegacyProvidersFormat
       ? [...new Set(config.authc.providers as Array<keyof ProvidersConfigType>)].reduce(
@@ -332,6 +341,7 @@ export function createConfig(
                   ? { enabled: true, showInSelector: true, order, ...config.authc[providerType] }
                   : { enabled: true, showInSelector: true, order },
             };
+
             return legacyProviders;
           },
           {} as Record<string, unknown>
@@ -346,16 +356,19 @@ export function createConfig(
     order: number;
     hasAccessAgreement: boolean;
   }> = [];
+
   for (const [type, providerGroup] of Object.entries(providers)) {
     for (const [name, { enabled, order, accessAgreement }] of Object.entries(providerGroup ?? {})) {
       if (!enabled) {
         delete providerGroup![name];
       } else {
+        const hasAccessAgreement: boolean = !!accessAgreement?.message;
+
         sortedProviders.push({
           type: type as any,
           name,
           order,
-          hasAccessAgreement: !!accessAgreement?.message,
+          hasAccessAgreement,
         });
       }
     }
@@ -391,6 +404,14 @@ export function createConfig(
         max: 10,
       },
     } as AppenderConfigType);
+
+  const session = getSessionConfig(config.session, providers);
+  if (session.concurrentSessions?.maxSessions != null && config.authc.http.enabled) {
+    logger.warn(
+      'Both concurrent user sessions limit and HTTP authentication are configured. The limit does not apply to HTTP authentication.'
+    );
+  }
+
   return {
     ...config,
     audit: {
@@ -403,7 +424,7 @@ export function createConfig(
       sortedProviders: Object.freeze(sortedProviders),
       http: config.authc.http,
     },
-    session: getSessionConfig(config.session, providers),
+    session,
     encryptionKey,
     secureCookies,
   };
@@ -411,6 +432,7 @@ export function createConfig(
 
 function getSessionConfig(session: RawConfigType['session'], providers: ProvidersConfigType) {
   return {
+    concurrentSessions: session.concurrentSessions,
     cleanupInterval: session.cleanupInterval,
     getExpirationTimeouts(provider: AuthenticationProvider | undefined) {
       // Both idle timeout and lifespan from the provider specific session config can have three

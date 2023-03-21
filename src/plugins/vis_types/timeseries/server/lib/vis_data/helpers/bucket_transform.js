@@ -7,7 +7,7 @@
  */
 
 import { getBucketsPath } from './get_buckets_path';
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { MODEL_SCRIPTS } from './moving_fn_scripts';

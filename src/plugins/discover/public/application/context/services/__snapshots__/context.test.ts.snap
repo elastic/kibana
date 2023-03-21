@@ -46,6 +46,9 @@ Object {
     Object {
       "field": "object.value",
     },
+    Object {
+      "field": "@timestamp",
+    },
   ],
   "query": Object {
     "bool": Object {

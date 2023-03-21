@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
-import type { FleetConfigType } from '../../../common';
+import type { FleetAuthzRouter } from '../../services/security';
 
-import type { FleetAuthzRouter } from '../security';
+import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../constants';
+import type { FleetConfigType } from '../../../common/types';
 
 import { getFleetStatusHandler, fleetSetupHandler } from './handlers';
 

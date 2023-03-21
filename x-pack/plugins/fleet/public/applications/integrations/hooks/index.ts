@@ -12,3 +12,5 @@ export * from './use_local_search';
 export * from './use_package_install';
 export * from './use_agent_policy_context';
 export * from './use_integrations_state';
+export * from './use_confirm_force_install';
+export * from './use_confirm_open_unverified';

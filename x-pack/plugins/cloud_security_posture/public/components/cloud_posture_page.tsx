@@ -6,19 +6,36 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { UseQueryResult } from 'react-query';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import type { UseQueryResult } from '@tanstack/react-query';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiImage,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NoDataPage } from '@kbn/kibana-react-plugin/public';
+import { NoDataPage, NoDataPageProps } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../common/constants';
+import { SubscriptionNotAllowed } from './subscription_not_allowed';
+import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
+import { FullSizeCenteredPage } from './full_size_centered_page';
+import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import { CspLoadingState } from './csp_loading_state';
-import { useCisKubernetesIntegration } from '../common/api/use_cis_kubernetes_integration';
-import { useCISIntegrationLink } from '../common/navigation/use_navigate_to_cis_integration';
+import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
+
+import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
+import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
 
 export const LOADING_STATE_TEST_SUBJECT = 'cloud_posture_page_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'cloud_posture_page_error';
 export const PACKAGE_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_package_not_installed';
+export const CSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_cspm_not_installed';
+export const KSPM_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT = 'cloud_posture_page_kspm_not_installed';
 export const DEFAULT_NO_DATA_TEST_SUBJECT = 'cloud_posture_page_no_data';
+export const SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT = 'cloud_posture_page_subscription_not_allowed';
 
 interface CommonError {
   body: {
@@ -41,39 +58,115 @@ export const isCommonError = (error: unknown): error is CommonError => {
   return true;
 };
 
-const packageNotInstalledRenderer = (cisIntegrationLink?: string) => (
-  <NoDataPage
-    data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
-    css={css`
-      max-width: 950px;
-      margin-top: 50px;
-      margin-left: auto;
-      margin-right: auto;
-    `}
-    pageTitle={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.pageTitle', {
-      defaultMessage: 'Install Integration to get started',
-    })}
-    solution={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.solutionNameLabel', {
-      defaultMessage: 'Cloud Security Posture',
-    })}
-    // TODO: Add real docs link once we have it
-    docsLink={'https://www.elastic.co/guide/index.html'}
-    logo={'logoSecurity'}
-    actions={{
-      elasticAgent: {
-        href: cisIntegrationLink,
-        isDisabled: !cisIntegrationLink,
-        title: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.buttonLabel', {
-          defaultMessage: 'Add a CIS integration',
-        }),
-        description: i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.description', {
-          defaultMessage:
-            'Use our CIS Kubernetes Benchmark integration to measure your Kubernetes cluster setup against the CIS recommendations.',
-        }),
-      },
-    }}
-  />
-);
+export interface CspNoDataPageProps {
+  pageTitle: NoDataPageProps['pageTitle'];
+  docsLink: NoDataPageProps['docsLink'];
+  actionHref: NoDataPageProps['actions']['elasticAgent']['href'];
+  actionTitle: NoDataPageProps['actions']['elasticAgent']['title'];
+  actionDescription: NoDataPageProps['actions']['elasticAgent']['description'];
+  testId: string;
+}
+
+export const CspNoDataPage = ({
+  pageTitle,
+  docsLink,
+  actionHref,
+  actionTitle,
+  actionDescription,
+  testId,
+}: CspNoDataPageProps) => {
+  return (
+    <NoDataPage
+      data-test-subj={testId}
+      css={css`
+        > :nth-child(3) {
+          display: block;
+          margin: auto;
+          width: 450px;
+        }
+      `}
+      pageTitle={pageTitle}
+      solution={i18n.translate('xpack.csp.cloudPosturePage.packageNotInstalled.solutionNameLabel', {
+        defaultMessage: 'Cloud Security Posture',
+      })}
+      docsLink={docsLink}
+      logo="logoSecurity"
+      actions={{
+        elasticAgent: {
+          href: actionHref,
+          isDisabled: !actionHref,
+          title: actionTitle,
+          description: actionDescription,
+        },
+      }}
+    />
+  );
+};
+
+const packageNotInstalledRenderer = ({
+  kspmIntegrationLink,
+  cspmIntegrationLink,
+}: {
+  kspmIntegrationLink?: string;
+  cspmIntegrationLink?: string;
+}) => {
+  return (
+    <FullSizeCenteredPage>
+      <EuiEmptyPrompt
+        data-test-subj={PACKAGE_NOT_INSTALLED_TEST_SUBJECT}
+        icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
+              defaultMessage="Detect security misconfigurations in your cloud infrastructure!"
+            />
+          </h2>
+        }
+        layout="horizontal"
+        color="plain"
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptDescription"
+              defaultMessage="Detect and remediate potential configuration risks in your cloud infrastructure, like publicly accessible S3 buckets, with our Cloud and Kubernetes Security Posture Management solutions. {learnMore}"
+              values={{
+                learnMore: (
+                  <EuiLink href={cspIntegrationDocsNavigation.cspm.overviewPath} target="_blank">
+                    <FormattedMessage
+                      id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
+                      defaultMessage="Learn more about Cloud Security Posture"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        }
+        actions={
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButton color="primary" fill href={cspmIntegrationLink}>
+                <FormattedMessage
+                  id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addCspmIntegrationButtonTitle"
+                  defaultMessage="Add CSPM Integration"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton color="primary" fill href={kspmIntegrationLink}>
+                <FormattedMessage
+                  id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle"
+                  defaultMessage="Add KSPM Integration"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      />
+    </FullSizeCenteredPage>
+  );
+};
 
 const defaultLoadingRenderer = () => (
   <CspLoadingState data-test-subj={LOADING_STATE_TEST_SUBJECT}>
@@ -85,46 +178,42 @@ const defaultLoadingRenderer = () => (
 );
 
 const defaultErrorRenderer = (error: unknown) => (
-  <EuiEmptyPrompt
-    css={css`
-      margin-top: 50px;
-    `}
-    color="danger"
-    iconType="alert"
-    data-test-subj={ERROR_STATE_TEST_SUBJECT}
-    title={
-      <h2>
-        <FormattedMessage
-          id="xpack.csp.cloudPosturePage.errorRenderer.errorTitle"
-          defaultMessage="We couldn't fetch your cloud security posture data"
-        />
-      </h2>
-    }
-    body={
-      isCommonError(error) ? (
-        <p>
+  <FullSizeCenteredPage>
+    <EuiEmptyPrompt
+      color="danger"
+      iconType="alert"
+      data-test-subj={ERROR_STATE_TEST_SUBJECT}
+      title={
+        <h2>
           <FormattedMessage
-            id="xpack.csp.cloudPosturePage.errorRenderer.errorDescription"
-            defaultMessage="{error} {statusCode}: {body}"
-            values={{
-              error: error.body.error,
-              statusCode: error.body.statusCode,
-              body: error.body.message,
-            }}
+            id="xpack.csp.cloudPosturePage.errorRenderer.errorTitle"
+            defaultMessage="We couldn't fetch your cloud security posture data"
           />
-        </p>
-      ) : undefined
-    }
-  />
+        </h2>
+      }
+      body={
+        isCommonError(error) ? (
+          <p>
+            <FormattedMessage
+              id="xpack.csp.cloudPosturePage.errorRenderer.errorDescription"
+              defaultMessage="{error} {statusCode}: {body}"
+              values={{
+                error: error.body.error,
+                statusCode: error.body.statusCode,
+                body: error.body.message,
+              }}
+            />
+          </p>
+        ) : undefined
+      }
+    />
+  </FullSizeCenteredPage>
 );
 
-const defaultNoDataRenderer = () => {
-  return (
+const defaultNoDataRenderer = () => (
+  <FullSizeCenteredPage>
     <NoDataPage
       data-test-subj={DEFAULT_NO_DATA_TEST_SUBJECT}
-      css={css`
-        margin-top: 50px;
-      `}
       pageTitle={i18n.translate('xpack.csp.cloudPosturePage.defaultNoDataConfig.pageTitle', {
         defaultMessage: 'No data found',
       })}
@@ -136,8 +225,14 @@ const defaultNoDataRenderer = () => {
       logo={'logoSecurity'}
       actions={{}}
     />
-  );
-};
+  </FullSizeCenteredPage>
+);
+
+const subscriptionNotAllowedRenderer = () => (
+  <FullSizeCenteredPage data-test-subj={SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT}>
+    <SubscriptionNotAllowed />
+  </FullSizeCenteredPage>
+);
 
 interface CloudPosturePageProps<TData, TError> {
   children: React.ReactNode;
@@ -154,20 +249,34 @@ export const CloudPosturePage = <TData, TError>({
   errorRender = defaultErrorRenderer,
   noDataRenderer = defaultNoDataRenderer,
 }: CloudPosturePageProps<TData, TError>) => {
-  const cisKubernetesPackageInfo = useCisKubernetesIntegration();
-  const cisIntegrationLink = useCISIntegrationLink();
+  const subscriptionStatus = useSubscriptionStatus();
+  const getSetupStatus = useCspSetupStatusApi();
+  const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
+  const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
 
   const render = () => {
-    if (cisKubernetesPackageInfo.isError) {
-      return defaultErrorRenderer(cisKubernetesPackageInfo.error);
+    if (subscriptionStatus.isError) {
+      return defaultErrorRenderer(subscriptionStatus.error);
     }
 
-    if (cisKubernetesPackageInfo.isLoading || cisKubernetesPackageInfo.isIdle) {
+    if (subscriptionStatus.isLoading) {
       return defaultLoadingRenderer();
     }
 
-    if (cisKubernetesPackageInfo.data.item.status !== 'installed') {
-      return packageNotInstalledRenderer(cisIntegrationLink);
+    if (!subscriptionStatus.data) {
+      return subscriptionNotAllowedRenderer();
+    }
+
+    if (getSetupStatus.isError) {
+      return defaultErrorRenderer(getSetupStatus.error);
+    }
+
+    if (getSetupStatus.isLoading) {
+      return defaultLoadingRenderer();
+    }
+
+    if (getSetupStatus.data.status === 'not-installed') {
+      return packageNotInstalledRenderer({ kspmIntegrationLink, cspmIntegrationLink });
     }
 
     if (!query) {
@@ -178,7 +287,7 @@ export const CloudPosturePage = <TData, TError>({
       return errorRender(query.error);
     }
 
-    if (query.isLoading || query.isIdle) {
+    if (query.isLoading) {
       return loadingRender();
     }
 

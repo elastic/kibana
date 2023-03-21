@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#start() getComponent returns renderable JSX tree 1`] = `
+<AppRouter
+  appStatuses$={
+    AnonymousSubject {
+      "closed": false,
+      "currentObservers": null,
+      "destination": AnonymousSubject {
+        "closed": false,
+        "currentObservers": null,
+        "destination": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": Array [],
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "operator": [Function],
+        "source": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": Array [],
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "thrownError": null,
+      },
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "operator": [Function],
+      "source": AnonymousSubject {
+        "closed": false,
+        "currentObservers": null,
+        "destination": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": Array [],
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "operator": [Function],
+        "source": BehaviorSubject {
+          "_value": Map {},
+          "closed": false,
+          "currentObservers": Array [],
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "thrownError": null,
+      },
+      "thrownError": null,
+    }
+  }
+  hasCustomBranding$={
+    Observable {
+      "operator": [Function],
+      "source": Observable {
+        "_subscribe": [Function],
+      },
+    }
+  }
+  history={
+    Object {
+      "push": [MockFunction],
+      "replace": [MockFunction],
+    }
+  }
+  mounters={Map {}}
+  setAppActionMenu={[Function]}
+  setAppLeaveHandler={[Function]}
+  setIsMounting={[Function]}
+  theme$={
+    Observable {
+      "_subscribe": [Function],
+    }
+  }
+/>
+`;

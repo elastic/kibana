@@ -33,7 +33,7 @@ import {
 export interface ReferenceLineAnnotationConfig {
   id: string;
   name?: string;
-  value: number;
+  value?: number;
   nextValue?: number;
   icon?: AvailableReferenceLineIcon;
   lineWidth?: number;
@@ -75,7 +75,7 @@ export const ReferenceLineAnnotations: FC<Props> = ({
   paddingMap,
   isHorizontal,
 }) => {
-  const { id, axisGroup, iconPosition, name, textVisibility, value, fill, color } = config;
+  const { id, axisGroup, iconPosition, name, value, fill, color } = config;
 
   const defaultColor = euiLightVars.euiColorDarkShade;
   // get the position for vertical chart
@@ -85,25 +85,16 @@ export const ReferenceLineAnnotations: FC<Props> = ({
     getOriginalAxisPosition(axisGroup?.position ?? Position.Bottom, isHorizontal)
   );
   // the padding map is built for vertical chart
-  const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
+  const isTextOnlyMarker = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
 
-  const props = getLineAnnotationProps(
-    config,
-    {
-      markerLabel: name,
-      markerBodyLabel: textVisibility && !hasReducedPadding ? name : undefined,
-    },
-    axesMap,
-    paddingMap,
-    isHorizontal
-  );
+  const props = getLineAnnotationProps(config, name, axesMap, isHorizontal, isTextOnlyMarker);
 
   const sharedStyle = getSharedStyle(config);
 
   const dataValues = {
     dataValue: value,
     header: name,
-    details: formatter?.convert(value) || value.toString(),
+    details: formatter?.convert(value) || value?.toString(),
   };
 
   const line = (

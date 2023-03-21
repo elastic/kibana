@@ -19,6 +19,7 @@ import { generalSettings } from './general_settings';
 import { javaSettings } from './java_settings';
 import { getDurationRt } from '../runtime_types/duration_rt';
 import { getBytesRt } from '../runtime_types/bytes_rt';
+import { getStorageSizeRt } from '../runtime_types/storage_size_rt';
 
 function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
   switch (setting.type) {
@@ -56,6 +57,19 @@ function getSettingDefaults(setting: RawSettingDefinition): SettingDefinition {
 
       return {
         validation: getBytesRt({ min, max }),
+        units,
+        min,
+        ...setting,
+      };
+    }
+
+    case 'storageSize': {
+      const units = setting.units ?? ['B', 'KB', 'MB', 'GB', 'TB'];
+      const min = setting.min ?? '0b';
+      const max = setting.max;
+
+      return {
+        validation: getStorageSizeRt({ min, max }),
         units,
         min,
         ...setting,

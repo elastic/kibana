@@ -82,7 +82,7 @@ const renderUseLinkExists = (id: SecurityPageName) =>
     wrapper: TestProviders,
   });
 
-describe('Security app links', () => {
+describe('Security links', () => {
   beforeEach(() => {
     mockLicense.hasAtLeast = licensePremiumMock;
 
@@ -119,13 +119,6 @@ describe('Security app links', () => {
               ...networkLinkItem,
               // all its links should be filtered for all different criteria
               links: [
-                {
-                  id: SecurityPageName.networkExternalAlerts,
-                  title: 'external alerts',
-                  path: '/external_alerts',
-                  experimentalKey:
-                    'flagDisabled' as unknown as keyof typeof mockExperimentalDefaults,
-                },
                 {
                   id: SecurityPageName.networkDns,
                   title: 'dns',

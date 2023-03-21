@@ -5,32 +5,38 @@
  * 2.0.
  */
 
-import { isObject, transform, snakeCase } from 'lodash';
+import { isObject, transform, snakeCase, isEmpty } from 'lodash';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ToastInputFields } from '@kbn/core/public';
-import {
+import type { ToastInputFields } from '@kbn/core/public';
+import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+import type {
   CaseResponse,
-  CaseResponseRt,
   CasesResponse,
-  CasesResponseRt,
-  throwErrors,
   CasesConfigurationsResponse,
-  CaseConfigurationsResponseRt,
   CasesConfigureResponse,
-  CaseConfigureResponseRt,
   CaseUserActionsResponse,
-  CaseUserActionsResponseRt,
-  CommentType,
   CasePatchRequest,
   CaseResolveResponse,
-  CaseResolveResponseRt,
   SingleCaseMetricsResponse,
-  SingleCaseMetricsResponseRt,
+  User,
+  CaseUserActionStatsResponse,
 } from '../../common/api';
-import { Case, UpdateByKey } from './types';
+import {
+  CaseResponseRt,
+  CasesResponseRt,
+  throwErrors,
+  CaseConfigurationsResponseRt,
+  CaseConfigureResponseRt,
+  CaseUserActionsResponseRt,
+  CommentType,
+  CaseResolveResponseRt,
+  SingleCaseMetricsResponseRt,
+  CaseUserActionStatsResponseRt,
+} from '../../common/api';
+import type { Case, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
@@ -80,6 +86,14 @@ export const decodeCaseUserActionsResponse = (respUserActions?: CaseUserActionsR
     fold(throwErrors(createToasterPlainError), identity)
   );
 
+export const decodeCaseUserActionStatsResponse = (
+  caseUserActionsStats: CaseUserActionStatsResponse
+) =>
+  pipe(
+    CaseUserActionStatsResponseRt.decode(caseUserActionsStats),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
 export const valueToUpdateIsSettings = (
   key: UpdateByKey['updateKey'],
   value: UpdateByKey['updateValue']
@@ -111,6 +125,7 @@ export const createUpdateSuccessToaster = (
 
   const toast: ToastInputFields = {
     title: i18n.UPDATED_CASE(caseAfterUpdate.title),
+    className: 'eui-textBreakWord',
   };
 
   if (valueToUpdateIsSettings(key, value) && value?.syncAlerts && caseHasAlerts) {
@@ -128,4 +143,32 @@ export const createUpdateSuccessToaster = (
   }
 
   return toast;
+};
+
+export const constructAssigneesFilter = (
+  assignees: FilterOptions['assignees']
+): { assignees?: string | string[] } =>
+  assignees === null || assignees.length > 0
+    ? {
+        assignees:
+          assignees?.map((assignee) =>
+            assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
+          ) ?? NO_ASSIGNEES_FILTERING_KEYWORD,
+      }
+    : {};
+
+export const constructReportersFilter = (reporters: User[]) => {
+  return reporters.length > 0
+    ? {
+        reporters: reporters
+          .map((reporter) => {
+            if (reporter.profile_uid != null) {
+              return reporter.profile_uid;
+            }
+
+            return reporter.username ?? '';
+          })
+          .filter((reporterID) => !isEmpty(reporterID)),
+      }
+    : {};
 };

@@ -42,7 +42,7 @@ const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
-  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch' | 'onChangeMetaData'
 >;
 
 const defaultExpression = {
@@ -311,6 +311,7 @@ export const Expressions: React.FC<Props> = (props) => {
               setRuleParams={updateParams}
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
+              dataView={derivedIndexPattern}
             >
               <ExpressionChart
                 expression={e}

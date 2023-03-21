@@ -11,11 +11,13 @@ import { WebDriver, WebElement, By, until } from 'selenium-webdriver';
 import { Browsers } from '../remote/browsers';
 import { FtrService, FtrProviderContext } from '../../ftr_provider_context';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
+import { TimeoutOpt } from './types';
 
 export class FindService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly config = this.ctx.getService('config');
   private readonly retry = this.ctx.getService('retry');
+  private readonly retryOnStale = this.ctx.getService('retryOnStale');
 
   private readonly WAIT_FOR_EXISTS_TIME = this.config.get('timeouts.waitForExists');
   private readonly POLLING_TIME = 500;
@@ -72,6 +74,26 @@ export class FindService extends FtrService {
     this.log.debug(`Find.setValue('${selector}', '${text}')`);
     return await this.retry.try(async () => {
       const element = await this.byCssSelector(selector);
+      await element.click(topOffset);
+
+      // in case the input element is actually a child of the testSubject, we
+      // call clearValue() and type() on the element that is focused after
+      // clicking on the testSubject
+      const input = await this.activeElement();
+      if (input) {
+        await input.clearValue();
+        await input.type(text);
+      } else {
+        await element.clearValue();
+        await element.type(text);
+      }
+    });
+  }
+
+  public async setValueByClass(selector: string, text: string, topOffset?: number): Promise<void> {
+    this.log.debug(`Find.setValueByClass('${selector}', '${text}')`);
+    return await this.retry.try(async () => {
+      const element = await this.byClassName(selector);
       await element.click(topOffset);
 
       // in case the input element is actually a child of the testSubject, we
@@ -285,16 +307,33 @@ export class FindService extends FtrService {
     }, timeout);
   }
 
-  public async clickByCssSelectorWhenNotDisabled(
+  public async clickByCssSelectorWhenNotDisabled(selector: string, opts?: TimeoutOpt) {
+    const timeout = opts?.timeout ?? this.defaultFindTimeout;
+
+    await this.retryOnStale(async () => {
+      this.log.debug(`Find.clickByCssSelectorWhenNotDisabled(${selector}, timeout=${timeout})`);
+
+      const element = await this.byCssSelector(selector);
+      await element.moveMouseTo();
+      await this.driver.wait(until.elementIsEnabled(element._webElement), timeout);
+      await element.click();
+    });
+  }
+
+  public async clickByCssSelectorWhenNotDisabledWithoutRetry(
     selector: string,
-    { timeout } = { timeout: this.defaultFindTimeout }
+    opts?: TimeoutOpt
   ): Promise<void> {
-    this.log.debug(`Find.clickByCssSelectorWhenNotDisabled('${selector}') with timeout=${timeout}`);
+    const timeout = opts?.timeout ?? this.defaultFindTimeout;
+
+    this.log.debug(
+      `Find.clickByCssSelectorWhenNotDisabledWithoutRetry(${selector}, timeout=${timeout})`
+    );
 
     // Don't wrap this code in a retry, or stale element checks may get caught here and the element
     // will never be re-grabbed.  Let errors bubble, but continue checking for disabled property until
     // it's gone.
-    const element = await this.byCssSelector(selector, timeout);
+    const element = await this.byCssSelector(selector);
     await element.moveMouseTo();
     await this.driver.wait(until.elementIsEnabled(element._webElement), timeout);
     await element.click();

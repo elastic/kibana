@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('saved_objects', () => {
     loadTestFile(require.resolve('./bulk_create'));
+    loadTestFile(require.resolve('./bulk_delete'));
     loadTestFile(require.resolve('./bulk_get'));
     loadTestFile(require.resolve('./bulk_update'));
     loadTestFile(require.resolve('./create'));

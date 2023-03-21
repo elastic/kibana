@@ -13,6 +13,7 @@ import { TestProviders } from '../../../../common/mock';
 import { parsedVulnerableHostsAlertsResult } from './mock_data';
 import type { UseHostAlertsItems } from './use_host_alerts_items';
 import { HostAlertsTable } from './host_alerts_table';
+import { openAlertsFilter } from '../utils';
 
 const mockGetAppUrl = jest.fn();
 jest.mock('../../../../common/lib/kibana/hooks', () => {
@@ -21,6 +22,15 @@ jest.mock('../../../../common/lib/kibana/hooks', () => {
     ...original,
     useNavigation: () => ({
       getAppUrl: mockGetAppUrl,
+    }),
+  };
+});
+
+const mockOpenTimelineWithFilters = jest.fn();
+jest.mock('../hooks/use_navigate_to_timeline', () => {
+  return {
+    useNavigateToTimeline: () => ({
+      openTimelineWithFilters: mockOpenTimelineWithFilters,
     }),
   };
 });
@@ -123,5 +133,43 @@ describe('HostAlertsTable', () => {
 
     fireEvent.click(page3);
     expect(mockSetPage).toHaveBeenCalledWith(2);
+  });
+
+  it('should open timeline with filters when total alerts is clicked', () => {
+    mockUseHostAlertsItemsReturn({ items: [parsedVulnerableHostsAlertsResult[0]] });
+    const { getByTestId } = renderComponent();
+
+    fireEvent.click(getByTestId('hostSeverityAlertsTable-totalAlertsLink'));
+
+    expect(mockOpenTimelineWithFilters).toHaveBeenCalledWith([
+      [
+        {
+          field: 'host.name',
+          value: 'Host-342m5gl1g2',
+        },
+        openAlertsFilter,
+      ],
+    ]);
+  });
+
+  it('should open timeline with filters when critical alert count is clicked', () => {
+    mockUseHostAlertsItemsReturn({ items: [parsedVulnerableHostsAlertsResult[0]] });
+    const { getByTestId } = renderComponent();
+
+    fireEvent.click(getByTestId('hostSeverityAlertsTable-criticalLink'));
+
+    expect(mockOpenTimelineWithFilters).toHaveBeenCalledWith([
+      [
+        {
+          field: 'host.name',
+          value: 'Host-342m5gl1g2',
+        },
+        openAlertsFilter,
+        {
+          field: 'kibana.alert.severity',
+          value: 'critical',
+        },
+      ],
+    ]);
   });
 });

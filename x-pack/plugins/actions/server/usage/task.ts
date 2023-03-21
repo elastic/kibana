@@ -101,36 +101,41 @@ export function telemetryTaskRunner(
           getTotalCount(esClient, kibanaIndex, logger, preconfiguredActions),
           getInUseTotalCount(esClient, kibanaIndex, logger, undefined, preconfiguredActions),
           getExecutionsPerDayCount(esClient, eventLogIndex, logger),
-        ])
-          .then(([totalAggegations, totalInUse, totalExecutionsPerDay]) => {
-            return {
-              state: {
-                runs: (state.runs || 0) + 1,
-                count_total: totalAggegations.countTotal,
-                count_by_type: totalAggegations.countByType,
-                count_active_total: totalInUse.countTotal,
-                count_active_by_type: totalInUse.countByType,
-                count_active_alert_history_connectors: totalInUse.countByAlertHistoryConnectorType,
-                count_active_email_connectors_by_service_type: totalInUse.countEmailByService,
-                count_actions_namespaces: totalInUse.countNamespaces,
-                count_actions_executions_per_day: totalExecutionsPerDay.countTotal,
-                count_actions_executions_by_type_per_day: totalExecutionsPerDay.countByType,
-                count_actions_executions_failed_per_day: totalExecutionsPerDay.countFailed,
-                count_actions_executions_failed_by_type_per_day:
-                  totalExecutionsPerDay.countFailedByType,
-                avg_execution_time_per_day: totalExecutionsPerDay.avgExecutionTime,
-                avg_execution_time_by_type_per_day: totalExecutionsPerDay.avgExecutionTimeByType,
-              },
-              runAt: getNextMidnight(),
-            };
-          })
-          .catch((errMsg) => {
-            logger.warn(`Error executing actions telemetry task: ${errMsg}`);
-            return {
-              state: {},
-              runAt: getNextMidnight(),
-            };
-          });
+        ]).then(([totalAggegations, totalInUse, totalExecutionsPerDay]) => {
+          const hasErrors =
+            totalAggegations.hasErrors || totalInUse.hasErrors || totalExecutionsPerDay.hasErrors;
+
+          const errorMessages = [
+            totalAggegations.errorMessage,
+            totalInUse.errorMessage,
+            totalExecutionsPerDay.errorMessage,
+          ].filter((message) => message !== undefined);
+
+          return {
+            state: {
+              has_errors: hasErrors,
+              ...(errorMessages.length > 0 && { error_messages: errorMessages }),
+              runs: (state.runs || 0) + 1,
+              count_total: totalAggegations.countTotal,
+              count_by_type: totalAggegations.countByType,
+              count_active_total: totalInUse.countTotal,
+              count_active_by_type: totalInUse.countByType,
+              count_active_alert_history_connectors: totalInUse.countByAlertHistoryConnectorType,
+              count_active_email_connectors_by_service_type: totalInUse.countEmailByService,
+              count_actions_namespaces: totalInUse.countNamespaces,
+              count_actions_executions_per_day: totalExecutionsPerDay.countTotal,
+              count_actions_executions_by_type_per_day: totalExecutionsPerDay.countByType,
+              count_actions_executions_failed_per_day: totalExecutionsPerDay.countFailed,
+              count_actions_executions_failed_by_type_per_day:
+                totalExecutionsPerDay.countFailedByType,
+              avg_execution_time_per_day: totalExecutionsPerDay.avgExecutionTime,
+              avg_execution_time_by_type_per_day: totalExecutionsPerDay.avgExecutionTimeByType,
+              count_connector_types_by_action_run_outcome_per_day:
+                totalExecutionsPerDay.countRunOutcomeByConnectorType,
+            },
+            runAt: getNextMidnight(),
+          };
+        });
       },
     };
   };

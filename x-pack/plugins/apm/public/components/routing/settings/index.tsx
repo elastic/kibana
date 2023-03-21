@@ -4,22 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import * as t from 'io-ts';
-import { Outlet } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
+import { Outlet } from '@kbn/typed-react-router-config';
+import * as t from 'io-ts';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { agentConfigurationPageStepRt } from '../../../../common/agent_configuration/constants';
+import { environmentRt } from '../../../../common/environment_rt';
 import { Breadcrumb } from '../../app/breadcrumb';
-import { SettingsTemplate } from '../templates/settings_template';
 import { AgentConfigurations } from '../../app/settings/agent_configurations';
-import { CreateAgentConfigurationRouteView } from './create_agent_configuration_route_view';
-import { EditAgentConfigurationRouteView } from './edit_agent_configuration_route_view';
+import { AgentExplorer } from '../../app/settings/agent_explorer';
+import { AgentKeys } from '../../app/settings/agent_keys';
+import { AnomalyDetection } from '../../app/settings/anomaly_detection';
 import { ApmIndices } from '../../app/settings/apm_indices';
 import { CustomLinkOverview } from '../../app/settings/custom_link';
+import { GeneralSettings } from '../../app/settings/general_settings';
 import { Schema } from '../../app/settings/schema';
-import { AnomalyDetection } from '../../app/settings/anomaly_detection';
-import { AgentKeys } from '../../app/settings/agent_keys';
+import { SettingsTemplate } from '../templates/settings_template';
+import { CreateAgentConfigurationRouteView } from './create_agent_configuration_route_view';
+import { EditAgentConfigurationRouteView } from './edit_agent_configuration_route_view';
 
 function page({
   title,
@@ -54,6 +57,14 @@ export const settings = {
       </Breadcrumb>
     ),
     children: {
+      '/settings/general-settings': page({
+        title: i18n.translate(
+          'xpack.apm.views.settings.generalSettings.title',
+          { defaultMessage: 'General settings' }
+        ),
+        element: <GeneralSettings />,
+        tab: 'general-settings',
+      }),
       '/settings/agent-configuration': page({
         tab: 'agent-configuration',
         title: i18n.translate(
@@ -132,8 +143,30 @@ export const settings = {
         element: <AgentKeys />,
         tab: 'agent-keys',
       }),
+      '/settings/agent-explorer': {
+        ...page({
+          title: i18n.translate(
+            'xpack.apm.views.settings.agentExplorer.title',
+            {
+              defaultMessage: 'Agent explorer',
+            }
+          ),
+          element: <AgentExplorer />,
+          tab: 'agent-explorer',
+        }),
+        params: t.type({
+          query: t.intersection([
+            environmentRt,
+            t.type({
+              kuery: t.string,
+              agentLanguage: t.string,
+              serviceName: t.string,
+            }),
+          ]),
+        }),
+      },
       '/settings': {
-        element: <Redirect to="/settings/agent-configuration" />,
+        element: <Redirect to="/settings/general-settings" />,
       },
     },
   },

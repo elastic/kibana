@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants';
-import { ConnectorMappings } from '../../../common/api';
-import { SavedObjectFindOptionsKueryNode } from '../../common/types';
-import { IndexRefresh } from '../types';
+import type { ConnectorMappings } from '../../../common/api';
+import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import type { IndexRefresh } from '../types';
 
 interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;

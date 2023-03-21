@@ -7,8 +7,8 @@
  */
 
 import { pick } from 'lodash';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 import {
   ExpressionsService,
@@ -42,6 +42,7 @@ export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, Express
     get() {
       return this;
     },
+    isLevelEnabled: () => true,
   };
 
   private readonly expressions: ExpressionsService = new ExpressionsService({

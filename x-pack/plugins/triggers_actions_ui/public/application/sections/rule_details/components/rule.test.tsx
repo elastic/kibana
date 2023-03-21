@@ -12,9 +12,10 @@ import { act } from 'react-dom/test-utils';
 import { RuleComponent, alertToListItem } from './rule';
 import { AlertListItem } from './types';
 import { RuleAlertList } from './rule_alert_list';
-import { RuleSummary, AlertStatus, RuleType } from '../../../../types';
-import { ExecutionDurationChart } from '../../common/components/execution_duration_chart';
+import { RuleSummary, AlertStatus, RuleType, RuleTypeModel } from '../../../../types';
 import { mockRule } from './test_helpers';
+import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -22,7 +23,23 @@ jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
+const ruleTypeR: RuleTypeModel = {
+  id: 'my-rule-type',
+  iconClass: 'test',
+  description: 'Rule when testing',
+  documentationUrl: 'https://localhost.local/docs',
+  validate: () => {
+    return { errors: {} };
+  },
+  ruleParamsExpression: jest.fn(),
+  requiresAppContext: false,
+};
+
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const ruleTypeRegistry = ruleTypeRegistryMock.create();
+
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import { waitFor } from '@testing-library/react';
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
@@ -37,6 +54,8 @@ const mockAPIs = {
 
 beforeAll(() => {
   jest.clearAllMocks();
+  ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
+  useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
   global.Date.now = jest.fn(() => fakeNow.getTime());
 });
 
@@ -54,20 +73,22 @@ describe('rules', () => {
           status: 'OK',
           muted: false,
           actionGroupId: 'default',
+          flapping: false,
         },
         second_rule: {
           status: 'Active',
           muted: false,
           actionGroupId: 'action group id unknown',
+          flapping: false,
         },
       },
     });
 
     const rules: AlertListItem[] = [
       // active first
-      alertToListItem(fakeNow.getTime(), ruleType, 'second_rule', ruleSummary.alerts.second_rule),
+      alertToListItem(fakeNow.getTime(), 'second_rule', ruleSummary.alerts.second_rule),
       // ok second
-      alertToListItem(fakeNow.getTime(), ruleType, 'first_rule', ruleSummary.alerts.first_rule),
+      alertToListItem(fakeNow.getTime(), 'first_rule', ruleSummary.alerts.first_rule),
     ];
 
     const wrapper = mountWithIntl(
@@ -116,10 +137,12 @@ describe('rules', () => {
       ['us-central']: {
         status: 'OK',
         muted: false,
+        flapping: false,
       },
       ['us-east']: {
         status: 'OK',
         muted: false,
+        flapping: false,
       },
     };
 
@@ -141,8 +164,8 @@ describe('rules', () => {
     });
 
     expect(wrapper.find(RuleAlertList).prop('items')).toEqual([
-      alertToListItem(fakeNow.getTime(), ruleType, 'us-central', alerts['us-central']),
-      alertToListItem(fakeNow.getTime(), ruleType, 'us-east', alerts['us-east']),
+      alertToListItem(fakeNow.getTime(), 'us-central', alerts['us-central']),
+      alertToListItem(fakeNow.getTime(), 'us-east', alerts['us-east']),
     ]);
   });
 
@@ -151,8 +174,8 @@ describe('rules', () => {
       mutedInstanceIds: ['us-west', 'us-east'],
     });
     const ruleType = mockRuleType();
-    const ruleUsWest: AlertStatus = { status: 'OK', muted: false };
-    const ruleUsEast: AlertStatus = { status: 'OK', muted: false };
+    const ruleUsWest: AlertStatus = { status: 'OK', muted: false, flapping: false };
+    const ruleUsEast: AlertStatus = { status: 'OK', muted: false, flapping: false };
 
     const wrapper = mountWithIntl(
       <RuleComponent
@@ -165,10 +188,12 @@ describe('rules', () => {
             'us-west': {
               status: 'OK',
               muted: false,
+              flapping: false,
             },
             'us-east': {
               status: 'OK',
               muted: false,
+              flapping: false,
             },
           },
         })}
@@ -181,31 +206,27 @@ describe('rules', () => {
     });
 
     expect(wrapper.find(RuleAlertList).prop('items')).toEqual([
-      alertToListItem(fakeNow.getTime(), ruleType, 'us-west', ruleUsWest),
-      alertToListItem(fakeNow.getTime(), ruleType, 'us-east', ruleUsEast),
+      alertToListItem(fakeNow.getTime(), 'us-west', ruleUsWest),
+      alertToListItem(fakeNow.getTime(), 'us-east', ruleUsEast),
     ]);
   });
 });
 
 describe('alertToListItem', () => {
   it('handles active rules', () => {
-    const ruleType = mockRuleType({
-      actionGroups: [
-        { id: 'default', name: 'Default Action Group' },
-        { id: 'testing', name: 'Test Action Group' },
-      ],
-    });
     const start = fake2MinutesAgo;
     const alert: AlertStatus = {
       status: 'Active',
       muted: false,
       activeStartDate: fake2MinutesAgo.toISOString(),
       actionGroupId: 'testing',
+      flapping: false,
     };
 
-    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+    expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
       alert: 'id',
-      status: { label: 'Active', actionGroup: 'Test Action Group', healthColor: 'primary' },
+      status: 'Active',
+      flapping: false,
       start,
       sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
@@ -214,17 +235,18 @@ describe('alertToListItem', () => {
   });
 
   it('handles active rules with no action group id', () => {
-    const ruleType = mockRuleType();
     const start = fake2MinutesAgo;
     const alert: AlertStatus = {
       status: 'Active',
       muted: false,
       activeStartDate: fake2MinutesAgo.toISOString(),
+      flapping: false,
     };
 
-    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+    expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
       alert: 'id',
-      status: { label: 'Active', actionGroup: 'Default Action Group', healthColor: 'primary' },
+      status: 'Active',
+      flapping: false,
       start,
       sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
@@ -233,18 +255,19 @@ describe('alertToListItem', () => {
   });
 
   it('handles active muted rules', () => {
-    const ruleType = mockRuleType();
     const start = fake2MinutesAgo;
     const alert: AlertStatus = {
       status: 'Active',
       muted: true,
       activeStartDate: fake2MinutesAgo.toISOString(),
       actionGroupId: 'default',
+      flapping: false,
     };
 
-    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+    expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
       alert: 'id',
-      status: { label: 'Active', actionGroup: 'Default Action Group', healthColor: 'primary' },
+      status: 'Active',
+      flapping: false,
       start,
       sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
@@ -253,16 +276,17 @@ describe('alertToListItem', () => {
   });
 
   it('handles active rules with start date', () => {
-    const ruleType = mockRuleType();
     const alert: AlertStatus = {
       status: 'Active',
       muted: false,
       actionGroupId: 'default',
+      flapping: false,
     };
 
-    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+    expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
       alert: 'id',
-      status: { label: 'Active', actionGroup: 'Default Action Group', healthColor: 'primary' },
+      status: 'Active',
+      flapping: false,
       start: undefined,
       duration: 0,
       sortPriority: 0,
@@ -271,15 +295,16 @@ describe('alertToListItem', () => {
   });
 
   it('handles muted inactive rules', () => {
-    const ruleType = mockRuleType();
     const alert: AlertStatus = {
       status: 'OK',
       muted: true,
       actionGroupId: 'default',
+      flapping: false,
     };
-    expect(alertToListItem(fakeNow.getTime(), ruleType, 'id', alert)).toEqual({
+    expect(alertToListItem(fakeNow.getTime(), 'id', alert)).toEqual({
       alert: 'id',
-      status: { label: 'Recovered', healthColor: 'subdued' },
+      status: 'OK',
+      flapping: false,
       start: undefined,
       duration: 0,
       sortPriority: 1,
@@ -290,6 +315,8 @@ describe('alertToListItem', () => {
 
 describe('execution duration overview', () => {
   it('render last execution status', async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
+
     const rule = mockRule({
       executionStatus: { status: 'ok', lastExecutionDate: new Date('2020-08-20T19:23:38Z') },
     });
@@ -316,95 +343,10 @@ describe('execution duration overview', () => {
     expect(ruleExecutionStatusStat.first().prop('description')).toEqual('Last response');
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').text()).toEqual('Ok');
   });
-
-  it('renders average execution duration', async () => {
-    const rule = mockRule();
-    const ruleType = mockRuleType({ ruleTaskTimeout: '10m' });
-    const ruleSummary = mockRuleSummary({
-      executionDuration: { average: 60284, valuesWithTimestamp: {} },
-    });
-
-    const wrapper = mountWithIntl(
-      <RuleComponent
-        {...mockAPIs}
-        rule={rule}
-        ruleType={ruleType}
-        readOnly={false}
-        ruleSummary={ruleSummary}
-      />
-    );
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
-    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
-    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('subdued');
-    expect(wrapper.find('EuiStat[data-test-subj="avgExecutionDurationStat"]').text()).toEqual(
-      'Average duration00:01:00.284'
-    );
-    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeFalsy();
-  });
-
-  it('renders warning when average execution duration exceeds rule timeout', async () => {
-    const rule = mockRule();
-    const ruleType = mockRuleType({ ruleTaskTimeout: '10m' });
-    const ruleSummary = mockRuleSummary({
-      executionDuration: { average: 60284345, valuesWithTimestamp: {} },
-    });
-
-    const wrapper = mountWithIntl(
-      <RuleComponent
-        {...mockAPIs}
-        rule={rule}
-        ruleType={ruleType}
-        readOnly={false}
-        ruleSummary={ruleSummary}
-      />
-    );
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    const avgExecutionDurationPanel = wrapper.find('[data-test-subj="avgExecutionDurationPanel"]');
-    expect(avgExecutionDurationPanel.exists()).toBeTruthy();
-    expect(avgExecutionDurationPanel.first().prop('color')).toEqual('warning');
-
-    const avgExecutionDurationStat = wrapper
-      .find('EuiStat[data-test-subj="avgExecutionDurationStat"]')
-      .text()
-      .replaceAll('Info', '');
-    expect(avgExecutionDurationStat).toEqual('Average duration16:44:44.345');
-    expect(wrapper.find('[data-test-subj="ruleDurationWarning"]').exists()).toBeTruthy();
-  });
-
-  it('renders execution duration chart', () => {
-    const rule = mockRule();
-    const ruleType = mockRuleType();
-    const ruleSummary = mockRuleSummary();
-
-    expect(
-      shallow(
-        <RuleComponent
-          {...mockAPIs}
-          rule={rule}
-          ruleType={ruleType}
-          ruleSummary={ruleSummary}
-          readOnly={false}
-        />
-      )
-        .find(ExecutionDurationChart)
-        .exists()
-    ).toBeTruthy();
-  });
 });
 
 describe('disable/enable functionality', () => {
-  it('should show that the rule is enabled', () => {
+  it('should show that the rule is enabled', async () => {
     const rule = mockRule();
     const ruleType = mockRuleType();
     const ruleSummary = mockRuleSummary();
@@ -417,7 +359,9 @@ describe('disable/enable functionality', () => {
         readOnly={false}
       />
     );
-    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"]').first();
+    const actionsElem = await waitFor(() =>
+      wrapper.find('[data-test-subj="statusDropdown"]').first()
+    );
 
     expect(actionsElem.text()).toEqual('Enabled');
   });
@@ -437,7 +381,9 @@ describe('disable/enable functionality', () => {
         readOnly={false}
       />
     );
-    const actionsElem = wrapper.find('[data-test-subj="statusDropdown"]').first();
+    const actionsElem = await waitFor(() =>
+      wrapper.find('[data-test-subj="statusDropdown"]').first()
+    );
 
     expect(actionsElem.text()).toEqual('Disabled');
   });
@@ -456,11 +402,13 @@ describe('tabbed content', () => {
           status: 'OK',
           muted: false,
           actionGroupId: 'default',
+          flapping: false,
         },
         second_rule: {
           status: 'Active',
           muted: false,
           actionGroupId: 'action group id unknown',
+          flapping: false,
         },
       },
     });
@@ -486,11 +434,6 @@ describe('tabbed content', () => {
       tabbedContent.update();
     });
 
-    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeTruthy();
-    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeFalsy();
-
-    tabbedContent.find('[data-test-subj="ruleAlertListTab"]').simulate('click');
-
     expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeFalsy();
     expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeTruthy();
 
@@ -498,6 +441,11 @@ describe('tabbed content', () => {
 
     expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeTruthy();
     expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeFalsy();
+
+    tabbedContent.find('[data-test-subj="ruleAlertListTab"]').simulate('click');
+
+    expect(tabbedContent.find('[aria-labelledby="rule_event_log_list"]').exists()).toBeFalsy();
+    expect(tabbedContent.find('[aria-labelledby="rule_alert_list"]').exists()).toBeTruthy();
   });
 });
 
@@ -540,6 +488,7 @@ function mockRuleSummary(overloads: Partial<RuleSummary> = {}): RuleSummary {
         status: 'OK',
         muted: false,
         actionGroupId: 'testActionGroup',
+        flapping: false,
       },
     },
     executionDuration: {

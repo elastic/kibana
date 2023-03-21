@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import {
   inspectSearchParams,
   SearchParamsMock,
@@ -29,9 +26,9 @@ describe('getDerivedServiceAnnotations', () => {
   describe('with 0 versions', () => {
     it('returns no annotations', async () => {
       mock = await inspectSearchParams(
-        (setup) =>
+        ({ mockApmEventClient }) =>
           getDerivedServiceAnnotations({
-            setup,
+            apmEventClient: mockApmEventClient,
             serviceName: 'foo',
             environment: 'bar',
             searchAggregatedTransactions: false,
@@ -57,9 +54,9 @@ describe('getDerivedServiceAnnotations', () => {
   describe('with 1 version', () => {
     it('returns no annotations', async () => {
       mock = await inspectSearchParams(
-        (setup) =>
+        ({ mockApmEventClient }) =>
           getDerivedServiceAnnotations({
-            setup,
+            apmEventClient: mockApmEventClient,
             serviceName: 'foo',
             environment: 'bar',
             searchAggregatedTransactions: false,
@@ -90,9 +87,9 @@ describe('getDerivedServiceAnnotations', () => {
         versionsFirstSeen,
       ];
       mock = await inspectSearchParams(
-        (setup) =>
+        ({ mockApmEventClient }) =>
           getDerivedServiceAnnotations({
-            setup,
+            apmEventClient: mockApmEventClient,
             serviceName: 'foo',
             environment: 'bar',
             searchAggregatedTransactions: false,

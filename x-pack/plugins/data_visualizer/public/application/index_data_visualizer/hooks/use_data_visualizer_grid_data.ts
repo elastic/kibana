@@ -5,35 +5,38 @@
  * 2.0.
  */
 
-import { Required } from 'utility-types';
+import type { Required } from 'utility-types';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { merge } from 'rxjs';
-import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { EuiTableActionsColumnType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataViewField, KBN_FIELD_TYPES, UI_SETTINGS } from '@kbn/data-plugin/common';
-import { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
+import { type DataViewField, UI_SETTINGS } from '@kbn/data-plugin/common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import seedrandom from 'seedrandom';
+import type { SamplingOption } from '@kbn/discover-plugin/public/application/main/components/field_stats_table/field_stats_table';
+import type { Dictionary } from '@kbn/ml-url-state';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import type { RandomSamplerOption } from '../constants/random_sampler';
+import type { DataVisualizerIndexBasedAppState } from '../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import { getEsQueryFromSavedSearch } from '../utils/saved_search_utils';
-import { MetricFieldsStats } from '../../common/components/stats_table/components/field_count_stats';
-import { useTimefilter } from './use_time_filter';
-import { dataVisualizerRefresh$ } from '../services/timefilter_refresh_service';
+import type { MetricFieldsStats } from '../../common/components/stats_table/components/field_count_stats';
 import { TimeBuckets } from '../../../../common/services/time_buckets';
-import { FieldVisConfig } from '../../common/components/stats_table/types';
+import type { FieldVisConfig } from '../../common/components/stats_table/types';
 import {
   SUPPORTED_FIELD_TYPES,
   NON_AGGREGATABLE_FIELD_TYPES,
   OMIT_FIELDS,
 } from '../../../../common/constants';
-import type { FieldRequestConfig, JobFieldType } from '../../../../common/types';
+import type { FieldRequestConfig, SupportedFieldType } from '../../../../common/types';
 import { kbnTypeToJobType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
-import { DataVisualizerGridInput } from '../embeddables/grid_embeddable/grid_embeddable';
+import type { DataVisualizerGridInput } from '../embeddables/grid_embeddable/grid_embeddable';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { useFieldStatsSearchStrategy } from './use_field_stats';
 import { useOverallStats } from './use_overall_stats';
-import { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
-import { Dictionary } from '../../common/util/url_state';
-import { AggregatableField, NonAggregatableField } from '../types/overall_stats';
+import type { OverallStatsSearchStrategyParams } from '../../../../common/types/field_stats';
+import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
 
 const defaults = getDefaultPageState();
 
@@ -41,17 +44,36 @@ function isDisplayField(fieldName: string): boolean {
   return !OMIT_FIELDS.includes(fieldName);
 }
 
+const DEFAULT_SAMPLING_OPTION: SamplingOption = {
+  mode: 'random_sampling',
+  seed: '',
+  probability: 0,
+};
 export const useDataVisualizerGridData = (
   input: DataVisualizerGridInput,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
+  savedRandomSamplerPreference?: RandomSamplerOption,
   onUpdate?: (params: Dictionary<unknown>) => void
 ) => {
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, data } = services;
+  const { uiSettings, data, security } = services;
   const { samplerShardSize, visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
 
   const [lastRefresh, setLastRefresh] = useState(0);
   const searchSessionId = input.sessionId;
+
+  const browserSessionSeed = useMemo(() => {
+    let seed = Math.abs(seedrandom().int32());
+    if (security !== undefined) {
+      security.authc.getCurrentUser().then((user) => {
+        const username = user.username;
+        if (username) {
+          seed = Math.abs(seedrandom(username).int32());
+        }
+      });
+    }
+    return seed;
+  }, [security]);
 
   const {
     currentSavedSearch,
@@ -60,6 +82,7 @@ export const useDataVisualizerGridData = (
     currentFilters,
     visibleFieldNames,
     fieldsToFetch,
+    samplingOption,
   } = useMemo(
     () => ({
       currentSavedSearch: input?.savedSearch,
@@ -68,12 +91,15 @@ export const useDataVisualizerGridData = (
       visibleFieldNames: input?.visibleFieldNames ?? [],
       currentFilters: input?.filters,
       fieldsToFetch: input?.fieldsToFetch,
+      /** By default, use random sampling **/
+      samplingOption: input?.samplingOption ?? DEFAULT_SAMPLING_OPTION,
     }),
     [input]
   );
 
   /** Prepare required params to pass to search strategy **/
-  const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
+  const { searchQueryLanguage, searchString, searchQuery, queryOrAggregateQuery } = useMemo(() => {
+    const filterManager = data.query.filterManager;
     const searchData = getEsQueryFromSavedSearch({
       dataView: currentDataView,
       uiSettings,
@@ -85,7 +111,10 @@ export const useDataVisualizerGridData = (
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
       if (dataVisualizerListState.filters) {
-        data.query.filterManager.setFilters(dataVisualizerListState.filters);
+        const globalFilters = filterManager?.getGlobalFilters();
+
+        if (filterManager) filterManager.setFilters(dataVisualizerListState.filters);
+        if (globalFilters) filterManager?.addFilters(globalFilters);
       }
       return {
         searchQuery: dataVisualizerListState.searchQuery,
@@ -94,6 +123,7 @@ export const useDataVisualizerGridData = (
       };
     } else {
       return {
+        queryOrAggregateQuery: searchData.queryOrAggregateQuery,
         searchQuery: searchData.searchQuery,
         searchString: searchData.searchString,
         searchQueryLanguage: searchData.queryLanguage,
@@ -176,13 +206,18 @@ export const useDataVisualizerGridData = (
         }
         const fieldName = field.displayName !== undefined ? field.displayName : field.name;
         if (!OMIT_FIELDS.includes(fieldName)) {
-          if (field.aggregatable === true && !NON_AGGREGATABLE_FIELD_TYPES.has(field.type)) {
+          if (
+            field.aggregatable === true &&
+            !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) &&
+            !field.esTypes?.some((d) => d === ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE)
+          ) {
             aggregatableFields.push(field.name);
           } else {
             nonAggregatableFields.push(field.name);
           }
         }
       });
+
       return {
         earliest,
         latest,
@@ -197,6 +232,8 @@ export const useDataVisualizerGridData = (
         aggregatableFields,
         nonAggregatableFields,
         fieldsToFetch,
+        browserSessionSeed,
+        samplingOption: { ...samplingOption, seed: browserSessionSeed.toString() },
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -206,16 +243,20 @@ export const useDataVisualizerGridData = (
       currentDataView.id,
       // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify(searchQuery),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify(samplingOption),
       samplerShardSize,
       searchSessionId,
       lastRefresh,
       fieldsToFetch,
+      browserSessionSeed,
     ]
   );
 
   const { overallStats, progress: overallStatsProgress } = useOverallStats(
     fieldStatsRequest,
-    lastRefresh
+    lastRefresh,
+    dataVisualizerListState.probability
   );
 
   const configsWithoutStats = useMemo(() => {
@@ -247,10 +288,20 @@ export const useDataVisualizerGridData = (
     return { metricConfigs: existMetricFields, nonMetricConfigs: existNonMetricFields };
   }, [metricConfigs, nonMetricConfigs, overallStatsProgress.loaded]);
 
+  const probability = useMemo(
+    () =>
+      // If random sampler probability is already manually selected, or is available from the URL
+      // use that instead of using the probability calculated from the doc count
+      (dataVisualizerListState.probability === null
+        ? overallStats?.documentCountStats?.probability
+        : dataVisualizerListState.probability) ?? 1,
+    [dataVisualizerListState.probability, overallStats?.documentCountStats?.probability]
+  );
   const strategyResponse = useFieldStatsSearchStrategy(
     fieldStatsRequest,
     configsWithoutStats,
-    dataVisualizerListState
+    dataVisualizerListState,
+    probability
   );
 
   const combinedProgress = useMemo(
@@ -262,7 +313,7 @@ export const useDataVisualizerGridData = (
     const timeUpdateSubscription = merge(
       timefilter.getTimeUpdate$(),
       timefilter.getAutoRefreshFetch$(),
-      dataVisualizerRefresh$
+      mlTimefilterRefresh$
     ).subscribe(() => {
       if (onUpdate) {
         onUpdate({
@@ -410,7 +461,7 @@ export const useDataVisualizerGridData = (
       } else {
         // Add a flag to indicate that this is one of the 'other' Kibana
         // field types that do not yet have a specific card type.
-        nonMetricConfig.type = field.type as JobFieldType;
+        nonMetricConfig.type = field.type as SupportedFieldType;
         nonMetricConfig.isUnsupportedType = true;
       }
 
@@ -511,7 +562,9 @@ export const useDataVisualizerGridData = (
 
   return {
     progress: combinedProgress,
+    overallStatsProgress,
     configs,
+    queryOrAggregateQuery,
     searchQueryLanguage,
     searchString,
     searchQuery,

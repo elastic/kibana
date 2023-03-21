@@ -7,13 +7,21 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
 import { latestFindingsTransform } from './latest_findings_transform';
+
+const LATEST_TRANSFORM_V830 = 'cloud_security_posture.findings_latest-default-0.0.1';
+const LATEST_TRANSFORM_V840 = 'cloud_security_posture.findings_latest-default-8.4.0';
+
+const PREVIOUS_TRANSFORMS = [LATEST_TRANSFORM_V830, LATEST_TRANSFORM_V840];
 
 // TODO: Move transforms to integration package
 export const initializeCspTransforms = async (
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> => {
+  // Deletes old assets from previous versions as part of upgrade process
+  await deletePreviousTransformsVersions(esClient, logger);
   await initializeTransform(esClient, latestFindingsTransform, logger);
 };
 
@@ -22,11 +30,11 @@ export const initializeTransform = async (
   transform: TransformPutTransformRequest,
   logger: Logger
 ) => {
-  return createTransformIfNotExists(esClient, transform, logger).then((succeeded) => {
-    if (succeeded) {
-      startTransformIfNotStarted(esClient, transform.transform_id, logger);
-    }
-  });
+  const success = await createTransformIfNotExists(esClient, transform, logger);
+
+  if (success) {
+    await startTransformIfNotStarted(esClient, transform.transform_id, logger);
+  }
 };
 
 /**
@@ -100,5 +108,33 @@ export const startTransformIfNotStarted = async (
   } catch (statsErr) {
     const statsError = transformError(statsErr);
     logger.error(`Failed to check if transform ${transformId} is started: ${statsError.message}`);
+  }
+};
+
+const deletePreviousTransformsVersions = async (esClient: ElasticsearchClient, logger: Logger) => {
+  for (const transform of PREVIOUS_TRANSFORMS) {
+    const response = await deleteTransformSafe(esClient, logger, transform);
+    if (response) return;
+  }
+};
+
+const deleteTransformSafe = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  name: string
+): Promise<boolean> => {
+  try {
+    await esClient.transform.deleteTransform({ transform_id: name, force: true });
+    logger.info(`Deleted transform successfully [Name: ${name}]`);
+    return true;
+  } catch (e) {
+    if (e instanceof errors.ResponseError && e.statusCode === 404) {
+      logger.trace(`Transform not exists [Name: ${name}]`);
+      return false;
+    } else {
+      logger.error(`Failed to delete transform [Name: ${name}]`);
+      logger.error(e);
+      return false;
+    }
   }
 };

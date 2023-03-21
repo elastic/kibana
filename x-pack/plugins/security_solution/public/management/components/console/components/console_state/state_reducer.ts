@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { parseCommandInput } from '../../service/parsed_command_input';
 import {
   handleInputAreaState,
   INPUT_DEFAULT_PLACEHOLDER_TEXT,
@@ -17,7 +18,13 @@ import { getBuiltinCommands } from '../../service/builtin_commands';
 
 export type InitialStateInterface = Pick<
   ConsoleDataState,
-  'commands' | 'scrollToBottom' | 'dataTestSubj' | 'HelpComponent' | 'managedKey' | 'keyCapture'
+  | 'commands'
+  | 'scrollToBottom'
+  | 'dataTestSubj'
+  | 'HelpComponent'
+  | 'managedKey'
+  | 'keyCapture'
+  | 'storagePrefix'
 >;
 
 export const initiateState = (
@@ -25,19 +32,21 @@ export const initiateState = (
   managedConsolePriorState?: ConsoleDataState
 ): ConsoleDataState => {
   const commands = getBuiltinCommands().concat(userCommandList);
-  const state = managedConsolePriorState ?? {
+  const state: ConsoleDataState = managedConsolePriorState ?? {
     commands,
     ...otherOptions,
     commandHistory: [],
     sidePanel: { show: null },
     footerContent: '',
     input: {
-      textEntered: '',
-      rightOfCursor: { text: '' },
-      commandEntered: '',
+      leftOfCursorText: '',
+      rightOfCursorText: '',
+      parsedInput: parseCommandInput(''),
+      enteredCommand: undefined,
       placeholder: INPUT_DEFAULT_PLACEHOLDER_TEXT,
       showPopover: undefined,
       history: [],
+      visibleState: undefined,
     },
   };
 
@@ -91,8 +100,11 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
 
     case 'updateInputPopoverState':
     case 'updateInputHistoryState':
+    case 'clearInputHistoryState':
     case 'updateInputTextEnteredState':
     case 'updateInputPlaceholderState':
+    case 'setInputState':
+    case 'updateInputCommandArgState':
       newState = handleInputAreaState(state, action);
       break;
 

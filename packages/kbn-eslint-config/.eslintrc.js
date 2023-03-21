@@ -9,6 +9,7 @@ module.exports = {
   ],
 
   plugins: [
+    '@kbn/eslint-plugin-disable',
     '@kbn/eslint-plugin-eslint',
     '@kbn/eslint-plugin-imports',
     'prettier',
@@ -87,7 +88,7 @@ module.exports = {
           from: 'styled-components',
           to: false,
           exclude: USES_STYLED_COMPONENTS,
-          disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in @kbn/dev-utils/src/babel.ts.`
+          disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in packages/kbn-babel-preset/styled_components_files.js.`
         },
         ...[
           '@elastic/eui/dist/eui_theme_light.json',
@@ -107,15 +108,42 @@ module.exports = {
           to: '@kbn/utility-types-jest',
           disallowedMessage: `import from @kbn/utility-types-jest instead`
         },
+        {
+          from: '@kbn/inspector-plugin',
+          to: '@kbn/inspector-plugin/common',
+          exact: true,
+        },
+        {
+          from: '@kbn/expressions-plugin',
+          to: '@kbn/expressions-plugin/common',
+          exact: true,
+        },
+        {
+          from: '@kbn/kibana-utils-plugin',
+          to: '@kbn/kibana-utils-plugin/common',
+          exact: true,
+        },
+        {
+          from: '@elastic/safer-lodash-set',
+          to: '@kbn/safer-lodash-set',
+        },
+        {
+          from: '@elastic/apm-synthtrace',
+          to: '@kbn/apm-synthtrace',
+        },
+        {
+          from: 'rison-node',
+          to: '@kbn/rison',
+        },
       ],
     ],
 
     /**
      * ESLint rule to aid with breaking up packages:
      *
-     *  `fromPacakge` the package name which was broken up
-     *  `toPackage` the package where the removed exports were placed
-     *  `exportNames` the list of exports which used to be found in `fromPacakge` and are now found in `toPackage`
+     *  `from` the package/request where the exports used to be
+     *  `to` the package/request where the exports are now
+     *  `exportNames` the list of exports which used to be found in `from` and are now found in `to`
      *
      * TODO(@spalger): once packages have types we should be able to filter this rule based on the package type
      *  of the file being linted so that we could re-route imports from `plugin-client` types to a different package
@@ -123,8 +151,8 @@ module.exports = {
      */
     '@kbn/imports/exports_moved_packages': ['error', [
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/tooling-log',
+        from: '@kbn/dev-utils',
+        to: '@kbn/tooling-log',
         exportNames: [
           'DEFAULT_LOG_LEVEL',
           'getLogLevelFlagsHelp',
@@ -143,8 +171,8 @@ module.exports = {
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/ci-stats-reporter',
+        from: '@kbn/dev-utils',
+        to: '@kbn/ci-stats-reporter',
         exportNames: [
           'CiStatsMetric',
           'CiStatsReporter',
@@ -160,15 +188,15 @@ module.exports = {
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/ci-stats-core',
+        from: '@kbn/dev-utils',
+        to: '@kbn/ci-stats-core',
         exportNames: [
           'Config',
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/jest-serializers',
+        from: '@kbn/dev-utils',
+        to: '@kbn/jest-serializers',
         exportNames: [
           'createAbsolutePathSerializer',
           'createStripAnsiSerializer',
@@ -178,23 +206,23 @@ module.exports = {
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/stdio-dev-helpers',
+        from: '@kbn/dev-utils',
+        to: '@kbn/stdio-dev-helpers',
         exportNames: [
           'observeReadable',
           'observeLines',
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/sort-package-json',
+        from: '@kbn/dev-utils',
+        to: '@kbn/sort-package-json',
         exportNames: [
           'sortPackageJson',
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/dev-cli-runner',
+        from: '@kbn/dev-utils',
+        to: '@kbn/dev-cli-runner',
         exportNames: [
           'run',
           'Command',
@@ -214,8 +242,8 @@ module.exports = {
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/dev-cli-errors',
+        from: '@kbn/dev-utils',
+        to: '@kbn/dev-cli-errors',
         exportNames: [
           'createFailError',
           'createFlagError',
@@ -223,15 +251,43 @@ module.exports = {
         ]
       },
       {
-        fromPackage: '@kbn/dev-utils',
-        toPackage: '@kbn/dev-proc-runner',
+        from: '@kbn/dev-utils',
+        to: '@kbn/dev-proc-runner',
         exportNames: [
           'withProcRunner',
           'ProcRunner',
         ]
       },
+      {
+        from: '@kbn/utils',
+        to: '@kbn/repo-info',
+        exportNames: [
+          'REPO_ROOT',
+          'UPSTREAM_BRANCH',
+          'kibanaPackageJson',
+          'isKibanaDistributable',
+          'fromRoot',
+        ]
+      },
+      {
+        from: '@kbn/presentation-util-plugin/common',
+        to: '@kbn/presentation-util-plugin/test_helpers',
+        exportNames: [
+          'functionWrapper',
+          'fontStyle'
+        ]
+      },
+      {
+        from: '@kbn/fleet-plugin/common',
+        to: '@kbn/fleet-plugin/common/mocks',
+        exportNames: [
+          'createFleetAuthzMock'
+        ]
+      }
     ]],
 
+    '@kbn/disable/no_protected_eslint_disable': 'error',
+    '@kbn/disable/no_naked_eslint_disable': 'error',
     '@kbn/eslint/no_async_promise_body': 'error',
     '@kbn/eslint/no_async_foreach': 'error',
     '@kbn/eslint/no_trailing_import_slash': 'error',
@@ -240,5 +296,6 @@ module.exports = {
     '@kbn/imports/no_unresolvable_imports': 'error',
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
+    '@kbn/imports/no_boundary_crossing': 'error',
   },
 };

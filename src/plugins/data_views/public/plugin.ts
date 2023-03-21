@@ -21,7 +21,7 @@ import { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper
 import { UiSettingsPublicToCommon } from './ui_settings_wrapper';
 
 import { DataViewsServicePublic } from './data_views_service_public';
-import { HasData } from './services';
+import { getIndices, HasData } from './services';
 
 import { debounceByKey } from './debounce_by_key';
 
@@ -76,6 +76,7 @@ export class DataViewsPublicPlugin
       getCanSaveSync: () => application.capabilities.indexPatterns.save === true,
       getCanSaveAdvancedSettings: () =>
         Promise.resolve(application.capabilities.advancedSettings.save === true),
+      getIndices: (props) => getIndices({ ...props, http: core.http }),
     });
   }
 

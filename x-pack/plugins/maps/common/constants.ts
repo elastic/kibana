@@ -53,6 +53,7 @@ export enum LAYER_TYPE {
   HEATMAP = 'HEATMAP',
   BLENDED_VECTOR = 'BLENDED_VECTOR',
   MVT_VECTOR = 'MVT_VECTOR',
+  LAYER_GROUP = 'LAYER_GROUP',
 }
 
 export enum SOURCE_TYPES {
@@ -219,6 +220,12 @@ export enum LABEL_BORDER_SIZES {
   LARGE = 'LARGE',
 }
 
+export enum LABEL_POSITIONS {
+  BOTTOM = 'BOTTOM',
+  CENTER = 'CENTER',
+  TOP = 'TOP',
+}
+
 export const DEFAULT_ICON = 'marker';
 export const DEFAULT_CUSTOM_ICON_CUTOFF = 0.25;
 export const DEFAULT_CUSTOM_ICON_RADIUS = 0.25;
@@ -241,10 +248,12 @@ export enum VECTOR_STYLES {
   ICON_SIZE = 'iconSize',
   ICON_ORIENTATION = 'iconOrientation',
   LABEL_TEXT = 'labelText',
+  LABEL_ZOOM_RANGE = 'labelZoomRange',
   LABEL_COLOR = 'labelColor',
   LABEL_SIZE = 'labelSize',
   LABEL_BORDER_COLOR = 'labelBorderColor',
   LABEL_BORDER_SIZE = 'labelBorderSize',
+  LABEL_POSITION = 'labelPosition',
 }
 
 export enum SCALING_TYPES {
@@ -308,6 +317,7 @@ export const emsWorldLayerId = 'world_countries';
 export enum WIZARD_ID {
   CHOROPLETH = 'choropleth',
   GEO_FILE = 'uploadGeoFile',
+  LAYER_GROUP = 'layerGroup',
   NEW_VECTOR = 'newVectorLayer',
   OBSERVABILITY = 'observabilityLayer',
   SECURITY = 'securityLayer',

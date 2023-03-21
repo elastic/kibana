@@ -6,7 +6,7 @@
  */
 
 import { AttachmentTypeRegistry } from '../../../common/registry';
-import { ExternalReferenceAttachmentType } from './types';
+import type { ExternalReferenceAttachmentType } from './types';
 
 export class ExternalReferenceAttachmentTypeRegistry extends AttachmentTypeRegistry<ExternalReferenceAttachmentType> {
   constructor() {

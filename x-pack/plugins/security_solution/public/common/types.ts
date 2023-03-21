@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { ResponseErrorAttributes } from '@kbn/core/server';
 import type { DataViewBase } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
@@ -19,6 +18,7 @@ export interface ServerApiError {
 
 export interface SecuritySolutionUiConfigType {
   enableExperimental: string[];
+  prebuiltRulesPackageVersion?: string;
 }
 
 /**
@@ -26,4 +26,8 @@ export interface SecuritySolutionUiConfigType {
  */
 export interface SecuritySolutionDataViewBase extends DataViewBase {
   fields: FieldSpec[];
+  getName?: () => string;
 }
+
+export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
+export type Refetch = () => void;

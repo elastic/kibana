@@ -9,9 +9,7 @@
 
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import bbox from '@turf/bbox';
-import uuid from 'uuid/v4';
-import { multiPoint } from '@turf/helpers';
+import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection } from 'geojson';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';
@@ -49,7 +47,9 @@ import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
 import { DataRequestMeta, MapExtent, DataFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
-import { scaleBounds, turfBboxToBounds } from '../../common/elasticsearch_util';
+import { scaleBounds } from '../../common/elasticsearch_util';
+import { getLayersExtent } from './get_layers_extent';
+import { isLayerGroup } from '../classes/layers/layer_group';
 
 const FIT_TO_BOUNDS_SCALE_FACTOR = 0.1;
 
@@ -101,7 +101,7 @@ export function cancelAllInFlightRequests() {
 export function updateStyleMeta(layerId: string | null) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
-    if (!layer) {
+    if (!layer || isLayerGroup(layer)) {
       return;
     }
 
@@ -378,8 +378,8 @@ export function fitToLayerExtent(layerId: string) {
 
     if (targetLayer) {
       try {
-        const bounds = await targetLayer.getBounds(
-          getDataRequestContext(dispatch, getState, layerId, false, false)
+        const bounds = await targetLayer.getBounds((boundsLayerId) =>
+          getDataRequestContext(dispatch, getState, boundsLayerId, false, false)
         );
         if (bounds) {
           await dispatch(setGotoWithBounds(scaleBounds(bounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
@@ -401,65 +401,22 @@ export function fitToLayerExtent(layerId: string) {
 
 export function fitToDataBounds(onNoBounds?: () => void) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    const layerList = getLayerList(getState());
-
-    if (!layerList.length) {
-      return;
-    }
-
-    const boundsPromises = layerList.map(async (layer: ILayer) => {
-      if (!(await layer.isFittable())) {
-        return null;
-      }
-      return layer.getBounds(
-        getDataRequestContext(dispatch, getState, layer.getId(), false, false)
-      );
+    const rootLayers = getLayerList(getState()).filter((layer) => {
+      return layer.getParent() === undefined;
     });
 
-    let bounds;
-    try {
-      bounds = await Promise.all(boundsPromises);
-    } catch (error) {
-      if (!(error instanceof DataRequestAbortError)) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          'Unhandled getBounds error for layer. Only DataRequestAbortError should be surfaced',
-          error
-        );
-      }
-      // new fitToDataBounds request has superseded this thread of execution. Results no longer needed.
-      return;
-    }
+    const extent = await getLayersExtent(rootLayers, (boundsLayerId) =>
+      getDataRequestContext(dispatch, getState, boundsLayerId, false, false)
+    );
 
-    const corners = [];
-    for (let i = 0; i < bounds.length; i++) {
-      const b = bounds[i];
-
-      // filter out undefined bounds (uses Infinity due to turf responses)
-      if (
-        b === null ||
-        b.minLon === Infinity ||
-        b.maxLon === Infinity ||
-        b.minLat === -Infinity ||
-        b.maxLat === -Infinity
-      ) {
-        continue;
-      }
-
-      corners.push([b.minLon, b.minLat]);
-      corners.push([b.maxLon, b.maxLat]);
-    }
-
-    if (!corners.length) {
+    if (extent === null) {
       if (onNoBounds) {
         onNoBounds();
       }
       return;
     }
 
-    const dataBounds = turfBboxToBounds(bbox(multiPoint(corners)));
-
-    dispatch(setGotoWithBounds(scaleBounds(dataBounds, FIT_TO_BOUNDS_SCALE_FACTOR)));
+    dispatch(setGotoWithBounds(scaleBounds(extent, FIT_TO_BOUNDS_SCALE_FACTOR)));
   };
 }
 
@@ -468,7 +425,7 @@ export function autoFitToBounds() {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     // Method can be triggered before async actions complete
     // Use localSetQueryCallId to only continue execution path if method has not been re-triggered.
-    const localSetQueryCallId = uuid();
+    const localSetQueryCallId = uuidv4();
     lastSetQueryCallId = localSetQueryCallId;
 
     // Joins are performed on the client.

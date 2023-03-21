@@ -17,6 +17,7 @@ export interface Field {
   description?: string;
   value?: string;
   format?: string;
+  date_format?: string;
   fields?: Fields;
   enabled?: boolean;
   path?: string;
@@ -30,12 +31,14 @@ export interface Field {
   search_analyzer?: string;
   ignore_above?: number;
   object_type?: string;
+  object_type_mapping_type?: string;
   scaling_factor?: number;
   dynamic?: 'strict' | boolean;
   include_in_parent?: boolean;
   include_in_root?: boolean;
   null_value?: string;
   dimension?: boolean;
+  default_field?: boolean;
 
   // Meta fields
   metric_type?: string;
@@ -245,8 +248,23 @@ export const getField = (fields: Fields, pathNames: string[]): Field | undefined
   return undefined;
 };
 
+export function processFieldsWithWildcard(fields: Fields): Fields {
+  const newFields: Fields = [];
+  for (const field of fields) {
+    const hasWildcard = field.name.includes('*');
+    const hasObjectType = field.object_type;
+    if (hasWildcard && !hasObjectType) {
+      newFields.push({ ...field, type: 'object', object_type: field.type });
+    } else {
+      newFields.push({ ...field });
+    }
+  }
+  return newFields;
+}
+
 export function processFields(fields: Fields): Fields {
-  const expandedFields = expandFields(fields);
+  const processedFields = processFieldsWithWildcard(fields);
+  const expandedFields = expandFields(processedFields);
   const dedupedFields = dedupFields(expandedFields);
   return validateFields(dedupedFields, dedupedFields);
 }
@@ -262,7 +280,7 @@ const isFields = (path: string) => {
  */
 
 export const loadFieldsFromYaml = (
-  pkg: Pick<PackageInfo, 'version' | 'name'>,
+  pkg: Pick<PackageInfo, 'version' | 'name' | 'type'>,
   datasetName?: string
 ): Field[] => {
   // Fetch all field definition files

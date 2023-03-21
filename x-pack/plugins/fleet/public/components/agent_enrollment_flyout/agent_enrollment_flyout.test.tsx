@@ -16,13 +16,18 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { AgentPolicy } from '../../../common';
-import { useGetSettings, sendGetOneAgentPolicy, useGetAgents } from '../../hooks/use_request';
+import {
+  useGetFleetServerHosts,
+  sendGetOneAgentPolicy,
+  useGetAgents,
+} from '../../hooks/use_request';
 import {
   FleetStatusProvider,
   ConfigContext,
   useAgentEnrollmentFlyoutData,
   KibanaVersionContext,
   useFleetStatus,
+  useFleetServerStandalone,
 } from '../../hooks';
 
 import { useAdvancedForm } from '../../applications/fleet/components/fleet_server_instructions/hooks';
@@ -78,9 +83,17 @@ describe('<AgentEnrollmentFlyout />', () => {
   let testBed: TestBed;
 
   beforeEach(() => {
-    (useGetSettings as jest.Mock).mockReturnValue({
-      data: { item: { fleet_server_hosts: ['test'] } },
+    (useGetFleetServerHosts as jest.Mock).mockReturnValue({
+      data: {
+        items: [
+          {
+            is_default: true,
+            host_urls: ['http://test.fr'],
+          },
+        ],
+      },
     });
+    jest.mocked(useFleetServerStandalone).mockReturnValue({ isFleetServerStandalone: false });
 
     (useFleetStatus as jest.Mock).mockReturnValue({ isReady: true });
     (useFleetServerUnhealthy as jest.Mock).mockReturnValue({
@@ -155,7 +168,6 @@ describe('<AgentEnrollmentFlyout />', () => {
   describe('managed instructions', () => {
     it('uses the agent policy selection step', () => {
       const { exists } = testBed;
-
       expect(exists('agentEnrollmentFlyout')).toBe(true);
       expect(exists('agent-policy-selection-step')).toBe(true);
       expect(exists('agent-enrollment-key-selection-step')).toBe(false);

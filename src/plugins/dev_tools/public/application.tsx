@@ -9,13 +9,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Observable } from 'rxjs';
 import ReactDOM from 'react-dom';
-import {
-  HashRouter as Router,
-  Switch,
-  Route,
-  Redirect,
-  RouteComponentProps,
-} from 'react-router-dom';
+import { HashRouter as Router, Switch, Redirect, RouteComponentProps } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { EuiTab, EuiTabs, EuiToolTip, EuiBetaBadge } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +23,7 @@ import type {
   CoreTheme,
   ExecutionContextStart,
 } from '@kbn/core/public';
-import { KibanaThemeProvider, useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { DocTitleService, BreadcrumbService } from './services';
 
 import { DevToolApp } from './dev_tool';
@@ -79,11 +74,6 @@ function DevToolsWrapper({
     breadcrumbService.setBreadcrumbs(activeDevTool.title);
   }, [activeDevTool, docTitleService, breadcrumbService]);
 
-  useExecutionContext(appServices.executionContext, {
-    type: 'application',
-    page: activeDevTool.id,
-  });
-
   return (
     <main className="devApp">
       <EuiTabs style={{ paddingLeft: euiThemeVars.euiSizeS }} size="l">
@@ -107,9 +97,6 @@ function DevToolsWrapper({
                     className="devApp__tabBeta"
                     label={i18n.translate('devTools.badge.betaLabel', {
                       defaultMessage: 'Beta',
-                    })}
-                    tooltipContent={i18n.translate('devTools.badge.betaTooltipText', {
-                      defaultMessage: 'This feature might change drastically in future releases',
                     })}
                   />
                 )}

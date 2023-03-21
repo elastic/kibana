@@ -11,6 +11,7 @@ import type {
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
   GetAgentsResponse,
+  BulkGetPackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec';
 import type {
   GetHostPolicyResponse,
@@ -120,9 +121,6 @@ const endpointListApiPathHandlerMocks = ({
     // Do policies referenced in endpoint list exist
     // just returns 1 single agent policy that includes all of the packagePolicy IDs provided
     [INGEST_API_AGENT_POLICIES]: (): GetAgentPoliciesResponse => {
-      (agentPolicy.package_policies as string[]).push(
-        ...endpointPackagePolicies.map((packagePolicy) => packagePolicy.id)
-      );
       return {
         items: [agentPolicy],
         total: 10,
@@ -146,12 +144,18 @@ const endpointListApiPathHandlerMocks = ({
       };
     },
 
+    // List of Policies (package policies) for onboarding
+    [`${INGEST_API_PACKAGE_POLICIES}/_bulk_get`]: (): BulkGetPackagePoliciesResponse => {
+      return {
+        items: endpointPackagePolicies,
+      };
+    },
+
     // List of Agents using Endpoint
     [INGEST_API_FLEET_AGENTS]: (): GetAgentsResponse => {
       return {
         total: totalAgentsUsingEndpoint,
         items: [],
-        totalInactive: 0,
         page: 1,
         perPage: 10,
       };
@@ -200,6 +204,17 @@ export const setEndpointListApiMockImplementation: (
 
   // Setup handling of GET requests
   mockedHttpService.get.mockImplementation(async (...args) => {
+    const [path] = args;
+    if (typeof path === 'string') {
+      if (apiHandlers[path]) {
+        return apiHandlers[path]();
+      }
+    }
+
+    throw new Error(`MOCK: api request does not have a mocked handler: ${path}`);
+  });
+
+  mockedHttpService.post.mockImplementation(async (...args) => {
     const [path] = args;
     if (typeof path === 'string') {
       if (apiHandlers[path]) {

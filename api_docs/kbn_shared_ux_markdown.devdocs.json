@@ -1,0 +1,63 @@
+{
+  "id": "@kbn/shared-ux-markdown",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-markdown",
+        "id": "def-common.Markdown",
+        "type": "Function",
+        "tags": [],
+        "label": "Markdown",
+        "description": [],
+        "signature": [
+          "({ ariaLabelContent, readOnly, markdownContent, children, openLinksInNewTab, defaultValue, placeholder, height, }: ",
+          "MarkdownProps",
+          ") => JSX.Element"
+        ],
+        "path": "packages/shared-ux/markdown/impl/markdown.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-markdown",
+            "id": "def-common.Markdown.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  ariaLabelContent,\n  readOnly,\n  markdownContent,\n  children,\n  openLinksInNewTab = true,\n  defaultValue = '',\n  placeholder = '',\n  height = 'full',\n}",
+            "description": [],
+            "signature": [
+              "MarkdownProps"
+            ],
+            "path": "packages/shared-ux/markdown/impl/markdown.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -12,8 +12,7 @@ import net from 'net';
 import stream from 'stream';
 import Boom from '@hapi/boom';
 import { URL } from 'url';
-
-import { encodePath } from './utils';
+import { sanitizeHostname } from './utils';
 
 interface Args {
   method: 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head';
@@ -23,15 +22,7 @@ interface Args {
   timeout: number;
   headers: http.OutgoingHttpHeaders;
   rejectUnauthorized?: boolean;
-  requestPath: string;
 }
-
-/**
- * Node http request library does not expect there to be trailing "[" or "]"
- * characters in ipv6 host names.
- */
-const sanitizeHostname = (hostName: string): string =>
-  hostName.trim().replace(/^\[/, '').replace(/\]$/, '');
 
 // We use a modified version of Hapi's Wreck because Hapi, Axios, and Superagent don't support GET requests
 // with bodies, but ES APIs do. Similarly with DELETE requests with bodies. Another library, `request`
@@ -44,11 +35,10 @@ export const proxyRequest = ({
   timeout,
   payload,
   rejectUnauthorized,
-  requestPath,
 }: Args) => {
-  const { hostname, port, protocol, search } = uri;
+  const { hostname, port, protocol, search, pathname } = uri;
   const client = uri.protocol === 'https:' ? https : http;
-  const encodedPath = encodePath(requestPath);
+
   let resolved = false;
 
   let resolve: (res: http.IncomingMessage) => void;
@@ -71,7 +61,7 @@ export const proxyRequest = ({
     host: sanitizeHostname(hostname),
     port: port === '' ? undefined : parseInt(port, 10),
     protocol,
-    path: `${encodedPath}${search || ''}`,
+    path: `${pathname}${search || ''}`,
     headers: {
       ...finalUserHeaders,
       'content-type': 'application/json',

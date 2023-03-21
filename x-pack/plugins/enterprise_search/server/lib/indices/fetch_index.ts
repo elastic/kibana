@@ -7,41 +7,71 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { Crawler } from '../../types/crawler';
+import { CONNECTORS_JOBS_INDEX } from '../..';
+
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
+import { SyncStatus } from '../../../common/types/connectors';
+import { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';
 import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
+import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 
-import { mapIndexStats } from './fetch_indices';
+import { mapIndexStats } from './utils/map_index_stats';
 
-export const fetchIndex = async (client: IScopedClusterClient, index: string) => {
+const hasInProgressSyncs = async (
+  client: IScopedClusterClient,
+  connectorId: string
+): Promise<boolean> => {
+  const inProgressCount = await client.asCurrentUser.count({
+    index: CONNECTORS_JOBS_INDEX,
+    query: {
+      bool: {
+        filter: [
+          { term: { 'connector.id': connectorId } },
+          { term: { status: SyncStatus.IN_PROGRESS } },
+        ],
+      },
+    },
+  });
+  return inProgressCount.count > 0;
+};
+
+export const fetchIndex = async (
+  client: IScopedClusterClient,
+  index: string
+): Promise<ElasticsearchIndexWithIngestion> => {
   const indexDataResult = await client.asCurrentUser.indices.get({ index });
   const indexData = indexDataResult[index];
   const { indices } = await client.asCurrentUser.indices.stats({ index });
+
+  const { count } = await client.asCurrentUser.count({ index });
+
   if (!indices || !indices[index] || !indexData) {
     throw new Error('404');
   }
   const indexStats = indices[index];
-  const indexResult = mapIndexStats(indexData, indexStats, index);
 
   const connector = await fetchConnectorByIndexName(client, index);
-  if (connector) {
+  const hasInProgressSyncsResult = connector
+    ? await hasInProgressSyncs(client, connector.id)
+    : false;
+
+  const indexResult = {
+    count,
+    ...mapIndexStats(indexData, indexStats, index),
+    has_in_progress_syncs: hasInProgressSyncsResult,
+  };
+
+  if (connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE) {
     return {
+      ...indexResult,
       connector,
-      index: indexResult,
     };
   }
 
-  const crawlerResult = await client.asCurrentUser.search<Crawler>({
-    index: '.ent-search-actastic-crawler2_configurations',
-    query: { term: { index_name: index } },
-  });
-  const crawler = crawlerResult.hits.hits[0]?._source;
-
+  const crawler = await fetchCrawlerByIndexName(client, index);
   if (crawler) {
-    return {
-      crawler,
-      index: indexResult,
-    };
+    return { ...indexResult, connector, crawler };
   }
 
-  return { index: indexResult };
+  return indexResult;
 };

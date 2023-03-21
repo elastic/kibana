@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/failed-test-reporter-cli",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}

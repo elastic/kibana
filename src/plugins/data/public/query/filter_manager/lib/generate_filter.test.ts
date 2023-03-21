@@ -199,4 +199,56 @@ describe('Generate filters', () => {
       [FIELD.name]: ANOTHER_PHRASE,
     });
   });
+
+  it('should genereate a range filter when date type field is provided', () => {
+    const filters = generateFilters(
+      mockFilterManager,
+      {
+        ...FIELD,
+        type: 'date',
+      } as DataViewFieldBase,
+      '2022-08-01',
+      '+',
+      MOCKED_INDEX
+    ) as RangeFilter[];
+    expect(filters).toHaveLength(1);
+    const [filter] = filters;
+    expect(filter.meta.index === INDEX_NAME);
+    expect(filter.meta.negate).toBeFalsy();
+    expect(isRangeFilter(filter)).toBeTruthy();
+    expect(filter.query.range).toEqual({
+      [FIELD.name]: {
+        format: 'date_time',
+        gte: expect.stringContaining('2022-08-01T00:00:00'),
+        lte: expect.stringContaining('2022-08-01T00:00:00'),
+      },
+    });
+  });
+
+  it('should update an existing date range filter', () => {
+    const [filter] = generateFilters(
+      mockFilterManager,
+      {
+        ...FIELD,
+        type: 'date',
+      } as DataViewFieldBase,
+      '2022-08-01',
+      '+',
+      MOCKED_INDEX
+    ) as RangeFilter[];
+    filtersArray.push(filter);
+
+    generateFilters(
+      mockFilterManager,
+      {
+        ...FIELD,
+        type: 'date',
+      } as DataViewFieldBase,
+      '2022-08-01',
+      '-',
+      MOCKED_INDEX
+    ) as RangeFilter[];
+
+    expect(filter).toHaveProperty('meta.negate', true);
+  });
 });

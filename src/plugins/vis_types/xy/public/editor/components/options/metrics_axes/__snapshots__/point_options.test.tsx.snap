@@ -23,21 +23,15 @@ exports[`PointOptions component should init with the default set of props 1`] = 
     label="Dots size"
     labelType="label"
   >
-    <EuiRange
+    <EuiRangeClass
       compressed={true}
       data-test-subj="circlesRadius"
       disabled={false}
       fullWidth={true}
-      isLoading={false}
-      levels={Array []}
       max={10}
       min={1}
       onChange={[Function]}
       showInput={true}
-      showLabels={false}
-      showRange={false}
-      showTicks={false}
-      showValue={false}
       step={1}
       value={3}
     />

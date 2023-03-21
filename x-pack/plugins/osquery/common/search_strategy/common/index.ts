@@ -20,12 +20,6 @@ export interface Inspect {
   dsl: string[];
 }
 
-export interface PageInfoPaginated {
-  activePage: number;
-  fakeTotalCount: number;
-  showMorePagesIndicator: boolean;
-}
-
 export interface CursorType {
   value?: Maybe<string>;
   tiebreaker?: Maybe<string>;
@@ -64,8 +58,6 @@ export interface PaginationInputPaginated {
   activePage: number;
   /** The cursorStart parameter defines the start of the results to be displayed */
   cursorStart: number;
-  /** The fakePossibleCount parameter determines the total count in order to show 5 additional pages */
-  fakePossibleCount: number;
   /** The querySize parameter is the number of items to be returned */
   querySize: number;
 }

@@ -27,7 +27,7 @@ import { InfluencersCell } from './influencers_cell';
 import { LinksMenu } from './links_menu';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { mlFieldFormatService } from '../../services/field_format_service';
-import { isRuleSupported } from '../../../../common/util/anomaly_utils';
+import { isRuleSupported, isMultiBucketAnomaly } from '../../../../common/util/anomaly_utils';
 import { formatValue } from '../../formatters/format_value';
 import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS } from './anomalies_table_constants';
 import { SeverityCell } from './severity_cell';
@@ -42,14 +42,18 @@ function renderTime(date, aggregationInterval) {
   }
 }
 
-function showLinksMenuForItem(item, showViewSeriesLink) {
+function showLinksMenuForItem(item, showViewSeriesLink, sourceIndicesWithGeoFields) {
   const canConfigureRules = isRuleSupported(item.source) && checkPermission('canUpdateJob');
   return (
     canConfigureRules ||
     (showViewSeriesLink && item.isTimeSeriesViewRecord) ||
     item.entityName === 'mlcategory' ||
     item.customUrls !== undefined ||
-    item.detector.includes(ML_JOB_AGGREGATION.LAT_LONG)
+    item.detector.includes(ML_JOB_AGGREGATION.LAT_LONG) ||
+    (item.sourceIndices &&
+      item.sourceIndices(
+        (sourceIndex) => sourceIndicesWithGeoFields[item.jobId][sourceIndex] !== undefined
+      ))
   );
 }
 
@@ -65,7 +69,8 @@ export function getColumns(
   itemIdToExpandedRowMap,
   toggleRow,
   filter,
-  influencerFilter
+  influencerFilter,
+  sourceIndicesWithGeoFields
 ) {
   const columns = [
     {
@@ -128,7 +133,7 @@ export function getColumns(
         </EuiToolTip>
       ),
       render: (score, item) => (
-        <SeverityCell score={score} multiBucketImpact={item.source.multi_bucket_impact} />
+        <SeverityCell score={score} isMultiBucketAnomaly={isMultiBucketAnomaly(item.source)} />
       ),
       sortable: true,
     },
@@ -307,7 +312,9 @@ export function getColumns(
     });
   }
 
-  const showLinks = items.some((item) => showLinksMenuForItem(item, showViewSeriesLink));
+  const showLinks = items.some((item) =>
+    showLinksMenuForItem(item, showViewSeriesLink, sourceIndicesWithGeoFields)
+  );
 
   if (showLinks === true) {
     columns.push({
@@ -316,7 +323,7 @@ export function getColumns(
         defaultMessage: 'Actions',
       }),
       render: (item) => {
-        if (showLinksMenuForItem(item, showViewSeriesLink) === true) {
+        if (showLinksMenuForItem(item, showViewSeriesLink, sourceIndicesWithGeoFields) === true) {
           return (
             <LinksMenu
               anomaly={item}
@@ -325,6 +332,7 @@ export function getColumns(
               isAggregatedData={isAggregatedData}
               interval={interval}
               showRuleEditorFlyout={showRuleEditorFlyout}
+              sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
             />
           );
         } else {

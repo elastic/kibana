@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectAttributes, SavedObjectsServiceSetup } from '@kbn/core/server';
+import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 
 /**
  * Used for accumulating the totals of all the stats older than 90d
  */
-export interface ApplicationUsageTotal extends SavedObjectAttributes {
+export interface ApplicationUsageTotal {
   appId: string;
   viewId: string;
   minutesOnScreen: number;

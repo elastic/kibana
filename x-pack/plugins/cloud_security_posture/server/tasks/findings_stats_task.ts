@@ -14,12 +14,9 @@ import {
 import { SearchRequest } from '@kbn/data-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
-import {
-  AggregatedFindingsByCluster,
-  ScoreBucket,
-  FindingsStatsTaskResult,
-  TaskHealthStatus,
-} from './types';
+import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
+import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
+import { FindingsStatsTaskResult, TaskHealthStatus, ScoreByPolicyTemplateBucket } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -69,10 +66,12 @@ export function setupFindingsStatsTask(
         createTaskRunner: taskRunner(coreStartServices, logger),
       },
     });
-    logger.info(`Task: ${CSPM_FINDINGS_STATS_TASK_TYPE} registered successfully`);
+    logger.info(`Registered task successfully [Task: ${CSPM_FINDINGS_STATS_TASK_TYPE}]`);
   } catch (errMsg) {
     const error = transformError(errMsg);
-    logger.error(`Failed to register task: ${CSPM_FINDINGS_STATS_TASK_TYPE}, ${error.message}`);
+    logger.error(
+      `Task registration failed [Task: ${CSPM_FINDINGS_STATS_TASK_TYPE}] ${error.message}`
+    );
   }
 }
 
@@ -107,118 +106,62 @@ export function taskRunner(coreStartServices: CspServerPluginStartServices, logg
   };
 }
 
-const aggregateLatestFindings = async (
-  esClient: ElasticsearchClient,
-  stateRuns: number,
-  logger: Logger
-): Promise<TaskHealthStatus> => {
-  try {
-    const startAggTime = performance.now();
-    const evaluationsQueryResult = await esClient.search<unknown, ScoreBucket>(getScoreQuery());
-
-    if (!evaluationsQueryResult.aggregations) {
-      logger.warn(`No data found in latest findings index`);
-      return 'warning';
-    }
-
-    const totalAggregationTime = performance.now() - startAggTime;
-    logger.debug(
-      `Task ${CSPM_FINDINGS_STATS_TASK_TYPE}, ${Number(totalAggregationTime).toFixed(
-        2
-      )} milliseconds for aggregation`
-    );
-
-    const clustersStats = Object.fromEntries(
-      evaluationsQueryResult.aggregations.score_by_cluster_id.buckets.map(
-        (clusterStats: AggregatedFindingsByCluster) => {
-          return [
-            clusterStats.key,
-            {
-              total_findings: clusterStats.total_findings.value,
-              passed_findings: clusterStats.passed_findings.doc_count,
-              failed_findings: clusterStats.failed_findings.doc_count,
-            },
-          ];
-        }
-      )
-    );
-
-    const startIndexTime = performance.now();
-    await esClient.index({
-      index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-      document: {
-        passed_findings: evaluationsQueryResult.aggregations.passed_findings.doc_count,
-        failed_findings: evaluationsQueryResult.aggregations.failed_findings.doc_count,
-        total_findings: evaluationsQueryResult.aggregations.total_findings.value,
-        score_by_cluster_id: clustersStats,
-      },
-    });
-
-    const totalIndexTime = Number(performance.now() - startIndexTime).toFixed(2);
-    logger.debug(
-      `Task ${CSPM_FINDINGS_STATS_TASK_TYPE}, ${totalIndexTime} milliseconds for indexing`
-    );
-
-    const totalTaskTime = Number(performance.now() - startAggTime).toFixed(2);
-    logger.debug(
-      `Task ${CSPM_FINDINGS_STATS_TASK_TYPE}, took ${totalTaskTime} milliseconds to run`
-    );
-
-    return 'ok';
-  } catch (errMsg) {
-    const error = transformError(errMsg);
-    logger.error(`failed to aggregate latest findings: ${error.message}`);
-    return 'error';
-  }
-};
-
 const getScoreQuery = (): SearchRequest => ({
   index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
   size: 0,
+  // creates the safe_posture_type and asset_identifier runtime fields
+  runtime_mappings: { ...getIdentifierRuntimeMapping(), ...getSafePostureTypeRuntimeMapping() },
   query: {
     match_all: {},
   },
   aggs: {
-    total_findings: {
-      value_count: {
-        field: 'result.evaluation.keyword',
-      },
-    },
-    passed_findings: {
-      filter: {
-        term: {
-          'result.evaluation.keyword': 'passed',
-        },
-      },
-    },
-    failed_findings: {
-      filter: {
-        term: {
-          'result.evaluation.keyword': 'failed',
-        },
-      },
-    },
-    score_by_cluster_id: {
+    score_by_policy_template: {
       terms: {
-        field: 'cluster_id.keyword',
+        field: 'safe_posture_type',
       },
-      aggregations: {
+      aggs: {
         total_findings: {
           value_count: {
-            field: 'result.evaluation.keyword',
+            field: 'result.evaluation',
           },
         },
         passed_findings: {
           filter: {
             term: {
-              'result.evaluation.keyword': 'passed',
+              'result.evaluation': 'passed',
             },
           },
         },
         failed_findings: {
           filter: {
             term: {
-              'result.evaluation.keyword': 'failed',
+              'result.evaluation': 'failed',
+            },
+          },
+        },
+        score_by_cluster_id: {
+          terms: {
+            field: 'asset_identifier',
+          },
+          aggregations: {
+            total_findings: {
+              value_count: {
+                field: 'result.evaluation',
+              },
+            },
+            passed_findings: {
+              filter: {
+                term: {
+                  'result.evaluation': 'passed',
+                },
+              },
+            },
+            failed_findings: {
+              filter: {
+                term: {
+                  'result.evaluation': 'failed',
+                },
+              },
             },
           },
         },
@@ -226,3 +169,87 @@ const getScoreQuery = (): SearchRequest => ({
     },
   },
 });
+
+export const aggregateLatestFindings = async (
+  esClient: ElasticsearchClient,
+  stateRuns: number,
+  logger: Logger
+): Promise<TaskHealthStatus> => {
+  try {
+    const startAggTime = performance.now();
+    const scoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(
+      getScoreQuery()
+    );
+
+    if (!scoreIndexQueryResult.aggregations) {
+      logger.warn(`No data found in latest findings index`);
+      return 'warning';
+    }
+
+    const totalAggregationTime = performance.now() - startAggTime;
+    logger.debug(
+      `Executed aggregation query [Task: ${CSPM_FINDINGS_STATS_TASK_TYPE}] [Duration: ${Number(
+        totalAggregationTime
+      ).toFixed(2)}ms]`
+    );
+
+    // getting score per policy template buckets
+    const scoresByPolicyTemplatesBuckets =
+      scoreIndexQueryResult.aggregations.score_by_policy_template.buckets;
+
+    // iterating over the buckets and return promises which will index a modified document into the scores index
+    const docIndexingPromises = scoresByPolicyTemplatesBuckets.map((policyTemplateTrend) => {
+      // creating score per cluster id objects
+      const clustersStats = Object.fromEntries(
+        policyTemplateTrend.score_by_cluster_id.buckets.map((clusterStats) => {
+          const clusterId = clusterStats.key;
+
+          return [
+            clusterId,
+            {
+              total_findings: clusterStats.total_findings.value,
+              passed_findings: clusterStats.passed_findings.doc_count,
+              failed_findings: clusterStats.failed_findings.doc_count,
+            },
+          ];
+        })
+      );
+
+      // each document contains the policy template and its scores
+      return esClient.index({
+        index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+        document: {
+          policy_template: policyTemplateTrend.key,
+          passed_findings: policyTemplateTrend.passed_findings.doc_count,
+          failed_findings: policyTemplateTrend.failed_findings.doc_count,
+          total_findings: policyTemplateTrend.total_findings.value,
+          score_by_cluster_id: clustersStats,
+        },
+      });
+    });
+
+    const startIndexTime = performance.now();
+
+    // executing indexing commands
+    await Promise.all(docIndexingPromises);
+
+    const totalIndexTime = Number(performance.now() - startIndexTime).toFixed(2);
+    logger.debug(
+      `Finished saving results [Task: ${CSPM_FINDINGS_STATS_TASK_TYPE}] [Duration: ${totalIndexTime}ms]`
+    );
+
+    const totalTaskTime = Number(performance.now() - startAggTime).toFixed(2);
+    logger.debug(
+      `Finished run ended [Task: ${CSPM_FINDINGS_STATS_TASK_TYPE}] [Duration: ${totalTaskTime}ms]`
+    );
+
+    return 'ok';
+  } catch (errMsg) {
+    const error = transformError(errMsg);
+    logger.error(
+      `Failure during task run [Task: ${CSPM_FINDINGS_STATS_TASK_TYPE}] ${error.message}`
+    );
+    logger.error(errMsg);
+    return 'error';
+  }
+};

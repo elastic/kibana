@@ -11,19 +11,19 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { fetchIndex } from './fetch_index_api_logic';
 
-describe('generateConnectorApiKeyApiLogic', () => {
+describe('FetchIndexApiLogic', () => {
   const { http } = mockHttpValues;
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe('generateApiKey', () => {
+  describe('fetchIndex', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
       http.get.mockReturnValue(promise);
       const result = fetchIndex({ indexName: 'indexName' });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/indices/indexName');
-      expect(result).resolves.toEqual('result');
+      await expect(result).resolves.toEqual('result');
     });
   });
 });

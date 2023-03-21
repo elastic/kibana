@@ -25,6 +25,7 @@ import {
   EuiHideFor,
   keys,
 } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
@@ -32,13 +33,15 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DataTableRecord } from '../../types';
 
 export interface DiscoverGridFlyoutProps {
+  savedSearchId?: string;
+  filters?: Filter[];
   columns: string[];
   hit: DataTableRecord;
   hits?: DataTableRecord[];
-  indexPattern: DataView;
+  dataView: DataView;
   onAddColumn: (column: string) => void;
   onClose: () => void;
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
   setExpandedDoc: (doc: DataTableRecord) => void;
 }
@@ -54,8 +57,10 @@ function getIndexByDocId(hits: DataTableRecord[], id: string) {
 export function DiscoverGridFlyout({
   hit,
   hits,
-  indexPattern,
+  dataView,
   columns,
+  savedSearchId,
+  filters,
   onFilter,
   onClose,
   onRemoveColumn,
@@ -95,14 +100,9 @@ export function DiscoverGridFlyout({
     [activePage, setPage]
   );
 
-  const { singleDocProps, surrDocsProps } = useNavigationProps({
-    indexPatternId: indexPattern.id!,
-    rowIndex: hit.raw._index,
-    rowId: hit.raw._id,
-    filterManager: services.filterManager,
-    addBasePath: services.addBasePath,
-    columns,
-  });
+  const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } = useNavigationProps(
+    { dataView, rowIndex: hit.raw._index, rowId: hit.raw._id, columns, filters, savedSearchId }
+  );
 
   return (
     <EuiPortal>
@@ -140,28 +140,32 @@ export function DiscoverGridFlyout({
               </EuiFlexItem>
             </EuiHideFor>
             <EuiFlexItem grow={false}>
+              {/*  eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiButtonEmpty
                 size="s"
                 iconSize="s"
                 iconType="document"
                 flush="left"
                 data-test-subj="docTableRowAction"
-                {...singleDocProps}
+                href={singleDocHref}
+                onClick={onOpenSingleDoc}
               >
                 {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
                   defaultMessage: 'Single document',
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            {indexPattern.isTimeBased() && indexPattern.id && (
+            {dataView.isTimeBased() && dataView.id && (
               <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
                 <EuiFlexItem grow={false}>
+                  {/*  eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButtonEmpty
                     size="s"
                     iconSize="s"
                     iconType="documents"
                     flush="left"
-                    {...surrDocsProps}
+                    onClick={onOpenContextView}
+                    href={contextViewHref}
                     data-test-subj="docTableRowAction"
                   >
                     {i18n.translate(
@@ -212,15 +216,19 @@ export function DiscoverGridFlyout({
           <DocViewer
             hit={actualHit}
             columns={columns}
-            indexPattern={indexPattern}
-            filter={(mapping, value, mode) => {
-              onFilter(mapping, value, mode);
-              services.toastNotifications.addSuccess(
-                i18n.translate('discover.grid.flyout.toastFilterAdded', {
-                  defaultMessage: `Filter was added`,
-                })
-              );
-            }}
+            dataView={dataView}
+            filter={
+              onFilter
+                ? (mapping, value, mode) => {
+                    onFilter(mapping, value, mode);
+                    services.toastNotifications.addSuccess(
+                      i18n.translate('discover.grid.flyout.toastFilterAdded', {
+                        defaultMessage: `Filter was added`,
+                      })
+                    );
+                  }
+                : undefined
+            }
             onRemoveColumn={(columnName: string) => {
               onRemoveColumn(columnName);
               services.toastNotifications.addSuccess(

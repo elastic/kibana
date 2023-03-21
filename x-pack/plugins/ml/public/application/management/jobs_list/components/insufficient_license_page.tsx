@@ -10,7 +10,7 @@ import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 
-import { EuiEmptyPrompt, EuiLink, EuiPageContent } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 
 interface Props {
   basePath: CoreStart['http']['basePath'];

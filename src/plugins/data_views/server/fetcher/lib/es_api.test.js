@@ -161,7 +161,7 @@ describe('server/index_patterns/service/lib/es_api', () => {
       sinon.assert.calledOnce(fieldCaps);
 
       const passedOpts = fieldCaps.args[0][0];
-      expect(passedOpts).toHaveProperty('fields', '*');
+      expect(passedOpts).toHaveProperty('fields', ['*']);
       expect(passedOpts).toHaveProperty('ignore_unavailable', true);
       expect(passedOpts).toHaveProperty('allow_no_indices', false);
     });

@@ -11,20 +11,29 @@
   "server": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-doc-links-server",
-        "id": "def-server.DocLinksServiceSetup",
+        "id": "def-common.DocLinksServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "DocLinksServiceSetup",
         "description": [],
         "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-doc-links-server",
-            "id": "def-server.DocLinksServiceSetup.version",
+            "id": "def-common.DocLinksServiceSetup.version",
             "type": "string",
             "tags": [],
             "label": "version",
@@ -32,11 +41,12 @@
               "The branch/version the docLinks are pointing to"
             ],
             "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-doc-links-server",
-            "id": "def-server.DocLinksServiceSetup.elasticWebsiteUrl",
+            "id": "def-common.DocLinksServiceSetup.elasticWebsiteUrl",
             "type": "string",
             "tags": [],
             "label": "elasticWebsiteUrl",
@@ -44,11 +54,12 @@
               "The base url for the elastic website"
             ],
             "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-doc-links-server",
-            "id": "def-server.DocLinksServiceSetup.links",
+            "id": "def-common.DocLinksServiceSetup.links",
             "type": "Object",
             "tags": [],
             "label": "links",
@@ -56,10 +67,17 @@
               "A record of all registered doc links"
             ],
             "signature": [
-              "DocLinks"
+              {
+                "pluginId": "@kbn/doc-links",
+                "scope": "common",
+                "docId": "kibKbnDocLinksPluginApi",
+                "section": "def-common.DocLinks",
+                "text": "DocLinks"
+              }
             ],
             "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -69,7 +87,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-doc-links-server",
-        "id": "def-server.DocLinksServiceStart",
+        "id": "def-common.DocLinksServiceStart",
         "type": "Type",
         "tags": [],
         "label": "DocLinksServiceStart",
@@ -77,25 +95,18 @@
         "signature": [
           {
             "pluginId": "@kbn/core-doc-links-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreDocLinksServerPluginApi",
-            "section": "def-server.DocLinksServiceSetup",
+            "section": "def-common.DocLinksServiceSetup",
             "text": "DocLinksServiceSetup"
           }
         ],
         "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

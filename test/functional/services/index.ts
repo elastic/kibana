@@ -13,9 +13,11 @@ import {
   BrowserProvider,
   FailureDebuggingProvider,
   FindProvider,
+  PngService,
   ScreenshotsService,
   SnapshotsService,
   TestSubjects,
+  RetryOnStaleProvider,
 } from './common';
 import { ComboBoxService } from './combo_box';
 import {
@@ -23,7 +25,11 @@ import {
   DashboardReplacePanelService,
   DashboardExpectService,
   DashboardPanelActionsService,
+  DashboardCustomizePanelProvider,
+  DashboardBadgeActionsProvider,
   DashboardVisualizationsService,
+  DashboardDrilldownPanelActionsProvider,
+  DashboardDrilldownsManageProvider,
 } from './dashboard';
 import { DocTableService } from './doc_table';
 import { EmbeddingService } from './embedding';
@@ -48,6 +54,8 @@ import { SavedQueryManagementComponentService } from './saved_query_management_c
 import { KibanaSupertestProvider } from './supertest';
 import { MenuToggleService } from './menu_toggle';
 import { MonacoEditorService } from './monaco_editor';
+import { UsageCollectionService } from './usage_collection';
+import { SavedObjectsFinderService } from './saved_objects_finder';
 
 export const services = {
   ...commonServiceProviders,
@@ -58,6 +66,7 @@ export const services = {
   find: FindProvider,
   testSubjects: TestSubjects,
   docTable: DocTableService,
+  png: PngService,
   screenshots: ScreenshotsService,
   snapshots: SnapshotsService,
   failureDebugging: FailureDebuggingProvider,
@@ -67,6 +76,10 @@ export const services = {
   dashboardAddPanel: DashboardAddPanelService,
   dashboardReplacePanel: DashboardReplacePanelService,
   dashboardPanelActions: DashboardPanelActionsService,
+  dashboardCustomizePanel: DashboardCustomizePanelProvider,
+  dashboardBadgeActions: DashboardBadgeActionsProvider,
+  dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
+  dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
   flyout: FlyoutService,
   comboBox: ComboBoxService,
   dataGrid: DataGridService,
@@ -86,4 +99,7 @@ export const services = {
   managementMenu: ManagementMenuService,
   monacoEditor: MonacoEditorService,
   menuToggle: MenuToggleService,
+  retryOnStale: RetryOnStaleProvider,
+  usageCollection: UsageCollectionService,
+  savedObjectsFinder: SavedObjectsFinderService,
 };

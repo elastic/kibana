@@ -1,0 +1,121 @@
+{
+  "attributes": {
+    "fieldAttrs": "{\"products.manufacturer\":{\"count\":1},\"products.price\":{\"count\":1},\"products.product_name\":{\"count\":1},\"total_quantity\":{\"count\":1}}",
+    "fieldFormatMap": "{\"taxful_total_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.[00]\"}},\"products.price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"taxless_total_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.taxless_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.taxful_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.min_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.base_unit_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}},\"products.base_price\":{\"id\":\"number\",\"params\":{\"pattern\":\"$0,0.00\"}}}",
+    "fields": "[]",
+    "name": "Kibana Sample Data eCommerce",
+    "runtimeFieldMap": "{}",
+    "timeFieldName": "order_date",
+    "title": "kibana_sample_data_ecommerce",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.6.0",
+  "created_at": "2022-10-31T12:06:45.150Z",
+  "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2022-10-31T12:06:45.150Z",
+  "version": "WzEzNywxXQ=="
+}
+
+{
+  "attributes": {
+    "columns": [
+      "category",
+      "taxful_total_price",
+      "products.price",
+      "products.product_name",
+      "products.manufacturer",
+      "sku"
+    ],
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "order_date",
+        "desc"
+      ]
+    ],
+    "title": "[eCommerce] Orders",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.6.0",
+  "created_at": "2022-10-31T12:06:45.150Z",
+  "id": "3ba638e0-b894-11e8-a6d9-e546fe2bba5f",
+  "migrationVersion": {
+    "search": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2022-10-31T12:06:45.150Z",
+  "version": "WzE0MCwxXQ=="
+}
+
+{
+  "attributes": {
+    "controlGroupInput": {
+      "chainingSystem": "HIERARCHICAL",
+      "controlStyle": "oneLine",
+      "ignoreParentSettingsJSON": "{\"ignoreFilters\":false,\"ignoreQuery\":false,\"ignoreTimerange\":false,\"ignoreValidations\":false}",
+      "panelsJSON": "{\"1ee1617f-fd8e-45e4-bc6a-d5736710ea20\":{\"order\":0,\"width\":\"small\",\"grow\":true,\"type\":\"optionsListControl\",\"explicitInput\":{\"title\":\"Manufacturer\",\"fieldName\":\"manufacturer.keyword\",\"parentFieldName\":\"manufacturer\",\"id\":\"1ee1617f-fd8e-45e4-bc6a-d5736710ea20\",\"enhancements\":{}}},\"afa9fa0f-a002-41a5-bab9-b738316d2590\":{\"order\":1,\"width\":\"small\",\"grow\":true,\"type\":\"optionsListControl\",\"explicitInput\":{\"title\":\"Category\",\"fieldName\":\"category.keyword\",\"parentFieldName\":\"category\",\"id\":\"afa9fa0f-a002-41a5-bab9-b738316d2590\",\"enhancements\":{}}},\"d3f766cb-5f96-4a12-8d3c-034e08be8855\":{\"order\":2,\"width\":\"small\",\"grow\":true,\"type\":\"rangeSliderControl\",\"explicitInput\":{\"title\":\"Quantity\",\"fieldName\":\"total_quantity\",\"id\":\"d3f766cb-5f96-4a12-8d3c-034e08be8855\",\"enhancements\":{}}}}"
+    },
+    "description": "Analyze mock eCommerce orders and revenue",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
+    "panelsJSON": "[{\"version\":\"8.6.0\",\"type\":\"search\",\"gridData\":{\"x\":0,\"y\":0,\"w\":48,\"h\":18,\"i\":\"10\"},\"panelIndex\":\"10\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_10\"}]",
+    "refreshInterval": {
+      "pause": true,
+      "value": 0
+    },
+    "timeTo": "2022-10-25T20:00:00.000Z",
+    "timeFrom": "2022-10-18T20:00:00.000Z",
+    "timeRestore": true,
+    "title": "[eCommerce] Saved Search Dashboard",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.6.0",
+  "created_at": "2022-10-31T12:08:58.731Z",
+  "id": "ccb9a590-5914-11ed-8d12-9d4a72794439",
+  "migrationVersion": {
+    "dashboard": "8.6.0"
+  },
+  "references": [
+    {
+      "id": "3ba638e0-b894-11e8-a6d9-e546fe2bba5f",
+      "name": "10:panel_10",
+      "type": "search"
+    },
+    {
+      "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+      "name": "controlGroup_1ee1617f-fd8e-45e4-bc6a-d5736710ea20:optionsListDataView",
+      "type": "index-pattern"
+    },
+    {
+      "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+      "name": "controlGroup_afa9fa0f-a002-41a5-bab9-b738316d2590:optionsListDataView",
+      "type": "index-pattern"
+    },
+    {
+      "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+      "name": "controlGroup_d3f766cb-5f96-4a12-8d3c-034e08be8855:rangeSliderDataView",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2022-10-31T12:08:58.731Z",
+  "version": "WzI1NCwxXQ=="
+}

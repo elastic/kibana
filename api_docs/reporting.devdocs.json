@@ -15,6 +15,7 @@
         ],
         "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "reporting",
@@ -40,6 +41,7 @@
             ],
             "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -53,7 +55,8 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/plugins/reporting/public/share_context_menu/reporting_panel_content/reporting_panel_content.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -70,7 +73,8 @@
               "\"canvas\" | \"print\" | undefined"
             ],
             "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "reporting",
@@ -85,7 +89,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "reporting",
@@ -101,6 +106,7 @@
             ],
             "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -118,6 +124,7 @@
         ],
         "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "reporting",
@@ -143,6 +150,7 @@
             ],
             "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
             "deprecated": true,
+            "trackAdoption": false,
             "references": [],
             "children": [
               {
@@ -163,6 +171,7 @@
                 ],
                 "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -190,6 +199,7 @@
             ],
             "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "reporting",
@@ -209,6 +219,7 @@
                 ],
                 "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -236,6 +247,7 @@
             ],
             "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "reporting",
@@ -255,6 +267,7 @@
                 ],
                 "path": "x-pack/plugins/reporting/public/shared/get_shared_components.tsx",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -287,6 +300,7 @@
       ],
       "path": "x-pack/plugins/reporting/public/index.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -318,6 +332,7 @@
       ],
       "path": "x-pack/plugins/reporting/server/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -357,6 +372,7 @@
         ],
         "path": "x-pack/plugins/reporting/common/types/base.ts",
         "deprecated": true,
+        "trackAdoption": false,
         "references": [],
         "children": [
           {
@@ -367,7 +383,8 @@
             "label": "headers",
             "description": [],
             "path": "x-pack/plugins/reporting/common/types/base.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "reporting",
@@ -380,7 +397,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/reporting/common/types/base.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "reporting",
@@ -393,7 +411,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/reporting/common/types/base.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -426,6 +445,7 @@
         ],
         "path": "x-pack/plugins/reporting/common/types/base.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "reporting",
@@ -435,7 +455,8 @@
             "label": "headers",
             "description": [],
             "path": "x-pack/plugins/reporting/common/types/base.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "reporting",
@@ -448,7 +469,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/reporting/common/types/base.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "reporting",
@@ -461,7 +483,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/reporting/common/types/base.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -485,6 +508,7 @@
         ],
         "path": "x-pack/plugins/reporting/common/types/url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "reporting",
@@ -494,7 +518,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/reporting/common/types/url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "reporting",
@@ -506,7 +531,8 @@
               "\nKibana version used to create the params"
             ],
             "path": "x-pack/plugins/reporting/common/types/url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "reporting",
@@ -521,7 +547,8 @@
               "P"
             ],
             "path": "x-pack/plugins/reporting/common/types/url.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -553,6 +580,7 @@
         ],
         "path": "x-pack/plugins/reporting/common/types/base.ts",
         "deprecated": true,
+        "trackAdoption": false,
         "references": [],
         "initialIsOpen": false
       },
@@ -585,11 +613,18 @@
             "text": "LocatorParams"
           },
           "<",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">[]; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/base.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -616,6 +651,7 @@
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf.ts",
         "deprecated": true,
+        "trackAdoption": false,
         "references": [],
         "initialIsOpen": false
       },
@@ -646,11 +682,18 @@
             "text": "LocatorParams"
           },
           "<",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">[]; }"
         ],
         "path": "x-pack/plugins/reporting/common/types/export_types/printable_pdf_v2.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

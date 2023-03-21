@@ -5,11 +5,16 @@
  * 2.0.
  */
 import React, { createContext } from 'react';
+import {
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
+} from '@kbn/observability-plugin/common';
 import { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { useApmRoutePath } from '../../hooks/use_apm_route_path';
 import { FetcherResult, useFetcher } from '../../hooks/use_fetcher';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 
 export const TimeRangeMetadataContext = createContext<
   FetcherResult<TimeRangeMetadata> | undefined
@@ -20,6 +25,10 @@ export function TimeRangeMetadataContextProvider({
 }: {
   children: React.ReactElement;
 }) {
+  const {
+    core: { uiSettings },
+  } = useApmPluginContext();
+
   const { query } = useApmParams('/*');
 
   const kuery = 'kuery' in query ? query.kuery : '';
@@ -37,9 +46,19 @@ export function TimeRangeMetadataContextProvider({
 
   const routePath = useApmRoutePath();
 
+  const enableServiceTransactionMetrics = uiSettings.get<boolean>(
+    apmEnableServiceMetrics,
+    true
+  );
+
+  const enableContinuousRollups = uiSettings.get<boolean>(
+    apmEnableContinuousRollups,
+    true
+  );
+
   const isOperationView =
-    routePath === '/dependencies/operation' ||
-    routePath === '/dependencies/operations';
+    routePath.startsWith('/dependencies/operation') ||
+    routePath.startsWith('/dependencies/operations');
 
   const fetcherResult = useFetcher(
     (callApmApi) => {
@@ -50,11 +69,20 @@ export function TimeRangeMetadataContextProvider({
             end,
             kuery,
             useSpanName: isOperationView,
+            enableServiceTransactionMetrics,
+            enableContinuousRollups,
           },
         },
       });
     },
-    [start, end, kuery, isOperationView]
+    [
+      start,
+      end,
+      kuery,
+      isOperationView,
+      enableServiceTransactionMetrics,
+      enableContinuousRollups,
+    ]
   );
 
   return (

@@ -29,4 +29,16 @@ describe('trackLegacyRBACExemption', () => {
     }
     expect(err).toBeUndefined();
   });
+
+  it('should call `usageCounter.incrementCounter` and increment by the passed in value', () => {
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+    trackLegacyRBACExemption('test', mockUsageCounter, 15);
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
+      counterName: `source_test`,
+      counterType: 'legacyRBACExemption',
+      incrementBy: 15,
+    });
+  });
 });

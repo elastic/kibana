@@ -11,10 +11,10 @@ import type { HTMLAttributes } from 'react';
 import React, { memo, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import type { EuiDescriptionListProps } from '@elastic/eui';
 import { htmlIdGenerator, EuiSpacer, EuiTitle, EuiText, EuiTextColor, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
-import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { StyledDescriptionList, StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as eventModel from '../../../../common/endpoint/models/event';
@@ -35,7 +35,6 @@ import { PanelContentError } from './panel_content_error';
 
 const StyledCubeForProcess = styled(CubeForProcess)`
   position: relative;
-  top: 0.75em;
 `;
 
 const nodeDetailError = i18n.translate('xpack.securitySolution.resolver.panel.nodeDetail.Error', {
@@ -103,6 +102,11 @@ const NodeDetailView = memo(function ({
       description: eventModel.userName(processEvent),
     };
 
+    const processEntityId = {
+      title: 'process.entity_id',
+      description: eventModel.entityId(processEvent),
+    };
+
     const domainEntry = {
       title: 'user.domain',
       description: eventModel.userDomain(processEvent),
@@ -132,6 +136,7 @@ const NodeDetailView = memo(function ({
       createdEntry,
       pathEntry,
       pidEntry,
+      processEntityId,
       userEntry,
       domainEntry,
       parentPidEntry,

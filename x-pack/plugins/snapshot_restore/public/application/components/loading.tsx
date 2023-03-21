@@ -14,7 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTextColor,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 
 interface Props {

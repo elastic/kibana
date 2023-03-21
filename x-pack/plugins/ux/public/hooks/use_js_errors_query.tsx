@@ -63,9 +63,9 @@ export function useJsErrorsQuery(pagination: {
 
     return {
       totalErrorPages: totalErrorPages?.value ?? 0,
-      totalErrors: esQueryResponse.hits.total ?? 0,
+      totalErrors: esQueryResponse.hits.total.value ?? 0,
       totalErrorGroups: totalErrorGroups?.value ?? 0,
-      items: errors?.buckets.map(({ sample, key, impactedPages }: any) => {
+      items: errors?.buckets.map(({ sample, key, impactedPages }) => {
         return {
           count: impactedPages.pageCount.value,
           errorGroupId: key,

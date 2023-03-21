@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { xor } from 'lodash';
 
 export const METRIC_EXPLORER_AGGREGATIONS = [
   'avg',
@@ -17,7 +18,10 @@ export const METRIC_EXPLORER_AGGREGATIONS = [
   'sum',
   'p95',
   'p99',
+  'custom',
 ] as const;
+
+export const OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS = ['custom', 'rate', 'p95', 'p99'];
 
 type MetricExplorerAggregations = typeof METRIC_EXPLORER_AGGREGATIONS[number];
 
@@ -27,12 +31,42 @@ const metricsExplorerAggregationKeys = METRIC_EXPLORER_AGGREGATIONS.reduce<
 
 export const metricsExplorerAggregationRT = rt.keyof(metricsExplorerAggregationKeys);
 
+export type MetricExplorerCustomMetricAggregations = Exclude<
+  MetricsExplorerAggregation,
+  'custom' | 'rate' | 'p95' | 'p99'
+>;
+const metricsExplorerCustomMetricAggregationKeys = xor(
+  METRIC_EXPLORER_AGGREGATIONS,
+  OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS
+).reduce<Record<MetricExplorerCustomMetricAggregations, null>>(
+  (acc, agg) => ({ ...acc, [agg]: null }),
+  {} as Record<MetricExplorerCustomMetricAggregations, null>
+);
+export const metricsExplorerCustomMetricAggregationRT = rt.keyof(
+  metricsExplorerCustomMetricAggregationKeys
+);
+
 export const metricsExplorerMetricRequiredFieldsRT = rt.type({
   aggregation: metricsExplorerAggregationRT,
 });
 
+export const metricsExplorerCustomMetricRT = rt.intersection([
+  rt.type({
+    name: rt.string,
+    aggregation: metricsExplorerCustomMetricAggregationRT,
+  }),
+  rt.partial({
+    field: rt.string,
+    filter: rt.string,
+  }),
+]);
+
+export type MetricsExplorerCustomMetric = rt.TypeOf<typeof metricsExplorerCustomMetricRT>;
+
 export const metricsExplorerMetricOptionalFieldsRT = rt.partial({
   field: rt.union([rt.string, rt.undefined]),
+  custom_metrics: rt.array(metricsExplorerCustomMetricRT),
+  equation: rt.string,
 });
 
 export const metricsExplorerMetricRT = rt.intersection([

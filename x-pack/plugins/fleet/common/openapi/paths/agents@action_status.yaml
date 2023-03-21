@@ -1,0 +1,86 @@
+get:
+  summary: Get agent action status
+  tags:
+    - Agent actions
+  parameters:
+    - $ref: ../components/parameters/page_size.yaml
+    - $ref: ../components/parameters/page_index.yaml
+    - schema:
+        type: integer
+        default: 5
+      in: query  
+      name: errorSize
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    actionId:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                        - COMPLETE
+                        - EXPIRED
+                        - CANCELLED
+                        - FAILED
+                        - IN_PROGRESS
+                        - ROLLOUT_PASSED
+                    nbAgentsActioned:
+                      type: number
+                    nbAgentsActionCreated:
+                      type: number
+                    nbAgentsAck:
+                      type: number
+                    nbAgentsFailed:
+                      type: number
+                    version:
+                      type: string
+                    startTime:
+                      type: string
+                    type:
+                      type: string
+                    expiration:
+                      type: string
+                    completionTime:
+                      type: string
+                    cancellationTime:
+                      type: string
+                    newPolicyId:
+                      type: string
+                    creationTime:
+                      type: string
+                    latestErrors:
+                      type: array
+                      description: latest errors that happened when the agents executed the action
+                      items:
+                        type: object
+                        properties:
+                          agentId:
+                            type: string  
+                          error:
+                            type: string
+                          timestamp:
+                            type: string    
+                  required:
+                    - actionId
+                    - complete
+                    - nbAgentsActioned
+                    - nbAgentsActionCreated
+                    - nbAgentsAck
+                    - nbAgentsFailed
+                    - status
+                    - creationTime
+            required:
+              - items
+    '400':
+      $ref: ../components/responses/error.yaml
+  operationId: agents-action-status

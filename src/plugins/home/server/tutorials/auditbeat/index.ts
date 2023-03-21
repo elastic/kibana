@@ -54,7 +54,7 @@ processes, users, logins, sockets information, file accesses, and more. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/auditbeat/screenshot.png',
+    previewImagePath: '/plugins/home/assets/auditbeat/screenshot.webp',
     onPrem: onPremInstructions(platforms, context),
     elasticCloud: cloudInstructions(platforms, context),
     onPremElasticCloud: onPremCloudInstructions(platforms, context),

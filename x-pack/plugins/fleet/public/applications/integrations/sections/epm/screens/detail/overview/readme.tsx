@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiLoadingContent, EuiText } from '@elastic/eui';
+import { EuiText, EuiSkeletonText } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import { useLinks, sendGetFileByPath } from '../../../../../hooks';
 
@@ -43,22 +44,26 @@ export function Readme({
   return (
     <Fragment>
       {markdown !== undefined ? (
-        <ReactMarkdown
-          transformImageUri={handleImageUri}
-          renderers={markdownRenderers}
-          source={markdown}
-        />
+        <EuiText grow={true}>
+          <ReactMarkdown
+            transformImageUri={handleImageUri}
+            components={markdownRenderers}
+            remarkPlugins={[remarkGfm]}
+          >
+            {markdown}
+          </ReactMarkdown>
+        </EuiText>
       ) : (
         <EuiText>
           {/* simulates a long page of text loading */}
           <p>
-            <EuiLoadingContent lines={5} />
+            <EuiSkeletonText lines={5} />
           </p>
           <p>
-            <EuiLoadingContent lines={6} />
+            <EuiSkeletonText lines={6} />
           </p>
           <p>
-            <EuiLoadingContent lines={4} />
+            <EuiSkeletonText lines={4} />
           </p>
         </EuiText>
       )}

@@ -7,10 +7,16 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { syncEditedMonitor } from './edit_monitor';
-import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
-import { EncryptedSyntheticsMonitor, SyntheticsMonitor } from '../../../common/runtime_types';
+import { SavedObject, SavedObjectsClientContract, KibanaRequest } from '@kbn/core/server';
+import {
+  EncryptedSyntheticsMonitor,
+  SyntheticsMonitor,
+  SyntheticsMonitorWithSecrets,
+} from '../../../common/runtime_types';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
+import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 
 jest.mock('../telemetry/monitor_upgrade_sender', () => ({
   sendTelemetryEvents: jest.fn(),
@@ -22,21 +28,33 @@ describe('syncEditedMonitor', () => {
 
   const serverMock: UptimeServerSetup = {
     uptimeEsClient: { search: jest.fn() },
-    kibanaVersion: null,
-    authSavedObjectsClient: { bulkUpdate: jest.fn() },
+    stackVersion: null,
+    authSavedObjectsClient: {
+      bulkUpdate: jest.fn(),
+      get: jest.fn(),
+      update: jest.fn(),
+    },
     logger,
+    config: {
+      service: {
+        username: 'dev',
+        password: '12345',
+      },
+    },
+    fleet: {
+      authz: {
+        fromRequest: jest
+          .fn()
+          .mockReturnValue({ integrations: { writeIntegrationPolicies: true } }),
+      },
+      packagePolicyService: {
+        get: jest.fn().mockReturnValue({}),
+        getByIDs: jest.fn().mockReturnValue([]),
+        buildPackagePolicyFromPackage: jest.fn().mockReturnValue({}),
+      },
+    },
+    encryptedSavedObjects: mockEncryptedSO,
   } as unknown as UptimeServerSetup;
-
-  const syntheticsService = new SyntheticsService(logger, serverMock, {
-    username: 'dev',
-    password: '12345',
-  });
-
-  const fakePush = jest.fn();
-
-  jest.spyOn(syntheticsService, 'pushConfigs').mockImplementationOnce(fakePush);
-
-  serverMock.syntheticsService = syntheticsService;
 
   const editedMonitor = {
     type: 'http',
@@ -46,7 +64,12 @@ describe('syncEditedMonitor', () => {
       unit: 'm',
     },
     name: 'my mon',
-    locations: [],
+    locations: [
+      {
+        id: 'test_location',
+        isServiceManaged: true,
+      },
+    ],
     urls: 'http://google.com',
     max_redirects: '0',
     password: '',
@@ -56,26 +79,47 @@ describe('syncEditedMonitor', () => {
     fields_under_root: true,
   } as unknown as SyntheticsMonitor;
 
-  const previousMonitor = { id: 'saved-obj-id' } as SavedObject<EncryptedSyntheticsMonitor>;
-  const editedMonitorSavedObject = {
-    id: 'saved-obj-id',
-  } as SavedObjectsUpdateResponse<EncryptedSyntheticsMonitor>;
+  const previousMonitor = {
+    id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+    attributes: { name: editedMonitor.name, locations: [] } as any,
+    type: 'synthetics-monitor',
+    references: [],
+  } as SavedObject<EncryptedSyntheticsMonitor>;
 
-  it('includes the isEdit flag', () => {
-    syncEditedMonitor({
-      editedMonitor,
-      editedMonitorSavedObject,
+  const syntheticsService = new SyntheticsService(serverMock);
+
+  const syntheticsMonitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
+
+  syntheticsService.editConfig = jest.fn();
+
+  it('includes the isEdit flag', async () => {
+    await syncEditedMonitor({
+      normalizedMonitor: editedMonitor,
       previousMonitor,
+      decryptedPreviousMonitor:
+        previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecrets>,
+      syntheticsMonitorClient,
       server: serverMock,
+      request: {} as unknown as KibanaRequest,
+      savedObjectsClient:
+        serverMock.authSavedObjectsClient as unknown as SavedObjectsClientContract,
+      spaceId: 'test-space',
     });
 
-    expect(fakePush).toHaveBeenCalledWith(
+    expect(syntheticsService.editConfig).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
-          id: 'saved-obj-id',
+          id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
         }),
-      ]),
-      true
+      ])
+    );
+
+    expect(serverMock.authSavedObjectsClient?.update).toHaveBeenCalledWith(
+      'synthetics-monitor',
+      '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+      expect.objectContaining({
+        enabled: true,
+      })
     );
   });
 });

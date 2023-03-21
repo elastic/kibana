@@ -16,7 +16,7 @@ import {
 } from '@kbn/controls-plugin/common';
 import { initializeControlGroupTelemetry } from '@kbn/controls-plugin/server';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { SavedDashboardPanel730ToLatest } from '../../common';
+import type { SavedDashboardPanel } from '../../common';
 import { TASK_ID, DashboardTelemetryTaskState } from './dashboard_telemetry_collection_task';
 export interface DashboardCollectorData {
   panels: {
@@ -55,7 +55,7 @@ export const getEmptyPanelTypeData = () => ({
 });
 
 export const collectPanelsByType = (
-  panels: SavedDashboardPanel730ToLatest[],
+  panels: SavedDashboardPanel[],
   collectorData: DashboardCollectorData,
   embeddableService: EmbeddablePersistableStateService
 ) => {

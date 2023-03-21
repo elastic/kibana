@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../breakdowns/breakdown_filter';
@@ -22,9 +22,9 @@ export function PageLoadDistribution() {
 
   const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
-  const onPercentileChange = (min: number, max: number) => {
+  const onPercentileChange = useCallback((min: number, max: number) => {
     setPercentileRange({ min, max });
-  };
+  }, []);
 
   return (
     <div data-cy="pageLoadDist">

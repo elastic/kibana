@@ -7,15 +7,20 @@
 
 import { omit } from 'lodash';
 import { CommentType, SECURITY_SOLUTION_OWNER } from '../../common';
-import {
+import type {
   AttributesTypeExternalReferenceNoSO,
   AttributesTypeExternalReferenceSO,
   AttributesTypePersistableState,
   CommentRequestPersistableStateType,
-  ExternalReferenceStorageType,
 } from '../../common/api';
+import { ExternalReferenceStorageType } from '../../common/api';
+import { ExternalReferenceAttachmentTypeRegistry } from './external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './persistable_state_registry';
-import { PersistableStateAttachmentTypeSetup, PersistableStateAttachmentState } from './types';
+import type {
+  PersistableStateAttachmentTypeSetup,
+  PersistableStateAttachmentState,
+  ExternalReferenceAttachmentType,
+} from './types';
 
 export const getPersistableAttachment = (): PersistableStateAttachmentTypeSetup => ({
   id: '.test',
@@ -40,6 +45,10 @@ export const getPersistableAttachment = (): PersistableStateAttachmentTypeSetup 
       persistableStateAttachmentState: { migrated: true },
     }),
   }),
+});
+
+export const getExternalReferenceAttachment = (): ExternalReferenceAttachmentType => ({
+  id: '.test',
 });
 
 export const externalReferenceAttachmentSO = {
@@ -130,10 +139,18 @@ export const externalReferenceAttachmentSOAttributesWithoutRefs = omit(
   'externalReferenceId'
 );
 
-export const getPersistableStateAttachmentTypeRegistry =
+export const createPersistableStateAttachmentTypeRegistryMock =
   (): PersistableStateAttachmentTypeRegistry => {
     const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
     persistableStateAttachmentTypeRegistry.register(getPersistableAttachment());
 
     return persistableStateAttachmentTypeRegistry;
+  };
+
+export const createExternalReferenceAttachmentTypeRegistryMock =
+  (): ExternalReferenceAttachmentTypeRegistry => {
+    const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+    externalReferenceAttachmentTypeRegistry.register(getExternalReferenceAttachment());
+
+    return externalReferenceAttachmentTypeRegistry;
   };

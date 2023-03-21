@@ -10,10 +10,12 @@ import { isEmpty } from 'lodash/fp';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
-import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { EventHit, TimelineEventsDetailsItem } from '../search_strategy';
 import { toObjectArrayOfStrings, toStringArray } from './to_array';
+import { ENRICHMENT_DESTINATION_PATH } from '../constants';
 export const baseCategoryFields = ['@timestamp', 'labels', 'message', 'tags'];
+const nonFlattenedFormatParamsFields = ['related_integrations', 'threat_mapping'];
 
 export const getFieldCategory = (field: string): string => {
   const fieldCategory = field.split('.')[0];
@@ -42,7 +44,11 @@ export const isGeoField = (field: string) =>
   field.includes('geo.location') || field.includes('geoip.location');
 
 export const isRuleParametersFieldOrSubfield = (field: string, prependField?: string) =>
-  prependField?.includes(ALERT_RULE_PARAMETERS) || field === ALERT_RULE_PARAMETERS;
+  (prependField?.includes(ALERT_RULE_PARAMETERS) || field === ALERT_RULE_PARAMETERS) &&
+  !nonFlattenedFormatParamsFields.includes(field);
+
+export const isThreatEnrichmentFieldOrSubfield = (field: string, prependField?: string) =>
+  prependField?.includes(ENRICHMENT_DESTINATION_PATH) || field === ENRICHMENT_DESTINATION_PATH;
 
 export const getDataFromFieldsHits = (
   fields: EventHit['fields'],
@@ -73,9 +79,12 @@ export const getDataFromFieldsHits = (
     // return simple field value (non-ecs object, non-array)
     if (
       !isObjectArray ||
-      Object.keys({ ...ecsFieldMap, ...technicalRuleFieldMap, ...experimentalRuleFieldMap }).find(
-        (ecsField) => ecsField === field
-      ) === undefined
+      (Object.keys({
+        ...ecsFieldMap,
+        ...technicalRuleFieldMap,
+        ...legacyExperimentalFieldMap,
+      }).find((ecsField) => ecsField === field) === undefined &&
+        !isRuleParametersFieldOrSubfield(field, prependField))
     ) {
       return [
         ...accumulator,
@@ -88,6 +97,19 @@ export const getDataFromFieldsHits = (
         },
       ];
     }
+
+    const threatEnrichmentObject = isThreatEnrichmentFieldOrSubfield(field, prependField)
+      ? [
+          {
+            category: fieldCategory,
+            field: dotField,
+            values: strArr,
+            originalValue: strArr,
+            isObjectArray,
+          },
+        ]
+      : [];
+
     // format nested fields
     let nestedFields;
     if (isRuleParametersFieldOrSubfield(field, prependField)) {
@@ -108,6 +130,7 @@ export const getDataFromFieldsHits = (
     const flat: Record<string, TimelineEventsDetailsItem> = [
       ...accumulator,
       ...nestedFields,
+      ...threatEnrichmentObject,
     ].reduce(
       (acc, f) => ({
         ...acc,

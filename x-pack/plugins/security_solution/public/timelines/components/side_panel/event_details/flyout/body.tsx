@@ -8,6 +8,7 @@
 import { EuiFlyoutBody } from '@elastic/eui';
 import styled from 'styled-components';
 import React from 'react';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EndpointIsolateSuccess } from '../../../../../common/components/endpoint/host_isolation';
 import { HostIsolationPanel } from '../../../../../detections/components/host_isolation';
 import type {
@@ -16,7 +17,6 @@ import type {
 } from '../../../../../../common/search_strategy';
 import type { HandleOnEventClosed } from '../expandable_event';
 import { ExpandableEvent } from '../expandable_event';
-import type { HostRisk } from '../../../../../risk_score/containers';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflow {
@@ -36,11 +36,11 @@ interface FlyoutBodyComponentProps {
   alertId: string;
   browserFields: BrowserFields;
   detailsData: TimelineEventsDetailsItem[] | null;
+  detailsEcsData: Ecs | null;
   event: { eventId: string; indexName: string };
   handleIsolationActionSuccess: () => void;
   handleOnEventClosed: HandleOnEventClosed;
   hostName: string;
-  hostRisk: HostRisk | null;
   isAlert: boolean;
   isDraggable?: boolean;
   isReadOnly?: boolean;
@@ -50,18 +50,18 @@ interface FlyoutBodyComponentProps {
   loading: boolean;
   rawEventData: object | undefined;
   showAlertDetails: () => void;
-  timelineId: string;
+  scopeId: string;
 }
 
 const FlyoutBodyComponent = ({
   alertId,
   browserFields,
   detailsData,
+  detailsEcsData,
   event,
   handleIsolationActionSuccess,
   handleOnEventClosed,
   hostName,
-  hostRisk,
   isAlert,
   isDraggable,
   isReadOnly,
@@ -71,7 +71,7 @@ const FlyoutBodyComponent = ({
   loading,
   rawEventData,
   showAlertDetails,
-  timelineId,
+  scopeId,
 }: FlyoutBodyComponentProps) => {
   return (
     <StyledEuiFlyoutBody>
@@ -93,14 +93,14 @@ const FlyoutBodyComponent = ({
         <ExpandableEvent
           browserFields={browserFields}
           detailsData={detailsData}
+          detailsEcsData={detailsEcsData}
           event={event}
           isAlert={isAlert}
           isDraggable={isDraggable}
           loading={loading}
           rawEventData={rawEventData}
-          timelineId={timelineId}
+          scopeId={scopeId}
           timelineTabType="flyout"
-          hostRisk={hostRisk}
           handleOnEventClosed={handleOnEventClosed}
           isReadOnly={isReadOnly}
         />

@@ -12,17 +12,18 @@ import _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import {
   coreMock,
+  docLinksServiceMock,
   elasticsearchServiceMock,
   loggingSystemMock,
   statusServiceMock,
 } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { DeepPartial } from 'utility-types';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -43,6 +44,7 @@ export const createMockPluginSetup = (
     taskManager: taskManagerMock.createSetup(),
     logger: loggingSystemMock.createLogger(),
     status: statusServiceMock.createSetupContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
     ...setupMock,
   };
 };
@@ -65,6 +67,7 @@ export const createMockPluginStart = async (
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: { getScopedClient: jest.fn() },
     uiSettings: { asScopedToClient: () => ({ get: jest.fn() }) },
+    discover: discoverPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
     fieldFormats: () => Promise.resolve(fieldFormatsMock),
     store: await createMockReportingStore(config),
@@ -112,6 +115,7 @@ export const createMockConfigSchema = (
       ...overrides.queue,
     },
     csv: {
+      scroll: { size: 500, duration: '30s' },
       ...overrides.csv,
     },
     roles: {

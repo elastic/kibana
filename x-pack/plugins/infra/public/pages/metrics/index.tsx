@@ -8,27 +8,29 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useContext } from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { RouteComponentProps, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
 import { useLinkProps } from '@kbn/observability-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
-import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import {
   MetricsExplorerOptionsContainer,
+  useMetricsExplorerOptionsContainerContext,
   DEFAULT_METRICS_EXPLORER_VIEW_STATE,
 } from './metrics_explorer/hooks/use_metrics_explorer_options';
 import { WithMetricsExplorerOptionsUrlState } from '../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
 import { WithSource } from '../../containers/with_source';
-import { Source } from '../../containers/metrics_source';
+import { SourceProvider } from '../../containers/metrics_source';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './inventory_view';
 import { MetricDetail } from './metric_detail';
 import { MetricsSettingsPage } from './settings';
+import { HostsLandingPage } from './hosts/hosts_landing_page';
 import { SourceLoadingPage } from '../../components/source_loading_page';
 import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options';
 import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
@@ -41,6 +43,7 @@ import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabi
 import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { CreateDerivedIndexPattern } from '../../containers/metrics_source';
+import { NotFoundPage } from '../404';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -65,18 +68,12 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
 
   return (
     <EuiErrorBoundary>
-      <Source.Provider sourceId="default">
+      <SourceProvider sourceId="default">
         <AlertPrefillProvider>
           <WaffleOptionsProvider>
             <WaffleTimeProvider>
               <WaffleFiltersProvider>
                 <InfraMLCapabilitiesProvider>
-                  <DocumentTitle
-                    title={i18n.translate('xpack.infra.homePage.documentTitle', {
-                      defaultMessage: 'Metrics',
-                    })}
-                  />
-
                   <HelpCenterContent
                     feedbackLink="https://discuss.elastic.co/c/metrics"
                     appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
@@ -109,7 +106,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                       render={(props) => (
                         <WithSource>
                           {({ configuration, createDerivedIndexPattern }) => (
-                            <MetricsExplorerOptionsContainer.Provider>
+                            <MetricsExplorerOptionsContainer>
                               <WithMetricsExplorerOptionsUrlState />
                               {configuration ? (
                                 <PageContent
@@ -119,20 +116,22 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                               ) : (
                                 <SourceLoadingPage />
                               )}
-                            </MetricsExplorerOptionsContainer.Provider>
+                            </MetricsExplorerOptionsContainer>
                           )}
                         </WithSource>
                       )}
                     />
                     <Route path="/detail/:type/:node" component={MetricDetail} />
+                    <Route path={'/hosts'} component={HostsLandingPage} />
                     <Route path={'/settings'} component={MetricsSettingsPage} />
+                    <Route render={() => <NotFoundPage title="Infrastructure" />} />
                   </Switch>
                 </InfraMLCapabilitiesProvider>
               </WaffleFiltersProvider>
             </WaffleTimeProvider>
           </WaffleOptionsProvider>
         </AlertPrefillProvider>
-      </Source.Provider>
+      </SourceProvider>
     </EuiErrorBoundary>
   );
 };
@@ -142,7 +141,7 @@ const PageContent = (props: {
   createDerivedIndexPattern: CreateDerivedIndexPattern;
 }) => {
   const { createDerivedIndexPattern, configuration } = props;
-  const { options } = useContext(MetricsExplorerOptionsContainer.Context);
+  const { options } = useMetricsExplorerOptionsContainerContext();
 
   return (
     <SavedViewProvider

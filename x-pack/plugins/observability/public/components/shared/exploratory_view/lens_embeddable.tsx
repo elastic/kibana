@@ -22,6 +22,9 @@ interface Props {
   lensAttributes: TypedLensByValueInput['attributes'];
   setChartTimeRangeContext: Dispatch<SetStateAction<ChartTimeRange | undefined>>;
 }
+const EXECUTION_CONTEXT = {
+  type: 'observability_exploratory_view',
+};
 
 export function LensEmbeddable(props: Props) {
   const { lensAttributes, setChartTimeRangeContext } = props;
@@ -92,6 +95,7 @@ export function LensEmbeddable(props: Props) {
         attributes={lensAttributes}
         onLoad={onLensLoad}
         onBrushEnd={onBrushEnd}
+        executionContext={EXECUTION_CONTEXT}
       />
       {isSaveOpen && lensAttributes && (
         <LensSaveModalComponent

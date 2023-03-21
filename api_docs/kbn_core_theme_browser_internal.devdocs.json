@@ -33,6 +33,7 @@
         ],
         "path": "packages/core/theme/core-theme-browser-internal/src/core_context_provider.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-theme-browser-internal",
@@ -46,6 +47,7 @@
             ],
             "path": "packages/core/theme/core-theme-browser-internal/src/core_context_provider.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],

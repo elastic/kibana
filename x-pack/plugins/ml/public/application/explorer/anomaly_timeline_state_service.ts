@@ -19,6 +19,8 @@ import {
 import { isEqual, sortBy, uniq } from 'lodash';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+// FIXME get rid of the static import
+import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type {
   AppStateSelectedCells,
@@ -38,8 +40,6 @@ import { mlJobService } from '../services/job_service';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
 import type { TimeBucketsInterval } from '../util/time_buckets';
 import { InfluencersFilterQuery } from '../../../common/types/es_client';
-// FIXME get rid of the static import
-import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import type { Refresh } from '../routing/use_refresh';
 import { StateService } from '../services/state_service';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
@@ -53,6 +53,8 @@ interface SwimLanePagination {
  * Service for managing anomaly timeline state.
  */
 export class AnomalyTimelineStateService extends StateService {
+  // TODO: Add services for getSelectionInfluencers, getSelectionJobIds, & getSelectionTimeRange
+  // to consolidate usage
   private readonly _explorerURLStateCallback: (
     update: AnomalyExplorerSwimLaneUrlState,
     replaceState?: boolean
@@ -70,7 +72,7 @@ export class AnomalyTimelineStateService extends StateService {
     undefined
   );
   private _swimLaneSeverity$ = new BehaviorSubject<number>(0);
-  private _swimLanePaginations$ = new BehaviorSubject<SwimLanePagination>({
+  private _swimLanePagination$ = new BehaviorSubject<SwimLanePagination>({
     viewByFromPage: 1,
     viewByPerPage: 10,
   });
@@ -152,6 +154,7 @@ export class AnomalyTimelineStateService extends StateService {
       combineLatest([
         this.anomalyExplorerCommonStateService.getSelectedJobs$(),
         this.getContainerWidth$(),
+        this._timeBounds$,
       ]).subscribe(([selectedJobs, containerWidth]) => {
         this._swimLaneBucketInterval$.next(
           this.anomalyTimelineService.getSwimlaneBucketInterval(selectedJobs, containerWidth!)
@@ -205,7 +208,7 @@ export class AnomalyTimelineStateService extends StateService {
       if (influencersFilerQuery) {
         resultPaginaiton = { viewByPerPage: pagination.viewByPerPage, viewByFromPage: 1 };
       }
-      this._swimLanePaginations$.next(resultPaginaiton);
+      this._swimLanePagination$.next(resultPaginaiton);
     });
   }
 
@@ -224,7 +227,7 @@ export class AnomalyTimelineStateService extends StateService {
         switchMap(([selectedJobs, severity, bucketInterval]) => {
           return from(
             this.anomalyTimelineService.loadOverallData(
-              selectedJobs!,
+              selectedJobs,
               undefined,
               bucketInterval!,
               severity
@@ -616,11 +619,11 @@ export class AnomalyTimelineStateService extends StateService {
   }
 
   public getSwimLanePagination$(): Observable<SwimLanePagination> {
-    return this._swimLanePaginations$.asObservable();
+    return this._swimLanePagination$.asObservable();
   }
 
   public getSwimLanePagination(): SwimLanePagination {
-    return this._swimLanePaginations$.getValue();
+    return this._swimLanePagination$.getValue();
   }
 
   public setSwimLanePagination(update: Partial<SwimLanePagination>) {
@@ -723,7 +726,7 @@ export class AnomalyTimelineStateService extends StateService {
     this._explorerURLStateCallback(
       {
         viewByFromPage: 1,
-        viewByPerPage: this._swimLanePaginations$.getValue().viewByPerPage,
+        viewByPerPage: this._swimLanePagination$.getValue().viewByPerPage,
         viewByFieldName: fieldName,
       },
       true

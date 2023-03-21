@@ -6,21 +6,15 @@
  * Side Public License, v 1.
  */
 
-import {
-  Dimension,
-  prepareLogTable,
-  validateAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
-import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER, REFERENCE_LINE } from '../constants';
+import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
 import { appendLayerIds, getAccessors, getShowLines, normalizeTable } from '../helpers';
 import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types';
-import { getLayerDimensions } from '../utils';
 import {
   hasAreaLayer,
   hasBarLayer,
-  hasHistogramBarLayer,
   validateExtents,
   validateFillOpacity,
   validateMarkSizeRatioLimits,
@@ -35,6 +29,7 @@ import {
   validateLinesVisibilityForChartType,
   validateAxes,
 } from './validate';
+import { logDatatable } from '../utils';
 
 const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
   const accessors = getAccessors<string | ExpressionValueVisDimension, XYArgs>(args, table);
@@ -67,7 +62,6 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
 
   const {
     referenceLines = [],
-    annotationLayers = [],
     // data_layer args
     seriesType,
     accessors,
@@ -105,24 +99,9 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),
     ...appendLayerIds(referenceLines, 'referenceLines'),
-    ...appendLayerIds(annotationLayers, 'annotationLayers'),
   ];
 
-  if (handlers.inspectorAdapters.tables) {
-    handlers.inspectorAdapters.tables.reset();
-    handlers.inspectorAdapters.tables.allowCsvExport = true;
-
-    const layerDimensions = layers.reduce<Dimension[]>((dimensions, layer) => {
-      if (layer.layerType === LayerTypes.ANNOTATIONS || layer.type === REFERENCE_LINE) {
-        return dimensions;
-      }
-
-      return [...dimensions, ...getLayerDimensions(layer)];
-    }, []);
-
-    const logTable = prepareLogTable(data, layerDimensions, true);
-    handlers.inspectorAdapters.tables.logDatatable('default', logTable);
-  }
+  logDatatable(data, layers, handlers, args.splitColumnAccessor, args.splitRowAccessor);
 
   const hasBar = hasBarLayer(dataLayers);
   const hasArea = hasAreaLayer(dataLayers);
@@ -132,9 +111,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
 
-  const hasNotHistogramBars = !hasHistogramBarLayer(dataLayers);
-
-  validateValueLabels(args.valueLabels, hasBar, hasNotHistogramBars);
+  validateValueLabels(args.valueLabels, hasBar);
   validateMarkSizeRatioWithAccessor(args.markSizeRatio, dataLayers[0].markSizeAccessor);
   validateMarkSizeRatioLimits(args.markSizeRatio);
   validateLineWidthForChartType(lineWidth, args.seriesType);
@@ -156,6 +133,10 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
           (handlers.variables?.embeddableTitle as string) ??
           handlers.getExecutionContext?.()?.description,
       },
+      canNavigateToLens: Boolean(handlers.variables.canNavigateToLens),
+      syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
+      syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
+      syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
     },
   };
 };

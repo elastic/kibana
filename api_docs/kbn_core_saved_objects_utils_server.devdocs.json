@@ -1,0 +1,619 @@
+{
+  "id": "@kbn/core-saved-objects-utils-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.SavedObjectsUtils",
+        "type": "Class",
+        "tags": [],
+        "label": "SavedObjectsUtils",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsUtils.namespaceIdToString",
+            "type": "Function",
+            "tags": [],
+            "label": "namespaceIdToString",
+            "description": [
+              "\nConverts a given saved object namespace ID to its string representation. All namespace IDs have an identical string representation, with\nthe exception of the `undefined` namespace ID (which has a namespace string of `'default'`).\n"
+            ],
+            "signature": [
+              "(namespace?: string | undefined) => string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsUtils.namespaceIdToString.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [
+                  "The namespace ID, which must be either a non-empty string or `undefined`."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsUtils.namespaceStringToId",
+            "type": "Function",
+            "tags": [],
+            "label": "namespaceStringToId",
+            "description": [
+              "\nConverts a given saved object namespace string to its ID representation. All namespace strings have an identical ID representation, with\nthe exception of the `'default'` namespace string (which has a namespace ID of `undefined`).\n"
+            ],
+            "signature": [
+              "(namespace: string) => string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsUtils.namespaceStringToId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [
+                  "The namespace string, which must be non-empty."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsUtils.createEmptyFindResponse",
+            "type": "Function",
+            "tags": [],
+            "label": "createEmptyFindResponse",
+            "description": [
+              "\nCreates an empty response for a find operation."
+            ],
+            "signature": [
+              "<T, A>({ page, perPage, }: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsFindOptions",
+                "text": "SavedObjectsFindOptions"
+              },
+              ") => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsFindResponse",
+                "text": "SavedObjectsFindResponse"
+              },
+              "<T, A>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsUtils.createEmptyFindResponse.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    page = FIND_DEFAULT_PAGE,\n    perPage = FIND_DEFAULT_PER_PAGE,\n  }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsFindOptions",
+                    "text": "SavedObjectsFindOptions"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsUtils.generateId",
+            "type": "Function",
+            "tags": [],
+            "label": "generateId",
+            "description": [
+              "\nGenerates a random ID for a saved objects."
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsUtils.isRandomId",
+            "type": "Function",
+            "tags": [
+              "todo"
+            ],
+            "label": "isRandomId",
+            "description": [
+              "\nValidates that a saved object ID has been randomly generated.\n"
+            ],
+            "signature": [
+              "(id: string | undefined) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsUtils.isRandomId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "The ID of a saved object."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.SavedObjectsUtils.getConvertedObjectId",
+            "type": "Function",
+            "tags": [],
+            "label": "getConvertedObjectId",
+            "description": [
+              "\nUses a single-namespace object's \"legacy ID\" to determine what its new ID will be after it is converted to a multi-namespace type.\n"
+            ],
+            "signature": [
+              "(namespace: string | undefined, type: string, id: string) => string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsUtils.getConvertedObjectId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [
+                  "The namespace of the saved object before it is converted."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsUtils.getConvertedObjectId.$2",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "The type of the saved object before it is converted."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-utils-server",
+                "id": "def-common.SavedObjectsUtils.getConvertedObjectId.$3",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "The ID of the saved object before it is converted."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "The ID of the saved object after it is converted."
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.arrayMapsAreEqual",
+        "type": "Function",
+        "tags": [],
+        "label": "arrayMapsAreEqual",
+        "description": [
+          "\nDetermines if a given map of arrays is equal to another given map of arrays.\nUsed for comparing namespace maps in saved object repo/security extension tests.\n"
+        ],
+        "signature": [
+          "(mapA: Map<T, T[] | undefined>, mapB: Map<T, T[] | undefined>) => boolean"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.arrayMapsAreEqual.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "mapA",
+            "description": [
+              "The first map to compare"
+            ],
+            "signature": [
+              "Map<T, T[] | undefined>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.arrayMapsAreEqual.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "mapB",
+            "description": [
+              "The second map to compare"
+            ],
+            "signature": [
+              "Map<T, T[] | undefined>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if map A is equal to map B"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.mergeSavedObjectMigrationMaps",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeSavedObjectMigrationMaps",
+        "description": [
+          "\nMerges two saved object migration maps.\n\nIf there is a migration for a given version on only one of the maps,\nthat migration function will be used:\n\nmergeSavedObjectMigrationMaps({ '1.2.3': f }, { '4.5.6': g }) -> { '1.2.3': f, '4.5.6': g }\n\nIf there is a migration for a given version on both maps, the migrations will be composed:\n\nmergeSavedObjectMigrationMaps({ '1.2.3': f }, { '1.2.3': g }) -> { '1.2.3': (doc, context) => f(g(doc, context), context) }\n"
+        ],
+        "signature": [
+          "(map1: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigrationMap",
+            "text": "SavedObjectMigrationMap"
+          },
+          ", map2: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigrationMap",
+            "text": "SavedObjectMigrationMap"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectMigrationMap",
+            "text": "SavedObjectMigrationMap"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migration_maps.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.mergeSavedObjectMigrationMaps.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "map1",
+            "description": [
+              "- The first map to merge"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectMigrationMap",
+                "text": "SavedObjectMigrationMap"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migration_maps.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.mergeSavedObjectMigrationMaps.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "map2",
+            "description": [
+              "- The second map to merge"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectMigrationMap",
+                "text": "SavedObjectMigrationMap"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/merge_migration_maps.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The merged map {@link SavedObjectMigrationMap }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.setMapsAreEqual",
+        "type": "Function",
+        "tags": [],
+        "label": "setMapsAreEqual",
+        "description": [
+          "\nDetermines if a given Map of Sets is equal to another given Map of Sets.\nUsed for comparing typeMaps and enforceMaps in saved object repo/security extension tests.\n"
+        ],
+        "signature": [
+          "(mapA: Map<T, Set<T>> | undefined, mapB: Map<T, Set<T>> | undefined) => boolean"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.setMapsAreEqual.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "mapA",
+            "description": [
+              "The first map to compare"
+            ],
+            "signature": [
+              "Map<T, Set<T>> | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.setMapsAreEqual.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "mapB",
+            "description": [
+              "The second map to compare"
+            ],
+            "signature": [
+              "Map<T, Set<T>> | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "True if map A is equal to map B"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.setsAreEqual",
+        "type": "Function",
+        "tags": [],
+        "label": "setsAreEqual",
+        "description": [
+          "\nDetermines if a given Set is equal to another given Set. Set types must be the same, and comparable.\n"
+        ],
+        "signature": [
+          "(setA: Set<T>, setB: Set<T>) => boolean"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.setsAreEqual.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "setA",
+            "description": [
+              "The first Set to compare"
+            ],
+            "signature": [
+              "Set<T>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-utils-server",
+            "id": "def-common.setsAreEqual.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "setB",
+            "description": [
+              "The second Set to compare"
+            ],
+            "signature": [
+              "Set<T>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_test_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if Set A is equal to Set B"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.ALL_NAMESPACES_STRING",
+        "type": "string",
+        "tags": [],
+        "label": "ALL_NAMESPACES_STRING",
+        "description": [],
+        "signature": [
+          "\"*\""
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.DEFAULT_NAMESPACE_STRING",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_NAMESPACE_STRING",
+        "description": [],
+        "signature": [
+          "\"default\""
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.FIND_DEFAULT_PAGE",
+        "type": "number",
+        "tags": [],
+        "label": "FIND_DEFAULT_PAGE",
+        "description": [],
+        "signature": [
+          "1"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-utils-server",
+        "id": "def-common.FIND_DEFAULT_PER_PAGE",
+        "type": "number",
+        "tags": [],
+        "label": "FIND_DEFAULT_PER_PAGE",
+        "description": [],
+        "signature": [
+          "20"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-utils-server/src/saved_objects_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -12,7 +12,11 @@ import {
   LicensingPluginSetup,
   LicensingApiRequestHandlerContext,
 } from '@kbn/licensing-plugin/server';
-import { AlertType, APM_SERVER_FEATURE_ID } from '../common/alert_types';
+import {
+  ApmRuleType,
+  APM_SERVER_FEATURE_ID,
+} from '../common/rules/apm_rule_types';
+import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '../common/apm_saved_object_constants';
 
 export const APM_FEATURE = {
   id: APM_SERVER_FEATURE_ID,
@@ -26,7 +30,7 @@ export const APM_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: Object.values(AlertType),
+  alerting: Object.values(ApmRuleType),
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
@@ -35,14 +39,14 @@ export const APM_FEATURE = {
       catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
-        read: [],
+        read: [APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE],
       },
       alerting: {
         alert: {
-          all: Object.values(AlertType),
+          all: Object.values(ApmRuleType),
         },
         rule: {
-          all: Object.values(AlertType),
+          all: Object.values(ApmRuleType),
         },
       },
       management: {
@@ -56,14 +60,14 @@ export const APM_FEATURE = {
       catalogue: [APM_SERVER_FEATURE_ID],
       savedObject: {
         all: [],
-        read: [],
+        read: [APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE],
       },
       alerting: {
         alert: {
-          read: Object.values(AlertType),
+          read: Object.values(ApmRuleType),
         },
         rule: {
-          read: Object.values(AlertType),
+          read: Object.values(ApmRuleType),
         },
       },
       management: {

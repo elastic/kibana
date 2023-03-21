@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useEvent } from 'react-use';
+import moment from 'moment';
+import { selectRefreshInterval, selectRefreshPaused } from '../state';
 
 interface SyntheticsRefreshContext {
   lastRefresh: number;
@@ -24,14 +28,43 @@ export const SyntheticsRefreshContext = createContext(defaultContext);
 export const SyntheticsRefreshContextProvider: React.FC = ({ children }) => {
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
 
-  const refreshApp = () => {
+  const refreshPaused = useSelector(selectRefreshPaused);
+  const refreshInterval = useSelector(selectRefreshInterval);
+
+  const refreshApp = useCallback(() => {
     const refreshTime = Date.now();
     setLastRefresh(refreshTime);
-  };
+  }, [setLastRefresh]);
 
   const value = useMemo(() => {
-    return { lastRefresh, refreshApp };
-  }, [lastRefresh]);
+    return {
+      lastRefresh,
+      refreshApp,
+    };
+  }, [lastRefresh, refreshApp]);
+
+  useEvent(
+    'visibilitychange',
+    () => {
+      const isOutdated = moment().diff(new Date(lastRefresh), 'seconds') > refreshInterval;
+      if (document.visibilityState !== 'hidden' && !refreshPaused && isOutdated) {
+        refreshApp();
+      }
+    },
+    document
+  );
+
+  useEffect(() => {
+    if (refreshPaused) {
+      return;
+    }
+    const interval = setInterval(() => {
+      if (document.visibilityState !== 'hidden') {
+        refreshApp();
+      }
+    }, refreshInterval * 1000);
+    return () => clearInterval(interval);
+  }, [refreshPaused, refreshApp, refreshInterval]);
 
   return <SyntheticsRefreshContext.Provider value={value} children={children} />;
 };

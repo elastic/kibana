@@ -6,13 +6,11 @@
  */
 
 import type { ESTermQuery } from '../../../../../common/typed_json';
-import type { NarrowDateRange } from '../../../components/ml/types';
-import type { UpdateDateRange } from '../../../components/charts/common';
 import type { GlobalTimeArgs } from '../../use_global_time';
-import type { HostsType } from '../../../../hosts/store/model';
-import type { NetworkType } from '../../../../network/store/model';
+import type { HostsType } from '../../../../explore/hosts/store/model';
+import type { NetworkType } from '../../../../explore/network/store/model';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
-import type { UsersType } from '../../../../users/store/model';
+import type { UsersType } from '../../../../explore/users/store/model';
 
 interface QueryTabBodyProps {
   type: HostsType | NetworkType | UsersType;
@@ -27,11 +25,9 @@ export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   endDate: GlobalTimeArgs['to'];
   flowTarget?: FlowTargetSourceDest;
   indexNames: string[];
-  narrowDateRange: NarrowDateRange;
   setQuery: GlobalTimeArgs['setQuery'];
   startDate: GlobalTimeArgs['from'];
   skip: boolean;
-  updateDateRange?: UpdateDateRange;
   hideHistogramIfEmpty?: boolean;
   ip?: string;
   hostName?: string;

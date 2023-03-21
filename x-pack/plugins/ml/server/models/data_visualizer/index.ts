@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getHistogramsForFields, DataVisualizer } from './data_visualizer';
+export { DataVisualizer } from './data_visualizer';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import {
   AggDescriptor,
   ColorDynamicOptions,
@@ -37,7 +37,6 @@ export interface CreateRegionMapLayerDescriptorParams {
   termsSize?: number;
   colorSchema: string;
   indexPatternId?: string;
-  indexPatternTitle?: string;
   metricAgg: string;
   metricFieldName?: string;
 }
@@ -65,7 +64,6 @@ export function createRegionMapLayerDescriptor({
   termsSize,
   colorSchema,
   indexPatternId,
-  indexPatternTitle,
   metricAgg,
   metricFieldName,
 }: CreateRegionMapLayerDescriptorParams): LayerDescriptor | null {
@@ -74,7 +72,7 @@ export function createRegionMapLayerDescriptor({
   }
 
   const metricsDescriptor = createAggDescriptor(metricAgg, metricFieldName);
-  const joinId = uuid();
+  const joinId = uuidv4();
   const joinKey = getJoinAggKey({
     aggType: metricsDescriptor.type,
     aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
@@ -87,7 +85,6 @@ export function createRegionMapLayerDescriptor({
     type: SOURCE_TYPES.ES_TERM_SOURCE,
     id: joinId,
     indexPatternId,
-    indexPatternTitle: indexPatternTitle ? indexPatternTitle : indexPatternId,
     term: termsFieldName,
     metrics: [metricsDescriptor],
     applyGlobalQuery: true,

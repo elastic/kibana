@@ -7,7 +7,7 @@
 
 import { identity } from 'lodash';
 import { AttachmentTypeRegistry } from '../../common/registry';
-import { PersistableStateAttachmentType, PersistableStateAttachmentTypeSetup } from './types';
+import type { PersistableStateAttachmentType, PersistableStateAttachmentTypeSetup } from './types';
 
 export class PersistableStateAttachmentTypeRegistry extends AttachmentTypeRegistry<PersistableStateAttachmentType> {
   constructor() {

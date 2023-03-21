@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import type { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { validateDuration, ValidateDurationOptions } from '../../../common/validate_duration';
 import {
   RULE_CCR_READ_EXCEPTIONS,
   RULE_DETAILS,
@@ -20,29 +19,9 @@ import {
   LazyExpressionProps,
 } from '../components/param_details_form/lazy_expression';
 
-interface ValidateOptions extends RuleTypeParams {
-  duration: string;
-}
-
-const validate = (inputValues: ValidateOptions): ValidationResult => {
-  const validationResult = { errors: {} };
-  const errors: { [key: string]: string[] } = {
-    duration: [],
-  };
-  if (!inputValues.duration) {
-    errors.duration.push(
-      i18n.translate('xpack.monitoring.alerts.validation.duration', {
-        defaultMessage: 'A valid duration is required.',
-      })
-    );
-  }
-  validationResult.errors = errors;
-  return validationResult;
-};
-
 export function createCCRReadExceptionsAlertType(
   config: MonitoringConfig
-): RuleTypeModel<ValidateOptions> {
+): RuleTypeModel<ValidateDurationOptions> {
   return {
     id: RULE_CCR_READ_EXCEPTIONS,
     description: RULE_DETAILS[RULE_CCR_READ_EXCEPTIONS].description,
@@ -57,7 +36,7 @@ export function createCCRReadExceptionsAlertType(
         paramDetails={RULE_DETAILS[RULE_CCR_READ_EXCEPTIONS].paramDetails}
       />
     ),
-    validate,
+    validate: validateDuration,
     defaultActionMessage: '{{context.internalFullMessage}}',
     requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
   };

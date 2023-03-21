@@ -4,21 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import { User } from '../../../../cases_api_integration/common/lib/authentication/types';
 import {
   casesAll,
   casesNoDelete,
   casesOnlyDelete,
+  casesRead,
   obsCasesAll,
   obsCasesNoDelete,
   obsCasesOnlyDelete,
+  obsCasesRead,
   secAll,
   secAllCasesNoDelete,
   secAllCasesNone,
@@ -110,6 +106,12 @@ export const casesAllUser: User = {
   roles: [casesAll.name],
 };
 
+export const casesReadUser: User = {
+  username: 'cases_read_user',
+  password: 'password',
+  roles: [casesRead.name],
+};
+
 /**
  * Users for Cases in Observability
  */
@@ -132,6 +134,12 @@ export const obsCasesAllUser: User = {
   roles: [obsCasesAll.name],
 };
 
+export const obsCasesReadUser: User = {
+  username: 'obs_cases_read_user',
+  password: 'password',
+  roles: [obsCasesRead.name],
+};
+
 export const users = [
   secAllCasesOnlyDeleteUser,
   secAllCasesNoDeleteUser,
@@ -145,7 +153,9 @@ export const users = [
   casesOnlyDeleteUser,
   casesNoDeleteUser,
   casesAllUser,
+  casesReadUser,
   obsCasesOnlyDeleteUser,
   obsCasesNoDeleteUser,
   obsCasesAllUser,
+  obsCasesReadUser,
 ];

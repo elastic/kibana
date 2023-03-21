@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { AddTimelineButton } from '.';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -183,17 +184,19 @@ describe('AddTimelineButton', () => {
       (useKibana as jest.Mock).mockReset();
     });
 
-    it('should render timelines table', () => {
+    it('should render timelines table', async () => {
       userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
-      expect(screen.getByTestId('open-timeline-button')).toBeInTheDocument();
+      await waitForEuiPopoverOpen();
+      expect(screen.getByTestId('open-timeline-button')).toBeVisible();
 
       userEvent.click(screen.getByTestId('open-timeline-button'));
       expect(screen.getByTestId('timelines-table')).toBeInTheDocument();
     });
 
-    it('should render correct actions', () => {
+    it('should render correct actions', async () => {
       userEvent.click(screen.getByLabelText(i18n.ADD_TIMELINE));
-      expect(screen.getByTestId('open-timeline-button')).toBeInTheDocument();
+      await waitForEuiPopoverOpen();
+      expect(screen.getByTestId('open-timeline-button')).toBeVisible();
 
       userEvent.click(screen.getByTestId('open-timeline-button'));
 

@@ -9,4 +9,5 @@ export type { ILicense, LicenseType, LicenseCheckState } from '@kbn/licensing-pl
 
 export type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 export { licensingMock } from '@kbn/licensing-plugin/server/mocks';

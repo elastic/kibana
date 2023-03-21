@@ -39,6 +39,9 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connect
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
 }));
+const { loadActionTypes } = jest.requireMock(
+  '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+);
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/rule_api', () => ({
   loadAlertTypes: jest.fn(),
@@ -140,6 +143,7 @@ describe('alert_form', () => {
               operation="create"
               actionTypeRegistry={actionTypeRegistry}
               ruleTypeRegistry={ruleTypeRegistry}
+              onChangeMetaData={() => {}}
             />
           </KibanaReactContext.Provider>
         </I18nProvider>
@@ -160,19 +164,6 @@ describe('alert_form', () => {
     it('renders registered selected alert type', async () => {
       const alertTypeSelectOptions = wrapper.find('[data-test-subj="selectedRuleTypeTitle"]');
       expect(alertTypeSelectOptions.exists()).toBeTruthy();
-    });
-
-    it('should update throttle value', async () => {
-      wrapper.find('button[data-test-subj="notifyWhenSelect"]').simulate('click');
-      wrapper.update();
-      wrapper.find('button[data-test-subj="onThrottleInterval"]').simulate('click');
-      wrapper.update();
-      const newThrottle = 17;
-      const throttleField = wrapper.find('[data-test-subj="throttleInput"]');
-      expect(throttleField.exists()).toBeTruthy();
-      throttleField.at(1).simulate('change', { target: { value: newThrottle.toString() } });
-      const throttleFieldAfterUpdate = wrapper.find('[data-test-subj="throttleInput"]');
-      expect(throttleFieldAfterUpdate.at(1).prop('value')).toEqual(newThrottle);
     });
   });
 
@@ -222,6 +213,18 @@ describe('alert_form', () => {
           mutedInstanceIds: [],
         } as unknown as Rule;
 
+        loadActionTypes.mockResolvedValue([
+          {
+            id: actionType.id,
+            name: 'Test',
+            enabled: true,
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
+            supportedFeatureIds: ['alerting'],
+          },
+        ]);
+
         const KibanaReactContext = createKibanaReactContext(Legacy.shims.kibanaServices);
 
         const actionWrapper = mount(
@@ -237,17 +240,11 @@ describe('alert_form', () => {
                 setActionParamsProperty={(key: string, value: any, index: number) =>
                   (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
                 }
+                setActionFrequencyProperty={(key: string, value: any, index: number) =>
+                  (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
+                }
                 actionTypeRegistry={actionTypeRegistry}
-                actionTypes={[
-                  {
-                    id: actionType.id,
-                    name: 'Test',
-                    enabled: true,
-                    enabledInConfig: true,
-                    enabledInLicense: true,
-                    minimumLicenseRequired: 'basic',
-                  },
-                ]}
+                featureId="alerting"
               />
             </KibanaReactContext.Provider>
           </I18nProvider>
@@ -265,7 +262,7 @@ describe('alert_form', () => {
       it('renders available action cards', async () => {
         const wrapperTwo = await setup();
         const actionOption = wrapperTwo.find(
-          `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
+          `[data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`
         );
         expect(actionOption.exists()).toBeTruthy();
       });

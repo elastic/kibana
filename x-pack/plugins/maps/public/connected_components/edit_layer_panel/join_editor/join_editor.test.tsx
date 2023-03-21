@@ -37,7 +37,6 @@ const defaultProps = {
       leftField: 'iso2',
       right: {
         id: '673ff994-fc75-4c67-909b-69fcb0e1060e',
-        indexPatternTitle: 'kibana_sample_data_logs',
         term: 'geo.src',
         indexPatternId: 'abcde',
         metrics: [

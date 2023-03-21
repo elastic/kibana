@@ -11,7 +11,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
-import { SampleDataCards } from '@kbn/home-sample-data-cards';
+import { SampleDataTab } from '@kbn/home-sample-data-tab';
 
 import { i18n } from '@kbn/i18n';
 import { Synopsis } from './synopsis';
@@ -38,7 +38,7 @@ class TutorialDirectoryUi extends React.Component {
           id: 'home.tutorial.tabs.sampleDataTitle',
           defaultMessage: 'Sample data',
         }),
-        content: <SampleDataCards />,
+        content: <SampleDataTab />,
       },
       ...extraTabs.map(({ id, name, component: Component }) => ({
         id,
@@ -69,12 +69,7 @@ class TutorialDirectoryUi extends React.Component {
   async componentDidMount() {
     this._isMounted = true;
 
-    getServices().chrome.setBreadcrumbs([
-      {
-        text: integrationsTitle,
-        href: this.props.addBasePath(`/app/integrations/browse`),
-      },
-    ]);
+    this.setBreadcrumbs();
 
     const tutorialConfigs = await getTutorials();
 
@@ -135,6 +130,30 @@ class TutorialDirectoryUi extends React.Component {
     });
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.selectedTabId !== this.state.selectedTabId) {
+      this.setBreadcrumbs();
+    }
+  }
+
+  setBreadcrumbs = () => {
+    const tab = this.getSelectedTab();
+    const breadcrumbs = [
+      {
+        text: integrationsTitle,
+        href: this.props.addBasePath(`/app/integrations/browse`),
+      },
+    ];
+
+    if (tab?.name) {
+      breadcrumbs.push({
+        text: tab.name,
+      });
+    }
+
+    getServices().chrome.setBreadcrumbs(breadcrumbs);
+  };
+
   onSelectedTabChanged = (id) => {
     this.setState({
       selectedTabId: id,
@@ -150,18 +169,14 @@ class TutorialDirectoryUi extends React.Component {
     }));
   };
 
+  getSelectedTab = () => {
+    return this.tabs.find(({ id }) => id === this.state.selectedTabId);
+  };
+
   renderTabContent = () => {
-    const tab = this.tabs.find(({ id }) => id === this.state.selectedTabId);
+    const tab = this.getSelectedTab();
+
     if (tab?.content) {
-      getServices().chrome.setBreadcrumbs([
-        {
-          text: integrationsTitle,
-          href: this.props.addBasePath(`/app/integrations/browse`),
-        },
-        {
-          text: tab.name,
-        },
-      ]);
       return tab.content;
     }
 

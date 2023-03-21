@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
-
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
     'visualize',
@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('histogram agg onSearchRequestStart', function () {
     before(async function () {
       // loading back default data
-      await esArchiver.load('test/functional/fixtures/es_archiver/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
 
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');

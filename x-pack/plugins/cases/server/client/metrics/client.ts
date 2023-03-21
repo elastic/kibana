@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   SingleCaseMetricsResponse,
   CasesMetricsRequest,
   CasesStatusRequest,
@@ -13,9 +13,9 @@ import {
   SingleCaseMetricsRequest,
   CasesMetricsResponse,
 } from '../../../common/api';
-import { CasesClient } from '../client';
+import type { CasesClient } from '../client';
 
-import { CasesClientArgs } from '../types';
+import type { CasesClientArgs } from '../types';
 import { getStatusTotalsByType } from './get_status_totals';
 import { getCaseMetrics } from './get_case_metrics';
 import { getCasesMetrics } from './get_cases_metrics';

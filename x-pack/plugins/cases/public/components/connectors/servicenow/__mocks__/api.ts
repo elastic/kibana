@@ -6,8 +6,8 @@
  */
 
 import { choices } from '../../mock';
-import { GetChoicesProps } from '../api';
-import { Choice } from '../types';
+import type { GetChoicesProps } from '../api';
+import type { Choice } from '../types';
 
 export const choicesResponse = {
   status: 'ok',

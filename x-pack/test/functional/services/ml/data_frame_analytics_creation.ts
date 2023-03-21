@@ -15,20 +15,22 @@ import {
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CanvasElementColorStats } from '../canvas_element';
 import type { MlCommonUI } from './common_ui';
-import { MlApi } from './api';
+import type { MlApi } from './api';
+import type { MlCommonFieldStatsFlyout } from './field_stats_flyout';
 
 export function MachineLearningDataFrameAnalyticsCreationProvider(
   { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
-  mlApi: MlApi
+  mlApi: MlApi,
+  mlCommonFieldStatsFlyout: MlCommonFieldStatsFlyout
 ) {
   const headerPage = getPageObject('header');
   const commonPage = getPageObject('common');
 
-  const testSubjects = getService('testSubjects');
+  const aceEditor = getService('aceEditor');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
-  const aceEditor = getService('aceEditor');
+  const testSubjects = getService('testSubjects');
 
   return {
     async assertJobTypeSelectExists() {
@@ -202,6 +204,19 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       });
     },
 
+    async assertFieldStatFlyoutContentFromIncludeFieldTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedContent?: string[]
+    ) {
+      await mlCommonFieldStatsFlyout.assertFieldStatFlyoutContentFromTrigger(
+        'mlAnalyticsCreateJobWizardIncludesSelect',
+        fieldName,
+        fieldType,
+        expectedContent
+      );
+    },
+
     async assertIncludeFieldsSelectionExists() {
       await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesTable', { timeout: 8000 });
 
@@ -255,6 +270,27 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       });
     },
 
+    async assertFieldStatsFlyoutContentFromDependentVariableInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedContent?: string[]
+    ) {
+      await mlCommonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'mlAnalyticsCreateJobWizardDependentVariableSelect loaded',
+        fieldName,
+        fieldType,
+        expectedContent
+      );
+    },
+
+    async assertFieldStatTopValuesContent(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedContent: string[]
+    ) {
+      await mlCommonFieldStatsFlyout.assertTopValuesContent(fieldName, fieldType, expectedContent);
+    },
+
     async assertDependentVariableInputMissing() {
       await testSubjects.missingOrFail(
         '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput'
@@ -287,7 +323,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       const subj = 'mlDataFrameAnalyticsRuntimeMappingsEditorSwitch';
       if ((await this.getRuntimeMappingsEditorSwitchCheckedState()) !== toggle) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(subj);
+          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
           await this.assertRuntimeMappingsEditorSwitchCheckState(toggle);
         });
       }
@@ -316,7 +352,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     async applyRuntimeMappings() {
       const subj = 'mlDataFrameAnalyticsRuntimeMappingsApplyButton';
       await testSubjects.existOrFail(subj);
-      await testSubjects.clickWhenNotDisabled(subj);
+      await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
       const isEnabled = await testSubjects.isEnabled(subj);
       expect(isEnabled).to.eql(
         false,
@@ -466,7 +502,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async continueToAdditionalOptionsStep() {
       await retry.tryForTime(15 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           'mlAnalyticsCreateJobWizardConfigurationStep active > mlAnalyticsCreateJobWizardContinueButton'
         );
         await this.assertAdditionalOptionsStepActive();
@@ -475,7 +511,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async continueToDetailsStep() {
       await retry.tryForTime(15 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           'mlAnalyticsCreateJobWizardAdvancedStep active > mlAnalyticsCreateJobWizardContinueButton'
         );
         await this.assertDetailsStepActive();
@@ -484,7 +520,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async continueToValidationStep() {
       await retry.tryForTime(15 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           'mlAnalyticsCreateJobWizardDetailsStep active > mlAnalyticsCreateJobWizardContinueButton'
         );
         await this.assertValidationStepActive();
@@ -504,7 +540,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async continueToCreateStep() {
       await retry.tryForTime(15 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           'mlAnalyticsCreateJobWizardValidationStepWrapper active > mlAnalyticsCreateJobWizardContinueButton'
         );
         await this.assertCreateStepActive();

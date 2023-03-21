@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { MgetResponseItem, GetGetResult } from '@elastic/elasticsearch/lib/api/types';
-import { CasesClientGetAlertsResponse } from './types';
-import { CasesClientArgs } from '..';
-import { AlertInfo } from '../../common/types';
-import { Alert } from '../../services/alerts';
+import type { MgetResponseItem, GetGetResult } from '@elastic/elasticsearch/lib/api/types';
+import type { CasesClientGetAlertsResponse } from './types';
+import type { CasesClientArgs } from '..';
+import type { AlertInfo } from '../../common/types';
+import type { Alert } from '../../services/alerts';
 
 function isAlert(
   doc?: MgetResponseItem<unknown>
@@ -21,7 +21,7 @@ export const getAlerts = async (
   alertsInfo: AlertInfo[],
   clientArgs: CasesClientArgs
 ): Promise<CasesClientGetAlertsResponse> => {
-  const { alertsService } = clientArgs;
+  const { alertsService } = clientArgs.services;
   if (alertsInfo.length === 0) {
     return [];
   }

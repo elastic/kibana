@@ -24,19 +24,19 @@ import { labels } from '../../../components/elasticsearch/shard_allocation/lib/l
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { ELASTICSEARCH_SYSTEM_ID, RULE_LARGE_SHARD_SIZE } from '../../../../common/constants';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const { services } = useKibana<{ data: any }>();
   const { index }: { index: string } = useParams();
   const { zoomInfo, onBrush } = useCharts();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;
-  const [data, setData] = useState({} as any);
-  const [indexLabel, setIndexLabel] = useState(labels.index as any);
-  const [nodesByIndicesData, setNodesByIndicesData] = useState([]);
+  const [data, setData] = useState<any>({});
+  const [indexLabel, setIndexLabel] = useState(labels.index);
+  const [nodesByIndicesData, setNodesByIndicesData] = useState<any[]>([]);
   const [alerts, setAlerts] = useState<AlertsByName>({});
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,

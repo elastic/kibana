@@ -27,6 +27,11 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'boolean',
     description: 'Opens the Synthetics Test Runner',
   })
+  .option('watch', {
+    default: false,
+    type: 'boolean',
+    description: 'Runs the server in watch mode, restarting on changes',
+  })
   .option('pauseOnError', {
     default: false,
     type: 'boolean',
@@ -72,7 +77,9 @@ function executeSyntheticsRunner(dirPath) {
     );
   } else if (runner) {
     childProcess.execSync(
-      `node ../../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'  --headless ${headless} --bail ${pauseOnError} --grep '${grep}'`,
+      `node ../../../../scripts/${ftrScript} --config ${config} --kibana-install-dir '${kibanaInstallDir}'  --headless ${headless} --bail ${pauseOnError} ${
+        grep ? '--grep ' + grep : ''
+      }`,
       {
         cwd: dirPath,
         stdio: 'inherit',

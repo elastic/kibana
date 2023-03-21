@@ -14,6 +14,8 @@ import {
   sendGetEnrollmentAPIKeys,
 } from '../../../../../../../hooks';
 
+import { generateNewAgentPolicyWithDefaults } from '../../../../../../../services';
+
 import type { AgentPolicy, NewAgentPolicy, EnrollmentAPIKey } from '../../../../../../../types';
 
 interface UseGetAgentPolicyOrDefaultResponse {
@@ -24,14 +26,14 @@ interface UseGetAgentPolicyOrDefaultResponse {
   created?: boolean;
 }
 export const DEFAULT_AGENT_POLICY_ID: string = 'fleet-first-agent-policy';
-export const DEFAULT_AGENT_POLICY: NewAgentPolicy = Object.freeze({
-  id: DEFAULT_AGENT_POLICY_ID,
-  name: i18n.translate('xpack.fleet.createPackagePolicy.firstAgentPolicyNameText', {
-    defaultMessage: 'My first agent policy',
-  }),
-  namespace: 'default',
-  monitoring_enabled: ['logs', 'metrics'],
-});
+export const DEFAULT_AGENT_POLICY: NewAgentPolicy = Object.freeze(
+  generateNewAgentPolicyWithDefaults({
+    id: DEFAULT_AGENT_POLICY_ID,
+    name: i18n.translate('xpack.fleet.createPackagePolicy.firstAgentPolicyNameText', {
+      defaultMessage: 'My first agent policy',
+    }),
+  })
+);
 
 const sendGetAgentPolicy = async (agentPolicyId: string) => {
   let result;

@@ -9,7 +9,7 @@
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
-import { decode } from 'rison-node';
+import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import type { Immutable, HostMetadata } from '../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../common/endpoint/types';
@@ -70,15 +70,6 @@ export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.i
 export const autoRefreshInterval = (state: Immutable<EndpointState>) => state.autoRefreshInterval;
 
 export const policyVersionInfo = (state: Immutable<EndpointState>) => state.policyVersionInfo;
-
-export const areEndpointsEnrolling = (state: Immutable<EndpointState>) => {
-  return state.agentsWithEndpointsTotal > state.endpointsTotal;
-};
-
-export const agentsWithEndpointsTotalError = (state: Immutable<EndpointState>) =>
-  state.agentsWithEndpointsTotalError;
-
-export const endpointsTotalError = (state: Immutable<EndpointState>) => state.endpointsTotalError;
 
 export const endpointPackageVersion = createSelector(endpointPackageInfo, (info) =>
   isLoadedResourceState(info) ? info.data.version : undefined
@@ -174,7 +165,7 @@ export const showView: (state: EndpointState) => EndpointIndexUIQueryParams['sho
  * Returns the Host Status which is connected the fleet agent
  */
 export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = createSelector(
-  (state) => state.hostStatus,
+  (state: Immutable<EndpointState>) => state.hostStatus,
   (hostStatus) => {
     return hostStatus ? hostStatus : HostStatus.UNHEALTHY;
   }
@@ -184,7 +175,7 @@ export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = c
  * Returns the Policy Response overall status
  */
 export const policyResponseStatus: (state: Immutable<EndpointState>) => string = createSelector(
-  (state) => state.policyResponse,
+  (state: Immutable<EndpointState>) => state.policyResponse,
   (policyResponse) => {
     return (policyResponse && policyResponse?.Endpoint?.policy?.applied?.status) || '';
   }
@@ -239,7 +230,7 @@ export const searchBarQuery: (state: Immutable<EndpointState>) => Query = create
 export const getCurrentIsolationRequestState = (
   state: Immutable<EndpointState>
 ): EndpointState['isolationRequestState'] => {
-  return state.isolationRequestState;
+  return state.isolationRequestState as EndpointState['isolationRequestState'];
 };
 
 export const getIsIsolationRequestPending: (state: Immutable<EndpointState>) => boolean =
@@ -287,6 +278,9 @@ export const getEndpointHostIsolationStatusPropsCallback: (
     return (endpoint: HostMetadata) => {
       let pendingIsolate = 0;
       let pendingUnIsolate = 0;
+      let pendingKillProcess = 0;
+      let pendingSuspendProcess = 0;
+      let pendingRunningProcesses = 0;
 
       if (isLoadedResourceState(pendingActionsState)) {
         const endpointPendingActions = pendingActionsState.data.get(endpoint.elastic.agent.id);
@@ -294,13 +288,21 @@ export const getEndpointHostIsolationStatusPropsCallback: (
         if (endpointPendingActions) {
           pendingIsolate = endpointPendingActions?.isolate ?? 0;
           pendingUnIsolate = endpointPendingActions?.unisolate ?? 0;
+          pendingKillProcess = endpointPendingActions?.['kill-process'] ?? 0;
+          pendingSuspendProcess = endpointPendingActions?.['suspend-process'] ?? 0;
+          pendingRunningProcesses = endpointPendingActions?.['running-processes'] ?? 0;
         }
       }
 
       return {
         isIsolated: isEndpointHostIsolated(endpoint),
-        pendingIsolate,
-        pendingUnIsolate,
+        pendingActions: {
+          pendingIsolate,
+          pendingUnIsolate,
+          pendingKillProcess,
+          pendingSuspendProcess,
+          pendingRunningProcesses,
+        },
       };
     };
   }

@@ -140,4 +140,27 @@ describe('threshold expression', () => {
     wrapper.update();
     expect(wrapper.find('input[data-test-subj="alertThresholdInput"]').length).toEqual(1);
   });
+
+  it('is valid when the threshold value is 0', () => {
+    const onChangeSelectedThreshold = jest.fn();
+    const onChangeSelectedThresholdComparator = jest.fn();
+    const wrapper = shallow(
+      <ThresholdExpression
+        thresholdComparator={'>'}
+        threshold={[0]}
+        errors={{ threshold0: [], threshold1: [] }}
+        onChangeSelectedThreshold={onChangeSelectedThreshold}
+        onChangeSelectedThresholdComparator={onChangeSelectedThresholdComparator}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="alertThresholdInput"]')).toMatchInlineSnapshot(`
+    <EuiFieldNumber
+      data-test-subj="alertThresholdInput"
+      isInvalid={false}
+      min={0}
+      onChange={[Function]}
+      value={0}
+    />
+    `);
+  });
 });

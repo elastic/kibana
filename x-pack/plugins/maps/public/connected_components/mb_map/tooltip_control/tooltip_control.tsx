@@ -16,7 +16,7 @@ import {
   Point2D,
   PointLike,
 } from '@kbn/mapbox-gl';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { Geometry } from 'geojson';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
@@ -178,13 +178,13 @@ export class TooltipControl extends Component<Props, {}> {
     for (let i = 0; i < mbFeatures.length; i++) {
       const mbFeature = mbFeatures[i];
       const layer = this._getLayerByMbLayerId(mbFeature.layer.id);
-      if (!layer) {
-        break;
+      if (!layer || !layer.canShowTooltip() || layer.areTooltipsDisabled()) {
+        continue;
       }
 
       const featureId = layer.getFeatureId(mbFeature);
       if (featureId === undefined) {
-        break;
+        continue;
       }
       const layerId = layer.getId();
       let match = false;
@@ -192,7 +192,7 @@ export class TooltipControl extends Component<Props, {}> {
         const uniqueFeature = uniqueFeatures[j];
         if (featureId === uniqueFeature.id && layerId === uniqueFeature.layerId) {
           match = true;
-          break;
+          continue;
         }
       }
       if (!match) {
@@ -251,7 +251,7 @@ export class TooltipControl extends Component<Props, {}> {
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeataure);
 
     const isLocked = true;
-    const tooltipId = uuid();
+    const tooltipId = uuidv4();
     const features = this._getTooltipFeatures(mbFeatures, isLocked, tooltipId);
     if (features.length === 0) {
       return;
@@ -293,7 +293,7 @@ export class TooltipControl extends Component<Props, {}> {
     const popupAnchorLocation = justifyAnchorLocation(e.lngLat, targetMbFeature);
 
     const isLocked = false;
-    const tooltipId = uuid();
+    const tooltipId = uuidv4();
     const features = this._getTooltipFeatures(mbFeatures, isLocked, tooltipId);
     if (features.length === 0) {
       return;

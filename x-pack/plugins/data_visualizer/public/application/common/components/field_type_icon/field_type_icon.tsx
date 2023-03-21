@@ -10,12 +10,12 @@ import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { getJobTypeLabel } from '../../util/field_types_utils';
-import type { JobFieldType } from '../../../../../common/types';
+import type { SupportedFieldType } from '../../../../../common/types';
 import './_index.scss';
 
 interface FieldTypeIconProps {
   tooltipEnabled: boolean;
-  type: JobFieldType;
+  type: SupportedFieldType;
 }
 
 export const FieldTypeIcon: FC<FieldTypeIconProps> = ({ tooltipEnabled = false, type }) => {
@@ -27,8 +27,13 @@ export const FieldTypeIcon: FC<FieldTypeIconProps> = ({ tooltipEnabled = false, 
     });
   if (tooltipEnabled === true) {
     return (
-      <EuiToolTip position="left" content={label} anchorClassName="dvFieldTypeIcon__anchor">
-        <FieldIcon type={type} />
+      <EuiToolTip
+        anchorClassName="dvFieldTypeIcon__anchor"
+        content={label}
+        data-test-subj="dvFieldTypeTooltip"
+        position="left"
+      >
+        <FieldIcon type={type} data-test-subj={`dvFieldTypeIcon-${type}`} />
       </EuiToolTip>
     );
   }

@@ -7,7 +7,7 @@
  */
 
 import { ArrayEntry } from '@elastic/charts';
-import { Datatable } from '@kbn/expressions-plugin';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 
 type SortFn = (([name1, node1]: ArrayEntry, [name2, node2]: ArrayEntry) => number) | undefined;
@@ -30,7 +30,7 @@ export const extractUniqTermsMap = (dataTable: Datatable, columnId: string) =>
     {}
   );
 
-const sortPredicateSaveSourceOrder: SortPredicatePureFn =
+export const sortPredicateSaveSourceOrder: SortPredicatePureFn =
   () =>
   ([, node1], [, node2]) => {
     const [index1] = node1.inputIndex ?? [];

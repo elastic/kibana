@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { testUsers } from '../test_users';
 
@@ -26,22 +26,6 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('POST /agents/{agentId}/actions', () => {
-      it('should return a 200 if this a valid actions request', async () => {
-        const { body: apiResponse } = await supertest
-          .post(`/api/fleet/agents/agent1/actions`)
-          .set('kbn-xsrf', 'xx')
-          .send({
-            action: {
-              type: 'POLICY_CHANGE',
-              data: { data: 'action_data' },
-            },
-          })
-          .expect(200);
-
-        expect(apiResponse.item.type).to.eql('POLICY_CHANGE');
-        expect(apiResponse.item.data).to.eql({ data: 'action_data' });
-      });
-
       it('should return a 200 if this a valid SETTINGS action request', async () => {
         const { body: apiResponse } = await supertest
           .post(`/api/fleet/agents/agent1/actions`)
@@ -96,8 +80,8 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xx')
           .send({
             action: {
-              type: 'POLICY_CHANGE',
-              data: { data: 'action_data' },
+              type: 'SETTINGS',
+              data: { log_level: 'debug' },
             },
           })
           .expect(404);
@@ -110,8 +94,8 @@ export default function (providerContext: FtrProviderContext) {
           .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
           .send({
             action: {
-              type: 'POLICY_CHANGE',
-              data: { data: 'action_data' },
+              type: 'SETTINGS',
+              data: { log_level: 'debug' },
             },
           })
           .expect(403);
@@ -127,11 +111,11 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should return a 200 and create a CANCEL action if the action exists', async () => {
-        const actionId = uuid();
+        const actionId = uuidv4();
         await es.create({
           index: '.fleet-actions',
           refresh: 'wait_for',
-          id: uuid(),
+          id: uuidv4(),
           body: {
             '@timestamp': new Date().toISOString(),
             expiration: new Date().toISOString(),

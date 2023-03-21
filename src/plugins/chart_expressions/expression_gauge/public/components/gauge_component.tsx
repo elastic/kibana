@@ -16,23 +16,23 @@ import { isVisDimension } from '@kbn/visualizations-plugin/common/utils';
 import {
   GaugeRenderProps,
   GaugeLabelMajorMode,
-  GaugeTicksPosition,
   GaugeLabelMajorModes,
   GaugeColorModes,
   GaugeShapes,
+  GaugeTicksPositions,
 } from '../../common';
-import { GaugeTicksPositions } from '../../common';
 import {
   getAccessorsFromArgs,
-  getIcons,
   getMaxValue,
   getMinValue,
   getValueFromAccessor,
   getSubtypeByGaugeType,
   getGoalConfig,
+  computeMinMax,
 } from './utils';
+import { getIcons } from './utils/icons';
 import './index.scss';
-import { GaugeCentralMajorMode } from '../../common/types';
+import { GaugeCentralMajorMode, GaugeTicksPosition } from '../../common/types';
 import { isBulletShape, isRoundShape } from '../../common/utils';
 
 import './gauge.scss';
@@ -122,7 +122,21 @@ function getTitle(
   return major || fallbackTitle || '';
 }
 
-// TODO: once charts handle not displaying labels when there's no space for them, it's safe to remove this
+const getPreviousSectionValue = (value: number, bands: number[]) => {
+  // bands value is equal to the stop. The purpose of this value is coloring the previous section, which is smaller, then the band.
+  // So, the smaller value should be taken. For the first element -1, for the next - middle value of the previous section.
+
+  let prevSectionValue = value - 1;
+  const valueIndex = bands.indexOf(value);
+  const prevBand = bands[valueIndex - 1];
+  const curBand = bands[valueIndex];
+  if (valueIndex > 0) {
+    prevSectionValue = value - (curBand - prevBand) / 2;
+  }
+
+  return prevSectionValue;
+};
+
 function getTicksLabels(baseStops: number[]) {
   const tenPercentRange = (Math.max(...baseStops) - Math.min(...baseStops)) * 0.1;
   const lastIndex = baseStops.length - 1;
@@ -150,57 +164,7 @@ function getTicks(
   if (ticksPosition === GaugeTicksPositions.BANDS && colorBands) {
     return colorBands && getTicksLabels(colorBands);
   }
-
-  const TICKS_NO = 3;
-  const min = Math.min(...(colorBands || []), ...range);
-  const max = Math.max(...(colorBands || []), ...range);
-  const step = (max - min) / TICKS_NO;
-
-  const ticks = [
-    ...Array(TICKS_NO)
-      .fill(null)
-      .map((_, i) => Number((min + step * i).toFixed(2))),
-    max,
-  ];
-  const convertToPercents = toPercents(min, max);
-  return percentageMode ? ticks.map(convertToPercents) : ticks;
 }
-
-const calculateRealRangeValueMin = (
-  relativeRangeValue: number,
-  { min, max }: { min: number; max: number }
-) => {
-  if (isFinite(relativeRangeValue)) {
-    return relativeRangeValue * ((max - min) / 100);
-  }
-  return min;
-};
-
-const calculateRealRangeValueMax = (
-  relativeRangeValue: number,
-  { min, max }: { min: number; max: number }
-) => {
-  if (isFinite(relativeRangeValue)) {
-    return relativeRangeValue * ((max - min) / 100);
-  }
-
-  return max;
-};
-
-const getPreviousSectionValue = (value: number, bands: number[]) => {
-  // bands value is equal to the stop. The purpose of this value is coloring the previous section, which is smaller, then the band.
-  // So, the smaller value should be taken. For the first element -1, for the next - middle value of the previous section.
-
-  let prevSectionValue = value - 1;
-  const valueIndex = bands.indexOf(value);
-  const prevBand = bands[valueIndex - 1];
-  const curBand = bands[valueIndex];
-  if (valueIndex > 0) {
-    prevSectionValue = value - (curBand - prevBand) / 2;
-  }
-
-  return prevSectionValue;
-};
 
 export const GaugeComponent: FC<GaugeRenderProps> = memo(
   ({ data, args, uiState, formatFactory, paletteService, chartsThemeService, renderComplete }) => {
@@ -217,6 +181,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       commonLabel,
     } = args;
 
+    const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
+
     const getColor = useCallback(
       (
         value,
@@ -224,24 +190,13 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
         bands: number[],
         percentageMode?: boolean
       ) => {
-        const { rangeMin, rangeMax, range }: CustomPaletteState = paletteConfig.params!;
-        const minRealValue = bands[0];
-        const maxRealValue = bands[bands.length - 1];
-        let min = rangeMin;
-        let max = rangeMax;
-
         let stops = paletteConfig.params?.stops ?? [];
 
         if (percentageMode) {
           stops = bands.map((v) => v * 100);
         }
 
-        if (range === 'percent') {
-          const minMax = { min: minRealValue, max: maxRealValue };
-
-          min = calculateRealRangeValueMin(min, minMax);
-          max = calculateRealRangeValueMax(max, minMax);
-        }
+        const { min, max } = computeMinMax(paletteConfig, bands);
 
         return paletteService
           .get(paletteConfig?.name ?? 'custom')
@@ -367,14 +322,17 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     // TODO: format in charts
     let actualValue = Math.round(Math.min(Math.max(metricValue, min), max) * 1000) / 1000;
-    const totalTicks = getTicks(ticksPosition, [min, max], bands, args.percentageMode);
-    const ticks =
-      gaugeType === GaugeShapes.CIRCLE ? totalTicks.slice(0, totalTicks.length - 1) : totalTicks;
 
     if (args.percentageMode && palette?.params && palette?.params.stops?.length) {
       bands = normalizeBandsLegacy(palette?.params as CustomPaletteState, actualValue);
       actualValue = actualValueToPercentsLegacy(palette?.params as CustomPaletteState, actualValue);
     }
+
+    const totalTicks = getTicks(ticksPosition, [min, max], bands, args.percentageMode);
+    const ticks =
+      totalTicks && gaugeType === GaugeShapes.CIRCLE
+        ? totalTicks.slice(0, totalTicks.length - 1)
+        : totalTicks;
 
     const goalConfig = getGoalConfig(gaugeType);
 
@@ -398,6 +356,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
             noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
             debugState={window._echDebugStateFlag ?? false}
             theme={[{ background: { color: 'transparent' } }, chartTheme]}
+            baseTheme={chartBaseTheme}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             onRenderChange={onRenderChange}

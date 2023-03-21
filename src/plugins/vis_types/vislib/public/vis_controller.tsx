@@ -9,14 +9,13 @@
 import $ from 'jquery';
 import React, { RefObject } from 'react';
 
-import { mountReactNode } from '@kbn/core/public/utils';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 import { VisTypeVislibCoreSetup } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
 import { BasicVislibParams } from './types';
-import { LegendDisplay, PieVisParams } from './pie';
 
 const legendClassName = {
   top: 'vislib--legend-top',
@@ -63,8 +62,9 @@ export const createVislibVisController = (
 
     async render(
       esResponse: any,
-      visParams: BasicVislibParams | PieVisParams,
-      handlers: IInterpreterRenderHandlers
+      visParams: BasicVislibParams,
+      handlers: IInterpreterRenderHandlers,
+      renderComplete: (() => void) | undefined
     ): Promise<void> {
       if (this.vislibVis) {
         this.destroy(false);
@@ -74,11 +74,10 @@ export const createVislibVisController = (
       this.chartEl.dataset.vislibChartType = visParams.type;
 
       if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
-        handlers.done();
+        renderComplete?.();
         return;
       }
 
-      // @ts-expect-error
       const { Vis: Vislib } = await import('./vislib/vis');
       const { uiState, event: fireEvent } = handlers;
 
@@ -98,7 +97,7 @@ export const createVislibVisController = (
           this.mountLegend(esResponse, visParams, fireEvent, uiState as PersistedState);
         }
 
-        handlers.done();
+        renderComplete?.();
       });
 
       this.removeListeners = () => {
@@ -123,12 +122,12 @@ export const createVislibVisController = (
 
     mountLegend(
       visData: unknown,
-      visParams: BasicVislibParams | PieVisParams,
+      visParams: BasicVislibParams,
       fireEvent: IInterpreterRenderHandlers['event'],
       uiState?: PersistedState
     ) {
       const { legendPosition } = visParams;
-      this.unmountLegend = mountReactNode(
+      this.unmountLegend = toMountPoint(
         <VisLegend
           ref={this.legendRef}
           vislibVis={this.vislibVis}
@@ -155,15 +154,8 @@ export const createVislibVisController = (
       }
     }
 
-    showLegend(visParams: BasicVislibParams | PieVisParams) {
-      if (this.arePieVisParams(visParams)) {
-        return visParams.legendDisplay === LegendDisplay.SHOW;
-      }
+    showLegend(visParams: BasicVislibParams) {
       return visParams.addLegend ?? false;
-    }
-
-    arePieVisParams(visParams: BasicVislibParams | PieVisParams): visParams is PieVisParams {
-      return Object.values(LegendDisplay).includes((visParams as PieVisParams).legendDisplay);
     }
   };
 };

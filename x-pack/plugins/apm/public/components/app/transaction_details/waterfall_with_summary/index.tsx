@@ -12,56 +12,81 @@ import {
   EuiPagination,
   EuiSpacer,
   EuiTitle,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { LoadingStatePrompt } from '../../../shared/loading_state_prompt';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
-import type { TraceSample } from '../../../../hooks/use_transaction_trace_samples_fetcher';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
 import { TransactionTab, TransactionTabs } from './transaction_tabs';
-import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { Environment } from '../../../../../common/environment_rt';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { WaterfallFetchResult } from '../use_waterfall_fetcher';
 
-interface Props {
-  waterfall: IWaterfall;
-  isLoading: boolean;
-  traceSamples: TraceSample[];
+interface Props<TSample extends {}> {
+  waterfallFetchResult: WaterfallFetchResult;
+  traceSamples?: TSample[];
+  traceSamplesFetchStatus: FETCH_STATUS;
   environment: Environment;
-  onSampleClick: (sample: { transactionId: string; traceId: string }) => void;
-  onTabClick: (tab: string) => void;
+  onSampleClick: (sample: TSample) => void;
+  onTabClick: (tab: TransactionTab) => void;
   serviceName?: string;
   waterfallItemId?: string;
   detailTab?: TransactionTab;
+  showCriticalPath: boolean;
+  onShowCriticalPathChange: (showCriticalPath: boolean) => void;
+  selectedSample?: TSample | null;
 }
 
-export function WaterfallWithSummary({
-  waterfall,
-  isLoading,
+export function WaterfallWithSummary<TSample extends {}>({
+  waterfallFetchResult,
   traceSamples,
+  traceSamplesFetchStatus,
   environment,
   onSampleClick,
   onTabClick,
   serviceName,
   waterfallItemId,
   detailTab,
-}: Props) {
+  showCriticalPath,
+  onShowCriticalPathChange,
+  selectedSample,
+}: Props<TSample>) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
 
+  const isControlled = selectedSample !== undefined;
+
+  const isLoading =
+    waterfallFetchResult.status === FETCH_STATUS.LOADING ||
+    traceSamplesFetchStatus === FETCH_STATUS.LOADING;
+  const isSucceded =
+    waterfallFetchResult.status === FETCH_STATUS.SUCCESS &&
+    traceSamplesFetchStatus === FETCH_STATUS.SUCCESS;
+
   useEffect(() => {
-    setSampleActivePage(0);
-  }, [traceSamples]);
+    if (!isControlled) {
+      setSampleActivePage(0);
+    }
+  }, [traceSamples, isControlled]);
 
   const goToSample = (index: number) => {
-    setSampleActivePage(index);
-    const sample = traceSamples[index];
+    const sample = traceSamples![index];
+    if (!isControlled) {
+      setSampleActivePage(index);
+    }
     onSampleClick(sample);
   };
 
-  const { entryWaterfallTransaction } = waterfall;
+  const samplePageIndex = isControlled
+    ? selectedSample
+      ? traceSamples?.indexOf(selectedSample)
+      : 0
+    : sampleActivePage;
 
-  if ((!entryWaterfallTransaction || traceSamples.length === 0) && !isLoading) {
+  const { entryTransaction } = waterfallFetchResult.waterfall;
+
+  if (!entryTransaction && traceSamples?.length === 0 && isSucceded) {
     return (
       <EuiEmptyPrompt
         title={
@@ -76,70 +101,83 @@ export function WaterfallWithSummary({
     );
   }
 
-  const entryTransaction = entryWaterfallTransaction?.doc;
-
   return (
-    <>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h5>
-              {i18n.translate('xpack.apm.transactionDetails.traceSampleTitle', {
-                defaultMessage: 'Trace sample',
-              })}
-            </h5>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPagination
-            pageCount={traceSamples?.length ?? 0}
-            activePage={sampleActivePage}
-            onPageClick={goToSample}
-            compressed
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <TransactionActionMenu
-                isLoading={isLoading}
-                transaction={entryTransaction}
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h5>
+                {i18n.translate(
+                  'xpack.apm.transactionDetails.traceSampleTitle',
+                  {
+                    defaultMessage: 'Trace sample',
+                  }
+                )}
+              </h5>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            {!!traceSamples?.length && (
+              <EuiPagination
+                pageCount={traceSamples.length}
+                activePage={samplePageIndex}
+                onPageClick={goToSample}
+                compressed
               />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <MaybeViewTraceLink
-                isLoading={isLoading}
-                transaction={entryTransaction}
-                waterfall={waterfall}
-                environment={environment}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <TransactionActionMenu
+                  isLoading={isLoading}
+                  transaction={entryTransaction}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <MaybeViewTraceLink
+                  isLoading={isLoading}
+                  transaction={entryTransaction}
+                  waterfall={waterfallFetchResult.waterfall}
+                  environment={environment}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
 
       {isLoading || !entryTransaction ? (
-        <LoadingStatePrompt />
-      ) : (
-        <>
-          <TransactionSummary
-            errorCount={waterfall.apiResponse.errorDocs.length}
-            totalDuration={waterfall.rootTransaction?.transaction.duration.us}
-            transaction={entryTransaction}
-          />
+        <EuiFlexItem grow={false}>
           <EuiSpacer size="s" />
-          <TransactionTabs
+          <EuiLoadingContent lines={1} data-test-sub="loading-content" />
+        </EuiFlexItem>
+      ) : (
+        <EuiFlexItem grow={false}>
+          <TransactionSummary
+            errorCount={waterfallFetchResult.waterfall.totalErrorsCount}
+            totalDuration={
+              waterfallFetchResult.waterfall.rootWaterfallTransaction?.duration
+            }
             transaction={entryTransaction}
-            detailTab={detailTab}
-            serviceName={serviceName}
-            waterfallItemId={waterfallItemId}
-            onTabClick={onTabClick}
-            waterfall={waterfall}
           />
-        </>
+        </EuiFlexItem>
       )}
-    </>
+
+      <EuiFlexItem grow={false}>
+        <TransactionTabs
+          transaction={entryTransaction}
+          detailTab={detailTab}
+          serviceName={serviceName}
+          waterfallItemId={waterfallItemId}
+          onTabClick={onTabClick}
+          waterfall={waterfallFetchResult.waterfall}
+          isLoading={isLoading}
+          showCriticalPath={showCriticalPath}
+          onShowCriticalPathChange={onShowCriticalPathChange}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getRenderCellValueFn } from './get_render_cell_value';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/data_view';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../utils/build_data_record';
 import { EsHitRecord } from '../../types';
@@ -71,15 +71,15 @@ const rowsFieldsWithTopLevelObject: EsHitRecord[] = [
   },
 ];
 
-const build = (hit: EsHitRecord) => buildDataTableRecord(hit, indexPatternMock);
+const build = (hit: EsHitRecord) => buildDataTableRecord(hit, dataViewMock);
 
 describe('Discover grid cell rendering', function () {
   it('renders bytes column correctly', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsSource.map(build),
       false,
-      [],
+      () => false,
       100,
       jest.fn()
     );
@@ -101,10 +101,10 @@ describe('Discover grid cell rendering', function () {
 
   it('renders bytes column correctly using _source when details is true', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsSource.map(build),
       false,
-      [],
+      () => false,
       100,
       jest.fn()
     );
@@ -120,17 +120,17 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"euiFlexGroup euiFlexGroup--directionRow\\"><div class=\\"euiFlexItem\\"><span class=\\"dscDiscoverGrid__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><button class=\\"euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"dscDiscoverGrid__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon euiButtonIcon--xSmall css-1q7ycil-euiButtonIcon-empty-primary-hoverStyles\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
   });
 
   it('renders bytes column correctly using fields when details is true', () => {
     const closePopoverMockFn = jest.fn();
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFields.map(build),
       false,
-      [],
+      () => false,
       100,
       closePopoverMockFn
     );
@@ -146,7 +146,7 @@ describe('Discover grid cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"euiFlexGroup euiFlexGroup--directionRow\\"><div class=\\"euiFlexItem\\"><span class=\\"dscDiscoverGrid__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><button class=\\"euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
+      `"<div class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"dscDiscoverGrid__cellPopoverValue eui-textBreakWord\\">100</span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon euiButtonIcon--xSmall css-1q7ycil-euiButtonIcon-empty-primary-hoverStyles\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
     findTestSubject(component, 'docTableClosePopover').simulate('click');
     expect(closePopoverMockFn).toHaveBeenCalledTimes(1);
@@ -154,10 +154,10 @@ describe('Discover grid cell rendering', function () {
 
   it('renders _source column correctly', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsSource.map(build),
       false,
-      ['extension', 'bytes'],
+      (fieldName) => ['extension', 'bytes'].includes(fieldName),
       100,
       jest.fn()
     );
@@ -228,10 +228,10 @@ describe('Discover grid cell rendering', function () {
 
   it('renders _source column correctly when isDetails is set to true', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsSource.map(build),
       false,
-      [],
+      () => false,
       100,
       jest.fn()
     );
@@ -248,6 +248,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiFlexGroup
+        className="dscDiscoverGrid__cellPopover"
         direction="column"
         gutterSize="none"
         justifyContent="flexEnd"
@@ -258,6 +259,7 @@ describe('Discover grid cell rendering', function () {
           <EuiFlexGroup
             gutterSize="none"
             justifyContent="flexEnd"
+            responsive={false}
           >
             <EuiFlexItem
               grow={false}
@@ -301,10 +303,10 @@ describe('Discover grid cell rendering', function () {
 
   it('renders fields-based column correctly', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFields.map(build),
       true,
-      ['extension', 'bytes'],
+      (fieldName) => ['extension', 'bytes'].includes(fieldName),
       100,
       jest.fn()
     );
@@ -379,10 +381,10 @@ describe('Discover grid cell rendering', function () {
 
   it('limits amount of rendered items', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFields.map(build),
       true,
-      ['extension', 'bytes'],
+      (fieldName) => ['extension', 'bytes'].includes(fieldName),
       // this is the number of rendered items
       1,
       jest.fn()
@@ -458,10 +460,10 @@ describe('Discover grid cell rendering', function () {
 
   it('renders fields-based column correctly when isDetails is set to true', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFields.map(build),
       true,
-      [],
+      (fieldName) => false,
       100,
       jest.fn()
     );
@@ -478,6 +480,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiFlexGroup
+        className="dscDiscoverGrid__cellPopover"
         direction="column"
         gutterSize="none"
         justifyContent="flexEnd"
@@ -488,6 +491,7 @@ describe('Discover grid cell rendering', function () {
           <EuiFlexGroup
             gutterSize="none"
             justifyContent="flexEnd"
+            responsive={false}
           >
             <EuiFlexItem
               grow={false}
@@ -536,10 +540,10 @@ describe('Discover grid cell rendering', function () {
 
   it('collect object fields and renders them like _source', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFieldsWithTopLevelObject.map(build),
       true,
-      ['object.value', 'extension', 'bytes'],
+      (fieldName) => ['object.value', 'extension', 'bytes'].includes(fieldName),
       100,
       jest.fn()
     );
@@ -576,12 +580,12 @@ describe('Discover grid cell rendering', function () {
   });
 
   it('collect object fields and renders them like _source with fallback for unmapped', () => {
-    (indexPatternMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFieldsWithTopLevelObject.map(build),
       true,
-      ['extension', 'bytes', 'object.value'],
+      (fieldName) => ['extension', 'bytes', 'object.value'].includes(fieldName),
       100,
       jest.fn()
     );
@@ -620,10 +624,10 @@ describe('Discover grid cell rendering', function () {
   it('collect object fields and renders them as json in details', () => {
     const closePopoverMockFn = jest.fn();
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFieldsWithTopLevelObject.map(build),
       true,
-      [],
+      () => false,
       100,
       closePopoverMockFn
     );
@@ -640,6 +644,7 @@ describe('Discover grid cell rendering', function () {
     );
     expect(component).toMatchInlineSnapshot(`
       <EuiFlexGroup
+        className="dscDiscoverGrid__cellPopover"
         direction="column"
         gutterSize="none"
         justifyContent="flexEnd"
@@ -650,6 +655,7 @@ describe('Discover grid cell rendering', function () {
           <EuiFlexGroup
             gutterSize="none"
             justifyContent="flexEnd"
+            responsive={false}
           >
             <EuiFlexItem
               grow={false}
@@ -685,10 +691,10 @@ describe('Discover grid cell rendering', function () {
   it('renders a functional close button when CodeEditor is rendered', () => {
     const closePopoverMockFn = jest.fn();
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFieldsWithTopLevelObject.map(build),
       true,
-      [],
+      () => false,
       100,
       closePopoverMockFn
     );
@@ -711,12 +717,12 @@ describe('Discover grid cell rendering', function () {
   });
 
   it('does not collect subfields when the the column is unmapped but part of fields response', () => {
-    (indexPatternMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFieldsWithTopLevelObject.map(build),
       true,
-      [],
+      () => false,
       100,
       jest.fn()
     );
@@ -747,10 +753,10 @@ describe('Discover grid cell rendering', function () {
 
   it('renders correctly when invalid row is given', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsSource.map(build),
       false,
-      [],
+      () => false,
       100,
       jest.fn()
     );
@@ -772,10 +778,10 @@ describe('Discover grid cell rendering', function () {
 
   it('renders correctly when invalid column is given', () => {
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsSource.map(build),
       false,
-      [],
+      () => false,
       100,
       jest.fn()
     );
@@ -796,7 +802,7 @@ describe('Discover grid cell rendering', function () {
   });
 
   it('renders unmapped fields correctly', () => {
-    (indexPatternMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
+    (dataViewMock.getFieldByName as jest.Mock).mockReturnValueOnce(undefined);
     const rowsFieldsUnmapped: EsHitRecord[] = [
       {
         _id: '1',
@@ -810,10 +816,10 @@ describe('Discover grid cell rendering', function () {
       },
     ];
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFieldsUnmapped.map(build),
       true,
-      ['unmapped'],
+      (fieldName) => ['unmapped'].includes(fieldName),
       100,
       jest.fn()
     );

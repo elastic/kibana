@@ -5,29 +5,23 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiCommentList,
-  EuiCommentProps,
-} from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCommentList } from '@elastic/eui';
 
 import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment } from '../add_comment';
-import { UserActionAvatar } from './avatar';
-import { UserActionUsername } from './username';
 import { useCaseViewParams } from '../../common/navigation';
 import { builderMap } from './builder';
 import { isUserActionTypeSupported, getManualAlertIdsWithNoRuleId } from './helpers';
 import type { UserActionTreeProps } from './types';
-import { getDescriptionUserAction } from './description';
 import { useUserActionsHandler } from './use_user_actions_handler';
 import { NEW_COMMENT_ID } from './constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { UserToolTip } from '../user_profiles/user_tooltip';
+import { Username } from '../user_profiles/username';
+import { HoverableAvatar } from '../user_profiles/hoverable_avatar';
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 8px;
@@ -39,6 +33,12 @@ const MyEuiCommentList = styled(EuiCommentList)`
       outline: solid 5px ${theme.eui.euiColorVis1_behindText};
       margin: 0.5em;
       transition: 0.8s;
+    }
+
+    & .draftFooter {
+      & .euiCommentEvent__body {
+        padding: 0;
+      }
     }
 
     & .euiComment.isEdit {
@@ -58,7 +58,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
 
     & .comment-alert .euiCommentEvent {
       background-color: ${theme.eui.euiColorLightestShade};
-      border: ${theme.eui.euiFlyoutBorder};
+      border: ${theme.eui.euiBorderThin};
       padding: ${theme.eui.euiSizeS};
       border-radius: ${theme.eui.euiSizeXS};
     }
@@ -67,7 +67,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
       flex-grow: 1;
     }
 
-    & .comment-action.empty-comment .euiCommentEvent--regular {
+    & .comment-action.empty-comment [class*="euiCommentEvent-regular"] {
       box-shadow: none;
       .euiCommentEvent__header {
         padding: ${theme.eui.euiSizeM} ${theme.eui.euiSizeS};
@@ -79,24 +79,28 @@ const MyEuiCommentList = styled(EuiCommentList)`
 
 export const UserActions = React.memo(
   ({
-    caseServices,
+    caseConnectors,
     caseUserActions,
+    userProfiles,
+    currentUserProfile,
     data: caseData,
     getRuleDetailsHref,
     actionsNavigation,
-    isLoadingDescription,
     isLoadingUserActions,
     onRuleDetailsClick,
     onShowAlertDetails,
     onUpdateField,
     statusActionButton,
     useFetchAlertData,
+    filterOptions,
   }: UserActionTreeProps) => {
     const { detailName: caseId, commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
-    const currentUser = useCurrentUser();
-    const { externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry } =
-      useCasesContext();
+    const {
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      appId,
+    } = useCasesContext();
 
     const alertIdsWithoutRuleInfo = useMemo(
       () => getManualAlertIdsWithNoRuleId(caseData.comments),
@@ -142,77 +146,57 @@ export const UserActions = React.memo(
       }
     }, [commentId, initLoading, isLoadingUserActions, loadingCommentIds, handleOutlineComment]);
 
-    const descriptionCommentListObj: EuiCommentProps = useMemo(
-      () =>
-        getDescriptionUserAction({
-          caseData,
-          commentRefs,
-          manageMarkdownEditIds,
-          isLoadingDescription,
-          onUpdateField,
-          handleManageMarkdownEditId,
-          handleManageQuote,
-        }),
-      [
-        caseData,
-        commentRefs,
-        manageMarkdownEditIds,
-        isLoadingDescription,
-        onUpdateField,
-        handleManageMarkdownEditId,
-        handleManageQuote,
-      ]
-    );
-
     const userActions: EuiCommentProps[] = useMemo(
       () =>
-        caseUserActions.reduce<EuiCommentProps[]>(
-          (comments, userAction, index) => {
-            if (!isUserActionTypeSupported(userAction.type)) {
-              return comments;
-            }
+        caseUserActions.reduce<EuiCommentProps[]>((comments, userAction, index) => {
+          if (!isUserActionTypeSupported(userAction.type)) {
+            return comments;
+          }
 
-            const builder = builderMap[userAction.type];
+          const builder = builderMap[userAction.type];
 
-            if (builder == null) {
-              return comments;
-            }
+          if (builder == null) {
+            return comments;
+          }
 
-            const userActionBuilder = builder({
-              caseData,
-              externalReferenceAttachmentTypeRegistry,
-              persistableStateAttachmentTypeRegistry,
-              userAction,
-              caseServices,
-              comments: caseData.comments,
-              index,
-              commentRefs,
-              manageMarkdownEditIds,
-              selectedOutlineCommentId,
-              loadingCommentIds,
-              loadingAlertData,
-              alertData: manualAlertsData,
-              handleOutlineComment,
-              handleManageMarkdownEditId,
-              handleDeleteComment,
-              handleSaveComment,
-              handleManageQuote,
-              onShowAlertDetails,
-              actionsNavigation,
-              getRuleDetailsHref,
-              onRuleDetailsClick,
-            });
-            return [...comments, ...userActionBuilder.build()];
-          },
-          [descriptionCommentListObj]
-        ),
+          const userActionBuilder = builder({
+            appId,
+            caseData,
+            caseConnectors,
+            externalReferenceAttachmentTypeRegistry,
+            persistableStateAttachmentTypeRegistry,
+            userAction,
+            userProfiles,
+            currentUserProfile,
+            comments: caseData.comments,
+            index,
+            commentRefs,
+            manageMarkdownEditIds,
+            selectedOutlineCommentId,
+            loadingCommentIds,
+            loadingAlertData,
+            alertData: manualAlertsData,
+            handleOutlineComment,
+            handleManageMarkdownEditId,
+            handleDeleteComment,
+            handleSaveComment,
+            handleManageQuote,
+            onShowAlertDetails,
+            actionsNavigation,
+            getRuleDetailsHref,
+            onRuleDetailsClick,
+          });
+          return [...comments, ...userActionBuilder.build()];
+        }, []),
       [
+        appId,
+        caseConnectors,
         caseUserActions,
+        userProfiles,
+        currentUserProfile,
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
-        descriptionCommentListObj,
         caseData,
-        caseServices,
         commentRefs,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
@@ -233,19 +217,18 @@ export const UserActions = React.memo(
 
     const { permissions } = useCasesContext();
 
-    const bottomActions = permissions.create
+    const showCommentEditor = permissions.create && filterOptions !== 'action'; // add-comment markdown is not visible in History filter
+
+    const bottomActions = showCommentEditor
       ? [
           {
             username: (
-              <UserActionUsername
-                username={currentUser?.username}
-                fullName={currentUser?.fullName}
-              />
+              <UserToolTip userInfo={currentUserProfile}>
+                <Username userInfo={currentUserProfile} />
+              </UserToolTip>
             ),
             'data-test-subj': 'add-comment',
-            timelineIcon: (
-              <UserActionAvatar username={currentUser?.username} fullName={currentUser?.fullName} />
-            ),
+            timelineAvatar: <HoverableAvatar userInfo={currentUserProfile} />,
             className: 'isEdit',
             children: MarkdownNewComment,
           },

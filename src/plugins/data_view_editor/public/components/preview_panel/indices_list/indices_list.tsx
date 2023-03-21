@@ -25,13 +25,14 @@ import {
 } from '@elastic/eui';
 
 import { Pager } from '@elastic/eui';
-
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MatchedItem, Tag } from '../../../types';
+import { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
 
-interface IndicesListProps {
+export interface IndicesListProps {
   indices: MatchedItem[];
   query: string;
+  isExactMatch: (indexName: string) => boolean;
 }
 
 interface IndicesListState {
@@ -41,15 +42,20 @@ interface IndicesListState {
 }
 
 const PER_PAGE_INCREMENTS = [5, 10, 20, 50];
+export const PER_PAGE_STORAGE_KEY = 'dataViews.previewPanel.indicesPerPage';
 
 export class IndicesList extends React.Component<IndicesListProps, IndicesListState> {
   pager: Pager;
+  storage: Storage;
+
   constructor(props: IndicesListProps) {
     super(props);
 
+    this.storage = new Storage(localStorage);
+
     this.state = {
       page: 0,
-      perPage: PER_PAGE_INCREMENTS[1],
+      perPage: this.storage.get(PER_PAGE_STORAGE_KEY) || PER_PAGE_INCREMENTS[1],
       isPerPageControlOpen: false,
     };
 
@@ -75,6 +81,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     this.setState({ perPage });
     this.resetPageTo0();
     this.closePerPageControl();
+    this.storage.set(PER_PAGE_STORAGE_KEY, perPage);
   };
 
   openPerPageControl = () => {
@@ -144,35 +151,58 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
   }
 
   highlightIndexName(indexName: string, query: string) {
-    const queryIdx = indexName.indexOf(query);
-    if (!query || queryIdx === -1) {
+    const { isExactMatch } = this.props;
+
+    if (!query) {
       return indexName;
     }
 
-    const preStr = indexName.substr(0, queryIdx);
-    const postStr = indexName.substr(queryIdx + query.length);
+    if (isExactMatch(indexName)) {
+      return <strong>{indexName}</strong>;
+    }
+
+    const queryAsArray = query
+      .split(',')
+      .map((q) => q.trim())
+      .filter(Boolean);
+    let queryIdx = -1;
+    let queryWithoutWildcard = '';
+    for (let i = 0; i < queryAsArray.length; i++) {
+      const queryComponent = queryAsArray[i];
+      queryWithoutWildcard = queryComponent.endsWith('*')
+        ? queryComponent.substring(0, queryComponent.length - 1)
+        : queryComponent;
+      queryIdx = indexName.indexOf(queryWithoutWildcard);
+
+      if (queryIdx !== -1) {
+        break;
+      }
+    }
+
+    if (queryIdx === -1) {
+      return indexName;
+    }
+
+    const preStr = indexName.substring(0, queryIdx);
+    const postStr = indexName.substr(queryIdx + queryWithoutWildcard.length);
 
     return (
       <span>
         {preStr}
-        <strong>{query}</strong>
+        <strong>{queryWithoutWildcard}</strong>
         {postStr}
       </span>
     );
   }
 
   render() {
-    const { indices, query, ...rest } = this.props;
-
-    const queryWithoutWildcard = query.endsWith('*') ? query.substr(0, query.length - 1) : query;
+    const { indices, query, isExactMatch, ...rest } = this.props;
 
     const paginatedIndices = indices.slice(this.pager.firstItemIndex, this.pager.lastItemIndex + 1);
     const rows = paginatedIndices.map((index, key) => {
       return (
         <EuiTableRow key={key}>
-          <EuiTableRowCell>
-            {this.highlightIndexName(index.name, queryWithoutWildcard)}
-          </EuiTableRowCell>
+          <EuiTableRowCell>{this.highlightIndexName(index.name, query)}</EuiTableRowCell>
           <EuiTableRowCell>
             {index.tags.map((tag: Tag) => {
               return (

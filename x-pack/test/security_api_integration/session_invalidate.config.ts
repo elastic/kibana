@@ -15,7 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
-  const idpPath = resolve(__dirname, './fixtures/saml/idp_metadata.xml');
+  const idpPath = require.resolve('@kbn/security-api-integration-helpers/saml/idp_metadata.xml');
 
   return {
     testFiles: [resolve(__dirname, './tests/session_invalidate')],

@@ -24,6 +24,7 @@ interface AutocompleteFieldProps {
   disabled?: boolean;
   autoFocus?: boolean;
   'aria-label'?: string;
+  compressed?: boolean;
 }
 
 interface AutocompleteFieldState {
@@ -53,6 +54,7 @@ export class AutocompleteField extends React.Component<
       value,
       disabled,
       'aria-label': ariaLabel,
+      compressed,
     } = this.props;
     const { areSuggestionsVisible, selectedIndex } = this.state;
 
@@ -60,6 +62,7 @@ export class AutocompleteField extends React.Component<
       <EuiOutsideClickDetector onOutsideClick={this.handleBlur}>
         <AutocompleteContainer>
           <EuiFieldSearch
+            compressed={compressed}
             fullWidth
             disabled={disabled}
             inputRef={this.handleChangeInputRef}
@@ -76,7 +79,7 @@ export class AutocompleteField extends React.Component<
             data-test-subj="infraSearchField"
           />
           {areSuggestionsVisible && !isLoadingSuggestions && suggestions.length > 0 ? (
-            <SuggestionsPanel>
+            <SuggestionsPanel data-test-subj="infraSuggestionsPanel">
               {suggestions.map((suggestion, suggestionIndex) => (
                 <SuggestionItem
                   key={suggestion.text}

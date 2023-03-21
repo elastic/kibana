@@ -74,3 +74,33 @@
     outline: none;
   }
 }
+
+@mixin euiFlyout {
+  border-left: $euiBorderThin;
+  // The mixin augments the above
+  // sass-lint:disable mixins-before-declarations
+  @include euiBottomShadowLarge;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  height: 100%;
+  z-index: $euiZFlyout;
+  background: $euiColorEmptyShade;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  clip-path: polygon(-50% 0, 100% 0, 100% 100%, -50% 100%);
+}
+
+@keyframes euiFlyoutAnimation {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  75% {
+    opacity: 1;
+    transform: translateX(0%);
+  }
+}

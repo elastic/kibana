@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SingleCaseMetricsResponse } from '../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../common/api';
 import { BaseHandler } from './base_handler';
-import { SingleCaseBaseHandlerCommonOptions } from './types';
+import type { SingleCaseBaseHandlerCommonOptions } from './types';
 
 export abstract class SingleCaseBaseHandler extends BaseHandler<SingleCaseMetricsResponse> {
   protected readonly caseId: string;

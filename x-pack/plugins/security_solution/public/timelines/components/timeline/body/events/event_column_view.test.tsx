@@ -9,7 +9,6 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
-import * as i18n from '../translations';
 
 import { EventColumnView } from './event_column_view';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
@@ -19,8 +18,12 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { getDefaultControlColumn } from '../control_columns';
 import { testLeadingControlColumn } from '../../../../../common/mock/mock_timeline_control_columns';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
-import { getActionsColumnWidth } from '@kbn/timelines-plugin/public';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import {
+  NOTES_DISABLE_TOOLTIP,
+  NOTES_TOOLTIP,
+} from '../../../../../common/components/header_actions/translations';
+import { getActionsColumnWidth } from '../../../../../common/components/header_actions';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -58,10 +61,14 @@ jest.mock('../../../../../common/lib/kibana', () => {
         cases: mockCasesContract(),
       },
     }),
+    useNavigateTo: () => ({
+      navigateTo: jest.fn(),
+    }),
     useToasts: jest.fn().mockReturnValue({
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      remove: jest.fn(),
     }),
     useGetUserCasesPermissions: originalModule.useGetUserCasesPermissions,
   };
@@ -133,7 +140,7 @@ describe('EventColumnView', () => {
   test('it renders correct tooltip for NotesButton - timeline', () => {
     const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
 
-    expect(wrapper.find('[data-test-subj="add-note"]').prop('toolTip')).toEqual(i18n.NOTES_TOOLTIP);
+    expect(wrapper.find('[data-test-subj="add-note"]').prop('toolTip')).toEqual(NOTES_TOOLTIP);
   });
 
   test('it renders correct tooltip for NotesButton - timeline template', () => {
@@ -142,7 +149,7 @@ describe('EventColumnView', () => {
     const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
 
     expect(wrapper.find('[data-test-subj="add-note"]').prop('toolTip')).toEqual(
-      i18n.NOTES_DISABLE_TOOLTIP
+      NOTES_DISABLE_TOOLTIP
     );
     (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
   });

@@ -6,10 +6,12 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { usePostPushToService, UsePostPushToService } from './use_post_push_to_service';
+import type { UsePostPushToService } from './use_post_push_to_service';
+import { usePostPushToService } from './use_post_push_to_service';
 import { pushedCase } from './mock';
 import * as api from './api';
-import { CaseConnector, ConnectorTypes } from '../../common/api';
+import type { CaseConnector } from '../../common/api';
+import { ConnectorTypes } from '../../common/api';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

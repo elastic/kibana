@@ -35,13 +35,8 @@ export const InstallationMessage: React.FunctionComponent<Props> = ({
 
   return (
     <>
-      <EuiText>
-        {isK8s === 'IS_KUBERNETES' ? (
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.stepRunAgentDescriptionk8s"
-            defaultMessage="From the directory where the Kubernetes manifest is downloaded, run the apply command."
-          />
-        ) : (
+      {isK8s !== 'IS_KUBERNETES_MULTIPAGE' && (
+        <EuiText>
           <FormattedMessage
             id="xpack.fleet.enrollmentInstructions.installationMessage"
             defaultMessage="Select the appropriate platform and run commands to install, enroll, and start Elastic Agent. Reuse commands to set up agents on more than one host. For aarch64, see our {downloadLink}. For additional guidance, see our {installationLink}."
@@ -76,8 +71,16 @@ export const InstallationMessage: React.FunctionComponent<Props> = ({
               ),
             }}
           />
-        )}
-      </EuiText>
+        </EuiText>
+      )}
+      {isK8s === 'IS_KUBERNETES_MULTIPAGE' && (
+        <EuiText>
+          <FormattedMessage
+            id="xpack.fleet.enrollmentInstructions.k8sInstallationMessage"
+            defaultMessage="The below manifest has been automatically generated and includes credentials for this instance of Elastic Agent to be centrally managed using Fleet once it gets running in your Kubernetes cluster."
+          />
+        </EuiText>
+      )}
       <EuiSpacer size="l" />
     </>
   );

@@ -6,12 +6,12 @@ exports[`EPM template tests loading base.yml: base.yml 1`] = `
     "user": {
       "properties": {
         "auid": {
-          "ignore_above": 1024,
-          "type": "keyword"
+          "type": "keyword",
+          "ignore_above": 1024
         },
         "euid": {
-          "ignore_above": 1024,
-          "type": "keyword"
+          "type": "keyword",
+          "ignore_above": 1024
         }
       }
     },
@@ -32,12 +32,12 @@ exports[`EPM template tests loading base.yml: base.yml 1`] = `
     "nested": {
       "properties": {
         "bar": {
-          "ignore_above": 1024,
-          "type": "keyword"
+          "type": "keyword",
+          "ignore_above": 1024
         },
         "baz": {
-          "ignore_above": 1024,
-          "type": "keyword"
+          "type": "keyword",
+          "ignore_above": 1024
         }
       }
     },
@@ -56,14 +56,67 @@ exports[`EPM template tests loading base.yml: base.yml 1`] = `
 }
 `;
 
+exports[`EPM template tests loading cockroachdb_dynamic_templates.yml: cockroachdb_dynamic_templates.yml 1`] = `
+{
+  "properties": {},
+  "dynamic_templates": [
+    {
+      "cockroachdb.status.labels": {
+        "mapping": {
+          "type": "keyword"
+        },
+        "match_mapping_type": "string",
+        "path_match": "cockroachdb.status.labels.*"
+      }
+    },
+    {
+      "cockroachdb.status.*.value": {
+        "mapping": {
+          "type": "double"
+        },
+        "match_mapping_type": "*",
+        "path_match": "cockroachdb.status.*.value"
+      }
+    },
+    {
+      "cockroachdb.status.*.counter": {
+        "mapping": {
+          "type": "double"
+        },
+        "match_mapping_type": "*",
+        "path_match": "cockroachdb.status.*.counter"
+      }
+    },
+    {
+      "cockroachdb.status.*.rate": {
+        "mapping": {
+          "type": "double"
+        },
+        "match_mapping_type": "*",
+        "path_match": "cockroachdb.status.*.rate"
+      }
+    },
+    {
+      "cockroachdb.status.*.histogram": {
+        "mapping": {
+          "type": "histogram"
+        },
+        "match_mapping_type": "*",
+        "path_match": "cockroachdb.status.*.histogram"
+      }
+    }
+  ]
+}
+`;
+
 exports[`EPM template tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
 {
   "properties": {
     "coredns": {
       "properties": {
         "id": {
-          "ignore_above": 1024,
-          "type": "keyword"
+          "type": "keyword",
+          "ignore_above": 1024
         },
         "query": {
           "properties": {
@@ -71,28 +124,28 @@ exports[`EPM template tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
               "type": "long"
             },
             "class": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "name": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "type": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             }
           }
         },
         "response": {
           "properties": {
             "code": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "flags": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "size": {
               "type": "long"
@@ -386,12 +439,12 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
         "diskio": {
           "properties": {
             "name": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "serial_number": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "read": {
               "properties": {
@@ -520,16 +573,16 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
               "type": "long"
             },
             "device_name": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "type": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "mount_point": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "files": {
               "type": "long"
@@ -744,8 +797,8 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
         "network": {
           "properties": {
             "name": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "out": {
               "properties": {
@@ -823,15 +876,12 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
         "process": {
           "properties": {
             "state": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "cmdline": {
-              "ignore_above": 2048,
-              "type": "keyword"
-            },
-            "env": {
-              "type": "object"
+              "type": "keyword",
+              "ignore_above": 2048
             },
             "cpu": {
               "properties": {
@@ -917,22 +967,22 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
             "cgroup": {
               "properties": {
                 "id": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 1024
                 },
                 "path": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 1024
                 },
                 "cpu": {
                   "properties": {
                     "id": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
+                      "type": "keyword",
+                      "ignore_above": 1024
                     },
                     "path": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
+                      "type": "keyword",
+                      "ignore_above": 1024
                     },
                     "cfs": {
                       "properties": {
@@ -995,12 +1045,12 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                 "cpuacct": {
                   "properties": {
                     "id": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
+                      "type": "keyword",
+                      "ignore_above": 1024
                     },
                     "path": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
+                      "type": "keyword",
+                      "ignore_above": 1024
                     },
                     "total": {
                       "properties": {
@@ -1026,21 +1076,18 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                           }
                         }
                       }
-                    },
-                    "percpu": {
-                      "type": "object"
                     }
                   }
                 },
                 "memory": {
                   "properties": {
                     "id": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
+                      "type": "keyword",
+                      "ignore_above": 1024
                     },
                     "path": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
+                      "type": "keyword",
+                      "ignore_above": 1024
                     },
                     "mem": {
                       "properties": {
@@ -1259,12 +1306,12 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                 "blkio": {
                   "properties": {
                     "id": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
+                      "type": "keyword",
+                      "ignore_above": 1024
                     },
                     "path": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
+                      "type": "keyword",
+                      "ignore_above": 1024
                     },
                     "total": {
                       "properties": {
@@ -1313,20 +1360,20 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
         "raid": {
           "properties": {
             "name": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "status": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "level": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "sync_action": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "disks": {
               "properties": {
@@ -1341,13 +1388,6 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                 },
                 "failed": {
                   "type": "long"
-                },
-                "states": {
-                  "properties": {
-                    "*": {
-                      "type": "object"
-                    }
-                  }
                 }
               }
             },
@@ -1384,29 +1424,26 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                   "type": "long"
                 },
                 "host": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 1024
                 },
                 "etld_plus_one": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 1024
                 },
                 "host_error": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 1024
                 }
               }
             },
             "process": {
               "properties": {
                 "cmdline": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 1024
                 }
               }
-            },
-            "user": {
-              "properties": {}
             },
             "summary": {
               "properties": {
@@ -1499,47 +1536,76 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
         "users": {
           "properties": {
             "id": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "seat": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "path": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "type": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "service": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "remote": {
               "type": "boolean"
             },
             "state": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "scope": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             },
             "leader": {
               "type": "long"
             },
             "remote_host": {
-              "ignore_above": 1024,
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 1024
             }
           }
         }
       }
     }
-  }
+  },
+  "dynamic_templates": [
+    {
+      "system.process.env": {
+        "mapping": {
+          "type": "keyword"
+        },
+        "match_mapping_type": "string",
+        "path_match": "system.process.env.*"
+      }
+    },
+    {
+      "system.process.cgroup.cpuacct.percpu": {
+        "mapping": {
+          "type": "long"
+        },
+        "match_mapping_type": "long",
+        "path_match": "system.process.cgroup.cpuacct.percpu.*"
+      }
+    },
+    {
+      "system.raid.disks.states.*": {
+        "mapping": {
+          "type": "keyword"
+        },
+        "match_mapping_type": "string",
+        "path_match": "system.raid.disks.states.*"
+      }
+    }
+  ]
 }
 `;

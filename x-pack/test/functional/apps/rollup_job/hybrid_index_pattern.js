@@ -38,9 +38,6 @@ export default function ({ getService, getPageObjects }) {
         'global_index_pattern_management_all',
         'test_rollup_reader',
       ]);
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup_hybrid'
-      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'rollup',
       });
@@ -120,9 +117,7 @@ export default function ({ getService, getPageObjects }) {
         `${regularIndexPrefix}*`,
         `${rollupSourceIndexPrefix}*`,
       ]);
-      await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup_hybrid'
-      );
+      await kibanaServer.savedObjects.cleanStandardList();
     });
   });
 }

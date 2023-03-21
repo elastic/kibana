@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { InfraPluginSetup } from '@kbn/infra-plugin/server';
-import { prefixIndexPatternWithCcs } from '../../../common/ccs_utils';
 import { CCS_REMOTE_PATTERN, INFRA_SOURCE_ID } from '../../../common/constants';
 import { MonitoringConfig } from '../../config';
+import { getIndexPatterns } from '../cluster/get_index_patterns';
 
 export const initInfraSource = (config: MonitoringConfig, infraPlugin: InfraPluginSetup) => {
   if (infraPlugin) {
-    const filebeatIndexPattern = prefixIndexPatternWithCcs(
+    const logsIndexPattern = getIndexPatterns({
       config,
-      config.ui.logs.index,
-      CCS_REMOTE_PATTERN
-    );
-    infraPlugin.defineInternalSourceConfiguration(INFRA_SOURCE_ID, {
+      type: 'logs',
+      ccs: CCS_REMOTE_PATTERN,
+    });
+
+    infraPlugin.logViews.defineInternalLogView(INFRA_SOURCE_ID, {
       name: 'Elastic Stack Logs',
       logIndices: {
         type: 'index_name',
-        indexName: filebeatIndexPattern,
+        indexName: logsIndexPattern,
       },
     });
   }

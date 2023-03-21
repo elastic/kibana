@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -17,16 +17,19 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
-import { AggregationType } from '../types';
+import { AggregationType, FieldOption } from '../types';
 import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
 import './of.scss';
 
+interface OfFieldOption {
+  label: string;
+}
 export interface OfExpressionProps {
   aggType: string;
   aggField?: string;
   errors: IErrorObject;
-  onChangeSelectedAggField: (selectedAggType?: string) => void;
+  onChangeSelectedAggField: (selectedAggField?: string) => void;
   fields: Record<string, any>;
   customAggTypesOptions?: {
     [key: string]: AggregationType;
@@ -71,14 +74,28 @@ export const OfExpression = ({
   };
   const aggregationTypes = customAggTypesOptions ?? builtInAggregationTypes;
 
-  const availablefieldsOptions = fields.reduce((esFieldOptions: any[], field: any) => {
-    if (aggregationTypes[aggType].validNormalizedTypes.includes(field.normalizedType)) {
-      esFieldOptions.push({
-        label: field.name,
-      });
+  const availableFieldOptions: OfFieldOption[] = fields.reduce(
+    (esFieldOptions: OfFieldOption[], field: FieldOption) => {
+      if (aggregationTypes[aggType].validNormalizedTypes.includes(field.normalizedType)) {
+        esFieldOptions.push({
+          label: field.name,
+        });
+      }
+      return esFieldOptions;
+    },
+    []
+  );
+
+  useEffect(() => {
+    // if current field set doesn't contain selected field, clear selection
+    if (
+      aggField &&
+      fields.length > 0 &&
+      !fields.find((field: FieldOption) => field.name === aggField)
+    ) {
+      onChangeSelectedAggField(undefined);
     }
-    return esFieldOptions;
-  }, []);
+  }, [aggField, fields, onChangeSelectedAggField]);
 
   return (
     <EuiPopover
@@ -105,7 +122,7 @@ export const OfExpression = ({
       closePopover={() => {
         setAggFieldPopoverOpen(false);
       }}
-      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
+      display={display === 'fullWidth' ? 'block' : 'inline-block'}
       anchorPosition={popupPosition ?? 'downRight'}
       zIndex={8000}
       repositionOnScroll
@@ -133,8 +150,8 @@ export const OfExpression = ({
                 data-test-subj="availablefieldsOptionsComboBox"
                 isInvalid={errors.aggField.length > 0 && aggField !== undefined}
                 placeholder={firstFieldOption.text}
-                options={availablefieldsOptions}
-                noSuggestions={!availablefieldsOptions.length}
+                options={availableFieldOptions}
+                noSuggestions={!availableFieldOptions.length}
                 selectedOptions={aggField ? [{ label: aggField }] : []}
                 onChange={(selectedOptions) => {
                   onChangeSelectedAggField(

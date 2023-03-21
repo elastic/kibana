@@ -7,18 +7,20 @@
 
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { getHeapMemoryChart } from './heap_memory';
-import { Setup } from '../../../../lib/helpers/setup_request';
 import { getNonHeapMemoryChart } from './non_heap_memory';
 import { getThreadCountChart } from './thread_count';
 import { getCPUChartData } from '../shared/cpu';
 import { getMemoryChartData } from '../shared/memory';
 import { getGcRateChart } from './gc/get_gc_rate_chart';
 import { getGcTimeChart } from './gc/get_gc_time_chart';
+import { APMConfig } from '../../../..';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export function getJavaMetricsCharts({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   serviceNodeName,
   start,
@@ -26,7 +28,8 @@ export function getJavaMetricsCharts({
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   serviceNodeName?: string;
   start: number;
@@ -36,7 +39,8 @@ export function getJavaMetricsCharts({
     const options = {
       environment,
       kuery,
-      setup,
+      config,
+      apmEventClient,
       serviceName,
       serviceNodeName,
       start,

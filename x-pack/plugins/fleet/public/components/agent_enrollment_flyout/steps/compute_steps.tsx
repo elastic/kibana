@@ -37,7 +37,6 @@ import {
   AgentEnrollmentConfirmationStep,
   InstallManagedAgentStep,
   IncomingDataConfirmationStep,
-  DownloadStep,
 } from '.';
 
 export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
@@ -122,7 +121,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   }, [fullAgentPolicy, isK8s]);
 
   const instructionsSteps = useMemo(() => {
-    const standaloneInstallCommands = StandaloneInstructions(kibanaVersion, isK8s);
+    const standaloneInstallCommands = StandaloneInstructions(kibanaVersion);
 
     const steps: EuiContainedStepProps[] = !agentPolicy
       ? [
@@ -187,7 +186,8 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   setSelectedPolicyId,
   selectedApiKeyId,
   setSelectedAPIKeyId,
-  settings,
+  fleetServerHosts,
+  fleetProxy,
   refreshAgentPolicies,
   mode,
   setMode,
@@ -195,7 +195,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   onClickViewAgents,
   isK8s,
   installedPackagePolicy,
-  isFleetServerPolicySelected,
 }) => {
   const kibanaVersion = useKibanaVersion();
   const core = useStartServices();
@@ -209,10 +208,12 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
 
   const enrolledAgentIds = usePollingAgentCount(selectedPolicy?.id || '');
 
-  const fleetServerHosts = useMemo(() => {
-    return settings?.fleet_server_hosts || [];
-  }, [settings]);
-  const installManagedCommands = ManualInstructions(enrollToken, fleetServerHosts, kibanaVersion);
+  const installManagedCommands = ManualInstructions({
+    apiKey: enrollToken,
+    fleetServerHosts,
+    fleetProxy,
+    kibanaVersion,
+  });
 
   const instructionsSteps = useMemo(() => {
     const steps: EuiContainedStepProps[] = !agentPolicy
@@ -240,18 +241,13 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
       );
     }
 
-    if (isK8s === 'IS_KUBERNETES') {
-      steps.push(
-        DownloadStep(isFleetServerPolicySelected || false, isK8s || '', enrollToken || '')
-      );
-    }
-
     steps.push(
       InstallManagedAgentStep({
         installCommand: installManagedCommands,
         apiKeyData,
         selectedApiKeyId,
         isK8s,
+        enrollToken,
       })
     );
     if (selectedApiKeyId && apiKeyData) {
@@ -292,7 +288,6 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     enrolledAgentIds,
     mode,
     setMode,
-    isFleetServerPolicySelected,
     enrollToken,
     onClickViewAgents,
     link,

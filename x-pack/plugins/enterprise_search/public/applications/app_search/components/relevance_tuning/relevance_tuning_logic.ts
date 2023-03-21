@@ -294,6 +294,7 @@ export const RelevanceTuningLogic = kea<
       actions.setResultsLoading(true);
 
       const filteredBoosts = removeEmptyValueBoosts(boosts);
+      const precisionSettings = values.isPrecisionTuningEnabled ? { precision } : {};
 
       try {
         const response = await http.post<{ results: SearchResult[] }>(url, {
@@ -303,7 +304,7 @@ export const RelevanceTuningLogic = kea<
           body: JSON.stringify({
             boosts: isEmpty(filteredBoosts) ? undefined : filteredBoosts,
             search_fields: isEmpty(searchFields) ? undefined : searchFields,
-            precision,
+            ...precisionSettings,
           }),
         });
 

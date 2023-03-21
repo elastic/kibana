@@ -6,7 +6,9 @@
  */
 
 import * as rt from 'io-ts';
-import { ActionTypes, UserActionWithAttributes } from './common';
+import { AssigneesUserActionPayloadRt } from './assignees';
+import type { UserActionWithAttributes } from './common';
+import { ActionTypes } from './common';
 import {
   ConnectorUserActionPayloadRt,
   ConnectorUserActionPayloadWithoutConnectorIdRt,
@@ -21,6 +23,7 @@ export const CommonFieldsRt = rt.type({
 });
 
 const CommonPayloadAttributesRt = rt.type({
+  assignees: AssigneesUserActionPayloadRt.props.assignees,
   description: DescriptionUserActionPayloadRt.props.description,
   status: rt.string,
   severity: rt.string,

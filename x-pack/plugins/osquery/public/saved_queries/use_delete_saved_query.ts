@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../common/lib/kibana';
@@ -27,7 +27,7 @@ export const useDeleteSavedQuery = ({ savedQueryId }: UseDeleteSavedQueryProps) 
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation(() => http.delete(`/internal/osquery/saved_query/${savedQueryId}`), {
+  return useMutation(() => http.delete(`/api/osquery/saved_queries/${savedQueryId}`), {
     onError: (error: { body: { error: string; message: string } }) => {
       setErrorToast(error, {
         title: error.body.error,
@@ -35,7 +35,7 @@ export const useDeleteSavedQuery = ({ savedQueryId }: UseDeleteSavedQueryProps) 
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(SAVED_QUERIES_ID);
+      queryClient.invalidateQueries([SAVED_QUERIES_ID]);
       navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
       toasts.addSuccess(
         i18n.translate('xpack.osquery.editSavedQuery.deleteSuccessToastMessageText', {

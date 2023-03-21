@@ -12,13 +12,15 @@ import { FrameHeading } from './frame_heading';
 
 function getRenderedStackframeText(
   stackframe: Stackframe,
-  codeLanguage: string
+  codeLanguage: string,
+  idx: string
 ) {
   const result = renderWithTheme(
     <FrameHeading
       codeLanguage={codeLanguage}
       isLibraryFrame={false}
       stackframe={stackframe}
+      idx={idx}
     />
   );
 
@@ -38,7 +40,8 @@ describe('FrameHeading', () => {
             function: 'Main.func2',
             module: 'main',
           },
-          'go'
+          'go',
+          '0'
         )
       ).toEqual('main.go in Main.func2 at line 196');
     });
@@ -57,7 +60,8 @@ describe('FrameHeading', () => {
             module: 'org.apache.catalina.connector',
             function: 'flushByteBuffer',
           },
-          'Java'
+          'Java',
+          '0'
         )
       ).toEqual(
         'at org.apache.catalina.connector.OutputBuffer.flushByteBuffer(OutputBuffer.java:825)'
@@ -82,7 +86,8 @@ describe('FrameHeading', () => {
                 'opbeans-dotnet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null',
               function: 'Get',
             },
-            'C#'
+            'C#',
+            '0'
           )
         ).toEqual(
           'OpbeansDotnet.Controllers.CustomersController in Get in /src/opbeans-dotnet/Controllers/CustomersController.cs at line 23'
@@ -103,7 +108,8 @@ describe('FrameHeading', () => {
               module:
                 'Microsoft.EntityFrameworkCore, Version=2.2.6.0, Culture=neutral, PublicKeyToken=adb9793829ddae60',
             },
-            'C#'
+            'C#',
+            '0'
           )
         ).toEqual(
           'Microsoft.EntityFrameworkCore.Query.Internal.LinqOperatorProvider+ResultEnumerable`1 in GetEnumerator'
@@ -124,7 +130,8 @@ describe('FrameHeading', () => {
             line: { number: 120 },
             function: 'callbackTrampoline',
           },
-          'javascript'
+          'javascript',
+          '0'
         )
       ).toEqual('at callbackTrampoline (internal/async_hooks.js:120)');
     });
@@ -142,7 +149,8 @@ describe('FrameHeading', () => {
               line: { number: 205 },
               function: 'onStreamRead',
             },
-            'javascript'
+            'javascript',
+            '0'
           )
         ).toEqual(
           'at TCPConnectWrap.onStreamRead (internal/stream_base_commons.js:205)'
@@ -161,7 +169,8 @@ describe('FrameHeading', () => {
               abs_path: 'internal/stream_base_commons.js',
               line: { number: 205 },
             },
-            'javascript'
+            'javascript',
+            '0'
           )
         ).toEqual('at  (internal/stream_base_commons.js:205)');
       });
@@ -195,7 +204,8 @@ describe('FrameHeading', () => {
             },
             vars: { request: "<WSGIRequest: POST '/api/orders'>" },
           },
-          'python'
+          'python',
+          '0'
         )
       ).toEqual('opbeans/views.py in orders at line 190');
     });
@@ -220,7 +230,8 @@ describe('FrameHeading', () => {
               post: ['    end\n', '  end\n'],
             },
           },
-          'ruby'
+          'ruby',
+          '0'
         )
       ).toEqual("api/customers_controller.rb:15 in `show'");
     });
@@ -243,10 +254,32 @@ describe('FrameHeading', () => {
             line: { number: 319, column: 3842 },
             function: 'unstable_runWithPriority',
           },
-          'javascript'
+          'javascript',
+          '0'
         )
       ).toEqual(
         'at unstable_runWithPriority (static/js/main.616809fb.js:319:3842)'
+      );
+    });
+  });
+
+  describe('with a PHP stackframe', () => {
+    it('renders', () => {
+      expect(
+        getRenderedStackframeText(
+          {
+            library_frame: false,
+            exclude_from_grouping: false,
+            filename:
+              '/app/vendor/laravel/framework/src/Illuminate/Database/Connectors/PostgresConnector.php',
+            line: { number: 87 },
+            function: 'PDOStatement->execute()',
+          },
+          'php',
+          '1'
+        )
+      ).toEqual(
+        '#1   PDOStatement->execute() called at [/app/vendor/laravel/framework/src/Illuminate/Database/Connectors/PostgresConnector.php:87]'
       );
     });
   });

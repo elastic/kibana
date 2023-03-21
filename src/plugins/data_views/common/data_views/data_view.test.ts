@@ -6,19 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { map, last } from 'lodash';
-
-import { DataView } from './data_view';
-
-import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
-
-import { DataViewField } from '../fields';
-
-import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { RuntimeField, RuntimeTypeExceptComposite } from '../types';
+
+import { RuntimeField, RuntimePrimitiveTypes, FieldSpec } from '../types';
 import { stubLogstashFields } from '../field.stub';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
+import { last, map } from 'lodash';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
+import { DataViewField } from '../fields';
+import { DataView } from './data_view';
 
 class MockFieldFormatter {}
 
@@ -41,7 +38,7 @@ const runtimeField = {
   type: 'string',
 };
 
-fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter()) as any;
+fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldFormatter());
 
 // helper function to create index patterns
 function create(id: string, spec?: object) {
@@ -97,6 +94,29 @@ describe('IndexPattern', () => {
       expect(indexPattern.fields[0]).toHaveProperty('sortable');
       expect(indexPattern.fields[0]).toHaveProperty('scripted');
       expect(indexPattern.fields[0]).toHaveProperty('isMapped');
+    });
+  });
+
+  describe('isTSDBMode', () => {
+    const tsdbField: FieldSpec = {
+      name: 'tsdb-metric-field',
+      type: 'number',
+      aggregatable: true,
+      searchable: true,
+      timeSeriesMetric: 'gauge',
+    };
+
+    test('should return false if no fields are tsdb fields', () => {
+      expect(indexPattern.isTSDBMode()).toBe(false);
+    });
+
+    test('should return true if some fields are tsdb fields', () => {
+      indexPattern.fields.add(tsdbField);
+      expect(indexPattern.isTSDBMode()).toBe(true);
+    });
+
+    afterAll(() => {
+      indexPattern.fields.remove(tsdbField);
     });
   });
 
@@ -243,10 +263,10 @@ describe('IndexPattern', () => {
       },
       fields: {
         a: {
-          type: 'keyword' as RuntimeTypeExceptComposite,
+          type: 'keyword' as RuntimePrimitiveTypes,
         },
         b: {
-          type: 'long' as RuntimeTypeExceptComposite,
+          type: 'long' as RuntimePrimitiveTypes,
         },
       },
     };
@@ -309,6 +329,29 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec()!.fields!['@tags'].runtimeField).toBeUndefined();
     });
 
+    test('ignore runtime field mapping if a mapped field exists with the same name', () => {
+      expect(indexPattern.getRuntimeMappings()).toEqual({
+        runtime_field: { script: { source: "emit('hello world')" }, type: 'keyword' },
+      });
+
+      // add a runtime field called "theme"
+      indexPattern.addRuntimeField('theme', runtimeWithAttrs);
+
+      // add a new mapped field also called "theme"
+      indexPattern.fields.add({
+        name: 'theme',
+        type: 'keyword',
+        aggregatable: true,
+        searchable: true,
+        readFromDocValues: false,
+        isMapped: true,
+      });
+
+      expect(indexPattern.getRuntimeMappings()).toEqual({
+        runtime_field: { script: { source: "emit('hello world')" }, type: 'keyword' },
+      });
+    });
+
     test('add and remove runtime field as new field', () => {
       indexPattern.addRuntimeField('new_field', runtimeWithAttrs);
       expect(indexPattern.toSpec().runtimeFieldMap).toEqual({
@@ -354,12 +397,25 @@ describe('IndexPattern', () => {
       expect(indexPattern.toSpec()!.fields!.new_field).toBeUndefined();
     });
 
-    test('should not allow runtime field with * in name', async () => {
+    test('should not allow runtime field with * in name', () => {
       try {
-        await indexPattern.addRuntimeField('test*123', runtime);
+        indexPattern.addRuntimeField('test*123', runtime);
       } catch (e) {
         expect(e).toBeInstanceOf(CharacterNotAllowedInField);
       }
+    });
+  });
+
+  describe('getIndexPattern', () => {
+    test('should return the index pattern, labeled title on the data view spec', () => {
+      expect(indexPattern.getIndexPattern()).toBe(
+        stubbedSavedObjectIndexPattern().attributes.title
+      );
+    });
+
+    test('setIndexPattern', () => {
+      indexPattern.setIndexPattern('test');
+      expect(indexPattern.getIndexPattern()).toBe('test');
     });
   });
 
@@ -409,7 +465,7 @@ describe('IndexPattern', () => {
         metaFields: [],
       });
       expect(restoredPattern.id).toEqual(indexPattern.id);
-      expect(restoredPattern.title).toEqual(indexPattern.title);
+      expect(restoredPattern.getIndexPattern()).toEqual(indexPattern.getIndexPattern());
       expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
       expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
     });

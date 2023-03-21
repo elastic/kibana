@@ -18,9 +18,8 @@ import {
 } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
 
@@ -30,6 +29,7 @@ import { GraphStore, setDatasource, submitSearchSaga } from '../state_management
 import { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 jest.mock('../services/source_modal', () => ({ openSourceModal: jest.fn() }));
 
@@ -43,6 +43,7 @@ function getServiceMocks() {
       },
     } as IUiSettingsClient,
     savedObjects: {} as SavedObjectsStart,
+    savedObjectsManagement: {} as SavedObjectsManagementPluginStart,
     notifications: {} as NotificationsStart,
     docLinks: {
       links: {
@@ -92,7 +93,7 @@ describe('search_bar', () => {
     isLoading: false,
     indexPatternProvider: {
       get: jest.fn(() =>
-        Promise.resolve({ fields: [], getName: () => 'Test Name' } as unknown as DataView)
+        Promise.resolve(createStubDataView({ spec: { fields: {}, name: 'Test Name' } }))
       ),
     },
     confirmWipeWorkspace: (callback: () => void) => {
@@ -105,11 +106,6 @@ describe('search_bar', () => {
       });
     },
   };
-
-  beforeEach(() => {
-    const autocompleteStart = unifiedSearchPluginMock.createStartContract();
-    setAutocomplete(autocompleteStart.autocomplete);
-  });
 
   beforeEach(() => {
     store = createMockGraphStore({
@@ -205,7 +201,7 @@ describe('search_bar', () => {
 
     // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme
-    instance.find('[data-test-subj="graphDatasourceButton"]').first().simulate('click');
+    instance.find('button[data-test-subj="graphDatasourceButton"]').first().simulate('click');
 
     expect(openSourceModal).toHaveBeenCalled();
   });

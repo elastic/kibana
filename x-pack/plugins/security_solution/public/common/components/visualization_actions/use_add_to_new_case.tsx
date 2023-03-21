@@ -8,7 +8,6 @@ import { useCallback, useMemo } from 'react';
 
 import { CommentType } from '@kbn/cases-plugin/common';
 
-import { APP_ID } from '../../../../common/constants';
 import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
 import { ADD_TO_CASE_SUCCESS } from './translations';
 
@@ -20,8 +19,6 @@ export interface UseAddToNewCaseProps {
   lensAttributes: LensAttributes | null;
 }
 
-const owner = APP_ID;
-
 export const useAddToNewCase = ({ onClick, timeRange, lensAttributes }: UseAddToNewCaseProps) => {
   const userCasesPermissions = useGetUserCasesPermissions();
   const { cases } = useKibana().services;
@@ -32,7 +29,6 @@ export const useAddToNewCase = ({ onClick, timeRange, lensAttributes }: UseAddTo
           timeRange,
           attributes: lensAttributes,
         })}}`,
-        owner,
         type: CommentType.user as const,
       },
     ];

@@ -8,22 +8,19 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useColumns } from './use_data_grid_columns';
-import { indexPatternMock } from '../__mocks__/index_pattern';
+import { dataViewMock } from '../__mocks__/data_view';
 import { configMock } from '../__mocks__/config';
-import { indexPatternsMock } from '../__mocks__/index_patterns';
-import { AppState } from '../application/context/services/context_state';
+import { dataViewsMock } from '../__mocks__/data_views';
 import { Capabilities } from '@kbn/core/types';
 
 describe('useColumns', () => {
   const defaultProps = {
     capabilities: { discover: { save: true } } as unknown as Capabilities,
     config: configMock,
-    indexPattern: indexPatternMock,
-    indexPatterns: indexPatternsMock,
+    dataView: dataViewMock,
+    dataViews: dataViewsMock,
     setAppState: () => {},
-    state: {
-      columns: ['Time', 'message'],
-    } as AppState,
+    columns: ['Time', 'message'],
     useNewFieldsApi: false,
   };
 
@@ -43,9 +40,7 @@ describe('useColumns', () => {
     const { result } = renderHook(() => {
       return useColumns({
         ...defaultProps,
-        state: {
-          columns: ['Time', '_source'],
-        },
+        columns: ['Time', '_source'],
         useNewFieldsApi: true,
       });
     });
@@ -57,9 +52,7 @@ describe('useColumns', () => {
     const { result } = renderHook(() => {
       return useColumns({
         ...defaultProps,
-        state: {
-          columns: [],
-        },
+        columns: [],
       });
     });
     expect(result.current.columns).toEqual([]);

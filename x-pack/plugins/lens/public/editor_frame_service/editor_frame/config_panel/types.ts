@@ -6,6 +6,7 @@
  */
 
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
 import {
   Visualization,
@@ -14,13 +15,16 @@ import {
   VisualizationDimensionGroupConfig,
   DatasourceMap,
   VisualizationMap,
+  UserMessagesGetter,
 } from '../../../types';
 export interface ConfigPanelWrapperProps {
   framePublicAPI: FramePublicAPI;
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
   core: DatasourceDimensionEditorProps['core'];
+  indexPatternService: IndexPatternServiceAPI;
   uiActions: UiActionsStart;
+  getUserMessages: UserMessagesGetter;
 }
 
 export interface LayerPanelProps {

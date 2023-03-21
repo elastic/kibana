@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import {
   AggDescriptor,
@@ -158,7 +158,7 @@ export function createLayerDescriptor({
   const metricsDescriptor = createAggDescriptor(metric);
 
   if (display === DISPLAY.CHOROPLETH) {
-    const joinId = uuid();
+    const joinId = uuidv4();
     const joinKey = getJoinAggKey({
       aggType: metricsDescriptor.type,
       aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
@@ -173,7 +173,6 @@ export function createLayerDescriptor({
             type: SOURCE_TYPES.ES_TERM_SOURCE,
             id: joinId,
             indexPatternId: APM_INDEX_PATTERN_ID,
-            indexPatternTitle: APM_INDEX_PATTERN_TITLE, // TODO look up from APM_OSS.indexPattern
             term: 'client.geo.country_iso_code',
             metrics: [metricsDescriptor],
             whereQuery: apmSourceQuery,

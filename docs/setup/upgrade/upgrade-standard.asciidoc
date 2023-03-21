@@ -1,8 +1,7 @@
 [[upgrade-standard]]
 === Standard upgrade
 
-NOTE: 7.17 includes an https://www.elastic.co/guide/en/kibana/7.17/upgrade-assistant.html[Upgrade Assistant]
-to help you prepare for your upgrade to 8.0. To access the assistant, go to *Stack Management > Upgrade Assistant*.
+NOTE: {kib} includes an <<upgrade-assistant,Upgrade Assistant>> to help you prepare for an upgrade. To access the assistant, go to *{stack-manage-app} > Upgrade Assistant*.
 
 [IMPORTANT]
 ===========================================

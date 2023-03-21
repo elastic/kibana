@@ -143,6 +143,7 @@ export function geoPointToGeometry(
     return;
   }
 
+  // geo_point fields API returns GeoJSON
   accumulator.push(value as Point);
 }
 

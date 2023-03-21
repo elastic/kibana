@@ -17,12 +17,20 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
+export enum SubmittingType {
+  savingAsAdHoc = 'savingAsAdHoc',
+  persisting = 'persisting',
+}
+
 interface FooterProps {
   onCancel: () => void;
   onSubmit: (isAdHoc?: boolean) => void;
+  submittingType: SubmittingType | undefined;
   submitDisabled: boolean;
   isEdit: boolean;
+  isPersisted: boolean;
   allowAdHoc: boolean;
+  canSave: boolean;
 }
 
 const closeButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutCloseButtonLabel', {
@@ -37,11 +45,28 @@ const editButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutEditButt
   defaultMessage: 'Save',
 });
 
+const editUnpersistedButtonLabel = i18n.translate(
+  'indexPatternEditor.editor.flyoutEditUnpersistedButtonLabel',
+  {
+    defaultMessage: 'Continue to use without saving',
+  }
+);
+
 const exploreButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutExploreButtonLabel', {
   defaultMessage: 'Use without saving',
 });
 
-export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit, allowAdHoc }: FooterProps) => {
+export const Footer = ({
+  onCancel,
+  onSubmit,
+  submittingType,
+  submitDisabled,
+  isEdit,
+  allowAdHoc,
+  isPersisted,
+  canSave,
+}: FooterProps) => {
+  const isEditingAdHoc = isEdit && !isPersisted;
   const submitPersisted = () => {
     onSubmit(false);
   };
@@ -72,6 +97,7 @@ export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit, allowAdHoc 
                   onClick={submitAdHoc}
                   data-test-subj="exploreIndexPatternButton"
                   disabled={submitDisabled}
+                  isLoading={submittingType === SubmittingType.savingAsAdHoc}
                   title={i18n.translate('indexPatternEditor.editor.flyoutExploreButtonTitle', {
                     defaultMessage: 'Use this data view without creating a saved object',
                   })}
@@ -81,17 +107,27 @@ export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit, allowAdHoc 
               </EuiFlexItem>
             )}
 
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                color="primary"
-                onClick={submitPersisted}
-                data-test-subj="saveIndexPatternButton"
-                fill
-                disabled={submitDisabled}
-              >
-                {isEdit ? editButtonLabel : saveButtonLabel}
-              </EuiButton>
-            </EuiFlexItem>
+            {(canSave || isEditingAdHoc) && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  onClick={submitPersisted}
+                  data-test-subj="saveIndexPatternButton"
+                  fill
+                  disabled={submitDisabled}
+                  isLoading={
+                    submittingType === SubmittingType.persisting ||
+                    (submittingType === SubmittingType.savingAsAdHoc && isEditingAdHoc)
+                  }
+                >
+                  {isEdit
+                    ? isPersisted
+                      ? editButtonLabel
+                      : editUnpersistedButtonLabel
+                    : saveButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -6,11 +6,11 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
-import { CaseConnector } from '../../common/api';
+import type { CaseConnector } from '../../common/api';
 
 import { pushCase } from './api';
 import * as i18n from './translations';
-import { Case } from './types';
+import type { Case } from './types';
 import { useToasts } from '../common/lib/kibana';
 
 interface PushToServiceState {
@@ -77,7 +77,10 @@ export const usePostPushToService = (): UsePostPushToService => {
 
         if (!cancel.current) {
           dispatch({ type: 'FETCH_SUCCESS' });
-          toasts.addSuccess(i18n.SUCCESS_SEND_TO_EXTERNAL_SERVICE(connector.name));
+          toasts.addSuccess({
+            title: i18n.SUCCESS_SEND_TO_EXTERNAL_SERVICE(connector.name),
+            className: 'eui-textBreakWord',
+          });
         }
 
         return response;

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { UNIQUE_COUNT } from '../../translations';
 import type { LensAttributes } from '../../types';
 
 export const kpiHostAreaLensAttributes: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           '416b6fad-1923-4f6a-a2df-b223bb287e30': {
             columnOrder: [
@@ -32,7 +33,7 @@ export const kpiHostAreaLensAttributes: LensAttributes = {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                label: ' ',
+                label: UNIQUE_COUNT('host.name'),
                 operationType: 'unique_count',
                 scale: 'ratio',
                 sourceField: 'host.name',

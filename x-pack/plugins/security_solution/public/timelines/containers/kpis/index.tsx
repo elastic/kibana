@@ -14,7 +14,6 @@ import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
 import type { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
-  DocValueFields,
   TimelineKpiStrategyRequest,
   TimelineKpiStrategyResponse,
   TimerangeInput,
@@ -28,14 +27,12 @@ export interface UseTimelineKpiProps {
   timerange: TimerangeInput;
   filterQuery?: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: DocValueFields[];
   isBlankTimeline: boolean;
 }
 
 export const useTimelineKpis = ({
   timerange,
   filterQuery,
-  docValueFields,
   defaultIndex,
   isBlankTimeline,
 }: UseTimelineKpiProps): [boolean, TimelineKpiStrategyResponse | null] => {
@@ -96,7 +93,6 @@ export const useTimelineKpis = ({
     setTimelineKpiRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        docValueFields,
         defaultIndex,
         timerange,
         filterQuery,
@@ -107,7 +103,7 @@ export const useTimelineKpis = ({
       }
       return prevRequest;
     });
-  }, [docValueFields, defaultIndex, timerange, filterQuery]);
+  }, [defaultIndex, timerange, filterQuery]);
 
   useEffect(() => {
     if (!isBlankTimeline) {

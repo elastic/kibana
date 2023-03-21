@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { mean, meanBy, sumBy } from 'lodash';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -43,6 +46,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ...commonQuery,
             probability: 1,
             kuery: `service.name : "${serviceName}" and processor.event : "${processorEvent}"`,
+            ...(processorEvent === ProcessorEvent.metric
+              ? {
+                  documentType: ApmDocumentType.TransactionMetric,
+                  rollupInterval: RollupInterval.OneMinute,
+                }
+              : {
+                  documentType: ApmDocumentType.TransactionEvent,
+                  rollupInterval: RollupInterval.None,
+                }),
           },
         },
       }),
@@ -114,7 +126,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   let errorRateMetricValues: Awaited<ReturnType<typeof getErrorRateValues>>;
   let errorTransactionValues: Awaited<ReturnType<typeof getErrorRateValues>>;
 
-  registry.when('Services APIs', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
+  registry.when('Services APIs', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_LIST_RATE = 75;
       const GO_PROD_LIST_ERROR_RATE = 25;
@@ -122,7 +134,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const GO_PROD_ID_ERROR_RATE = 50;
       before(async () => {
         const serviceGoProdInstance = apm
-          .service(serviceName, 'production', 'go')
+          .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
 
         const transactionNameProductList = 'GET /api/product/list';
@@ -134,7 +146,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_PROD_LIST_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction(transactionNameProductList)
+                .transaction({ transactionName: transactionNameProductList })
                 .timestamp(timestamp)
                 .duration(1000)
                 .success()
@@ -144,7 +156,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_PROD_LIST_ERROR_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction(transactionNameProductList)
+                .transaction({ transactionName: transactionNameProductList })
                 .duration(1000)
                 .timestamp(timestamp)
                 .failure()
@@ -154,7 +166,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_PROD_ID_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction(transactionNameProductId)
+                .transaction({ transactionName: transactionNameProductId })
                 .timestamp(timestamp)
                 .duration(1000)
                 .success()
@@ -164,7 +176,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .rate(GO_PROD_ID_ERROR_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction(transactionNameProductId)
+                .transaction({ transactionName: transactionNameProductId })
                 .duration(1000)
                 .timestamp(timestamp)
                 .failure()

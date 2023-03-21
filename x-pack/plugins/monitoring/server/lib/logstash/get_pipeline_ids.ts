@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { LegacyRequest, Bucket, Pipeline } from '../../types';
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 interface GetLogstashPipelineIdsParams {
@@ -37,7 +37,7 @@ export async function getLogstashPipelineIds({
 
   const dataset = 'node_stats';
   const moduleType = 'logstash';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: ccs || req.payload.ccs,
     moduleType,

@@ -100,24 +100,6 @@ export const createTimelineTemplate = (timeline: CompleteTimeline) =>
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
 
-export const deleteTimeline = (timelineId: string) => {
-  cy.request({
-    method: 'POST',
-    url: 'api/timeline',
-    body: {
-      id: [timelineId],
-    },
-    headers: { 'kbn-xsrf': 'delete-signals' },
-  });
-};
-
-export const getTimelineById = (timelineId: string) =>
-  cy.request({
-    method: 'GET',
-    url: `api/timeline?id=${timelineId}`,
-    headers: { 'kbn-xsrf': 'timeline-by-id' },
-  });
-
 export const loadPrepackagedTimelineTemplates = () =>
   cy.request({
     method: 'POST',

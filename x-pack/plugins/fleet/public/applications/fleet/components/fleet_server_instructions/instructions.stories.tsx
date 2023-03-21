@@ -7,10 +7,10 @@
 
 import React from 'react';
 
-import { FleetServerInstructions as FleetServerInstructionsComponent } from '.';
+import { AddFleetServerLanding } from '.';
 
 export const FleetServerInstructions = () => {
-  return <FleetServerInstructionsComponent />;
+  return <AddFleetServerLanding />;
 };
 
 FleetServerInstructions.args = {

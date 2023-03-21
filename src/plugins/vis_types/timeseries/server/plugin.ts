@@ -18,10 +18,10 @@ import {
 import { firstValueFrom, Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
 import { map } from 'rxjs/operators';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { PluginStart } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { PluginStart as DataViewsPublicPluginStart } from '@kbn/data-views-plugin/server';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { VisTypeTimeseriesConfig } from './config';
@@ -41,19 +41,17 @@ import {
 } from './lib/search_strategies';
 import type { TimeseriesVisData, VisPayload } from '../common/types';
 
-import { registerTimeseriesUsageCollector } from './usage_collector';
-
 export interface LegacySetup {
   server: Server;
 }
 
 interface VisTypeTimeseriesPluginSetupDependencies {
-  usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
 }
 
 interface VisTypeTimeseriesPluginStartDependencies {
   data: PluginStart;
+  fieldFormats: FieldFormatsStart;
   dataViews: DataViewsPublicPluginStart;
 }
 
@@ -116,9 +114,9 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
         );
       },
       getFieldFormatsService: async (uiSettings) => {
-        const [, { data }] = await core.getStartServices();
+        const [, { fieldFormats }] = await core.getStartServices();
 
-        return data.fieldFormats.fieldFormatServiceFactory(uiSettings);
+        return fieldFormats.fieldFormatServiceFactory(uiSettings);
       },
     };
 
@@ -127,10 +125,6 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
 
     visDataRoutes(router, framework);
     fieldsRoutes(router, framework);
-
-    if (plugins.usageCollection) {
-      registerTimeseriesUsageCollector(plugins.usageCollection, plugins.home);
-    }
 
     return {
       getVisData: async (

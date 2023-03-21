@@ -8,13 +8,14 @@
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { ModelsList } from '../../../trained_models/models_management';
+import { ModelsList } from '../../../model_management';
 import { MlPageHeader } from '../../../components/page_header';
 
 export const modelsListRouteFactory = (
@@ -22,7 +23,7 @@ export const modelsListRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'trained_models',
-  path: '/trained_models',
+  path: createPath(ML_PAGES.TRAINED_MODELS_MANAGE),
   title: i18n.translate('xpack.ml.modelManagement.trainedModels.docTitle', {
     defaultMessage: 'Trained Models',
   }),
@@ -46,11 +47,11 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     undefined,
     deps.config,
     deps.dataViewsContract,
+    deps.getSavedSearchDeps,
     basicResolvers(deps)
   );
   return (
     <PageLoader context={context}>
-      <ModelsList />
       <MlPageHeader>
         <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
           <EuiFlexItem grow={false}>
@@ -59,25 +60,9 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
               defaultMessage="Trained Models"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaLabel', {
-                defaultMessage: 'Technical preview',
-              })}
-              size="m"
-              color="hollow"
-              tooltipContent={i18n.translate(
-                'xpack.ml.navMenu.trainedModelsTabBetaTooltipContent',
-                {
-                  defaultMessage:
-                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-                }
-              )}
-              tooltipPosition={'right'}
-            />
-          </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
+      <ModelsList />
     </PageLoader>
   );
 };

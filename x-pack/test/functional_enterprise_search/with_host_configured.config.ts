@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { EnterpriseSearchCypressVisualTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseConfig = await readConfigFile(require.resolve('./base_config'));
+  const kibanaCommonTestsConfig = await readConfigFile(
+    require.resolve('../../../test/common/config.js')
+  );
+  const baseConfig = await readConfigFile(require.resolve('./cypress.config'));
 
   return {
+    ...kibanaCommonTestsConfig.getAll(),
     // default to the xpack functional config
     ...baseConfig.getAll(),
-
-    testFiles: [resolve(__dirname, './apps/enterprise_search/with_host_configured')],
 
     junit: {
       reportName: 'X-Pack Enterprise Search Functional Tests with Host Configured',
     },
-
     kbnTestServer: {
       ...baseConfig.get('kbnTestServer'),
       serverArgs: [
@@ -28,5 +29,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--enterpriseSearch.host=http://localhost:3002',
       ],
     },
+    testRunner: EnterpriseSearchCypressVisualTestRunner,
   };
 }

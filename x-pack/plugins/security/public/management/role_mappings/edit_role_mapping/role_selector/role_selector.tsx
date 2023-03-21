@@ -26,6 +26,7 @@ interface Props {
   canUseStoredScripts: boolean;
   mode: 'roles' | 'templates';
   onChange: (roleMapping: RoleMapping) => void;
+  readOnly?: boolean;
 }
 
 interface State {
@@ -33,6 +34,10 @@ interface State {
 }
 
 export class RoleSelector extends React.Component<Props, State> {
+  static defaultProps: Partial<Props> = {
+    readOnly: false,
+  };
+
   constructor(props: Props) {
     super(props);
 
@@ -57,6 +62,7 @@ export class RoleSelector extends React.Component<Props, State> {
     const { roles = [] } = this.props.roleMapping;
     return (
       <RoleComboBox
+        data-test-subj="roleMappingFormRolesCombo"
         placeholder={i18n.translate(
           'xpack.security.management.editRoleMapping.selectRolesPlaceholder',
           { defaultMessage: 'Select one or more roles' }
@@ -71,6 +77,7 @@ export class RoleSelector extends React.Component<Props, State> {
             role_templates: [],
           });
         }}
+        isDisabled={this.props.readOnly}
       />
     );
   };
@@ -82,6 +89,7 @@ export class RoleSelector extends React.Component<Props, State> {
         {roleTemplates.map((rt, index) => (
           <Fragment key={index}>
             <RoleTemplateEditor
+              data-test-subj="roleMappingFormRoleTemplateEditor"
               canUseStoredScripts={this.props.canUseStoredScripts}
               canUseInlineScripts={this.props.canUseInlineScripts}
               roleTemplate={rt}
@@ -101,10 +109,21 @@ export class RoleSelector extends React.Component<Props, State> {
                   role_templates: templates,
                 });
               }}
+              readOnly={this.props.readOnly}
             />
-            <EuiHorizontalRule />
+            {index === roleTemplates.length - 1 && this.props.readOnly ? null : (
+              <EuiHorizontalRule />
+            )}
           </Fragment>
         ))}
+        {this.conditionallyRenderAddRoleTemplateButton()}
+      </div>
+    );
+  };
+
+  private conditionallyRenderAddRoleTemplateButton = () => {
+    if (!this.props.readOnly) {
+      return (
         <AddRoleTemplateButton
           canUseStoredScripts={this.props.canUseStoredScripts}
           canUseInlineScripts={this.props.canUseInlineScripts}
@@ -133,8 +152,9 @@ export class RoleSelector extends React.Component<Props, State> {
             }
           }}
         />
-      </div>
-    );
+      );
+    }
+    return null;
   };
 
   private getHelpText = () => {

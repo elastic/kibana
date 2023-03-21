@@ -18,6 +18,7 @@ import type {
 import type { ITelemetryEventsSender } from './sender';
 import type { TelemetryEvent } from './types';
 import type { ITelemetryReceiver } from './receiver';
+import { tlog } from './helpers';
 
 /**
  * Preview telemetry events sender for the telemetry route.
@@ -45,7 +46,8 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
      * Reject the request intentionally to stop from sending to the server
      */
     this.axiosInstance.interceptors.request.use((config) => {
-      this.logger.debug(
+      tlog(
+        this.logger,
         `Intercepting telemetry', ${JSON.stringify(
           config.data
         )} and not sending data to the telemetry server`

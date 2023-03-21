@@ -12,10 +12,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewInsufficientAccessError } from '@kbn/data-views-plugin/common';
 import { AppDataType } from '../types';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
-import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
-import { getDataHandler } from '../../../../data_handler';
-import { useExploratoryView } from '../contexts/exploratory_view_config';
-import { getApmDataViewTitle } from '../utils/utils';
+import {
+  getDataTypeIndices,
+  ObservabilityDataViews,
+} from '../../../../utils/observability_data_views';
 
 export interface DataViewContext {
   loading: boolean;
@@ -46,48 +46,18 @@ export function DataViewContextProvider({ children }: ProviderProps) {
     services: { dataViews: dataViewsService },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
-  const { dataViews: dataViewsList } = useExploratoryView();
-
   const loadDataView: DataViewContext['loadDataView'] = useCallback(
     async ({ dataType }) => {
       if (typeof hasAppData[dataType] === 'undefined' && !loading[dataType]) {
         setLoading((prevState) => ({ ...prevState, [dataType]: true }));
 
         try {
-          let hasDataT = false;
-          let indices: string | undefined = '';
-          if (dataViewsList[dataType]) {
-            indices = dataViewsList[dataType];
-            hasDataT = true;
-          }
-          switch (dataType) {
-            case 'ux':
-            case 'synthetics':
-              const resultUx = await getDataHandler(dataType)?.hasData();
-              hasDataT = Boolean(resultUx?.hasData);
-              indices = resultUx?.indices;
-              break;
-            case 'infra_metrics':
-              const resultMetrics = await getDataHandler(dataType)?.hasData();
-              hasDataT = Boolean(resultMetrics?.hasData);
-              indices = resultMetrics?.indices;
-              break;
-            case 'infra_logs':
-              const resultLogs = await getDataHandler(dataType)?.hasData();
-              hasDataT = Boolean(resultLogs?.hasData);
-              indices = resultLogs?.indices;
-              break;
-            case 'apm':
-            case 'mobile':
-              const resultApm = await getDataHandler('apm')!.hasData();
-              hasDataT = Boolean(resultApm?.hasData);
-              indices = getApmDataViewTitle(resultApm?.indices);
-              break;
-          }
-          setHasAppData((prevState) => ({ ...prevState, [dataType]: hasDataT }));
+          const { indices, hasData } = await getDataTypeIndices(dataType);
 
-          if (hasDataT && indices) {
-            const obsvDataV = new ObservabilityDataViews(dataViewsService);
+          setHasAppData((prevState) => ({ ...prevState, [dataType]: hasData }));
+
+          if (hasData && indices) {
+            const obsvDataV = new ObservabilityDataViews(dataViewsService, true);
             const dataV = await obsvDataV.getDataView(dataType, indices);
 
             setDataViews((prevState) => ({ ...prevState, [dataType]: dataV }));
@@ -104,7 +74,7 @@ export function DataViewContextProvider({ children }: ProviderProps) {
         }
       }
     },
-    [dataViewsService, hasAppData, dataViewsList, loading]
+    [dataViewsService, hasAppData, loading]
   );
 
   return (

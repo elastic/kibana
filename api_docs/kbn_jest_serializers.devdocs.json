@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/jest-serializers",
-        "id": "def-server.createAbsolutePathSerializer",
+        "id": "def-common.createAbsolutePathSerializer",
         "type": "Function",
         "tags": [],
         "label": "createAbsolutePathSerializer",
@@ -23,10 +31,11 @@
         ],
         "path": "packages/kbn-jest-serializers/src/absolute_path_serializer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createAbsolutePathSerializer.$1",
+            "id": "def-common.createAbsolutePathSerializer.$1",
             "type": "string",
             "tags": [],
             "label": "rootPath",
@@ -36,11 +45,12 @@
             ],
             "path": "packages/kbn-jest-serializers/src/absolute_path_serializer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createAbsolutePathSerializer.$2",
+            "id": "def-common.createAbsolutePathSerializer.$2",
             "type": "string",
             "tags": [],
             "label": "replacement",
@@ -50,6 +60,7 @@
             ],
             "path": "packages/kbn-jest-serializers/src/absolute_path_serializer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -58,7 +69,7 @@
       },
       {
         "parentPluginId": "@kbn/jest-serializers",
-        "id": "def-server.createAnyInstanceSerializer",
+        "id": "def-common.createAnyInstanceSerializer",
         "type": "Function",
         "tags": [],
         "label": "createAnyInstanceSerializer",
@@ -68,10 +79,11 @@
         ],
         "path": "packages/kbn-jest-serializers/src/any_instance_serizlizer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createAnyInstanceSerializer.$1",
+            "id": "def-common.createAnyInstanceSerializer.$1",
             "type": "Object",
             "tags": [],
             "label": "Class",
@@ -81,11 +93,12 @@
             ],
             "path": "packages/kbn-jest-serializers/src/any_instance_serizlizer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createAnyInstanceSerializer.$2",
+            "id": "def-common.createAnyInstanceSerializer.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "name",
@@ -95,6 +108,7 @@
             ],
             "path": "packages/kbn-jest-serializers/src/any_instance_serizlizer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -103,7 +117,7 @@
       },
       {
         "parentPluginId": "@kbn/jest-serializers",
-        "id": "def-server.createRecursiveSerializer",
+        "id": "def-common.createRecursiveSerializer",
         "type": "Function",
         "tags": [],
         "label": "createRecursiveSerializer",
@@ -113,10 +127,11 @@
         ],
         "path": "packages/kbn-jest-serializers/src/recursive_serializer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createRecursiveSerializer.$1",
+            "id": "def-common.createRecursiveSerializer.$1",
             "type": "Function",
             "tags": [],
             "label": "test",
@@ -126,11 +141,12 @@
             ],
             "path": "packages/kbn-jest-serializers/src/recursive_serializer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createRecursiveSerializer.$2",
+            "id": "def-common.createRecursiveSerializer.$2",
             "type": "Function",
             "tags": [],
             "label": "print",
@@ -140,6 +156,7 @@
             ],
             "path": "packages/kbn-jest-serializers/src/recursive_serializer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -148,7 +165,7 @@
       },
       {
         "parentPluginId": "@kbn/jest-serializers",
-        "id": "def-server.createReplaceSerializer",
+        "id": "def-common.createReplaceSerializer",
         "type": "Function",
         "tags": [],
         "label": "createReplaceSerializer",
@@ -158,10 +175,11 @@
         ],
         "path": "packages/kbn-jest-serializers/src/replace_serializer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createReplaceSerializer.$1",
+            "id": "def-common.createReplaceSerializer.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "toReplace",
@@ -171,11 +189,12 @@
             ],
             "path": "packages/kbn-jest-serializers/src/replace_serializer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/jest-serializers",
-            "id": "def-server.createReplaceSerializer.$2",
+            "id": "def-common.createReplaceSerializer.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "replaceWith",
@@ -185,6 +204,7 @@
             ],
             "path": "packages/kbn-jest-serializers/src/replace_serializer.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -193,7 +213,7 @@
       },
       {
         "parentPluginId": "@kbn/jest-serializers",
-        "id": "def-server.createStripAnsiSerializer",
+        "id": "def-common.createStripAnsiSerializer",
         "type": "Function",
         "tags": [],
         "label": "createStripAnsiSerializer",
@@ -203,19 +223,12 @@
         ],
         "path": "packages/kbn-jest-serializers/src/strip_ansi_serializer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

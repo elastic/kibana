@@ -16,6 +16,7 @@ import {
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { publicConfigKeys } from '../common/plugin_config_types';
@@ -31,6 +32,10 @@ import { InfraKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_
 import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_status';
 import { registerRuleTypes } from './lib/alerting';
+import {
+  LOGS_RULES_ALERT_CONTEXT,
+  METRICS_RULES_ALERT_CONTEXT,
+} from './lib/alerting/register_rule_types';
 import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
@@ -115,12 +120,12 @@ export class InfraServerPlugin
 
     this.logsRules = new RulesService(
       LOGS_FEATURE_ID,
-      'observability.logs',
+      LOGS_RULES_ALERT_CONTEXT,
       this.logger.get('logsRules')
     );
     this.metricsRules = new RulesService(
       METRICS_FEATURE_ID,
-      'observability.metrics',
+      METRICS_RULES_ALERT_CONTEXT,
       this.logger.get('metricsRules')
     );
 
@@ -170,6 +175,7 @@ export class InfraServerPlugin
       logsRules: this.logsRules.setup(core, plugins),
       metricsRules: this.metricsRules.setup(core, plugins),
       getStartServices: () => core.getStartServices(),
+      getAlertDetailsConfig: () => plugins.observability.getAlertDetailsConfig(),
       logger: this.logger,
       basePath: core.http.basePath,
     };
@@ -195,7 +201,7 @@ export class InfraServerPlugin
         const soClient = (await context.core).savedObjects.client;
         const mlSystem = plugins.ml?.mlSystemProvider(request, soClient);
         const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(request, soClient);
-        const spaceId = plugins.spaces?.spacesService.getSpaceId(request) || 'default';
+        const spaceId = plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
         return {
           mlAnomalyDetectors,

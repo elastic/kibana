@@ -25,7 +25,7 @@ import type { SessionInfo } from '../../common/types';
 import { createSessionExpiredMock } from './session_expired.mock';
 import { SessionTimeout, startTimer } from './session_timeout';
 
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 jest.spyOn(window, 'addEventListener');
 jest.spyOn(window, 'removeEventListener');

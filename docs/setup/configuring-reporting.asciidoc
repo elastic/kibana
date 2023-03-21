@@ -111,41 +111,27 @@ Granting the privilege to generate reports also grants the user the privilege to
 ==== Grant access with the role API
 With <<grant-user-access, {kib} application privileges>> enabled in Reporting, you can also use the {ref}/security-api-put-role.html[role API] to grant access to the {report-features}, using *All* privileges, or sub-feature privileges.
 
-NOTE: If you have a Basic license, sub-feature privileges are unavailable. For details, check out the API command to grant *All* privileges in <<grant-user-access-basic>>.
-
-Grant users custom Reporting roles, other roles that grant read access to the data in {es}, and at least read access in the applications where users can generate reports.
-
-[source, json]
+NOTE: this [API request](https://www.elastic.co/guide/en/kibana/current/role-management-api-put.html) needs to be executed against the Kibana API endpoint
+[source, sh]
 ---------------------------------------------------------------
-PUT localhost:5601/api/security/role/custom_reporting_user
+POST <kibana host>:<port>/api/_security/role/custom_reporting_user
 {
-  "elasticsearch": { "cluster": [], "indices": [], "run_as": [] },
-  "kibana": [
-    {
-      "base": [],
-      "feature": {
-        "dashboard": [
-          "minimal_read",
-          "generate_report", <1>
-          "download_csv_report" <2>
-        ],
-        "discover": [
-          "minimal_read",
-          "generate_report" <3>
-        ],
-        "canvas": [
-          "minimal_read",
-          "generate_report" <4>
-        ],
-        "visualize": [
-          "minimal_read",
-          "generate_report" <5>
-        ]
-      },
-      "spaces": [ "*" ]
-    }
-  ],
-  "metadata": {} // optional
+	"elasticsearch": {
+		"cluster": [],
+		"indices": [],
+		"run_as": []
+	},
+	"kibana": [{
+		"spaces": ["*"],
+		"base": [],
+		"feature": {
+			"dashboard": ["generate_report",  <1>
+      "download_csv_report"], <2>
+      "discover": ["generate_report"], <3>
+			"canvas": ["generate_report"], <4>
+			"visualize": ["generate_report"] <5>
+		}
+	}]
 }
 ---------------------------------------------------------------
 // CONSOLE

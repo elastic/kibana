@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import {
@@ -14,21 +14,17 @@ import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
 } from '../../common/constants';
-import {
-  ActionTypes,
-  CaseConnector,
-  CaseExternalServiceBasic,
-  NONE_CONNECTOR_ID,
-  User,
-} from '../../../common/api';
-import {
+import type { CaseConnector, CaseExternalServiceBasic, User } from '../../../common/api';
+import { ActionTypes, NONE_CONNECTOR_ID } from '../../../common/api';
+import type {
   BuilderDeps,
   BuilderParameters,
-  BuilderReturnValue,
   CommonBuilderArguments,
+  SavedObjectParameters,
   UserActionParameters,
+  UserActionEvent,
 } from './types';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
 export abstract class UserActionBuilder {
   protected readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
@@ -103,7 +99,7 @@ export abstract class UserActionBuilder {
     attachmentId,
     connectorId,
     type,
-  }: CommonBuilderArguments): BuilderReturnValue => {
+  }: CommonBuilderArguments): SavedObjectParameters => {
     return {
       attributes: {
         ...this.getCommonUserActionAttributes({ user, owner }),
@@ -126,5 +122,5 @@ export abstract class UserActionBuilder {
 
   public abstract build<T extends keyof BuilderParameters>(
     args: UserActionParameters<T>
-  ): BuilderReturnValue;
+  ): UserActionEvent | void;
 }

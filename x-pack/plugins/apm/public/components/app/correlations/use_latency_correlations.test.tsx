@@ -20,7 +20,6 @@ import { delay } from '../../../utils/test_helpers';
 import { fromQuery } from '../../shared/links/url_helpers';
 
 import { useLatencyCorrelations } from './use_latency_correlations';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { APIEndpoint } from '../../../../server';
 
 function wrapper({
@@ -63,13 +62,6 @@ function wrapper({
               },
             ],
           };
-        case 'POST /internal/apm/correlations/field_stats/transactions':
-          return {
-            stats: [
-              { fieldName: 'field-name-1', count: 123 },
-              { fieldName: 'field-name-2', count: 1111 },
-            ],
-          };
         default:
           return {};
       }
@@ -103,7 +95,7 @@ function wrapper({
 
 describe('useLatencyCorrelations', () => {
   beforeEach(async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
   afterEach(() => {
     jest.useRealTimers();
@@ -165,7 +157,6 @@ describe('useLatencyCorrelations', () => {
         });
         expect(result.current.response).toEqual({
           ccsWarning: false,
-          fieldStats: undefined,
           latencyCorrelations: undefined,
           overallHistogram: [
             {
@@ -203,48 +194,12 @@ describe('useLatencyCorrelations', () => {
 
         expect(result.current.progress).toEqual({
           error: undefined,
-          isRunning: true,
-          loaded: 1,
-        });
-
-        expect(result.current.response).toEqual({
-          ccsWarning: false,
-          fieldStats: undefined,
-          latencyCorrelations: [
-            {
-              fieldName: 'field-name-1',
-              fieldValue: 'field-value-1',
-              correlation: 0.5,
-              histogram: [{ key: 'the-key', doc_count: 123 }],
-              ksTest: 0.001,
-            },
-          ],
-          overallHistogram: [
-            {
-              doc_count: 1234,
-              key: 'the-key',
-            },
-          ],
-          percentileThresholdValue: 1.234,
-        });
-
-        jest.advanceTimersByTime(100);
-        await waitFor(() =>
-          expect(result.current.response.fieldStats).toBeDefined()
-        );
-
-        expect(result.current.progress).toEqual({
-          error: undefined,
           isRunning: false,
           loaded: 1,
         });
 
         expect(result.current.response).toEqual({
           ccsWarning: false,
-          fieldStats: [
-            { fieldName: 'field-name-1', count: 123 },
-            { fieldName: 'field-name-2', count: 1111 },
-          ],
           latencyCorrelations: [
             {
               fieldName: 'field-name-1',

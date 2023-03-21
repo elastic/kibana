@@ -6,9 +6,12 @@
  */
 
 import React, { memo } from 'react';
-import { EuiSuperSelect, EuiSuperSelectOption, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Status, statuses } from '../status';
-import { CaseStatusWithAllStatus, StatusAll } from '../../../common/ui/types';
+import type { EuiSuperSelectOption } from '@elastic/eui';
+import { EuiSuperSelect, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { Status } from '@kbn/cases-components';
+import { allCaseStatus, statuses } from '../status';
+import type { CaseStatusWithAllStatus } from '../../../common/ui/types';
+import { StatusAll } from '../../../common/ui/types';
 
 interface Props {
   stats: Record<CaseStatusWithAllStatus, number | null>;
@@ -16,6 +19,16 @@ interface Props {
   onStatusChanged: (status: CaseStatusWithAllStatus) => void;
   hiddenStatuses?: CaseStatusWithAllStatus[];
 }
+
+const AllStatusBadge = () => {
+  return (
+    <EuiBadge data-test-subj="status-badge-all" color={allCaseStatus[StatusAll].color}>
+      {allCaseStatus[StatusAll].label}
+    </EuiBadge>
+  );
+};
+
+AllStatusBadge.displayName = 'AllStatusBadge';
 
 const StatusFilterComponent: React.FC<Props> = ({
   stats,
@@ -31,9 +44,7 @@ const StatusFilterComponent: React.FC<Props> = ({
       inputDisplay: (
         <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
           <EuiFlexItem grow={false}>
-            <span>
-              <Status type={status} />
-            </span>
+            <span>{status === 'all' ? <AllStatusBadge /> : <Status status={status} />}</span>
           </EuiFlexItem>
           {status !== StatusAll && <EuiFlexItem grow={false}>{` (${stats[status]})`}</EuiFlexItem>}
         </EuiFlexGroup>

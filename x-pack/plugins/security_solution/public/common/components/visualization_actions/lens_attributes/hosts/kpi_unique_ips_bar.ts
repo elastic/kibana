@@ -6,13 +6,13 @@
  */
 
 import type { LensAttributes } from '../../types';
-import { SOURCE_CHART_LABEL, DESTINATION_CHART_LABEL } from '../../translations';
+import { SOURCE_CHART_LABEL, DESTINATION_CHART_LABEL, UNIQUE_COUNT } from '../../translations';
 
 export const kpiUniqueIpsBarLensAttributes: LensAttributes = {
   description: '',
   state: {
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           '8be0156b-d423-4a39-adf1-f54d4c9f2e69': {
             columnOrder: [
@@ -23,7 +23,7 @@ export const kpiUniqueIpsBarLensAttributes: LensAttributes = {
               '32f66676-f4e1-48fd-b7f8-d4de38318601': {
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Unique count of source.ip',
+                label: UNIQUE_COUNT('source.ip'),
                 operationType: 'unique_count',
                 scale: 'ratio',
                 sourceField: 'source.ip',
@@ -34,7 +34,12 @@ export const kpiUniqueIpsBarLensAttributes: LensAttributes = {
                 label: 'Filters',
                 operationType: 'filters',
                 params: {
-                  filters: [{ input: { language: 'kuery', query: '' }, label: SOURCE_CHART_LABEL }],
+                  filters: [
+                    {
+                      input: { language: 'kuery', query: 'source.ip: *' },
+                      label: SOURCE_CHART_LABEL,
+                    },
+                  ],
                 },
                 scale: 'ordinal',
               },
@@ -50,7 +55,7 @@ export const kpiUniqueIpsBarLensAttributes: LensAttributes = {
               'b7e59b08-96e6-40d1-84fd-e97b977d1c47': {
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Unique count of destination.ip',
+                label: UNIQUE_COUNT('destination.ip'),
                 operationType: 'unique_count',
                 scale: 'ratio',
                 sourceField: 'destination.ip',
@@ -62,7 +67,9 @@ export const kpiUniqueIpsBarLensAttributes: LensAttributes = {
                 label: DESTINATION_CHART_LABEL,
                 operationType: 'filters',
                 params: {
-                  filters: [{ input: { language: 'kuery', query: '' }, label: 'Dest.' }],
+                  filters: [
+                    { input: { language: 'kuery', query: 'destination.ip: *' }, label: 'Dest.' },
+                  ],
                 },
                 scale: 'ordinal',
               },
@@ -105,7 +112,7 @@ export const kpiUniqueIpsBarLensAttributes: LensAttributes = {
       yRightExtent: { mode: 'full' },
     },
   },
-  title: '[Host] Unique IPs - bar',
+  title: '[Host] Unique IPs - bar chart',
   visualizationType: 'lnsXY',
   references: [
     {

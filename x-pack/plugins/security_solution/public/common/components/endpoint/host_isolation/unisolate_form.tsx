@@ -31,7 +31,7 @@ export const EndpointUnisolateForm = memo<EndpointIsolatedFormProps>(
     );
 
     return (
-      <EuiForm>
+      <EuiForm data-test-subj="endpointHostIsolationForm">
         <EuiFormRow fullWidth>
           <EuiText size="s">
             <p>
@@ -62,7 +62,11 @@ export const EndpointUnisolateForm = memo<EndpointIsolatedFormProps>(
         <EuiFormRow fullWidth>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onCancel} disabled={isLoading}>
+              <EuiButtonEmpty
+                onClick={onCancel}
+                disabled={isLoading}
+                data-test-subj="hostIsolateCancelButton"
+              >
                 {CANCEL}
               </EuiButtonEmpty>
             </EuiFlexItem>

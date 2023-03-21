@@ -1,10 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`getting started should render getting started component 1`] = `
-<KibanaPageTemplate
-  template="centeredBody"
+<_KibanaPageTemplate
+  grow={true}
+  panelled={false}
 >
-  <div
+  <_EuiPageSection
+    alignment="center"
     css={
       Object {
         "map": undefined,
@@ -16,6 +18,7 @@ exports[`getting started should render getting started component 1`] = `
         "toString": [Function],
       }
     }
+    data-test-subj="onboarding--landing-page"
   >
     <EuiTitle
       className="eui-textCenter"
@@ -29,12 +32,11 @@ exports[`getting started should render getting started component 1`] = `
       size="s"
     />
     <EuiText
-      color="subdued"
-      size="s"
+      size="m"
       textAlign="center"
     >
       <p>
-        Select a starting point for a quick tour of how Elastic can help you do even more with your data.
+        Select an option and we'll help you get started.
       </p>
     </EuiText>
     <EuiSpacer
@@ -43,39 +45,30 @@ exports[`getting started should render getting started component 1`] = `
     <EuiSpacer
       size="xxl"
     />
-    <EuiFlexGrid
-      columns={3}
-      gutterSize="xl"
-    >
-      <EuiFlexItem>
-        <UseCaseCard
-          useCase="search"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <UseCaseCard
-          useCase="observability"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <UseCaseCard
-          useCase="security"
-        />
-      </EuiFlexItem>
-    </EuiFlexGrid>
-    <EuiSpacer />
-    <EuiHorizontalRule />
+    <GuideFilters
+      activeFilter="all"
+      setActiveFilter={[Function]}
+    />
+    <EuiSpacer
+      size="xxl"
+    />
+    <GuideCards
+      activateGuide={[Function]}
+      activeFilter="all"
+      guidesState={Array []}
+      navigateToApp={[MockFunction]}
+    />
     <EuiSpacer />
     <div
       className="eui-textCenter"
     >
       <EuiLink
-        data-test-subj="onboarding--skipUseCaseTourLink"
+        data-test-subj="onboarding--skipGuideLink"
         onClick={[Function]}
       >
-        No thanks, I’ll explore on my own.
+        I’d like to do something else.
       </EuiLink>
     </div>
-  </div>
-</KibanaPageTemplate>
+  </_EuiPageSection>
+</_KibanaPageTemplate>
 `;

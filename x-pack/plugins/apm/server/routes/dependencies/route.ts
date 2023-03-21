@@ -7,7 +7,6 @@
 
 import * as t from 'io-ts';
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getMetadataForDependency } from './get_metadata_for_dependency';
@@ -28,6 +27,7 @@ import {
   DependencySpan,
   getTopDependencySpans,
 } from './get_top_dependency_spans';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const topDependenciesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/dependencies/top_dependencies',
@@ -100,11 +100,11 @@ const topDependenciesRoute = createApmServerRoute({
       location: import('./../../../common/connections').Node;
     }>;
   }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const { environment, offset, numBuckets, kuery, start, end } =
       resources.params.query;
 
-    const opts = { setup, start, end, numBuckets, environment, kuery };
+    const opts = { apmEventClient, start, end, numBuckets, environment, kuery };
 
     const [currentDependencies, previousDependencies] = await Promise.all([
       getTopDependencies(opts),
@@ -198,7 +198,7 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
       location: import('./../../../common/connections').Node;
     }>;
   }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const {
       query: {
         dependencyName,
@@ -213,7 +213,7 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
 
     const opts = {
       dependencyName,
-      setup,
+      apmEventClient,
       start,
       end,
       numBuckets,
@@ -264,14 +264,14 @@ const dependencyMetadataRoute = createApmServerRoute({
   ): Promise<{
     metadata: { spanType: string | undefined; spanSubtype: string | undefined };
   }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
 
     const { dependencyName, start, end } = params.query;
 
     const metadata = await getMetadataForDependency({
       dependencyName,
-      setup,
+      apmEventClient,
       start,
       end,
     });
@@ -304,7 +304,7 @@ const dependencyLatencyChartsRoute = createApmServerRoute({
     currentTimeseries: Array<{ x: number; y: number }>;
     comparisonTimeseries: Array<{ x: number; y: number }> | null;
   }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const {
       dependencyName,
@@ -322,7 +322,7 @@ const dependencyLatencyChartsRoute = createApmServerRoute({
         dependencyName,
         spanName,
         searchServiceDestinationMetrics,
-        setup,
+        apmEventClient,
         start,
         end,
         kuery,
@@ -333,7 +333,7 @@ const dependencyLatencyChartsRoute = createApmServerRoute({
             dependencyName,
             spanName,
             searchServiceDestinationMetrics,
-            setup,
+            apmEventClient,
             start,
             end,
             kuery,
@@ -371,7 +371,7 @@ const dependencyThroughputChartsRoute = createApmServerRoute({
     currentTimeseries: Array<{ x: number; y: number | null }>;
     comparisonTimeseries: Array<{ x: number; y: number | null }> | null;
   }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const {
       dependencyName,
@@ -388,7 +388,7 @@ const dependencyThroughputChartsRoute = createApmServerRoute({
       getThroughputChartsForDependency({
         dependencyName,
         spanName,
-        setup,
+        apmEventClient,
         start,
         end,
         kuery,
@@ -399,7 +399,7 @@ const dependencyThroughputChartsRoute = createApmServerRoute({
         ? getThroughputChartsForDependency({
             dependencyName,
             spanName,
-            setup,
+            apmEventClient,
             start,
             end,
             kuery,
@@ -438,7 +438,7 @@ const dependencyFailedTransactionRateChartsRoute = createApmServerRoute({
     currentTimeseries: Array<{ x: number; y: number }>;
     comparisonTimeseries: Array<{ x: number; y: number }> | null;
   }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const {
       dependencyName,
@@ -455,7 +455,7 @@ const dependencyFailedTransactionRateChartsRoute = createApmServerRoute({
       getErrorRateChartsForDependency({
         dependencyName,
         spanName,
-        setup,
+        apmEventClient,
         start,
         end,
         kuery,
@@ -466,7 +466,7 @@ const dependencyFailedTransactionRateChartsRoute = createApmServerRoute({
         ? getErrorRateChartsForDependency({
             dependencyName,
             spanName,
-            setup,
+            apmEventClient,
             start,
             end,
             kuery,
@@ -492,26 +492,38 @@ const dependencyOperationsRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       offsetRt,
-      t.type({ dependencyName: t.string }),
+      t.type({
+        dependencyName: t.string,
+        searchServiceDestinationMetrics: toBooleanRt,
+      }),
     ]),
   }),
   handler: async (
     resources
   ): Promise<{ operations: DependencyOperation[] }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
-      query: { dependencyName, start, end, environment, kuery, offset },
+      query: {
+        dependencyName,
+        start,
+        end,
+        environment,
+        kuery,
+        offset,
+        searchServiceDestinationMetrics,
+      },
     } = resources.params;
 
     const operations = await getTopDependencyOperations({
-      setup,
+      apmEventClient,
       dependencyName,
       start,
       end,
       offset,
       environment,
       kuery,
+      searchServiceDestinationMetrics,
     });
 
     return { operations };
@@ -541,7 +553,7 @@ const dependencyLatencyDistributionChartsRoute = createApmServerRoute({
     allSpansDistribution: OverallLatencyDistributionResponse;
     failedSpansDistribution: OverallLatencyDistributionResponse;
   }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const {
       dependencyName,
@@ -554,7 +566,7 @@ const dependencyLatencyDistributionChartsRoute = createApmServerRoute({
     } = params.query;
 
     return getDependencyLatencyDistribution({
-      setup,
+      apmEventClient,
       dependencyName,
       spanName,
       percentileThreshold,
@@ -581,7 +593,7 @@ const topDependencySpansRoute = createApmServerRoute({
     ]),
   }),
   handler: async (resources): Promise<{ spans: DependencySpan[] }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       query: {
@@ -597,7 +609,7 @@ const topDependencySpansRoute = createApmServerRoute({
     } = resources.params;
 
     const spans = await getTopDependencySpans({
-      setup,
+      apmEventClient,
       dependencyName,
       spanName,
       start,

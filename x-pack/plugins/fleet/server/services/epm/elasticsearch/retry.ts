@@ -17,11 +17,12 @@ const retryResponseStatuses = [
   410, // Gone
 ];
 
-const isRetryableError = (e: any) =>
+const isRetryableError = (e: any, additionalResponseStatuses: number[] = []) =>
   e instanceof EsErrors.NoLivingConnectionsError ||
   e instanceof EsErrors.ConnectionError ||
   e instanceof EsErrors.TimeoutError ||
-  (e instanceof EsErrors.ResponseError && retryResponseStatuses.includes(e?.statusCode!));
+  (e instanceof EsErrors.ResponseError &&
+    [...retryResponseStatuses, ...additionalResponseStatuses].includes(e?.statusCode!));
 
 /**
  * Retries any transient network or configuration issues encountered from Elasticsearch with an exponential backoff.
@@ -29,12 +30,16 @@ const isRetryableError = (e: any) =>
  */
 export const retryTransientEsErrors = async <T>(
   esCall: () => Promise<T>,
-  { logger, attempt = 0 }: { logger?: Logger; attempt?: number } = {}
+  {
+    logger,
+    attempt = 0,
+    additionalResponseStatuses = [],
+  }: { logger?: Logger; attempt?: number; additionalResponseStatuses?: number[] } = {}
 ): Promise<T> => {
   try {
     return await esCall();
   } catch (e) {
-    if (attempt < MAX_ATTEMPTS && isRetryableError(e)) {
+    if (attempt < MAX_ATTEMPTS && isRetryableError(e, additionalResponseStatuses)) {
       const retryCount = attempt + 1;
       const retryDelaySec = Math.min(Math.pow(2, retryCount), 64); // 2s, 4s, 8s, 16s, 32s, 64s, 64s, 64s ...
 

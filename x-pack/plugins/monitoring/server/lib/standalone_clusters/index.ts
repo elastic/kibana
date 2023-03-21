@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-// @ts-ignore
 export { hasStandaloneClusters } from './has_standalone_clusters';
-// @ts-ignore
 export { getStandaloneClusterDefinition } from './get_standalone_cluster_definition';
-// @ts-ignore
 export { standaloneClusterFilter } from './standalone_cluster_query_filter';

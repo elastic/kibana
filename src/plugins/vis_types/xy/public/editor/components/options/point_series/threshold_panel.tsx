@@ -66,6 +66,7 @@ function ThresholdPanel({
         paramName="show"
         value={stateParams.thresholdLine.show}
         setValue={setThresholdLine}
+        data-test-subj="xyShowThresholdLine"
       />
 
       {stateParams.thresholdLine.show && (

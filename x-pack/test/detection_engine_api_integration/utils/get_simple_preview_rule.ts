@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PreviewRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { PreviewRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 /**
  * This is a typical simple preview rule for testing that is easy for most basic testing
@@ -26,4 +26,5 @@ export const getSimplePreviewRule = (
   type: 'query',
   query: 'user.name: root or user.name: admin',
   invocationCount,
+  timeframeEnd: new Date().toISOString(),
 });

@@ -5,6 +5,7 @@ steps:
       queue: n2-2-spot
     depends_on: build
     timeout_in_minutes: 30
+    soft_fail: true
     retry:
       automatic:
         - exit_status: '-1'

@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonProps,
-  EuiLink,
-  EuiLinkProps,
-  EuiToolTip,
-  PropsForAnchor,
-  PropsForButton,
-} from '@elastic/eui';
+import type { EuiButtonProps, EuiLinkProps, PropsForAnchor, PropsForButton } from '@elastic/eui';
+import { EuiButton, EuiLink, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useCaseViewNavigation, useConfigureCasesNavigation } from '../../common/navigation';
 import * as i18n from './translations';

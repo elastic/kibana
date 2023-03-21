@@ -5,39 +5,38 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-
-import { EuiTitle, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   Axis,
+  BrushEndListener,
   Chart,
   niceTimeFormatter,
   Position,
   Settings,
   TooltipValue,
-  BrushEndListener,
 } from '@elastic/charts';
-import { first, last } from 'lodash';
-import moment from 'moment';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
+import { first, last } from 'lodash';
+import moment from 'moment';
+import React, { useCallback, useMemo } from 'react';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
+import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
+import { getChartTheme } from '../../../../utils/get_chart_theme';
+import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import {
+  MetricsExplorerChartOptions,
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
   MetricsExplorerYAxisMode,
-  MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
-import { createFormatterForMetric } from './helpers/create_formatter_for_metric';
-import { MetricExplorerSeriesChart } from './series_chart';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';
-import { MetricsExplorerEmptyChart } from './empty_chart';
-import { MetricsExplorerNoMetrics } from './no_metrics';
-import { getChartTheme } from './helpers/get_chart_theme';
-import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
-import { calculateDomain } from './helpers/calculate_domain';
 import { ChartTitle } from './chart_title';
+import { MetricsExplorerEmptyChart } from './empty_chart';
+import { calculateDomain } from './helpers/calculate_domain';
+import { createFormatterForMetric } from './helpers/create_formatter_for_metric';
+import { MetricsExplorerNoMetrics } from './no_metrics';
+import { MetricExplorerSeriesChart } from './series_chart';
 
 interface Props {
   title?: string | null;

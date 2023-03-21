@@ -10,14 +10,17 @@ import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../../common/constants';
-import { ESCaseAttributes } from '../../services/cases/types';
-import {
+import { ESCaseStatus } from '../../services/cases/types';
+import type { ESCaseAttributes } from '../../services/cases/types';
+import { OWNERS } from '../constants';
+import type {
   CollectTelemetryDataParams,
   Buckets,
   CasesTelemetry,
   Cardinality,
   ReferencesAggregation,
   LatestDates,
+  CaseAggregationResult,
 } from '../types';
 import {
   findValueInBuckets,
@@ -27,6 +30,7 @@ import {
   getOnlyAlertsCommentsFilter,
   getOnlyConnectorsFilter,
   getReferencesAggregationQuery,
+  getSolutionValues,
 } from './utils';
 
 export const getLatestCasesDates = async ({
@@ -58,8 +62,7 @@ export const getCasesTelemetryData = async ({
   savedObjectsClient,
   logger,
 }: CollectTelemetryDataParams): Promise<CasesTelemetry['cases']> => {
-  const owners = ['observability', 'securitySolution', 'cases'] as const;
-  const byOwnerAggregationQuery = owners.reduce(
+  const byOwnerAggregationQuery = OWNERS.reduce(
     (aggQuery, owner) => ({
       ...aggQuery,
       [owner]: {
@@ -68,28 +71,23 @@ export const getCasesTelemetryData = async ({
             [`${CASE_SAVED_OBJECT}.attributes.owner`]: owner,
           },
         },
-        aggs: getCountsAggregationQuery(CASE_SAVED_OBJECT),
+        aggs: {
+          ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
+          ...getAssigneesAggregations(),
+        },
       },
     }),
     {}
   );
 
-  const casesRes = await savedObjectsClient.find<
-    unknown,
-    Record<typeof owners[number], { counts: Buckets }> & {
-      counts: Buckets;
-      syncAlerts: Buckets;
-      status: Buckets;
-      users: Cardinality;
-      tags: Cardinality;
-    }
-  >({
+  const casesRes = await savedObjectsClient.find<unknown, CaseAggregationResult>({
     page: 0,
     perPage: 0,
     type: CASE_SAVED_OBJECT,
     aggs: {
       ...byOwnerAggregationQuery,
       ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
+      ...getAssigneesAggregations(),
       totalsByOwner: {
         terms: { field: `${CASE_SAVED_OBJECT}.attributes.owner` },
       },
@@ -116,7 +114,7 @@ export const getCasesTelemetryData = async ({
 
   const commentsRes = await savedObjectsClient.find<
     unknown,
-    Record<typeof owners[number], { counts: Buckets }> & {
+    Record<typeof OWNERS[number], { counts: Buckets }> & {
       participants: Cardinality;
     } & ReferencesAggregation
   >({
@@ -164,16 +162,7 @@ export const getCasesTelemetryData = async ({
 
   const aggregationsBuckets = getAggregationsBuckets({
     aggs: casesRes.aggregations,
-    keys: [
-      'counts',
-      'observability.counts',
-      'securitySolution.counts',
-      'cases.counts',
-      'syncAlerts',
-      'status',
-      'totalsByOwner',
-      'users',
-    ],
+    keys: ['counts', 'syncAlerts', 'status', 'users', 'totalAssignees'],
   });
 
   return {
@@ -181,9 +170,9 @@ export const getCasesTelemetryData = async ({
       total: casesRes.total,
       ...getCountsFromBuckets(aggregationsBuckets.counts),
       status: {
-        open: findValueInBuckets(aggregationsBuckets.status, 'open'),
-        inProgress: findValueInBuckets(aggregationsBuckets.status, 'in-progress'),
-        closed: findValueInBuckets(aggregationsBuckets.status, 'closed'),
+        open: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.OPEN),
+        inProgress: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.IN_PROGRESS),
+        closed: findValueInBuckets(aggregationsBuckets.status, ESCaseStatus.CLOSED),
       },
       syncAlertsOn: findValueInBuckets(aggregationsBuckets.syncAlerts, 1),
       syncAlertsOff: findValueInBuckets(aggregationsBuckets.syncAlerts, 0),
@@ -195,18 +184,47 @@ export const getCasesTelemetryData = async ({
       totalWithConnectors:
         totalConnectorsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
       latestDates,
+      assignees: {
+        total: casesRes.aggregations?.totalAssignees.value ?? 0,
+        totalWithZero: casesRes.aggregations?.assigneeFilters.buckets.zero.doc_count ?? 0,
+        totalWithAtLeastOne:
+          casesRes.aggregations?.assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
+      },
     },
-    sec: {
-      total: findValueInBuckets(aggregationsBuckets.totalsByOwner, 'securitySolution'),
-      ...getCountsFromBuckets(aggregationsBuckets['securitySolution.counts']),
-    },
-    obs: {
-      total: findValueInBuckets(aggregationsBuckets.totalsByOwner, 'observability'),
-      ...getCountsFromBuckets(aggregationsBuckets['observability.counts']),
-    },
-    main: {
-      total: findValueInBuckets(aggregationsBuckets.totalsByOwner, 'cases'),
-      ...getCountsFromBuckets(aggregationsBuckets['cases.counts']),
-    },
+    sec: getSolutionValues(casesRes.aggregations, 'securitySolution'),
+    obs: getSolutionValues(casesRes.aggregations, 'observability'),
+    main: getSolutionValues(casesRes.aggregations, 'cases'),
   };
 };
+
+const getAssigneesAggregations = () => ({
+  totalAssignees: {
+    value_count: {
+      field: `${CASE_SAVED_OBJECT}.attributes.assignees.uid`,
+    },
+  },
+  assigneeFilters: {
+    filters: {
+      filters: {
+        zero: {
+          bool: {
+            must_not: {
+              exists: {
+                field: `${CASE_SAVED_OBJECT}.attributes.assignees.uid`,
+              },
+            },
+          },
+        },
+        atLeastOne: {
+          bool: {
+            filter: {
+              exists: {
+                field: `${CASE_SAVED_OBJECT}.attributes.assignees.uid`,
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+});

@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { render, screen } from '@testing-library/react';
 
-import { Connectors, Props } from './connectors';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import type { Props } from './connectors';
+import { Connectors } from './connectors';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { ConnectorsDropdown } from './connectors_dropdown';
 import { connectors, actionTypes } from './__mock__';
 import { ConnectorTypes } from '../../../common/api';
@@ -118,7 +121,7 @@ describe('Connectors', () => {
       newWrapper
         .find('button[data-test-subj="case-configure-update-selected-connector-button"]')
         .text()
-    ).toBe('Update My Connector');
+    ).toBe('Update My SN connector');
   });
 
   it('shows the deprecated callout when the connector is deprecated', async () => {

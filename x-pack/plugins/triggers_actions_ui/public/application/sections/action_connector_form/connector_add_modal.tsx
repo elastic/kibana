@@ -15,13 +15,14 @@ import {
   EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
-  EuiTitle,
   EuiFlexItem,
   EuiIcon,
   EuiFlexGroup,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import './connector_add_modal.scss';
+import { betaBadgeProps } from './beta_badge_props';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionType, ActionConnector, ActionTypeRegistryContract } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
@@ -133,16 +134,16 @@ const ConnectorAddModal = ({
   return (
     <EuiModal className="actConnectorModal" data-test-subj="connectorAddModal" onClose={closeModal}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <EuiFlexGroup gutterSize="m" alignItems="center">
-            {actionTypeModel && actionTypeModel.iconClass ? (
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={actionTypeModel.iconClass} size="xl" />
-              </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h3 id="flyoutTitle">
+        <EuiFlexGroup gutterSize="m" alignItems="center">
+          {actionTypeModel && actionTypeModel.iconClass ? (
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={actionTypeModel.iconClass} size="xl" />
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
+              <EuiFlexItem>
+                <EuiModalHeaderTitle size="s" component="h3" id="flyoutTitle">
                   <FormattedMessage
                     defaultMessage="{actionTypeName} connector"
                     id="xpack.triggersActionsUI.sections.addModalConnectorForm.flyoutTitle"
@@ -150,11 +151,19 @@ const ConnectorAddModal = ({
                       actionTypeName: actionType.name,
                     }}
                   />
-                </h3>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiModalHeaderTitle>
+                </EuiModalHeaderTitle>
+              </EuiFlexItem>
+              {actionTypeModel && actionTypeModel.isExperimental && (
+                <EuiFlexItem className="betaBadgeFlexItem" grow={false}>
+                  <EuiBetaBadge
+                    label={betaBadgeProps.label}
+                    tooltipContent={betaBadgeProps.tooltipContent}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalHeader>
 
       <EuiModalBody>

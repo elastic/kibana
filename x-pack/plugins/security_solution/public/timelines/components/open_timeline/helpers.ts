@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr, isEmpty } from 'lodash/fp';
 import type { Action } from 'typescript-fsa';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { Dispatch } from 'redux';
 import deepMerge from 'deepmerge';
 
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import type {
   ColumnHeaderOptions,
   TimelineResult,
@@ -61,7 +62,7 @@ import type {
 } from './types';
 import { createNote } from '../notes/helpers';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
-import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
+import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
 import { sourcererActions } from '../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import {
@@ -200,7 +201,7 @@ const getTemplateTimelineId = (
 
   return duplicate && timeline.timelineType === TimelineType.template
     ? // TODO: MOVE TO THE BACKEND
-      uuid.v4()
+      uuidv4()
     : timeline.templateTimelineId;
 };
 
@@ -412,6 +413,7 @@ export const dispatchUpdateTimeline =
     timeline,
     to,
     ruleNote,
+    ruleAuthor,
   }: UpdateTimeline): (() => void) =>
   () => {
     if (!isEmpty(timeline.indexNames)) {
@@ -429,7 +431,7 @@ export const dispatchUpdateTimeline =
     ) {
       dispatch(
         dispatchSetRelativeRangeDatePicker({
-          id: 'timeline',
+          id: InputsModelId.timeline,
           fromStr: 'now-24h',
           toStr: 'now',
           from: DEFAULT_FROM_MOMENT.toISOString(),
@@ -463,7 +465,7 @@ export const dispatchUpdateTimeline =
     }
 
     if (duplicate && ruleNote != null && !isEmpty(ruleNote)) {
-      const newNote = createNote({ newNote: ruleNote });
+      const newNote = createNote({ newNote: ruleNote, user: ruleAuthor || 'elastic' });
       dispatch(dispatchUpdateNote({ note: newNote }));
       dispatch(dispatchAddGlobalTimelineNote({ noteId: newNote.id, id }));
     }

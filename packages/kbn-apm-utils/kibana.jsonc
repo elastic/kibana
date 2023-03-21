@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/apm-utils",
+  "owner": "@elastic/apm-ui"
+}

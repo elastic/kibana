@@ -112,6 +112,76 @@ describe('buildEcsObjects', () => {
               type: [],
             },
           },
+          {
+            feed: {
+              name: [],
+            },
+            indicator: {
+              provider: [],
+              reference: [],
+            },
+            matched: {
+              atomic: ['MacBook-Pro-de-Gloria.local'],
+              field: ['host.name'],
+              type: ['indicator_match_rule'],
+            },
+          },
+          {
+            feed: {
+              name: [],
+            },
+            indicator: {
+              provider: [],
+              reference: [],
+            },
+            matched: {
+              atomic: ['MacBook-Pro-de-Gloria.local'],
+              field: ['host.hostname'],
+              type: ['indicator_match_rule'],
+            },
+          },
+          {
+            feed: {
+              name: [],
+            },
+            indicator: {
+              provider: [],
+              reference: [],
+            },
+            matched: {
+              atomic: ['x86_64'],
+              field: ['host.architecture'],
+              type: ['indicator_match_rule'],
+            },
+          },
+          {
+            feed: {
+              name: [],
+            },
+            indicator: {
+              provider: [],
+              reference: [],
+            },
+            matched: {
+              atomic: ['MacBook-Pro-de-Gloria.local'],
+              field: ['host.name'],
+              type: ['indicator_match_rule'],
+            },
+          },
+          {
+            feed: {
+              name: [],
+            },
+            indicator: {
+              provider: [],
+              reference: [],
+            },
+            matched: {
+              atomic: ['MacBook-Pro-de-Gloria.local'],
+              field: ['host.hostname'],
+              type: ['indicator_match_rule'],
+            },
+          },
         ],
       },
       timestamp: '2020-11-17T14:48:08.922Z',

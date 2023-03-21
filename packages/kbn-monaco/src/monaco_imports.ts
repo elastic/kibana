@@ -23,7 +23,9 @@ import 'monaco-editor/esm/vs/editor/contrib/hover/hover.js'; // Needed for hover
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/parameterHints.js'; // Needed for signature
 import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/bracketMatching.js'; // Needed for brackets matching highlight
 
+import 'monaco-editor/esm/vs/language/json/monaco.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.js'; // Needed for basic javascript support
 import 'monaco-editor/esm/vs/basic-languages/xml/xml.contribution.js'; // Needed for basic xml support
+import 'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution'; // Needed for yaml support
 
 export { monaco };

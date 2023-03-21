@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
+import Fsp from 'fs/promises';
 
 /**
  * @param {string} path
- * @returns {string}
+ * @returns {Promise<string>}
  */
-export function maybeRealpath(path) {
+export async function maybeRealpath(path) {
   try {
-    return Fs.realpathSync.native(path);
+    return Fsp.realpath(path);
   } catch (error) {
     if (error.code !== 'ENOENT') {
       throw error;
@@ -26,11 +26,11 @@ export function maybeRealpath(path) {
 
 /**
  * @param {string} path
- * @returns {boolean}
+ * @returns {Promise<boolean>}
  */
-export function isDirectory(path) {
+export async function isDirectory(path) {
   try {
-    const stat = Fs.statSync(path);
+    const stat = await Fsp.stat(path);
     return stat.isDirectory();
   } catch (error) {
     return false;
@@ -39,11 +39,11 @@ export function isDirectory(path) {
 
 /**
  * @param {string} path
- * @returns {boolean}
+ * @returns {Promise<boolean>}
  */
-export function isFile(path) {
+export async function isFile(path) {
   try {
-    const stat = Fs.statSync(path);
+    const stat = await Fsp.stat(path);
     return stat.isFile();
   } catch (error) {
     return false;

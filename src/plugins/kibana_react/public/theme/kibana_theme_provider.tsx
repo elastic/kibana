@@ -9,13 +9,14 @@
 import React, { FC, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { EuiProvider } from '@elastic/eui';
+import { EuiProvider, EuiProviderProps } from '@elastic/eui';
 import createCache from '@emotion/cache';
 import type { CoreTheme } from '@kbn/core/public';
 import { getColorMode } from './utils';
 
 interface KibanaThemeProviderProps {
   theme$: Observable<CoreTheme>;
+  modify?: EuiProviderProps<{}>['modify'];
 }
 
 const defaultTheme: CoreTheme = {
@@ -36,7 +37,7 @@ emotionCache.compat = true;
 That copy and this comment can be removed once https://github.com/elastic/kibana/issues/119204 is implemented.*/
 // IMPORTANT: This code has been copied to the `kibana_utils` plugin, to avoid cyclical dependency, any changes here should be applied there too.
 
-export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, children }) => {
+export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, modify, children }) => {
   const theme = useObservable(theme$, defaultTheme);
   const colorMode = useMemo(() => getColorMode(theme), [theme]);
   return (
@@ -45,6 +46,7 @@ export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, chil
       cache={{ default: emotionCache, global: globalCache }}
       globalStyles={false}
       utilityClasses={false}
+      modify={modify}
     >
       {children}
     </EuiProvider>

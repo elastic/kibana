@@ -6,21 +6,27 @@
  */
 
 import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
 import React, { memo } from 'react';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { MANAGEMENT_ROUTING_BLOCKLIST_PATH } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
 import { Blocklist } from './view/blocklist';
+import { SecurityPageName } from '../../../app/types';
+import { SpyRoute } from '../../../common/utils/route/spy_routes';
 
 /**
  * Provides the routing container for the blocklist related views
  */
 export const BlocklistContainer = memo(() => {
   return (
-    <Switch>
-      <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} exact component={Blocklist} />
-      <Route path="*" component={NotFoundPage} />
-    </Switch>
+    <TrackApplicationView viewId={SecurityPageName.blocklist}>
+      <Switch>
+        <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} exact component={Blocklist} />
+        <Route path="*" component={NotFoundPage} />
+      </Switch>
+      <SpyRoute pageName={SecurityPageName.blocklist} />
+    </TrackApplicationView>
   );
 });
 

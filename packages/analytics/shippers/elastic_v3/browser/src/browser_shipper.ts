@@ -6,7 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, interval, Subject, bufferWhen, concatMap, filter, skipWhile } from 'rxjs';
+import {
+  BehaviorSubject,
+  interval,
+  Subject,
+  bufferWhen,
+  concatMap,
+  skipWhile,
+  firstValueFrom,
+  map,
+  merge,
+} from 'rxjs';
 import type {
   AnalyticsClientInitContext,
   Event,
@@ -39,6 +49,8 @@ export class ElasticV3BrowserShipper implements IShipper {
   private readonly url: string;
 
   private readonly internalQueue$ = new Subject<Event>();
+  private readonly flush$ = new Subject<void>();
+  private readonly queueFlushed$ = new Subject<void>();
 
   private readonly isOptedIn$ = new BehaviorSubject<boolean | undefined>(undefined);
   private clusterUuid: string = 'UNKNOWN';
@@ -93,24 +105,47 @@ export class ElasticV3BrowserShipper implements IShipper {
   }
 
   /**
+   * Triggers a flush of the internal queue to attempt to send any events held in the queue
+   * and resolves the returned promise once the queue is emptied.
+   */
+  public async flush() {
+    if (this.flush$.isStopped) {
+      // If called after shutdown, return straight away
+      return;
+    }
+
+    const promise = firstValueFrom(this.queueFlushed$);
+    this.flush$.next();
+    await promise;
+  }
+
+  /**
    * Shuts down the shipper.
    * Triggers a flush of the internal queue to attempt to send any events held in the queue.
    */
   public shutdown() {
     this.internalQueue$.complete(); // NOTE: When completing the observable, the buffer logic does not wait and releases any buffered events.
+    this.flush$.complete();
   }
 
   private setUpInternalQueueSubscriber() {
     this.internalQueue$
       .pipe(
         // Buffer events for 1 second or until we have an optIn value
-        bufferWhen(() => interval(1000).pipe(skipWhile(() => this.isOptedIn$.value === undefined))),
-        // Discard any events if we are not opted in
-        skipWhile(() => this.isOptedIn$.value === false),
-        // Skip empty buffers
-        filter((events) => events.length > 0),
-        // Send events
-        concatMap(async (events) => this.sendEvents(events))
+        bufferWhen(() =>
+          merge(
+            this.flush$,
+            interval(1000).pipe(skipWhile(() => this.isOptedIn$.value === undefined))
+          )
+        ),
+        // Send events (one batch at a time)
+        concatMap(async (events) => {
+          // Only send if opted-in and there's anything to send
+          if (this.isOptedIn$.value === true && events.length > 0) {
+            await this.sendEvents(events);
+          }
+        }),
+        map(() => this.queueFlushed$.next())
       )
       .subscribe();
   }

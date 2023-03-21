@@ -16,7 +16,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPopover,
   EuiSpacer,
   EuiTitle,

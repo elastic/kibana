@@ -7,7 +7,7 @@
 
 import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX, CONNECTORS_VERSION } from '..';
 
-import { setupConnectorsIndices } from './setup_indices';
+import { defaultConnectorsPipelineMeta, setupConnectorsIndices } from './setup_indices';
 
 describe('Setup Indices', () => {
   const mockClient = {
@@ -29,7 +29,9 @@ describe('Setup Indices', () => {
   const connectorsMappings = {
     _meta: {
       version: CONNECTORS_VERSION,
+      pipeline: defaultConnectorsPipelineMeta,
     },
+    dynamic: false,
     properties: {
       api_key_id: {
         type: 'keyword',
@@ -37,13 +39,108 @@ describe('Setup Indices', () => {
       configuration: {
         type: 'object',
       },
+      custom_scheduling: {
+        type: 'object',
+      },
+      description: { type: 'text' },
       error: { type: 'keyword' },
-      index_name: { type: 'text' },
+      features: {
+        properties: {
+          filtering_advanced_config: { type: 'boolean' },
+          filtering_rules: { type: 'boolean' },
+        },
+      },
+      filtering: {
+        properties: {
+          active: {
+            properties: {
+              advanced_snippet: {
+                properties: {
+                  created_at: { type: 'date' },
+                  updated_at: { type: 'date' },
+                  value: { type: 'object' },
+                },
+              },
+              rules: {
+                properties: {
+                  created_at: { type: 'date' },
+                  field: { type: 'keyword' },
+                  id: { type: 'keyword' },
+                  order: { type: 'short' },
+                  policy: { type: 'keyword' },
+                  rule: { type: 'keyword' },
+                  updated_at: { type: 'date' },
+                  value: { type: 'keyword' },
+                },
+              },
+              validation: {
+                properties: {
+                  errors: {
+                    properties: {
+                      ids: { type: 'keyword' },
+                      messages: { type: 'text' },
+                    },
+                  },
+                  state: { type: 'keyword' },
+                },
+              },
+            },
+          },
+          domain: { type: 'keyword' },
+          draft: {
+            properties: {
+              advanced_snippet: {
+                properties: {
+                  created_at: { type: 'date' },
+                  updated_at: { type: 'date' },
+                  value: { type: 'object' },
+                },
+              },
+              rules: {
+                properties: {
+                  created_at: { type: 'date' },
+                  field: { type: 'keyword' },
+                  id: { type: 'keyword' },
+                  order: { type: 'short' },
+                  policy: { type: 'keyword' },
+                  rule: { type: 'keyword' },
+                  updated_at: { type: 'date' },
+                  value: { type: 'keyword' },
+                },
+              },
+              validation: {
+                properties: {
+                  errors: {
+                    properties: {
+                      ids: { type: 'keyword' },
+                      messages: { type: 'text' },
+                    },
+                  },
+                  state: { type: 'keyword' },
+                },
+              },
+            },
+          },
+        },
+      },
+      index_name: { type: 'keyword' },
+      is_native: { type: 'boolean' },
       language: { type: 'keyword' },
+      last_deleted_document_count: { type: 'long' },
+      last_indexed_document_count: { type: 'long' },
       last_seen: { type: 'date' },
       last_sync_error: { type: 'keyword' },
       last_sync_status: { type: 'keyword' },
       last_synced: { type: 'date' },
+      name: { type: 'keyword' },
+      pipeline: {
+        properties: {
+          extract_binary_content: { type: 'boolean' },
+          name: { type: 'keyword' },
+          reduce_whitespace: { type: 'boolean' },
+          run_ml_inference: { type: 'boolean' },
+        },
+      },
       scheduling: {
         properties: {
           enabled: { type: 'boolean' },
@@ -60,29 +157,72 @@ describe('Setup Indices', () => {
     _meta: {
       version: CONNECTORS_VERSION,
     },
+    dynamic: false,
     properties: {
-      api_key_id: {
-        type: 'keyword',
-      },
-      configuration: {
-        type: 'object',
-      },
-      error: { type: 'keyword' },
-      index_name: { type: 'text' },
-      language: { type: 'keyword' },
-      last_seen: { type: 'date' },
-      last_sync_error: { type: 'keyword' },
-      last_sync_status: { type: 'keyword' },
-      last_synced: { type: 'date' },
-      scheduling: {
+      cancelation_requested_at: { type: 'date' },
+      canceled_at: { type: 'date' },
+      completed_at: { type: 'date' },
+      connector: {
         properties: {
-          enabled: { type: 'boolean' },
-          interval: { type: 'text' },
+          configuration: { type: 'object' },
+          filtering: {
+            properties: {
+              advanced_snippet: {
+                properties: {
+                  created_at: { type: 'date' },
+                  updated_at: { type: 'date' },
+                  value: { type: 'object' },
+                },
+              },
+              domain: { type: 'keyword' },
+              rules: {
+                properties: {
+                  created_at: { type: 'date' },
+                  field: { type: 'keyword' },
+                  id: { type: 'keyword' },
+                  order: { type: 'short' },
+                  policy: { type: 'keyword' },
+                  rule: { type: 'keyword' },
+                  updated_at: { type: 'date' },
+                  value: { type: 'keyword' },
+                },
+              },
+              warnings: {
+                properties: {
+                  ids: { type: 'keyword' },
+                  messages: { type: 'text' },
+                },
+              },
+            },
+          },
+          id: { type: 'keyword' },
+          index_name: { type: 'keyword' },
+          language: { type: 'keyword' },
+          pipeline: {
+            properties: {
+              extract_binary_content: { type: 'boolean' },
+              name: { type: 'keyword' },
+              reduce_whitespace: { type: 'boolean' },
+              run_ml_inference: { type: 'boolean' },
+            },
+          },
+          service_type: { type: 'keyword' },
         },
       },
-      service_type: { type: 'keyword' },
-      status: { type: 'keyword' },
-      sync_now: { type: 'boolean' },
+      created_at: { type: 'date' },
+      deleted_document_count: { type: 'integer' },
+      error: { type: 'keyword' },
+      indexed_document_count: { type: 'integer' },
+      indexed_document_volume: { type: 'integer' },
+      last_seen: { type: 'date' },
+      metadata: { type: 'object' },
+      started_at: { type: 'date' },
+      status: {
+        type: 'keyword',
+      },
+      total_document_count: { type: 'integer' },
+      trigger_method: { type: 'keyword' },
+      worker_hostname: { type: 'keyword' },
     },
   };
 
@@ -163,7 +303,7 @@ describe('Setup Indices', () => {
       expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
         index: connectorsIndexName,
         mappings: connectorsMappings,
-        settings: { hidden: true },
+        settings: { auto_expand_replicas: '0-3', hidden: true, number_of_replicas: 0 },
       });
       expect(mockClient.asCurrentUser.indices.updateAliases).toHaveBeenCalledWith({
         actions: [
@@ -197,7 +337,7 @@ describe('Setup Indices', () => {
       expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
         index: jobsIndexName,
         mappings: connectorsJobsMappings,
-        settings: { hidden: true },
+        settings: { auto_expand_replicas: '0-3', hidden: true, number_of_replicas: 0 },
       });
       expect(mockClient.asCurrentUser.indices.updateAliases).toHaveBeenCalledWith({
         actions: [

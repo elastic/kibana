@@ -19,7 +19,7 @@ import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { SuggestionPanel, SuggestionPanelProps, SuggestionPanelWrapper } from './suggestion_panel';
 import { getSuggestions } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip, EuiAccordion } from '@elastic/eui';
-import { LensIconChartDatatable } from '../../assets/chart_datatable';
+import { IconChartDatatable } from '@kbn/chart-icons';
 import { mountWithProvider } from '../../mocks';
 import {
   applyChanges,
@@ -104,6 +104,7 @@ describe('suggestion_panel', () => {
       },
       ExpressionRenderer: expressionRendererMock,
       frame: createMockFramePublicAPI(),
+      getUserMessages: () => [],
     };
   });
 
@@ -286,7 +287,7 @@ describe('suggestion_panel', () => {
     getSuggestionsMock.mockReturnValue([
       {
         datasourceState: {},
-        previewIcon: LensIconChartDatatable,
+        previewIcon: IconChartDatatable,
         score: 0.5,
         visualizationState: suggestion1State,
         visualizationId: 'testVis',
@@ -317,7 +318,7 @@ describe('suggestion_panel', () => {
 
     expect(instance.find(SELECTORS.SUGGESTIONS_PANEL).find(EuiIcon)).toHaveLength(1);
     expect(instance.find(SELECTORS.SUGGESTIONS_PANEL).find(EuiIcon).prop('type')).toEqual(
-      LensIconChartDatatable
+      IconChartDatatable
     );
   });
 

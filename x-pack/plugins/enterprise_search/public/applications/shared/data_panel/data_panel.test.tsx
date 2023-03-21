@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiIcon, EuiButton, EuiTitle, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiIcon, EuiButton, EuiTitle, EuiSpacer } from '@elastic/eui';
 
 import { LoadingOverlay } from '../loading';
 
@@ -94,16 +94,6 @@ describe('DataPanel', () => {
       expect(wrapper.find(EuiTitle).prop('size')).toEqual('s');
     });
 
-    it('passes responsive to the header flex group', () => {
-      const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
-
-      expect(wrapper.find(EuiFlexGroup).first().prop('responsive')).toEqual(false);
-
-      wrapper.setProps({ responsive: true });
-
-      expect(wrapper.find(EuiFlexGroup).first().prop('responsive')).toEqual(true);
-    });
-
     it('renders panel color based on filled flag', () => {
       const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
 
@@ -129,7 +119,7 @@ describe('DataPanel', () => {
     });
 
     it('passes hasBorder', () => {
-      const wrapper = shallow(<DataPanel title={<h1>Test</h1>} />);
+      const wrapper = shallow(<DataPanel filled title={<h1>Test</h1>} />);
       expect(wrapper.prop('hasBorder')).toBeFalsy();
 
       wrapper.setProps({ hasBorder: true });

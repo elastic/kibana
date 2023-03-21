@@ -23,13 +23,12 @@ export type ControlInput = EmbeddableInput & {
   query?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
+  timeslice?: [number, number];
   controlStyle?: ControlStyle;
   ignoreParentSettings?: ParentIgnoreSettings;
 };
 
 export type DataControlInput = ControlInput & {
   fieldName: string;
-  parentFieldName?: string;
-  childFieldName?: string;
   dataViewId: string;
 };

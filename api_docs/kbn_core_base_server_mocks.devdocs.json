@@ -14,66 +14,7 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/core-base-server-mocks",
-        "id": "def-server.mockCoreContext",
-        "type": "Object",
-        "tags": [],
-        "label": "mockCoreContext",
-        "description": [],
-        "path": "packages/core/base/core-base-server-mocks/src/core_context.mock.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-base-server-mocks",
-            "id": "def-server.mockCoreContext.create",
-            "type": "Function",
-            "tags": [],
-            "label": "create",
-            "description": [],
-            "signature": [
-              "({ env, logger, configService, }?: { env?: ",
-              "Env",
-              " | undefined; logger?: jest.Mocked<",
-              "LoggerFactory",
-              "> | undefined; configService?: jest.Mocked<",
-              "IConfigService",
-              "> | undefined; }) => ",
-              "DeeplyMockedKeys",
-              "<",
-              "CoreContext",
-              ">"
-            ],
-            "path": "packages/core/base/core-base-server-mocks/src/core_context.mock.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-base-server-mocks",
-                "id": "def-server.mockCoreContext.create.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "__0",
-                "description": [],
-                "signature": [
-                  "{ env?: ",
-                  "Env",
-                  " | undefined; logger?: jest.Mocked<",
-                  "LoggerFactory",
-                  "> | undefined; configService?: jest.Mocked<",
-                  "IConfigService",
-                  "> | undefined; }"
-                ],
-                "path": "packages/core/base/core-base-server-mocks/src/core_context.mock.ts",
-                "deprecated": false
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   },
   "common": {
     "classes": [],
@@ -81,6 +22,98 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-base-server-mocks",
+        "id": "def-common.mockCoreContext",
+        "type": "Object",
+        "tags": [],
+        "label": "mockCoreContext",
+        "description": [],
+        "path": "packages/core/base/core-base-server-mocks/src/core_context.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-base-server-mocks",
+            "id": "def-common.mockCoreContext.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "({ env, logger, configService, }?: { env?: ",
+              {
+                "pluginId": "@kbn/config",
+                "scope": "common",
+                "docId": "kibKbnConfigPluginApi",
+                "section": "def-common.Env",
+                "text": "Env"
+              },
+              " | undefined; logger?: jest.Mocked<",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.LoggerFactory",
+                "text": "LoggerFactory"
+              },
+              "> | undefined; configService?: jest.Mocked<",
+              "IConfigService",
+              "> | undefined; }) => ",
+              {
+                "pluginId": "@kbn/utility-types-jest",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesJestPluginApi",
+                "section": "def-common.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
+              },
+              "<",
+              "CoreContext",
+              ">"
+            ],
+            "path": "packages/core/base/core-base-server-mocks/src/core_context.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-base-server-mocks",
+                "id": "def-common.mockCoreContext.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ env?: ",
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "common",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-common.Env",
+                    "text": "Env"
+                  },
+                  " | undefined; logger?: jest.Mocked<",
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.LoggerFactory",
+                    "text": "LoggerFactory"
+                  },
+                  "> | undefined; configService?: jest.Mocked<",
+                  "IConfigService",
+                  "> | undefined; }"
+                ],
+                "path": "packages/core/base/core-base-server-mocks/src/core_context.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

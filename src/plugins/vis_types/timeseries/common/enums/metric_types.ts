@@ -16,7 +16,6 @@ export enum TSVB_METRIC_TYPES {
   STD_DEVIATION = 'std_deviation',
   SUM_OF_SQUARES = 'sum_of_squares',
   TOP_HIT = 'top_hit',
-  VALUE_COUNT = 'value_count',
   VARIANCE = 'variance',
   CALCULATION = 'calculation',
   MOVING_AVERAGE = 'moving_average',
@@ -32,4 +31,17 @@ export enum TSVB_METRIC_TYPES {
 export enum BUCKET_TYPES {
   TERMS = 'terms',
   FILTERS = 'filters',
+}
+
+export enum BASIC_AGGS_TYPES {
+  COUNT = 'count',
+  AVG = 'avg',
+  MIN = 'min',
+  MAX = 'max',
+  SUM = 'sum',
+  STD_DEV = 'std_deviation',
+  SUM_OF_SQUARES = 'sum_of_squares',
+  VARIANCE = 'variance',
+  CARDINALITY = 'cardinality',
+  VALUE_COUNT = 'value_count',
 }

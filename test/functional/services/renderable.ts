@@ -47,4 +47,23 @@ export class RenderableService extends FtrService {
       }
     });
   }
+
+  public async getRenderCount(count: number = 1): Promise<Record<string, number>> {
+    const map: Record<string, number> = {};
+    await this.waitForRender(count);
+
+    const renderedElements = await this.find.allByCssSelector(RENDER_COMPLETE_SELECTOR);
+
+    for (let i = 0; i < renderedElements.length; i++) {
+      const renderedElement = renderedElements[i];
+      const title = (await renderedElement.getAttribute('data-title')) || i.toString();
+      const renderingCount = Number(
+        (await renderedElement.getAttribute('data-rendering-count')) || '0'
+      );
+
+      map[title] = renderingCount;
+    }
+
+    return map;
+  }
 }

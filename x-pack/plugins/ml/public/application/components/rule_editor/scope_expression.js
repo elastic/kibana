@@ -26,9 +26,6 @@ import { FILTER_TYPE } from '../../../../common/constants/detector_rule';
 import { filterTypeToText } from './utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-// Raise the popovers above GuidePageSideNav
-const POPOVER_STYLE = { zIndex: '200' };
-
 function getFilterListOptions(filterListIds) {
   return filterListIds.map((filterId) => ({ value: filterId, text: filterId }));
 }
@@ -76,7 +73,7 @@ export class ScopeExpression extends Component {
     const { filterId, filterType, filterListIds } = this.props;
 
     return (
-      <div style={POPOVER_STYLE}>
+      <div>
         <EuiPopoverTitle>
           <FormattedMessage
             id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
@@ -156,7 +153,7 @@ export class ScopeExpression extends Component {
               }
               isOpen={this.state.isFilterListOpen}
               closePopover={this.closeFilterList}
-              panelPaddingSize="none"
+              panelPaddingSize="s"
               ownFocus
               anchorPosition="downLeft"
             >

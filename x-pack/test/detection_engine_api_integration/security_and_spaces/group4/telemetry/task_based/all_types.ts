@@ -9,9 +9,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getSecurityTelemetryStats,
+  removeTimeFieldsFromTelemetryStats,
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
 
@@ -37,18 +38,47 @@ export default ({ getService }: FtrProviderContext) => {
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
       await deleteAllExceptions(supertest, log);
     });
 
-    it('should have initialized empty/zero values when no rules are running', async () => {
+    it('should only have task metric values when no rules are running', async () => {
       await retry.try(async () => {
         const stats = await getSecurityTelemetryStats(supertest, log);
+        removeTimeFieldsFromTelemetryStats(stats);
         expect(stats).to.eql({
-          detection_rules: [],
-          security_lists: [],
-          endpoints: [],
-          diagnostics: [],
+          detection_rules: [
+            [
+              {
+                name: 'Security Solution Detection Rule Lists Telemetry',
+                passed: true,
+              },
+            ],
+          ],
+          security_lists: [
+            [
+              {
+                name: 'Security Solution Lists Telemetry',
+                passed: true,
+              },
+            ],
+          ],
+          endpoints: [
+            [
+              {
+                name: 'Security Solution Telemetry Endpoint Metrics and Info task',
+                passed: true,
+              },
+            ],
+          ],
+          diagnostics: [
+            [
+              {
+                name: 'Security Solution Telemetry Diagnostics task',
+                passed: true,
+              },
+            ],
+          ],
         });
       });
     });

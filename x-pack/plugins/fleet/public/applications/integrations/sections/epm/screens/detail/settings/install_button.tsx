@@ -14,7 +14,6 @@ import { InstallStatus } from '../../../../../types';
 import { useAuthz, useGetPackageInstallStatus, useInstallPackage } from '../../../../../hooks';
 
 import { ConfirmPackageInstall } from './confirm_package_install';
-
 type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version'> & {
   disabled?: boolean;
   dryRunData?: UpgradePackagePolicyDryRunResponse | null;
@@ -33,7 +32,6 @@ export function InstallButton(props: InstallationButtonProps) {
 
   const isInstalling = installationStatus === InstallStatus.installing;
   const [isInstallModalVisible, setIsInstallModalVisible] = useState<boolean>(false);
-
   const toggleInstallModal = useCallback(() => {
     setIsInstallModalVisible(!isInstallModalVisible);
   }, [isInstallModalVisible]);
@@ -54,7 +52,12 @@ export function InstallButton(props: InstallationButtonProps) {
 
   return canInstallPackages ? (
     <Fragment>
-      <EuiButton iconType={'importAction'} isLoading={isInstalling} onClick={toggleInstallModal}>
+      <EuiButton
+        iconType={'importAction'}
+        isLoading={isInstalling}
+        onClick={toggleInstallModal}
+        data-test-subj="installAssetsButton"
+      >
         {isInstalling ? (
           <FormattedMessage
             id="xpack.fleet.integrations.installPackage.installingPackageButtonLabel"

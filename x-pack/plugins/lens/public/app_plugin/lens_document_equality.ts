@@ -54,9 +54,9 @@ export const isLensEqual = (
       .map((type) =>
         datasourceMap[type].isEqual(
           doc1.state.datasourceStates[type],
-          doc1.references,
+          [...doc1.references, ...(doc1.state.internalReferences || [])],
           doc2.state.datasourceStates[type],
-          doc2.references
+          [...doc2.references, ...(doc2.state.internalReferences || [])]
         )
       )
       .every((res) => res);

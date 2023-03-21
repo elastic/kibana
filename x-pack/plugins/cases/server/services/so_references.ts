@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import { SavedObjectsUpdateResponse } from '@kbn/core/server';
-import { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectsUpdateResponse } from '@kbn/core/server';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/types';
 import { isEqual, uniqWith } from 'lodash';
-import {
+import type {
   CommentAttributesNoSO,
   CommentRequest,
   CommentAttributes,
   CommentPatchAttributes,
   CommentAttributesWithoutRefs,
 } from '../../common/api';
-import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import {
   injectPersistableReferencesToSO,
   extractPersistableStateReferencesFromSO,
 } from '../attachment_framework/so_references';
 import { EXTERNAL_REFERENCE_REF_NAME } from '../common/constants';
 import { isCommentRequestTypeExternalReferenceSO } from '../common/utils';
+import type { PartialField } from '../types';
 import { SOReferenceExtractor } from './so_reference_extractor';
 
 export const getAttachmentSOExtractor = (attachment: Partial<CommentRequest>) => {
@@ -36,6 +37,30 @@ export const getAttachmentSOExtractor = (attachment: Partial<CommentRequest>) =>
   }
 
   return new SOReferenceExtractor(fieldsToExtract);
+};
+
+type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'>;
+
+/**
+ * This function should be used when the attributes field could be undefined. Specifically when
+ * performing a bulkGet within the core saved object library. If one of the requested ids does not exist in elasticsearch
+ * then the error field will be set and attributes will be undefined.
+ */
+export const injectAttachmentAttributesAndHandleErrors = (
+  savedObject: OptionalAttributes<CommentAttributesWithoutRefs>,
+  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
+): OptionalAttributes<CommentAttributes> => {
+  if (!hasAttributes(savedObject)) {
+    // we don't actually have an attributes field here so the type doesn't matter, this cast is to get the types to stop
+    // complaining though
+    return savedObject as OptionalAttributes<CommentAttributes>;
+  }
+
+  return injectAttachmentSOAttributesFromRefs(savedObject, persistableStateAttachmentTypeRegistry);
+};
+
+const hasAttributes = <T>(savedObject: OptionalAttributes<T>): savedObject is SavedObject<T> => {
+  return savedObject.error == null && savedObject.attributes != null;
 };
 
 export const injectAttachmentSOAttributesFromRefs = (

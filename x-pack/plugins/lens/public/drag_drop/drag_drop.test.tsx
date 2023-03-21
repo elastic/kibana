@@ -19,7 +19,7 @@ import {
 import { act } from 'react-dom/test-utils';
 import { DropType } from '../types';
 
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 const dataTransfer = {
   setData: jest.fn(),

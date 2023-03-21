@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   PaletteContinuity,
   checkIsMaxContinuity,
@@ -15,6 +16,9 @@ import {
   getDataMinMax,
   CustomPaletteParams,
 } from '../../../../palettes';
+import { InfinityIcon } from '../../assets/infinity';
+import { ValueMaxIcon } from '../../assets/value_max';
+import { ValueMinIcon } from '../../assets/value_min';
 
 import type { ColorRange, ColorRangeAccessor } from '../types';
 
@@ -98,13 +102,13 @@ export const toColorStops = (colorRanges: ColorRange[], continuity: PaletteConti
 export const getValueForContinuity = (
   colorRanges: ColorRange[],
   continuity: PaletteContinuity,
-  isLast: boolean,
+  isUpper: boolean,
   rangeType: CustomPaletteParams['rangeType'],
   dataBounds: DataBounds
 ) => {
   const { max, min } = getDataMinMax(rangeType, dataBounds);
   let value;
-  if (isLast) {
+  if (isUpper) {
     if (checkIsMaxContinuity(continuity)) {
       value = Number.POSITIVE_INFINITY;
     } else {
@@ -123,4 +127,53 @@ export const getValueForContinuity = (
   }
 
   return value;
+};
+
+/**
+ * Returns information about an automatic bound (the top and bottom boundaries of the palette range)
+ */
+export const getAutoBoundInformation = ({
+  isPercentage,
+  isUpper,
+  isAuto,
+}: {
+  isPercentage: boolean;
+  isUpper: boolean;
+  isAuto: boolean;
+}) => {
+  const representation = isUpper
+    ? isPercentage
+      ? i18n.translate('coloring.dynamicColoring.customPalette.maxValuePlaceholderPercentage', {
+          defaultMessage: '100',
+        })
+      : i18n.translate('coloring.dynamicColoring.customPalette.maxValuePlaceholder', {
+          defaultMessage: 'No max.',
+        })
+    : isPercentage
+    ? i18n.translate('coloring.dynamicColoring.customPalette.minValuePlaceholderPercentage', {
+        defaultMessage: '0',
+      })
+    : i18n.translate('coloring.dynamicColoring.customPalette.minValuePlaceholder', {
+        defaultMessage: 'No min.',
+      });
+
+  const actionDescription = isUpper
+    ? isPercentage
+      ? i18n.translate('coloring.dynamicColoring.customPalette.useAutoMaxValuePercentage', {
+          defaultMessage: `Use maximum percentage`,
+        })
+      : i18n.translate('coloring.dynamicColoring.customPalette.useAutoMaxValue', {
+          defaultMessage: `No maximum value`,
+        })
+    : isPercentage
+    ? i18n.translate('coloring.dynamicColoring.customPalette.useAutoMinValuePercentage', {
+        defaultMessage: `Use minimum percentage`,
+      })
+    : i18n.translate('coloring.dynamicColoring.customPalette.useAutoMinValue', {
+        defaultMessage: `No minimum value`,
+      });
+
+  const icon = !isPercentage ? InfinityIcon : isUpper ? ValueMaxIcon : ValueMinIcon;
+
+  return { representation, actionDescription, icon };
 };

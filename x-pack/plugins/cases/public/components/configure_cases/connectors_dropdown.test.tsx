@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { EuiSuperSelect } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-import { ConnectorsDropdown, Props } from './connectors_dropdown';
+import type { Props } from './connectors_dropdown';
+import { ConnectorsDropdown } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
 import { connectors } from './__mock__';
 
@@ -81,7 +83,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <span>
-                My Connector
+                My SN connector
               </span>
             </EuiFlexItem>
           </EuiFlexGroup>,
@@ -106,7 +108,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <span>
-                My Connector 2
+                My Resilient connector
               </span>
             </EuiFlexItem>
           </EuiFlexGroup>,
@@ -181,7 +183,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <span>
-                My Connector
+                My deprecated SN connector
                  (deprecated)
               </span>
             </EuiFlexItem>
@@ -233,7 +235,7 @@ describe('ConnectorsDropdown', () => {
         .find('[data-test-subj="dropdown-connectors"]')
         .first()
         .text()
-        .includes('My Connector, is selected')
+        .includes('My SN connector, is selected')
     ).toBeTruthy();
   });
 

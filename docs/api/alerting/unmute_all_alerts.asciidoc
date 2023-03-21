@@ -1,20 +1,41 @@
 [[unmute-all-alerts-api]]
-=== Unmute all alerts API
+== Unmute all alerts API
 ++++
 <titleabbrev>Unmute all alerts</titleabbrev>
 ++++
 
 Unmute all alerts.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification]. For a preview, check out <<rule-apis>>.
+====
+
 [[unmute-all-alerts-api-all-request]]
-==== Request
+=== {api-request-title}
 
 `POST <kibana host>:<port>/api/alerting/rule/<id>/_unmute_all`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>/_unmute_all`
 
+=== {api-prereq-title}
+
+You must have `all` privileges for the appropriate {kib} features, depending on
+the `consumer` and `rule_type_id` of the rule. For example, the
+*Management* > *Stack Rules* feature, *Analytics* > *Discover* and *{ml-app}*
+features, *{observability}*, and *Security* features. If the rule has `actions`,
+you must also have `read` privileges for the *Management* >
+*{connectors-feature}* feature. For more details, refer to
+<<kibana-feature-privileges>>.
+
+=== {api-description-title}
+
+If the rule has its notifications snoozed indefinitely, this API cancels the
+snooze.
+
 [[unmute-all-alerts-api-path-params]]
-==== Path parameters
+=== {api-path-parms-title}
 
 `id`::
   (Required, string) The ID of the rule whose alerts you want to unmute.
@@ -23,17 +44,15 @@ Unmute all alerts.
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[unmute-all-alerts-api-response-codes]]
-==== Response code
+=== {api-response-codes-title}
 
-`200`::
+`204`::
   Indicates a successful call.
 
-==== Example
-
-Unmute all alerts with ID:
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/alerting/rule/41893910-6bca-11eb-9e0d-85d233e3ee35/_unmute_all
+POST api/alerting/rule/41893910-6bca-11eb-9e0d-85d233e3ee35/_unmute_all
 --------------------------------------------------
 // KIBANA

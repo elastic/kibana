@@ -8,7 +8,7 @@
 
 import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Datatable, DatatableRow } from '@kbn/expressions-plugin';
+import { Datatable, DatatableRow } from '@kbn/expressions-plugin/common';
 import { LayerTypes } from '../constants';
 import { DataLayerConfig, ExtendedDataLayerConfig, XYProps } from '../types';
 
@@ -132,6 +132,15 @@ export const createArgsWithLayers = (
     },
   ],
   layers: Array.isArray(layers) ? layers : [layers],
+  annotations: {
+    type: 'event_annotations_result',
+    layers: [],
+    datatable: {
+      type: 'datatable',
+      columns: [],
+      rows: [],
+    },
+  },
 });
 
 export function sampleArgs() {

@@ -12,15 +12,18 @@ import './jest.mocks';
 import React, { FunctionComponent } from 'react';
 import { merge } from 'lodash';
 
-import { defer } from 'rxjs';
+import { defer, BehaviorSubject } from 'rxjs';
 import { notificationServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsMock as fieldFormats } from '@kbn/field-formats-plugin/common/mocks';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+import { PreviewController } from '../../../public/components/preview/preview_controller';
 import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
 import { FieldPreviewProvider } from '../../../public/components/preview';
 import { initApi, ApiService } from '../../../public/lib';
 import { init as initHttpRequests } from './http_requests';
+import { RuntimeFieldSubFields } from '../../../public/shared_imports';
 
 const dataStart = dataPluginMock.createStartContract();
 const { search } = dataStart;
@@ -114,17 +117,20 @@ export const WithFieldEditorDependencies =
       return new MockDefaultFieldFormat();
     });
 
-    const dependencies: Context = {
-      dataView: {
+    const dataView = createStubDataView({
+      spec: {
         title: indexPatternNameForTest,
-        name: indexPatternNameForTest,
-        getName: () => indexPatternNameForTest,
-        fields: { getAll: spyIndexPatternGetAllFields },
-      } as any,
+      },
+    });
+
+    jest.spyOn(dataView.fields, 'getAll').mockImplementation(spyIndexPatternGetAllFields);
+
+    const dependencies: Context = {
+      dataView,
       uiSettings: uiSettingsServiceMock.createStartContract(),
       fieldTypeToProcess: 'runtime',
       existingConcreteFields: [],
-      namesNotAllowed: [],
+      namesNotAllowed: { fields: [], runtimeComposites: [] },
       links: {
         runtimePainless: 'https://elastic.co',
       },
@@ -138,13 +144,16 @@ export const WithFieldEditorDependencies =
         getById: () => undefined,
       },
       fieldFormats,
+      fieldName$: new BehaviorSubject(''),
+      subfields$: new BehaviorSubject<RuntimeFieldSubFields | undefined>(undefined),
     };
 
     const mergedDependencies = merge({}, dependencies, overridingDependencies);
+    const previewController = new PreviewController({ dataView, search });
 
     return (
       <FieldEditorProvider {...mergedDependencies}>
-        <FieldPreviewProvider>
+        <FieldPreviewProvider controller={previewController}>
           <Comp {...props} />
         </FieldPreviewProvider>
       </FieldEditorProvider>

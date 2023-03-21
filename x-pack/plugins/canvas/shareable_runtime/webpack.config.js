@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-require('../../../../src/setup_node_env');
+require('@kbn/babel-register').install();
 
 const path = require('path');
 const webpack = require('webpack');
-const { stringifyRequest } = require('loader-utils'); // eslint-disable-line
+const { stringifyRequest } = require('loader-utils');
 
 const { CiStatsPlugin } = require('./webpack/ci_stats_plugin');
 const {
@@ -20,14 +20,6 @@ const {
 } = require('./constants');
 
 const isProd = process.env.NODE_ENV === 'production';
-
-const nodeModulesButNotKbnPackages = (_path) => {
-  if (!_path.includes('node_modules')) {
-    return false;
-  }
-
-  return !_path.includes(`node_modules${path.sep}@kbn${path.sep}`);
-};
 
 module.exports = {
   context: KIBANA_ROOT,
@@ -42,10 +34,9 @@ module.exports = {
   },
   resolve: {
     alias: {
-      core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/core_app/images'),
+      core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/images'),
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
-    symlinks: false,
   },
   module: {
     rules: [
@@ -78,8 +69,8 @@ module.exports = {
           {
             loader: 'postcss-loader',
             options: {
-              config: {
-                path: require.resolve('./postcss.config.js'),
+              postcssOptions: {
+                config: require.resolve('./postcss.config.js'),
               },
             },
           },
@@ -111,8 +102,8 @@ module.exports = {
           {
             loader: 'postcss-loader',
             options: {
-              config: {
-                path: require.resolve('@kbn/optimizer/postcss.config.js'),
+              postcssOptions: {
+                config: require.resolve('@kbn/optimizer/postcss.config'),
               },
             },
           },
@@ -127,7 +118,7 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        exclude: [nodeModulesButNotKbnPackages, /\.module\.s(a|c)ss$/],
+        exclude: [/node_modules/, /\.module\.s(a|c)ss$/],
         use: [
           {
             loader: 'style-loader',
@@ -142,8 +133,8 @@ module.exports = {
             loader: 'postcss-loader',
             options: {
               sourceMap: !isProd,
-              config: {
-                path: require.resolve('./postcss.config'),
+              postcssOptions: {
+                config: require.resolve('./postcss.config'),
               },
             },
           },
@@ -153,7 +144,7 @@ module.exports = {
               additionalData(content, loaderContext) {
                 return `@import ${stringifyRequest(
                   loaderContext,
-                  path.resolve(KIBANA_ROOT, 'src/core/public/core_app/styles/_globals_v8light.scss')
+                  path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
                 )};\n${content}`;
               },
               implementation: require('node-sass'),
@@ -186,6 +177,10 @@ module.exports = {
           require.resolve('highlight.js'),
         ],
         use: require.resolve('null-loader'),
+      },
+      {
+        test: /\.peggy$/,
+        use: require.resolve('@kbn/peggy-loader'),
       },
     ],
   },

@@ -66,12 +66,8 @@ print('Updating PATH for depot_tools: ' + full_path)
 os.environ['PATH'] = full_path
 
 # configure environment: build dependencies
-if platform.system() == 'Linux':
-  if arch_name:
-    print('Running sysroot install script...')
-    runcmd(src_path + '/build/linux/sysroot_scripts/install-sysroot.py --arch=' + arch_name)
-  print('Running install-build-deps...')
-  runcmd(src_path + '/build/install-build-deps.sh')
+print('Running sysroot install script...')
+runcmd(src_path + '/build/linux/sysroot_scripts/install-sysroot.py --arch=' + arch_name)
 
 print('Updating all modules')
 runcmd('gclient sync -D')
@@ -95,14 +91,14 @@ runcmd('autoninja -C out/headless headless_shell')
 
 # Optimize the output on Linux x64 by stripping inessentials from the binary
 # ARM must be cross-compiled from Linux and can not read the ARM binary in order to strip
-if platform.system() != 'Windows' and arch_name != 'arm64':
+if arch_name != 'arm64':
   print('Optimizing headless_shell')
   shutil.move('out/headless/headless_shell', 'out/headless/headless_shell_raw')
   runcmd('strip -o out/headless/headless_shell out/headless/headless_shell_raw')
 
 # Create the zip and generate the md5 hash using filenames like:
 # chromium-4747cc2-linux_x64.zip
-base_filename = 'out/headless/chromium-' + base_version + '-' + platform.system().lower() + '_' + arch_name
+base_filename = 'out/headless/chromium-' + base_version + '-locales-' + platform.system().lower() + '_' + arch_name
 zip_filename = base_filename + '.zip'
 md5_filename = base_filename + '.md5'
 
@@ -115,6 +111,9 @@ path_prefix = 'headless_shell-' + platform.system().lower() + '_' + arch_name
 archive.write('out/headless/headless_shell', path.join(path_prefix, 'headless_shell'))
 archive.write('out/headless/libEGL.so', path.join(path_prefix, 'libEGL.so'))
 archive.write('out/headless/libGLESv2.so', path.join(path_prefix, 'libGLESv2.so'))
+archive.write('out/headless/libvk_swiftshader.so', path.join(path_prefix, 'libvk_swiftshader.so'))
+archive.write('out/headless/libvulkan.so.1', path.join(path_prefix, 'libvulkan.so.1'))
+archive.write('out/headless/vk_swiftshader_icd.json', path.join(path_prefix, 'vk_swiftshader_icd.json'))
 archive.write(en_us_locale_file_path, path.join(path_prefix, 'locales', en_us_locale_pak_file_name))
 
 archive.close()

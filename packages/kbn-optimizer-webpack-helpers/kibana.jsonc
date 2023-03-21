@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/optimizer-webpack-helpers",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations"
+}

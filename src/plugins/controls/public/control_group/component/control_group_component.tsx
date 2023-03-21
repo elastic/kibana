@@ -8,7 +8,7 @@
 
 import '../control_group.scss';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import classNames from 'classnames';
 import {
@@ -28,27 +28,28 @@ import {
   useSensors,
   LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
+
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
-import { ControlGroupInput } from '../types';
-import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlClone, SortableControl } from './control_group_sortable_item';
+import { useControlGroupContainerContext } from '../control_group_renderer';
+import { ControlGroupStrings } from '../control_group_strings';
 
 export const ControlGroup = () => {
   // Redux embeddable container Context
-  const reduxContainerContext = useReduxContainerContext<
-    ControlGroupInput,
-    typeof controlGroupReducers
-  >();
+  const reduxContext = useControlGroupContainerContext();
   const {
-    useEmbeddableSelector,
-    useEmbeddableDispatch,
+    embeddableInstance: controlGroup,
     actions: { setControlOrders },
-  } = reduxContainerContext;
+    useEmbeddableSelector: select,
+    useEmbeddableDispatch,
+  } = reduxContext;
   const dispatch = useEmbeddableDispatch();
 
   // current state
-  const { panels, viewMode, controlStyle } = useEmbeddableSelector((state) => state);
+  const panels = select((state) => state.explicitInput.panels);
+  const viewMode = select((state) => state.explicitInput.viewMode);
+  const controlStyle = select((state) => state.explicitInput.controlStyle);
+  const showAddButton = select((state) => state.componentState.showAddButton);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -97,7 +98,7 @@ export const ControlGroup = () => {
 
   return (
     <>
-      {idsInOrder.length > 0 ? (
+      {idsInOrder.length > 0 || showAddButton ? (
         <EuiPanel
           borderRadius="m"
           color={panelBg}
@@ -155,6 +156,18 @@ export const ControlGroup = () => {
                 </DragOverlay>
               </DndContext>
             </EuiFlexItem>
+            {showAddButton && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  size="s"
+                  iconSize="m"
+                  display="base"
+                  iconType={'plusInCircle'}
+                  aria-label={ControlGroupStrings.management.getAddControlTitle()}
+                  onClick={() => controlGroup.openAddDataControlFlyout()}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiPanel>
       ) : (

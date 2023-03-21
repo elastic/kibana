@@ -6,32 +6,57 @@
  * Side Public License, v 1.
  */
 
+import { FieldSpec } from '@kbn/data-views-plugin/public';
 import { FunctionComponent } from 'react';
-
+import { DeleteFieldProviderProps } from './components';
+import { OpenFieldDeleteModalOptions } from './open_delete_modal';
+import { OpenFieldEditorOptions } from './open_editor';
+import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
 import {
   DataPublicPluginStart,
   DataViewsPublicPluginStart,
-  RuntimeField,
-  RuntimeType,
-  UsageCollectionStart,
   FieldFormatsStart,
+  RuntimeField,
+  UsageCollectionStart,
+  RuntimeType,
+  SerializedFieldFormat,
 } from './shared_imports';
-import { OpenFieldEditorOptions } from './open_editor';
-import { OpenFieldDeleteModalOptions } from './open_delete_modal';
-import { FormatEditorServiceSetup, FormatEditorServiceStart } from './service';
-import { DeleteFieldProviderProps } from './components';
 
+/**
+ * Public setup contract of data view field editor
+ * @public
+ */
 export interface PluginSetup {
   fieldFormatEditors: FormatEditorServiceSetup['fieldFormatEditors'];
 }
 
+/**
+ * Public start contract of data view field editor
+ * @public
+ */
 export interface PluginStart {
+  /**
+   * Method to open the data view field editor fly-out
+   */
   openEditor(options: OpenFieldEditorOptions): () => void;
+  /**
+   * Method to open the data view field delete fly-out
+   * @param options Configuration options for the fly-out
+   */
   openDeleteModal(options: OpenFieldDeleteModalOptions): () => void;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
+  /**
+   * Convenience method for user permissions checks
+   */
   userPermissions: {
+    /**
+     * Whether the user has permission to edit data views
+     */
     editIndexPattern: () => boolean;
   };
+  /**
+   * Context provider for delete runtime field modal
+   */
   DeleteRuntimeFieldProvider: FunctionComponent<DeleteFieldProviderProps>;
 }
 
@@ -47,20 +72,25 @@ export interface StartPlugins {
 
 export type InternalFieldType = 'concrete' | 'runtime';
 
-export interface Field {
-  name: string;
-  type: RuntimeField['type'] | string;
-  script?: RuntimeField['script'];
-  customLabel?: string;
-  popularity?: number;
-  format?: FieldFormatConfig;
+/**
+ * The data model for the field editor
+ * @public
+ */
+export interface Field extends RuntimeField {
+  /**
+   * name / path used for the field
+   */
+  name: FieldSpec['name'];
+  /**
+   * Name of parent field. Used for composite subfields
+   */
+  parentName?: string;
 }
 
 export interface FieldFormatConfig {
   id: string;
-  params?: { [key: string]: any };
+  params?: SerializedFieldFormat['params'];
 }
-
 export interface EsRuntimeField {
   type: RuntimeType | string;
   script?: {

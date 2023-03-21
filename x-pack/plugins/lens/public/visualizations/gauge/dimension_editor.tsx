@@ -25,13 +25,14 @@ import {
 } from '@kbn/coloring';
 import { GaugeTicksPositions, GaugeColorModes } from '@kbn/expression-gauge-plugin/common';
 import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
-import { isNumericFieldForDatatable } from '../../../common/expressions';
+import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import { applyPaletteParams, PalettePanelContainer, TooltipWrapper } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import './dimension_editor.scss';
-import { GaugeVisualizationState } from './constants';
+import type { GaugeVisualizationState } from './constants';
 import { defaultPaletteParams } from './palette_config';
 import { getAccessorsFromState } from './utils';
+
+import './dimension_editor.scss';
 
 export function GaugeDimensionEditor(
   props: VisualizationDimensionEditorProps<GaugeVisualizationState> & {

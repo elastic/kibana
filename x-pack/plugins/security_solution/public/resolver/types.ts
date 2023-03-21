@@ -175,22 +175,6 @@ export interface IndexedTreeNode extends BBox {
 }
 
 /**
- * A type describing the shape of section titles and entries for description lists
- */
-export type SectionData = Array<{
-  sectionTitle: string;
-  entries: Array<{ title: string; description: string }>;
-}>;
-
-/**
- * The two query parameters we read/write on to control which view the table presents:
- */
-export interface CrumbInfo {
-  crumbId: string;
-  crumbEvent: string;
-}
-
-/**
  * A type containing all things to actually be rendered to the DOM.
  */
 export interface VisibleEntites {
@@ -322,6 +306,8 @@ export interface DataState {
     loading: boolean;
     data: SafeResolverEvent | null;
   };
+
+  readonly detectedBounds?: TimeFilters;
 
   readonly tree?: {
     /**
@@ -686,8 +672,8 @@ export interface IsometricTaxiLayout {
  * Defines the type for bounding a search by a time box.
  */
 export interface TimeRange {
-  from: string;
-  to: string;
+  from: string | number;
+  to: string | number;
 }
 
 /**
@@ -706,7 +692,7 @@ export interface DataAccessLayer {
     indexPatterns,
   }: {
     entityID: string;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
   }) => Promise<ResolverRelatedEvents>;
 
@@ -724,7 +710,7 @@ export interface DataAccessLayer {
     entityID: string;
     category: string;
     after?: string;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
   }) => Promise<ResolverPaginatedEvents>;
 
@@ -739,7 +725,7 @@ export interface DataAccessLayer {
     limit,
   }: {
     ids: string[];
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
     limit: number;
   }): Promise<SafeResolverEvent[]>;
@@ -761,7 +747,7 @@ export interface DataAccessLayer {
     eventTimestamp: string;
     eventID?: string | number;
     winlogRecordID: string;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indexPatterns: string[];
   }) => Promise<SafeResolverEvent | null>;
 
@@ -778,7 +764,7 @@ export interface DataAccessLayer {
   }: {
     dataId: string;
     schema: ResolverSchema;
-    timeRange: TimeRange;
+    timeRange?: TimeRange;
     indices: string[];
     ancestors: number;
     descendants: number;

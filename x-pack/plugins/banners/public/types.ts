@@ -8,5 +8,5 @@
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 
 export interface BannerPluginStartDependencies {
-  screenshotMode: ScreenshotModePluginStart;
+  screenshotMode?: ScreenshotModePluginStart;
 }

@@ -7,34 +7,43 @@
 
 jest.mock('axios', () => jest.fn());
 
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { SyntheticsService } from './synthetics_service';
 import { loggerMock } from '@kbn/logging-mocks';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import axios, { AxiosResponse } from 'axios';
 import times from 'lodash/times';
-import { LocationStatus } from '../../common/runtime_types';
-import { SyntheticsConfig } from './formatters/format_configs';
+import { LocationStatus, HeartbeatConfig } from '../../common/runtime_types';
+import { mockEncryptedSO } from './utils/mocks';
+
+const taskManagerSetup = taskManagerMock.createSetup();
 
 describe('SyntheticsService', () => {
   const mockEsClient = {
     search: jest.fn(),
   };
 
+  const logger = loggerMock.create();
+
   const serverMock: UptimeServerSetup = {
+    logger,
     uptimeEsClient: mockEsClient,
     authSavedObjectsClient: {
       bulkUpdate: jest.fn(),
     },
+    config: {
+      service: {
+        username: 'dev',
+        password: '12345',
+        manifestUrl: 'http://localhost:8080/api/manifest',
+      },
+    },
+    encryptedSavedObjects: mockEncryptedSO,
   } as unknown as UptimeServerSetup;
-
-  const logger = loggerMock.create();
 
   const getMockedService = (locationsNum: number = 1) => {
     serverMock.config = { service: { devUrl: 'http://localhost' } };
-    const service = new SyntheticsService(logger, serverMock, {
-      username: 'dev',
-      password: '12345',
-    });
+    const service = new SyntheticsService(serverMock);
 
     const locations = times(locationsNum).map((n) => {
       return {
@@ -52,13 +61,12 @@ describe('SyntheticsService', () => {
 
     service.apiClient.locations = locations;
 
-    jest.spyOn(service, 'getApiKey').mockResolvedValue({ name: 'example', id: 'i', apiKey: 'k' });
     jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
 
     return { service, locations };
   };
 
-  const getFakePayload = (locations: SyntheticsConfig['locations']) => {
+  const getFakePayload = (locations: HeartbeatConfig['locations']) => {
     return {
       type: 'http',
       enabled: true,
@@ -84,34 +92,34 @@ describe('SyntheticsService', () => {
 
   afterEach(() => jest.restoreAllMocks());
 
-  it('inits properly', async () => {
-    const service = new SyntheticsService(logger, serverMock, {});
-    service.init();
+  it('setup properly', async () => {
+    const service = new SyntheticsService(serverMock);
+    service.setup(taskManagerSetup);
 
     expect(service.isAllowed).toEqual(false);
     expect(service.locations).toEqual([]);
     expect(service.signupUrl).toEqual(null);
   });
 
-  it('inits properly with basic auth', async () => {
-    const service = new SyntheticsService(logger, serverMock, {
-      username: 'dev',
-      password: '12345',
-    });
+  it('setup properly with basic auth', async () => {
+    const service = new SyntheticsService(serverMock);
 
-    await service.init();
+    await service.setup(taskManagerSetup);
 
     expect(service.isAllowed).toEqual(true);
   });
 
-  it('inits properly with locations with dev', async () => {
-    serverMock.config = { service: { devUrl: 'http://localhost' } };
-    const service = new SyntheticsService(logger, serverMock, {
-      username: 'dev',
-      password: '12345',
-    });
+  it('setup properly with locations with dev', async () => {
+    serverMock.config = {
+      service: {
+        devUrl: 'http://localhost',
+        username: 'dev',
+        password: '12345',
+      },
+    };
+    const service = new SyntheticsService(serverMock);
 
-    await service.init();
+    await service.setup(taskManagerSetup);
 
     expect(service.isAllowed).toEqual(true);
     expect(service.locations).toEqual([
@@ -121,6 +129,7 @@ describe('SyntheticsService', () => {
           lon: 0,
         },
         id: 'localhost',
+        isInvalid: false,
         label: 'Local Synthetics Service',
         url: 'http://localhost',
         isServiceManaged: true,
@@ -137,7 +146,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.addConfig(payload as SyntheticsConfig);
+      await service.addConfig(payload as HeartbeatConfig);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -149,23 +158,6 @@ describe('SyntheticsService', () => {
   });
 
   describe('pushConfigs', () => {
-    it('does not include the isEdit flag on normal push requests', async () => {
-      const { service, locations } = getMockedService();
-
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
-
-      const payload = getFakePayload([locations[0]]);
-
-      await service.pushConfigs([payload] as SyntheticsConfig[]);
-
-      expect(axios).toHaveBeenCalledTimes(1);
-      expect(axios).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({ is_edit: false }),
-        })
-      );
-    });
-
     it('includes the isEdit flag on edit requests', async () => {
       const { service, locations } = getMockedService();
 
@@ -173,7 +165,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.pushConfigs([payload] as SyntheticsConfig[], true);
+      await service.editConfig([payload] as HeartbeatConfig[]);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(

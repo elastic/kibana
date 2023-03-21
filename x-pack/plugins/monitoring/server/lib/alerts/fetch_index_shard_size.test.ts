@@ -7,6 +7,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchIndexShardSize } from './fetch_index_shard_size';
+import { estypes } from '@elastic/elasticsearch';
 
 jest.mock('../../static_globals', () => ({
   Globals: {
@@ -24,7 +25,6 @@ import { Globals } from '../../static_globals';
 
 describe('fetchIndexShardSize', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-
   const clusters = [
     {
       clusterUuid: 'cluster123',
@@ -34,7 +34,21 @@ describe('fetchIndexShardSize', () => {
   const size = 10;
   const shardIndexPatterns = '*';
   const threshold = 0.00000001;
-  const esRes = {
+
+  const esRes: estypes.SearchResponse = {
+    took: 1,
+    timed_out: false,
+    _shards: {
+      total: 0,
+      successful: 0,
+      failed: 0,
+      skipped: 0,
+    },
+    hits: {
+      total: 0,
+      max_score: 0,
+      hits: [],
+    },
     aggregations: {
       clusters: {
         buckets: [
@@ -63,11 +77,44 @@ describe('fetchIndexShardSize', () => {
                           _source: {
                             index_stats: {
                               shards: {
+                                primaries: 2,
+                              },
+                              primaries: {
+                                store: {
+                                  size_in_bytes: 2171105970,
+                                },
+                              },
+                            },
+                          },
+                          sort: [1643314607570],
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  key: '.monitoring-es-7-2022.01.28',
+                  doc_count: 30,
+                  hits: {
+                    hits: {
+                      total: {
+                        value: 30,
+                        relation: 'eq',
+                      },
+                      max_score: null,
+                      hits: [
+                        {
+                          _index: '.monitoring-es-7-2022.01.27',
+                          _id: 'JVkunX4BfK-FILsH9Wr_',
+                          _score: null,
+                          _source: {
+                            index_stats: {
+                              shards: {
                                 primaries: 1,
                               },
                               primaries: {
                                 store: {
-                                  size_in_bytes: 3537949,
+                                  size_in_bytes: 1073741823,
                                 },
                               },
                             },
@@ -118,12 +165,9 @@ describe('fetchIndexShardSize', () => {
       },
     },
   };
-  it('fetch as expected', async () => {
-    esClient.search.mockResponse(
-      // @ts-expect-error not full response interface
-      esRes
-    );
 
+  it('fetch as expected', async () => {
+    esClient.search.mockResponse(esRes);
     const result = await fetchIndexShardSize(
       esClient,
       clusters,
@@ -135,7 +179,13 @@ describe('fetchIndexShardSize', () => {
       {
         ccs: undefined,
         shardIndex: '.monitoring-es-7-2022.01.27',
-        shardSize: 0,
+        shardSize: 1.01,
+        clusterUuid: 'NG2d5jHiSBGPE6HLlUN2Bg',
+      },
+      {
+        ccs: undefined,
+        shardIndex: '.monitoring-es-7-2022.01.28',
+        shardSize: 1,
         clusterUuid: 'NG2d5jHiSBGPE6HLlUN2Bg',
       },
       {
@@ -146,11 +196,32 @@ describe('fetchIndexShardSize', () => {
       },
     ]);
   });
+
+  it('higher alert threshold', async () => {
+    esClient.search.mockResponse(esRes);
+    const oneGBThreshold = 1;
+    const result = await fetchIndexShardSize(
+      esClient,
+      clusters,
+      oneGBThreshold,
+      shardIndexPatterns,
+      size
+    );
+    expect(result).toEqual([
+      {
+        ccs: undefined,
+        shardIndex: '.monitoring-es-7-2022.01.27',
+        shardSize: 1.01,
+        clusterUuid: 'NG2d5jHiSBGPE6HLlUN2Bg',
+      },
+    ]);
+  });
+
   it('should call ES with correct query', async () => {
     await fetchIndexShardSize(esClient, clusters, threshold, shardIndexPatterns, size);
     expect(esClient.search).toHaveBeenCalledWith({
       index:
-        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.index-*,metrics-elasticsearch.index-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.index-*,metrics-elasticsearch.stack_monitoring.index-*',
       filter_path: ['aggregations.clusters.buckets'],
       body: {
         size: 0,
@@ -162,7 +233,7 @@ describe('fetchIndexShardSize', () => {
                   should: [
                     { term: { type: 'index_stats' } },
                     { term: { 'metricset.name': 'index' } },
-                    { term: { 'data_stream.dataset': 'elasticsearch.index' } },
+                    { term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.index' } },
                   ],
                   minimum_should_match: 1,
                 },
@@ -201,6 +272,7 @@ describe('fetchIndexShardSize', () => {
       },
     });
   });
+
   it('should call ES with correct query when ccs disabled', async () => {
     // @ts-ignore
     Globals.app.config.ui.ccs.enabled = false;
@@ -211,6 +283,6 @@ describe('fetchIndexShardSize', () => {
     });
     await fetchIndexShardSize(esClient, clusters, threshold, shardIndexPatterns, size);
     // @ts-ignore
-    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.index-*');
+    expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.stack_monitoring.index-*');
   });
 });

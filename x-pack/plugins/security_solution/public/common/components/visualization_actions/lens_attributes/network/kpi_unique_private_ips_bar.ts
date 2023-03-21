@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SOURCE_CHART_LABEL, DESTINATION_CHART_LABEL } from '../../translations';
+import { SOURCE_CHART_LABEL, DESTINATION_CHART_LABEL, UNIQUE_COUNT } from '../../translations';
 import type { LensAttributes } from '../../types';
 
 export const kpiUniquePrivateIpsBarLensAttributes: LensAttributes = {
@@ -85,12 +85,12 @@ export const kpiUniquePrivateIpsBarLensAttributes: LensAttributes = {
     },
     filters: [],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           'e406bf4f-942b-41ac-b516-edb5cef06ec8': {
             columns: {
               '5acd4c9d-dc3b-4b21-9632-e4407944c36d': {
-                label: SOURCE_CHART_LABEL,
+                label: UNIQUE_COUNT('source.ip'),
                 dataType: 'number',
                 isBucketed: false,
                 operationType: 'unique_count',
@@ -111,10 +111,7 @@ export const kpiUniquePrivateIpsBarLensAttributes: LensAttributes = {
                 params: {
                   filters: [
                     {
-                      input: {
-                        query: '',
-                        language: 'kuery',
-                      },
+                      input: { language: 'kuery', query: 'source.ip: *' },
                       label: SOURCE_CHART_LABEL,
                     },
                   ],
@@ -130,7 +127,7 @@ export const kpiUniquePrivateIpsBarLensAttributes: LensAttributes = {
           '38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7': {
             columns: {
               'd27e0966-daf9-41f4-9033-230cf1e76dc9': {
-                label: DESTINATION_CHART_LABEL,
+                label: UNIQUE_COUNT('destination.ip'),
                 dataType: 'number',
                 isBucketed: false,
                 operationType: 'unique_count',
@@ -151,10 +148,7 @@ export const kpiUniquePrivateIpsBarLensAttributes: LensAttributes = {
                 params: {
                   filters: [
                     {
-                      input: {
-                        query: '',
-                        language: 'kuery',
-                      },
+                      input: { language: 'kuery', query: 'destination.ip: *' },
                       label: DESTINATION_CHART_LABEL,
                     },
                   ],

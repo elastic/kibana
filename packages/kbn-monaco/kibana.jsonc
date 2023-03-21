@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/monaco",
+  "owner": "@elastic/appex-sharedux"
+}

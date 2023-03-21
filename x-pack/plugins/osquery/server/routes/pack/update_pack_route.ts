@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment-timezone';
-import { set, unset, has, difference, filter, find, map, mapKeys, uniq } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { unset, has, difference, filter, find, map, mapKeys, uniq, some, isEmpty } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -20,14 +21,21 @@ import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
-import { convertSOQueriesToPack, convertPackQueriesToSO } from './utils';
-import { getInternalSavedObjectsClient } from '../../usage/collector';
+import {
+  convertSOQueriesToPack,
+  convertPackQueriesToSO,
+  convertSOQueriesToPackConfig,
+  getInitialPolicies,
+  findMatchingShards,
+} from './utils';
+
+import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObjectAttributes } from '../../common/types';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.put(
     {
-      path: '/internal/osquery/packs/{id}',
+      path: '/api/osquery/packs/{id}',
       validate: {
         params: schema.object(
           {
@@ -41,12 +49,15 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             description: schema.maybe(schema.string()),
             enabled: schema.maybe(schema.boolean()),
             policy_ids: schema.maybe(schema.arrayOf(schema.string())),
+            shards: schema.maybe(schema.recordOf(schema.string(), schema.number())),
             queries: schema.maybe(
               schema.recordOf(
                 schema.string(),
                 schema.object({
                   query: schema.string(),
                   interval: schema.maybe(schema.number()),
+                  snapshot: schema.maybe(schema.boolean()),
+                  removed: schema.maybe(schema.boolean()),
                   platform: schema.maybe(schema.string()),
                   version: schema.maybe(schema.string()),
                   ecs_mapping: schema.maybe(
@@ -81,7 +92,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { name, description, queries, enabled, policy_ids } = request.body;
+      const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
 
       const currentPackSO = await savedObjectsClient.get<{ name: string; enabled: boolean }>(
         packSavedObjectType,
@@ -95,11 +106,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         });
 
         if (
-          filter(
-            conflictingEntries.saved_objects,
-            (packSO) =>
-              packSO.id !== currentPackSO.id && packSO.attributes.name.length === name.length
-          ).length
+          some(
+            filter(conflictingEntries.saved_objects, (packSO) => packSO.id !== currentPackSO.id),
+            ['attributes.name', name]
+          )
         ) {
           return response.conflict({ body: `Pack with name "${name}" already exists.` });
         }
@@ -116,32 +126,40 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const currentPackagePolicies = filter(packagePolicies, (packagePolicy) =>
         has(packagePolicy, `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`)
       );
-      const agentPolicies = policy_ids
-        ? mapKeys(await agentPolicyService?.getByIds(internalSavedObjectsClient, policy_ids), 'id')
-        : {};
-      const agentPolicyIds = Object.keys(agentPolicies);
+
+      const policiesList = getInitialPolicies(packagePolicies, policy_ids, shards);
+
+      const agentPolicies = await agentPolicyService?.getByIds(
+        internalSavedObjectsClient,
+        policiesList
+      );
+
+      const policyShards = findMatchingShards(agentPolicies, shards);
+
+      const agentPoliciesIdMap = mapKeys(agentPolicies, 'id');
 
       const nonAgentPolicyReferences = filter(
         currentPackSO.references,
         (reference) => reference.type !== AGENT_POLICY_SAVED_OBJECT_TYPE
       );
-
       const getUpdatedReferences = () => {
-        if (policy_ids) {
-          return [
-            ...nonAgentPolicyReferences,
-            ...policy_ids.map((id) => ({
-              id,
-              name: agentPolicies[id].name,
-              type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-            })),
-          ];
+        if (!policy_ids && isEmpty(shards)) {
+          return currentPackSO.references;
         }
 
-        return currentPackSO.references;
+        return [
+          ...nonAgentPolicyReferences,
+          ...policiesList.map((id) => ({
+            id,
+            name: agentPoliciesIdMap[id]?.name,
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          })),
+        ];
       };
 
-      await savedObjectsClient.update(
+      const references = getUpdatedReferences();
+
+      await savedObjectsClient.update<PackSavedObjectAttributes>(
         packSavedObjectType,
         request.params.id,
         {
@@ -151,10 +169,11 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           queries: queries && convertPackQueriesToSO(queries),
           updated_at: moment().toISOString(),
           updated_by: currentUser,
+          shards: convertShardsToArray(shards),
         },
         {
           refresh: 'wait_for',
-          references: getUpdatedReferences(),
+          references,
         }
       );
 
@@ -162,7 +181,6 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         filter(currentPackSO.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]),
         'id'
       );
-
       const updatedPackSO = await savedObjectsClient.get<{
         name: string;
         enabled: boolean;
@@ -172,12 +190,12 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       updatedPackSO.attributes.queries = convertSOQueriesToPack(updatedPackSO.attributes.queries);
 
       if (enabled == null && !currentPackSO.attributes.enabled) {
-        return response.ok({ body: updatedPackSO });
+        return response.ok({ body: { data: updatedPackSO } });
       }
 
       if (enabled != null && enabled !== currentPackSO.attributes.enabled) {
         if (enabled) {
-          const policyIds = policy_ids ? agentPolicyIds : currentAgentPolicyIds;
+          const policyIds = policy_ids || !isEmpty(shards) ? policiesList : currentAgentPolicyIds;
 
           await Promise.all(
             policyIds.map((agentPolicyId) => {
@@ -232,11 +250,12 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           );
         }
       } else {
-        const agentPolicyIdsToRemove = uniq(difference(currentAgentPolicyIds, agentPolicyIds));
+        // TODO double check if policiesList shouldnt be changed into policyIds
+        const agentPolicyIdsToRemove = uniq(difference(currentAgentPolicyIds, policiesList));
         const agentPolicyIdsToUpdate = uniq(
           difference(currentAgentPolicyIds, agentPolicyIdsToRemove)
         );
-        const agentPolicyIdsToAdd = uniq(difference(agentPolicyIds, currentAgentPolicyIds));
+        const agentPolicyIdsToAdd = uniq(difference(policiesList, currentAgentPolicyIds));
 
         await Promise.all(
           agentPolicyIdsToRemove.map((agentPolicyId) => {
@@ -282,9 +301,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     draft,
                     `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                     {
-                      queries: convertSOQueriesToPack(updatedPackSO.attributes.queries, {
-                        removeMultiLines: true,
-                      }),
+                      shard: policyShards[packagePolicy.policy_id]
+                        ? policyShards[packagePolicy.policy_id]
+                        : 100,
+                      queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                     }
                   );
 
@@ -314,7 +334,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     draft,
                     `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                     {
-                      queries: updatedPackSO.attributes.queries,
+                      shard: policyShards[packagePolicy.policy_id]
+                        ? policyShards[packagePolicy.policy_id]
+                        : 100,
+                      queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                     }
                   );
 
@@ -326,7 +349,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
       }
 
-      return response.ok({ body: updatedPackSO });
+      return response.ok({ body: { data: updatedPackSO } });
     }
   );
 };

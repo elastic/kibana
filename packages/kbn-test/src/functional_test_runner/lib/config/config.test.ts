@@ -23,6 +23,7 @@ describe('Config', () => {
       },
       primary: true,
       path: process.cwd(),
+      module: {} as any,
     });
 
     expect(config.has('services.foo')).toEqual(true);

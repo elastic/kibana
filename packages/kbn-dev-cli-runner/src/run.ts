@@ -10,7 +10,8 @@ import { pickLevelFromFlags, ToolingLog, LogLevel } from '@kbn/tooling-log';
 import { ProcRunner, withProcRunner } from '@kbn/dev-proc-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 
-import { Flags, getFlags, FlagOptions } from './flags';
+import { Flags, getFlags, FlagOptions, DEFAULT_FLAG_ALIASES } from './flags';
+import { FlagsReader } from './flags_reader';
 import { getHelp } from './help';
 import { CleanupTask, Cleanup } from './cleanup';
 import { Metrics, MetricsMeta } from './metrics';
@@ -21,6 +22,7 @@ export interface RunContext {
   procRunner: ProcRunner;
   statsMeta: MetricsMeta;
   addCleanupTask: (task: CleanupTask) => void;
+  flagsReader: FlagsReader;
 }
 export type RunFn = (context: RunContext) => Promise<void> | void;
 
@@ -71,6 +73,12 @@ export async function run(fn: RunFn, options: RunOptions = {}) {
         procRunner,
         statsMeta: metrics.meta,
         addCleanupTask: cleanup.add.bind(cleanup),
+        flagsReader: new FlagsReader(flags, {
+          aliases: {
+            ...options.flags?.alias,
+            ...DEFAULT_FLAG_ALIASES,
+          },
+        }),
       });
     });
   } catch (error) {

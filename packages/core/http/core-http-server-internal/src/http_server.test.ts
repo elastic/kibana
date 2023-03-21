@@ -60,7 +60,7 @@ beforeEach(() => {
     maxPayload: new ByteSizeValue(1024),
     port: 10002,
     ssl: { enabled: false },
-    compression: { enabled: true },
+    compression: { enabled: true, brotli: { enabled: false, quality: 3 } },
     requestId: {
       allowFromAnyIp: true,
       ipAllowlist: [],
@@ -817,6 +817,56 @@ test('allows attaching metadata to attach meta-data tag strings to a route', asy
   await supertest(innerServer.listener).get('/without-tags').expect(200, { tags: [] });
 });
 
+test('allows declaring route access to flag a route as public or internal', async () => {
+  const access = 'internal';
+  const { registerRouter, server: innerServer } = await server.setup(config);
+
+  const router = new Router('', logger, enhanceWithContext);
+  router.get({ path: '/with-access', validate: false, options: { access } }, (context, req, res) =>
+    res.ok({ body: { access: req.route.options.access } })
+  );
+  router.get({ path: '/without-access', validate: false }, (context, req, res) =>
+    res.ok({ body: { access: req.route.options.access } })
+  );
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener).get('/with-access').expect(200, { access });
+
+  await supertest(innerServer.listener).get('/without-access').expect(200, { access: 'public' });
+});
+
+test('infers access flag from path if not defined', async () => {
+  const { registerRouter, server: innerServer } = await server.setup(config);
+
+  const router = new Router('', logger, enhanceWithContext);
+  router.get({ path: '/internal/foo', validate: false }, (context, req, res) =>
+    res.ok({ body: { access: req.route.options.access } })
+  );
+  router.get({ path: '/random/foo', validate: false }, (context, req, res) =>
+    res.ok({ body: { access: req.route.options.access } })
+  );
+  router.get({ path: '/random/internal/foo', validate: false }, (context, req, res) =>
+    res.ok({ body: { access: req.route.options.access } })
+  );
+
+  router.get({ path: '/api/foo/internal/my-foo', validate: false }, (context, req, res) =>
+    res.ok({ body: { access: req.route.options.access } })
+  );
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener).get('/internal/foo').expect(200, { access: 'internal' });
+
+  await supertest(innerServer.listener).get('/random/foo').expect(200, { access: 'public' });
+  await supertest(innerServer.listener)
+    .get('/random/internal/foo')
+    .expect(200, { access: 'public' });
+  await supertest(innerServer.listener)
+    .get('/api/foo/internal/my-foo')
+    .expect(200, { access: 'public' });
+});
+
 test('exposes route details of incoming request to a route handler', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
 
@@ -833,6 +883,7 @@ test('exposes route details of incoming request to a route handler', async () =>
       options: {
         authRequired: true,
         xsrfRequired: false,
+        access: 'public',
         tags: [],
         timeout: {},
       },
@@ -865,7 +916,7 @@ describe('conditional compression', () => {
   test('with `compression.enabled: false`', async () => {
     const listener = await setupServer({
       ...config,
-      compression: { enabled: false },
+      compression: { enabled: false, brotli: { enabled: false, quality: 3 } },
     });
 
     const response = await supertest(listener).get('/').set('accept-encoding', 'gzip');
@@ -873,12 +924,38 @@ describe('conditional compression', () => {
     expect(response.header).not.toHaveProperty('content-encoding');
   });
 
+  test('with `compression.brotli.enabled: false`', async () => {
+    const listener = await setupServer({
+      ...config,
+      compression: { enabled: true, brotli: { enabled: false, quality: 3 } },
+    });
+
+    const response = await supertest(listener).get('/').set('accept-encoding', 'br');
+
+    expect(response.header).not.toHaveProperty('content-encoding', 'br');
+  });
+
+  test('with `compression.brotli.enabled: true`', async () => {
+    const listener = await setupServer({
+      ...config,
+      compression: { enabled: true, brotli: { enabled: true, quality: 3 } },
+    });
+
+    const response = await supertest(listener).get('/').set('accept-encoding', 'br');
+
+    expect(response.header).toHaveProperty('content-encoding', 'br');
+  });
+
   describe('with defined `compression.referrerWhitelist`', () => {
     let listener: Server;
     beforeEach(async () => {
       listener = await setupServer({
         ...config,
-        compression: { enabled: true, referrerWhitelist: ['foo'] },
+        compression: {
+          enabled: true,
+          referrerWhitelist: ['foo'],
+          brotli: { enabled: false, quality: 3 },
+        },
       });
     });
 
@@ -984,6 +1061,7 @@ test('exposes route details of incoming request to a route handler (POST + paylo
       options: {
         authRequired: true,
         xsrfRequired: true,
+        access: 'public',
         tags: [],
         timeout: {
           payload: 10000,

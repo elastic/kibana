@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
 import { InventoryModel } from '../types';
 
+export { awsRDSSnapshotMetricTypes } from './metrics';
+
 export const awsRDS: InventoryModel = {
   id: 'awsRDS',
   displayName: i18n.translate('xpack.infra.inventoryModels.awsRDS.displayName', {

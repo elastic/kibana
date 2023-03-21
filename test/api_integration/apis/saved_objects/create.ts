@@ -8,17 +8,13 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
   describe('create', () => {
-    let KIBANA_VERSION: string;
-
     before(async () => {
-      KIBANA_VERSION = await getKibanaVersion(getService);
       await kibanaServer.importExport.load(
         'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
@@ -54,8 +50,9 @@ export default function ({ getService }: FtrProviderContext) {
             id: resp.body.id,
             type: 'visualization',
             migrationVersion: resp.body.migrationVersion,
-            coreMigrationVersion: KIBANA_VERSION,
+            coreMigrationVersion: '8.0.0',
             updated_at: resp.body.updated_at,
+            created_at: resp.body.created_at,
             version: resp.body.version,
             attributes: {
               title: 'My favorite vis',
@@ -67,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
     });
 
-    it('result should be updated to the latest coreMigrationVersion', async () => {
+    it('result should not be updated to the latest Kibana version if there are no migrations', async () => {
       await supertest
         .post(`/api/saved_objects/visualization`)
         .send({
@@ -78,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200)
         .then((resp) => {
-          expect(resp.body.coreMigrationVersion).to.eql(KIBANA_VERSION);
+          expect(resp.body.coreMigrationVersion).to.eql('1.2.3');
         });
     });
   });

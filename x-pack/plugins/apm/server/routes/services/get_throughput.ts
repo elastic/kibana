@@ -14,22 +14,22 @@ import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
-import { Setup } from '../../lib/helpers/setup_request';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface Options {
   environment: string;
   kuery: string;
   searchAggregatedTransactions: boolean;
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   transactionType: string;
   transactionName?: string;
   start: number;
@@ -42,15 +42,13 @@ export async function getThroughput({
   kuery,
   searchAggregatedTransactions,
   serviceName,
-  setup,
+  apmEventClient,
   transactionType,
   transactionName,
   start,
   end,
   offset,
 }: Options) {
-  const { apmEventClient } = setup;
-
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
@@ -68,6 +66,7 @@ export async function getThroughput({
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {

@@ -6,6 +6,7 @@
  */
 
 import { EuiFacetButton, EuiFacetGroup } from '@elastic/eui';
+import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -16,7 +17,12 @@ export interface CategoryFacet {
   count: number;
   id: string;
   title: string;
+  parent_id?: string;
+  parent_title?: string;
 }
+
+export const UPDATES_AVAILABLE = 'updates_available';
+export type ExtendedIntegrationCategory = IntegrationCategory | typeof UPDATES_AVAILABLE | '';
 
 export const ALL_CATEGORY = {
   id: '',
@@ -25,10 +31,17 @@ export const ALL_CATEGORY = {
   }),
 };
 
-export const INSTALLED_CATEGORY = {
+export const ALL_INSTALLED_CATEGORY = {
   id: '',
   title: i18n.translate('xpack.fleet.epmList.allPackagesInstalledFilterLinkText', {
     defaultMessage: 'All installed',
+  }),
+};
+
+export const UPDATES_AVAILABLE_CATEGORY = {
+  id: UPDATES_AVAILABLE,
+  title: i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
+    defaultMessage: 'Updates available',
   }),
 };
 
@@ -53,6 +66,7 @@ export function CategoryFacets({
         categories.map((category) => {
           return (
             <EuiFacetButton
+              data-test-subj={`epmList.categories.${category.id}`}
               isSelected={category.id === selectedCategory}
               key={category.id}
               id={category.id}

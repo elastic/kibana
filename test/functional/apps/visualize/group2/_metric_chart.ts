@@ -184,6 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async function tryingForTime() {
           // click first metric bucket
           await PageObjects.visEditor.clickMetricByIndex(0);
+          await PageObjects.visChart.waitForVisualizationRenderingStabilized();
           filterCount = await filterBar.getFilterCount();
         });
         await filterBar.removeAllFilters();

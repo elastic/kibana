@@ -14,7 +14,8 @@ import {
   RenderOptions,
   MatcherFunction,
 } from '@testing-library/react';
-import { Route, Router } from 'react-router-dom';
+import { Router } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -22,7 +23,6 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '@kbn/unified-search-plugin/public/services';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
@@ -190,7 +190,7 @@ export function render<ExtraCore>(
     url = '/app/observability/exploratory-view/',
     initSeries = {},
   }: RenderRouterOptions<ExtraCore> = {}
-) {
+): any {
   if (url) {
     history = getHistoryFromUrl(url);
   }
@@ -208,7 +208,6 @@ export function render<ExtraCore>(
         <ExploratoryViewContextProvider
           reportTypes={reportTypesList}
           dataTypes={dataTypes}
-          dataViews={{}}
           reportConfigMap={obsvReportConfigMap}
           setHeaderActionMenu={jest.fn()}
           theme$={themeServiceMock.createTheme$()}

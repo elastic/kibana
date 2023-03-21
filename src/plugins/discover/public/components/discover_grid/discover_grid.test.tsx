@@ -11,7 +11,7 @@ import { EuiCopy } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { esHits } from '../../__mocks__/es_hits';
-import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { dataViewMock } from '../../__mocks__/data_view';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -21,10 +21,13 @@ import { getDocId } from '../../utils/get_doc_id';
 import { EsHitRecord } from '../../types';
 
 function getProps() {
+  const services = discoverServiceMock;
+  services.dataViewFieldEditor.userPermissions.editIndexPattern = jest.fn().mockReturnValue(true);
+
   return {
     ariaLabelledBy: '',
     columns: [],
-    indexPattern: indexPatternMock,
+    dataView: dataViewMock,
     isLoading: false,
     expandedDoc: undefined,
     onAddColumn: jest.fn(),
@@ -33,7 +36,7 @@ function getProps() {
     onResize: jest.fn(),
     onSetColumns: jest.fn(),
     onSort: jest.fn(),
-    rows: esHits.map((hit) => buildDataTableRecord(hit, indexPatternMock)),
+    rows: esHits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
     sampleSize: 30,
     searchDescription: '',
     searchTitle: '',
@@ -42,6 +45,7 @@ function getProps() {
     showTimeCol: true,
     sort: [],
     useNewFieldsApi: true,
+    services,
   };
 }
 
@@ -147,7 +151,7 @@ describe('DiscoverGrid', () => {
               bytes: 50,
             },
           },
-        ].map((row) => buildDataTableRecord(row, indexPatternMock)),
+        ].map((row) => buildDataTableRecord(row, dataViewMock)),
       });
       expect(getDisplayedDocNr(component)).toBe(1);
       expect(getSelectedDocNr(component)).toBe(0);

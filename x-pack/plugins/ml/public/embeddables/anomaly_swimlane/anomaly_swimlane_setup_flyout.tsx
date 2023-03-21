@@ -40,13 +40,12 @@ export async function resolveAnomalySwimlaneUserInput(
               defaultTitle={title}
               influencers={influencers}
               initialInput={input}
-              onCreate={({ panelTitle, viewBy, swimlaneType }) => {
+              onCreate={(explicitInput) => {
                 modalSession.close();
                 resolve({
                   jobIds,
-                  title: panelTitle,
-                  swimlaneType,
-                  viewBy,
+                  title: explicitInput.panelTitle,
+                  ...explicitInput,
                 });
               }}
               onCancel={() => {

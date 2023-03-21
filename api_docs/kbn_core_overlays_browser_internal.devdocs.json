@@ -1,0 +1,58 @@
+{
+  "id": "@kbn/core-overlays-browser-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-overlays-browser-internal",
+        "id": "def-common.InternalOverlayBannersStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "InternalOverlayBannersStart",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-overlays-browser-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreOverlaysBrowserInternalPluginApi",
+            "section": "def-common.InternalOverlayBannersStart",
+            "text": "InternalOverlayBannersStart"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-overlays-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+            "section": "def-common.OverlayBannersStart",
+            "text": "OverlayBannersStart"
+          }
+        ],
+        "path": "packages/core/overlays/core-overlays-browser-internal/src/banners/banners_service.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

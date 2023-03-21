@@ -27,19 +27,18 @@ interface DistributionChartBar {
 }
 
 export function buildChartDataFromStats(
-  stats: any,
+  distribution: any,
   chartWidth: number
 ): MetricDistributionChartData[] {
   // Process the raw percentiles data so it is in a suitable format for plotting in the metric distribution chart.
   let chartData: MetricDistributionChartData[] = [];
 
-  const distribution = stats.distribution;
   if (distribution === undefined) {
     return chartData;
   }
 
   const percentiles: DistributionPercentile[] = distribution.percentiles;
-  if (percentiles.length === 0) {
+  if (percentiles?.length === 0) {
     return chartData;
   }
 

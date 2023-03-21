@@ -1,0 +1,131 @@
+{
+  "id": "@kbn/core-plugins-browser-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-plugins-browser-mocks",
+        "id": "def-common.pluginsServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "pluginsServiceMock",
+        "description": [],
+        "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-plugins-browser-mocks",
+            "id": "def-common.pluginsServiceMock.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<PluginsServiceContract>"
+            ],
+            "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-browser-mocks",
+            "id": "def-common.pluginsServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              "PluginsServiceSetup"
+            ],
+            "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-browser-mocks",
+            "id": "def-common.pluginsServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => ",
+              "PluginsServiceSetup"
+            ],
+            "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-browser-mocks",
+            "id": "def-common.pluginsServiceMock.createPluginInitializerContext",
+            "type": "Function",
+            "tags": [],
+            "label": "createPluginInitializerContext",
+            "description": [],
+            "signature": [
+              "(config?: unknown) => ",
+              {
+                "pluginId": "@kbn/core-plugins-browser",
+                "scope": "common",
+                "docId": "kibKbnCorePluginsBrowserPluginApi",
+                "section": "def-common.PluginInitializerContext",
+                "text": "PluginInitializerContext"
+              },
+              "<object>"
+            ],
+            "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-plugins-browser-mocks",
+                "id": "def-common.pluginsServiceMock.createPluginInitializerContext.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "packages/core/plugins/core-plugins-browser-mocks/src/plugins_service.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

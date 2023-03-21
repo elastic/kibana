@@ -71,6 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should reflect stop colors change on the chart', async () => {
       await PageObjects.lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
       await PageObjects.lens.openPalettePanel('lnsHeatmap');
+      await PageObjects.common.sleep(1000);
       await retry.try(async () => {
         await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '10', {
           clearWithKeyboard: true,
@@ -172,6 +173,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { key: '14,142.11 - 16,948.55', name: '14,142.11 - 16,948.55', color: '#e7664c' },
         { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#cc5642' },
       ]);
+    });
+
+    // Skip for now as EC is not reporting title
+    it.skip('should display axis values when setting axis title mode to Auto', async () => {
+      await PageObjects.lens.closeDimensionEditor();
+
+      await PageObjects.lens.toggleToolbarPopover('lnsLeftAxisButton');
+      await testSubjects.selectValue('lnsLeftAxisTitle-select', 'Auto');
+
+      const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
+      if (!debugState) {
+        throw new Error('Debug state is not available');
+      }
+      expect(debugState?.axes?.y?.[0].title).to.eql('Average of bytes');
     });
   });
 }

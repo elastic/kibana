@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/yarn-lock-validator",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations"
+}

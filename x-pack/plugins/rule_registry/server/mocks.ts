@@ -11,7 +11,7 @@ import {
   ruleDataServiceMock,
   RuleDataServiceMock,
 } from './rule_data_plugin_service/rule_data_plugin_service.mock';
-import { createLifecycleAlertServicesMock } from './utils/lifecycle_alert_services_mock';
+import { createLifecycleAlertServicesMock } from './utils/lifecycle_alert_services.mock';
 
 export const ruleRegistryMocks = {
   createLifecycleAlertServices: createLifecycleAlertServicesMock,

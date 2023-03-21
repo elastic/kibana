@@ -227,6 +227,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
       setFetchingAdvancedParamErrors(false);
       setAdvancedParamErrors(paramErrors);
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     alpha,
     downsampleFactor,
@@ -263,7 +264,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             'xpack.ml.dataframe.analytics.create.computeFeatureInfluenceLabelHelpText',
             {
               defaultMessage:
-                'Specifies whether the feature influence calculation is enabled. Defaults to true.',
+                'Specify whether the feature influence calculation is enabled. Defaults to true.',
             }
           )}
         >
@@ -398,7 +399,7 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
             'xpack.ml.dataframe.analytics.create.predictionFieldNameHelpText',
             {
               defaultMessage:
-                'Defines the name of the prediction field in the results. Defaults to <dependent_variable>_prediction.',
+                'Define the name of the prediction field in the results. The default is <dependent_variable>_prediction.',
             }
           )}
         >

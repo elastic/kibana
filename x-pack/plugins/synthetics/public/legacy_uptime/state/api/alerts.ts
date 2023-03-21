@@ -7,15 +7,16 @@
 
 import type { ActionType, AsApiContract, Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
+import { MonitorStatusTranslations } from '../../../../common/translations';
+import { ActionConnector } from '../../../../common/rules/types';
+import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/uptime_alerts';
 import { apiService } from './utils';
-import { ActionConnector } from '../alerts/alerts';
 
 import { AlertsResult, MonitorIdParam } from '../actions/types';
 import { API_URLS } from '../../../../common/constants';
 import { AtomicStatusCheckParams } from '../../../../common/runtime_types/alerts';
 
-import { populateAlertActions, RuleAction } from './alert_actions';
+import { populateAlertActions, RuleAction } from '../../../../common/rules/alert_actions';
 import { Ping } from '../../../../common/runtime_types/ping';
 import { DefaultEmail } from '../../../../common/runtime_types';
 
@@ -62,6 +63,7 @@ type NewMonitorStatusAlert = Omit<
   | 'muteAll'
   | 'mutedInstanceIds'
   | 'executionStatus'
+  | 'revision'
   | 'ruleTypeId'
   | 'notifyWhen'
   | 'actions'
@@ -79,8 +81,14 @@ export const createAlert = async ({
 }: NewAlertParams): Promise<Rule> => {
   const actions: RuleAction[] = populateAlertActions({
     defaultActions,
-    selectedMonitor,
     defaultEmail,
+    groupId: MONITOR_STATUS.id,
+    translations: {
+      defaultActionMessage: MonitorStatusTranslations.defaultActionMessage,
+      defaultRecoveryMessage: MonitorStatusTranslations.defaultRecoveryMessage,
+      defaultSubjectMessage: MonitorStatusTranslations.defaultSubjectMessage,
+    },
+    isLegacy: true,
   });
 
   const data: NewMonitorStatusAlert = {
@@ -152,20 +160,22 @@ export const disableAlertById = async ({ alertId }: { alertId: string }) => {
 };
 
 export const fetchActionTypes = async (): Promise<ActionType[]> => {
-  const response = (await apiService.get(API_URLS.CONNECTOR_TYPES)) as Array<
-    AsApiContract<ActionType>
-  >;
+  const response = (await apiService.get(API_URLS.CONNECTOR_TYPES, {
+    feature_id: 'uptime',
+  })) as Array<AsApiContract<ActionType>>;
   return response.map<ActionType>(
     ({
       enabled_in_config: enabledInConfig,
       enabled_in_license: enabledInLicense,
       minimum_license_required: minimumLicenseRequired,
+      supported_feature_ids: supportedFeatureIds,
       ...res
     }: AsApiContract<ActionType>) => ({
       ...res,
       enabledInConfig,
       enabledInLicense,
       minimumLicenseRequired,
+      supportedFeatureIds,
     })
   );
 };

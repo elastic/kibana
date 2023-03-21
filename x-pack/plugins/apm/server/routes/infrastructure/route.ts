@@ -6,10 +6,11 @@
  */
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { setupRequest } from '../../lib/helpers/setup_request';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { getInfrastructureData } from './get_infrastructure_data';
 import { getContainerHostNames } from './get_host_names';
+import { createInfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 const infrastructureRoute = createApmServerRoute({
   endpoint:
@@ -28,13 +29,10 @@ const infrastructureRoute = createApmServerRoute({
     hostNames: string[];
     podNames: string[];
   }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
+    const infraMetricsClient = createInfraMetricsClient(resources);
 
-    const {
-      context,
-      params,
-      plugins: { infra },
-    } = resources;
+    const { params } = resources;
 
     const {
       path: { serviceName },
@@ -42,7 +40,7 @@ const infrastructureRoute = createApmServerRoute({
     } = params;
 
     const infrastructureData = await getInfrastructureData({
-      setup,
+      apmEventClient,
       serviceName,
       environment,
       kuery,
@@ -54,8 +52,7 @@ const infrastructureRoute = createApmServerRoute({
     // due some limitations on the data we get from apm-metrics indices, if we have a service running in a container we want to query, to get the host.name, filtering by container.id
     const containerHostNames = await getContainerHostNames({
       containerIds,
-      context,
-      infra,
+      infraMetricsClient,
       start,
       end,
     });

@@ -482,16 +482,16 @@ const UnstyledProcessEventDot = React.memo(
             >
               <StyledEuiButtonContent
                 isShowingIcon={nodeState === 'loading' || nodeState === 'error'}
+                className="eui-textTruncate"
+                data-test-subj={'euiButton__text'}
               >
-                <span className="euiButton__text" data-test-subj={'euiButton__text'}>
-                  {i18n.translate('xpack.securitySolution.resolver.node_button_name', {
-                    defaultMessage: `{nodeState, select, error {Reload {nodeName}} other {{nodeName}}}`,
-                    values: {
-                      nodeState,
-                      nodeName: processName,
-                    },
-                  })}
-                </span>
+                {i18n.translate('xpack.securitySolution.resolver.node_button_name', {
+                  defaultMessage: `{nodeState, select, error {Reload {nodeName}} other {{nodeName}}}`,
+                  values: {
+                    nodeState,
+                    nodeName: processName,
+                  },
+                })}
               </StyledEuiButtonContent>
             </EuiButton>
           </div>

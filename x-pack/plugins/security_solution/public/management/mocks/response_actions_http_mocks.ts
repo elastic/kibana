@@ -11,27 +11,35 @@ import {
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
   GET_PROCESSES_ROUTE,
-  ENDPOINTS_ACTION_LIST_ROUTE,
+  BASE_ENDPOINT_ACTION_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
+  GET_FILE_ROUTE,
+  ACTION_AGENT_FILE_INFO_ROUTE,
+  EXECUTE_ROUTE,
 } from '../../../common/endpoint/constants';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
 import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';
 import type {
   ActionDetailsApiResponse,
   ActionListApiResponse,
-  HostIsolationResponse,
+  ResponseActionApiResponse,
   PendingActionsResponse,
-  ProcessesEntry,
   ActionDetails,
+  GetProcessesActionOutputContent,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
+  ActionFileInfoApiResponse,
+  ResponseActionExecuteOutputContent,
+  ResponseActionsExecuteParameters,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
-  isolateHost: () => HostIsolationResponse;
+  isolateHost: () => ResponseActionApiResponse;
 
-  releaseHost: () => HostIsolationResponse;
+  releaseHost: () => ResponseActionApiResponse;
 
   killProcess: () => ActionDetailsApiResponse;
 
@@ -43,7 +51,13 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
 
   agentPendingActionsSummary: (options: HttpFetchOptionsWithPath) => PendingActionsResponse;
 
-  processes: () => ActionDetailsApiResponse<ProcessesEntry>;
+  processes: () => ActionDetailsApiResponse<GetProcessesActionOutputContent>;
+
+  getFile: () => ActionDetailsApiResponse<ResponseActionGetFileOutputContent>;
+
+  fileInfo: () => ActionFileInfoApiResponse;
+
+  execute: () => ActionDetailsApiResponse<ResponseActionExecuteOutputContent>;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -51,16 +65,16 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     id: 'isolateHost',
     path: ISOLATE_HOST_ROUTE,
     method: 'post',
-    handler: (): HostIsolationResponse => {
-      return { action: '1-2-3' };
+    handler: (): ResponseActionApiResponse => {
+      return { action: '1-2-3', data: { id: '1-2-3' } as ResponseActionApiResponse['data'] };
     },
   },
   {
     id: 'releaseHost',
     path: UNISOLATE_HOST_ROUTE,
     method: 'post',
-    handler: (): HostIsolationResponse => {
-      return { action: '3-2-1' };
+    handler: (): ResponseActionApiResponse => {
+      return { action: '3-2-1', data: { id: '3-2-1' } as ResponseActionApiResponse['data'] };
     },
   },
   {
@@ -98,7 +112,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
   },
   {
     id: 'actionList',
-    path: ENDPOINTS_ACTION_LIST_ROUTE,
+    path: BASE_ENDPOINT_ACTION_ROUTE,
     method: 'get',
     handler: (): ActionListApiResponse => {
       const response = new EndpointActionGenerator('seed').generateActionDetails();
@@ -111,6 +125,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
         startDate: 'now-10d',
         endDate: 'now',
         data: [response],
+        statuses: undefined,
         userIds: ['elastic'],
         total: 1,
       };
@@ -134,7 +149,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     id: 'processes',
     path: GET_PROCESSES_ROUTE,
     method: 'post',
-    handler: (): ActionDetailsApiResponse<ProcessesEntry> => {
+    handler: (): ActionDetailsApiResponse<GetProcessesActionOutputContent> => {
       const generator = new EndpointActionGenerator('seed');
       const response = generator.generateActionDetails({
         outputs: {
@@ -145,7 +160,63 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
             },
           },
         },
-      }) as ActionDetails<ProcessesEntry>;
+      }) as ActionDetails<GetProcessesActionOutputContent>;
+
+      return { data: response };
+    },
+  },
+  {
+    id: 'getFile',
+    path: GET_FILE_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<
+      ResponseActionGetFileOutputContent,
+      ResponseActionGetFileParameters
+    > => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails<
+        ResponseActionGetFileOutputContent,
+        ResponseActionGetFileParameters
+      >({
+        command: 'get-file',
+      });
+
+      return { data: response };
+    },
+  },
+  {
+    id: 'fileInfo',
+    path: ACTION_AGENT_FILE_INFO_ROUTE,
+    method: 'get',
+    handler: (): ActionFileInfoApiResponse => {
+      return {
+        data: {
+          created: '2022-10-10T14:57:30.682Z',
+          actionId: 'abc',
+          agentId: '123',
+          id: '123',
+          mimeType: 'text/plain',
+          name: 'test.txt',
+          size: 1234,
+          status: 'READY',
+        },
+      };
+    },
+  },
+  {
+    id: 'execute',
+    path: EXECUTE_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<ResponseActionExecuteOutputContent> => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails<
+        ResponseActionExecuteOutputContent,
+        ResponseActionsExecuteParameters
+      >({
+        outputs: {
+          'a.b.c': generator.generateExecuteActionResponseOutput(),
+        },
+      });
 
       return { data: response };
     },

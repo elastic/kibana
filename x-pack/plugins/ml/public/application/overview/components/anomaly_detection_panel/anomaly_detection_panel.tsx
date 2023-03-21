@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
+import React, { FC, Fragment, useEffect, useState } from 'react';
 import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { zipObject } from 'lodash';
-import { useMlKibana, useTimefilter } from '../../../contexts/kibana';
+import { useMlKibana } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { getGroupsFromJobs, getStatsBarData } from './utils';
@@ -18,7 +18,6 @@ import { MlSummaryJob, MlSummaryJobs } from '../../../../../common/types/anomaly
 import { useRefresh } from '../../../routing/use_refresh';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { AnomalyTimelineService } from '../../../services/anomaly_timeline_service';
-import { mlResultsServiceProvider } from '../../../services/results_service';
 import type { OverallSwimlaneData } from '../../../explorer/explorer_utils';
 import { JobStatsBarStats } from '../../../components/stats_bar';
 import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/anomaly_detection_empty_state';
@@ -38,27 +37,21 @@ export interface Group {
 }
 
 interface Props {
+  anomalyTimelineService: AnomalyTimelineService;
   jobCreationDisabled: boolean;
   setLazyJobCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJobCount }) => {
+export const AnomalyDetectionPanel: FC<Props> = ({
+  anomalyTimelineService,
+  jobCreationDisabled,
+  setLazyJobCount,
+}) => {
   const {
-    services: {
-      uiSettings,
-      mlServices: { mlApiServices },
-    },
+    services: { charts: chartsService },
   } = useMlKibana();
 
   const { displayErrorToast } = useToastNotificationService();
-
-  const timefilter = useTimefilter();
-
-  const anomalyTimelineService = useMemo(
-    () =>
-      new AnomalyTimelineService(timefilter, uiSettings, mlResultsServiceProvider(mlApiServices)),
-    [timefilter, uiSettings, mlApiServices]
-  );
 
   const refresh = useRefresh();
 
@@ -133,6 +126,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
 
   useEffect(() => {
     loadJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh?.timeRange]);
 
   const errorDisplay = (
@@ -167,7 +161,11 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled, setLazyJ
       {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}
 
       {isLoading === false && typeof errorMessage === 'undefined' && groupsCount > 0 ? (
-        <AnomalyDetectionTable items={groups} statsBarData={statsBarData!} />
+        <AnomalyDetectionTable
+          items={groups}
+          statsBarData={statsBarData!}
+          chartsService={chartsService}
+        />
       ) : null}
     </EuiPanel>
   );

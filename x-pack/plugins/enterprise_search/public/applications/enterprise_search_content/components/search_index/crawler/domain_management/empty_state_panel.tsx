@@ -55,7 +55,11 @@ export const EmptyStatePanel: React.FC = () => {
           <EuiSpacer />
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={openFlyout} fill>
+              <EuiButton
+                data-telemetry-id="entSearchContent-crawler-domainManagement-noDomains-addFirstDomain"
+                onClick={openFlyout}
+                fill
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.crawler.domainManagement.emptyState.addDomainButtonLabel',
                   {

@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickRelationshipsTab();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       expect(parseInt(await PageObjects.settings.getRelationshipsTabCount(), 10)).to.be(1);
     });
   });

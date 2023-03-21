@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`install footer should render 1`] = `
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-stretch-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <button
+      aria-label="Remove Data Set Name"
+      class="euiButtonEmpty euiButtonEmpty--flushLeft css-1v3a3p6-empty-danger"
+      data-test-subj="removeSampleDataSetdata-set-id"
+      type="button"
+    >
+      <span
+        class="euiButtonContent euiButtonEmpty__content"
+      >
+        <span
+          class="euiButtonEmpty__text"
+        >
+          Remove
+        </span>
+      </span>
+    </button>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
+  >
+    <button
+      aria-label="View Data Set Name"
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+      data-test-subj="launchSampleDataSetdata-set-id"
+      type="button"
+    >
+      <span
+        class="emotion-euiButtonDisplayContent"
+      >
+        <span
+          class="eui-textTruncate"
+        >
+          View data
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;

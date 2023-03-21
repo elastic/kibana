@@ -9,10 +9,12 @@ import { merge } from 'lodash';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
 import { LegacyRequest } from '../../types';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getKibanaDataset } from '../cluster/get_index_patterns';
 import { MissingRequiredError } from '../error_missing_required';
 import { buildKibanaInfo } from './build_kibana_info';
 import { isKibanaStatusStale } from './is_kibana_status_stale';
+import { createQuery } from '../create_query';
+import { KibanaMetric } from '../metrics';
 
 export function handleResponse(resp: ElasticsearchResponse) {
   const hit = resp.hits?.hits[0];
@@ -36,10 +38,13 @@ export function getKibanaInfo(
   { clusterUuid, kibanaUuid }: { clusterUuid: string; kibanaUuid: string }
 ) {
   const moduleType = 'kibana';
-  const indexPatterns = getNewIndexPatterns({
+  const type = 'kibana_stats';
+  const dataset = 'stats';
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     moduleType,
+    dataset,
   });
   const params = {
     index: indexPatterns,
@@ -58,14 +63,14 @@ export function getKibanaInfo(
       'hits.hits._source.service.version',
     ],
     body: {
-      query: {
-        bool: {
-          filter: [
-            { term: { cluster_uuid: clusterUuid } },
-            { term: { 'kibana_stats.kibana.uuid': kibanaUuid } },
-          ],
-        },
-      },
+      query: createQuery({
+        type,
+        dsDataset: getKibanaDataset(dataset),
+        metricset: dataset,
+        clusterUuid,
+        uuid: kibanaUuid,
+        metric: KibanaMetric.getMetricFields(),
+      }),
       collapse: { field: 'kibana_stats.kibana.uuid' },
       sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },

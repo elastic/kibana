@@ -28,6 +28,8 @@ const defaultProps = {
   showAddLayerWizard: async () => {},
   closeLayerTOC: () => {},
   openLayerTOC: () => {},
+  hideAllLayers: () => {},
+  showAllLayers: () => {},
   isLayerTOCOpen: true,
   layerList: [],
   isFlyoutOpen: false,

@@ -149,6 +149,7 @@ export class MonitoringPlugin
         'staleStatusThresholdSeconds',
         monitoring.ui.kibana.reporting.stale_status_threshold_seconds,
       ],
+      ['isCcsEnabled', monitoring.ui.ccs.enabled],
     ];
   }
 

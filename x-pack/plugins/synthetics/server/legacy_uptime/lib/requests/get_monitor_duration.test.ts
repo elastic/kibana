@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import mockChartsData from './__fixtures__/monitor_charts_mock.json';
 import { getMonitorDurationChart } from './get_monitor_duration';
-import { getUptimeESMockClient } from './helper';
+import { getUptimeESMockClient } from './test_helpers';
 
 describe('ElasticsearchMonitorsAdapter', () => {
   it('getMonitorChartsData will provide expected filters', async () => {

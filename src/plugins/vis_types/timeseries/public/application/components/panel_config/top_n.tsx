@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import {
   htmlIdGenerator,
   EuiTabs,
@@ -25,7 +25,6 @@ import {
   EuiCode,
 } from '@elastic/eui';
 
-// @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
 // @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
 import { IndexPattern } from '../index_pattern';
@@ -49,7 +48,7 @@ export class TopNPanelConfig extends Component<
   UNSAFE_componentWillMount() {
     const { model } = this.props;
     if (!model.bar_color_rules || !model.bar_color_rules.length) {
-      this.props.onChange({ bar_color_rules: [{ id: uuid.v1() }] });
+      this.props.onChange({ bar_color_rules: [{ id: uuidv1() }] });
     }
   }
 

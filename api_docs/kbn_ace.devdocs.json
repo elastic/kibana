@@ -31,6 +31,7 @@
         ],
         "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ace",
@@ -44,6 +45,7 @@
             ],
             "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -58,6 +60,7 @@
             ],
             "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -76,6 +79,7 @@
         ],
         "path": "packages/kbn-ace/src/ace/modes/lexer_rules/elasticsearch_sql_highlight_rules.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [],
         "initialIsOpen": false
@@ -94,6 +98,7 @@
         ],
         "path": "packages/kbn-ace/src/ace/modes/x_json/x_json.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ace",
@@ -107,6 +112,7 @@
             ],
             "path": "packages/kbn-ace/src/ace/modes/x_json/x_json.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -125,6 +131,7 @@
         ],
         "path": "packages/kbn-ace/src/ace/modes/lexer_rules/script_highlight_rules.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ace",
@@ -138,6 +145,7 @@
             ],
             "path": "packages/kbn-ace/src/ace/modes/lexer_rules/script_highlight_rules.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -156,6 +164,7 @@
         ],
         "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ace",
@@ -169,6 +178,7 @@
             ],
             "path": "packages/kbn-ace/src/ace/modes/lexer_rules/x_json_highlight_rules.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -191,6 +201,7 @@
         ],
         "path": "packages/kbn-ace/src/ace/modes/x_json/x_json.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

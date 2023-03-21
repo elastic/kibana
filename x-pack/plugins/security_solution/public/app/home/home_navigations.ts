@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { getSecuritySolutionNavTab as getSecuritySolutionCSPNavTab } from '@kbn/cloud-security-posture-plugin/public';
+import { getSecuritySolutionNavTab as getSecuritySolutionTINavTab } from '@kbn/threat-intelligence-plugin/public';
+import { getSecuritySolutionNavTab as getSecuritySolutionCloudDefendNavTab } from '@kbn/cloud-defend-plugin/public';
 import * as i18n from '../translations';
 import type { SecurityNav, SecurityNavGroup } from '../../common/components/navigation/types';
 import { SecurityNavGroupKey } from '../../common/components/navigation/types';
@@ -18,7 +21,6 @@ import {
   APP_NETWORK_PATH,
   APP_TIMELINES_PATH,
   APP_CASES_PATH,
-  APP_MANAGEMENT_PATH,
   APP_ENDPOINTS_PATH,
   APP_POLICIES_PATH,
   APP_TRUSTED_APPS_PATH,
@@ -29,7 +31,10 @@ import {
   APP_USERS_PATH,
   APP_KUBERNETES_PATH,
   APP_LANDING_PATH,
-  APP_RESPONSE_ACTIONS_PATH,
+  APP_RESPONSE_ACTIONS_HISTORY_PATH,
+  APP_ENTITY_ANALYTICS_PATH,
+  APP_DATA_QUALITY_PATH,
+  APP_PATH,
 } from '../../../common/constants';
 
 export const navTabs: SecurityNav = {
@@ -117,13 +122,6 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'cases',
   },
-  [SecurityPageName.administration]: {
-    id: SecurityPageName.administration,
-    name: i18n.ADMINISTRATION,
-    href: APP_MANAGEMENT_PATH,
-    disabled: false,
-    urlKey: 'administration',
-  },
   [SecurityPageName.endpoints]: {
     id: SecurityPageName.endpoints,
     name: i18n.ENDPOINTS,
@@ -166,12 +164,46 @@ export const navTabs: SecurityNav = {
     disabled: false,
     urlKey: 'administration',
   },
-  [SecurityPageName.responseActions]: {
-    id: SecurityPageName.responseActions,
-    name: i18n.RESPONSE_ACTIONS,
-    href: APP_RESPONSE_ACTIONS_PATH,
+  [SecurityPageName.responseActionsHistory]: {
+    id: SecurityPageName.responseActionsHistory,
+    name: i18n.RESPONSE_ACTIONS_HISTORY,
+    href: APP_RESPONSE_ACTIONS_HISTORY_PATH,
     disabled: false,
     urlKey: 'administration',
+  },
+  [SecurityPageName.threatIntelligenceIndicators]: {
+    ...getSecuritySolutionTINavTab<SecurityPageName>('indicators', APP_PATH),
+    urlKey: 'indicators',
+  },
+  [SecurityPageName.cloudSecurityPostureFindings]: {
+    ...getSecuritySolutionCSPNavTab<SecurityPageName>('findings', APP_PATH),
+    urlKey: 'findings',
+  },
+  [SecurityPageName.cloudSecurityPostureDashboard]: {
+    ...getSecuritySolutionCSPNavTab<SecurityPageName>('dashboard', APP_PATH),
+    urlKey: 'cloud_posture',
+  },
+  [SecurityPageName.cloudSecurityPostureBenchmarks]: {
+    ...getSecuritySolutionCSPNavTab<SecurityPageName>('benchmarks', APP_PATH),
+    urlKey: 'administration',
+  },
+  [SecurityPageName.cloudDefendPolicies]: {
+    ...getSecuritySolutionCloudDefendNavTab<SecurityPageName>('policies', APP_PATH),
+    urlKey: 'administration',
+  },
+  [SecurityPageName.entityAnalytics]: {
+    id: SecurityPageName.entityAnalytics,
+    name: i18n.ENTITY_ANALYTICS,
+    href: APP_ENTITY_ANALYTICS_PATH,
+    disabled: false,
+    urlKey: 'entity_analytics',
+  },
+  [SecurityPageName.dataQuality]: {
+    id: SecurityPageName.dataQuality,
+    name: i18n.DATA_QUALITY,
+    href: APP_DATA_QUALITY_PATH,
+    disabled: false,
+    urlKey: 'data_quality',
   },
 };
 
@@ -184,9 +216,17 @@ export const securityNavGroup: SecurityNavGroup = {
     id: SecurityNavGroupKey.detect,
     name: i18n.DETECT,
   },
+  [SecurityNavGroupKey.findings]: {
+    id: SecurityNavGroupKey.findings,
+    name: i18n.FINDINGS,
+  },
   [SecurityNavGroupKey.explore]: {
     id: SecurityNavGroupKey.explore,
     name: i18n.EXPLORE,
+  },
+  [SecurityNavGroupKey.intelligence]: {
+    id: SecurityNavGroupKey.intelligence,
+    name: i18n.THREAT_INTELLIGENCE,
   },
   [SecurityNavGroupKey.investigate]: {
     id: SecurityNavGroupKey.investigate,

@@ -1,0 +1,84 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render popover when appLinks is not empty 1`] = `
+<div
+  class="euiPopover emotion-euiPopover"
+  data-test-subj="launchSampleDataSetecommerce"
+  id="sampleDataLinksecommerce"
+>
+  <div
+    class="euiPopover__anchor css-16vtueo-render"
+  >
+    <button
+      aria-label="View Sample eCommerce orders"
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+      type="button"
+    >
+      <span
+        class="emotion-euiButtonDisplayContent"
+      >
+        <span
+          class="eui-textTruncate"
+        >
+          View data
+        </span>
+        <span
+          color="inherit"
+          data-euiicon-type="arrowDown"
+        />
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`should render popover with ordered appLinks 1`] = `
+<div
+  class="euiPopover emotion-euiPopover"
+  data-test-subj="launchSampleDataSetecommerce"
+  id="sampleDataLinksecommerce"
+>
+  <div
+    class="euiPopover__anchor css-16vtueo-render"
+  >
+    <button
+      aria-label="View Sample eCommerce orders"
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+      type="button"
+    >
+      <span
+        class="emotion-euiButtonDisplayContent"
+      >
+        <span
+          class="eui-textTruncate"
+        >
+          View data
+        </span>
+        <span
+          color="inherit"
+          data-euiicon-type="arrowDown"
+        />
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`should render simple button when appLinks is empty 1`] = `
+<button
+  aria-label="View Sample eCommerce orders"
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-primary"
+  data-test-subj="launchSampleDataSetecommerce"
+  type="button"
+>
+  <span
+    class="emotion-euiButtonDisplayContent"
+  >
+    <span
+      class="eui-textTruncate"
+    >
+      View data
+    </span>
+  </span>
+</button>
+`;

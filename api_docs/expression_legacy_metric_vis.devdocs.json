@@ -38,6 +38,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/expression_functions/metric_vis_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -53,6 +54,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -73,7 +75,8 @@
               ")[]"
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -94,7 +97,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -108,7 +112,23 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "expressionLegacyMetricVis",
+            "id": "def-common.MetricArguments.autoScaleMetricAlignment",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoScaleMetricAlignment",
+            "description": [],
+            "signature": [
+              "MetricAlignment",
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "expressionLegacyMetricVis",
             "id": "def-common.MetricArguments.percentageMode",
@@ -117,7 +137,8 @@
             "label": "percentageMode",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -130,7 +151,8 @@
               "\"Background\" | \"Labels\" | \"None\""
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -140,7 +162,8 @@
             "label": "showLabels",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -150,7 +173,13 @@
             "label": "palette",
             "description": [],
             "signature": [
-              "PaletteOutput",
+              {
+                "pluginId": "@kbn/coloring",
+                "scope": "common",
+                "docId": "kibKbnColoringPluginApi",
+                "section": "def-common.PaletteOutput",
+                "text": "PaletteOutput"
+              },
               "<",
               {
                 "pluginId": "charts",
@@ -162,7 +191,8 @@
               "> | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -181,7 +211,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -200,7 +231,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -213,7 +245,8 @@
               "\"top\" | \"bottom\""
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -234,7 +267,8 @@
               ")[]"
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -255,7 +289,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -265,7 +300,8 @@
             "label": "colorFullBackground",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -278,7 +314,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -292,6 +329,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -301,7 +339,8 @@
             "label": "value",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -311,7 +350,8 @@
             "label": "label",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -324,7 +364,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -337,7 +378,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -347,7 +389,8 @@
             "label": "lightText",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -357,7 +400,8 @@
             "label": "colIndex",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -367,7 +411,8 @@
             "label": "rowIndex",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -381,7 +426,23 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "expressionLegacyMetricVis",
+            "id": "def-common.MetricVisParam.autoScaleMetricAlignment",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "autoScaleMetricAlignment",
+            "description": [],
+            "signature": [
+              "MetricAlignment",
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "expressionLegacyMetricVis",
             "id": "def-common.MetricVisParam.percentageMode",
@@ -390,7 +451,8 @@
             "label": "percentageMode",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -403,7 +465,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -416,7 +479,8 @@
               "\"Background\" | \"Labels\" | \"None\""
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -436,7 +500,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -466,7 +531,8 @@
               "; }"
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -494,7 +560,8 @@
               ", \"bgColor\" | \"labelColor\">"
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -504,7 +571,8 @@
             "label": "colorFullBackground",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -517,7 +585,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -531,6 +600,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -543,7 +613,8 @@
               "\"metric\""
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -562,7 +633,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -591,7 +663,19 @@
               "; }"
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionLegacyMetricVis",
+            "id": "def-common.MetricVisRenderConfig.canNavigateToLens",
+            "type": "boolean",
+            "tags": [],
+            "label": "canNavigateToLens",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -605,6 +689,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -614,7 +699,8 @@
             "label": "addTooltip",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -624,7 +710,8 @@
             "label": "addLegend",
             "description": [],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -643,7 +730,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -662,7 +750,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionLegacyMetricVis",
@@ -675,7 +764,8 @@
               "\"metric\""
             ],
             "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -695,6 +785,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -715,6 +806,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -781,11 +873,18 @@
             "text": "Adapters"
           },
           ", ",
-          "SerializableRecord",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
           ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -800,6 +899,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -814,6 +914,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_legacy_metric/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

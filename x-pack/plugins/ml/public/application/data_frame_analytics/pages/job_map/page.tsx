@@ -9,7 +9,7 @@ import React, { FC, useState, useEffect, useCallback } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useUrlState } from '../../../util/url_state';
+import { useUrlState } from '@kbn/ml-url-state';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
@@ -63,12 +63,13 @@ export const Page: FC = () => {
       setJobsExist(count > 0);
     } catch (e) {
       // Swallow the error and just show the empty table in the analytics id selector
-      console.error('Error checking analytics jobs exist', e); // eslint-disable-line
+      console.error('Error checking analytics jobs exist', e); // eslint-disable-line no-console
     }
   };
 
   useEffect(function checkJobs() {
     checkJobsExist();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getEmptyState = () => {

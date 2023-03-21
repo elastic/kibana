@@ -29,7 +29,7 @@ export interface AggListProps {
 export const AggListForm: React.FC<AggListProps> = ({ deleteHandler, list, onChange, options }) => {
   const listKeys = Object.keys(list);
   return (
-    <Fragment>
+    <>
       {listKeys.map((aggName: AggName, i) => {
         const otherAggNames = listKeys.filter((k) => k !== aggName);
         return (
@@ -47,6 +47,6 @@ export const AggListForm: React.FC<AggListProps> = ({ deleteHandler, list, onCha
           </Fragment>
         );
       })}
-    </Fragment>
+    </>
   );
 };

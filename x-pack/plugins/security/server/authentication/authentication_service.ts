@@ -6,6 +6,7 @@
  */
 
 import type {
+  CustomBrandingSetup,
   ElasticsearchServiceSetup,
   HttpServiceSetup,
   HttpServiceStart,
@@ -26,7 +27,7 @@ import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
-import type { UserProfileServiceStart } from '../user_profile';
+import type { UserProfileServiceStartInternal } from '../user_profile';
 import { APIKeys } from './api_keys';
 import type { AuthenticationResult } from './authentication_result';
 import type { ProviderLoginAttempt } from './authenticator';
@@ -37,6 +38,7 @@ import { renderUnauthenticatedPage } from './unauthenticated_page';
 
 interface AuthenticationServiceSetupParams {
   http: Pick<HttpServiceSetup, 'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse'>;
+  customBranding: CustomBrandingSetup;
   elasticsearch: Pick<ElasticsearchServiceSetup, 'setUnauthorizedErrorHandler'>;
   config: ConfigType;
   license: SecurityLicense;
@@ -49,7 +51,7 @@ interface AuthenticationServiceStartParams {
   clusterClient: IClusterClient;
   audit: AuditServiceSetup;
   featureUsageService: SecurityFeatureUsageServiceStart;
-  userProfileService: UserProfileServiceStart;
+  userProfileService: UserProfileServiceStartInternal;
   session: PublicMethodsOf<Session>;
   loggers: LoggerFactory;
   applicationName: string;
@@ -62,7 +64,9 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
     APIKeys,
     | 'areAPIKeysEnabled'
     | 'create'
+    | 'update'
     | 'invalidate'
+    | 'validate'
     | 'grantAsInternalUser'
     | 'invalidateAsInternalUser'
   >;
@@ -81,6 +85,7 @@ export interface AuthenticationServiceStart {
     | 'areAPIKeysEnabled'
     | 'create'
     | 'invalidate'
+    | 'validate'
     | 'grantAsInternalUser'
     | 'invalidateAsInternalUser'
   >;
@@ -94,7 +99,14 @@ export class AuthenticationService {
 
   constructor(private readonly logger: Logger) {}
 
-  setup({ config, http, license, buildNumber, elasticsearch }: AuthenticationServiceSetupParams) {
+  setup({
+    config,
+    http,
+    license,
+    buildNumber,
+    elasticsearch,
+    customBranding,
+  }: AuthenticationServiceSetupParams) {
     this.license = license;
 
     // If we cannot automatically authenticate users we should redirect them straight to the login
@@ -121,7 +133,7 @@ export class AuthenticationService {
       // If security is disabled, then continue with no user credentials.
       if (!license.isEnabled()) {
         this.logger.debug(
-          'Current license does not support any security features, authentication is not needed.'
+          'Authentication is not required, as security features are disabled in Elasticsearch.'
         );
         return t.authenticated();
       }
@@ -198,8 +210,16 @@ export class AuthenticationService {
         ? this.authenticator.getRequestOriginalURL(request)
         : `${http.basePath.get(request)}/`;
       if (!isLoginPageAvailable) {
+        const customBrandingValue = await customBranding.getBrandingFor(request, {
+          unauthenticated: true,
+        });
         return toolkit.render({
-          body: renderUnauthenticatedPage({ buildNumber, basePath: http.basePath, originalURL }),
+          body: renderUnauthenticatedPage({
+            buildNumber,
+            basePath: http.basePath,
+            originalURL,
+            customBranding: customBrandingValue,
+          }),
           headers: { 'Content-Security-Policy': http.csp.header },
         });
       }
@@ -335,7 +355,10 @@ export class AuthenticationService {
       loggers,
       clusterClient,
       basePath: http.basePath,
-      config: { authc: config.authc },
+      config: {
+        authc: config.authc,
+        accessAgreement: config.accessAgreement,
+      },
       getCurrentUser,
       featureUsageService,
       userProfileService,
@@ -349,8 +372,10 @@ export class AuthenticationService {
       apiKeys: {
         areAPIKeysEnabled: apiKeys.areAPIKeysEnabled.bind(apiKeys),
         create: apiKeys.create.bind(apiKeys),
+        update: apiKeys.update.bind(apiKeys),
         grantAsInternalUser: apiKeys.grantAsInternalUser.bind(apiKeys),
         invalidate: apiKeys.invalidate.bind(apiKeys),
+        validate: apiKeys.validate.bind(apiKeys),
         invalidateAsInternalUser: apiKeys.invalidateAsInternalUser.bind(apiKeys),
       },
 

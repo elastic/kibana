@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-ux-page-analytics-no-data",
+  "owner": "@elastic/appex-sharedux"
+}

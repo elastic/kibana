@@ -24,14 +24,14 @@ const fleetAgents = [
   {
     id: '1',
     name: 'agent foo',
-    apmServerUrl: 'foo',
-    secretToken: 'foo',
+    apmServerUrl: 'foo url',
+    secretToken: 'foo token',
   },
   {
     id: '2',
     name: 'agent bar',
-    apmServerUrl: 'bar',
-    secretToken: 'bar',
+    apmServerUrl: 'bar url',
+    secretToken: 'bar token',
   },
 ];
 
@@ -87,12 +87,12 @@ describe('TutorialConfigAgent', () => {
       expect(commands).not.toEqual('');
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
-        -Delastic.apm.service_name=my-application \\\\
-        -Delastic.apm.server_urls=http://localhost:8200 \\\\
+        -Delastic.apm.service_name=my-service-name \\\\
         -Delastic.apm.secret_token= \\\\
-        -Delastic.apm.environment=production \\\\
+        -Delastic.apm.server_url=http://localhost:8200 \\\\
+        -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
-        -jar my-application.jar"
+        -jar my-service-name.jar"
       `);
 
       fireEvent.click(component.getByTestId('comboBoxToggleListButton'));
@@ -101,12 +101,12 @@ describe('TutorialConfigAgent', () => {
       expect(commands).not.toEqual('');
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
-        -Delastic.apm.service_name=my-application \\\\
-        -Delastic.apm.server_urls=foo \\\\
-        -Delastic.apm.secret_token=foo \\\\
-        -Delastic.apm.environment=production \\\\
+        -Delastic.apm.service_name=my-service-name \\\\
+        -Delastic.apm.secret_token=foo token \\\\
+        -Delastic.apm.server_url=foo url \\\\
+        -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
-        -jar my-application.jar"
+        -jar my-service-name.jar"
       `);
     });
     describe('running on prem', () => {
@@ -138,12 +138,12 @@ describe('TutorialConfigAgent', () => {
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
           "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
-          -Delastic.apm.service_name=my-application \\\\
-          -Delastic.apm.server_urls=http://localhost:8200 \\\\
+          -Delastic.apm.service_name=my-service-name \\\\
           -Delastic.apm.secret_token= \\\\
-          -Delastic.apm.environment=production \\\\
+          -Delastic.apm.server_url=http://localhost:8200 \\\\
+          -Delastic.apm.environment=my-environment \\\\
           -Delastic.apm.application_packages=org.example \\\\
-          -jar my-application.jar"
+          -jar my-service-name.jar"
         `);
       });
       it('shows get started with fleet link when there are no fleet agents', async () => {
@@ -174,12 +174,12 @@ describe('TutorialConfigAgent', () => {
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
           "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
-          -Delastic.apm.service_name=my-application \\\\
-          -Delastic.apm.server_urls=http://localhost:8200 \\\\
+          -Delastic.apm.service_name=my-service-name \\\\
           -Delastic.apm.secret_token= \\\\
-          -Delastic.apm.environment=production \\\\
+          -Delastic.apm.server_url=http://localhost:8200 \\\\
+          -Delastic.apm.environment=my-environment \\\\
           -Delastic.apm.application_packages=org.example \\\\
-          -jar my-application.jar"
+          -jar my-service-name.jar"
         `);
         expectTextsInDocument(component, ['Get started with fleet']);
       });
@@ -216,12 +216,12 @@ describe('TutorialConfigAgent', () => {
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
           "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
-          -Delastic.apm.service_name=my-application \\\\
-          -Delastic.apm.server_urls=cloud_url \\\\
+          -Delastic.apm.service_name=my-service-name \\\\
           -Delastic.apm.secret_token=cloud_token \\\\
-          -Delastic.apm.environment=production \\\\
+          -Delastic.apm.server_url=cloud_url \\\\
+          -Delastic.apm.environment=my-environment \\\\
           -Delastic.apm.application_packages=org.example \\\\
-          -jar my-application.jar"
+          -jar my-service-name.jar"
         `);
       });
       it('selects policy elastic agent on cloud when available by default', async () => {
@@ -255,12 +255,12 @@ describe('TutorialConfigAgent', () => {
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
           "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
-          -Delastic.apm.service_name=my-application \\\\
-          -Delastic.apm.server_urls=apm_cloud_url \\\\
+          -Delastic.apm.service_name=my-service-name \\\\
           -Delastic.apm.secret_token=apm_cloud_token \\\\
-          -Delastic.apm.environment=production \\\\
+          -Delastic.apm.server_url=apm_cloud_url \\\\
+          -Delastic.apm.environment=my-environment \\\\
           -Delastic.apm.application_packages=org.example \\\\
-          -jar my-application.jar"
+          -jar my-service-name.jar"
         `);
       });
 
@@ -287,12 +287,12 @@ describe('TutorialConfigAgent', () => {
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
           "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
-          -Delastic.apm.service_name=my-application \\\\
-          -Delastic.apm.server_urls=http://localhost:8200 \\\\
+          -Delastic.apm.service_name=my-service-name \\\\
           -Delastic.apm.secret_token= \\\\
-          -Delastic.apm.environment=production \\\\
+          -Delastic.apm.server_url=http://localhost:8200 \\\\
+          -Delastic.apm.environment=my-environment \\\\
           -Delastic.apm.application_packages=org.example \\\\
-          -jar my-application.jar"
+          -jar my-service-name.jar"
         `);
       });
     });
@@ -350,12 +350,12 @@ describe('TutorialConfigAgent', () => {
       expect(commands).not.toEqual('');
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
-        -Delastic.apm.service_name=my-application \\\\
-        -Delastic.apm.server_urls=http://localhost:8200 \\\\
+        -Delastic.apm.service_name=my-service-name \\\\
         -Delastic.apm.secret_token= \\\\
-        -Delastic.apm.environment=production \\\\
+        -Delastic.apm.server_url=http://localhost:8200 \\\\
+        -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
-        -jar my-application.jar"
+        -jar my-service-name.jar"
       `);
     });
     it('shows default standalone on cloud', async () => {
@@ -387,12 +387,12 @@ describe('TutorialConfigAgent', () => {
       expect(commands).not.toEqual('');
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
-        -Delastic.apm.service_name=my-application \\\\
-        -Delastic.apm.server_urls=cloud_url \\\\
+        -Delastic.apm.service_name=my-service-name \\\\
         -Delastic.apm.secret_token=cloud_token \\\\
-        -Delastic.apm.environment=production \\\\
+        -Delastic.apm.server_url=cloud_url \\\\
+        -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
-        -jar my-application.jar"
+        -jar my-service-name.jar"
       `);
     });
   });

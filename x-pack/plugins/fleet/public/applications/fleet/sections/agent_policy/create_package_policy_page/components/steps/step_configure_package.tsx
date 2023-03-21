@@ -15,9 +15,15 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import {
+  getNormalizedInputs,
+  isIntegrationPolicyTemplate,
+  getRegistryStreamWithDataStreamForInputType,
+} from '../../../../../../../../common/services';
+
 import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../../types';
 import { Loading } from '../../../../../components';
-import { getStreamsForInputType, doesPackageHaveIntegrations } from '../../../../../services';
+import { doesPackageHaveIntegrations } from '../../../../../services';
 
 import type { PackagePolicyValidationResults } from '../../services';
 
@@ -31,6 +37,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
   noTopRule?: boolean;
+  isEditPage?: boolean;
 }> = ({
   packageInfo,
   showOnlyIntegration,
@@ -39,6 +46,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   validationResults,
   submitAttempted,
   noTopRule = false,
+  isEditPage = false,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const packagePolicyTemplates = useMemo(
@@ -57,16 +65,19 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         {!noTopRule && <EuiHorizontalRule margin="m" />}
         <EuiFlexGroup direction="column" gutterSize="none">
           {packagePolicyTemplates.map((policyTemplate) => {
-            return (policyTemplate.inputs || []).map((packageInput) => {
+            const inputs = getNormalizedInputs(policyTemplate);
+            return inputs.map((packageInput) => {
               const packagePolicyInput = packagePolicy.inputs.find(
                 (input) =>
                   input.type === packageInput.type &&
                   (hasIntegrations ? input.policy_template === policyTemplate.name : true)
               );
-              const packageInputStreams = getStreamsForInputType(
+              const packageInputStreams = getRegistryStreamWithDataStreamForInputType(
                 packageInput.type,
                 packageInfo,
-                hasIntegrations ? policyTemplate.data_streams : []
+                hasIntegrations && isIntegrationPolicyTemplate(policyTemplate)
+                  ? policyTemplate.data_streams
+                  : []
               );
               return packagePolicyInput ? (
                 <EuiFlexItem key={packageInput.type}>
@@ -76,6 +87,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                     packagePolicy={packagePolicy}
                     packageInputStreams={packageInputStreams}
                     packagePolicyInput={packagePolicyInput}
+                    updatePackagePolicy={updatePackagePolicy}
                     updatePackagePolicyInput={(updatedInput: Partial<NewPackagePolicyInput>) => {
                       const indexOfUpdatedInput = packagePolicy.inputs.findIndex(
                         (input) =>
@@ -99,6 +111,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                       ]
                     }
                     forceShowErrors={submitAttempted}
+                    isEditPage={isEditPage}
                   />
                   <EuiHorizontalRule margin="m" />
                 </EuiFlexItem>

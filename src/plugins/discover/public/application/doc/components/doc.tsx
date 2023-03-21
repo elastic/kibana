@@ -8,9 +8,16 @@
 
 import React, { useEffect, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent, EuiPage } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPage,
+} from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { getRootBreadcrumbs } from '../../../utils/breadcrumbs';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { ElasticRequestState } from '../types';
 import { useEsDocSearch } from '../../../hooks/use_es_doc_search';
@@ -28,23 +35,34 @@ export interface DocProps {
   /**
    * DataView entity
    */
-  indexPattern: DataView;
+  dataView: DataView;
   /**
    * If set, will always request source, regardless of the global `fieldsFromSource` setting
    */
   requestSource?: boolean;
+  /**
+   * Discover main view url
+   */
+  referrer?: string;
 }
 
 export function Doc(props: DocProps) {
-  const { indexPattern } = props;
+  const { dataView } = props;
   const [reqState, hit] = useEsDocSearch(props);
-  const { docLinks } = useDiscoverServices();
+  const { locator, chrome, docLinks } = useDiscoverServices();
   const indexExistsLink = docLinks.links.apis.indexExists;
 
   const singleDocTitle = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     singleDocTitle.current?.focus();
   }, []);
+
+  useEffect(() => {
+    chrome.setBreadcrumbs([
+      ...getRootBreadcrumbs(props.referrer),
+      { text: `${props.index}#${props.id}` },
+    ]);
+  }, [chrome, props.referrer, props.index, props.id, dataView, locator]);
 
   return (
     <EuiPage>
@@ -61,16 +79,16 @@ export function Doc(props: DocProps) {
         })}
       </h1>
       <EuiPageContent>
-        {reqState === ElasticRequestState.NotFoundIndexPattern && (
+        {reqState === ElasticRequestState.NotFoundDataView && (
           <EuiCallOut
             color="danger"
-            data-test-subj={`doc-msg-notFoundIndexPattern`}
+            data-test-subj={`doc-msg-notFoundDataView`}
             iconType="alert"
             title={
               <FormattedMessage
                 id="discover.doc.failedToLocateDataView"
-                defaultMessage="No data view matches ID {indexPatternId}."
-                values={{ indexPatternId: indexPattern.id }}
+                defaultMessage="No data view matches ID {dataViewId}."
+                values={{ dataViewId: dataView.id }}
               />
             }
           />
@@ -127,9 +145,9 @@ export function Doc(props: DocProps) {
           </EuiCallOut>
         )}
 
-        {reqState === ElasticRequestState.Found && hit !== null && indexPattern && (
+        {reqState === ElasticRequestState.Found && hit !== null && dataView && (
           <div data-test-subj="doc-hit">
-            <DocViewer hit={hit} indexPattern={indexPattern} />
+            <DocViewer hit={hit} dataView={dataView} />
           </div>
         )}
       </EuiPageContent>

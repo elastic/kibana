@@ -9,25 +9,26 @@
  * React component for rendering a select element with threshold levels.
  */
 import React, { Fragment, FC, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText, EuiSuperSelectProps } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { usePageUrlState } from '@kbn/ml-url-state';
+
 import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
-import { usePageUrlState } from '../../../util/url_state';
 import { ANOMALY_THRESHOLD } from '../../../../../common';
 
-const warningLabel = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
+const warningLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
   defaultMessage: 'warning',
 });
-const minorLabel = i18n.translate('xpack.ml.controls.selectSeverity.minorLabel', {
+const minorLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.minorLabel', {
   defaultMessage: 'minor',
 });
-const majorLabel = i18n.translate('xpack.ml.controls.selectSeverity.majorLabel', {
+const majorLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.majorLabel', {
   defaultMessage: 'major',
 });
-const criticalLabel = i18n.translate('xpack.ml.controls.selectSeverity.criticalLabel', {
+const criticalLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.criticalLabel', {
   defaultMessage: 'critical',
 });
 
@@ -37,6 +38,11 @@ const optionsMap = {
   [majorLabel]: ANOMALY_THRESHOLD.MAJOR,
   [criticalLabel]: ANOMALY_THRESHOLD.CRITICAL,
 };
+
+export interface TableSeverityPageUrlState {
+  pageKey: 'mlSelectSeverity';
+  pageUrlState: TableSeverity;
+}
 
 export interface TableSeverity {
   val: number;
@@ -82,7 +88,7 @@ export function optionValueToThreshold(value: number) {
 const TABLE_SEVERITY_DEFAULT = SEVERITY_OPTIONS[0];
 
 export const useTableSeverity = () => {
-  return usePageUrlState<TableSeverity>('mlSelectSeverity', TABLE_SEVERITY_DEFAULT);
+  return usePageUrlState<TableSeverityPageUrlState>('mlSelectSeverity', TABLE_SEVERITY_DEFAULT);
 };
 
 export const getSeverityOptions = () =>

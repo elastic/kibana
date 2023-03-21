@@ -9,15 +9,15 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
-import { StatefulEventContext } from '@kbn/timelines-plugin/public';
-import type { TimelineExpandedDetailType } from '../../../../../../common/types/timeline';
+import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
+import type { ExpandedDetailType } from '../../../../../../common/types';
+import { getScopedActions } from '../../../../../helpers';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { UserDetailsLink } from '../../../../../common/components/links';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
-import { timelineActions } from '../../../../store/timeline';
 
 interface Props {
   contextId: string;
@@ -60,20 +60,22 @@ const UserNameComponent: React.FC<Props> = ({
       }
       if (eventContext && isInTimelineContext) {
         const { timelineID, tabType } = eventContext;
-        const updatedExpandedDetail: TimelineExpandedDetailType = {
+        const updatedExpandedDetail: ExpandedDetailType = {
           panelView: 'userDetail',
           params: {
             userName,
           },
         };
-
-        dispatch(
-          timelineActions.toggleDetailPanel({
-            ...updatedExpandedDetail,
-            timelineId: timelineID,
-            tabType,
-          })
-        );
+        const scopedActions = getScopedActions(timelineID);
+        if (scopedActions) {
+          dispatch(
+            scopedActions.toggleDetailPanel({
+              ...updatedExpandedDetail,
+              id: timelineID,
+              tabType: tabType as TimelineTabs,
+            })
+          );
+        }
 
         if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
           activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });

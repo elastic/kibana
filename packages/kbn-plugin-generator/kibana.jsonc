@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/plugin-generator",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations"
+}

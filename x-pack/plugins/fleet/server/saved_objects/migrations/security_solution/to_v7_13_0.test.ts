@@ -29,7 +29,6 @@ describe('7.13.0 Endpoint Package Policy migration', () => {
         policy_id: '',
         enabled: true,
         namespace: '',
-        output_id: '',
         revision: 0,
         updated_at: '',
         updated_by: '',

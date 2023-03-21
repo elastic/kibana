@@ -7,7 +7,7 @@
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 
-export interface IHttpSerializedFetchError {
+export interface IHttpSerializedFetchError<P = unknown> {
   name: string;
   body: {
     error?: string;
@@ -15,9 +15,26 @@ export interface IHttpSerializedFetchError {
     statusCode?: number;
   };
   requestUrl: string;
+  getPayload?: P;
 }
 
-export const serializeHttpFetchError = (error: IHttpFetchError): IHttpSerializedFetchError => {
+export const serializeHttpFetchError = <P>(
+  error: IHttpFetchError,
+  getPayload?: P
+): IHttpSerializedFetchError<P> => {
+  if (error.name && !error.body) {
+    return {
+      name: error.name,
+      body: {
+        error: error.toString(),
+        message: error.message,
+        statusCode: undefined,
+      },
+      requestUrl: error?.request?.url,
+      getPayload,
+    };
+  }
+
   const body = error.body as { error: string; message: string; statusCode: number };
   return {
     name: error.name,
@@ -27,5 +44,6 @@ export const serializeHttpFetchError = (error: IHttpFetchError): IHttpSerialized
       statusCode: body!.statusCode,
     },
     requestUrl: error.request.url,
+    getPayload,
   };
 };

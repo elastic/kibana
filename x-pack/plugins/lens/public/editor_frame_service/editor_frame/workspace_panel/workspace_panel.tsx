@@ -9,6 +9,7 @@ import React, { useState, useEffect, useMemo, useContext, useCallback, useRef } 
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { i18n } from '@kbn/i18n';
 import {
   EuiEmptyPrompt,
@@ -17,51 +18,49 @@ import {
   EuiText,
   EuiButtonEmpty,
   EuiLink,
-  EuiPageContentBody,
-  EuiButton,
-  EuiSpacer,
   EuiTextColor,
+  EuiSpacer,
 } from '@elastic/eui';
-import type { CoreStart, ApplicationStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart, ExecutionContextSearch } from '@kbn/data-plugin/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import type {
   ExpressionRendererEvent,
   ExpressionRenderError,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
+import { DropIllustration } from '@kbn/chart-icons';
+import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
+import { getSearchWarningMessages } from '../../../utils';
 import {
   FramePublicAPI,
   isLensBrushEvent,
   isLensFilterEvent,
+  isLensMultiFilterEvent,
   isLensEditEvent,
   VisualizationMap,
   DatasourceMap,
-  DatasourceFixAction,
   Suggestion,
+  DatasourceLayers,
+  UserMessage,
+  UserMessagesGetter,
+  AddUserMessages,
+  isMessageRemovable,
 } from '../../../types';
 import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
-import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
-import { DropIllustration } from '../../../assets/drop_illustration';
 import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
 import applyChangesIllustrationLight from '../../../assets/render_light@2x.png';
-import {
-  getOriginalRequestErrorMessages,
-  getUnknownVisualizationTypeError,
-} from '../../error_helper';
-import { getMissingIndexPattern, validateDatasourceAndVisualization } from '../state_helpers';
+import { getOriginalRequestErrorMessages } from '../../error_helper';
 import {
   onActiveDataChange,
   useLensDispatch,
   editVisualizationAction,
-  updateDatasourceState,
   setSaveable,
   useLensSelector,
   selectExecutionContext,
@@ -75,11 +74,13 @@ import {
   selectDatasourceLayers,
   applyChanges,
   selectChangesApplied,
+  VisualizationState,
+  DatasourceStates,
+  DataViewsState,
 } from '../../../state_management';
 import type { LensInspector } from '../../../lens_inspector_service';
-import { inferTimeField } from '../../../utils';
+import { inferTimeField, DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { setChangesApplied } from '../../../state_management/lens_slice';
-import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../config_panel/dimension_container';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -90,14 +91,11 @@ export interface WorkspacePanelProps {
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   getSuggestionForField: (field: DragDropIdentifier) => Suggestion | undefined;
   lensInspector: LensInspector;
+  getUserMessages: UserMessagesGetter;
+  addUserMessages: AddUserMessages;
 }
 
 interface WorkspaceState {
-  expressionBuildError?: Array<{
-    shortMessage: string;
-    longMessage: React.ReactNode;
-    fixAction?: DatasourceFixAction<unknown>;
-  }>;
   expandError: boolean;
   expressionToRender: string | null | undefined;
 }
@@ -114,7 +112,15 @@ const dropProps = {
   order: [1, 0, 0, 0],
 };
 
-// Exported for testing purposes only.
+const executionContext: KibanaExecutionContext = {
+  type: 'application',
+  child: {
+    type: 'lens',
+  },
+};
+
+const EXPRESSION_BUILD_ERROR_ID = 'expression_build_error';
+
 export const WorkspacePanel = React.memo(function WorkspacePanel(props: WorkspacePanelProps) {
   const { getSuggestionForField, ...restProps } = props;
 
@@ -140,6 +146,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   ExpressionRenderer: ExpressionRendererComponent,
   suggestionForDraggedField,
   lensInspector,
+  getUserMessages,
+  addUserMessages,
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
 }) {
@@ -151,66 +159,134 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
   const changesApplied = useLensSelector(selectChangesApplied);
   const triggerApply = useLensSelector(selectTriggerApplyChanges);
+  const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
+  const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
-    expressionBuildError: undefined,
     expandError: false,
     expressionToRender: undefined,
   });
 
-  // const expressionToRender = useRef<null | undefined | string>();
   const initialRenderComplete = useRef<boolean>();
 
+  const renderDeps = useRef<{
+    datasourceMap: DatasourceMap;
+    datasourceStates: DatasourceStates;
+    visualization: VisualizationState;
+    visualizationMap: VisualizationMap;
+    datasourceLayers: DatasourceLayers;
+    dataViews: DataViewsState;
+  }>();
+
+  const { dataViews } = framePublicAPI;
+
+  renderDeps.current = {
+    datasourceMap,
+    datasourceStates,
+    visualization,
+    visualizationMap,
+    datasourceLayers,
+    dataViews,
+  };
+
+  const onRender$ = useCallback(() => {
+    if (renderDeps.current) {
+      const datasourceEvents = Object.values(renderDeps.current.datasourceMap).reduce<string[]>(
+        (acc, datasource) => {
+          if (!renderDeps.current!.datasourceStates[datasource.id]) return [];
+          return [
+            ...acc,
+            ...(datasource.getRenderEventCounters?.(
+              renderDeps.current!.datasourceStates[datasource.id]?.state
+            ) ?? []),
+          ];
+        },
+        []
+      );
+      let visualizationEvents: string[] = [];
+      if (renderDeps.current.visualization.activeId) {
+        visualizationEvents =
+          renderDeps.current.visualizationMap[
+            renderDeps.current.visualization.activeId
+          ].getRenderEventCounters?.(renderDeps.current.visualization.state) ?? [];
+      }
+      const events = ['vis_editor', ...datasourceEvents, ...visualizationEvents];
+
+      const adHocDataViews = Object.values(renderDeps.current.dataViews.indexPatterns || {}).filter(
+        (indexPattern) => !indexPattern.isPersisted
+      );
+      adHocDataViews.forEach(() => {
+        events.push('ad_hoc_data_view');
+      });
+
+      trackUiCounterEvents(events);
+    }
+  }, []);
+
+  const removeSearchWarningMessagesRef = useRef<() => void>();
+  const removeExpressionBuildErrorsRef = useRef<() => void>();
+
+  const onData$ = useCallback(
+    (_data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
+      if (renderDeps.current) {
+        const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
+        const datasource = Object.values(renderDeps.current.datasourceMap)[0];
+        const datasourceState = Object.values(renderDeps.current.datasourceStates)[0].state;
+
+        let requestWarnings: UserMessage[] = [];
+
+        if (adapters?.requests) {
+          requestWarnings = getSearchWarningMessages(
+            adapters.requests,
+            datasource,
+            datasourceState,
+            {
+              searchService: plugins.data.search,
+            }
+          );
+        }
+
+        if (requestWarnings.length) {
+          removeSearchWarningMessagesRef.current = addUserMessages(
+            requestWarnings.filter(isMessageRemovable)
+          );
+        } else if (removeSearchWarningMessagesRef.current) {
+          removeSearchWarningMessagesRef.current();
+          removeSearchWarningMessagesRef.current = undefined;
+        }
+
+        if (adapters && adapters.tables) {
+          dispatchLens(
+            onActiveDataChange({
+              activeData: Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
+                (acc, [key, value], _index, tables) => ({
+                  ...acc,
+                  [tables.length === 1 ? defaultLayerId : key]: value,
+                }),
+                {}
+              ),
+            })
+          );
+        }
+      }
+    },
+    [addUserMessages, dispatchLens, plugins.data.search]
+  );
+
   const shouldApplyExpression = autoApplyEnabled || !initialRenderComplete.current || triggerApply;
-
-  const { datasourceLayers } = framePublicAPI;
-
   const activeVisualization = visualization.activeId
     ? visualizationMap[visualization.activeId]
     : null;
 
-  const missingIndexPatterns = getMissingIndexPattern(
-    activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-    activeDatasourceId ? datasourceStates[activeDatasourceId] : null
-  );
-
-  const missingRefsErrors = missingIndexPatterns.length
-    ? [
-        {
-          shortMessage: '',
-          longMessage: i18n.translate('xpack.lens.indexPattern.missingDataView', {
-            defaultMessage:
-              'The {count, plural, one {data view} other {data views}} ({count, plural, one {id} other {ids}}: {indexpatterns}) cannot be found',
-            values: {
-              count: missingIndexPatterns.length,
-              indexpatterns: missingIndexPatterns.join(', '),
-            },
-          }),
-        },
-      ]
-    : [];
-
-  const unknownVisError = visualization.activeId && !activeVisualization;
-
-  // Note: mind to all these eslint disable lines: the frameAPI will change too frequently
-  // and to prevent race conditions it is ok to leave them there.
-
-  const configurationValidationError = useMemo(
-    () =>
-      validateDatasourceAndVisualization(
-        activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
-        activeDatasourceId && datasourceStates[activeDatasourceId]?.state,
-        activeVisualization,
-        visualization.state,
-        framePublicAPI
-      ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeVisualization, visualization.state, activeDatasourceId, datasourceMap, datasourceStates]
-  );
+  const workspaceErrors = getUserMessages(['visualization', 'visualizationInEditor'], {
+    severity: 'error',
+  });
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user
   const unappliedExpression = useMemo(() => {
-    if (!configurationValidationError?.length && !missingRefsErrors.length && !unknownVisError) {
+    // shouldn't build expression if there is any type of error other than an expression build error
+    // (in which case we try again every time because the config might have changed)
+    if (workspaceErrors.every((error) => error.uniqueId === EXPRESSION_BUILD_ERROR_ID)) {
       try {
         const ast = buildExpression({
           visualization: activeVisualization,
@@ -218,6 +294,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           datasourceMap,
           datasourceStates,
           datasourceLayers,
+          indexPatterns: dataViews.indexPatterns,
+          dateRange: framePublicAPI.dateRange,
+          searchSessionId,
         });
 
         if (ast) {
@@ -229,36 +308,42 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           return null;
         }
       } catch (e) {
-        const buildMessages = activeVisualization?.getErrorMessages(visualization.state);
-        const defaultMessage = {
-          shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
-            defaultMessage: 'An unexpected error occurred while preparing the chart',
-          }),
-          longMessage: e.toString(),
-        };
-        // Most likely an error in the expression provided by a datasource or visualization
-        setLocalState((s) => ({
-          ...s,
-          expressionBuildError: buildMessages ?? [defaultMessage],
-        }));
+        removeExpressionBuildErrorsRef.current = addUserMessages([
+          {
+            uniqueId: EXPRESSION_BUILD_ERROR_ID,
+            severity: 'error',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'visualization' }],
+            shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
+              defaultMessage: 'An unexpected error occurred while preparing the chart',
+            }),
+            longMessage: (
+              <>
+                <p data-test-subj="expression-failure">
+                  <FormattedMessage
+                    id="xpack.lens.editorFrame.expressionFailure"
+                    defaultMessage="An error occurred in the expression"
+                  />
+                </p>
+
+                <p>{e.toString()}</p>
+              </>
+            ),
+          },
+        ]);
       }
     }
-    if (unknownVisError) {
-      setLocalState((s) => ({
-        ...s,
-        expressionBuildError: [getUnknownVisualizationTypeError(visualization.activeId!)],
-      }));
-    }
   }, [
+    workspaceErrors,
     activeVisualization,
     visualization.state,
     datasourceMap,
     datasourceStates,
     datasourceLayers,
-    configurationValidationError?.length,
-    missingRefsErrors.length,
-    unknownVisError,
-    visualization.activeId,
+    dataViews.indexPatterns,
+    framePublicAPI.dateRange,
+    searchSessionId,
+    addUserMessages,
   ]);
 
   useEffect(() => {
@@ -281,6 +366,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   }, [unappliedExpression, shouldApplyExpression]);
 
   const expressionExists = Boolean(localState.expressionToRender);
+
+  useEffect(() => {
+    // reset expression error if component attempts to run it again
+    if (expressionExists && removeExpressionBuildErrorsRef.current) {
+      removeExpressionBuildErrorsRef.current();
+      removeExpressionBuildErrorsRef.current = undefined;
+    }
+  }, [expressionExists]);
+
   useEffect(() => {
     // null signals an empty workspace which should count as an initial render
     if (
@@ -305,7 +399,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           },
         });
       }
-      if (isLensFilterEvent(event)) {
+      if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
         plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
           data: {
             ...event.data,
@@ -331,7 +425,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         // ui actions not available, not handling event...
         return false;
       }
-      if (!isLensFilterEvent(event)) {
+      if (!isLensFilterEvent(event) && !isLensMultiFilterEvent(event)) {
         return false;
       }
       return (
@@ -346,23 +440,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     [plugins.uiActions]
   );
 
-  useEffect(() => {
-    // reset expression error if component attempts to run it again
-    if (expressionExists && localState.expressionBuildError) {
-      setLocalState((s) => ({
-        ...s,
-        expressionBuildError: undefined,
-      }));
-    }
-  }, [expressionExists, localState.expressionBuildError]);
-
   const onDrop = useCallback(() => {
     if (suggestionForDraggedField) {
-      trackUiEvent('drop_onto_workspace');
-      trackUiEvent(expressionExists ? 'drop_non_empty' : 'drop_empty');
+      trackUiCounterEvents('drop_onto_workspace');
       switchToSuggestion(dispatchLens, suggestionForDraggedField, { clearStagedPreview: true });
     }
-  }, [suggestionForDraggedField, expressionExists, dispatchLens]);
+  }, [suggestionForDraggedField, dispatchLens]);
 
   const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
 
@@ -471,17 +554,18 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
         setLocalState={setLocalState}
-        localState={{ ...localState, configurationValidationError, missingRefsErrors }}
+        localState={{ ...localState }}
+        errors={workspaceErrors}
         ExpressionRendererComponent={ExpressionRendererComponent}
-        application={core.application}
-        datasourceMap={datasourceMap}
+        core={core}
         activeDatasourceId={activeDatasourceId}
+        onRender$={onRender$}
+        onData$={onData$}
       />
     );
   };
 
   const dragDropContext = useContext(DragContext);
-
   const renderWorkspace = () => {
     const customWorkspaceRenderer =
       activeDatasourceId &&
@@ -489,7 +573,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       dragDropContext.dragging
         ? datasourceMap[activeDatasourceId].getCustomWorkspaceRenderer!(
             datasourceStates[activeDatasourceId].state,
-            dragDropContext.dragging
+            dragDropContext.dragging,
+            dataViews.indexPatterns
           )
         : undefined;
 
@@ -517,9 +602,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         value={dropProps.value}
         order={dropProps.order}
       >
-        <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-          {renderWorkspaceContents()}
-        </EuiPageContentBody>
+        <div className="lnsWorkspacePanelWrapper__pageContentBody">{renderWorkspaceContents()}</div>
       </DragDrop>
     );
   };
@@ -533,6 +616,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       datasourceMap={datasourceMap}
       visualizationMap={visualizationMap}
       isFullscreen={isFullscreen}
+      lensInspector={lensInspector}
+      getUserMessages={getUserMessages}
     >
       {renderWorkspace()}
     </WorkspacePanelWrapper>
@@ -547,10 +632,12 @@ export const VisualizationWrapper = ({
   hasCompatibleActions,
   setLocalState,
   localState,
+  errors,
   ExpressionRendererComponent,
-  application,
+  core,
   activeDatasourceId,
-  datasourceMap,
+  onRender$,
+  onData$,
 }: {
   expression: string | null | undefined;
   framePublicAPI: FramePublicAPI;
@@ -558,19 +645,13 @@ export const VisualizationWrapper = ({
   onEvent: (event: ExpressionRendererEvent) => void;
   hasCompatibleActions: (event: ExpressionRendererEvent) => Promise<boolean>;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
-  localState: WorkspaceState & {
-    configurationValidationError?: Array<{
-      shortMessage: string;
-      longMessage: React.ReactNode;
-      fixAction?: DatasourceFixAction<unknown>;
-    }>;
-    missingRefsErrors?: Array<{ shortMessage: string; longMessage: React.ReactNode }>;
-    unknownVisError?: Array<{ shortMessage: string; longMessage: React.ReactNode }>;
-  };
+  localState: WorkspaceState;
+  errors: UserMessage[];
   ExpressionRendererComponent: ReactExpressionRendererType;
-  application: ApplicationStart;
+  core: CoreStart;
   activeDatasourceId: string | null;
-  datasourceMap: DatasourceMap;
+  onRender$: () => void;
+  onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
 }) => {
   const context = useLensSelector(selectExecutionContext);
   const searchContext: ExecutionContextSearch = useMemo(
@@ -581,196 +662,52 @@ export const VisualizationWrapper = ({
         to: context.dateRange.toDate,
       },
       filters: context.filters,
+      disableShardWarnings: true,
     }),
     [context]
   );
   const searchSessionId = useLensSelector(selectSearchSessionId);
-  const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
-  const dispatchLens = useLensDispatch();
-  const [defaultLayerId] = Object.keys(datasourceLayers);
 
-  const onData$ = useCallback(
-    (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
-      if (adapters && adapters.tables) {
-        dispatchLens(
-          onActiveDataChange(
-            Object.entries(adapters.tables?.tables).reduce<Record<string, Datatable>>(
-              (acc, [key, value], index, tables) => ({
-                ...acc,
-                [tables.length === 1 ? defaultLayerId : key]: value,
-              }),
-              {}
-            )
-          )
-        );
-      }
-    },
-    [defaultLayerId, dispatchLens]
-  );
+  if (errors?.length) {
+    const showExtraErrorsAction =
+      !localState.expandError && errors.length > 1 ? (
+        <EuiButtonEmpty
+          onClick={() => {
+            setLocalState((prevState: WorkspaceState) => ({
+              ...prevState,
+              expandError: !prevState.expandError,
+            }));
+          }}
+          data-test-subj="workspace-more-errors-button"
+        >
+          {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
+            defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
+            values: { errors: errors.length - 1 },
+          })}
+        </EuiButtonEmpty>
+      ) : null;
 
-  function renderFixAction(
-    validationError:
-      | {
-          shortMessage: string;
-          longMessage: React.ReactNode;
-          fixAction?: DatasourceFixAction<unknown>;
-        }
-      | undefined
-  ) {
-    return (
-      validationError &&
-      validationError.fixAction &&
-      activeDatasourceId && (
-        <>
-          <EuiButton
-            data-test-subj="errorFixAction"
-            onClick={async () => {
-              trackUiEvent('error_fix_action');
-              const newState = await validationError.fixAction?.newState({
-                ...framePublicAPI,
-                ...context,
-              });
-              dispatchLens(
-                updateDatasourceState({
-                  updater: newState,
-                  datasourceId: activeDatasourceId,
-                })
-              );
-            }}
-          >
-            {validationError.fixAction.label}
-          </EuiButton>
-          <EuiSpacer />
-        </>
-      )
-    );
-  }
-
-  if (localState.configurationValidationError?.length) {
-    let showExtraErrors = null;
-    let showExtraErrorsAction = null;
-
-    if (localState.configurationValidationError.length > 1) {
-      if (localState.expandError) {
-        showExtraErrors = localState.configurationValidationError
-          .slice(1)
-          .map((validationError) => (
-            <>
-              <p
-                key={validationError.shortMessage}
-                className="eui-textBreakWord"
-                data-test-subj="configuration-failure-error"
-              >
-                {validationError.longMessage}
-              </p>
-              {renderFixAction(validationError)}
-            </>
-          ));
-      } else {
-        showExtraErrorsAction = (
-          <EuiButtonEmpty
-            onClick={() => {
-              setLocalState((prevState: WorkspaceState) => ({
-                ...prevState,
-                expandError: !prevState.expandError,
-              }));
-            }}
-            data-test-subj="configuration-failure-more-errors"
-          >
-            {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
-              defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
-              values: { errors: localState.configurationValidationError.length - 1 },
-            })}
-          </EuiButtonEmpty>
-        );
-      }
-    }
+    const [firstMessage, ...rest] = errors;
 
     return (
-      <EuiFlexGroup data-test-subj="configuration-failure">
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiEmptyPrompt
             actions={showExtraErrorsAction}
             body={
               <>
-                <p className="eui-textBreakWord" data-test-subj="configuration-failure-error">
-                  {localState.configurationValidationError[0].longMessage}
-                </p>
-                {renderFixAction(localState.configurationValidationError?.[0])}
-
-                {showExtraErrors}
-              </>
-            }
-            iconColor="danger"
-            iconType="alert"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  if (localState.missingRefsErrors?.length) {
-    // Check for access to both Management app && specific indexPattern section
-    const { management: isManagementEnabled } = application.capabilities.navLinks;
-    const isIndexPatternManagementEnabled =
-      application.capabilities.management.kibana.indexPatterns;
-    return (
-      <EuiFlexGroup data-test-subj="configuration-failure">
-        <EuiFlexItem>
-          <EuiEmptyPrompt
-            actions={
-              isManagementEnabled && isIndexPatternManagementEnabled ? (
-                <RedirectAppLinks application={application}>
-                  <a
-                    href={application.getUrlForApp('management', {
-                      path: '/kibana/indexPatterns/create',
-                    })}
-                    data-test-subj="configuration-failure-reconfigure-indexpatterns"
-                  >
-                    {i18n.translate('xpack.lens.editorFrame.dataViewReconfigure', {
-                      defaultMessage: `Recreate it in the data view management page`,
-                    })}
-                  </a>
-                </RedirectAppLinks>
-              ) : null
-            }
-            body={
-              <>
-                <p className="eui-textBreakWord" data-test-subj="missing-refs-failure">
-                  <FormattedMessage
-                    id="xpack.lens.editorFrame.dataViewNotFound"
-                    defaultMessage="Data view not found"
-                  />
-                </p>
-                <p className="eui-textBreakWord lnsSelectableErrorMessage">
-                  {localState.missingRefsErrors[0].longMessage}
-                </p>
-              </>
-            }
-            iconColor="danger"
-            iconType="alert"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  if (localState.expressionBuildError?.length) {
-    const firstError = localState.expressionBuildError[0];
-    return (
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiEmptyPrompt
-            body={
-              <>
-                <p data-test-subj="expression-failure">
-                  <FormattedMessage
-                    id="xpack.lens.editorFrame.expressionFailure"
-                    defaultMessage="An error occurred in the expression"
-                  />
-                </p>
-
-                <p>{firstError.longMessage}</p>
+                <div data-test-subj="workspace-error-message">{firstMessage.longMessage}</div>
+                {localState.expandError && (
+                  <>
+                    <EuiSpacer />
+                    {rest.map((message) => (
+                      <div data-test-subj="workspace-error-message">
+                        {message.longMessage}
+                        <EuiSpacer />
+                      </div>
+                    ))}
+                  </>
+                )}
               </>
             }
             iconColor="danger"
@@ -792,7 +729,9 @@ export const VisualizationWrapper = ({
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
         onData$={onData$}
+        onRender$={onRender$}
         inspectorAdapters={lensInspector.adapters}
+        executionContext={executionContext}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const errorsFromRequest = getOriginalRequestErrorMessages(error);

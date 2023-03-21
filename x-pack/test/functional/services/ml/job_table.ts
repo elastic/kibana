@@ -41,10 +41,11 @@ export interface OtherUrlConfig {
 }
 
 export function MachineLearningJobTableProvider(
-  { getService }: FtrProviderContext,
+  { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
   customUrls: MlCustomUrls
 ) {
+  const headerPage = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -229,7 +230,7 @@ export function MachineLearningJobTableProvider(
     ) {
       const testSubjStr =
         tableEnvironment === 'mlAnomalyDetection'
-          ? 'mlRefreshPageButton'
+          ? 'mlDatePickerRefreshPageButton'
           : 'mlRefreshJobListButton';
 
       await this.waitForRefreshButtonLoaded(testSubjStr);
@@ -466,6 +467,18 @@ export function MachineLearningJobTableProvider(
       await testSubjects.missingOrFail('mlDeleteJobConfirmModal', { timeout: 30 * 1000 });
     }
 
+    public async clickDeleteAnnotationsInDeleteJobModal(checked: boolean) {
+      await testSubjects.setEuiSwitch(
+        'mlDeleteJobConfirmModal > mlDeleteJobConfirmModalDeleteAnnotationsSwitch',
+        checked ? 'check' : 'uncheck'
+      );
+      const isChecked = await testSubjects.isEuiSwitchChecked(
+        'mlDeleteJobConfirmModal > mlDeleteJobConfirmModalDeleteAnnotationsSwitch'
+      );
+
+      expect(isChecked).to.eql(checked, `Expected delete annotations switch to be ${checked}`);
+    }
+
     public async clickOpenJobInSingleMetricViewerButton(jobId: string) {
       await testSubjects.click(this.rowSelector(jobId, 'mlOpenJobsInSingleMetricViewerButton'));
       await testSubjects.existOrFail('~mlPageSingleMetricViewer');
@@ -606,6 +619,7 @@ export function MachineLearningJobTableProvider(
       // click Custom URLs tab
       await testSubjects.click('mlEditJobFlyout-customUrls');
       await this.ensureEditCustomUrlTabOpen();
+      await headerPage.waitUntilLoadingHasFinished();
     }
 
     public async ensureEditCustomUrlTabOpen() {

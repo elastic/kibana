@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import rison from 'rison-node';
+import rison from '@kbn/rison';
 import { getUrl } from '@kbn/test';
 import { FtrService } from '../ftr_provider_context';
 

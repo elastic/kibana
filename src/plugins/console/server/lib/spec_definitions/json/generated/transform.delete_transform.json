@@ -1,7 +1,8 @@
 {
   "transform.delete_transform": {
     "url_params": {
-      "force": "__flag__"
+      "force": "__flag__",
+      "timeout": ""
     },
     "methods": [
       "DELETE"

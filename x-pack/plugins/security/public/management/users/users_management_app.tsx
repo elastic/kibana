@@ -10,7 +10,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { RouteComponentProps } from 'react-router-dom';
-import { Redirect, Route, Router, Switch } from 'react-router-dom';
+import { Redirect, Router, Switch } from 'react-router-dom';
 import type { Observable } from 'rxjs';
 
 import type { CoreStart, CoreTheme, StartServicesAccessor } from '@kbn/core/public';
@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
 
 import type { AuthenticationServiceSetup } from '../../authentication';
 import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
@@ -28,6 +29,7 @@ import {
 } from '../../components/breadcrumb';
 import { AuthenticationProvider } from '../../components/use_current_user';
 import type { PluginStartDependencies } from '../../plugin';
+import { ReadonlyBadge } from '../badges/readonly_badge';
 import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {
@@ -72,6 +74,12 @@ export const usersManagementApp = Object.freeze({
             authc={authc}
             onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
           >
+            <ReadonlyBadge
+              featureId="users"
+              tooltip={i18n.translate('xpack.security.management.users.readonlyTooltip', {
+                defaultMessage: 'Unable to create or edit users',
+              })}
+            />
             <Breadcrumb
               text={i18n.translate('xpack.security.users.breadcrumb', {
                 defaultMessage: 'Users',
@@ -86,6 +94,7 @@ export const usersManagementApp = Object.freeze({
                     rolesAPIClient={new RolesAPIClient(coreStart.http)}
                     history={history}
                     navigateToApp={coreStart.application.navigateToApp}
+                    readOnly={!coreStart.application.capabilities.users.save}
                   />
                 </Route>
                 <Route path="/create">

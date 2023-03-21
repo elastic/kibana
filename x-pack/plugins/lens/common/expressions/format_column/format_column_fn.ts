@@ -6,7 +6,7 @@
  */
 
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { supportedFormats } from './supported_formats';
 import type { FormatColumnArgs } from '.';
 import type { FormatColumnExpressionFunction } from './types';
@@ -32,7 +32,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
         if (!parentFormat) {
           if (supportedFormats[format]) {
             const serializedFormat: SerializedFieldFormat = {
-              id: format,
+              id: supportedFormats[format].formatId,
               params: { pattern: supportedFormats[format].decimalsToPattern(decimals) },
             };
             return withParams(col, serializedFormat as Record<string, unknown>);
@@ -64,7 +64,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
               id: parentFormatId,
               params: {
                 ...col.meta.params?.params,
-                id: format,
+                id: supportedFormats[format].formatId,
                 ...parentFormatParams,
                 // some wrapper formatters require params to be flatten out (i.e. terms) while others
                 // require them to be in the params property (i.e. ranges)
@@ -83,7 +83,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
             id: parentFormatId,
             params: {
               ...col.meta.params?.params,
-              id: format,
+              id: supportedFormats[format].formatId,
               // some wrapper formatters require params to be flatten out (i.e. terms) while others
               // require them to be in the params property (i.e. ranges)
               // so for now duplicate

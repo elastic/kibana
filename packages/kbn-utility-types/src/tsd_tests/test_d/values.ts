@@ -7,7 +7,7 @@
  */
 
 import { expectAssignable } from 'tsd';
-import { Values } from '../..';
+import { Values } from '../../..';
 
 // Arrays
 type STRING = Values<string[]>;

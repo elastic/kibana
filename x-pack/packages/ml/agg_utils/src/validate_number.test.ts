@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { numberValidator } from '@kbn/ml-agg-utils';
+import { numberValidator } from './validate_number';
 
 describe('numberValidator', () => {
   it('should only allow integers above zero', () => {

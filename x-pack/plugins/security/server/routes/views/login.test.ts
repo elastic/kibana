@@ -172,6 +172,7 @@ describe('Login view routes', () => {
         allowSubFeaturePrivileges: true,
         allowAuditLogging: true,
         showLogin: true,
+        allowUserProfileCollaboration: true,
       });
 
       const request = httpServerMock.createKibanaRequest();

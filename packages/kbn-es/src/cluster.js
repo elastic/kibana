@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+const fs = require('fs');
 const fsp = require('fs/promises');
 const execa = require('execa');
 const chalk = require('chalk');
 const path = require('path');
+const Rx = require('rxjs');
 const { Client } = require('@elastic/elasticsearch');
 const { downloadSnapshot, installSnapshot, installSource, installArchive } = require('./install');
 const { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } = require('./paths');
@@ -315,6 +317,7 @@ exports.Cluster = class Cluster {
       startTime,
       skipReadyCheck,
       readyTimeout,
+      writeLogsToPath,
       ...options
     } = opts;
 
@@ -322,7 +325,19 @@ exports.Cluster = class Cluster {
       throw new Error('ES has already been started');
     }
 
-    this._log.info(chalk.bold('Starting'));
+    /** @type {NodeJS.WritableStream | undefined} */
+    let stdioTarget;
+
+    if (writeLogsToPath) {
+      stdioTarget = fs.createWriteStream(writeLogsToPath, 'utf8');
+      this._log.info(
+        chalk.bold('Starting'),
+        `and writing logs to ${path.relative(process.cwd(), writeLogsToPath)}`
+      );
+    } else {
+      this._log.info(chalk.bold('Starting'));
+    }
+
     this._log.indent(4);
 
     const esArgs = new Map([
@@ -428,7 +443,8 @@ exports.Cluster = class Cluster {
     let reportSent = false;
     // parse and forward es stdout to the log
     this._process.stdout.on('data', (data) => {
-      const lines = parseEsLog(data.toString());
+      const chunk = data.toString();
+      const lines = parseEsLog(chunk);
       lines.forEach((line) => {
         if (!reportSent && line.message.includes('publish_address')) {
           reportSent = true;
@@ -436,12 +452,36 @@ exports.Cluster = class Cluster {
             success: true,
           });
         }
-        this._log.info(line.formattedMessage);
+
+        if (stdioTarget) {
+          stdioTarget.write(chunk);
+        } else {
+          this._log.info(line.formattedMessage);
+        }
       });
     });
 
     // forward es stderr to the log
-    this._process.stderr.on('data', (data) => this._log.error(chalk.red(data.toString())));
+    this._process.stderr.on('data', (data) => {
+      const chunk = data.toString();
+      if (stdioTarget) {
+        stdioTarget.write(chunk);
+      } else {
+        this._log.error(chalk.red());
+      }
+    });
+
+    // close the stdio target if we have one defined
+    if (stdioTarget) {
+      Rx.combineLatest([
+        Rx.fromEvent(this._process.stderr, 'end'),
+        Rx.fromEvent(this._process.stdout, 'end'),
+      ])
+        .pipe(Rx.first())
+        .subscribe(() => {
+          stdioTarget.end();
+        });
+    }
 
     // observe the exit code of the process and reflect in _outcome promies
     const exitCode = new Promise((resolve) => this._process.once('exit', resolve));

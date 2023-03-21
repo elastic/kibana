@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESFilter } from '@kbn/core/types/elasticsearch';
+import type { ESFilter } from '@kbn/es-types';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import {
   uxLocalUIFilterNames,

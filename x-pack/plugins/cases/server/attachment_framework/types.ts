@@ -6,7 +6,7 @@
  */
 
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import { CommentRequestPersistableStateType } from '../../common/api';
+import type { CommentRequestPersistableStateType } from '../../common/api';
 
 export type PersistableStateAttachmentState = Pick<
   CommentRequestPersistableStateType,
@@ -25,6 +25,11 @@ export interface PersistableStateAttachmentTypeSetup
 
 export interface ExternalReferenceAttachmentType {
   id: string;
+  /**
+   * A function to validate data stored with the attachment type. This function should throw an error
+   * if the data is not in the form it expects.
+   */
+  schemaValidator?: (data: unknown) => void;
 }
 
 export interface AttachmentFramework {

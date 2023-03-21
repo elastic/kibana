@@ -31,6 +31,10 @@ jest.mock('./queries/task_claiming', () => {
   };
 });
 
+jest.mock('./constants', () => ({
+  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report', 'quickReport'],
+}));
+
 describe('TaskPollingLifecycle', () => {
   let clock: sinon.SinonFakeTimers;
   const taskManagerLogger = mockLogger();
@@ -48,6 +52,7 @@ describe('TaskPollingLifecycle', () => {
       monitored_aggregated_stats_refresh_rate: 5000,
       monitored_stats_health_verbose_log: {
         enabled: false,
+        level: 'debug' as const,
         warn_delayed_task_start_in_seconds: 60,
       },
       monitored_stats_required_freshness: 5000,
@@ -206,9 +211,7 @@ describe('TaskPollingLifecycle', () => {
         )
       );
 
-      expect(
-        isOk(await getFirstAsPromise(claimAvailableTasks([], taskClaiming, logger)))
-      ).toBeTruthy();
+      expect(isOk(await getFirstAsPromise(claimAvailableTasks(taskClaiming, logger)))).toBeTruthy();
 
       expect(taskClaiming.claimAvailableTasksIfCapacityIsAvailable).toHaveBeenCalledTimes(1);
     });
@@ -266,7 +269,7 @@ describe('TaskPollingLifecycle', () => {
           })
       );
 
-      const err = await getFirstAsPromise(claimAvailableTasks([], taskClaiming, logger));
+      const err = await getFirstAsPromise(claimAvailableTasks(taskClaiming, logger));
 
       expect(isErr(err)).toBeTruthy();
       expect((err as Err<FillPoolResult>).error).toEqual(FillPoolResult.Failed);

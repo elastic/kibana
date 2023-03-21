@@ -6,8 +6,11 @@
  */
 
 import * as React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiErrorBoundary } from '@elastic/eui';
+import { getAlertsSingleMetricConfig } from './configurations/alerts_configs/single_metric_config';
+import { getAlertsKPIConfig } from './configurations/alerts_configs/kpi_over_time_config';
+import { DataTypes, DataTypesLabels } from './labels';
+import { getSyntheticsHeatmapConfig } from './configurations/synthetics/heatmap_config';
 import { getSyntheticsSingleMetricConfig } from './configurations/synthetics/single_metric_config';
 import { ExploratoryViewPage } from '.';
 import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
@@ -16,12 +19,12 @@ import { AppDataType, ReportViewType } from './types';
 import {
   CORE_WEB_VITALS_LABEL,
   DEVICE_DISTRIBUTION_LABEL,
+  HEATMAP_LABEL,
   KPI_OVER_TIME_LABEL,
   PERF_DIST_LABEL,
   SINGLE_METRIC_LABEL,
 } from './configurations/constants/labels';
 import { SELECT_REPORT_TYPE } from './series_editor/series_editor';
-import { DataTypes } from './configurations/constants';
 import { getRumDistributionConfig } from './configurations/rum/data_distribution_config';
 import { getKPITrendsLensConfig } from './configurations/rum/kpi_over_time_config';
 import { getCoreWebVitalsConfig } from './configurations/rum/core_web_vitals_config';
@@ -34,33 +37,6 @@ import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { getLogsKPIConfig } from './configurations/infra_logs/kpi_over_time_config';
 import { getSingleMetricConfig } from './configurations/rum/single_metric_config';
 
-export const DataTypesLabels = {
-  [DataTypes.UX]: i18n.translate('xpack.observability.overview.exploratoryView.uxLabel', {
-    defaultMessage: 'User experience (RUM)',
-  }),
-
-  [DataTypes.SYNTHETICS]: i18n.translate(
-    'xpack.observability.overview.exploratoryView.syntheticsLabel',
-    {
-      defaultMessage: 'Synthetics monitoring',
-    }
-  ),
-
-  [DataTypes.METRICS]: i18n.translate('xpack.observability.overview.exploratoryView.metricsLabel', {
-    defaultMessage: 'Metrics',
-  }),
-
-  [DataTypes.LOGS]: i18n.translate('xpack.observability.overview.exploratoryView.logsLabel', {
-    defaultMessage: 'Logs',
-  }),
-
-  [DataTypes.MOBILE]: i18n.translate(
-    'xpack.observability.overview.exploratoryView.mobileExperienceLabel',
-    {
-      defaultMessage: 'Mobile experience',
-    }
-  ),
-};
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   {
     id: DataTypes.SYNTHETICS,
@@ -78,6 +54,10 @@ export const dataTypes: Array<{ id: AppDataType; label: string }> = [
     id: DataTypes.MOBILE,
     label: DataTypesLabels[DataTypes.MOBILE],
   },
+  {
+    id: DataTypes.ALERTS,
+    label: DataTypesLabels[DataTypes.ALERTS],
+  },
 ];
 
 export const reportTypesList: Array<{
@@ -89,6 +69,7 @@ export const reportTypesList: Array<{
   { reportType: 'core-web-vitals', label: CORE_WEB_VITALS_LABEL },
   { reportType: 'device-data-distribution', label: DEVICE_DISTRIBUTION_LABEL },
   { reportType: 'single-metric', label: SINGLE_METRIC_LABEL },
+  { reportType: 'heatmap', label: HEATMAP_LABEL },
 ];
 
 export const obsvReportConfigMap = {
@@ -102,6 +83,7 @@ export const obsvReportConfigMap = {
     getSyntheticsKPIConfig,
     getSyntheticsDistributionConfig,
     getSyntheticsSingleMetricConfig,
+    getSyntheticsHeatmapConfig,
   ],
   [DataTypes.MOBILE]: [
     getMobileKPIConfig,
@@ -109,6 +91,7 @@ export const obsvReportConfigMap = {
     getMobileDeviceDistributionConfig,
   ],
   [DataTypes.LOGS]: [getLogsKPIConfig],
+  [DataTypes.ALERTS]: [getAlertsKPIConfig, getAlertsSingleMetricConfig],
 };
 
 export function ObservabilityExploratoryView() {
@@ -118,7 +101,6 @@ export function ObservabilityExploratoryView() {
       <ExploratoryViewContextProvider
         reportTypes={reportTypesList}
         dataTypes={dataTypes}
-        dataViews={{}}
         reportConfigMap={obsvReportConfigMap}
         setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
         theme$={appMountParameters.theme$}

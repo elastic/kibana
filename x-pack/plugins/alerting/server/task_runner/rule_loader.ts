@@ -6,9 +6,8 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
-import type { Request } from '@hapi/hapi';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import { CoreKibanaRequest } from '@kbn/core/server';
+import { CoreKibanaRequest, FakeRawRequest, Headers } from '@kbn/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -17,6 +16,7 @@ import {
   RuleTypeRegistry,
   RuleTypeParamsValidator,
   SanitizedRule,
+  RulesClientApi,
 } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
@@ -35,11 +35,17 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
     params;
   let enabled: boolean;
   let apiKey: string | null;
+  let rule: SanitizedRule<Params>;
+  let fakeRequest: CoreKibanaRequest;
+  let rulesClient: RulesClientApi;
 
   try {
-    const decryptedAttributes = await getDecryptedAttributes(context, ruleId, spaceId);
-    apiKey = decryptedAttributes.apiKey;
-    enabled = decryptedAttributes.enabled;
+    const attributes = await getRuleAttributes<Params>(context, ruleId, spaceId);
+    apiKey = attributes.apiKey;
+    enabled = attributes.enabled;
+    rule = attributes.rule;
+    fakeRequest = attributes.fakeRequest;
+    rulesClient = attributes.rulesClient;
   } catch (err) {
     throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
   }
@@ -49,18 +55,6 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
       RuleExecutionStatusErrorReasons.Disabled,
       new Error(`Rule failed to execute because rule ran after it was disabled.`)
     );
-  }
-
-  const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey);
-  const rulesClient = context.getRulesClientWithRequest(fakeRequest);
-
-  let rule: SanitizedRule<Params>;
-
-  // Ensure API key is still valid and user has access
-  try {
-    rule = await rulesClient.get<Params>({ id: ruleId });
-  } catch (err) {
-    throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Read, err);
   }
 
   alertingEventLogger.setRuleName(rule.name);
@@ -79,9 +73,9 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
   }
 
   if (rule.monitoring) {
-    if (rule.monitoring.execution.history.length >= MONITORING_HISTORY_LIMIT) {
+    if (rule.monitoring.run.history.length >= MONITORING_HISTORY_LIMIT) {
       // Remove the first (oldest) record
-      rule.monitoring.execution.history.shift();
+      rule.monitoring.run.history.shift();
     }
   }
 
@@ -94,24 +88,44 @@ export async function loadRule<Params extends RuleTypeParams>(params: LoadRulePa
   };
 }
 
-export async function getDecryptedAttributes(
+export async function getRuleAttributes<Params extends RuleTypeParams>(
   context: TaskRunnerContext,
   ruleId: string,
   spaceId: string
-): Promise<{ apiKey: string | null; enabled: boolean; consumer: string }> {
+): Promise<{
+  apiKey: string | null;
+  enabled: boolean;
+  consumer: string;
+  rule: SanitizedRule<Params>;
+  fakeRequest: CoreKibanaRequest;
+  rulesClient: RulesClientApi;
+}> {
   const namespace = context.spaceIdToNamespace(spaceId);
 
-  // Only fetch encrypted attributes here, we'll create a saved objects client
-  // scoped with the API key to fetch the remaining data.
-  const {
-    attributes: { apiKey, enabled, consumer },
-  } = await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+  const rawRule = await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
     'alert',
     ruleId,
     { namespace }
   );
 
-  return { apiKey, enabled, consumer };
+  const fakeRequest = getFakeKibanaRequest(context, spaceId, rawRule.attributes.apiKey);
+  const rulesClient = context.getRulesClientWithRequest(fakeRequest);
+  const rule = rulesClient.getAlertFromRaw({
+    id: ruleId,
+    ruleTypeId: rawRule.attributes.alertTypeId as string,
+    rawRule: rawRule.attributes as RawRule,
+    references: rawRule.references,
+    includeLegacyId: false,
+  });
+
+  return {
+    rule,
+    apiKey: rawRule.attributes.apiKey,
+    enabled: rawRule.attributes.enabled,
+    consumer: rawRule.attributes.consumer,
+    fakeRequest,
+    rulesClient,
+  };
 }
 
 export function getFakeKibanaRequest(
@@ -119,7 +133,7 @@ export function getFakeKibanaRequest(
   spaceId: string,
   apiKey: RawRule['apiKey']
 ) {
-  const requestHeaders: Record<string, string> = {};
+  const requestHeaders: Headers = {};
 
   if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
@@ -127,20 +141,12 @@ export function getFakeKibanaRequest(
 
   const path = addSpaceIdToPath('/', spaceId);
 
-  const fakeRequest = CoreKibanaRequest.from({
+  const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
     path: '/',
-    route: { settings: {} },
-    url: {
-      href: '/',
-    },
-    raw: {
-      req: {
-        url: '/',
-      },
-    },
-  } as unknown as Request);
+  };
 
+  const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
   context.basePathService.set(fakeRequest, path);
 
   return fakeRequest;

@@ -16,7 +16,7 @@ import { ComponentProps } from '../../route_init';
 import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import {
@@ -34,7 +34,7 @@ export const ElasticsearchNodesPage: React.FC<ComponentProps> = ({ clusters }) =
   const { showCgroupMetricsElasticsearch } = useContext(ExternalConfigContext);
   const { services } = useKibana<{ data: any }>();
   const [isLoading, setIsLoading] = React.useState(false);
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const { getPaginationRouteOptions, updateTotalItemCount, getPaginationTableProps } =
     useTable('elasticsearch.nodes');
   const clusterUuid = globalState.cluster_uuid;

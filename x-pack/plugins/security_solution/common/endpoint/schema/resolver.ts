@@ -24,10 +24,12 @@ export const validateTree = {
     descendants: schema.number({ defaultValue: 1000, min: 0, max: 10000 }),
     // if the ancestry array isn't specified allowing 200 might be too high
     ancestors: schema.number({ defaultValue: 200, min: 0, max: 10000 }),
-    timeRange: schema.object({
-      from: schema.string(),
-      to: schema.string(),
-    }),
+    timeRange: schema.maybe(
+      schema.object({
+        from: schema.string(),
+        to: schema.string(),
+      })
+    ),
     schema: schema.object({
       // the ancestry field is optional
       ancestry: schema.maybe(schema.string({ minLength: 1 })),
@@ -42,6 +44,7 @@ export const validateTree = {
       minSize: 1,
     }),
     indexPatterns: schema.arrayOf(schema.string(), { minSize: 1 }),
+    includeHits: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -55,12 +58,16 @@ export const validateEvents = {
     afterEvent: schema.maybe(schema.string()),
   }),
   body: schema.object({
-    timeRange: schema.object({
-      from: schema.string(),
-      to: schema.string(),
-    }),
+    timeRange: schema.maybe(
+      schema.object({
+        from: schema.string(),
+        to: schema.string(),
+      })
+    ),
     indexPatterns: schema.arrayOf(schema.string()),
     filter: schema.maybe(schema.string()),
+    entityType: schema.maybe(schema.string()),
+    eventID: schema.maybe(schema.string()),
   }),
 };
 

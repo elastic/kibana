@@ -120,17 +120,15 @@ describe('Initializing the store', () => {
       datasource1State,
       [],
       undefined,
-      {
-        isFullEditor: true,
-      }
+      [],
+      {}
     );
     expect(datasourceMap.testDatasource2.initialize).toHaveBeenCalledWith(
       datasource2State,
       [],
       undefined,
-      {
-        isFullEditor: true,
-      }
+      [],
+      {}
     );
     expect(datasourceMap.testDatasource3.initialize).not.toHaveBeenCalled();
     expect(store.getState()).toMatchSnapshot();
@@ -311,7 +309,7 @@ describe('Initializing the store', () => {
       expect(deps.lensServices.attributeService.unwrapAttributes).toHaveBeenCalledWith({
         savedObjectId: defaultSavedObjectId,
       });
-      expect(deps.lensServices.spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith({
+      expect(deps.lensServices.spaces?.ui.redirectLegacyUrl).toHaveBeenCalledWith({
         path: '#/edit/id2?search',
         aliasPurpose: 'savedObjectConversion',
         objectNoun: 'Lens visualization',

@@ -8,43 +8,47 @@
 
 const path = require('path');
 
-const createLangWorkerConfig = (lang) => {
-  const entry =
-    lang === 'default'
-      ? 'monaco-editor/esm/vs/editor/editor.worker.js'
-      : path.resolve(__dirname, 'src', lang, 'worker', `${lang}.worker.ts`);
-
-  return {
-    mode: 'production',
-    entry,
-    output: {
-      path: path.resolve(__dirname, 'target_workers'),
-      filename: `${lang}.editor.worker.js`,
-    },
-    resolve: {
-      extensions: ['.js', '.ts', '.tsx'],
-    },
-    stats: 'errors-only',
-    module: {
-      rules: [
-        {
-          test: /\.(js|ts)$/,
-          exclude: /node_modules/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-            },
-          },
-        },
-      ],
-    },
-  };
+const getWorkerEntry = (language) => {
+  switch (language) {
+    case 'default':
+      return 'monaco-editor/esm/vs/editor/editor.worker.js';
+    case 'json':
+      return 'monaco-editor/esm/vs/language/json/json.worker.js';
+    case 'yaml':
+      return 'monaco-yaml/lib/esm/yaml.worker.js';
+    default:
+      return path.resolve(__dirname, 'src', language, 'worker', `${language}.worker.ts`);
+  }
 };
 
-module.exports = [
-  createLangWorkerConfig('xjson'),
-  createLangWorkerConfig('painless'),
-  createLangWorkerConfig('default'),
-];
+const getWorkerConfig = (language) => ({
+  mode: process.env.NODE_ENV || 'development',
+  entry: getWorkerEntry(language),
+  devtool: process.env.NODE_ENV === 'production' ? false : '#cheap-source-map',
+  output: {
+    path: path.resolve(__dirname, 'target_workers'),
+    filename: `${language}.editor.worker.js`,
+  },
+  resolve: {
+    extensions: ['.js', '.ts', '.tsx'],
+  },
+  stats: 'errors-only',
+  module: {
+    rules: [
+      {
+        test: /\.(jsx?|tsx?)$/,
+        exclude: /node_modules(?!\/@kbn\/)(\/[^\/]+\/)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            envName: process.env.NODE_ENV || 'development',
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+          },
+        },
+      },
+    ],
+  },
+});
+
+module.exports = ['default', 'json', 'painless', 'xjson', 'esql', 'yaml'].map(getWorkerConfig);

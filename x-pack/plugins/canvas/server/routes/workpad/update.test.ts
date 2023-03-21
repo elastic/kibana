@@ -9,7 +9,7 @@ import { AwaitedProperties } from '@kbn/utility-types';
 import sinon from 'sinon';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateWorkpadRoute, initializeUpdateWorkpadAssetsRoute } from './update';
-import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory, RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { workpads } from '../../../__fixtures__/workpads';
 import { okResponse } from '../ok_response';
@@ -28,7 +28,9 @@ const mockRouteContext = {
 const workpad = workpads[0];
 const now = new Date();
 
-jest.mock('uuid/v4', () => jest.fn().mockReturnValue('123abc'));
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('123abc'),
+}));
 
 describe('PUT workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -85,9 +87,7 @@ describe('PUT workpad', () => {
     });
 
     mockRouteContext.canvas.workpad.update.mockImplementationOnce(() => {
-      throw mockRouteContext.core.savedObjects.client.errors.createGenericNotFoundError(
-        'not found'
-      );
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError('not found');
     });
 
     const response = await routeHandler(
@@ -110,7 +110,7 @@ describe('PUT workpad', () => {
     });
 
     mockRouteContext.canvas.workpad.update.mockImplementationOnce(() => {
-      throw mockRouteContext.core.savedObjects.client.errors.createBadRequestError('bad request');
+      throw SavedObjectsErrorHelpers.createBadRequestError('bad request');
     });
 
     const response = await routeHandler(

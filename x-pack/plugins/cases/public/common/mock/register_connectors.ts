@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
-import { CaseActionConnector } from '../../../common/ui/types';
+import type { CaseActionConnector } from '../../../common/ui/types';
 
 const getUniqueActionTypeIds = (connectors: CaseActionConnector[]) =>
   new Set(connectors.map((connector) => connector.actionTypeId));

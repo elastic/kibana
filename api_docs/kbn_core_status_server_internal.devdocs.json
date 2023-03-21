@@ -1,0 +1,560 @@
+{
+  "id": "@kbn/core-status-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-status-server-internal",
+        "id": "def-common.StatusService",
+        "type": "Class",
+        "tags": [],
+        "label": "StatusService",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-status-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreStatusServerInternalPluginApi",
+            "section": "def-common.StatusService",
+            "text": "StatusService"
+          },
+          " implements ",
+          "CoreService",
+          "<",
+          "InternalStatusServiceSetup",
+          ", void>"
+        ],
+        "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.StatusService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-status-server-internal",
+                "id": "def-common.StatusService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "coreContext",
+                "description": [],
+                "signature": [
+                  "CoreContext"
+                ],
+                "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.StatusService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "({ analytics, elasticsearch, pluginDependencies, http, metrics, savedObjects, environment, coreUsageData, }: ",
+              {
+                "pluginId": "@kbn/core-status-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusServerInternalPluginApi",
+                "section": "def-common.StatusServiceSetupDeps",
+                "text": "StatusServiceSetupDeps"
+              },
+              ") => Promise<{ core$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.CoreStatus",
+                "text": "CoreStatus"
+              },
+              ">; coreOverall$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.ServiceStatus",
+                "text": "ServiceStatus"
+              },
+              "<unknown>>; overall$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.ServiceStatus",
+                "text": "ServiceStatus"
+              },
+              "<unknown>>; plugins: { set: (plugin: string, status$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.ServiceStatus",
+                "text": "ServiceStatus"
+              },
+              "<unknown>>) => void; getDependenciesStatus$: (plugin: string) => ",
+              "Observable",
+              "<Record<string, ",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.ServiceStatus",
+                "text": "ServiceStatus"
+              },
+              "<unknown>>>; getDerivedStatus$: (plugin: string) => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.ServiceStatus",
+                "text": "ServiceStatus"
+              },
+              "<unknown>>; }; isStatusPageAnonymous: () => boolean; }>"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-status-server-internal",
+                "id": "def-common.StatusService.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    analytics,\n    elasticsearch,\n    pluginDependencies,\n    http,\n    metrics,\n    savedObjects,\n    environment,\n    coreUsageData,\n  }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-status-server-internal",
+                    "scope": "common",
+                    "docId": "kibKbnCoreStatusServerInternalPluginApi",
+                    "section": "def-common.StatusServiceSetupDeps",
+                    "text": "StatusServiceSetupDeps"
+                  }
+                ],
+                "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.StatusService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.StatusService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-status-server-internal",
+        "id": "def-common.registerStatusRoute",
+        "type": "Function",
+        "tags": [],
+        "label": "registerStatusRoute",
+        "description": [],
+        "signature": [
+          "({ router, config, metrics, status, incrementUsageCounter, }: Deps) => void"
+        ],
+        "path": "packages/core/status/core-status-server-internal/src/routes/status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.registerStatusRoute.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  router,\n  config,\n  metrics,\n  status,\n  incrementUsageCounter,\n}",
+            "description": [],
+            "signature": [
+              "Deps"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/routes/status.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-status-server-internal",
+        "id": "def-common.StatusServiceSetupDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "StatusServiceSetupDeps",
+        "description": [],
+        "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.StatusServiceSetupDeps.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [],
+            "signature": [
+              "{ optIn: (optInConfig: ",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.OptInConfig",
+                "text": "OptInConfig"
+              },
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.TelemetryCounter",
+                "text": "TelemetryCounter"
+              },
+              ">; registerEventType: <EventTypeData>(eventTypeOps: ",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.EventTypeOpts",
+                "text": "EventTypeOpts"
+              },
+              "<EventTypeData>) => void; registerShipper: <Shipper extends ",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.IShipper",
+                "text": "IShipper"
+              },
+              ", ShipperConfig>(Shipper: ",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.ShipperClassConstructor",
+                "text": "ShipperClassConstructor"
+              },
+              "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.RegisterShipperOpts",
+                "text": "RegisterShipperOpts"
+              },
+              " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
+              {
+                "pluginId": "@kbn/analytics-client",
+                "scope": "common",
+                "docId": "kibKbnAnalyticsClientPluginApi",
+                "section": "def-common.ContextProviderOpts",
+                "text": "ContextProviderOpts"
+              },
+              "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.StatusServiceSetupDeps.elasticsearch",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch",
+            "description": [],
+            "signature": [
+              "{ status$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.ServiceStatus",
+                "text": "ServiceStatus"
+              },
+              "<",
+              "ElasticsearchStatusMeta",
+              ">>; }"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.StatusServiceSetupDeps.environment",
+            "type": "Object",
+            "tags": [],
+            "label": "environment",
+            "description": [],
+            "signature": [
+              "InternalEnvironmentServicePreboot"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.StatusServiceSetupDeps.pluginDependencies",
+            "type": "Object",
+            "tags": [],
+            "label": "pluginDependencies",
+            "description": [],
+            "signature": [
+              "ReadonlyMap<string, string[]>"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.StatusServiceSetupDeps.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "InternalHttpServiceSetup"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.StatusServiceSetupDeps.metrics",
+            "type": "Object",
+            "tags": [],
+            "label": "metrics",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "common",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-common.MetricsServiceSetup",
+                "text": "MetricsServiceSetup"
+              }
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.StatusServiceSetupDeps.savedObjects",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjects",
+            "description": [],
+            "signature": [
+              "{ status$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.ServiceStatus",
+                "text": "ServiceStatus"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectStatusMeta",
+                "text": "SavedObjectStatusMeta"
+              },
+              ">>; }"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.StatusServiceSetupDeps.coreUsageData",
+            "type": "Object",
+            "tags": [],
+            "label": "coreUsageData",
+            "description": [],
+            "signature": [
+              "{ incrementUsageCounter: ",
+              {
+                "pluginId": "@kbn/core-usage-data-server",
+                "scope": "common",
+                "docId": "kibKbnCoreUsageDataServerPluginApi",
+                "section": "def-common.CoreIncrementUsageCounter",
+                "text": "CoreIncrementUsageCounter"
+              },
+              "; }"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-status-server-internal",
+        "id": "def-common.StatusConfigType",
+        "type": "Type",
+        "tags": [],
+        "label": "StatusConfigType",
+        "description": [],
+        "signature": [
+          "{ readonly allowAnonymous: boolean; }"
+        ],
+        "path": "packages/core/status/core-status-server-internal/src/status_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-status-server-internal",
+        "id": "def-common.statusConfig",
+        "type": "Object",
+        "tags": [],
+        "label": "statusConfig",
+        "description": [],
+        "path": "packages/core/status/core-status-server-internal/src/status_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.statusConfig.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "packages/core/status/core-status-server-internal/src/status_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-common.statusConfig.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ObjectType",
+                "text": "ObjectType"
+              },
+              "<{ allowAnonymous: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<boolean>; }>"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

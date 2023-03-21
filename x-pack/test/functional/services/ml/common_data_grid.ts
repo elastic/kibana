@@ -43,10 +43,10 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
         .toArray()
         .map((cell) => {
           const cellText = $(cell).text();
-          const pattern = /^(.*)Row: (\d+); Column: (\d+)$/;
+          const pattern = /^(.*)-(?:.*), column (\d+), row (\d+)$/;
           const matches = cellText.match(pattern);
           expect(matches).to.not.eql(null, `Cell text should match pattern '${pattern}'`);
-          return { text: matches![1], row: Number(matches![2]), column: Number(matches![3]) };
+          return { text: matches![1], column: Number(matches![2]), row: Number(matches![3]) };
         })
         .filter((cell) =>
           maxColumnsToParse !== undefined ? cell?.column <= maxColumnsToParse : false
@@ -218,6 +218,21 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
         // Close popover
         await browser.pressKeys(browser.keys.ESCAPE);
       });
+    },
+
+    async assertActivePage(tableSubj: string, expectedPage: number) {
+      const table = await testSubjects.find(tableSubj);
+      const pagination = await table.findByClassName('euiPagination__list');
+      const activePage = await pagination.findByCssSelector(
+        '.euiPaginationButton[aria-current] .euiButtonEmpty__text'
+      );
+      const text = await activePage.getVisibleText();
+      expect(text).to.eql(expectedPage);
+    },
+
+    async selectPage(tableSubj: string, page: number) {
+      await testSubjects.click(`${tableSubj} > pagination-button-${page - 1}`);
+      await this.assertActivePage(tableSubj, page);
     },
   };
 }

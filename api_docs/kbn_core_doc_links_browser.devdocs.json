@@ -29,6 +29,7 @@
         "description": [],
         "path": "packages/core/doc-links/core-doc-links-browser/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-doc-links-browser",
@@ -38,7 +39,8 @@
             "label": "DOC_LINK_VERSION",
             "description": [],
             "path": "packages/core/doc-links/core-doc-links-browser/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-doc-links-browser",
@@ -48,7 +50,8 @@
             "label": "ELASTIC_WEBSITE_URL",
             "description": [],
             "path": "packages/core/doc-links/core-doc-links-browser/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-doc-links-browser",
@@ -58,10 +61,17 @@
             "label": "links",
             "description": [],
             "signature": [
-              "DocLinks"
+              {
+                "pluginId": "@kbn/doc-links",
+                "scope": "common",
+                "docId": "kibKbnDocLinksPluginApi",
+                "section": "def-common.DocLinks",
+                "text": "DocLinks"
+              }
             ],
             "path": "packages/core/doc-links/core-doc-links-browser/src/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -7,17 +7,11 @@
  */
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import { EXPRESSION_HEATMAP_LEGEND_NAME } from '../constants';
-import { HeatmapLegendConfig, HeatmapLegendConfigResult } from '../types';
+import { HeatmapLegendExpressionFunctionDefinition } from '../types';
 
-export const heatmapLegendConfig: ExpressionFunctionDefinition<
-  typeof EXPRESSION_HEATMAP_LEGEND_NAME,
-  null,
-  HeatmapLegendConfig,
-  HeatmapLegendConfigResult
-> = {
+export const heatmapLegendConfig: HeatmapLegendExpressionFunctionDefinition = {
   name: EXPRESSION_HEATMAP_LEGEND_NAME,
   aliases: [],
   type: EXPRESSION_HEATMAP_LEGEND_NAME,

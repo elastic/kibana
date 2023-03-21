@@ -21,6 +21,13 @@ export const DASHBOARDS_PAGE_TITLE = i18n.translate(
   }
 );
 
+export const DASHBOARDS_PAGE_CREATE_BUTTON = i18n.translate(
+  'xpack.securitySolution.landing.dashboards.createButton',
+  {
+    defaultMessage: 'Create Dashboard',
+  }
+);
+
 export const DASHBOARDS_PAGE_SECTION_DEFAULT = i18n.translate(
   'xpack.securitySolution.landing.dashboards.section.default',
   {

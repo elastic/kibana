@@ -14,9 +14,12 @@ import path from 'path';
 const STORYBOOKS = [
   'apm',
   'canvas',
+  'cases',
   'ci_composite',
-  'cloud',
+  'cloud_chat',
   'coloring',
+  'chart_icons',
+  'content_management_examples',
   'controls',
   'custom_integrations',
   'dashboard_enhanced',
@@ -39,7 +42,9 @@ const STORYBOOKS = [
   'presentation',
   'security_solution',
   'shared_ux',
+  'triggers_actions_ui',
   'ui_actions_enhanced',
+  'language_documentation_popover',
   'unified_search',
 ];
 

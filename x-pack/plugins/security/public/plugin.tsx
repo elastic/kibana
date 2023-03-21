@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type {
   CoreSetup,
   CoreStart,
@@ -28,6 +29,7 @@ import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
+import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
 import type { SecurityNavControlServiceStart } from './nav_control';
@@ -42,6 +44,7 @@ export interface PluginSetupDependencies {
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
   share?: SharePluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginStartDependencies {
@@ -50,6 +53,7 @@ export interface PluginStartDependencies {
   management?: ManagementStart;
   spaces?: SpacesPluginStart;
   share?: SharePluginStart;
+  cloud?: CloudStart;
 }
 
 export class SecurityPlugin
@@ -71,6 +75,7 @@ export class SecurityPlugin
   private readonly anonymousAccessService = new AnonymousAccessService();
   private readonly analyticsService = new AnalyticsService();
   private authc!: AuthenticationServiceSetup;
+  private securityApiClients!: SecurityApiClients;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
@@ -79,7 +84,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
-    { home, licensing, management, share }: PluginSetupDependencies
+    { cloud, home, licensing, management, share }: PluginSetupDependencies
   ): SecurityPluginSetup {
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
 
@@ -93,7 +98,7 @@ export class SecurityPlugin
       http: core.http,
     });
 
-    const securityApiClients = {
+    this.securityApiClients = {
       userProfiles: new UserProfileAPIClient(core.http),
       users: new UserAPIClient(core.http),
     };
@@ -101,16 +106,22 @@ export class SecurityPlugin
     this.navControlService.setup({
       securityLicense: license,
       logoutUrl: getLogoutUrl(core.http),
-      securityApiClients,
+      securityApiClients: this.securityApiClients,
     });
 
-    this.analyticsService.setup({ securityLicense: license });
+    this.analyticsService.setup({
+      analytics: core.analytics,
+      authc: this.authc,
+      cloudId: cloud?.cloudId,
+      http: core.http,
+      securityLicense: license,
+    });
 
     accountManagementApp.create({
       authc: this.authc,
       application: core.application,
       getStartServices: core.getStartServices,
-      securityApiClients,
+      securityApiClients: this.securityApiClients,
     });
 
     if (management) {
@@ -181,6 +192,17 @@ export class SecurityPlugin
       uiApi: getUiApi({ core }),
       navControlService: this.navControlService.start({ core, authc: this.authc }),
       authc: this.authc as AuthenticationServiceStart,
+      userProfiles: {
+        getCurrent: this.securityApiClients.userProfiles.getCurrent.bind(
+          this.securityApiClients.userProfiles
+        ),
+        bulkGet: this.securityApiClients.userProfiles.bulkGet.bind(
+          this.securityApiClients.userProfiles
+        ),
+        suggest: this.securityApiClients.userProfiles.suggest.bind(
+          this.securityApiClients.userProfiles
+        ),
+      },
     };
   }
 
@@ -217,6 +239,11 @@ export interface SecurityPluginStart {
    * Exposes authentication information about the currently logged in user.
    */
   authc: AuthenticationServiceStart;
+  /**
+   * A set of methods to work with Kibana user profiles.
+   */
+  userProfiles: Pick<UserProfileAPIClient, 'getCurrent' | 'bulkGet' | 'suggest'>;
+
   /**
    * Exposes UI components that will be loaded asynchronously.
    * @deprecated

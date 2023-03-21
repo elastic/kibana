@@ -11,7 +11,7 @@ import { waitFor, render, act } from '@testing-library/react';
 import { AlertSummaryView } from './alert_summary_view';
 import { mockAlertDetailsData } from './__mocks__';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
+import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
 import { TestProviders, TestProvidersComponent } from '../../mock';
 import { TimelineId } from '../../../../common/types';
@@ -20,9 +20,27 @@ import * as i18n from './translations';
 
 jest.mock('../../lib/kibana');
 
-jest.mock('../../../detections/containers/detection_engine/rules/use_rule_with_fallback', () => {
+jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => {
   return {
     useRuleWithFallback: jest.fn(),
+  };
+});
+
+jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => {
+  return {
+    useRuleWithFallback: jest.fn(),
+  };
+});
+
+jest.mock('@kbn/cell-actions/src/hooks/use_load_actions', () => {
+  const actual = jest.requireActual('@kbn/cell-actions/src/hooks/use_load_actions');
+  return {
+    ...actual,
+    useLoadActions: jest.fn().mockImplementation(() => ({
+      value: [],
+      error: undefined,
+      loading: false,
+    })),
   };
 });
 
@@ -30,7 +48,7 @@ const props = {
   data: mockAlertDetailsData as TimelineEventsDetailsItem[],
   browserFields: mockBrowserFields,
   eventId: '5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31',
-  timelineId: 'detections-page',
+  scopeId: 'alerts-page',
   title: '',
   goToTable: jest.fn(),
 };
@@ -62,7 +80,8 @@ describe('AlertSummaryView', () => {
           <AlertSummaryView {...props} />
         </TestProviders>
       );
-      expect(getAllByTestId('hover-actions-filter-for').length).toBeGreaterThan(0);
+
+      expect(getAllByTestId('inlineActions').length).toBeGreaterThan(0);
     });
   });
 
@@ -74,14 +93,7 @@ describe('AlertSummaryView', () => {
         </TestProviders>
       );
 
-      [
-        'host.name',
-        'user.name',
-        i18n.RULE_TYPE,
-        'query',
-        i18n.SOURCE_EVENT_ID,
-        i18n.SESSION_ID,
-      ].forEach((fieldId) => {
+      ['host.name', 'user.name', i18n.RULE_TYPE, 'query', 'rule.name'].forEach((fieldId) => {
         expect(getByText(fieldId));
       });
     });
@@ -91,10 +103,11 @@ describe('AlertSummaryView', () => {
     await act(async () => {
       const { queryAllByTestId } = render(
         <TestProviders>
-          <AlertSummaryView {...props} timelineId={TimelineId.active} />
+          <AlertSummaryView {...props} scopeId={TimelineId.active} />
         </TestProviders>
       );
-      expect(queryAllByTestId('hover-actions-filter-for').length).toEqual(0);
+
+      expect(queryAllByTestId('inlineActions').length).toEqual(0);
     });
   });
 
@@ -105,7 +118,7 @@ describe('AlertSummaryView', () => {
           <AlertSummaryView {...{ ...props, isReadOnly: true }} />
         </TestProviders>
       );
-      expect(queryAllByTestId('hover-actions-filter-for').length).toEqual(0);
+      expect(queryAllByTestId('inlineActions').length).toEqual(0);
     });
   });
 
@@ -569,13 +582,7 @@ describe('AlertSummaryView', () => {
         </TestProvidersComponent>
       );
 
-      [
-        'Threshold Count',
-        'host.name [threshold]',
-        'host.id [threshold]',
-        'Threshold Cardinality',
-        'count(host.name) >= 9001',
-      ].forEach((fieldId) => {
+      ['Event Count', 'Event Cardinality', 'host.name', 'host.id'].forEach((fieldId) => {
         expect(getByText(fieldId));
       });
     });
@@ -637,14 +644,14 @@ describe('AlertSummaryView', () => {
         </TestProvidersComponent>
       );
 
-      ['Threshold Count'].forEach((fieldId) => {
+      ['Event Count'].forEach((fieldId) => {
         expect(getByText(fieldId));
       });
 
       [
         'host.name [threshold]',
         'host.id [threshold]',
-        'Threshold Cardinality',
+        'Event Cardinality',
         'count(host.name) >= 9001',
       ].forEach((fieldText) => {
         expect(() => getByText(fieldText)).toThrow();
@@ -695,6 +702,47 @@ describe('AlertSummaryView', () => {
           expect(() => getByText(fieldText)).toThrow();
         }
       );
+    });
+  });
+
+  test('New terms events have special fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['new_terms'],
+            originalValue: ['new_terms'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.new_terms',
+        values: ['127.0.0.1'],
+        originalValue: ['127.0.0.1'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.rule.parameters.new_terms_fields',
+        values: ['host.ip'],
+        originalValue: ['host.ip'],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    ['New Terms', '127.0.0.1', 'New Terms fields', 'host.ip'].forEach((fieldId) => {
+      expect(getByText(fieldId));
     });
   });
 

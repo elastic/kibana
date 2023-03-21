@@ -8,7 +8,7 @@
 import React from 'react';
 import { StickyProperties } from '.';
 import { shallow } from 'enzyme';
-import { USER_ID, URL_FULL } from '../../../../common/elasticsearch_fieldnames';
+import { USER_ID, URL_FULL } from '../../../../common/es_fields/apm';
 import { mockMoment } from '../../../utils/test_helpers';
 
 describe('StickyProperties', () => {

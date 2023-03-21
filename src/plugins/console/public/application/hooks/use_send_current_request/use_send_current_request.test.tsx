@@ -106,7 +106,9 @@ describe('useSendCurrentRequest', () => {
     (sendRequest as jest.Mock).mockReturnValue(
       [{ request: {} }, { request: {} }] /* two responses to save history */
     );
-    (mockContextValue.services.settings.toJSON as jest.Mock).mockReturnValue({});
+    (mockContextValue.services.settings.toJSON as jest.Mock).mockReturnValue({
+      isHistoryEnabled: true,
+    });
     (mockContextValue.services.history.addToHistory as jest.Mock).mockImplementation(() => {
       // Mock throwing
       throw new Error('cannot save!');

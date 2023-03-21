@@ -8,10 +8,15 @@
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LicenseDashboard, UploadLicense } from './sections';
-import { Switch, Route } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { APP_PERMISSION } from '../../common/constants';
 import { SectionLoading, useExecutionContext } from '../shared_imports';
-import { EuiPageContent, EuiPageBody, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageBody,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
 
 export const App = ({
   hasPermission,

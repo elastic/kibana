@@ -20,6 +20,7 @@ import { useResizeObserver } from '@elastic/eui';
 import { autoScaleWrapperStyle } from './with_auto_scale.styles';
 
 interface AutoScaleParams {
+  autoScaleMetricAlignment?: 'left' | 'center' | 'right';
   minScale?: number;
   containerStyles: CSSProperties;
 }
@@ -83,7 +84,6 @@ export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
     const parentRef = useRef<HTMLDivElement>(null);
     const childrenRef = useRef<HTMLDivElement>(null);
     const parentDimensions = useResizeObserver(parentRef.current);
-
     const scaleFn = useMemo(
       () =>
         throttle(() => {
@@ -120,6 +120,16 @@ export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
           ref={childrenRef}
           style={{
             transform: `scale(${scale || 0})`,
+            ...(parentDimensions.width &&
+            scale &&
+            autoScaleParams?.autoScaleMetricAlignment &&
+            autoScaleParams?.autoScaleMetricAlignment !== 'center'
+              ? {
+                  position: 'relative',
+                  [autoScaleParams.autoScaleMetricAlignment]:
+                    (1 - scale) * parentDimensions.width * scale * -1, // The difference of width after scaled
+                }
+              : {}),
           }}
         >
           <WrappedComponent {...(restProps as T)} />

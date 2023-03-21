@@ -2,18 +2,17 @@
 
 exports[`Transform: Aggregation <PopoverForm /> Minimal initialization 1`] = `
 <EuiForm
-  data-test-subj="transformAggPopoverForm_the-group-by-agg-name"
-  style={
+  css={
     Object {
       "width": "300px",
     }
   }
+  data-test-subj="transformAggPopoverForm_the-group-by-agg-name"
 >
   <EuiFormRow
     describedByIds={Array []}
     display="row"
     error={false}
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     helpText=""
@@ -31,15 +30,16 @@ exports[`Transform: Aggregation <PopoverForm /> Minimal initialization 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="row"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={true}
     labelType="label"
   >
     <EuiButton
+      color="primary"
       data-test-subj="transformApplyAggChanges"
       isDisabled={false}
       onClick={[Function]}
+      size="m"
     >
       Apply
     </EuiButton>

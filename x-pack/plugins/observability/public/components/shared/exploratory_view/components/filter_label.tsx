@@ -14,13 +14,13 @@ import { SeriesUrl } from '../types';
 interface Props {
   field: string;
   label: string;
-  value: string | string[];
+  value: string | Array<string | number>;
   seriesId: number;
   series: SeriesUrl;
   negate: boolean;
   definitionFilter?: boolean;
   dataView: DataView;
-  removeFilter: (field: string, value: string | string[], notVal: boolean) => void;
+  removeFilter: (field: string, value: string | Array<string | number>, notVal: boolean) => void;
 }
 
 export function FilterLabel({

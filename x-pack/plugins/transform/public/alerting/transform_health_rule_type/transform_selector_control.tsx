@@ -7,8 +7,8 @@
 
 import { EuiComboBox, EuiComboBoxProps, EuiFormRow } from '@elastic/eui';
 import React, { FC, useMemo } from 'react';
+import { isDefined } from '@kbn/ml-is-defined';
 import { ALL_TRANSFORMS_SELECTION } from '../../../common/constants';
-import { isDefined } from '../../../common/types/common';
 
 export interface TransformSelectorControlProps {
   label?: string | JSX.Element;

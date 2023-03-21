@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import type { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response/rules_schema';
 import { getSimpleRuleOutput } from './get_simple_rule_output';
+import { RuleWithoutServerGeneratedProperties } from './remove_server_generated_properties';
 
 /**
  * This is the typical output of a simple rule that Kibana will output with all the defaults except
  * for all the server generated properties such as created_by. Useful for testing end to end tests.
  */
-export const getSimpleRuleOutputWithoutRuleId = (ruleId = 'rule-1'): Partial<RulesSchema> => {
+export const getSimpleRuleOutputWithoutRuleId = (
+  ruleId = 'rule-1'
+): Omit<RuleWithoutServerGeneratedProperties, 'rule_id'> => {
   const rule = getSimpleRuleOutput(ruleId);
   const { rule_id: rId, ...ruleWithoutRuleId } = rule;
   return ruleWithoutRuleId;

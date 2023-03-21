@@ -1,0 +1,23 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../typings/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/i18n",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

@@ -44,7 +44,6 @@ import {
   showMultiBucketAnomalyTooltip,
 } from './chart_utils';
 
-import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
 import { CHART_TYPE } from '../explorer/explorer_constants';
 
 timefilter.setTime({
@@ -159,44 +158,24 @@ describe('ML - chart utils', () => {
   });
 
   describe('showMultiBucketAnomalyMarker', () => {
-    test('returns true for points with multiBucketImpact at or above medium impact', () => {
-      expect(showMultiBucketAnomalyMarker({ multiBucketImpact: MULTI_BUCKET_IMPACT.HIGH })).toBe(
-        true
-      );
-      expect(showMultiBucketAnomalyMarker({ multiBucketImpact: MULTI_BUCKET_IMPACT.MEDIUM })).toBe(
-        true
-      );
+    test('returns true for points with isMultiBucketAnomaly=true', () => {
+      expect(showMultiBucketAnomalyMarker({ isMultiBucketAnomaly: true })).toBe(true);
     });
 
     test('returns false for points with multiBucketImpact missing or below medium impact', () => {
       expect(showMultiBucketAnomalyMarker({})).toBe(false);
-      expect(showMultiBucketAnomalyMarker({ multiBucketImpact: MULTI_BUCKET_IMPACT.LOW })).toBe(
-        false
-      );
-      expect(showMultiBucketAnomalyMarker({ multiBucketImpact: MULTI_BUCKET_IMPACT.NONE })).toBe(
-        false
-      );
+      expect(showMultiBucketAnomalyMarker({ isMultiBucketAnomaly: false })).toBe(false);
     });
   });
 
   describe('showMultiBucketAnomalyTooltip', () => {
-    test('returns true for points with multiBucketImpact at or above low impact', () => {
-      expect(showMultiBucketAnomalyTooltip({ multiBucketImpact: MULTI_BUCKET_IMPACT.HIGH })).toBe(
-        true
-      );
-      expect(showMultiBucketAnomalyTooltip({ multiBucketImpact: MULTI_BUCKET_IMPACT.MEDIUM })).toBe(
-        true
-      );
-      expect(showMultiBucketAnomalyTooltip({ multiBucketImpact: MULTI_BUCKET_IMPACT.LOW })).toBe(
-        true
-      );
+    test('returns true for points with isMultiBucketAnomaly=true', () => {
+      expect(showMultiBucketAnomalyTooltip({ isMultiBucketAnomaly: true })).toBe(true);
     });
 
     test('returns false for points with multiBucketImpact missing or below medium impact', () => {
       expect(showMultiBucketAnomalyTooltip({})).toBe(false);
-      expect(showMultiBucketAnomalyTooltip({ multiBucketImpact: MULTI_BUCKET_IMPACT.NONE })).toBe(
-        false
-      );
+      expect(showMultiBucketAnomalyTooltip({ isMultiBucketAnomaly: false })).toBe(false);
     });
   });
 

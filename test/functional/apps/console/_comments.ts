@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  describe('console app', function testComments() {
+  // Failing: See https://github.com/elastic/kibana/issues/138160
+  describe.skip('console app', function testComments() {
     this.tags('includeFirefox');
     before(async () => {
       log.debug('navigateTo console');
@@ -127,6 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               body: '{\n "query": \'\'', // E.g. using single quotes
             },
           ],
+
           async () => {
             expect(await PageObjects.console.hasInvalidSyntax()).to.be(true);
           }

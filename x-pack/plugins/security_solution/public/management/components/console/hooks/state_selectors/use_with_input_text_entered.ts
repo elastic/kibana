@@ -9,18 +9,24 @@ import { useMemo } from 'react';
 import { useConsoleStore } from '../../components/console_state/console_state';
 import type { ConsoleDataState } from '../../components/console_state/types';
 
-type InputTextEntered = Pick<ConsoleDataState['input'], 'textEntered' | 'rightOfCursor'> & {
+type InputTextEntered = Pick<
+  ConsoleDataState['input'],
+  'leftOfCursorText' | 'rightOfCursorText' | 'parsedInput' | 'enteredCommand'
+> & {
   fullTextEntered: string;
 };
 
 export const useWithInputTextEntered = (): InputTextEntered => {
-  const inputState = useConsoleStore().state.input;
+  const { leftOfCursorText, rightOfCursorText, parsedInput, enteredCommand } =
+    useConsoleStore().state.input;
 
   return useMemo(() => {
     return {
-      textEntered: inputState.textEntered,
-      rightOfCursor: inputState.rightOfCursor,
-      fullTextEntered: inputState.textEntered + inputState.rightOfCursor.text,
+      leftOfCursorText,
+      rightOfCursorText,
+      parsedInput,
+      enteredCommand,
+      fullTextEntered: leftOfCursorText + rightOfCursorText,
     };
-  }, [inputState.rightOfCursor, inputState.textEntered]);
+  }, [enteredCommand, leftOfCursorText, parsedInput, rightOfCursorText]);
 };

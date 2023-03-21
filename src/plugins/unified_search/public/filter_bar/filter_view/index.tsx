@@ -6,25 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge, EuiBadgeProps, useInnerText } from '@elastic/eui';
+import { EuiBadgeProps, EuiToolTip, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { Filter, isFilterPinned } from '@kbn/es-query';
-import { FilterLabel } from '..';
+import { DataView } from '@kbn/data-views-plugin/common';
 import type { FilterLabelStatus } from '../filter_item/filter_item';
+import { FilterBadge } from '../../filter_badge';
 
 interface Props {
   filter: Filter;
+  readOnly: boolean;
   valueLabel: string;
   fieldLabel?: string;
   filterLabelStatus: FilterLabelStatus;
   errorMessage?: string;
   hideAlias?: boolean;
   [propName: string]: any;
+  dataViews: DataView[];
 }
 
 export const FilterView: FC<Props> = ({
   filter,
+  readOnly,
   iconOnClick,
   onClick,
   valueLabel,
@@ -32,17 +36,22 @@ export const FilterView: FC<Props> = ({
   errorMessage,
   filterLabelStatus,
   hideAlias,
+  dataViews,
   ...rest
 }: Props) => {
   const [ref, innerText] = useInnerText();
 
-  let title =
-    errorMessage ||
-    i18n.translate('unifiedSearch.filter.filterBar.moreFilterActionsMessage', {
-      defaultMessage: 'Filter: {innerText}. Select for more filter actions.',
-      values: { innerText },
-    });
+  const filterString = readOnly
+    ? i18n.translate('unifiedSearch.filter.filterBar.filterString', {
+        defaultMessage: 'Filter: {innerText}.',
+        values: { innerText },
+      })
+    : i18n.translate('unifiedSearch.filter.filterBar.filterActionsMessage', {
+        defaultMessage: 'Filter: {innerText}. Select for more filter actions.',
+        values: { innerText },
+      });
 
+  let title: string = errorMessage || filterString;
   if (isFilterPinned(filter)) {
     title = `${i18n.translate('unifiedSearch.filter.filterBar.pinnedFilterPrefix', {
       defaultMessage: 'Pinned',
@@ -54,41 +63,59 @@ export const FilterView: FC<Props> = ({
     })} ${title}`;
   }
 
-  const badgeProps: EuiBadgeProps = {
-    title,
-    color: 'hollow',
-    iconType: 'cross',
-    iconSide: 'right',
-    closeButtonProps: {
-      // Removing tab focus on close button because the same option can be obtained through the context menu
-      // Also, we may want to add a `DEL` keyboard press functionality
-      tabIndex: -1,
-    },
-    iconOnClick,
-    iconOnClickAriaLabel: i18n.translate(
-      'unifiedSearch.filter.filterBar.filterItemBadgeIconAriaLabel',
-      {
-        defaultMessage: 'Delete {filter}',
-        values: { filter: innerText },
-      }
-    ),
-    onClick,
-    onClickAriaLabel: i18n.translate('unifiedSearch.filter.filterBar.filterItemBadgeAriaLabel', {
-      defaultMessage: 'Filter actions',
-    }),
-  };
+  const sharedProps = { color: 'hollow', tabIndex: 0 };
+  const badgeProps: EuiBadgeProps = readOnly
+    ? // prevent native tooltip for read-only filter pulls by setting title to undefined
+      { ...sharedProps, title: undefined }
+    : {
+        ...sharedProps,
+        title, // use native tooltip for non-read-only filter pills
+        iconType: 'cross',
+        iconSide: 'right',
+        closeButtonProps: {
+          // Removing tab focus on close button because the same option can be obtained through the context menu
+          // Also, we may want to add a `DEL` keyboard press functionality
+          tabIndex: -1,
+        },
+        iconOnClick,
+        iconOnClickAriaLabel: i18n.translate(
+          'unifiedSearch.filter.filterBar.filterItemBadgeIconAriaLabel',
+          {
+            defaultMessage: 'Delete {filter}',
+            values: { filter: innerText },
+          }
+        ),
+        onClick,
+        onClickAriaLabel: i18n.translate(
+          'unifiedSearch.filter.filterBar.filterItemBadgeAriaLabel',
+          {
+            defaultMessage: 'Filter actions',
+          }
+        ),
+      };
 
-  return (
-    <EuiBadge {...badgeProps} {...rest}>
+  const FilterPill = () => (
+    <FilterBadge
+      filter={filter}
+      dataViews={dataViews}
+      valueLabel={valueLabel}
+      filterLabelStatus={filterLabelStatus}
+      hideAlias={hideAlias}
+      {...badgeProps}
+      {...rest}
+      data-test-subj={`filter-badge-'${innerText}' ${rest['data-test-subj']}`}
+    />
+  );
+
+  return readOnly ? (
+    <EuiToolTip position="bottom" content={title}>
       <span ref={ref}>
-        <FilterLabel
-          filter={filter}
-          valueLabel={valueLabel}
-          fieldLabel={fieldLabel}
-          filterLabelStatus={filterLabelStatus}
-          hideAlias={hideAlias}
-        />
+        <FilterPill />
       </span>
-    </EuiBadge>
+    </EuiToolTip>
+  ) : (
+    <span ref={ref}>
+      <FilterPill />
+    </span>
   );
 };

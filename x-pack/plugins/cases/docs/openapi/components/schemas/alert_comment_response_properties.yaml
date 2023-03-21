@@ -1,5 +1,7 @@
-
+title: Add case comment response properties for alerts
 type: object
+required:
+  - type
 properties:
   alertId:
     type: string
@@ -11,15 +13,7 @@ properties:
   created_by:
     type: object
     properties:
-      email:
-        type: string
-        example: null
-      full_name:
-        type: string
-        example: null
-      username:
-        type: string
-        example: elastic
+      $ref: 'user_properties.yaml'
   id:
     type: string
     example: 73362370-ab1a-11ec-985f-97e55adae8b9
@@ -36,28 +30,17 @@ properties:
   pushed_by:
     type: object
     properties:
-      email:
-        type: string
-        example: null
-      full_name:
-        type: string
-        example: null
-      username:
-        type: string
-        example: elastic
+      $ref: 'user_properties.yaml'
     nullable: true
   rule:
     type: object
     properties:
-      id:
-        type: string
-        example: 94d80550-aaf4-11ec-985f-97e55adae8b9
-      name:
-        type: string
-        example: security_rule
+      $ref: 'rule_properties.yaml'
   type:
     type: string
     example: alert
+    enum:
+      - alert
   updated_at:
     type: string
     format: date-time
@@ -65,15 +48,7 @@ properties:
   updated_by:
     type: object
     properties:
-      email:
-        type: string
-        example: null
-      full_name:
-        type: string
-        example: null
-      username:
-        type: string
-        example: elastic
+      $ref: 'user_properties.yaml'
   version:
     type: string
     example: WzMwNDgsMV0=

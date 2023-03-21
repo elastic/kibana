@@ -27,7 +27,7 @@ export const plainColumnRenderer: ColumnRenderer = {
     eventId,
     field,
     isDraggable = true,
-    timelineId,
+    scopeId,
     truncate,
     values,
     linkValues,
@@ -38,7 +38,7 @@ export const plainColumnRenderer: ColumnRenderer = {
     field: ColumnHeaderOptions;
     globalFilters?: Filter[];
     isDraggable?: boolean;
-    timelineId: string;
+    scopeId: string;
     truncate?: boolean;
     values: string[] | undefined | null;
     linkValues?: string[] | null | undefined;
@@ -52,14 +52,14 @@ export const plainColumnRenderer: ColumnRenderer = {
       return values.map((value, i) => (
         <FormattedFieldValue
           asPlainText={asPlainText}
-          contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
+          contextId={`plain-column-renderer-formatted-field-value-${scopeId}`}
           eventId={eventId}
           fieldFormat={field.format ?? ''}
           fieldName={columnName}
           isAggregatable={field.aggregatable ?? false}
           fieldType={field.type ?? ''}
           isDraggable={isDraggable}
-          key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
+          key={`plain-column-renderer-formatted-field-value-${scopeId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
           linkValue={head(linkValues)}
           truncate={truncate}
           value={value}
@@ -72,14 +72,14 @@ export const plainColumnRenderer: ColumnRenderer = {
       return (
         <FormattedFieldValue
           asPlainText={asPlainText}
-          contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
+          contextId={`plain-column-renderer-formatted-field-value-${scopeId}`}
           eventId={eventId}
           fieldFormat={field.format ?? ''}
           fieldName={columnName}
           isAggregatable={field.aggregatable ?? false}
           fieldType={field.type ?? ''}
           isDraggable={isDraggable}
-          key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}`}
+          key={`plain-column-renderer-formatted-field-value-${scopeId}-${columnName}-${eventId}-${field.id}`}
           linkValue={head(linkValues)}
           truncate={truncate}
           value={joinValues(values)}

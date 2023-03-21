@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_ACTION_GROUP } from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
 import {
   ActionGroup,
@@ -15,6 +15,7 @@ import {
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
+import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
@@ -30,12 +31,25 @@ import {
   buildNoDataAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
-import { createScopedLogger, getViewInAppUrlInventory } from '../common/utils';
+import {
+  AdditionalContext,
+  createScopedLogger,
+  flattenAdditionalContext,
+  getAlertDetailsUrl,
+  getContextForRecoveredAlerts,
+  getViewInInventoryAppUrl,
+  UNGROUPED_FACTORY_KEY,
+} from '../common/utils';
 import { evaluateCondition, ConditionResult } from './evaluate_condition';
 
 type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
 >;
+
+export const FIRED_ACTIONS_ID = 'metrics.inventory_threshold.fired';
+export const WARNING_ACTIONS_ID = 'metrics.inventory_threshold.warning';
+
+type InventoryThrehsoldActionGroup = typeof FIRED_ACTIONS_ID | typeof WARNING_ACTIONS_ID;
 
 export type InventoryMetricThresholdRuleTypeState = RuleTypeState; // no specific state used
 export type InventoryMetricThresholdAlertState = AlertState; // no specific state used
@@ -49,6 +63,8 @@ type InventoryMetricThresholdAlert = Alert<
 type InventoryMetricThresholdAlertFactory = (
   id: string,
   reason: string,
+  actionGroup: InventoryThrehsoldActionGroup,
+  additionalContext?: AdditionalContext | null,
   threshold?: number | undefined,
   value?: number | undefined
 ) => InventoryMetricThresholdAlert;
@@ -60,180 +76,241 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     InventoryMetricThresholdAlertState,
     InventoryMetricThresholdAlertContext,
     InventoryMetricThresholdAllowedActionGroups
-  >(async ({ services, params, alertId, executionId, startedAt }) => {
-    const startTime = Date.now();
-    const { criteria, filterQuery, sourceId = 'default', nodeType, alertOnNoData } = params;
-    if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
-    const logger = createScopedLogger(libs.logger, 'inventoryRule', { alertId, executionId });
-    const { alertWithLifecycle, savedObjectsClient, getAlertStartedDate } = services;
-    const alertFactory: InventoryMetricThresholdAlertFactory = (id, reason) =>
-      alertWithLifecycle({
-        id,
-        fields: {
-          [ALERT_REASON]: reason,
-          [ALERT_RULE_PARAMETERS]: params as any, // the type assumes the object is already flattened when writing the same way as when reading https://github.com/elastic/kibana/blob/main/x-pack/plugins/rule_registry/common/field_map/runtime_type_from_fieldmap.ts#L60
-        },
+  >(
+    async ({
+      services,
+      params,
+      executionId,
+      spaceId,
+      startedAt,
+      rule: { id: ruleId, tags: ruleTags },
+    }) => {
+      const startTime = Date.now();
+
+      const { criteria, filterQuery, sourceId = 'default', nodeType, alertOnNoData } = params;
+
+      if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
+
+      const logger = createScopedLogger(libs.logger, 'inventoryRule', {
+        alertId: ruleId,
+        executionId,
       });
 
-    if (!params.filterQuery && params.filterQueryText) {
-      try {
-        const { fromKueryExpression } = await import('@kbn/es-query');
-        fromKueryExpression(params.filterQueryText);
-      } catch (e) {
-        logger.error(e.message);
-        const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
-        const reason = buildInvalidQueryAlertReason(params.filterQueryText);
-        const alert = alertFactory('*', reason);
-        const indexedStartedDate = getAlertStartedDate('*') ?? startedAt.toISOString();
-        const viewInAppUrl = getViewInAppUrlInventory(
-          criteria,
-          nodeType,
-          indexedStartedDate,
-          libs.basePath
-        );
-        alert.scheduleActions(actionGroupId, {
-          group: '*',
-          alertState: stateToAlertMessage[AlertStates.ERROR],
-          reason,
-          timestamp: startedAt.toISOString(),
-          viewInAppUrl,
-          value: null,
-          metric: mapToConditionsLookup(criteria, (c) => c.metric),
-        });
-        return {};
-      }
-    }
-    const source = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId);
+      const esClient = services.scopedClusterClient.asCurrentUser;
 
-    const [, , { logViews }] = await libs.getStartServices();
-    const logQueryFields: LogQueryFields | undefined = await logViews
-      .getClient(savedObjectsClient, services.scopedClusterClient.asCurrentUser)
-      .getResolvedLogView(sourceId)
-      .then(
-        ({ indices }) => ({ indexPattern: indices }),
-        () => undefined
+      const {
+        alertWithLifecycle,
+        savedObjectsClient,
+        getAlertStartedDate,
+        getAlertUuid,
+        getAlertByAlertUuid,
+      } = services;
+      const alertFactory: InventoryMetricThresholdAlertFactory = (
+        id,
+        reason,
+        actionGroup,
+        additionalContext
+      ) =>
+        alertWithLifecycle({
+          id,
+          fields: {
+            [ALERT_REASON]: reason,
+            [ALERT_ACTION_GROUP]: actionGroup,
+            ...flattenAdditionalContext(additionalContext),
+          },
+        });
+
+      if (!params.filterQuery && params.filterQueryText) {
+        try {
+          const { fromKueryExpression } = await import('@kbn/es-query');
+          fromKueryExpression(params.filterQueryText);
+        } catch (e) {
+          logger.error(e.message);
+          const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
+          const reason = buildInvalidQueryAlertReason(params.filterQueryText);
+          const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason, actionGroupId);
+          const indexedStartedDate =
+            getAlertStartedDate(UNGROUPED_FACTORY_KEY) ?? startedAt.toISOString();
+          const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
+
+          alert.scheduleActions(actionGroupId, {
+            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+            alertState: stateToAlertMessage[AlertStates.ERROR],
+            group: UNGROUPED_FACTORY_KEY,
+            metric: mapToConditionsLookup(criteria, (c) => c.metric),
+            reason,
+            timestamp: startedAt.toISOString(),
+            value: null,
+            viewInAppUrl: getViewInInventoryAppUrl({
+              basePath: libs.basePath,
+              criteria,
+              nodeType,
+              timestamp: indexedStartedDate,
+              spaceId,
+            }),
+          });
+
+          return { state: {} };
+        }
+      }
+      const source = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId);
+
+      const [, , { logViews }] = await libs.getStartServices();
+      const logQueryFields: LogQueryFields | undefined = await logViews
+        .getClient(savedObjectsClient, esClient)
+        .getResolvedLogView({
+          type: 'log-view-reference',
+          logViewId: sourceId,
+        })
+        .then(
+          ({ indices }) => ({ indexPattern: indices }),
+          () => undefined
+        );
+
+      const compositeSize = libs.configuration.alerting.inventory_threshold.group_by_page_size;
+      const results = await Promise.all(
+        criteria.map((condition) =>
+          evaluateCondition({
+            compositeSize,
+            condition,
+            esClient,
+            executionTimestamp: startedAt,
+            filterQuery,
+            logger,
+            logQueryFields,
+            nodeType,
+            source,
+          })
+        )
       );
 
-    const compositeSize = libs.configuration.alerting.inventory_threshold.group_by_page_size;
-    const results = await Promise.all(
-      criteria.map((condition) =>
-        evaluateCondition({
-          condition,
-          nodeType,
-          source,
-          logQueryFields,
-          esClient: services.scopedClusterClient.asCurrentUser,
-          compositeSize,
-          filterQuery,
-          executionTimestamp: startedAt,
-          logger,
-        })
-      )
-    );
-    let scheduledActionsCount = 0;
-    const inventoryItems = Object.keys(first(results)!);
-    for (const group of inventoryItems) {
-      // AND logic; all criteria must be across the threshold
-      const shouldAlertFire = results.every((result) => result[group]?.shouldFire);
-      const shouldAlertWarn = results.every((result) => result[group]?.shouldWarn);
-      // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
-      // whole alert is in a No Data/Error state
-      const isNoData = results.some((result) => result[group]?.isNoData);
-      const isError = results.some((result) => result[group]?.isError);
+      let scheduledActionsCount = 0;
+      const inventoryItems = Object.keys(first(results)!);
+      for (const group of inventoryItems) {
+        // AND logic; all criteria must be across the threshold
+        const shouldAlertFire = results.every((result) => result[group]?.shouldFire);
+        const shouldAlertWarn = results.every((result) => result[group]?.shouldWarn);
+        // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
+        // whole alert is in a No Data/Error state
+        const isNoData = results.some((result) => result[group]?.isNoData);
+        const isError = results.some((result) => result[group]?.isError);
 
-      const nextState = isError
-        ? AlertStates.ERROR
-        : isNoData
-        ? AlertStates.NO_DATA
-        : shouldAlertFire
-        ? AlertStates.ALERT
-        : shouldAlertWarn
-        ? AlertStates.WARNING
-        : AlertStates.OK;
-      let reason;
-      if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
-        reason = results
-          .map((result) =>
-            buildReasonWithVerboseMetricName(
-              group,
-              result[group],
-              buildFiredAlertReason,
-              nextState === AlertStates.WARNING
-            )
-          )
-          .join('\n');
-      }
-      if (alertOnNoData) {
-        if (nextState === AlertStates.NO_DATA) {
+        const nextState = isError
+          ? AlertStates.ERROR
+          : isNoData
+          ? AlertStates.NO_DATA
+          : shouldAlertFire
+          ? AlertStates.ALERT
+          : shouldAlertWarn
+          ? AlertStates.WARNING
+          : AlertStates.OK;
+        let reason;
+        if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
           reason = results
-            .filter((result) => result[group].isNoData)
             .map((result) =>
-              buildReasonWithVerboseMetricName(group, result[group], buildNoDataAlertReason)
-            )
-            .join('\n');
-        } else if (nextState === AlertStates.ERROR) {
-          reason = results
-            .filter((result) => result[group].isError)
-            .map((result) =>
-              buildReasonWithVerboseMetricName(group, result[group], buildErrorAlertReason)
+              buildReasonWithVerboseMetricName(
+                group,
+                result[group],
+                buildFiredAlertReason,
+                nextState === AlertStates.WARNING
+              )
             )
             .join('\n');
         }
-      }
-      if (reason) {
-        const actionGroupId =
-          nextState === AlertStates.WARNING ? WARNING_ACTIONS.id : FIRED_ACTIONS.id;
+        if (alertOnNoData) {
+          if (nextState === AlertStates.NO_DATA) {
+            reason = results
+              .filter((result) => result[group].isNoData)
+              .map((result) =>
+                buildReasonWithVerboseMetricName(group, result[group], buildNoDataAlertReason)
+              )
+              .join('\n');
+          } else if (nextState === AlertStates.ERROR) {
+            reason = results
+              .filter((result) => result[group].isError)
+              .map((result) =>
+                buildReasonWithVerboseMetricName(group, result[group], buildErrorAlertReason)
+              )
+              .join('\n');
+          }
+        }
+        if (reason) {
+          const actionGroupId =
+            nextState === AlertStates.WARNING ? WARNING_ACTIONS_ID : FIRED_ACTIONS_ID;
 
-        const alert = alertFactory(group, reason);
-        const indexedStartedDate = getAlertStartedDate(group) ?? startedAt.toISOString();
-        const viewInAppUrl = getViewInAppUrlInventory(
-          criteria,
-          nodeType,
-          indexedStartedDate,
-          libs.basePath
-        );
-        scheduledActionsCount++;
-        const context = {
-          group,
-          alertState: stateToAlertMessage[nextState],
-          reason,
-          timestamp: startedAt.toISOString(),
-          viewInAppUrl,
-          value: mapToConditionsLookup(results, (result) =>
-            formatMetric(result[group].metric, result[group].currentValue)
-          ),
-          threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+          const additionalContext = results && results.length > 0 ? results[0][group].context : {};
+          additionalContext.tags = Array.from(
+            new Set([...(additionalContext.tags ?? []), ...ruleTags])
+          );
+
+          const alert = alertFactory(group, reason, actionGroupId, additionalContext);
+          const indexedStartedDate = getAlertStartedDate(group) ?? startedAt.toISOString();
+          const alertUuid = getAlertUuid(group);
+
+          scheduledActionsCount++;
+
+          const context = {
+            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+            alertState: stateToAlertMessage[nextState],
+            group,
+            reason,
+            metric: mapToConditionsLookup(criteria, (c) => c.metric),
+            timestamp: startedAt.toISOString(),
+            threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+            value: mapToConditionsLookup(results, (result) =>
+              formatMetric(result[group].metric, result[group].currentValue)
+            ),
+            viewInAppUrl: getViewInInventoryAppUrl({
+              basePath: libs.basePath,
+              criteria,
+              nodeType,
+              timestamp: indexedStartedDate,
+              spaceId,
+            }),
+            ...additionalContext,
+          };
+          alert.scheduleActions(actionGroupId, context);
+        }
+      }
+
+      const { getRecoveredAlerts } = services.alertFactory.done();
+      const recoveredAlerts = getRecoveredAlerts();
+
+      for (const alert of recoveredAlerts) {
+        const recoveredAlertId = alert.getId();
+        const indexedStartedDate = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
+        const alertUuid = getAlertUuid(recoveredAlertId);
+        const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
+        const additionalContext = getContextForRecoveredAlerts(alertHits);
+        const originalActionGroup = getOriginalActionGroup(alertHits);
+
+        alert.setContext({
+          alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
+          alertState: stateToAlertMessage[AlertStates.OK],
+          group: recoveredAlertId,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
-        };
-        alert.scheduleActions(actionGroupId, context);
+          threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+          timestamp: startedAt.toISOString(),
+          viewInAppUrl: getViewInInventoryAppUrl({
+            basePath: libs.basePath,
+            criteria,
+            nodeType,
+            timestamp: indexedStartedDate,
+            spaceId,
+          }),
+          originalAlertState: translateActionGroupToAlertState(originalActionGroup),
+          originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS_ID,
+          originalAlertStateWasWARNING: originalActionGroup === WARNING_ACTIONS_ID,
+          ...additionalContext,
+        });
       }
-    }
 
-    const { getRecoveredAlerts } = services.alertFactory.done();
-    const recoveredAlerts = getRecoveredAlerts();
-    for (const alert of recoveredAlerts) {
-      const recoveredAlertId = alert.getId();
-      const indexedStartedDate = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
-      const viewInAppUrl = getViewInAppUrlInventory(
-        criteria,
-        nodeType,
-        indexedStartedDate,
-        libs.basePath
-      );
-      const context = {
-        group: recoveredAlertId,
-        alertState: stateToAlertMessage[AlertStates.OK],
-        timestamp: startedAt.toISOString(),
-        viewInAppUrl,
-        threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
-        metric: mapToConditionsLookup(criteria, (c) => c.metric),
-      };
-      alert.setContext(context);
-    }
+      const stopTime = Date.now();
+      logger.debug(`Scheduled ${scheduledActionsCount} actions in ${stopTime - startTime}ms`);
 
-    const stopTime = Date.now();
-    logger.debug(`Scheduled ${scheduledActionsCount} actions in ${stopTime - startTime}ms`);
-  });
+      return { state: {} };
+    }
+  );
 
 const formatThreshold = (metric: SnapshotMetricType, value: number | number[]) => {
   const metricFormatter = get(METRIC_FORMATTERS, metric, METRIC_FORMATTERS.count);
@@ -290,19 +367,28 @@ const mapToConditionsLookup = (
       {}
     );
 
-export const FIRED_ACTIONS_ID = 'metrics.inventory_threshold.fired';
 export const FIRED_ACTIONS: ActionGroup<typeof FIRED_ACTIONS_ID> = {
   id: FIRED_ACTIONS_ID,
   name: i18n.translate('xpack.infra.metrics.alerting.inventory.threshold.fired', {
     defaultMessage: 'Alert',
   }),
 };
-export const WARNING_ACTIONS_ID = 'metrics.inventory_threshold.warning';
 export const WARNING_ACTIONS = {
   id: WARNING_ACTIONS_ID,
   name: i18n.translate('xpack.infra.metrics.alerting.threshold.warning', {
     defaultMessage: 'Warning',
   }),
+};
+
+const translateActionGroupToAlertState = (
+  actionGroupId: string | undefined
+): string | undefined => {
+  if (actionGroupId === FIRED_ACTIONS.id) {
+    return stateToAlertMessage[AlertStates.ALERT];
+  }
+  if (actionGroupId === WARNING_ACTIONS.id) {
+    return stateToAlertMessage[AlertStates.WARNING];
+  }
 };
 
 const formatMetric = (metric: SnapshotMetricType, value: number) => {

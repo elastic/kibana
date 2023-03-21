@@ -10,7 +10,6 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/data_view_management'],
-  testRunner: 'jasmine2',
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/data_view_management',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: ['<rootDir>/src/plugins/data_view_management/{public,server}/**/*.{ts,tsx}'],

@@ -7,63 +7,64 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { CloudPlugin } from './plugin';
-import { config } from './config';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
+
+const baseConfig = {
+  base_url: 'https://cloud.elastic.co',
+  deployment_url: '/abc123',
+  profile_url: '/user/settings/',
+  organization_url: '/account/',
+};
 
 describe('Cloud Plugin', () => {
+  const setupPlugin = () => {
+    const initContext = coreMock.createPluginInitializerContext({
+      ...baseConfig,
+      id: 'cloudId',
+      cname: 'cloud.elastic.co',
+    });
+    const plugin = new CloudPlugin(initContext);
+
+    const coreSetup = coreMock.createSetup();
+    const setup = plugin.setup(coreSetup, {});
+    const start = plugin.start();
+
+    return { setup, start };
+  };
+
   describe('#setup', () => {
-    describe('setupSecurity', () => {
-      it('properly handles missing optional Security dependency if Cloud ID is NOT set.', async () => {
-        const plugin = new CloudPlugin(
-          coreMock.createPluginInitializerContext(config.schema.validate({}))
-        );
-
-        expect(() =>
-          plugin.setup(coreMock.createSetup(), {
-            usageCollection: usageCollectionPluginMock.createSetupContract(),
-          })
-        ).not.toThrow();
+    describe('interface', () => {
+      it('exposes isCloudEnabled', () => {
+        const { setup } = setupPlugin();
+        expect(setup.isCloudEnabled).toBe(true);
       });
 
-      it('properly handles missing optional Security dependency if Cloud ID is set.', async () => {
-        const plugin = new CloudPlugin(
-          coreMock.createPluginInitializerContext(config.schema.validate({ id: 'my-cloud' }))
-        );
-
-        expect(() =>
-          plugin.setup(coreMock.createSetup(), {
-            usageCollection: usageCollectionPluginMock.createSetupContract(),
-          })
-        ).not.toThrow();
+      it('exposes cloudId', () => {
+        const { setup } = setupPlugin();
+        expect(setup.cloudId).toBe('cloudId');
       });
 
-      it('does not notify Security plugin about Cloud environment if Cloud ID is NOT set.', async () => {
-        const plugin = new CloudPlugin(
-          coreMock.createPluginInitializerContext(config.schema.validate({}))
-        );
-
-        const securityDependencyMock = securityMock.createSetup();
-        plugin.setup(coreMock.createSetup(), {
-          security: securityDependencyMock,
-          usageCollection: usageCollectionPluginMock.createSetupContract(),
-        });
-
-        expect(securityDependencyMock.setIsElasticCloudDeployment).not.toHaveBeenCalled();
+      it('exposes instanceSizeMb', () => {
+        const { setup } = setupPlugin();
+        expect(setup.instanceSizeMb).toBeUndefined();
       });
 
-      it('properly notifies Security plugin about Cloud environment if Cloud ID is set.', async () => {
-        const plugin = new CloudPlugin(
-          coreMock.createPluginInitializerContext(config.schema.validate({ id: 'my-cloud' }))
-        );
+      it('exposes deploymentId', () => {
+        const { setup } = setupPlugin();
+        expect(setup.deploymentId).toBe('abc123');
+      });
 
-        const securityDependencyMock = securityMock.createSetup();
-        plugin.setup(coreMock.createSetup(), {
-          security: securityDependencyMock,
-          usageCollection: usageCollectionPluginMock.createSetupContract(),
-        });
+      it('exposes apm', () => {
+        const { setup } = setupPlugin();
+        expect(setup.apm).toStrictEqual({ url: undefined, secretToken: undefined });
+      });
+    });
+  });
 
-        expect(securityDependencyMock.setIsElasticCloudDeployment).toHaveBeenCalledTimes(1);
+  describe('#start', () => {
+    describe('interface', () => {
+      it('exposes isCloudEnabled', () => {
+        const { start } = setupPlugin();
+        expect(start.isCloudEnabled).toBe(true);
       });
     });
   });

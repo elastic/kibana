@@ -32,12 +32,17 @@ import type {
   FleetGetAgentStatusHttpMockInterface,
   FleetGetCheckPermissionsInterface,
   FleetGetEndpointPackagePolicyHttpMockInterface,
+  FleetGetPackageHttpMockInterface,
   FleetGetPackageListHttpMockInterface,
 } from '../../mocks';
 import {
   fleetGetAgentPolicyListHttpMock,
   fleetGetCheckPermissionsHttpMock,
   fleetGetPackageListHttpMock,
+  fleetGetPackageHttpMock,
+  fleetBulkGetPackagePoliciesListHttpMock,
+  fleetBulkGetAgentPolicyListHttpMock,
+  fleetGetPackagePoliciesListHttpMock,
 } from '../../mocks';
 
 type EndpointMetadataHttpMocksInterface = ResponseProvidersInterface<{
@@ -122,6 +127,7 @@ export const transformsHttpMocks = httpHandlerMockFactory<TransformHttpMocksInte
 ]);
 
 export type EndpointListFleetApisHttpMockInterface = FleetGetPackageListHttpMockInterface &
+  FleetGetPackageHttpMockInterface &
   FleetGetAgentPolicyListHttpMockInterface &
   FleetGetCheckPermissionsInterface &
   FleetGetAgentStatusHttpMockInterface &
@@ -132,7 +138,11 @@ export type EndpointListFleetApisHttpMockInterface = FleetGetPackageListHttpMock
 export const endpointListFleetApisHttpMock =
   composeHttpHandlerMocks<EndpointListFleetApisHttpMockInterface>([
     fleetGetPackageListHttpMock,
+    fleetGetPackageHttpMock,
     fleetGetAgentPolicyListHttpMock,
+    fleetBulkGetPackagePoliciesListHttpMock,
+    fleetBulkGetAgentPolicyListHttpMock,
+    fleetGetPackagePoliciesListHttpMock,
     fleetGetCheckPermissionsHttpMock,
   ]);
 type EndpointPageHttpMockInterface = EndpointMetadataHttpMocksInterface &

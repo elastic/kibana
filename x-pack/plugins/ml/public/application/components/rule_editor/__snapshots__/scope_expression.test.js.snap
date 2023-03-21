@@ -95,20 +95,14 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
         />
       }
       closePopover={[Function]}
-      display="inlineBlock"
+      display="inline-block"
       hasArrow={true}
       id="operatorValuePopover"
       isOpen={false}
       ownFocus={true}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
     >
-      <div
-        style={
-          Object {
-            "zIndex": "200",
-          }
-        }
-      >
+      <div>
         <EuiPopoverTitle>
           <FormattedMessage
             defaultMessage="Is"
@@ -246,20 +240,14 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
         />
       }
       closePopover={[Function]}
-      display="inlineBlock"
+      display="inline-block"
       hasArrow={true}
       id="operatorValuePopover"
       isOpen={false}
       ownFocus={true}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
     >
-      <div
-        style={
-          Object {
-            "zIndex": "200",
-          }
-        }
-      >
+      <div>
         <EuiPopoverTitle>
           <FormattedMessage
             defaultMessage="Is"
@@ -397,20 +385,14 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
         />
       }
       closePopover={[Function]}
-      display="inlineBlock"
+      display="inline-block"
       hasArrow={true}
       id="operatorValuePopover"
       isOpen={false}
       ownFocus={true}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
     >
-      <div
-        style={
-          Object {
-            "zIndex": "200",
-          }
-        }
-      >
+      <div>
         <EuiPopoverTitle>
           <FormattedMessage
             defaultMessage="Is"

@@ -10,10 +10,8 @@ import { omit } from 'lodash/fp';
 import { usePrimaryNavigation } from './use_primary_navigation';
 import { useKibana } from '../../../lib/kibana';
 import { useSetBreadcrumbs } from '../breadcrumbs';
-import { makeMapStateToProps } from '../../url_state/helpers';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { navTabs } from '../../../../app/home/home_navigations';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import type { GenericNavRecord } from '../types';
 
@@ -23,14 +21,11 @@ import type { GenericNavRecord } from '../types';
  */
 export const useSecuritySolutionNavigation = () => {
   const [routeProps] = useRouteSpy();
-  const urlMapState = makeMapStateToProps();
-  const { urlState } = useDeepEqualSelector(urlMapState);
+
   const {
     chrome,
     application: { getUrlForApp, navigateToUrl },
   } = useKibana().services;
-
-  const { detailName, flowTarget, pageName, pathName, search, state, tabName } = routeProps;
 
   const disabledNavTabs = [
     ...(!useIsExperimentalFeatureEnabled('kubernetesEnabled') ? ['kubernetes'] : []),
@@ -40,41 +35,15 @@ export const useSecuritySolutionNavigation = () => {
   const setBreadcrumbs = useSetBreadcrumbs();
 
   useEffect(() => {
-    if (pathName || pageName) {
-      setBreadcrumbs(
-        {
-          detailName,
-          flowTarget,
-          navTabs: enabledNavTabs,
-          pageName,
-          pathName,
-          search,
-          state,
-          tabName,
-        },
-        chrome,
-        navigateToUrl
-      );
+    if (!routeProps.pathName && !routeProps.pageName) {
+      return;
     }
-  }, [
-    chrome,
-    pageName,
-    pathName,
-    search,
-    state,
-    detailName,
-    flowTarget,
-    tabName,
-    getUrlForApp,
-    navigateToUrl,
-    enabledNavTabs,
-    setBreadcrumbs,
-  ]);
+
+    setBreadcrumbs({ ...routeProps, navTabs }, chrome, navigateToUrl);
+  }, [routeProps, chrome, getUrlForApp, navigateToUrl, enabledNavTabs, setBreadcrumbs]);
 
   return usePrimaryNavigation({
     navTabs: enabledNavTabs,
-    pageName,
-    tabName,
-    timeline: urlState.timeline,
+    pageName: routeProps.pageName,
   });
 };

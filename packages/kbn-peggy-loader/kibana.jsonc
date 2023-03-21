@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/peggy-loader",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}

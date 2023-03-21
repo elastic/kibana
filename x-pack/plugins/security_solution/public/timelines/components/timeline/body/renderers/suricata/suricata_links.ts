@@ -6,12 +6,23 @@
  */
 
 import { uniq } from 'lodash/fp';
-import { db } from 'suricata-sid-db';
+
+const lazySuricataLibConfiguration = () => {
+  /**
+   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+   * See https://webpack.js.org/api/module-methods/#magic-comments
+   */
+  return import(
+    /* webpackChunkName: "lazy_suricata_lib_configuration" */
+    'suricata-sid-db'
+  );
+};
 
 const has = <T>(obj: T, key: string | number | symbol): key is keyof T =>
   Object.prototype.hasOwnProperty.call(obj, key);
 
-export const getLinksFromSignature = (id: number): string[] => {
+export const getLinksFromSignature = async (id: number): Promise<string[]> => {
+  const db = (await lazySuricataLibConfiguration()).db;
   const refs = has(db, id) ? db[id] : null;
   if (refs != null) {
     return uniq(refs);

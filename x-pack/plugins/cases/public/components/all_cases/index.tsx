@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { CasesDeepLinkId } from '../../common/navigation';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
+import { CaseCallouts } from '../callouts/case_callouts';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { AllCasesList } from './all_cases_list';
@@ -21,6 +22,7 @@ export const AllCases: React.FC = () => {
 
   return (
     <>
+      <CaseCallouts />
       <CasesTableHeader actionsErrors={actionsErrors} />
       <AllCasesList />
     </>

@@ -7,46 +7,45 @@
  */
 
 import React from 'react';
-import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
-import { ChangeDataView } from './change_dataview';
+import { withSuspense } from '@kbn/shared-ux-utility';
 
-export type ChangeDataViewTriggerProps = EuiButtonProps & {
-  label: string;
-  title?: string;
-};
+export type { DataViewPickerProps, OnSaveTextLanguageQueryProps } from './data_view_picker';
 
-/** @public */
-export interface DataViewPickerProps {
-  trigger: ChangeDataViewTriggerProps;
-  isMissingCurrent?: boolean;
-  onChangeDataView: (newId: string) => void;
-  currentDataViewId?: string;
-  selectableProps?: EuiSelectableProps;
-  onAddField?: () => void;
-  onDataViewCreated?: () => void;
-  showNewMenuTour?: boolean;
-}
+/**
+ * The Lazily-loaded `DataViewsList` component.  Consumers should use `React.Suspense` or
+ * the withSuspense` HOC to load this component.
+ */
+export const DataViewsListLazy = React.lazy(() => import('./dataview_list'));
 
-export const DataViewPicker = ({
-  isMissingCurrent,
-  currentDataViewId,
-  onChangeDataView,
-  onAddField,
-  onDataViewCreated,
-  trigger,
-  selectableProps,
-  showNewMenuTour,
-}: DataViewPickerProps) => {
-  return (
-    <ChangeDataView
-      isMissingCurrent={isMissingCurrent}
-      currentDataViewId={currentDataViewId}
-      onChangeDataView={onChangeDataView}
-      onAddField={onAddField}
-      onDataViewCreated={onDataViewCreated}
-      trigger={trigger}
-      selectableProps={selectableProps}
-      showNewMenuTour={showNewMenuTour}
-    />
-  );
-};
+/**
+ * A `DataViewsList` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `DataViewsLazy` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const DataViewsList = withSuspense(DataViewsListLazy);
+
+/**
+ * The Lazily-loaded `DataViewSelector` component.  Consumers should use `React.Suspense` or
+ * the withSuspense` HOC to load this component.
+ */
+export const DataViewSelectorLazy = React.lazy(() => import('./data_view_selector'));
+
+/**
+ * A `DataViewSelector` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `DataViewSelectorLazy` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const DataViewSelector = withSuspense(DataViewSelectorLazy);
+
+/**
+ * The Lazily-loaded `DataViewPicker` component.  Consumers should use `React.Suspense` or
+ * the withSuspense` HOC to load this component.
+ */
+export const DataViewPickerLazy = React.lazy(() => import('./data_view_picker'));
+
+/**
+ * A `DataViewPicker` component that is wrapped by the `withSuspense` HOC. This component can
+ * be used directly by consumers and will load the `DataViewPickerLazy` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const DataViewPicker = withSuspense(DataViewPickerLazy);

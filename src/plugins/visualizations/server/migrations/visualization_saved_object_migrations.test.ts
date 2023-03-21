@@ -2623,4 +2623,94 @@ describe('migration visualization', () => {
       expect(visState.params.legendSize).toBeUndefined();
     });
   });
+
+  describe('8.5.0 tsvb - remove exclamation circle icon', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['8.5.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const createTestDocWithType = (params: any) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: `{
+          "type":"metrics",
+          "params": ${JSON.stringify(params)}
+        }`,
+      },
+    });
+
+    it('should not change anything if there are no annotations', () => {
+      const params = {
+        series: [
+          {
+            id: '7c154cf3-e06b-4c8f-9987-7f7c770cba89',
+            line_width: 1,
+            metrics: [{ id: '10f736e0-e15f-4753-afe9-6db3e4be5cf5', type: 'count' }],
+          },
+        ],
+        truncate_legend: 1,
+        type: 'timeseries',
+      };
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(migratedParams).toEqual(params);
+    });
+
+    it('should change exclamation circle icon, leave others alone and dont change any other params', () => {
+      const params = {
+        series: [
+          {
+            id: '7c154cf3-e06b-4c8f-9987-7f7c770cba89',
+            line_width: 1,
+            metrics: [{ id: '10f736e0-e15f-4753-afe9-6db3e4be5cf5', type: 'count' }],
+          },
+        ],
+        annotations: [
+          {
+            color: '#F00',
+            icon: 'fa-map-marker',
+            id: '1',
+          },
+          {
+            color: '#F00',
+            icon: 'fa-exclamation-circle',
+            id: '2',
+          },
+          {
+            color: '#F00',
+            icon: 'fa-exclamation-triangle',
+            id: '2',
+          },
+        ],
+        truncate_legend: 1,
+        type: 'timeseries',
+      };
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(migratedParams.annotations).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "color": "#F00",
+            "icon": "fa-map-marker",
+            "id": "1",
+          },
+          Object {
+            "color": "#F00",
+            "icon": "fa-exclamation-triangle",
+            "id": "2",
+          },
+          Object {
+            "color": "#F00",
+            "icon": "fa-exclamation-triangle",
+            "id": "2",
+          },
+        ]
+      `);
+    });
+  });
 });

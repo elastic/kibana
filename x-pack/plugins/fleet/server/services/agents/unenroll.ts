@@ -7,22 +7,23 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { Agent, BulkActionResult } from '../../types';
-import { invalidateAPIKeys } from '../api_keys';
+import { v4 as uuidv4 } from 'uuid';
+
+import type { Agent } from '../../types';
 import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import { SO_SEARCH_LIMIT } from '../../constants';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
-import { errorsToResults } from './crud';
+import { openPointInTime } from './crud';
+import { getAgentsByKuery } from './crud';
+import { getAgentById, getAgents, updateAgent, getAgentPolicyForAgent } from './crud';
 import {
-  getAgentById,
-  getAgents,
-  updateAgent,
-  getAgentPolicyForAgent,
-  bulkUpdateAgents,
-  processAgentsInBatches,
-} from './crud';
-import { getHostedPolicies, isHostedAgent } from './hosted_agent';
+  invalidateAPIKeysForAgents,
+  UnenrollActionRunner,
+  unenrollBatch,
+  updateActionsForForceUnenroll,
+} from './unenroll_action_runner';
 
 async function unenrollAgentIsAllowed(
   soClient: SavedObjectsClientContract,
@@ -52,7 +53,7 @@ export async function unenrollAgent(
     await unenrollAgentIsAllowed(soClient, esClient, agentId);
   }
   if (options?.revoke) {
-    return forceUnenrollAgent(soClient, esClient, agentId);
+    return forceUnenrollAgent(esClient, soClient, agentId);
   }
   const now = new Date().toISOString();
   await createAgentAction(esClient, {
@@ -73,115 +74,44 @@ export async function unenrollAgents(
     revoke?: boolean;
     batchSize?: number;
   }
-): Promise<{ items: BulkActionResult[] }> {
+): Promise<{ actionId: string }> {
   if ('agentIds' in options) {
-    const givenAgents = await getAgents(esClient, options);
+    const givenAgents = await getAgents(esClient, soClient, options);
     return await unenrollBatch(soClient, esClient, givenAgents, options);
   }
-  return await processAgentsInBatches(
-    esClient,
-    {
-      kuery: options.kuery,
-      showInactive: options.showInactive ?? false,
-      batchSize: options.batchSize,
-    },
-    async (agents: Agent[], skipSuccess?: boolean) =>
-      await unenrollBatch(soClient, esClient, agents, options, skipSuccess)
-  );
-}
 
-async function unenrollBatch(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  givenAgents: Agent[],
-  options: {
-    force?: boolean;
-    revoke?: boolean;
-  },
-  skipSuccess?: boolean
-): Promise<{ items: BulkActionResult[] }> {
-  // Filter to those not already unenrolled, or unenrolling
-  const agentsEnrolled = givenAgents.filter((agent) => {
-    if (options.revoke) {
-      return !agent.unenrolled_at;
-    }
-    return !agent.unenrollment_started_at && !agent.unenrolled_at;
+  const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
+  const res = await getAgentsByKuery(esClient, soClient, {
+    kuery: options.kuery,
+    showInactive: options.showInactive ?? false,
+    page: 1,
+    perPage: batchSize,
   });
-
-  const hostedPolicies = await getHostedPolicies(soClient, agentsEnrolled);
-
-  const outgoingErrors: Record<Agent['id'], Error> = {};
-
-  // And which are allowed to unenroll
-  const agentsToUpdate = options.force
-    ? agentsEnrolled
-    : agentsEnrolled.reduce<Agent[]>((agents, agent, index) => {
-        if (isHostedAgent(hostedPolicies, agent)) {
-          const id = givenAgents[index].id;
-          outgoingErrors[id] = new HostedAgentPolicyRestrictionRelatedError(
-            `Cannot unenroll ${agent.id} from a hosted agent policy ${agent.policy_id}`
-          );
-        } else {
-          agents.push(agent);
-        }
-        return agents;
-      }, []);
-
-  const now = new Date().toISOString();
-  if (options.revoke) {
-    // Get all API keys that need to be invalidated
-    await invalidateAPIKeysForAgents(agentsToUpdate);
+  if (res.total <= batchSize) {
+    const givenAgents = await getAgents(esClient, soClient, options);
+    return await unenrollBatch(soClient, esClient, givenAgents, options);
   } else {
-    // Create unenroll action for each agent
-    await createAgentAction(esClient, {
-      agents: agentsToUpdate.map((agent) => agent.id),
-      created_at: now,
-      type: 'UNENROLL',
-    });
-  }
-
-  // Update the necessary agents
-  const updateData = options.revoke
-    ? { unenrolled_at: now, active: false }
-    : { unenrollment_started_at: now };
-
-  await bulkUpdateAgents(
-    esClient,
-    agentsToUpdate.map(({ id }) => ({ agentId: id, data: updateData }))
-  );
-
-  return {
-    items: errorsToResults(givenAgents, outgoingErrors, undefined, skipSuccess),
-  };
-}
-
-export async function invalidateAPIKeysForAgents(agents: Agent[]) {
-  const apiKeys = agents.reduce<string[]>((keys, agent) => {
-    if (agent.access_api_key_id) {
-      keys.push(agent.access_api_key_id);
-    }
-    if (agent.default_api_key_id) {
-      keys.push(agent.default_api_key_id);
-    }
-    if (agent.default_api_key_history) {
-      agent.default_api_key_history.forEach((apiKey) => keys.push(apiKey.id));
-    }
-    return keys;
-  }, []);
-
-  if (apiKeys.length) {
-    await invalidateAPIKeys(apiKeys);
+    return await new UnenrollActionRunner(
+      esClient,
+      soClient,
+      {
+        ...options,
+        batchSize,
+        total: res.total,
+      },
+      { pitId: await openPointInTime(esClient) }
+    ).runActionAsyncWithRetry();
   }
 }
 
 export async function forceUnenrollAgent(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   agentIdOrAgent: string | Agent
 ) {
   const agent =
     typeof agentIdOrAgent === 'string'
-      ? await getAgentById(esClient, agentIdOrAgent)
+      ? await getAgentById(esClient, soClient, agentIdOrAgent)
       : agentIdOrAgent;
 
   await invalidateAPIKeysForAgents([agent]);
@@ -189,4 +119,5 @@ export async function forceUnenrollAgent(
     active: false,
     unenrolled_at: new Date().toISOString(),
   });
+  await updateActionsForForceUnenroll(esClient, [agent.id], uuidv4(), 1);
 }

@@ -6,22 +6,29 @@
  */
 
 import React from 'react';
+import Chance from 'chance';
 import { Rules } from '.';
 import { render, screen } from '@testing-library/react';
-import { QueryClient } from 'react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { TestProvider } from '../../test/test_provider';
 import { useCspIntegrationInfo } from './use_csp_integration';
 import { type RouteComponentProps } from 'react-router-dom';
 import type { PageUrlParams } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { coreMock } from '@kbn/core/public/mocks';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
+import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
+import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 
 jest.mock('./use_csp_integration', () => ({
   useCspIntegrationInfo: jest.fn(),
 }));
-jest.mock('../../common/api/use_cis_kubernetes_integration');
+jest.mock('../../common/api/use_setup_status_api');
+jest.mock('../../common/hooks/use_subscription_status');
+jest.mock('../../common/navigation/use_csp_integration_link');
+
+const chance = new Chance();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -58,10 +65,21 @@ describe('<Rules />', () => {
   beforeEach(() => {
     queryClient.clear();
     jest.clearAllMocks();
+    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: { status: 'indexed' },
+      })
+    );
 
-    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
-      data: { item: { status: 'installed' } },
-    }));
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: true,
+      })
+    );
+
+    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
   });
 
   it('calls API with URL params', async () => {
@@ -80,7 +98,7 @@ describe('<Rules />', () => {
 
   it('displays success state when result request is resolved', async () => {
     const Component = getTestComponent({ packagePolicyId: '21', policyId: '22' });
-    const request = createReactQueryResponse({
+    const response = createReactQueryResponse({
       status: 'success',
       data: [
         {
@@ -88,18 +106,28 @@ describe('<Rules />', () => {
           package: {
             title: 'my package',
           },
+          inputs: [
+            {
+              enabled: true,
+              policy_template: 'kspm',
+              type: 'cloudbeat/cis_k8s',
+            },
+            {
+              enabled: false,
+              policy_template: 'kspm',
+              type: 'cloudbeat/cis_eks',
+            },
+          ],
         },
         { name: 'my agent' },
       ],
     });
 
-    (useCspIntegrationInfo as jest.Mock).mockReturnValue(request);
+    (useCspIntegrationInfo as jest.Mock).mockReturnValue(response);
 
     render(<Component />);
 
-    expect(
-      await screen.findByText(`${request.data?.[0]?.package?.title}, ${request.data?.[1].name}`)
-    ).toBeInTheDocument();
     expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_CONTAINER)).toBeInTheDocument();
+    expect(await screen.findByTestId(TEST_SUBJECTS.CSP_RULES_SHARED_VALUES)).toBeInTheDocument();
   });
 });

@@ -30,6 +30,7 @@ export class SecurityPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly esArchiver = this.ctx.getService('esArchiver');
+  private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly userMenu = this.ctx.getService('userMenu');
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly supertest = this.ctx.getService('supertestWithoutAuth');
@@ -63,6 +64,21 @@ export class SecurityPageObject extends FtrService {
           ? 'chrome'
           : undefined
       );
+    },
+
+    getInfoMessage: async () => {
+      return await this.retry.try(async () => {
+        const infoMessageContainer = await this.retry.try(() =>
+          this.testSubjects.find('loginInfoMessage')
+        );
+        const infoMessageText = await infoMessageContainer.getVisibleText();
+
+        if (!infoMessageText) {
+          throw new Error('Login Info Message not present yet');
+        }
+
+        return infoMessageText;
+      });
     },
 
     getErrorMessage: async () => {
@@ -233,7 +249,7 @@ export class SecurityPageObject extends FtrService {
 
   async initTests() {
     this.log.debug('SecurityPage:initTests');
-    await this.esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+    await this.kibanaServer.savedObjects.cleanStandardList();
     await this.esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     await this.browser.setWindowSize(1600, 1000);
   }

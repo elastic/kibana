@@ -6,6 +6,7 @@ The Kibana actions plugin provides a framework to create executable actions that
 
 - Register a sub action and map it to a function of your choice.
 - Define a schema for the parameters of your sub action.
+- Define custom validators (or use the provided helpers) for the parameters of your sub action.
 - Define a response schema for responses from external services.
 - Create connectors that are supported by the Cases management system.
 
@@ -345,12 +346,28 @@ The actions framework exports the `registerSubActionConnectorType` to register s
 
 ```
 plugins.actions.registerSubActionConnectorType({
-  id: '.test-sub-action-connector',
+  id: 'test.sub-action-connector',
   name: 'Test: Sub action connector',
   minimumLicenseRequired: 'platinum' as const,
   schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
   Service: TestSubActionConnector,
+  renderParameterTemplates: renderTestTemplate
 });
 ```
 
-You can see a full example in [x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/sub_action_connector.ts](../../../../test/alerting_api_integration/common/fixtures/plugins/alerts/server/sub_action_connector.ts)
+You can see a full example in [x-pack/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts](../../../../test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts)
+
+### Example: Register sub action connector with custom validators
+
+The sub actions framework allows custom validators during registration of the connector type. Below is an example of including the URL validation for the `TestSubActionConnector` `url` configuration field.
+
+```typescript
+plugins.actions.registerSubActionConnectorType({
+  id: 'test.sub-action-connector',
+  name: 'Test: Sub action connector',
+  minimumLicenseRequired: 'platinum' as const,
+  schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
+  validators: [{type: ValidatorType.CONFIG, validate: urlAllowListValidator('url')}]
+  Service: TestSubActionConnector,
+});
+```

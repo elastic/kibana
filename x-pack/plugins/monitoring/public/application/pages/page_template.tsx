@@ -7,9 +7,9 @@
 
 import {
   EuiPage,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageBody,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiTab,
   EuiTabs,
   EuiSpacer,
@@ -20,7 +20,7 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser'
 import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
-import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
+import { useMonitoringTimeContainerContext } from '../hooks/use_monitoring_time';
 import { PageLoading } from '../../components';
 import {
   getSetupModeState,
@@ -38,7 +38,9 @@ export interface TabMenuItem {
   id: string;
   label: string;
   testSubj?: string;
-  route: string;
+  route?: string;
+  onClick?: () => void;
+  prepend?: React.ReactNode;
 }
 export interface PageTemplateProps {
   title: string;
@@ -58,7 +60,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
 }) => {
   useTitle('', title);
 
-  const { currentTimerange } = useContext(MonitoringTimeContainer.Context);
+  const { currentTimerange } = useMonitoringTimeContainerContext();
   const [loaded, setLoaded] = useState(false);
   const [isRequestPending, setIsRequestPending] = useState(false);
   const history = useHistory();
@@ -139,8 +141,10 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
                     disabled={isDisabledTab(product)}
                     title={item.label}
                     data-test-subj={item.testSubj}
-                    href={createHref(item.route)}
-                    isSelected={isTabSelected(item.route)}
+                    href={item.route ? createHref(item.route) : undefined}
+                    isSelected={item.route ? isTabSelected(item.route) : undefined}
+                    onClick={item.onClick}
+                    prepend={item.prepend}
                   >
                     {item.label}
                   </EuiTab>
@@ -148,7 +152,11 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
               })}
             </EuiTabs>
           )}
-          <EuiPageContentBody>{renderContent()}</EuiPageContentBody>
+          <EuiPageContentBody>
+            <EuiPage paddingSize="m">
+              <EuiPageBody>{renderContent()}</EuiPageBody>
+            </EuiPage>
+          </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

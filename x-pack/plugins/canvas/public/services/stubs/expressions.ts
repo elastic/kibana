@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AnyExpressionRenderDefinition } from '@kbn/expressions-plugin';
+import { AnyExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { plugin } from '@kbn/expressions-plugin/public';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { functions as functionDefinitions } from '../../../canvas_plugin_src/functions/common';

@@ -10,7 +10,7 @@ import { Location } from 'history';
 import { IBasePath } from '@kbn/core/public';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import rison, { RisonValue } from 'rison-node';
+import rison from '@kbn/rison';
 import url from 'url';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../../../common/data_view_constants';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -53,7 +53,7 @@ export const getDiscoverHref = ({
   const href = url.format({
     pathname: basePath.prepend('/app/discover'),
     hash: `/?_g=${rison.encode(risonQuery._g)}&_a=${rison.encode(
-      risonQuery._a as RisonValue
+      risonQuery._a
     )}`,
   });
   return href;

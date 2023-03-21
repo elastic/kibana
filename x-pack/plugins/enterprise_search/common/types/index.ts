@@ -15,13 +15,13 @@ import {
 } from './workplace_search';
 
 export interface InitialAppData {
+  access?: ProductAccess;
+  appSearch?: AppSearchAccount;
+  configuredLimits?: ConfiguredLimits;
   enterpriseSearchVersion?: string;
   kibanaVersion?: string;
   readOnlyMode?: boolean;
   searchOAuth?: SearchOAuth;
-  configuredLimits?: ConfiguredLimits;
-  access?: ProductAccess;
-  appSearch?: AppSearchAccount;
   workplaceSearch?: WorkplaceSearchInitialData;
 }
 
@@ -32,6 +32,7 @@ export interface ConfiguredLimits {
 
 export interface ProductAccess {
   hasAppSearchAccess: boolean;
+  hasSearchEnginesAccess: boolean;
   hasWorkplaceSearchAccess: boolean;
 }
 
@@ -51,4 +52,5 @@ export interface Meta {
   page: MetaPage;
 }
 
-export type { ElasticsearchIndex } from './indices';
+export type { ElasticsearchIndexWithPrivileges } from './indices';
+export type { KibanaDeps } from './kibana_deps';

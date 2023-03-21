@@ -36,6 +36,8 @@ export function FieldValueSuggestions({
   inspector,
   asCombobox = true,
   keepHistory = true,
+  showLogicalConditionSwitch,
+  useLogicalAND,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
   const [query, setQuery] = useState('');
@@ -77,6 +79,8 @@ export function FieldValueSuggestions({
       allowExclusions={allowExclusions}
       allowAllValuesSelection={singleSelection ? false : allowAllValuesSelection}
       required={required}
+      showLogicalConditionSwitch={showLogicalConditionSwitch}
+      useLogicalAND={useLogicalAND}
     />
   );
 }

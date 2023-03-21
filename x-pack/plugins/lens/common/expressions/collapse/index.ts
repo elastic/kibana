@@ -9,11 +9,14 @@ import { i18n } from '@kbn/i18n';
 
 import type { CollapseExpressionFunction } from './types';
 
+export type CollapseFunction = 'sum' | 'avg' | 'min' | 'max';
 export interface CollapseArgs {
   by?: string[];
   metric?: string[];
-  fn: 'sum' | 'avg' | 'min' | 'max';
+  fn: CollapseFunction[];
 }
+
+export type { CollapseExpressionFunction };
 
 /**
  * Collapses multiple rows into a single row using the specified function.
@@ -56,6 +59,7 @@ export const collapse: CollapseExpressionFunction = {
         defaultMessage: 'The aggregate function to apply',
       }),
       types: ['string'],
+      multi: true,
       required: true,
     },
   },

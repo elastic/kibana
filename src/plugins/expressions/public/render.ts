@@ -11,6 +11,8 @@ import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { isNumber } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+
 import {
   ExpressionRenderError,
   RenderErrorHandlerFnType,
@@ -28,9 +30,12 @@ export interface ExpressionRenderHandlerParams {
   onRenderError?: RenderErrorHandlerFnType;
   renderMode?: RenderMode;
   syncColors?: boolean;
+  syncCursor?: boolean;
   syncTooltips?: boolean;
   interactive?: boolean;
   hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
+  getCompatibleCellValueActions?: (data: object[]) => Promise<unknown[]>;
+  executionContext?: KibanaExecutionContext;
 }
 
 type UpdateValue = IInterpreterRenderUpdateParams<IExpressionLoaderParams>;
@@ -56,8 +61,11 @@ export class ExpressionRenderHandler {
       renderMode,
       syncColors,
       syncTooltips,
+      syncCursor,
       interactive,
       hasCompatibleActions = async () => false,
+      getCompatibleCellValueActions = async () => [],
+      executionContext,
     }: ExpressionRenderHandlerParams = {}
   ) {
     this.element = element;
@@ -84,6 +92,9 @@ export class ExpressionRenderHandler {
       reload: () => {
         this.updateSubject.next(null);
       },
+      getExecutionContext() {
+        return executionContext;
+      },
       update: (params: UpdateValue) => {
         this.updateSubject.next(params);
       },
@@ -99,10 +110,14 @@ export class ExpressionRenderHandler {
       isSyncTooltipsEnabled: () => {
         return syncTooltips || false;
       },
+      isSyncCursorEnabled: () => {
+        return syncCursor || true;
+      },
       isInteractive: () => {
         return interactive ?? true;
       },
       hasCompatibleActions,
+      getCompatibleCellValueActions,
     };
   }
 

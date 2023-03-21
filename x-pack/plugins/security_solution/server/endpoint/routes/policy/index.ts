@@ -30,12 +30,17 @@ export function registerPolicyRoutes(router: IRouter, endpointAppContext: Endpoi
       options: { authRequired: true },
     },
     withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
+      { any: ['canReadSecuritySolution', 'canAccessFleet'] },
       logger,
       getHostPolicyResponseHandler()
     )
   );
 
+  /**
+   * @deprecated
+   * @removeBy 9.0.0
+   *
+   */
   router.get(
     {
       path: AGENT_POLICY_SUMMARY_ROUTE,

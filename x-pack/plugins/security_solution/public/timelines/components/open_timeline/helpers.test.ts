@@ -48,13 +48,13 @@ import {
 import { resolveTimeline } from '../../containers/api';
 
 jest.mock('../../../common/store/inputs/actions');
-jest.mock('../../../common/components/url_state/normalize_time_range');
+jest.mock('../../../common/utils/normalize_time_range');
 jest.mock('../../store/timeline/actions');
 jest.mock('../../../common/store/app/actions');
 jest.mock('uuid', () => {
   return {
-    v1: jest.fn(() => 'uuid.v1()'),
-    v4: jest.fn(() => 'uuid.v4()'),
+    v1: jest.fn(() => 'uuidv1()'),
+    v4: jest.fn(() => 'uuidv4()'),
   };
 });
 
@@ -876,7 +876,7 @@ describe('helpers', () => {
       })();
       const expectedNote: Note = {
         created: new Date(anchor),
-        id: 'uuid.v4()',
+        id: 'uuidv4()',
         lastEdit: null,
         note: '# this would be some markdown',
         saveObjectId: null,
@@ -888,7 +888,7 @@ describe('helpers', () => {
       expect(dispatchUpdateNote).toHaveBeenCalledWith({ note: expectedNote });
       expect(dispatchAddGlobalTimelineNote).toHaveBeenLastCalledWith({
         id: TimelineId.active,
-        noteId: 'uuid.v4()',
+        noteId: 'uuidv4()',
       });
     });
   });

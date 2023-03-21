@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kibanaPackageJson } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { GetDeprecationsContext } from '@kbn/core/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -54,7 +54,7 @@ describe('getDeprecations', () => {
               get: () =>
                 ({
                   id: 'foo',
-                  package_policies: [''],
+                  package_policies: [{ package: { name: 'system' } }],
                 } as AgentPolicy),
             },
           }),

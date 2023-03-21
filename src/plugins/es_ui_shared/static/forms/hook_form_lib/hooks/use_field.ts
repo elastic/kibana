@@ -602,8 +602,14 @@ export const useField = <T, FormType = FormData, I = T>(
       // We only remove the field from the form "fieldsRefs" map when its path
       // changes (which in practice never occurs) or whenever the <UseField /> unmounts
       __removeField(path);
+
+      // We also have to trigger validation of dependant fields
+      const dependantFields = fieldsToValidateOnChange?.filter((f) => f !== path);
+      if (dependantFields?.length) {
+        validateFields(dependantFields);
+      }
     };
-  }, [path, __removeField]);
+  }, [path, __removeField, fieldsToValidateOnChange, validateFields]);
 
   // Value change: notify prop listener (<UseField onChange={() => {...}})
   // We have a separate useEffect for this as the "onChange" handler pass through prop
@@ -633,13 +639,6 @@ export const useField = <T, FormType = FormData, I = T>(
         setIsChangingValue(false);
       }
     });
-
-    return () => {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-        debounceTimeout.current = null;
-      }
-    };
   }, [valueHasChanged, runValidationsOnValueChange]);
 
   // Value change: set "isModified" state
@@ -676,6 +675,11 @@ export const useField = <T, FormType = FormData, I = T>(
 
     return () => {
       isMounted.current = false;
+
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+        debounceTimeout.current = null;
+      }
     };
   }, []);
 

@@ -12,6 +12,7 @@ export { getAppLandingUrl } from '../redirect_to_landing';
 export { getHostDetailsUrl, getHostsUrl } from '../redirect_to_hosts';
 export { getNetworkUrl, getNetworkDetailsUrl } from '../redirect_to_network';
 export { getTimelineTabsUrl, getTimelineUrl } from '../redirect_to_timelines';
+export { getAlertDetailsUrl, getAlertDetailsTabUrl } from '../redirect_to_alerts';
 export {
   getCaseDetailsUrl,
   getCaseUrl,
@@ -24,6 +25,7 @@ export const useFormatUrl = (page: SecurityPageName) => ({
   search: '',
 });
 
+// do not delete
 export const useGetSecuritySolutionUrl =
   () =>
   ({ path }: { path: string }) =>

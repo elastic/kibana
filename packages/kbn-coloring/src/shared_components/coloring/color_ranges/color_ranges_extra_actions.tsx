@@ -51,7 +51,7 @@ export function ColorRangesExtraActions({
   });
 
   return (
-    <EuiFlexGroup justifyContent="flexStart" gutterSize="none" wrap={true}>
+    <EuiFlexGroup justifyContent="flexStart" gutterSize="m" wrap={true}>
       <EuiFlexItem grow={false}>
         <TooltipWrapper
           tooltipContent={i18n.translate(

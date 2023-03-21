@@ -35,6 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('listing', () => {
+      before(async () => {
+        PageObjects.home.openSampleDataAccordion();
+      });
+
       it('should display registered flights sample data sets', async () => {
         await retry.try(async () => {
           const exists = await PageObjects.home.doesSampleDataSetExist('flights');
@@ -91,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(17);
+        expect(panelCount).to.be(16);
       });
 
       it('should render visualizations', async () => {
@@ -103,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Checking saved searches rendered');
         await dashboardExpect.savedSearchRowCount(10);
         log.debug('Checking input controls rendered');
-        await dashboardExpect.inputControlItemCount(3);
+        await dashboardExpect.controlCount(3);
         log.debug('Checking tag cloud rendered');
         await dashboardExpect.tagCloudWithValuesFound(['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail']);
         log.debug('Checking vega chart rendered');
@@ -115,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(13);
+        expect(panelCount).to.be(12);
       });
 
       it('should launch sample ecommerce data set dashboard', async () => {
@@ -123,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await renderable.waitForRender();
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.be(15);
+        expect(panelCount).to.be(14);
       });
     });
 

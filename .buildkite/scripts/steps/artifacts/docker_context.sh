@@ -4,13 +4,14 @@ set -euo pipefail
 
 .buildkite/scripts/bootstrap.sh
 
+source "$(dirname "$0")/../../common/util.sh"
 source .buildkite/scripts/steps/artifacts/env.sh
 
 KIBANA_DOCKER_CONTEXT="${KIBANA_DOCKER_CONTEXT:="default"}"
 
 echo "--- Create contexts"
 mkdir -p target
-node scripts/build --skip-initialize --skip-generic-folders --skip-platform-folders --skip-archives --docker-context-use-local-artifact $(echo "$BUILD_ARGS")
+node scripts/build --skip-initialize --skip-generic-folders --skip-platform-folders --skip-archives --docker-context-use-local-artifact "${BUILD_ARGS[@]}"
 
 echo "--- Setup context"
 DOCKER_BUILD_FOLDER=$(mktemp -d)
@@ -28,7 +29,7 @@ fi
 tar -xf "target/$DOCKER_CONTEXT_FILE" -C "$DOCKER_BUILD_FOLDER"
 cd $DOCKER_BUILD_FOLDER
 
-buildkite-agent artifact download "kibana-$FULL_VERSION-linux-x86_64.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_artifact "kibana-$FULL_VERSION-linux-x86_64.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
 echo "--- Build context"
 docker build .

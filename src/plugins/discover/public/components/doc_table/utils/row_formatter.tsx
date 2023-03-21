@@ -13,6 +13,7 @@ import { formatHit } from '../../../utils/format_hit';
 import type { DataTableRecord } from '../../../types';
 
 import './row_formatter.scss';
+import { type ShouldShowFieldInTableHandler } from '../../../utils/get_should_show_field_handler';
 
 interface Props {
   defPairs: Array<readonly [string, string]>;
@@ -39,12 +40,12 @@ const TemplateComponent = ({ defPairs }: Props) => {
 
 export const formatRow = (
   hit: DataTableRecord,
-  indexPattern: DataView,
-  fieldsToShow: string[],
+  dataView: DataView,
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
   fieldFormats: FieldFormatsStart
 ) => {
-  const pairs = formatHit(hit, indexPattern, fieldsToShow, maxEntries, fieldFormats);
+  const pairs = formatHit(hit, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
   return <TemplateComponent defPairs={pairs} />;
 };
 
@@ -53,7 +54,7 @@ export const formatTopLevelObject = (
   row: Record<string, any>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fields: Record<string, any>,
-  indexPattern: DataView,
+  dataView: DataView,
   maxEntries: number
 ) => {
   const highlights = row.highlight ?? {};
@@ -61,10 +62,10 @@ export const formatTopLevelObject = (
   const sourcePairs: Array<[string, string]> = [];
   const sorted = Object.entries(fields).sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
   sorted.forEach(([key, values]) => {
-    const field = indexPattern.getFieldByName(key);
+    const field = dataView.getFieldByName(key);
     const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
     const formatter = field
-      ? indexPattern.getFormatterForField(field)
+      ? dataView.getFormatterForField(field)
       : { convert: (v: unknown, ..._: unknown[]) => String(v) };
     if (!values.map) return;
     const formatted = values

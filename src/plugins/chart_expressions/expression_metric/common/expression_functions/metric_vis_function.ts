@@ -16,7 +16,7 @@ import {
 import { LayoutDirection } from '@elastic/charts';
 import { visType } from '../types';
 import { MetricVisExpressionFunctionDefinition } from '../types';
-import { EXPRESSION_METRIC_NAME } from '../constants';
+import { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';
 
 export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_NAME,
@@ -31,11 +31,18 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       help: i18n.translate('expressionMetricVis.function.metric.help', {
         defaultMessage: 'The primary metric.',
       }),
+      required: true,
     },
     secondaryMetric: {
       types: ['vis_dimension', 'string'],
       help: i18n.translate('expressionMetricVis.function.secondaryMetric.help', {
         defaultMessage: 'The secondary metric (shown above the primary).',
+      }),
+    },
+    max: {
+      types: ['vis_dimension', 'string'],
+      help: i18n.translate('expressionMetricVis.function.max.help.', {
+        defaultMessage: 'The dimension containing the maximum value.',
       }),
     },
     breakdownBy: {
@@ -44,22 +51,22 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'The dimension containing the labels for sub-categories.',
       }),
     },
+    trendline: {
+      types: [EXPRESSION_METRIC_TRENDLINE_NAME],
+      help: i18n.translate('expressionMetricVis.function.trendline.help', {
+        defaultMessage: 'An optional trendline configuration',
+      }),
+    },
     subtitle: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.subtitle.help', {
         defaultMessage: 'The subtitle for a single metric. Overridden if breakdownBy is supplied.',
       }),
     },
-    extraText: {
+    secondaryPrefix: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.extra.help', {
-        defaultMessage: 'Text to be shown above metric value. Overridden by secondaryMetric.',
-      }),
-    },
-    progressMax: {
-      types: ['vis_dimension', 'string'],
-      help: i18n.translate('expressionMetricVis.function.progressMax.help.', {
-        defaultMessage: 'The dimension containing the maximum value.',
+      help: i18n.translate('expressionMetricVis.function.secondaryPrefix.help', {
+        defaultMessage: 'Optional text to be show before secondaryMetric.',
       }),
     },
     progressDirection: {
@@ -71,6 +78,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }),
       strict: true,
     },
+    color: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.color.help', {
+        defaultMessage: 'Provides a static visualization color. Overridden by palette.',
+      }),
+    },
     palette: {
       types: ['palette'],
       help: i18n.translate('expressionMetricVis.function.palette.help', {
@@ -79,7 +92,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
     maxCols: {
       types: ['number'],
-      help: i18n.translate('expressionMetricVis.function.maxCols.help', {
+      help: i18n.translate('expressionMetricVis.function.numCols.help', {
         defaultMessage: 'Specifies the max number of columns in the metric grid.',
       }),
       default: 5,
@@ -91,10 +104,19 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
           'Specifies the minimum number of tiles in the metric grid regardless of the input data.',
       }),
     },
+    inspectorTableId: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.inspectorTableId.help', {
+        defaultMessage: 'An ID for the inspector table',
+      }),
+      multi: false,
+      default: 'default',
+    },
   },
   fn(input, args, handlers) {
     validateAccessor(args.metric, input.columns);
     validateAccessor(args.secondaryMetric, input.columns);
+    validateAccessor(args.max, input.columns);
     validateAccessor(args.breakdownBy, input.columns);
 
     if (handlers?.inspectorAdapters?.tables) {
@@ -128,9 +150,9 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         ]);
       }
 
-      if (args.progressMax) {
+      if (args.max) {
         argsTable.push([
-          [args.progressMax],
+          [args.max],
           i18n.translate('expressionMetricVis.function.dimension.maximum', {
             defaultMessage: 'Maximum',
           }),
@@ -138,7 +160,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }
 
       const logTable = prepareLogTable(input, argsTable, true);
-      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+      handlers.inspectorAdapters.tables.logDatatable(args.inspectorTableId, logTable);
+
+      if (args.trendline?.inspectorTable && args.trendline.inspectorTableId) {
+        handlers.inspectorAdapters.tables.logDatatable(
+          args.trendline?.inspectorTableId,
+          args.trendline?.inspectorTable
+        );
+      }
     }
 
     return {
@@ -150,17 +179,19 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         visConfig: {
           metric: {
             subtitle: args.subtitle,
-            extraText: args.extraText,
+            secondaryPrefix: args.secondaryPrefix,
+            color: args.color,
             palette: args.palette?.params,
             progressDirection: args.progressDirection,
             maxCols: args.maxCols,
             minTiles: args.minTiles,
+            trends: args.trendline?.trends,
           },
           dimensions: {
             metric: args.metric,
             secondaryMetric: args.secondaryMetric,
+            max: args.max,
             breakdownBy: args.breakdownBy,
-            progressMax: args.progressMax,
           },
         },
       },

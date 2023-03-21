@@ -7,7 +7,7 @@
  */
 
 import { identity } from 'lodash';
-import type { ExpressionAstExpression } from '@kbn/expressions-plugin';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 
 import { AggConfig, IAggConfig } from './agg_config';
 import { AggConfigs, CreateAggConfigParams } from './agg_configs';
@@ -190,6 +190,85 @@ describe('AggConfig', () => {
       expect(dsl.aggs).toHaveProperty(medianConfig.id);
       expect(dsl.aggs[medianConfig.id]).toHaveProperty('percentiles');
       expect(dsl.aggs[medianConfig.id].percentiles).toBe(football);
+    });
+
+    it('properly handles nested sibling pipeline aggregations', () => {
+      const customBucket = {
+        type: 'date_histogram',
+        params: {
+          field: '@timestamp',
+          interval: '1h',
+        },
+      };
+      const customMetric = {
+        type: 'avg_bucket',
+        params: {
+          customBucket: {
+            type: 'date_histogram',
+            params: {
+              field: '@timestamp',
+              interval: '30m',
+            },
+          },
+          customMetric: {
+            type: 'sum',
+            params: {
+              field: 'bytes',
+            },
+          },
+        },
+      };
+      const configStates = [
+        {
+          type: 'avg_bucket',
+          params: {
+            customBucket,
+            customMetric,
+          },
+        },
+      ];
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
+      const dsl = ac.toDsl();
+
+      expect(dsl).toMatchInlineSnapshot(`
+        Object {
+          "1": Object {
+            "avg_bucket": Object {
+              "buckets_path": "1-bucket>1-metric",
+            },
+          },
+          "1-bucket": Object {
+            "aggs": Object {
+              "1-bucket": Object {
+                "aggs": Object {
+                  "1-metric": Object {
+                    "sum": Object {
+                      "field": "bytes",
+                    },
+                  },
+                },
+                "date_histogram": Object {
+                  "field": "@timestamp",
+                  "fixed_interval": "30m",
+                  "min_doc_count": 1,
+                  "time_zone": "dateFormat:tz",
+                },
+              },
+              "1-metric": Object {
+                "avg_bucket": Object {
+                  "buckets_path": "1-bucket>1-metric",
+                },
+              },
+            },
+            "date_histogram": Object {
+              "calendar_interval": "1h",
+              "field": "@timestamp",
+              "min_doc_count": 1,
+              "time_zone": "dateFormat:tz",
+            },
+          },
+        }
+      `);
     });
   });
 
@@ -563,11 +642,17 @@ describe('AggConfig', () => {
                 "enabled": Array [
                   true,
                 ],
+                "excludeIsRegex": Array [
+                  true,
+                ],
                 "field": Array [
                   "machine.os.keyword",
                 ],
                 "id": Array [
                   "1",
+                ],
+                "includeIsRegex": Array [
+                  true,
                 ],
                 "missingBucket": Array [
                   false,
@@ -629,11 +714,17 @@ describe('AggConfig', () => {
                   "enabled": Array [
                     true,
                   ],
+                  "excludeIsRegex": Array [
+                    true,
+                  ],
                   "field": Array [
                     "bytes",
                   ],
                   "id": Array [
                     "1-orderAgg",
+                  ],
+                  "includeIsRegex": Array [
+                    true,
                   ],
                   "missingBucket": Array [
                     false,

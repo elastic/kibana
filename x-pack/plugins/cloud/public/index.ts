@@ -13,5 +13,3 @@ export type { CloudSetup, CloudConfigType, CloudStart } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new CloudPlugin(initializerContext);
 }
-
-export { Chat } from './components';

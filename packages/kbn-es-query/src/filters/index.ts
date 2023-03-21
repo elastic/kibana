@@ -17,6 +17,7 @@ export {
   isFilter,
   isFilters,
   pinFilter,
+  updateFilter,
   isFilterPinned,
   onlyDisabledFiltersChanged,
   enableFilter,
@@ -34,6 +35,8 @@ export {
 export {
   isExistsFilter,
   isMatchAllFilter,
+  buildCombinedFilter,
+  isCombinedFilter,
   isPhraseFilter,
   isPhrasesFilter,
   isRangeFilter,
@@ -55,10 +58,12 @@ export {
   isScriptedPhraseFilter,
   isScriptedRangeFilter,
   getFilterParams,
+  BooleanRelation,
 } from './build_filters';
 
 export type {
   Query,
+  AggregateQuery,
   Filter,
   LatLon,
   FieldFilter,
@@ -74,6 +79,8 @@ export type {
   CustomFilter,
   RangeFilterParams,
   QueryStringFilter,
+  CombinedFilter,
+  CombinedFilterMeta,
 } from './build_filters';
 
 export { FilterStateStore, FILTERS } from './build_filters/types';

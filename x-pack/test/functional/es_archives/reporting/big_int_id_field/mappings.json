@@ -1,0 +1,25 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "test_elastic",
+    "mappings": {
+      "properties": {
+        "timestamp": {
+          "format": "yyyyMMddHHmmss||yyyyMMddHHmmssZ||strict_date_optional_time||epoch_millis",
+          "type": "date"
+        },
+        "message_type": {
+          "type": "keyword"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

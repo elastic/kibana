@@ -9,9 +9,9 @@ import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
 import type { ObjectWithNavTabs } from '.';
 import { getBreadcrumbsForRoute, useSetBreadcrumbs } from '.';
-import { HostsTableType } from '../../../../hosts/store/model';
-import type { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
-import { NetworkRouteType } from '../../../../network/pages/navigation/types';
+import { HostsTableType } from '../../../../explore/hosts/store/model';
+import type { RouteSpyState } from '../../../utils/route/types';
+import { NetworkRouteType } from '../../../../explore/network/pages/navigation/types';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { AdministrationSubTab } from '../../../../management/types';
 import { renderHook } from '@testing-library/react-hooks';
@@ -24,6 +24,8 @@ import { navTabs } from '../../../../app/home/home_navigations';
 import { links } from '../../../links/app_links';
 import { updateAppLinks } from '../../../links';
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
+import { AlertDetailRouteType } from '../../../../detections/pages/alert_details/types';
+import { UsersTableType } from '../../../../explore/users/store/model';
 
 jest.mock('../../../hooks/use_selector');
 
@@ -42,31 +44,72 @@ const chromeMock = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
 
-const mockDefaultTab = (pageName: string): SiemRouteType | undefined => {
-  switch (pageName) {
-    case 'hosts':
-      return HostsTableType.authentications;
-    case 'network':
-      return NetworkRouteType.flows;
-    case 'administration':
-      return AdministrationSubTab.endpoints;
-    default:
-      return undefined;
-  }
-};
-
 const getMockObject = (
   pageName: SecurityPageName,
   pathName: string,
   detailName: string | undefined
-): RouteSpyState & ObjectWithNavTabs => ({
-  detailName,
-  navTabs,
-  pageName,
-  pathName,
-  search: '',
-  tabName: mockDefaultTab(pageName) as HostsTableType,
-});
+): RouteSpyState & ObjectWithNavTabs => {
+  switch (pageName) {
+    case SecurityPageName.hosts:
+      return {
+        detailName,
+        navTabs,
+        pageName,
+        pathName,
+        search: '',
+        tabName: HostsTableType.authentications,
+      };
+
+    case SecurityPageName.users:
+      return {
+        detailName,
+        navTabs,
+        pageName,
+        pathName,
+        search: '',
+        tabName: UsersTableType.allUsers,
+      };
+
+    case SecurityPageName.network:
+      return {
+        detailName,
+        navTabs,
+        pageName,
+        pathName,
+        search: '',
+        tabName: NetworkRouteType.flows,
+      };
+
+    case SecurityPageName.administration:
+      return {
+        detailName,
+        navTabs,
+        pageName,
+        pathName,
+        search: '',
+        tabName: AdministrationSubTab.endpoints,
+      };
+
+    case SecurityPageName.alerts:
+      return {
+        detailName,
+        navTabs,
+        pageName,
+        pathName,
+        search: '',
+        tabName: AlertDetailRouteType.summary,
+      };
+
+    default:
+      return {
+        detailName,
+        navTabs,
+        pageName,
+        pathName,
+        search: '',
+      } as RouteSpyState & ObjectWithNavTabs;
+  }
+};
 
 (useDeepEqualSelector as jest.Mock).mockImplementation(() => {
   return {
@@ -131,6 +174,11 @@ const exploreBreadcrumbs = {
 const rulesBReadcrumb = {
   text: 'Rules',
   href: 'securitySolutionUI/rules',
+};
+
+const exceptionsBReadcrumb = {
+  text: 'Shared Exception Lists',
+  href: 'securitySolutionUI/exceptions',
 };
 
 const manageBreadcrumbs = {
@@ -240,7 +288,7 @@ describe('Navigation Breadcrumbs', () => {
           hostsBreadcrumbs,
           {
             text: 'siem-kibana',
-            href: 'securitySolutionUI/hosts/siem-kibana',
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
           },
           { text: 'Authentications', href: '' },
         ]);
@@ -257,7 +305,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv4,
-            href: `securitySolutionUI/network/ip/${ipv4}/source`,
+            href: `securitySolutionUI/network/ip/${ipv4}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
@@ -274,7 +322,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv6,
-            href: `securitySolutionUI/network/ip/${ipv6Encoded}/source`,
+            href: `securitySolutionUI/network/ip/${ipv6Encoded}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
@@ -290,6 +338,10 @@ describe('Navigation Breadcrumbs', () => {
           securityBreadCrumb,
           {
             text: 'Alerts',
+            href: 'securitySolutionUI/alerts',
+          },
+          {
+            text: 'Summary',
             href: '',
           },
         ]);
@@ -304,7 +356,7 @@ describe('Navigation Breadcrumbs', () => {
         expect(breadcrumbs).toEqual([
           securityBreadCrumb,
           {
-            text: 'Exception lists',
+            text: 'Shared Exception Lists',
             href: '',
           },
         ]);
@@ -359,8 +411,8 @@ describe('Navigation Breadcrumbs', () => {
           securityBreadCrumb,
           rulesBReadcrumb,
           {
-            text: mockRuleName,
-            href: ``,
+            text: 'ALERT_RULE_NAME',
+            href: '',
           },
         ]);
       });
@@ -418,9 +470,9 @@ describe('Navigation Breadcrumbs', () => {
         expect(breadcrumbs).toEqual(null);
       });
 
-      test('should return Admin breadcrumbs when supplied endpoints pageName', () => {
+      test('should return Endpoints breadcrumbs when supplied endpoints pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject(SecurityPageName.administration, '/endpoints', undefined),
+          getMockObject(SecurityPageName.endpoints, '/endpoints', undefined),
           getSecuritySolutionUrl,
           false
         );
@@ -430,6 +482,32 @@ describe('Navigation Breadcrumbs', () => {
           {
             text: 'Endpoints',
             href: '',
+          },
+        ]);
+      });
+
+      test('should return Exceptions breadcrumbs when supplied exception Details pageName', () => {
+        const mockListName = 'new shared list';
+        const breadcrumbs = getBreadcrumbsForRoute(
+          {
+            ...getMockObject(
+              SecurityPageName.exceptions,
+              `/exceptions/details/${mockListName}`,
+              undefined
+            ),
+            state: {
+              listName: mockListName,
+            },
+          },
+          getSecuritySolutionUrl,
+          false
+        );
+        expect(breadcrumbs).toEqual([
+          securityBreadCrumb,
+          exceptionsBReadcrumb,
+          {
+            text: mockListName,
+            href: ``,
           },
         ]);
       });
@@ -458,7 +536,7 @@ describe('Navigation Breadcrumbs', () => {
           }),
           expect.objectContaining({
             text: 'siem-kibana',
-            href: 'securitySolutionUI/hosts/siem-kibana',
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
             onClick: expect.any(Function),
           }),
           {
@@ -556,7 +634,7 @@ describe('Navigation Breadcrumbs', () => {
           hostsBreadcrumbs,
           {
             text: 'siem-kibana',
-            href: 'securitySolutionUI/hosts/siem-kibana',
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
           },
           { text: 'Authentications', href: '' },
         ]);
@@ -574,7 +652,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv4,
-            href: `securitySolutionUI/network/ip/${ipv4}/source`,
+            href: `securitySolutionUI/network/ip/${ipv4}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
@@ -592,7 +670,7 @@ describe('Navigation Breadcrumbs', () => {
           networkBreadcrumb,
           {
             text: ipv6,
-            href: `securitySolutionUI/network/ip/${ipv6Encoded}/source`,
+            href: `securitySolutionUI/network/ip/${ipv6Encoded}/source/flows`,
           },
           { text: 'Flows', href: '' },
         ]);
@@ -608,6 +686,10 @@ describe('Navigation Breadcrumbs', () => {
           securityBreadCrumb,
           {
             text: 'Alerts',
+            href: 'securitySolutionUI/alerts',
+          },
+          {
+            text: 'Summary',
             href: '',
           },
         ]);
@@ -623,7 +705,7 @@ describe('Navigation Breadcrumbs', () => {
           securityBreadCrumb,
           manageBreadcrumbs,
           {
-            text: 'Exception lists',
+            text: 'Shared Exception Lists',
             href: '',
           },
         ]);
@@ -741,9 +823,9 @@ describe('Navigation Breadcrumbs', () => {
         expect(breadcrumbs).toEqual(null);
       });
 
-      test('should return Admin breadcrumbs when supplied endpoints pageName', () => {
+      test('should return Endpoints breadcrumbs when supplied endpoints pageName', () => {
         const breadcrumbs = getBreadcrumbsForRoute(
-          getMockObject(SecurityPageName.administration, '/endpoints', undefined),
+          getMockObject(SecurityPageName.endpoints, '/', undefined),
           getSecuritySolutionUrl,
           true
         );
@@ -754,6 +836,47 @@ describe('Navigation Breadcrumbs', () => {
           {
             text: 'Endpoints',
             href: '',
+          },
+        ]);
+      });
+
+      test('should return Admin breadcrumbs when supplied admin pageName', () => {
+        const breadcrumbs = getBreadcrumbsForRoute(
+          getMockObject(SecurityPageName.administration, '/', undefined),
+          getSecuritySolutionUrl,
+          true
+        );
+
+        expect(breadcrumbs).toEqual([
+          securityBreadCrumb,
+          {
+            text: 'Manage',
+            href: '',
+          },
+        ]);
+      });
+      test('should return Exceptions breadcrumbs when supplied exception Details pageName', () => {
+        const mockListName = 'new shared list';
+        const breadcrumbs = getBreadcrumbsForRoute(
+          {
+            ...getMockObject(
+              SecurityPageName.exceptions,
+              `/exceptions/details/${mockListName}`,
+              undefined
+            ),
+            state: {
+              listName: mockListName,
+            },
+          },
+          getSecuritySolutionUrl,
+          false
+        );
+        expect(breadcrumbs).toEqual([
+          securityBreadCrumb,
+          exceptionsBReadcrumb,
+          {
+            text: mockListName,
+            href: ``,
           },
         ]);
       });
@@ -787,7 +910,7 @@ describe('Navigation Breadcrumbs', () => {
           }),
           expect.objectContaining({
             text: 'siem-kibana',
-            href: 'securitySolutionUI/hosts/siem-kibana',
+            href: 'securitySolutionUI/hosts/name/siem-kibana',
             onClick: expect.any(Function),
           }),
           {

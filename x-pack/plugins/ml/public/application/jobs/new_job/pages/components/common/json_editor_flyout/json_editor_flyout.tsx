@@ -8,6 +8,7 @@
 import React, { Fragment, FC, useState, useContext, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { memoize } from 'lodash';
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -20,7 +21,8 @@ import {
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
-import { collapseLiteralStrings } from '../../../../../../../../shared_imports';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { useMlApiContext } from '../../../../../../contexts/kibana';
 import { CombinedJob, Datafeed } from '../../../../../../../../common/types/anomaly_detection_jobs';
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
@@ -28,6 +30,8 @@ import { JobCreatorContext } from '../../job_creator_context';
 import { isAdvancedJobCreator } from '../../../../common/job_creator';
 import { DatafeedPreview } from '../datafeed_preview_flyout';
 import { useToastNotificationService } from '../../../../../../services/toast_notification_service';
+
+const { collapseLiteralStrings } = XJson;
 
 export enum EDITOR_MODE {
   HIDDEN,
@@ -40,11 +44,23 @@ interface Props {
   jobEditorMode: EDITOR_MODE;
   datafeedEditorMode: EDITOR_MODE;
 }
+
+const fetchSchemas = memoize(
+  async (jsonSchemaApi, path: string, method: string) =>
+    jsonSchemaApi.getSchemaDefinition({
+      path,
+      method,
+    }),
+  (jsonSchemaApi, path, method) => path + method
+);
+
 export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafeedEditorMode }) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const { displayErrorToast } = useToastNotificationService();
   const [showJsonFlyout, setShowJsonFlyout] = useState(false);
   const [showChangedIndicesWarning, setShowChangedIndicesWarning] = useState(false);
+
+  const { jsonSchema: jsonSchemaApi } = useMlApiContext();
 
   const [jobConfigString, setJobConfigString] = useState(jobCreator.formattedJobJson);
   const [datafeedConfigString, setDatafeedConfigString] = useState(
@@ -52,10 +68,13 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
   );
   const [saveable, setSaveable] = useState(false);
   const [tempCombinedJob, setTempCombinedJob] = useState<CombinedJob | null>(null);
+  const [jobSchema, setJobSchema] = useState<object>();
+  const [datafeedSchema, setDatafeedSchema] = useState<object>();
 
   useEffect(() => {
     setJobConfigString(jobCreator.formattedJobJson);
     setDatafeedConfigString(jobCreator.formattedDatafeedJson);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
@@ -72,7 +91,31 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
     } else {
       setTempCombinedJob(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showJsonFlyout]);
+
+  useEffect(
+    function fetchSchemasOnMount() {
+      fetchSchemas(jsonSchemaApi, '/_ml/anomaly_detectors/{job_id}', 'put')
+        .then((result) => {
+          setJobSchema(result);
+        })
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.error(e);
+        });
+
+      fetchSchemas(jsonSchemaApi, '/_ml/datafeeds/{datafeed_id}', 'put')
+        .then((result) => {
+          setDatafeedSchema(result);
+        })
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.error(e);
+        });
+    },
+    [jsonSchemaApi]
+  );
 
   const editJsonMode =
     jobEditorMode === EDITOR_MODE.EDITABLE || datafeedEditorMode === EDITOR_MODE.EDITABLE;
@@ -156,7 +199,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
         <EuiFlyout onClose={() => setShowJsonFlyout(false)} hideCloseButton size={'l'}>
           <EuiFlyoutBody>
             <EuiFlexGroup>
-              {jobEditorMode !== EDITOR_MODE.HIDDEN && (
+              {jobEditorMode !== EDITOR_MODE.HIDDEN ? (
                 <Contents
                   editJson={jobEditorMode === EDITOR_MODE.EDITABLE}
                   onChange={onJobChange}
@@ -165,9 +208,10 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                   })}
                   value={jobConfigString}
                   heightOffset={showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0}
+                  schema={jobSchema}
                 />
-              )}
-              {datafeedEditorMode !== EDITOR_MODE.HIDDEN && (
+              ) : null}
+              {datafeedEditorMode !== EDITOR_MODE.HIDDEN ? (
                 <>
                   <Contents
                     editJson={datafeedEditorMode === EDITOR_MODE.EDITABLE}
@@ -177,6 +221,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                     })}
                     value={datafeedConfigString}
                     heightOffset={showChangedIndicesWarning ? WARNING_CALLOUT_OFFSET : 0}
+                    schema={datafeedSchema}
                   />
                   {datafeedEditorMode === EDITOR_MODE.EDITABLE && (
                     <EuiFlexItem>
@@ -187,7 +232,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                     </EuiFlexItem>
                   )}
                 </>
-              )}
+              ) : null}
             </EuiFlexGroup>
             {showChangedIndicesWarning && (
               <>
@@ -270,7 +315,8 @@ const Contents: FC<{
   editJson: boolean;
   onChange(s: string): void;
   heightOffset?: number;
-}> = ({ title, value, editJson, onChange, heightOffset = 0 }) => {
+  schema?: object;
+}> = ({ title, value, editJson, onChange, heightOffset = 0, schema }) => {
   // the ace editor requires a fixed height
   const editorHeight = useMemo(
     () => `${window.innerHeight - 230 - heightOffset}px`,
@@ -285,9 +331,10 @@ const Contents: FC<{
       <MLJobEditor
         value={value}
         height={editorHeight}
-        mode={ML_EDITOR_MODE.XJSON}
+        mode={ML_EDITOR_MODE.JSON}
         readOnly={editJson === false}
         onChange={onChange}
+        schema={schema}
       />
     </EuiFlexItem>
   );

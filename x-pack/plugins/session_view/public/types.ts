@@ -27,6 +27,7 @@ export interface SessionViewDeps {
     // Callback used when alert flyout panel is closed
     handleOnAlertDetailsClosed: () => void
   ) => void;
+  canAccessEndpointManagement?: boolean;
 }
 
 export interface EuiTabProps {
@@ -107,14 +108,14 @@ export interface DetailPanelOrchestrator {
     name: string;
     type: string;
     ip: string;
+    parent: {
+      type: string;
+    };
   };
   namespace: string;
   cluster: {
     name: string;
     id: string;
-  };
-  parent: {
-    type: string;
   };
 }
 

@@ -7,8 +7,9 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import { FieldOption } from '../types';
 
-const DATA_API_ROOT = '/api/triggers_actions_ui/data';
+const DATA_API_ROOT = '/internal/triggers_actions_ui/data';
 
 const formatPattern = (pattern: string) => {
   let formattedPattern = pattern;
@@ -47,15 +48,7 @@ export async function getESIndexFields({
 }: {
   indexes: string[];
   http: HttpSetup;
-}): Promise<
-  Array<{
-    name: string;
-    type: string;
-    normalizedType: string;
-    searchable: boolean;
-    aggregatable: boolean;
-  }>
-> {
+}): Promise<FieldOption[]> {
   const { fields } = await http.post<{ fields: ReturnType<typeof getESIndexFields> }>(
     `${DATA_API_ROOT}/_fields`,
     { body: JSON.stringify({ indexPatterns: indexes }) }

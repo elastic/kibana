@@ -18,13 +18,16 @@ describe('KibanaExecutionContext', () => {
         type: 'test-type',
         name: 'test-name',
         id: '42',
+        meta: {
+          foo: 'test',
+        },
         description: 'test-descripton',
       };
 
       const value = new ExecutionContextContainer(context).toHeader();
       expect(value).toMatchInlineSnapshot(`
         Object {
-          "x-kbn-context": "%7B%22type%22%3A%22test-type%22%2C%22name%22%3A%22test-name%22%2C%22id%22%3A%2242%22%2C%22description%22%3A%22test-descripton%22%7D",
+          "x-kbn-context": "%7B%22type%22%3A%22test-type%22%2C%22name%22%3A%22test-name%22%2C%22id%22%3A%2242%22%2C%22meta%22%3A%7B%22foo%22%3A%22test%22%7D%2C%22description%22%3A%22test-descripton%22%7D",
         }
       `);
     });
@@ -34,6 +37,9 @@ describe('KibanaExecutionContext', () => {
         type: 'child-test-type',
         name: 'child-test-name',
         id: '42',
+        meta: {
+          foo: true,
+        },
         description: 'child-test-descripton',
       };
 
@@ -48,7 +54,7 @@ describe('KibanaExecutionContext', () => {
       const value = new ExecutionContextContainer(context).toHeader();
       expect(value).toMatchInlineSnapshot(`
         Object {
-          "x-kbn-context": "%7B%22type%22%3A%22type%22%2C%22name%22%3A%22name%22%2C%22id%22%3A%2241%22%2C%22description%22%3A%22descripton%22%2C%22child%22%3A%7B%22type%22%3A%22child-test-type%22%2C%22name%22%3A%22child-test-name%22%2C%22id%22%3A%2242%22%2C%22description%22%3A%22child-test-descripton%22%7D%7D",
+          "x-kbn-context": "%7B%22type%22%3A%22type%22%2C%22name%22%3A%22name%22%2C%22id%22%3A%2241%22%2C%22description%22%3A%22descripton%22%2C%22child%22%3A%7B%22type%22%3A%22child-test-type%22%2C%22name%22%3A%22child-test-name%22%2C%22id%22%3A%2242%22%2C%22meta%22%3A%7B%22foo%22%3Atrue%7D%2C%22description%22%3A%22child-test-descripton%22%7D%7D",
         }
       `);
     });
@@ -58,13 +64,16 @@ describe('KibanaExecutionContext', () => {
         type: 'test-type',
         name: 'test-name',
         id: '42',
+        meta: {
+          foo: '1',
+        },
         description: 'long long test-descripton,'.repeat(1000),
       };
 
       const value = new ExecutionContextContainer(context).toHeader();
       expect(value).toMatchInlineSnapshot(`
         Object {
-          "x-kbn-context": "%7B%22type%22%3A%22test-type%22%2C%22name%22%3A%22test-name%22%2C%22id%22%3A%2242%22%2C%22description%22%3A%22long%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test",
+          "x-kbn-context": "%7B%22type%22%3A%22test-type%22%2C%22name%22%3A%22test-name%22%2C%22id%22%3A%2242%22%2C%22meta%22%3A%7B%22foo%22%3A%221%22%7D%2C%22description%22%3A%22long%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20long%20test-descripton%2Clong%20lo",
         }
       `);
 
@@ -78,13 +87,16 @@ describe('KibanaExecutionContext', () => {
         type: 'test-type',
         name: 'test-name',
         id: '42',
+        meta: {
+          foo: 'meta',
+        },
         description: 'описание',
       };
 
       const value = new ExecutionContextContainer(context).toHeader();
       expect(value).toMatchInlineSnapshot(`
         Object {
-          "x-kbn-context": "%7B%22type%22%3A%22test-type%22%2C%22name%22%3A%22test-name%22%2C%22id%22%3A%2242%22%2C%22description%22%3A%22%D0%BE%D0%BF%D0%B8%D1%81%D0%B0%D0%BD%D0%B8%D0%B5%22%7D",
+          "x-kbn-context": "%7B%22type%22%3A%22test-type%22%2C%22name%22%3A%22test-name%22%2C%22id%22%3A%2242%22%2C%22meta%22%3A%7B%22foo%22%3A%22meta%22%7D%2C%22description%22%3A%22%D0%BE%D0%BF%D0%B8%D1%81%D0%B0%D0%BD%D0%B8%D0%B5%22%7D",
         }
       `);
     });
@@ -95,6 +107,9 @@ describe('KibanaExecutionContext', () => {
         type: 'test-type',
         name: 'test-name',
         id: '42',
+        meta: {
+          foo: false,
+        },
         description: 'test-descripton',
       };
 
@@ -107,6 +122,9 @@ describe('KibanaExecutionContext', () => {
         type: 'child-b-type',
         name: 'child-b-name',
         id: '42',
+        meta: {
+          foo: 'test',
+        },
         description: 'child-b-descripton',
       };
 

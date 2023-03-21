@@ -14,13 +14,12 @@ import { PieTypeProps } from '../../types';
 const PieOptionsLazy = lazy(() => import('./pie'));
 
 export const getPieOptions =
-  ({ showElasticChartsOptions, palettes, trackUiMetric }: PieTypeProps) =>
+  ({ showElasticChartsOptions, palettes }: PieTypeProps) =>
   (props: VisEditorOptionsProps<PartitionVisParams>) =>
     (
       <PieOptionsLazy
         {...props}
         palettes={palettes}
         showElasticChartsOptions={showElasticChartsOptions}
-        trackUiMetric={trackUiMetric}
       />
     );

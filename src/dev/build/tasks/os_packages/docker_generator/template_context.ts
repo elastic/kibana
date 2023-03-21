@@ -15,6 +15,7 @@ export interface TemplateContext {
   license: string;
   artifactsDir: string;
   dockerPush: boolean;
+  dockerTag: string | null;
   dockerTagQualifier: string | null;
   dockerCrossCompile: boolean;
   imageTag: string;

@@ -16,7 +16,7 @@ Object {
       },
     ],
   },
-  "index": "myIndex",
+  "index": ".apm-custom-link",
   "size": 500,
 }
 `;
@@ -84,7 +84,7 @@ Object {
       },
     ],
   },
-  "index": "myIndex",
+  "index": ".apm-custom-link",
   "size": 500,
 }
 `;

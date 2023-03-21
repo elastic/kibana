@@ -7,7 +7,15 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { EuiCallOut, EuiForm, EuiLink, EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiForm,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiSplitPanel,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -92,10 +100,12 @@ export class TelemetryManagementSection extends Component<Props, State> {
       <Fragment>
         {showExample && (
           <TrackApplicationView viewId="optInExampleFlyout">
-            <OptInExampleFlyout
-              fetchExample={telemetryService.fetchExample}
-              onClose={this.toggleExample}
-            />
+            <React.Suspense fallback={<EuiLoadingSpinner />}>
+              <OptInExampleFlyout
+                fetchExample={telemetryService.fetchExample}
+                onClose={this.toggleExample}
+              />
+            </React.Suspense>
           </TrackApplicationView>
         )}
         <EuiSplitPanel.Outer hasBorder>
@@ -151,22 +161,20 @@ export class TelemetryManagementSection extends Component<Props, State> {
         color="primary"
         iconType="spacesApp"
         title={
-          <p>
-            <FormattedMessage
-              id="telemetry.callout.appliesSettingTitle"
-              defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
-              values={{
-                allOfKibanaText: (
-                  <strong>
-                    <FormattedMessage
-                      id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
-                      defaultMessage="all of Kibana"
-                    />
-                  </strong>
-                ),
-              }}
-            />
-          </p>
+          <FormattedMessage
+            id="telemetry.callout.appliesSettingTitle"
+            defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
+            values={{
+              allOfKibanaText: (
+                <strong>
+                  <FormattedMessage
+                    id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
+                    defaultMessage="all of Kibana"
+                  />
+                </strong>
+              ),
+            }}
+          />
         }
       />
     );

@@ -45,6 +45,7 @@ describe('connectors_selection', () => {
       group: 'group',
       class: 'test class',
     },
+    uuid: '123-456',
   };
 
   const actionTypeIndex: Record<string, ActionType> = {
@@ -55,6 +56,7 @@ describe('connectors_selection', () => {
       enabledInConfig: true,
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
     },
   };
 

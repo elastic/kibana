@@ -60,7 +60,7 @@ The number of saved object fields broken down by saved object type.
 [[ci-metric-adding-new-metrics]]
 === Adding new metrics
 
-You can report new metrics by using the `CiStatsReporter` class provided by the `@kbn/dev-utils` package. This class is automatically configured on CI and its methods noop when running outside of CI. For more details checkout the {kib-repo}blob/{branch}/packages/kbn-dev-utils/src/ci_stats_reporter[`CiStatsReporter` readme].
+You can report new metrics by using the `CiStatsReporter` class provided by the `@kbn/dev-utils` package. This class is automatically configured on CI and its methods noop when running outside of CI. For more details checkout the {kib-repo}blob/{branch}/packages/kbn-ci-stats-reporter[`CiStatsReporter` readme].
 
 [[ci-metric-resolving-overages]]
 === Resolving `page load bundle size` overages

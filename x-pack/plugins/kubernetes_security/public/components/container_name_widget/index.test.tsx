@@ -21,7 +21,7 @@ import { ROW_TEST_ID } from './container_name_row';
 
 const TABLE_SORT_BUTTON_ID = 'tableHeaderSortButton';
 
-const TITLE = 'Container Images Session';
+const TITLE = 'Container images';
 const GLOBAL_FILTER: GlobalFilter = {
   endDate: '2022-06-15T14:15:25.777Z',
   filterQuery: '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}',
@@ -64,6 +64,7 @@ jest.mock('../../hooks/use_filter', () => ({
   useSetFilter: () => ({
     getFilterForValueButton: jest.fn(),
     getFilterOutValueButton: jest.fn(),
+    getCopyButton: jest.fn(),
     filterManager: {},
   }),
 }));

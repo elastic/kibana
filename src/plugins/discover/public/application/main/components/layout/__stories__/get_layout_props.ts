@@ -6,132 +6,168 @@
  * Side Public License, v 1.
  */
 
-import { DataView, DataViewAttributes, SavedObject } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { SearchSource } from '@kbn/data-plugin/common';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { RequestAdapter } from '@kbn/inspector-plugin';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { action } from '@storybook/addon-actions';
+import { createHashHistory } from 'history';
 import { FetchStatus } from '../../../../types';
 import {
   AvailableFields$,
-  DataCharts$,
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
-} from '../../../hooks/use_saved_search';
+  RecordRawType,
+} from '../../../services/discover_data_state_container';
 import { buildDataTableRecordList } from '../../../../../utils/build_data_record';
 import { esHits } from '../../../../../__mocks__/es_hits';
-import { Chart } from '../../chart/point_series';
 import { SavedSearch } from '../../../../..';
-import { GetStateReturn } from '../../../services/discover_state';
 import { DiscoverLayoutProps } from '../types';
+import {
+  DiscoverStateContainer,
+  getDiscoverStateContainer,
+} from '../../../services/discover_state';
+import { services } from '../../../../../__mocks__/__storybook_mocks__/with_discover_services';
 
-export function getLayoutProps(indexPattern: DataView) {
-  const searchSourceMock = {} as unknown as SearchSource;
-
-  const indexPatternList = [indexPattern].map((ip) => {
-    return { ...ip, ...{ attributes: { title: ip.title } } };
-  }) as unknown as Array<SavedObject<DataViewAttributes>>;
-
-  const main$ = new BehaviorSubject({
+const documentObservables = {
+  main$: new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
-  }) as DataMain$;
+  }) as DataMain$,
 
-  const documents$ = new BehaviorSubject({
+  documents$: new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     result: buildDataTableRecordList(esHits),
-  }) as DataDocuments$;
+  }) as DataDocuments$,
 
-  const availableFields$ = new BehaviorSubject({
+  availableFields$: new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     fields: [] as string[],
-  }) as AvailableFields$;
+  }) as AvailableFields$,
 
-  const totalHits$ = new BehaviorSubject({
+  totalHits$: new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
     result: Number(esHits.length),
-  }) as DataTotalHits$;
+  }) as DataTotalHits$,
+  fetch$: new Observable(),
+};
 
-  const chartData = {
-    xAxisOrderedValues: [
-      1623880800000, 1623967200000, 1624053600000, 1624140000000, 1624226400000, 1624312800000,
-      1624399200000, 1624485600000, 1624572000000, 1624658400000, 1624744800000, 1624831200000,
-      1624917600000, 1625004000000, 1625090400000,
-    ],
-    xAxisFormat: { id: 'date', params: { pattern: 'YYYY-MM-DD' } },
-    xAxisLabel: 'order_date per day',
-    yAxisFormat: { id: 'number' },
-    ordered: {
-      date: true,
-      interval: {
-        asMilliseconds: () => 1000,
-      },
-      intervalESUnit: 'd',
-      intervalESValue: 1,
-      min: '2021-03-18T08:28:56.411Z',
-      max: '2021-07-01T07:28:56.411Z',
-    },
-    yAxisLabel: 'Count',
-    values: [
-      { x: 1623880800000, y: 134 },
-      { x: 1623967200000, y: 152 },
-      { x: 1624053600000, y: 141 },
-      { x: 1624140000000, y: 138 },
-      { x: 1624226400000, y: 142 },
-      { x: 1624312800000, y: 157 },
-      { x: 1624399200000, y: 149 },
-      { x: 1624485600000, y: 146 },
-      { x: 1624572000000, y: 170 },
-      { x: 1624658400000, y: 137 },
-      { x: 1624744800000, y: 150 },
-      { x: 1624831200000, y: 144 },
-      { x: 1624917600000, y: 147 },
-      { x: 1625004000000, y: 137 },
-      { x: 1625090400000, y: 66 },
-    ],
-  } as unknown as Chart;
-
-  const charts$ = new BehaviorSubject({
+const plainRecordObservables = {
+  main$: new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    chartData,
-    bucketInterval: {
-      scaled: true,
-      description: 'test',
-      scale: 2,
-    },
-  }) as DataCharts$;
+    foundDocuments: true,
+    recordRawType: RecordRawType.PLAIN,
+  }) as DataMain$,
 
-  const savedSearchData$ = {
-    main$,
-    documents$,
-    totalHits$,
-    charts$,
-    availableFields$,
-  };
+  documents$: new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    result: buildDataTableRecordList(esHits),
+    recordRawType: RecordRawType.PLAIN,
+  }) as DataDocuments$,
+
+  availableFields$: new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    fields: [] as string[],
+    recordRawType: RecordRawType.PLAIN,
+  }) as AvailableFields$,
+
+  totalHits$: new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    recordRawType: RecordRawType.PLAIN,
+  }) as DataTotalHits$,
+};
+
+const getCommonProps = () => {
+  const searchSourceMock = {} as unknown as SearchSource;
+
   const savedSearchMock = {} as unknown as SavedSearch;
   return {
-    indexPattern,
-    indexPatternList,
     inspectorAdapters: { requests: new RequestAdapter() },
     navigateTo: action('navigate to somewhere nice'),
-    onChangeIndexPattern: action('change the data view'),
+    onChangeDataView: action('change the data view'),
     onUpdateQuery: action('update the query'),
     resetSavedSearch: action('reset the saved search the query'),
     savedSearch: savedSearchMock,
-    savedSearchData$,
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
-    state: { columns: ['name', 'message', 'bytes'], sort: [['date', 'desc']] },
     stateContainer: {
       setAppState: action('Set app state'),
-      appStateContainer: {
+      appState: {
         getState: () => ({
           interval: 'auto',
         }),
         setState: action('Set app state'),
       },
-    } as unknown as GetStateReturn,
+    } as unknown as DiscoverStateContainer,
     setExpandedDoc: action('opening an expanded doc'),
+  };
+};
+
+function getSavedSearch(dataView: DataView) {
+  return {
+    searchSource: {
+      getField: (value: string) => {
+        if (value === 'index') {
+          return dataView;
+        }
+      },
+      getOwnField: () => {
+        return {
+          query: '',
+        };
+      },
+      createChild: () => {
+        return {
+          fetch$: () => new Observable(),
+        } as unknown as SearchSource;
+      },
+    },
+  } as unknown as SavedSearch;
+}
+
+export function getDocumentsLayoutProps(dataView: DataView) {
+  const stateContainer = getDiscoverStateContainer({
+    history: createHashHistory(),
+    savedSearch: getSavedSearch(dataView),
+    services,
+  });
+  stateContainer.appState.set({
+    columns: ['name', 'message', 'bytes'],
+    sort: dataView.timeFieldName ? [['date', 'desc']] : [['name', 'desc']],
+    query: {
+      language: 'kuery',
+      query: '',
+    },
+    filters: [],
+    hideChart: true,
+  });
+  stateContainer.actions.setDataView(dataView);
+  stateContainer.dataState.data$ = documentObservables;
+  return {
+    ...getCommonProps(),
+    stateContainer,
   } as unknown as DiscoverLayoutProps;
 }
+
+export const getPlainRecordLayoutProps = (dataView: DataView) => {
+  const stateContainer = getDiscoverStateContainer({
+    history: createHashHistory(),
+    savedSearch: getSavedSearch(dataView),
+    services,
+  });
+  stateContainer.appState.set({
+    columns: ['name', 'message', 'bytes'],
+    sort: [['date', 'desc']],
+    query: {
+      sql: 'SELECT * FROM "kibana_sample_data_ecommerce"',
+    },
+    filters: [],
+  });
+  stateContainer.actions.setDataView(dataView);
+  stateContainer.dataState.data$ = plainRecordObservables;
+  return {
+    ...getCommonProps(),
+    stateContainer,
+  } as unknown as DiscoverLayoutProps;
+};

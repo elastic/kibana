@@ -16,10 +16,10 @@ import { useDiscoverTourContext } from './discover_tour_context';
 import { DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';
 
 describe('Discover tour', () => {
-  const mountComponent = (innerContent?: JSX.Element) => {
+  const mountComponent = (innerContent: JSX.Element) => {
     return mountWithIntl(
       <KibanaContextProvider services={discoverServiceMock}>
-        <DiscoverTourProvider>{innerContent}</DiscoverTourProvider>
+        <DiscoverTourProvider isPlainRecord={false}>{innerContent}</DiscoverTourProvider>
       </KibanaContextProvider>
     );
   };
@@ -41,7 +41,7 @@ describe('Discover tour', () => {
     expect(component.find(EuiTourStep)).toHaveLength(0);
 
     // one step should become visible after the tour is triggered
-    component.find(`[data-test-subj="${buttonSubjToTestStart}"]`).at(0).simulate('click');
+    component.find(`button[data-test-subj="${buttonSubjToTestStart}"]`).at(0).simulate('click');
 
     expect(component.find(EuiTourStep)).toHaveLength(5);
     expect(

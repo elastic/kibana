@@ -72,7 +72,7 @@ const serviceOverviewLink = apmRouter.link('/services/:serviceName', {
 
 If you're not in React context, you can also import `apmRouter` directly and call its `link` function - but you have to prepend the basePath manually in that case.
 
-We also have the [`getLegacyApmHref` function and `APMLink` component](../public/components/shared/links/apm/APMLink.tsx), but we should consider them deprecated, in favor of `router.link`. Other components inside that directory contain other functions and components that provide the same functionality for linking to more specific sections inside the APM plugin.
+We also have the [`getLegacyApmHref` function and `LegacyAPMLink` component](../public/components/shared/links/apm/apm_link.tsx), but we should consider them deprecated, in favor of `router.link`. Other components inside that directory contain other functions and components that provide the same functionality for linking to more specific sections inside the APM plugin.
 
 ### Cross-app linking
 

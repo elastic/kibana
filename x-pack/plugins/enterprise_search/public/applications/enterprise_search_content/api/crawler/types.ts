@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Meta } from '../../../../../common/types';
+import { CrawlerStatus } from '../../../../../common/types/crawler';
+import { ExtractionRule } from '../../../../../common/types/extraction_rules';
+
+// TODO remove this proxy export, which will affect a lot of files
+export { CrawlerStatus };
 
 export enum CrawlerPolicies {
   allow = 'allow',
@@ -51,19 +57,6 @@ export type CrawlerDomainValidationStepName =
   | 'networkConnectivity'
   | 'indexingRestrictions'
   | 'contentVerification';
-// See SharedTogo::Crawler::Status for details on how these are generated
-export enum CrawlerStatus {
-  Pending = 'pending',
-  Suspended = 'suspended',
-  Starting = 'starting',
-  Running = 'running',
-  Suspending = 'suspending',
-  Canceling = 'canceling',
-  Success = 'success',
-  Failed = 'failed',
-  Canceled = 'canceled',
-  Skipped = 'skipped',
-}
 
 export type CrawlEventStage = 'crawl' | 'process';
 
@@ -72,9 +65,23 @@ export enum CrawlType {
   Partial = 'partial',
 }
 
+export interface BasicCrawlerAuth {
+  password: string;
+  type: 'basic';
+  username: string;
+}
+
+export interface RawCrawlerAuth {
+  header: string;
+  type: 'raw';
+}
+
+export type CrawlerAuth = BasicCrawlerAuth | RawCrawlerAuth | null;
+
 // Server
 
 export interface CrawlerDomainFromServer {
+  auth: CrawlerAuth;
   available_deduplication_fields: string[];
   crawl_rules: CrawlRule[];
   created_on: string;
@@ -83,6 +90,7 @@ export interface CrawlerDomainFromServer {
   default_crawl_rule?: CrawlRule;
   document_count: number;
   entry_points: EntryPoint[];
+  extraction_rules: ExtractionRule[];
   id: string;
   last_visited_at?: string;
   name: string;
@@ -98,6 +106,7 @@ export interface CrawlerDataFromServer {
   domains: CrawlerDomainFromServer[];
   events: CrawlEventFromServer[];
   most_recent_crawl_request: CrawlRequestFromServer | null;
+  user_agent: string;
 }
 
 export interface CrawlerDomainValidationResultFromServer {
@@ -155,9 +164,16 @@ export interface DomainConfigFromServer {
   sitemap_urls: string[];
 }
 
+export interface CrawlScheduleFromServer {
+  frequency: number;
+  unit: CrawlUnits;
+  use_connector_schedule: boolean;
+}
+
 // Client
 
 export interface CrawlerDomain {
+  auth: CrawlerAuth;
   availableDeduplicationFields: string[];
   crawlRules: CrawlRule[];
   createdOn: string;
@@ -166,6 +182,7 @@ export interface CrawlerDomain {
   defaultCrawlRule?: CrawlRule;
   documentCount: number;
   entryPoints: EntryPoint[];
+  extractionRules: ExtractionRule[];
   id: string;
   lastCrawl?: string;
   sitemaps: Sitemap[];
@@ -181,6 +198,7 @@ export interface CrawlerData {
   domains: CrawlerDomain[];
   events: CrawlEvent[];
   mostRecentCrawlRequest: CrawlRequest | null;
+  userAgent: string;
 }
 
 export interface CrawlerDomainValidationStep {
@@ -244,6 +262,7 @@ export type CrawlEvent = CrawlRequest & {
 export interface CrawlSchedule {
   frequency: number;
   unit: CrawlUnits;
+  useConnectorSchedule: boolean;
 }
 
 export interface DomainConfig {

@@ -49,12 +49,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Alerts table', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs');
         await observability.alerts.common.navigateToTimeWithData();
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs');
       });
 
       it('Renders the table', async () => {
@@ -83,6 +83,13 @@ export default ({ getService }: FtrProviderContext) => {
           await observability.alerts.common.typeInQueryBar('kibana.alert.s');
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.start-');
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.status-');
+        });
+
+        it('Invalid input should not break the page', async () => {
+          await observability.alerts.common.submitQuery('""""');
+          await testSubjects.existOrFail('errorToastMessage');
+          // Page should not go blank with invalid input
+          await testSubjects.existOrFail('alertsPageWithData');
         });
 
         it('Applies filters correctly', async () => {
@@ -163,8 +170,8 @@ export default ({ getService }: FtrProviderContext) => {
               'Oct 19, 2021 @ 15:00:41.555',
               'Oct 19, 2021 @ 15:20:38.749',
               '20 minutes',
-              '5',
-              '30.73',
+              '5.0%',
+              '31%',
               'Failed transaction rate threshold',
             ];
 
@@ -231,15 +238,6 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      /*
-       * ATTENTION FUTURE DEVELOPER
-       *
-       * These tests should only be valid for 7.17.x
-       * You can run this test if you go to this file:
-       * x-pack/plugins/observability/public/pages/alerts/containers/alerts_table_t_grid/alerts_table_t_grid.tsx
-       * and at line 397 and change showCheckboxes to true
-       *
-       */
       describe.skip('Bulk Actions', () => {
         before(async () => {
           await security.testUser.setRoles(['global_alerts_logs_all_else_read']);

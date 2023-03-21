@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 import { ConfigureCaseButton, LinkButton } from '../links';
-import { ErrorMessage } from '../use_push_to_service/callout/types';
+import type { ErrorMessage } from '../use_push_to_service/callout/types';
 import { useCreateCaseNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 

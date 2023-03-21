@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConnectorSwimlaneTypeFields } from '../../../common/api';
-import { Format } from './types';
+import type { ConnectorSwimlaneTypeFields } from '../../../common/api';
+import type { Format } from './types';
 
 export const format: Format = (theCase) => {
   const { caseId = theCase.id } =

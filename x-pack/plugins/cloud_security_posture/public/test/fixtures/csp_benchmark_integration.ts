@@ -17,6 +17,8 @@ type CreateCspBenchmarkIntegrationFixtureInput = {
 export const createCspBenchmarkIntegrationFixture = ({
   chance = new Chance(),
   package_policy = {
+    revision: chance?.integer(),
+    enabled: true,
     id: chance.guid(),
     name: chance.string(),
     policy_id: chance.guid(),
@@ -25,6 +27,23 @@ export const createCspBenchmarkIntegrationFixture = ({
     updated_by: chance.word(),
     created_at: chance.date().toISOString(),
     created_by: chance.word(),
+    inputs: [
+      {
+        type: 'cloudbeat/cis_k8s',
+        policy_template: 'kspm',
+        enabled: true,
+        streams: [
+          {
+            id: chance?.guid(),
+            enabled: true,
+            data_stream: {
+              type: 'logs',
+              dataset: 'cloud_security_posture.findings',
+            },
+          },
+        ],
+      },
+    ],
     package: {
       name: chance.string(),
       title: chance.string(),
@@ -36,13 +55,9 @@ export const createCspBenchmarkIntegrationFixture = ({
     name: chance.sentence(),
     agents: chance.integer({ min: 0 }),
   },
-  rules = {
-    all: chance.integer(),
-    enabled: chance.integer(),
-    disabled: chance.integer(),
-  },
+  rules_count = chance.integer({ min: 0, max: 10 }),
 }: CreateCspBenchmarkIntegrationFixtureInput = {}): Benchmark => ({
   package_policy,
   agent_policy,
-  rules,
+  rules_count,
 });

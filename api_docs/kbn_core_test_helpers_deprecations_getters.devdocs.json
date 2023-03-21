@@ -1,0 +1,251 @@
+{
+  "id": "@kbn/core-test-helpers-deprecations-getters",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
+        "id": "def-common.getDeprecationsFor",
+        "type": "Function",
+        "tags": [],
+        "label": "getDeprecationsFor",
+        "description": [],
+        "signature": [
+          "({ provider, settings, path, }: { provider: ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.ConfigDeprecationProvider",
+            "text": "ConfigDeprecationProvider"
+          },
+          "; settings?: Record<string, any> | undefined; path: string; }) => { messages: string[]; levels: string[]; migrated: Record<string, any>; }"
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
+            "id": "def-common.getDeprecationsFor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  provider,\n  settings = {},\n  path,\n}",
+            "description": [],
+            "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
+                "id": "def-common.getDeprecationsFor.$1.provider",
+                "type": "Function",
+                "tags": [],
+                "label": "provider",
+                "description": [],
+                "signature": [
+                  "(factory: ",
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "common",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-common.ConfigDeprecationFactory",
+                    "text": "ConfigDeprecationFactory"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "common",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-common.ConfigDeprecation",
+                    "text": "ConfigDeprecation"
+                  },
+                  "[]"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
+                    "id": "def-common.getDeprecationsFor.$1.provider.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "factory",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/config",
+                        "scope": "common",
+                        "docId": "kibKbnConfigPluginApi",
+                        "section": "def-common.ConfigDeprecationFactory",
+                        "text": "ConfigDeprecationFactory"
+                      }
+                    ],
+                    "path": "packages/kbn-config/src/deprecation/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
+                "id": "def-common.getDeprecationsFor.$1.settings",
+                "type": "Object",
+                "tags": [],
+                "label": "settings",
+                "description": [],
+                "signature": [
+                  "Record<string, any> | undefined"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
+                "id": "def-common.getDeprecationsFor.$1.path",
+                "type": "string",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
+        "id": "def-common.getDeprecationsForGlobalSettings",
+        "type": "Function",
+        "tags": [],
+        "label": "getDeprecationsForGlobalSettings",
+        "description": [],
+        "signature": [
+          "({ provider, settings, }: { provider: ",
+          {
+            "pluginId": "@kbn/config",
+            "scope": "common",
+            "docId": "kibKbnConfigPluginApi",
+            "section": "def-common.ConfigDeprecationProvider",
+            "text": "ConfigDeprecationProvider"
+          },
+          "; settings?: Record<string, any> | undefined; }) => { messages: string[]; levels: string[]; migrated: Record<string, any>; }"
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
+            "id": "def-common.getDeprecationsForGlobalSettings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  provider,\n  settings = {},\n}",
+            "description": [],
+            "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
+                "id": "def-common.getDeprecationsForGlobalSettings.$1.provider",
+                "type": "Function",
+                "tags": [],
+                "label": "provider",
+                "description": [],
+                "signature": [
+                  "(factory: ",
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "common",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-common.ConfigDeprecationFactory",
+                    "text": "ConfigDeprecationFactory"
+                  },
+                  ") => ",
+                  {
+                    "pluginId": "@kbn/config",
+                    "scope": "common",
+                    "docId": "kibKbnConfigPluginApi",
+                    "section": "def-common.ConfigDeprecation",
+                    "text": "ConfigDeprecation"
+                  },
+                  "[]"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
+                    "id": "def-common.getDeprecationsForGlobalSettings.$1.provider.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "factory",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/config",
+                        "scope": "common",
+                        "docId": "kibKbnConfigPluginApi",
+                        "section": "def-common.ConfigDeprecationFactory",
+                        "text": "ConfigDeprecationFactory"
+                      }
+                    ],
+                    "path": "packages/kbn-config/src/deprecation/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-deprecations-getters",
+                "id": "def-common.getDeprecationsForGlobalSettings.$1.settings",
+                "type": "Object",
+                "tags": [],
+                "label": "settings",
+                "description": [],
+                "signature": [
+                  "Record<string, any> | undefined"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-deprecations-getters/src/deprecations_getters.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

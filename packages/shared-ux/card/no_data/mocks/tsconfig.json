@@ -1,0 +1,22 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "node",
+      "react",
+      "jest"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/shared-ux-card-no-data-types",
+    "@kbn/shared-ux-link-redirect-app-mocks",
+    "@kbn/shared-ux-storybook-mock"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

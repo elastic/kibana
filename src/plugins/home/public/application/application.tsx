@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { i18n } from '@kbn/i18n';
 import { ScopedHistory, CoreStart, CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 import {
@@ -17,7 +16,7 @@ import {
   RedirectAppLinks,
 } from '@kbn/kibana-react-plugin/public';
 
-import { SampleDataCardsKibanaProvider } from '@kbn/home-sample-data-cards';
+import { SampleDataTabKibanaProvider } from '@kbn/home-sample-data-tab';
 
 // @ts-ignore
 import { HomeApp } from './components/home_app';
@@ -31,8 +30,7 @@ export const renderApp = async (
   coreStart: CoreStart,
   history: ScopedHistory
 ) => {
-  const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
-  const { featureCatalogue, chrome, dataViewsService: dataViews } = getServices();
+  const { featureCatalogue, chrome, dataViewsService: dataViews, trackUiMetric } = getServices();
 
   // all the directories could be get in "start" phase of plugin after all of the legacy plugins will be moved to a NP
   const directories = featureCatalogue.get();
@@ -47,17 +45,15 @@ export const renderApp = async (
       <RedirectAppLinks application={coreStart.application}>
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...coreStart }}>
-            <SampleDataCardsKibanaProvider {...{ coreStart, dataViews }}>
+            <SampleDataTabKibanaProvider {...{ coreStart, dataViews, trackUiMetric }}>
               <HomeApp directories={directories} solutions={solutions} />
-            </SampleDataCardsKibanaProvider>
+            </SampleDataTabKibanaProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </RedirectAppLinks>,
       element
     );
   });
-
-  chrome.setBreadcrumbs([{ text: homeTitle }]);
 
   // dispatch synthetic hash change event to update hash history objects
   // this is necessary because hash updates triggered by using popState won't trigger this event naturally.

@@ -7,16 +7,13 @@
 
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
-import { noop } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { BulkAction } from '../../../../../common/detection_engine/schemas/common';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
-import { useUpdateRulesCache } from '../../../containers/detection_engine/rules/use_find_rules_query';
-import { executeRulesBulkAction } from '../../../pages/detection_engine/rules/all/actions';
-import { useRulesTableContextOptional } from '../../../pages/detection_engine/rules/all/rules_table/rules_table_context';
+import { useExecuteBulkAction } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action';
+import { useRulesTableContextOptional } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
 
 const StaticSwitch = styled(EuiSwitch)`
   .euiSwitch__thumb,
@@ -32,6 +29,7 @@ export interface RuleSwitchProps {
   enabled: boolean;
   isDisabled?: boolean;
   isLoading?: boolean;
+  startMlJobsIfNeeded?: () => Promise<void>;
   onChange?: (enabled: boolean) => void;
 }
 
@@ -43,13 +41,13 @@ export const RuleSwitchComponent = ({
   isDisabled,
   isLoading,
   enabled,
+  startMlJobsIfNeeded,
   onChange,
 }: RuleSwitchProps) => {
   const [myIsLoading, setMyIsLoading] = useState(false);
   const rulesTableContext = useRulesTableContextOptional();
-  const updateRulesCache = useUpdateRulesCache();
-  const toasts = useAppToasts();
   const { startTransaction } = useStartTransaction();
+  const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: !rulesTableContext });
 
   const onRuleStateChange = useCallback(
     async (event: EuiSwitchEvent) => {
@@ -57,22 +55,21 @@ export const RuleSwitchComponent = ({
       startTransaction({
         name: enabled ? SINGLE_RULE_ACTIONS.DISABLE : SINGLE_RULE_ACTIONS.ENABLE,
       });
-      const bulkActionResponse = await executeRulesBulkAction({
-        setLoadingRules: rulesTableContext?.actions.setLoadingRules,
-        toasts,
-        onSuccess: rulesTableContext ? undefined : noop,
-        action: event.target.checked ? BulkAction.enable : BulkAction.disable,
-        search: { ids: [id] },
-        visibleRuleIds: [],
+      const enableRule = event.target.checked;
+      if (enableRule) {
+        await startMlJobsIfNeeded?.();
+      }
+      const bulkActionResponse = await executeBulkAction({
+        type: enableRule ? BulkActionType.enable : BulkActionType.disable,
+        ids: [id],
       });
       if (bulkActionResponse?.attributes.results.updated.length) {
         // The rule was successfully updated
-        updateRulesCache(bulkActionResponse.attributes.results.updated);
         onChange?.(bulkActionResponse.attributes.results.updated[0].enabled);
       }
       setMyIsLoading(false);
     },
-    [enabled, id, onChange, rulesTableContext, startTransaction, toasts, updateRulesCache]
+    [enabled, executeBulkAction, id, onChange, startMlJobsIfNeeded, startTransaction]
   );
 
   const showLoader = useMemo((): boolean => {
@@ -84,7 +81,7 @@ export const RuleSwitchComponent = ({
   }, [myIsLoading, isLoading]);
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
+    <EuiFlexGroup alignItems="center" justifyContent="spaceAround" id={`rule-switch-${id}`}>
       <EuiFlexItem grow={false}>
         {showLoader ? (
           <EuiLoadingSpinner size="m" data-test-subj="ruleSwitchLoader" />

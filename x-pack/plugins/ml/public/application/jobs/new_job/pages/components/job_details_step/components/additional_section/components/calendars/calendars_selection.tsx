@@ -56,11 +56,13 @@ export const CalendarsSelection: FC = () => {
 
   useEffect(() => {
     loadCalendars();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     jobCreator.calendars = selectedCalendars;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCalendars.join()]);
 
   const comboBoxProps: EuiComboBoxProps<Calendar> = {

@@ -1,0 +1,330 @@
+{
+  "attributes": {
+    "title": "Copy to Space index pattern 1 from default space"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "cts_ip_1_default",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "originId": "cts_ip_1",
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzUyOCwxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "CTS vis 1 from default space",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{},\"legendSize\":\"auto\"},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "cts_vis_1_default",
+  "migrationVersion": {
+    "visualization": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "cts_ip_1_default",
+      "name": "CTS IP 1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzUyMSwxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "CTS vis 2 from default space",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{},\"legendSize\":\"auto\"},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "cts_vis_2_default",
+  "migrationVersion": {
+    "visualization": "8.3.0"
+  },
+  "references": [
+    {
+      "id": "cts_ip_1_default",
+      "name": "CTS IP 1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzUyMiwxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "AreaChart",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{}"
+    },
+    "title": "CTS vis 3 from default space",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"New Visualization\",\"type\":\"area\",\"params\":{\"shareYAxis\":true,\"addTooltip\":true,\"addLegend\":true,\"smoothLines\":false,\"scale\":\"linear\",\"interpolate\":\"linear\",\"mode\":\"stacked\",\"times\":[],\"addTimeMarker\":false,\"defaultYExtents\":false,\"setYExtents\":false,\"yAxis\":{},\"legendSize\":\"auto\"},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"@timestamp\",\"interval\":\"auto\",\"min_doc_count\":1,\"extended_bounds\":{}}}],\"listeners\":{}}"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "cts_vis_3_default",
+  "migrationVersion": {
+    "visualization": "8.3.0"
+  },
+  "originId": "cts_vis_3",
+  "references": [
+    {
+      "id": "cts_ip_1_default",
+      "name": "CTS IP 1",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzUyMywxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "Copy to Space Dashboard from the default space",
+    "title": "This is the default test space CTS dashboard"
+  },
+  "coreMigrationVersion": "8.4.0",
+  "id": "cts_dashboard_default",
+  "migrationVersion": {
+    "dashboard": "8.4.0"
+  },
+  "originId": "cts_dashboard",
+  "references": [
+    {
+      "id": "cts_vis_1_default",
+      "name": "CTS Vis 1",
+      "type": "visualization"
+    },
+    {
+      "id": "cts_vis_2_default",
+      "name": "CTS Vis 2",
+      "type": "visualization"
+    },
+    {
+      "id": "cts_vis_3_default",
+      "name": "CTS Vis 3",
+      "type": "visualization"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzUyMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "id": "conflict_2_default",
+  "originId": "conflict_2",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzUxMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in all spaces"
+  },
+  "id": "conflict_2_all",
+  "originId": "conflict_2",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzUxMSwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test an inexact match conflict for an originId -> id match"
+  },
+  "id": "conflict_1b_default",
+  "originId": "conflict_1b_space_2",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzUwMywxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test an inexact match conflict for an originId -> originId match"
+  },
+  "id": "conflict_1a_default",
+  "originId": "conflict_1a",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzUwMCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "Some title"
+  },
+  "id": "my_isolated_object",
+  "references": [],
+  "type": "isolatedtype",
+  "updated_at": "2017-09-21T18:49:16.270Z",
+  "version": "WzQ4NywxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in all spaces"
+  },
+  "id": "all_spaces",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ5NywxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in one space"
+  },
+  "id": "default_only",
+  "references": [
+    {
+      "id": "each_space",
+      "name": "refname",
+      "type": "sharedtype"
+    }
+  ],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ4OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in the default, space_1, and space_2 spaces"
+  },
+  "id": "each_space",
+  "references": [
+    {
+      "id": "default_only",
+      "name": "refname",
+      "type": "sharedtype"
+    },
+    {
+      "id": "space_1_only",
+      "name": "refname",
+      "type": "sharedtype"
+    },
+    {
+      "id": "space_2_only",
+      "name": "refname",
+      "type": "sharedtype"
+    },
+    {
+      "id": "all_spaces",
+      "name": "refname",
+      "type": "sharedtype"
+    }
+  ],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ5NiwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test an inexact match conflict for an id -> originId match"
+  },
+  "id": "conflict_1c_default_and_space_1",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzUwNiwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in the default and space_1 spaces"
+  },
+  "id": "default_and_space_1",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ5MywxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in the default and space_2 spaces"
+  },
+  "id": "default_and_space_2",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ5NCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "This object only exists to test the third assertion for spacesWithMatchingOrigins in get_shareable_references"
+  },
+  "id": "space_2_only_matching_origin",
+  "originId": "space_2_only",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ5MiwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test that when an object is unshared from a space, inbound aliases for just those spaces are removed"
+  },
+  "id": "alias_delete_inclusive",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ5OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "This is used to test that when an object is unshared from all space, inbound aliases for all spaces are removed"
+  },
+  "id": "alias_delete_exclusive",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ5OSwxXQ=="
+}
+
+{
+  "attributes": {
+    "title": "A shared saved-object in the space_1 and space_2 spaces"
+  },
+  "id": "space_1_and_space_2",
+  "references": [],
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ5NSwxXQ=="
+}

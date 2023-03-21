@@ -2,7 +2,13 @@
 
 load("@npm//@bazel/typescript:index.bzl", _ts_project = "ts_project")
 
-def ts_project(validate = False, **kwargs):
+def contains(list, item):
+  for i in list:
+    if i == item:
+      return True
+  return False
+
+def ts_project(validate = False, deps = [], **kwargs):
   """A macro around the upstream ts_project rule.
 
   Args:
@@ -10,7 +16,11 @@ def ts_project(validate = False, **kwargs):
     **kwargs: the rest
   """
 
+  if contains(deps, "@npm//tslib") == False:
+    deps = deps + ["@npm//tslib"]
+
   _ts_project(
     validate = validate,
+    deps = deps,
     **kwargs
   )

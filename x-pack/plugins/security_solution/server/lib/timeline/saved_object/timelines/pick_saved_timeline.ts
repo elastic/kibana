@@ -7,6 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type { SavedTimelineWithSavedObjectId } from '../../../../../common/types/timeline';
 import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
@@ -20,12 +21,12 @@ export const pickSavedTimeline = (
 
   if (timelineId == null) {
     savedTimeline.created = dateNow;
-    savedTimeline.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;
+    savedTimeline.createdBy = userInfo ? getUserDisplayName(userInfo) : UNAUTHENTICATED_USER;
     savedTimeline.updated = dateNow;
-    savedTimeline.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
+    savedTimeline.updatedBy = userInfo ? getUserDisplayName(userInfo) : UNAUTHENTICATED_USER;
   } else if (timelineId != null) {
     savedTimeline.updated = dateNow;
-    savedTimeline.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
+    savedTimeline.updatedBy = userInfo ? getUserDisplayName(userInfo) : UNAUTHENTICATED_USER;
   }
 
   if (savedTimeline.status === TimelineStatus.draft || savedTimeline.status == null) {

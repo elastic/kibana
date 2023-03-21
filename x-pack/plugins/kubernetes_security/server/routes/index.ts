@@ -6,10 +6,14 @@
  */
 import { IRouter } from '@kbn/core/server';
 import { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import { registerAgentIdRoute } from './agent_id';
 import { registerAggregateRoute } from './aggregate';
 import { registerCountRoute } from './count';
+import { registerMultiTermsAggregateRoute } from './multi_terms_aggregate';
 
 export const registerRoutes = (router: IRouter, ruleRegistry: RuleRegistryPluginStartContract) => {
   registerAggregateRoute(router);
   registerCountRoute(router);
+  registerAgentIdRoute(router);
+  registerMultiTermsAggregateRoute(router);
 };

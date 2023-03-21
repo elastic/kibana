@@ -20,13 +20,13 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { ActionGroup, RuleActionParam } from '@kbn/alerting-plugin/common';
+import { betaBadgeProps } from './beta_badge_props';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
   ActionTypeModel,
   RuleAction,
   ActionTypeIndex,
   ActionConnector,
-  ActionType,
   ActionVariables,
   ActionTypeRegistryContract,
 } from '../../../types';
@@ -35,9 +35,8 @@ import { ActionTypeForm } from './action_type_form';
 import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import { VIEW_LICENSE_OPTIONS_LINK, DEFAULT_HIDDEN_ACTION_TYPES } from '../../../common/constants';
+import { DEFAULT_FREQUENCY, VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
-import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 import { ConnectorAddModal } from '.';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
 import { OmitMessageVariablesType } from '../../lib/action_variables';
@@ -56,13 +55,19 @@ export interface ActionAccordionFormProps {
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setActions: (actions: RuleAction[]) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
-  actionTypes?: ActionType[];
+  setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
+  featureId: string;
   messageVariables?: ActionVariables;
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
-  getDefaultActionParams?: DefaultActionParamsGetter;
+  recoveryActionGroup?: string;
   isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
+  hideActionHeader?: boolean;
+  hideNotifyWhen?: boolean;
+  defaultSummaryMessage?: string;
+  hasSummary?: boolean;
+  minimumThrottleInterval?: [number | undefined, string];
 }
 
 interface ActiveActionConnectorState {
@@ -77,15 +82,21 @@ export const ActionForm = ({
   setActionGroupIdByIndex,
   setActions,
   setActionParamsProperty,
-  actionTypes,
+  setActionFrequencyProperty,
+  featureId,
   messageVariables,
   actionGroups,
   defaultActionMessage,
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   actionTypeRegistry,
-  getDefaultActionParams,
+  recoveryActionGroup,
   isActionGroupDisabledForActionType,
+  hideActionHeader,
+  hideNotifyWhen,
+  defaultSummaryMessage,
+  hasSummary,
+  minimumThrottleInterval,
 }: ActionAccordionFormProps) => {
   const {
     http,
@@ -112,8 +123,8 @@ export const ActionForm = ({
     (async () => {
       try {
         setIsLoadingActionTypes(true);
-        const registeredActionTypes = (actionTypes ?? (await loadActionTypes({ http }))).sort(
-          (a, b) => a.name.localeCompare(b.name)
+        const registeredActionTypes = (await loadActionTypes({ http, featureId })).sort((a, b) =>
+          a.name.localeCompare(b.name)
         );
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of registeredActionTypes) {
@@ -209,6 +220,7 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
+        frequency: DEFAULT_FREQUENCY,
       });
       setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
     }
@@ -220,6 +232,7 @@ export const ActionForm = ({
         actionTypeId: actionTypeModel.id,
         group: defaultActionGroupId,
         params: {},
+        frequency: DEFAULT_FREQUENCY,
       });
       setActionIdByIndex(actions.length.toString(), actions.length - 1);
       setEmptyActionsIds([...emptyActionsIds, actions.length.toString()]);
@@ -232,11 +245,6 @@ export const ActionForm = ({
     const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
     actionTypeNodes = actionTypeRegistry
       .list()
-      /**
-       * TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
-       * If actionTypes are set, hidden connectors are filtered out. Otherwise, they are not.
-       */
-      .filter(({ id }) => actionTypes ?? !DEFAULT_HIDDEN_ACTION_TYPES.includes(id))
       .filter((item) => actionTypesIndex[item.id])
       .filter((item) => !!item.actionParamsFields)
       .sort((a, b) =>
@@ -260,8 +268,12 @@ export const ActionForm = ({
           <EuiKeyPadMenuItem
             key={index}
             isDisabled={!checkEnabledResult.isEnabled}
-            data-test-subj={`${item.id}-ActionTypeSelectOption`}
+            data-test-subj={`${item.id}-${featureId}-ActionTypeSelectOption`}
             label={actionTypesIndex[item.id].name}
+            betaBadgeLabel={item.isExperimental ? betaBadgeProps.label : undefined}
+            betaBadgeTooltipContent={
+              item.isExperimental ? betaBadgeProps.tooltipContent : undefined
+            }
             onClick={() => addActionType(item)}
           >
             <EuiIcon
@@ -297,15 +309,19 @@ export const ActionForm = ({
     </SectionLoading>
   ) : (
     <>
-      <EuiTitle size="s">
-        <h4>
-          <FormattedMessage
-            defaultMessage="Actions"
-            id="xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle"
-          />
-        </h4>
-      </EuiTitle>
-      <EuiSpacer size="m" />
+      {!hideActionHeader && (
+        <>
+          <EuiTitle size="s">
+            <h4>
+              <FormattedMessage
+                defaultMessage="Actions"
+                id="xpack.triggersActionsUI.sections.actionForm.actionSectionsTitle"
+              />
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {actionTypesIndex &&
         actions.map((actionItem: RuleAction, index: number) => {
           const actionConnector = connectors.find((field) => field.id === actionItem.id);
@@ -356,13 +372,14 @@ export const ActionForm = ({
               index={index}
               key={`action-form-action-at-${index}`}
               setActionParamsProperty={setActionParamsProperty}
+              setActionFrequencyProperty={setActionFrequencyProperty}
               actionTypesIndex={actionTypesIndex}
               connectors={connectors}
               defaultActionGroupId={defaultActionGroupId}
               messageVariables={messageVariables}
               actionGroups={actionGroups}
               defaultActionMessage={defaultActionMessage}
-              defaultParams={getDefaultActionParams?.(actionItem.actionTypeId, actionItem.group)}
+              recoveryActionGroup={recoveryActionGroup}
               isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
               setActionGroupIdByIndex={setActionGroupIdByIndex}
               onAddConnector={() => {
@@ -378,16 +395,16 @@ export const ActionForm = ({
                   (_item: RuleAction, i: number) => i !== index
                 );
                 setActions(updatedActions);
-                setIsAddActionPanelOpen(
-                  updatedActions.filter((item: RuleAction) => item.id !== actionItem.id).length ===
-                    0
-                );
+                setIsAddActionPanelOpen(updatedActions.length === 0);
                 setActiveActionItem(undefined);
               }}
+              hideNotifyWhen={hideNotifyWhen}
+              defaultSummaryMessage={defaultSummaryMessage}
+              hasSummary={hasSummary}
+              minimumThrottleInterval={minimumThrottleInterval}
             />
           );
         })}
-      <EuiSpacer size="m" />
       {isAddActionPanelOpen ? (
         <>
           <EuiFlexGroup id="alertActionTypeTitle" justifyContent="spaceBetween">
@@ -437,9 +454,11 @@ export const ActionForm = ({
         </>
       ) : (
         <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow>
             <EuiButton
-              size="s"
+              size="m"
+              fullWidth
+              iconType="plusInCircle"
               data-test-subj="addAlertActionButton"
               onClick={() => setIsAddActionPanelOpen(true)}
             >

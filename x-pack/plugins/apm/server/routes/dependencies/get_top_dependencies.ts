@@ -10,10 +10,10 @@ import { NodeType } from '../../../common/connections';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getConnectionStatsItemsWithRelativeImpact } from '../../lib/connections/get_connection_stats/get_connection_stats_items_with_relative_impact';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTopDependencies({
-  setup,
+  apmEventClient,
   start,
   end,
   numBuckets,
@@ -21,7 +21,7 @@ export async function getTopDependencies({
   offset,
   kuery,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   numBuckets: number;
@@ -30,7 +30,7 @@ export async function getTopDependencies({
   kuery: string;
 }) {
   const statsItems = await getConnectionStats({
-    setup,
+    apmEventClient,
     start,
     end,
     numBuckets,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
+import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type {
@@ -19,10 +19,10 @@ import type {
   GetOneEnrollmentAPIKeyResponse,
   DeleteEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyResponse,
-} from '../../../common';
+} from '../../../common/types';
 import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
-import { defaultIngestErrorHandler, AgentPolicyNotFoundError } from '../../errors';
+import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,
@@ -47,7 +47,7 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 export const postEnrollmentApiKeyHandler: RequestHandler<
@@ -61,7 +61,7 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
   try {
     // validate policy id
     await agentPolicyService.get(soClient, request.body.policy_id).catch((err) => {
-      if (soClient.errors.isNotFoundError(err)) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         throw new AgentPolicyNotFoundError(`Agent policy "${request.body.policy_id}" not found`);
       }
 
@@ -78,7 +78,7 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -98,7 +98,7 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<
         body: { message: `EnrollmentAPIKey ${request.params.keyId} not found` },
       });
     }
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -119,6 +119,6 @@ export const getOneEnrollmentApiKeyHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

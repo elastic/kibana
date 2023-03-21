@@ -20,8 +20,6 @@ const findSum = (total, current) => total + current;
  * sum([10, 20, 30, 40], 10, [1, 2, 3], 22) // returns sum(10, 20, 30, 40, 10, 1, 2, 3, 22) = 138
  */
 
-module.exports = { sum };
-
 function sum(...args) {
   return args.reduce((total, current) => {
     if (Array.isArray(current)) {
@@ -30,3 +28,4 @@ function sum(...args) {
     return total + current;
   }, 0);
 }
+module.exports = { sum };

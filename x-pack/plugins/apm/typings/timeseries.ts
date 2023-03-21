@@ -69,5 +69,5 @@ export interface APMChartSpec<
   groupId?: string;
 }
 
-export type ChartType = 'area' | 'linemark';
+export type ChartType = 'area' | 'linemark' | 'bar';
 export type YUnit = 'percent' | 'bytes' | 'number' | 'time' | 'integer';

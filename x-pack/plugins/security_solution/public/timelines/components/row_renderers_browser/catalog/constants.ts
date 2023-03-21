@@ -8,6 +8,7 @@ import { RowRendererId } from '../../../../../common/types/timeline';
 import * as i18n from './translations';
 
 export const eventRendererNames: { [key in RowRendererId]: string } = {
+  [RowRendererId.alert]: i18n.ALERT_NAME,
   [RowRendererId.alerts]: i18n.ALERTS_NAME,
   [RowRendererId.auditd]: i18n.AUDITD_NAME,
   [RowRendererId.auditd_file]: i18n.AUDITD_FILE_NAME,

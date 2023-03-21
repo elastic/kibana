@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { getArchiveEntry } from '../../archive/cache';
@@ -40,6 +39,14 @@ describe('Install pipeline tests', () => {
       await res.install(esClient, logger);
 
       expect(esClient.ingest.putPipeline).toBeCalled();
+
+      // It should add the @custom pipeline for the main pipeline
+      const pipelinesWithCustomProcessor = esClient.ingest.putPipeline.mock.calls.filter((call) =>
+        // @ts-ignore-error
+        call[0]?.body.includes('@custom')
+      );
+
+      expect(pipelinesWithCustomProcessor).toHaveLength(1);
     });
 
     it('should work with datastream with ingest pipelines define in the package', async () => {
@@ -74,6 +81,14 @@ describe('Install pipeline tests', () => {
       await res.install(esClient, logger);
 
       expect(esClient.ingest.putPipeline).toBeCalledTimes(2);
+
+      // It should add the @custom pipeline only for the main pipeline
+      const pipelinesWithCustomProcessor = esClient.ingest.putPipeline.mock.calls.filter((call) =>
+        // @ts-ignore-error
+        call[0]?.body.includes('@custom')
+      );
+
+      expect(pipelinesWithCustomProcessor).toHaveLength(1);
     });
   });
 });

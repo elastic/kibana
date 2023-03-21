@@ -91,10 +91,12 @@ exports[`PipelinesTable component renders component as expected 1`] = `
       ],
       "toolsLeft": null,
       "toolsRight": <EuiButton
+        color="primary"
         data-test-subj="btnAdd"
         fill={true}
         isDisabled={false}
         onClick={[MockFunction]}
+        size="m"
       >
         <FormattedMessage
           defaultMessage="Create pipeline"

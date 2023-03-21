@@ -12,14 +12,16 @@ import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { APP_ICON, getFullPath } from '../../common/constants';
 import { migrateDataPersistedState } from '../../common/migrations/migrate_data_persisted_state';
+import { migrateDataViewsPersistedState } from '../../common/migrations/migrate_data_view_persisted_state';
 import type { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { savedObjectMigrations } from './saved_object_migrations';
 
 export function setupSavedObjects(
   core: CoreSetup,
-  getFilterMigrations: () => MigrateFunctionsObject
+  getFilterMigrations: () => MigrateFunctionsObject,
+  getDataViewMigrations: () => MigrateFunctionsObject
 ) {
-  core.savedObjects.registerType({
+  core.savedObjects.registerType<MapSavedObjectAttributes>({
     name: 'map',
     hidden: false,
     namespaceType: 'multiple-isolated',
@@ -51,34 +53,20 @@ export function setupSavedObjects(
     },
     migrations: () => {
       return mergeSavedObjectMigrationMaps(
-        savedObjectMigrations,
-        getPersistedStateMigrations(getFilterMigrations()) as unknown as SavedObjectMigrationMap
+        mergeSavedObjectMigrationMaps(
+          savedObjectMigrations,
+          getMapsFilterMigrations(getFilterMigrations()) as unknown as SavedObjectMigrationMap
+        ),
+        getMapsDataViewMigrations(getDataViewMigrations())
       );
-    },
-  });
-
-  /*
-   * The maps-telemetry saved object type isn't used, but in order to remove these fields from
-   * the mappings we register this type with `type: 'object', enabled: true` to remove all
-   * previous fields from the mappings until https://github.com/elastic/kibana/issues/67086 is
-   * solved.
-   */
-  core.savedObjects.registerType({
-    name: 'maps-telemetry',
-    hidden: false,
-    namespaceType: 'agnostic',
-    mappings: {
-      // @ts-ignore Core types don't support this since it's only really valid when removing a previously registered type
-      type: 'object',
-      enabled: false,
     },
   });
 }
 
 /**
- * This creates a migration map that applies external plugin migrations to persisted state stored in Maps
+ * This creates a migration map that applies external data plugin migrations to persisted filter state stored in Maps
  */
-export const getPersistedStateMigrations = (
+export const getMapsFilterMigrations = (
   filterMigrations: MigrateFunctionsObject
 ): MigrateFunctionsObject =>
   mapValues(
@@ -86,6 +74,30 @@ export const getPersistedStateMigrations = (
     (filterMigration) => (doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>) => {
       try {
         const attributes = migrateDataPersistedState(doc, filterMigration);
+
+        return {
+          ...doc,
+          attributes,
+        };
+      } catch (e) {
+        // Do not fail migration
+        // Maps application can display error when saved object is viewed
+        return doc;
+      }
+    }
+  );
+
+/**
+ * This creates a migration map that applies external data view plugin migrations to persisted data view state stored in Maps
+ */
+export const getMapsDataViewMigrations = (
+  migrations: MigrateFunctionsObject
+): MigrateFunctionsObject =>
+  mapValues(
+    migrations,
+    (migration) => (doc: SavedObjectUnsanitizedDoc<MapSavedObjectAttributes>) => {
+      try {
+        const attributes = migrateDataViewsPersistedState(doc, migration);
 
         return {
           ...doc,

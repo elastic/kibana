@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/test",
+  "devOnly": true,
+  "owner": "@elastic/kibana-operations"
+}

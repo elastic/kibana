@@ -29,6 +29,7 @@ describe('export_exception_list_and_items', () => {
 
       const result = await exportExceptionListAndItems({
         id: '123',
+        includeExpiredExceptions: true,
         listId: 'non-existent',
         namespaceType: 'single',
         savedObjectsClient: savedObjectsClientMock.create(),
@@ -45,6 +46,7 @@ describe('export_exception_list_and_items', () => {
       );
       const result = await exportExceptionListAndItems({
         id: '123',
+        includeExpiredExceptions: true,
         listId: 'non-existent',
         namespaceType: 'single',
         savedObjectsClient: savedObjectsClientMock.create(),

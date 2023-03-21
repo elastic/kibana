@@ -7,8 +7,8 @@
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { useCaseViewNavigation, useCaseViewParams } from '../../../common/navigation';
-import { CASE_VIEW_PAGE_TABS } from '../../case_view/types';
 import { SHOW_ALERT_TABLE_TOOLTIP } from '../translations';
 
 export const ShowAlertTableLink = () => {

@@ -20,16 +20,16 @@ describe('UserProfileAPIClient', () => {
   });
 
   it('should get user profile without retrieving any user data', async () => {
-    await apiClient.get();
+    await apiClient.getCurrent();
     expect(coreStart.http.get).toHaveBeenCalledWith('/internal/security/user_profile', {
-      query: { data: undefined },
+      query: { dataPath: undefined },
     });
   });
 
   it('should get user profile and user data', async () => {
-    await apiClient.get('*');
+    await apiClient.getCurrent({ dataPath: '*' });
     expect(coreStart.http.get).toHaveBeenCalledWith('/internal/security/user_profile', {
-      query: { data: '*' },
+      query: { dataPath: '*' },
     });
   });
 
@@ -37,6 +37,13 @@ describe('UserProfileAPIClient', () => {
     await apiClient.update({ avatar: { imageUrl: 'avatar.png' } });
     expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_data', {
       body: '{"avatar":{"imageUrl":"avatar.png"}}',
+    });
+  });
+
+  it('should get user profiles in bulk', async () => {
+    await apiClient.bulkGet({ uids: new Set(['UID-1', 'UID-2']), dataPath: '*' });
+    expect(coreStart.http.post).toHaveBeenCalledWith('/internal/security/user_profile/_bulk_get', {
+      body: '{"uids":["UID-1","UID-2"],"dataPath":"*"}',
     });
   });
 });

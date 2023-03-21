@@ -33,6 +33,10 @@ export interface IShipper {
    */
   telemetryCounter$?: Observable<TelemetryCounter>;
   /**
+   * Sends all the enqueued events and fulfills the returned promise.
+   */
+  flush: () => Promise<void>;
+  /**
    * Shutdown the shipper.
    */
   shutdown: () => void;

@@ -95,7 +95,6 @@ export const AgentPolicyIntegrationForm: React.FunctionComponent<Props> = ({
             />
           }
           buttonClassName="ingest-active-button"
-          data-test-subj="advancedOptionsBtn"
         >
           <EuiSpacer size="l" />
           <AgentPolicyAdvancedOptionsContent

@@ -26,10 +26,7 @@ import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { ValidatedNumberInput } from '../../../../components/validated_number_input';
 
 import { getTermsFields } from '../../../../index_pattern_util';
-import {
-  getIndexPatternService,
-  getIndexPatternSelectComponent,
-} from '../../../../kibana_services';
+import { getIndexPatternSelectComponent } from '../../../../kibana_services';
 import type { JoinField } from '../join_editor';
 
 interface Props {
@@ -44,13 +41,7 @@ interface Props {
   // Right source props
   rightSourceIndexPatternId: string;
   rightSourceName: string;
-  onRightSourceChange: ({
-    indexPatternId,
-    indexPatternTitle,
-  }: {
-    indexPatternId: string;
-    indexPatternTitle: string;
-  }) => void;
+  onRightSourceChange: (indexPatternId: string) => void;
 
   // Right field props
   rightValue: string;
@@ -81,24 +72,24 @@ export class JoinExpression extends Component<Props, State> {
     });
   };
 
-  _onRightSourceChange = async (indexPatternId?: string) => {
+  _onRightSourceChange = (indexPatternId?: string) => {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
 
-    try {
-      const indexPattern = await getIndexPatternService().get(indexPatternId);
-      this.props.onRightSourceChange({
-        indexPatternId,
-        indexPatternTitle: indexPattern.title,
-      });
-    } catch (err) {
-      // do not call onChange with when unable to get indexPatternId
-    }
+    this.props.onRightSourceChange(indexPatternId);
   };
 
   _onLeftFieldChange = (selectedFields: Array<EuiComboBoxOptionOption<JoinField>>) => {
     this.props.onLeftFieldChange(_.get(selectedFields, '[0].value.name', null));
+  };
+
+  _onRightFieldChange = (term?: string) => {
+    if (!term || term.length === 0) {
+      return;
+    }
+
+    this.props.onRightFieldChange(term);
   };
 
   _renderLeftFieldSelect() {
@@ -184,7 +175,7 @@ export class JoinExpression extends Component<Props, State> {
         <SingleFieldSelect
           placeholder={getSelectFieldPlaceholder()}
           value={this.props.rightValue}
-          onChange={this.props.onRightFieldChange}
+          onChange={this._onRightFieldChange}
           fields={getTermsFields(this.props.rightFields)}
           isClearable={false}
         />

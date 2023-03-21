@@ -1,0 +1,100 @@
+.lnsFormula {
+  display: flex;
+  flex-direction: column;
+
+  .lnsIndexPatternDimensionEditor-isFullscreen & {
+    height: 100%;
+  }
+
+  & > * {
+    flex: 1;
+    min-height: 0;
+  }
+
+  & > * + * {
+    border-top: $euiBorderThin;
+  }
+}
+
+.lnsFormula__editor {
+  .lnsIndexPatternDimensionEditor-isFullscreen & {
+    border-bottom: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  & > * + * {
+    border-top: $euiBorderThin;
+  }
+}
+
+.lnsFormula__editorHeader,
+.lnsFormula__editorFooter {
+  padding: $euiSizeS;
+}
+
+.lnsFormula__editorFooter {
+  // make sure docs are rendered in front of monaco
+  z-index: 1;
+  background-color: $euiColorLightestShade;
+  border-bottom-right-radius: $euiBorderRadius;
+  border-bottom-left-radius: $euiBorderRadius;
+}
+
+.lnsFormula__editorHeaderGroup,
+.lnsFormula__editorFooterGroup {
+  display: block; // Overrides EUI's styling of `display: flex` on `EuiFlexItem` components
+}
+
+.lnsFormula__editorContent {
+  min-height: 0;
+  position: relative;
+
+  .lnsIndexPatternDimensionEditor:not(.lnsIndexPatternDimensionEditor-isFullscreen) & {
+    height: 200px;
+  }
+
+  .lnsIndexPatternDimensionEditor-isFullscreen & {
+    flex: 1;
+  }
+}
+
+.lnsFormula__editorPlaceholder {
+  position: absolute;
+  top: 0;
+  left: $euiSize;
+  right: 0;
+  color: $euiTextSubduedColor;
+  // Matches monaco editor
+  font-family: Menlo, Monaco, 'Courier New', monospace;
+  pointer-events: none;
+}
+
+.lnsFormula__warningText + .lnsFormula__warningText {
+  margin-top: $euiSizeS;
+  border-top: $euiBorderThin;
+  padding-top: $euiSizeS;
+}
+
+.lnsFormula__editorHelp--inline {
+  align-items: center;
+  display: flex;
+  padding: $euiSizeXS;
+
+  & > * + * {
+    margin-left: $euiSizeXS;
+  }
+}
+
+.lnsFormula__editorError {
+  white-space: nowrap;
+}
+
+.lnsFormula__docs {
+  background: $euiColorEmptyShade;
+}
+
+.lnsFormulaOverflow {
+  // Needs to be higher than the modal and all flyouts
+  z-index: $euiZLevel9 + 1;
+}

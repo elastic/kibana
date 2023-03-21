@@ -6,41 +6,52 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import React, { useEffect, useRef } from 'react';
-import { CoreStart } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { Query } from '@kbn/es-query';
+import type { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { Filter, TimeRange } from '@kbn/es-query';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
+import type { UnifiedSearchPublicPluginStart } from '../types';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
-  data: Omit<DataPublicPluginStart, 'ui'>;
+  data: DataPublicPluginStart;
   storage: IStorageWrapper;
   usageCollection?: UsageCollectionSetup;
   isScreenshotMode?: boolean;
+  unifiedSearch: Omit<UnifiedSearchPublicPluginStart, 'ui'>;
 }
 
-export type StatefulSearchBarProps = SearchBarOwnProps & {
-  appName: string;
-  useDefaultBehaviors?: boolean;
-  savedQueryId?: string;
-  onSavedQueryIdChange?: (savedQueryId?: string) => void;
-};
+export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> =
+  SearchBarOwnProps<QT> & {
+    appName: string;
+    useDefaultBehaviors?: boolean;
+    savedQueryId?: string;
+    onSavedQueryIdChange?: (savedQueryId?: string) => void;
+    onFiltersUpdated?: (filters: Filter[]) => void;
+  };
 
 // Respond to user changing the filters
-const defaultFiltersUpdated = (queryService: QueryStart) => {
+const defaultFiltersUpdated = (
+  queryService: QueryStart,
+  onFiltersUpdated?: (filters: Filter[]) => void
+) => {
   return (filters: Filter[]) => {
-    queryService.filterManager.setFilters(filters);
+    if (onFiltersUpdated) {
+      onFiltersUpdated(filters);
+    } else {
+      queryService.filterManager.setFilters(filters);
+    }
   };
 };
 
@@ -56,19 +67,18 @@ const defaultOnRefreshChange = (queryService: QueryStart) => {
 };
 
 // Respond to user changing the query string or time settings
-const defaultOnQuerySubmit = (
-  props: StatefulSearchBarProps,
+const defaultOnQuerySubmit = <QT extends AggregateQuery | Query = Query>(
+  props: StatefulSearchBarProps<QT>,
   queryService: QueryStart,
-  currentQuery: Query
+  currentQuery: QT | Query
 ) => {
   if (!props.useDefaultBehaviors) return props.onQuerySubmit;
 
   const { timefilter } = queryService.timefilter;
 
-  return (payload: { dateRange: TimeRange; query?: Query }) => {
+  return (payload: { dateRange: TimeRange; query?: QT | Query }) => {
     const isUpdate =
-      !_.isEqual(timefilter.getTime(), payload.dateRange) ||
-      !_.isEqual(payload.query, currentQuery);
+      !isEqual(timefilter.getTime(), payload.dateRange) || !isEqual(payload.query, currentQuery);
     if (isUpdate) {
       timefilter.setTime(payload.dateRange);
       if (payload.query) {
@@ -91,7 +101,10 @@ const defaultOnQuerySubmit = (
 };
 
 // Respond to user clearing a saved query
-const defaultOnClearSavedQuery = (props: StatefulSearchBarProps, clearSavedQuery: Function) => {
+const defaultOnClearSavedQuery = <QT extends AggregateQuery | Query = Query>(
+  props: StatefulSearchBarProps<QT>,
+  clearSavedQuery: Function
+) => {
   if (!props.useDefaultBehaviors) return props.onClearSavedQuery;
   return () => {
     clearSavedQuery();
@@ -100,7 +113,10 @@ const defaultOnClearSavedQuery = (props: StatefulSearchBarProps, clearSavedQuery
 };
 
 // Respond to user saving or updating a saved query
-const defaultOnSavedQueryUpdated = (props: StatefulSearchBarProps, setSavedQuery: Function) => {
+const defaultOnSavedQueryUpdated = <QT extends AggregateQuery | Query = Query>(
+  props: StatefulSearchBarProps<QT>,
+  setSavedQuery: Function
+) => {
   if (!props.useDefaultBehaviors) return props.onSavedQueryUpdated;
   return (savedQuery: SavedQuery) => {
     setSavedQuery(savedQuery);
@@ -108,7 +124,9 @@ const defaultOnSavedQueryUpdated = (props: StatefulSearchBarProps, setSavedQuery
   };
 };
 
-const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
+const overrideDefaultBehaviors = <QT extends AggregateQuery | Query = Query>(
+  props: StatefulSearchBarProps<QT>
+) => {
   return props.useDefaultBehaviors ? {} : props;
 };
 
@@ -118,10 +136,11 @@ export function createSearchBar({
   data,
   usageCollection,
   isScreenshotMode = false,
+  unifiedSearch,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
-  return (props: StatefulSearchBarProps) => {
+  return <QT extends AggregateQuery | Query = Query>(props: StatefulSearchBarProps<QT>) => {
     const { useDefaultBehaviors } = props;
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
@@ -135,7 +154,7 @@ export function createSearchBar({
     const { query } = useQueryStringManager({
       query: props.query,
       queryStringManager: data.query.queryString,
-    });
+    }) as { query: QT };
     const { timeRange, refreshInterval } = useTimefilter({
       dateRangeFrom: props.dateRangeFrom,
       dateRangeTo: props.dateRangeTo,
@@ -170,43 +189,51 @@ export function createSearchBar({
           data,
           storage,
           usageCollection,
+          unifiedSearch,
           ...core,
         }}
       >
-        <SearchBar
-          showAutoRefreshOnly={props.showAutoRefreshOnly}
-          showDatePicker={props.showDatePicker}
-          showFilterBar={props.showFilterBar}
-          showQueryBar={props.showQueryBar}
-          showQueryInput={props.showQueryInput}
-          showSaveQuery={props.showSaveQuery}
-          screenTitle={props.screenTitle}
-          indexPatterns={props.indexPatterns}
-          indicateNoData={props.indicateNoData}
-          timeHistory={data.query.timefilter.history}
-          dateRangeFrom={timeRange.from}
-          dateRangeTo={timeRange.to}
-          refreshInterval={refreshInterval.value}
-          isRefreshPaused={refreshInterval.pause}
-          filters={filters}
-          query={query}
-          onFiltersUpdated={defaultFiltersUpdated(data.query)}
-          onRefreshChange={defaultOnRefreshChange(data.query)}
-          savedQuery={savedQuery}
-          onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
-          onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
-          onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
-          onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
-          iconType={props.iconType}
-          nonKqlMode={props.nonKqlMode}
-          customSubmitButton={props.customSubmitButton}
-          isClearable={props.isClearable}
-          placeholder={props.placeholder}
-          {...overrideDefaultBehaviors(props)}
-          dataViewPickerComponentProps={props.dataViewPickerComponentProps}
-          displayStyle={props.displayStyle}
-          isScreenshotMode={isScreenshotMode}
-        />
+        <core.i18n.Context>
+          <SearchBar
+            showAutoRefreshOnly={props.showAutoRefreshOnly}
+            showDatePicker={props.showDatePicker}
+            showFilterBar={props.showFilterBar}
+            showQueryMenu={props.showQueryMenu}
+            showQueryInput={props.showQueryInput}
+            showSaveQuery={props.showSaveQuery}
+            showSubmitButton={props.showSubmitButton}
+            submitButtonStyle={props.submitButtonStyle}
+            isDisabled={props.isDisabled}
+            screenTitle={props.screenTitle}
+            indexPatterns={props.indexPatterns}
+            indicateNoData={props.indicateNoData}
+            timeHistory={data.query.timefilter.history}
+            dateRangeFrom={timeRange.from}
+            dateRangeTo={timeRange.to}
+            refreshInterval={refreshInterval.value}
+            isRefreshPaused={refreshInterval.pause}
+            filters={filters}
+            query={query}
+            onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
+            onRefreshChange={defaultOnRefreshChange(data.query)}
+            savedQuery={savedQuery}
+            onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
+            onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
+            onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
+            onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
+            iconType={props.iconType}
+            nonKqlMode={props.nonKqlMode}
+            customSubmitButton={props.customSubmitButton}
+            isClearable={props.isClearable}
+            placeholder={props.placeholder}
+            {...overrideDefaultBehaviors(props)}
+            dataViewPickerComponentProps={props.dataViewPickerComponentProps}
+            textBasedLanguageModeErrors={props.textBasedLanguageModeErrors}
+            onTextBasedSavedAndExit={props.onTextBasedSavedAndExit}
+            displayStyle={props.displayStyle}
+            isScreenshotMode={isScreenshotMode}
+          />
+        </core.i18n.Context>
       </KibanaContextProvider>
     );
   };
