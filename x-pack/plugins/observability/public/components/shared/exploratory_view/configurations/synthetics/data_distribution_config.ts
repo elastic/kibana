@@ -6,12 +6,8 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import {
-  FieldLabels,
-  REPORT_METRIC_FIELD,
-  RECORDS_PERCENTAGE_FIELD,
-  ReportTypes,
-} from '../constants';
+import { REPORT_METRIC_FIELD, RECORDS_PERCENTAGE_FIELD, ReportTypes } from '../constants';
+import { FieldLabels } from '../constants/field_labels';
 import {
   CLS_LABEL,
   DCL_LABEL,

@@ -7,7 +7,6 @@
 
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
-  FieldLabels,
   LABEL_FIELDS_BREAKDOWN,
   LABEL_FIELDS_FILTER,
   OPERATION_COLUMN,
@@ -16,6 +15,7 @@ import {
   PERCENTILE,
   ReportTypes,
 } from '../constants';
+import { FieldLabels } from '../constants/field_labels';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,

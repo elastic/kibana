@@ -6,7 +6,8 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, RECORDS_FIELD, ReportTypes } from '../constants';
+import { RECORDS_FIELD, ReportTypes } from '../constants';
+import { FieldLabels } from '../constants/field_labels';
 
 export function getAlertsSingleMetricConfig({ spaceId }: ConfigProps): SeriesConfig {
   return {

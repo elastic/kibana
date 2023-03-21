@@ -7,12 +7,12 @@
 
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
-  FieldLabels,
   REPORT_METRIC_FIELD,
   RECORDS_PERCENTAGE_FIELD,
   ReportTypes,
   LABEL_FIELDS_FILTER,
 } from '../constants';
+import { FieldLabels } from '../constants/field_labels';
 import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,

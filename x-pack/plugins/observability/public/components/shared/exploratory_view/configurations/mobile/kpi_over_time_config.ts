@@ -7,13 +7,13 @@
 
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
-  FieldLabels,
   LABEL_FIELDS_FILTER,
   OPERATION_COLUMN,
   RECORDS_FIELD,
   REPORT_METRIC_FIELD,
   ReportTypes,
 } from '../constants';
+import { FieldLabels } from '../constants/field_labels';
 import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,

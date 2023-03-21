@@ -13,7 +13,8 @@ import {
   SYNTHETICS_STEP_NAME,
 } from '../constants/field_names/synthetics';
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
+import { FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
+import { FieldLabels } from '../constants/field_labels';
 import { buildExistsFilter } from '../utils';
 
 export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): SeriesConfig {

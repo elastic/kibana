@@ -6,7 +6,8 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, RECORDS_FIELD, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
+import { RECORDS_FIELD, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
+import { FieldLabels } from '../constants/field_labels';
 import { DOWN_LABEL, UP_LABEL } from '../constants/labels';
 import { SYNTHETICS_STEP_NAME } from '../constants/field_names/synthetics';
 import { buildExistsFilter } from '../utils';

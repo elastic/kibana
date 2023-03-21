@@ -6,7 +6,8 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, OPERATION_COLUMN, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
+import { OPERATION_COLUMN, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
+import { FieldLabels } from '../constants/field_labels';
 import {
   SYSTEM_CPU_PERCENTAGE_FIELD,
   DOCKER_CPU_PERCENTAGE_FIELD,

@@ -6,7 +6,7 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels } from '../constants';
+import { FieldLabels } from '../constants/field_labels';
 import { buildPhraseFilter } from '../utils';
 import { PROCESSOR_EVENT, TRANSACTION_TYPE } from '../constants/elasticsearch_fieldnames';
 

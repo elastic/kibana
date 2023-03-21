@@ -7,13 +7,13 @@
 
 import { ColumnFilter, ConfigProps, SeriesConfig } from '../../types';
 import {
-  FieldLabels,
   OPERATION_COLUMN,
   REPORT_METRIC_FIELD,
   PERCENTILE,
   ReportTypes,
   FORMULA_COLUMN,
 } from '../constants';
+import { FieldLabels } from '../constants/field_labels';
 import {
   CLS_LABEL,
   DCL_LABEL,

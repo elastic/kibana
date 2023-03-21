@@ -7,12 +7,12 @@
 
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
-  FieldLabels,
   LABEL_FIELDS_FILTER,
   REPORT_METRIC_FIELD,
   ReportTypes,
   USE_BREAK_DOWN_COLUMN,
 } from '../constants';
+import { FieldLabels } from '../constants/field_labels';
 import { buildPhraseFilter } from '../utils';
 import { SERVICE_NAME } from '../constants/elasticsearch_fieldnames';
 import { MOBILE_APP, NUMBER_OF_DEVICES } from '../constants/labels';
