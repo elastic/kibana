@@ -143,7 +143,7 @@ export class ContentStream extends Duplex {
         ? (cborx.decode(buffer) as GetResponse<FileChunkDocument>)
         : undefined;
 
-      // Because `asStream` was used in retrieving the document, errors will also not be processes
+      // Because `asStream` was used in retrieving the document, errors are also not be processed
       // and thus are returned "as is", so we check to see if an ES error occurred while attempting
       // to retrieve the chunk.
       if (decodedChunkDoc && ('error' in decodedChunkDoc || !decodedChunkDoc.found)) {

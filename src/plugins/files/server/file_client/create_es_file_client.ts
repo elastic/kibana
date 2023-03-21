@@ -31,8 +31,8 @@ export interface CreateEsFileClientArgs {
    */
   elasticsearchClient: ElasticsearchClient;
   /**
-   * Tread the indexes provided as Aliases. If set to true, ES `search()` will be used to
-   * retrieve the file info and content instead of `get()`. This is needed to ensurer the
+   * Treat the indices provided as Aliases. If set to true, ES `search()` will be used to
+   * retrieve the file info and content instead of `get()`. This is needed to ensure the
    * content can be retrieved in cases where an index may have rolled over (ES `get()`
    * needs a "real" index)
    */
