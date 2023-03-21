@@ -65,21 +65,6 @@ import {
   SLOS_URL,
 } from '../routes/routes';
 
-export interface ConfigSchema {
-  unsafe: {
-    alertDetails: {
-      metrics: {
-        enabled: boolean;
-      };
-      logs: {
-        enabled: boolean;
-      };
-      uptime: {
-        enabled: boolean;
-      };
-    };
-  };
-}
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
   share: SharePluginSetup;
@@ -178,7 +163,7 @@ export class Plugin
     }),
   ];
 
-  constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {}
+  constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
@@ -321,7 +306,6 @@ export class Plugin
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
-    const config = this.initContext.config.get();
 
     updateGlobalNavigation({
       capabilities: application.capabilities,
@@ -342,7 +326,7 @@ export class Plugin
       const { getAlertsTableConfiguration } = await import(
         '../components/alerts_table/get_alerts_table_configuration'
       );
-      return getAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
+      return getAlertsTableConfiguration(this.observabilityRuleTypeRegistry);
     };
 
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;

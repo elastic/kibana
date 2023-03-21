@@ -155,7 +155,7 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
       <EuiFlexGrid columns={3}>
         {collections.map((collection) => (
           <AnalyticsCollectionCardWithLens
-            key={collection.id}
+            key={collection.name}
             collection={collection}
             subtitle={selectedFilterLabel}
             filterBy={filterId}

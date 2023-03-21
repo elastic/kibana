@@ -21,8 +21,6 @@ import { AlertDetails } from './alert_details';
 import { alert, alertWithNoData } from '../../../data/alerts/alert';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
 import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ConfigSchema } from '../../../plugin/plugin';
-import type { Subset } from '../../../typings/utils';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -95,16 +93,6 @@ const params = {
   alertId: chance.guid(),
 };
 
-const config: Subset<ConfigSchema> = {
-  unsafe: {
-    alertDetails: {
-      logs: { enabled: true },
-      metrics: { enabled: true },
-      uptime: { enabled: true },
-    },
-  },
-};
-
 describe('Alert details', () => {
   jest
     .spyOn(useUiSettingHook, 'useUiSetting')
@@ -123,7 +111,7 @@ describe('Alert details', () => {
   it('should show the alert detail page with all necessary components', async () => {
     useFetchAlertDetailMock.mockReturnValue([false, alert]);
 
-    const alertDetails = render(<AlertDetails />, config);
+    const alertDetails = render(<AlertDetails />);
 
     await waitFor(() => expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeFalsy());
 
@@ -136,7 +124,7 @@ describe('Alert details', () => {
   it('should show error loading the alert details', async () => {
     useFetchAlertDetailMock.mockReturnValue([false, alertWithNoData]);
 
-    const alertDetails = render(<AlertDetails />, config);
+    const alertDetails = render(<AlertDetails />);
 
     expect(alertDetails.queryByTestId('alertDetailsError')).toBeTruthy();
     expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeFalsy();
@@ -146,7 +134,7 @@ describe('Alert details', () => {
   it('should show loading spinner', async () => {
     useFetchAlertDetailMock.mockReturnValue([true, alertWithNoData]);
 
-    const alertDetails = render(<AlertDetails />, config);
+    const alertDetails = render(<AlertDetails />);
 
     expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeTruthy();
     expect(alertDetails.queryByTestId('alertDetailsError')).toBeFalsy();

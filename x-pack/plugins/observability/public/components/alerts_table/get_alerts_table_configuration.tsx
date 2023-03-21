@@ -23,12 +23,10 @@ import {
 } from '../../routes/pages/alerts/components/alert_actions';
 import { useGetAlertFlyoutComponents } from '../use_get_alert_flyout_components';
 import type { ObservabilityRuleTypeRegistry } from '../../plugin/rule_registry/create_observability_rule_type_registry';
-import type { ConfigSchema } from '../../plugin/plugin';
 import type { TopAlert } from '../../typings/alerts';
 
 export const getAlertsTableConfiguration = (
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
-  config: ConfigSchema
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
 ): AlertsTableConfigurationRegistry => ({
   id: observabilityFeatureId,
   casesFeatureId,
@@ -47,7 +45,6 @@ export const getAlertsTableConfiguration = (
     renderCustomActionsRow: ({ alert, id, setFlyoutAlert }: RenderCustomActionsRowArgs) => {
       return (
         <AlertActions
-          config={config}
           data={Object.entries(alert).reduce<AlertActionsProps['data']>(
             (acc, [field, value]) => [...acc, { field, value: value as string[] }],
             []

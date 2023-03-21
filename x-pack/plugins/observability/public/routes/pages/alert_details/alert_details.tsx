@@ -107,7 +107,7 @@ export function AlertDetails() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <PageTitle title={alert?.reason} active={Boolean(alert?.active)} />,
+        pageTitle: <PageTitle alert={alert} />,
         rightSideItems: [
           <CasesContext
             owner={[observabilityFeatureId]}
@@ -117,11 +117,11 @@ export function AlertDetails() {
             <HeaderActions alert={alert} />
           </CasesContext>,
         ],
-        bottomBorder: false,
+        bottomBorder: true,
       }}
       data-test-subj="alertDetails"
     >
-      <AlertSummary alert={alert} alertSummaryFields={summaryFields} />
+      <AlertSummary alertSummaryFields={summaryFields} />
       <EuiSpacer size="l" />
       {AlertDetailsAppSection && rule && (
         <AlertDetailsAppSection
