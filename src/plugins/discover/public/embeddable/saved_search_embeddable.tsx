@@ -7,21 +7,20 @@
  */
 
 import { lastValueFrom, Subscription } from 'rxjs';
-import { map, distinctUntilChanged, skip, startWith } from 'rxjs/operators';
+import { distinctUntilChanged, skip, startWith } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
-import {
-  onlyDisabledFiltersChanged,
-  Filter,
-  Query,
-  TimeRange,
-  FilterStateStore,
-} from '@kbn/es-query';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { Container, Embeddable, FilterableEmbeddable, shouldFetch$ } from '@kbn/embeddable-plugin/public';
+import {
+  Container,
+  Embeddable,
+  FilterableEmbeddable,
+  shouldFetch$,
+} from '@kbn/embeddable-plugin/public';
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import {
@@ -149,20 +148,20 @@ export class SavedSearchEmbeddable
   }
 
   private setupSubscriptions() {
-    this.subscriptions.push(shouldFetch$<SearchInput>(this.getUpdated$(), () => this.getInput()).subscribe(() => {
-      this.reload(true);
-    }));
+    this.subscriptions.push(
+      shouldFetch$<SearchInput>(this.getUpdated$(), () => this.getInput()).subscribe(() => {
+        this.reload(true);
+      })
+    );
 
     this.subscriptions.push(
       this.getInput$()
         .pipe(
-            // wrapping distinctUntilChanged with startWith and skip to prime distinctUntilChanged with an initial sort value.
-            startWith(this.getInput()),
-            distinctUntilChanged((a, b) =>
-              fastIsEqual(a.sort, b.sort)
-            ),
-            skip(1)
-          )
+          // wrapping distinctUntilChanged with startWith and skip to prime distinctUntilChanged with an initial sort value.
+          startWith(this.getInput()),
+          distinctUntilChanged((a, b) => fastIsEqual(a.sort, b.sort)),
+          skip(1)
+        )
         .subscribe((sort) => {
           this.reload(true);
         })
@@ -175,10 +174,10 @@ export class SavedSearchEmbeddable
           this.panelTitle = this.output.title || '';
         }
 
-        const isRerenderRequired = this.searchProps && (
-          this.input.rowsPerPage !== this.searchProps.rowsPerPageState ||
-          (this.input.columns && !fastIsEqual(this.input.columns, this.searchProps.columns))
-        );
+        const isRerenderRequired =
+          this.searchProps &&
+          (this.input.rowsPerPage !== this.searchProps.rowsPerPageState ||
+            (this.input.columns && !fastIsEqual(this.input.columns, this.searchProps.columns)));
 
         if (titleChanged || isRerenderRequired) {
           this.reload(false);
