@@ -29,14 +29,11 @@ describe('Alert summary', () => {
   });
 
   it('should show alert data', async () => {
-    const alertSummary = render(
-      <AlertSummary alertSummaryFields={alertSummaryFieldsMock} />
-    );
+    const alertSummary = render(<AlertSummary alertSummaryFields={alertSummaryFieldsMock} />);
 
     expect(alertSummary.queryByText('Actual value')).toBeInTheDocument();
-    expect(alertSummary.queryByText(alertWithTags.fields['kibana.alert.evaluation.value']!))
+    expect(alertSummary.queryByText(alertWithTags.fields['kibana.alert.evaluation.value']!));
     expect(alertSummary.queryByText('Expected value')).toBeInTheDocument();
-    expect(alertSummary.queryByText(alertWithTags.fields['kibana.alert.evaluation.threshold']!))
-    
+    expect(alertSummary.queryByText(alertWithTags.fields['kibana.alert.evaluation.threshold']!));
   });
 });
