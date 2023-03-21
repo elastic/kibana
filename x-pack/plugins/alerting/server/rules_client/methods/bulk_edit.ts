@@ -11,7 +11,6 @@ import { cloneDeep, omit } from 'lodash';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import {
-  SavedObjectReference,
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
