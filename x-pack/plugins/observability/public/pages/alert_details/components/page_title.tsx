@@ -67,7 +67,7 @@ export function PageTitle({ alert }: PageTitleProps) {
               `}
               size="s"
             >
-              {moment(Number(alert.start)).fromNow()}
+              {moment(Number(alert.start)).locale(i18n.getLocale()).fromNow()}
             </EuiText>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -105,7 +105,7 @@ export function PageTitle({ alert }: PageTitleProps) {
               `}
               size="s"
             >
-              {moment(alert.fields[TIMESTAMP]?.toString()).fromNow()}
+              {moment(alert.fields[TIMESTAMP]?.toString()).locale(i18n.getLocale()).fromNow()}
             </EuiText>
           </EuiFlexGroup>
         </EuiFlexItem>
