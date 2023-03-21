@@ -12,7 +12,7 @@ import { alert } from '../mock/alert';
 
 describe('Page Title', () => {
   const defaultProps = {
-   alert
+    alert,
   };
 
   const renderComp = (props: PageTitleProps) => {
@@ -30,11 +30,10 @@ describe('Page Title', () => {
   });
 
   it('should display an inactive badge when active is false', async () => {
-    const updatedProps = {alert}
-    updatedProps.alert.active = false
-    
+    const updatedProps = { alert };
+    updatedProps.alert.active = false;
+
     const { getByText } = renderComp({ ...updatedProps });
     expect(getByText('Recovered')).toBeTruthy();
   });
-
 });

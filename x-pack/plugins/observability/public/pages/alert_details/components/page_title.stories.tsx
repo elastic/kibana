@@ -15,8 +15,7 @@ import { alert } from '../mock/alert';
 export default {
   component: Component,
   title: 'app/AlertDetails/PageTitle',
-  alert: alert
-
+  alert,
 };
 
 const Template: ComponentStory<typeof Component> = (props: PageTitleProps) => (
@@ -30,7 +29,7 @@ const TemplateWithPageTemplate: ComponentStory<typeof Component> = (props: PageT
 );
 
 const defaultProps = {
-  alert
+  alert,
 };
 
 export const PageTitle = Template.bind({});
