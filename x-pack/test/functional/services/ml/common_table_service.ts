@@ -101,6 +101,47 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
         `Filtered table should have ${expectedRowCount} row(s) for filter '${queryString}' (got ${rows.length} matching  items)`
       );
     }
+
+    public async assertTableSorting(
+      columnName: string,
+      columnIndex: number,
+      expectedDirection: 'desc' | 'asc'
+    ) {
+      const actualDirection = await this.getCurrentSorting();
+      expect(actualDirection?.direction).to.eql(expectedDirection);
+      expect(actualDirection?.columnName).to.eql(columnName);
+    }
+
+    public async getCurrentSorting(): Promise<
+      { columnName: string; direction: string } | undefined
+    > {
+      const table = await testSubjects.find(`~${this.tableTestSubj}`);
+      const headers = await table.findAllByClassName('euiTableHeaderCell');
+      for (const header of headers) {
+        const ariaSort = await header.getAttribute('aria-sort');
+        if (ariaSort !== 'none') {
+          // TODO Add support for column names with _
+          const columnName = (await header.getAttribute('data-test-subj')).split('_')[1];
+          return { columnName, direction: ariaSort.replace('ending', '') };
+        }
+      }
+    }
+
+    public async sortByField(columnName: string, columnIndex: number, direction: 'desc' | 'asc') {
+      const currentSorting = await this.getCurrentSorting();
+
+      const testSubjString = `tableHeaderCell_${columnName}_${columnIndex}`;
+
+      if (currentSorting && currentSorting.direction !== direction) {
+        // if current sorting order is different, need to click twice
+        await testSubjects.click(testSubjString);
+        await this.waitForTableToLoad();
+      }
+
+      await testSubjects.click(testSubjString);
+      await this.waitForTableToLoad();
+      await this.assertTableSorting(columnName, columnIndex, direction);
+    }
   };
 
   return {

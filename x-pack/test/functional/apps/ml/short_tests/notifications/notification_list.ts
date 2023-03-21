@@ -58,6 +58,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await ml.notifications.table.waitForTableToLoad();
       await ml.notifications.table.assertRowsNumberPerPage(25);
+      await ml.notifications.table.assertTableSorting('timestamp', 0, 'desc');
+    });
+
+    it('support custom sorting for notifications level', async () => {
+      await ml.notifications.table.sortByField('level', 1, 'desc');
     });
 
     it('does not show notifications from another space', async () => {
