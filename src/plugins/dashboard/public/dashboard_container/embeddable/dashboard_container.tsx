@@ -639,13 +639,21 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     return titles;
   }
 
-  public scrollToPanel = (id: string) => {
-    setTimeout(() => {
-      document
-        .getElementById(`panel-${id}`)
-        ?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-      this.highlightPanel(id);
-    }, 500);
+  public scrollToPanel = (id: string, options: ScrollIntoViewOptions = {}) => {
+    const panelToScrollTo = document.getElementById(`panel-${id}`);
+
+    console.log({ panelToScrollTo });
+
+    if (panelToScrollTo) {
+      panelToScrollTo.scrollIntoView({ block: 'center', behavior: 'auto', ...options });
+    } else {
+      setTimeout(() => this.scrollToPanel(id, options), 100);
+    }
+    // setTimeout(() => {
+    //   document
+    //     .getElementById(`panel-${id}`)
+    //     ?.scrollIntoView({ block: 'center', behavior: 'auto', ...options });
+    // }, 1000);
   };
 
   public scrollToTop = () => {
@@ -658,11 +666,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public highlightPanel = async (id: string) => {
     const panelToHighlight = document.getElementById(`panel-${id}`);
-    // do the highlight
-    panelToHighlight?.classList.add('dshDashboardGrid__item--highlighted');
 
-    setTimeout(() => {
-      panelToHighlight?.classList.remove('dshDashboardGrid__item--highlighted');
-    }, 5000);
+    if (panelToHighlight) {
+      panelToHighlight.classList.add('dshDashboardGrid__item--highlighted');
+      setTimeout(() => {
+        panelToHighlight.classList.remove('dshDashboardGrid__item--highlighted');
+      }, 5000);
+    }
   };
 }

@@ -136,7 +136,8 @@ export function showPlaceholderUntil<TPlacementMethodArgs extends IPanelPlacemen
       const panelId = await this.replacePanel(placeholderPanelState, newPanelState);
 
       if (placementArgs?.scrollToPanel) {
-        this.scrollToPanel(panelId);
+        this.scrollToPanel(panelId, { behavior: 'smooth' });
+        this.highlightPanel(panelId);
       }
     });
 }
