@@ -20,9 +20,7 @@ import { AnalyticsCollectionTable } from './analytics_collection_table';
 describe('AnalyticsCollectionTable', () => {
   const analyticsCollections: AnalyticsCollection[] = [
     {
-      event_retention_day_length: 180,
       events_datastream: 'analytics-events-example',
-      id: 'example',
       name: 'example',
     },
   ];

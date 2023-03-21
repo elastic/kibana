@@ -83,7 +83,7 @@ export const AnalyticsCollectionEvents: React.FC<AnalyticsCollectionEventsProps>
               onClick={() =>
                 navigateToUrl(
                   generateEncodedPath(COLLECTION_VIEW_PATH, {
-                    id: collection.id,
+                    id: collection.name,
                     section: 'integrate',
                   })
                 )
