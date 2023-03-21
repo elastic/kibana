@@ -26,9 +26,7 @@ describe('AnalyticsCollectionTable', () => {
       name: 'example',
     },
     {
-      event_retention_day_length: 180,
       events_datastream: 'analytics-events-example2',
-      id: 'example2',
       name: 'example2',
     },
   ];
