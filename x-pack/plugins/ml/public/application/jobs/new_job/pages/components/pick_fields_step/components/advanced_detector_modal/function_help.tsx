@@ -230,7 +230,7 @@ export const FunctionHelpPopover: FC = memo(() => {
       initialFocus="#mlAdFunctionsHelpTableId"
     >
       <EuiPopoverTitle paddingSize="s">
-                <FormattedMessage
+        <FormattedMessage
           id="xpack.ml.anomalyDetection.functions.popoverTitle"
           defaultMessage="Function reference"
         />
@@ -256,7 +256,7 @@ export const FunctionHelpPopover: FC = memo(() => {
       </EuiPanel>
       <EuiPanel color="transparent" paddingSize="s">
         <EuiText color="subdued" size="xs">
-           <FormattedMessage
+          <FormattedMessage
             id="xpack.ml.anomalyDetection.functions.learnMoreText"
             defaultMessage="Learn more about {link}"
             values={{
