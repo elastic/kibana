@@ -23,7 +23,11 @@ export const ViewLocationMonitors = ({
   const onButtonClick = () => setIsPopoverOpen((prevState) => !prevState);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const button = <EuiButtonEmpty onClick={onButtonClick}>{count}</EuiButtonEmpty>;
+  const button = (
+    <EuiButtonEmpty data-test-subj="syntheticsViewLocationMonitorsButton" onClick={onButtonClick}>
+      {count}
+    </EuiButtonEmpty>
+  );
 
   const history = useHistory();
 
@@ -37,6 +41,7 @@ export const ViewLocationMonitors = ({
       <EuiSpacer size="s" />
       {count > 0 ? (
         <EuiButton
+          data-test-subj="syntheticsViewLocationMonitorsButton"
           href={history.createHref({
             pathname: '/monitors',
             search: `?locations=${JSON.stringify([locationName])}`,
@@ -46,6 +51,7 @@ export const ViewLocationMonitors = ({
         </EuiButton>
       ) : (
         <EuiButton
+          data-test-subj="syntheticsViewLocationMonitorsButton"
           href={history.createHref({
             pathname: '/add-monitor',
           })}
