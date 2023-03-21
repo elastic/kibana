@@ -134,7 +134,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     }
   }, [prevDiagnosticsEntries, diagnosticsEntries, notifications.toasts]);
 
-  const errorIcon = <MarginedIcon type="alert" color="red" />;
+  const errorIcon = <MarginedIcon type="warning" color="red" />;
   const getErrorMessage = (error?: string) => (error ? `Error: ${error}` : '');
 
   const columns: Array<EuiTableFieldDataColumnType<AgentDiagnostics>> = [
@@ -238,7 +238,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
         <EuiCallOut
-          iconType="alert"
+          iconType="warning"
           color="warning"
           title={
             <FormattedMessage

@@ -12,7 +12,7 @@ import { EuiAccordion, EuiIcon } from '@elastic/eui';
 import './summary_section.scss';
 
 const ICON_PROPS = {
-  error: { type: 'crossInACircleFilled', color: 'danger' },
+  error: { type: 'error', color: 'danger' },
   success: { type: 'checkInCircleFilled', color: 'success' },
   info: { type: 'iInCircle', color: 'default' },
 };

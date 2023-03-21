@@ -27,7 +27,7 @@
         "label": "getGroupingQuery",
         "description": [],
         "signature": [
-          "({ additionalFilters, additionalAggregationsRoot, additionalStatsAggregationsFields0, additionalStatsAggregationsFields1, from, runtimeMappings, stackByMultipleFields0, stackByMultipleFields0Size, stackByMultipleFields0From, stackByMultipleFields0Sort, stackByMultipleFields1, stackByMultipleFields1Size, stackByMultipleFields1From, stackByMultipleFields1Sort, to, }: ",
+          "({ additionalFilters, from, groupByFields, metricsAggregations, pageNumber, rootAggregations, runtimeMappings, size, sort, to, }: ",
           "GroupingQueryArgs",
           ") => ",
           "GroupingQuery"
@@ -41,7 +41,7 @@
             "id": "def-common.getGroupingQuery.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  additionalFilters = [],\n  additionalAggregationsRoot,\n  additionalStatsAggregationsFields0,\n  additionalStatsAggregationsFields1,\n  from,\n  runtimeMappings,\n  stackByMultipleFields0,\n  stackByMultipleFields0Size = DEFAULT_STACK_BY_FIELD0_SIZE,\n  stackByMultipleFields0From,\n  stackByMultipleFields0Sort,\n  stackByMultipleFields1,\n  stackByMultipleFields1Size = DEFAULT_STACK_BY_FIELD1_SIZE,\n  stackByMultipleFields1From,\n  stackByMultipleFields1Sort,\n  to,\n}",
+            "label": "{\n  additionalFilters = [],\n  from,\n  groupByFields,\n  metricsAggregations,\n  pageNumber,\n  rootAggregations,\n  runtimeMappings,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  sort,\n  to,\n}",
             "description": [],
             "signature": [
               "GroupingQueryArgs"
@@ -133,7 +133,7 @@
         "label": "useGrouping",
         "description": [],
         "signature": [
-          "<T>({ defaultGroupingOptions, fields, groupingId, }: GroupingArgs) => Grouping<T>"
+          "<T>({ defaultGroupingOptions, fields, groupingId, onGroupChangeCallback, tracker, }: GroupingArgs) => Grouping<T>"
         ],
         "path": "packages/kbn-securitysolution-grouping/src/hooks/use_grouping.tsx",
         "deprecated": false,
@@ -144,7 +144,7 @@
             "id": "def-common.useGrouping.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  defaultGroupingOptions,\n  fields,\n  groupingId,\n}",
+            "label": "{\n  defaultGroupingOptions,\n  fields,\n  groupingId,\n  onGroupChangeCallback,\n  tracker,\n}",
             "description": [],
             "signature": [
               "GroupingArgs"
@@ -185,10 +185,10 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-grouping",
-            "id": "def-common.GroupingAggregation.stackByMultipleFields0",
+            "id": "def-common.GroupingAggregation.groupByFields",
             "type": "Object",
             "tags": [],
-            "label": "stackByMultipleFields0",
+            "label": "groupByFields",
             "description": [],
             "signature": [
               "{ buckets?: ",
@@ -207,10 +207,24 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-grouping",
-            "id": "def-common.GroupingAggregation.groupsCount0",
+            "id": "def-common.GroupingAggregation.groupsCount",
             "type": "Object",
             "tags": [],
-            "label": "groupsCount0",
+            "label": "groupsCount",
+            "description": [],
+            "signature": [
+              "{ value?: number | null | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-grouping/src/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-grouping",
+            "id": "def-common.GroupingAggregation.unitsCount",
+            "type": "Object",
+            "tags": [],
+            "label": "unitsCount",
             "description": [],
             "signature": [
               "{ value?: number | null | undefined; } | undefined"

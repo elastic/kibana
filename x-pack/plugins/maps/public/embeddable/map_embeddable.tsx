@@ -488,7 +488,7 @@ export class MapEmbeddable
       sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict' ? (
         <div className="mapEmbeddedError">
           <EuiEmptyPrompt
-            iconType="alert"
+            iconType="warning"
             iconColor="danger"
             data-test-subj="embeddable-maps-failure"
             body={spaces.ui.components.getEmbeddableLegacyUrlConflict({

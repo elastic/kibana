@@ -10,6 +10,7 @@ import type {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';
 
@@ -89,8 +90,21 @@ export interface RuleAction {
   };
 }
 
-export interface RuleAggregations {
-  alertExecutionStatus: { [status: string]: number };
+export interface AggregateOptions {
+  search?: string;
+  defaultSearchOperator?: 'AND' | 'OR';
+  searchFields?: string[];
+  hasReference?: {
+    type: string;
+    id: string;
+  };
+  filter?: string | KueryNode;
+  page?: number;
+  perPage?: number;
+}
+
+export interface RuleAggregationFormattedResult {
+  ruleExecutionStatus: { [status: string]: number };
   ruleLastRunOutcome: { [status: string]: number };
   ruleEnabledStatus: { enabled: number; disabled: number };
   ruleMutedStatus: { muted: number; unmuted: number };
@@ -147,6 +161,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   isSnoozedUntil?: Date | null;
   lastRun?: RuleLastRun | null;
   nextRun?: Date | null;
+  revision: number;
   running?: boolean | null;
   viewInAppRelativeUrl?: string;
 }
