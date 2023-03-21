@@ -165,7 +165,7 @@ export function registerAnalyticsRoutes({
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
 
-      const eventsIndexExists = await analyticsEventsIndexExists(client, request.params.id);
+      const eventsIndexExists = await analyticsEventsIndexExists(client, request.params.name);
 
       if (!eventsIndexExists) {
         return response.ok({ body: { exists: false } });

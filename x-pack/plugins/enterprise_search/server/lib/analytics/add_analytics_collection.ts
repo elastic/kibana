@@ -31,14 +31,6 @@ const createAnalyticsCollection = async (
   return response;
 };
 
-export const getDataViewName = (collectionName: string): string => {
-  return `behavioral_analytics.events-${collectionName}`;
-};
-
-export const getDataStreamName = (collectionName: string): string => {
-  return `behavioral_analytics-events-${getDataViewName(collectionName)}`;
-};
-
 const createDataView = async (
   dataViewsService: DataViewsService,
   analyticsCollection: AnalyticsCollection
@@ -46,9 +38,9 @@ const createDataView = async (
   return dataViewsService.createAndSave(
     {
       allowNoIndex: true,
-      name: getDataViewName(analyticsCollection.name),
+      name: `behavioral_analytics.events-${analyticsCollection.name}`,
       timeFieldName: '@timestamp',
-      title: getDataStreamName(analyticsCollection.name),
+      title: analyticsCollection.events_datastream,
     },
     true
   );

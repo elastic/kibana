@@ -66,7 +66,7 @@ describe('add analytics collection lib function', () => {
       {
         allowNoIndex: true,
         name: 'behavioral_analytics.events-example',
-        title: 'behavioral_analytics-events-behavioral_analytics.events-example',
+        title: 'example-datastream',
         timeFieldName: '@timestamp',
       },
       true

@@ -38,10 +38,10 @@ export const AnalyticsCollectionEvents: React.FC<AnalyticsCollectionEventsProps>
   const { navigateToUrl } = useValues(KibanaLogic);
 
   useEffect(() => {
-    analyticsEventsIndexExists(collection.id);
+    analyticsEventsIndexExists(collection.events_datastream);
 
     const interval = setInterval(() => {
-      analyticsEventsIndexExists(collection.id);
+      analyticsEventsIndexExists(collection.events_datastream);
     }, EVENTS_POLLING_INTERVAL);
 
     return () => clearInterval(interval);
@@ -91,7 +91,7 @@ export const AnalyticsCollectionEvents: React.FC<AnalyticsCollectionEventsProps>
             >
               {i18n.translate(
                 'xpack.enterpriseSearch.analytics.collections.collectionsView.eventsTab.emptyState.actions',
-                {
+      {
                   defaultMessage: 'View integration instructions',
                 }
               )}
