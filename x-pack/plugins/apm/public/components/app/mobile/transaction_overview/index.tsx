@@ -37,6 +37,7 @@ export function MobileTransactionOverview() {
       kuery,
       offset,
       comparisonEnabled,
+      mobileTablesTab,
     },
   } = useApmParams('/mobile-services/{serviceName}/transactions');
 
@@ -93,6 +94,9 @@ export function MobileTransactionOverview() {
           kueryWithMobileFilters={kueryWithMobileFilters}
           start={start}
           end={end}
+          comparisonEnabled={comparisonEnabled}
+          offset={offset}
+          mobileTablesTab={mobileTablesTab}
         />
       </EuiPanel>
     </>

@@ -4,29 +4,40 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
+import { push } from '../../../../shared/links/url_helpers';
 import { transactionsTab } from './transactions_tab';
+import { osVersionTab } from './os_version_tab';
+import { appVersionTab } from './app_version_tab';
+import { devicesTab } from './devices_tab';
 
 export interface TabContentProps {
   environment: string;
   start: string;
   end: string;
   kueryWithMobileFilters: string;
+  comparisonEnabled: boolean;
+  offset?: string;
+  mobileTablesTab?: string;
 }
 
-const tabs = [transactionsTab];
+const tabs = [transactionsTab, appVersionTab, osVersionTab, devicesTab];
 
 export function TransactionOverviewTabs({
   environment,
   start,
   end,
   kueryWithMobileFilters,
+  comparisonEnabled,
+  offset,
+  mobileTablesTab,
 }: TabContentProps) {
-  const [currentTab, setCurrentTab] = useState(transactionsTab.key);
+  const history = useHistory();
 
   const { component: TabContent } =
-    tabs.find((tab) => tab.key === currentTab) ?? transactionsTab;
+    tabs.find((tab) => tab.key === mobileTablesTab) ?? transactionsTab;
   return (
     <>
       <EuiTabs>
@@ -34,9 +45,13 @@ export function TransactionOverviewTabs({
           <EuiTab
             data-test-subj={dataTestSubj}
             key={key}
-            isSelected={key === currentTab}
+            isSelected={key === mobileTablesTab}
             onClick={() => {
-              setCurrentTab(key);
+              push(history, {
+                query: {
+                  mobileTablesTab: key,
+                },
+              });
             }}
           >
             {label}
@@ -50,6 +65,8 @@ export function TransactionOverviewTabs({
           start,
           end,
           kueryWithMobileFilters,
+          comparisonEnabled,
+          offset,
         }}
       />
     </>
