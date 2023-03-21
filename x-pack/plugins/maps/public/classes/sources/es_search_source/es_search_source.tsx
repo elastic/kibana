@@ -886,13 +886,18 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     delete requestBody.script_fields;
     delete requestBody.stored_fields;
 
-    return `${mvtUrlServicePath}\
-?geometryFieldName=${this._descriptor.geoField}\
-&index=${dataView.getIndexPattern()}\
-&hasLabels=${hasLabels}\
-&buffer=${buffer}\
-&requestBody=${encodeMvtResponseBody(requestBody)}\
-&token=${refreshToken}`;
+    const params = new URLSearchParams();
+    params.set('geometryFieldName', this._descriptor.geoField);
+    params.set('index', dataView.getIndexPattern());
+    params.set('hasLabels', hasLabels.toString());
+    params.set('buffer', buffer.toString());
+    params.set('requestBody', encodeMvtResponseBody(requestBody));
+    params.set('token', refreshToken);
+    if (searchFilters.savedObjectId) {
+      params.set('savedObjectId', searchFilters.savedObjectId);
+    }
+
+    return `${mvtUrlServicePath}?${params.toString()}`;
   }
 
   async getTimesliceMaskFieldName(): Promise<string | null> {

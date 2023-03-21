@@ -50,6 +50,7 @@ export function initMVTRoutes({
           requestBody: schema.string(),
           index: schema.string(),
           token: schema.maybe(schema.string()),
+          savedObjectId: schema.maybe(schema.string()),
         }),
       },
     },
@@ -90,6 +91,7 @@ export function initMVTRoutes({
         executionContext: makeExecutionContext({
           description: 'mvt:get_hits_tile',
           url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/${z}/${x}/${y}.pbf`,
+          id: query.savedObjectId,
         }),
         logger,
         path: tileRequest.path,
@@ -117,6 +119,7 @@ export function initMVTRoutes({
           renderAs: schema.string(),
           token: schema.maybe(schema.string()),
           gridPrecision: schema.number(),
+          savedObjectId: schema.maybe(schema.string()),
         }),
       },
     },
@@ -159,6 +162,7 @@ export function initMVTRoutes({
         executionContext: makeExecutionContext({
           description: 'mvt:get_aggs_tile',
           url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/${z}/${x}/${y}.pbf`,
+          id: query.savedObjectId,
         }),
         logger,
         path: tileRequest.path,

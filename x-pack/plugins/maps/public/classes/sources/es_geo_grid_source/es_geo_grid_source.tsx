@@ -525,15 +525,20 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
-    return `${mvtUrlServicePath}\
-?geometryFieldName=${this._descriptor.geoField}\
-&index=${dataView.getIndexPattern()}\
-&gridPrecision=${this._getGeoGridPrecisionResolutionDelta()}\
-&hasLabels=${hasLabels}\
-&buffer=${buffer}\
-&requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
-&renderAs=${this._descriptor.requestType}\
-&token=${refreshToken}`;
+    const params = new URLSearchParams();
+    params.set('geometryFieldName', this._descriptor.geoField);
+    params.set('index', dataView.getIndexPattern());
+    params.set('gridPrecision', this._getGeoGridPrecisionResolutionDelta().toString());
+    params.set('hasLabels', hasLabels.toString());
+    params.set('buffer', buffer.toString());
+    params.set('requestBody', encodeMvtResponseBody(searchSource.getSearchRequestBody()));
+    params.set('renderAs', this._descriptor.requestType);
+    params.set('token', refreshToken);
+    if (searchFilters.savedObjectId) {
+      params.set('savedObjectId', searchFilters.savedObjectId);
+    }
+
+    return `${mvtUrlServicePath}?${params.toString()}`;
   }
 
   isFilterByMapBounds(): boolean {

@@ -110,15 +110,44 @@ describe('ESSearchSource', () => {
         isFeatureEditorOpenForLayer: false,
       };
 
-      it('Should only include required props', async () => {
+      it('Should include required props', async () => {
         const esSearchSource = new ESSearchSource({
           geoField: geoFieldName,
           indexPatternId: 'ipId',
         });
         const tileUrl = await esSearchSource.getTileUrl(searchFilters, '1234', false, 5);
-        expect(tileUrl).toBe(
-          `rootdir/api/maps/mvt/getTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=foobar-title-*&hasLabels=false&buffer=5&requestBody=(foobar%3AES_DSL_PLACEHOLDER%2Cparams%3A('0'%3A('0'%3Aindex%2C'1'%3A(fields%3A()%2Ctitle%3A'foobar-title-*'))%2C'1'%3A('0'%3Asize%2C'1'%3A1000)%2C'2'%3A('0'%3Afilter%2C'1'%3A!())%2C'3'%3A('0'%3Aquery)%2C'4'%3A('0'%3Aindex%2C'1'%3A(fields%3A()%2Ctitle%3A'foobar-title-*'))%2C'5'%3A('0'%3Aquery%2C'1'%3A(language%3AKQL%2Cquery%3A'tooltipField%3A%20foobar'))%2C'6'%3A('0'%3AfieldsFromSource%2C'1'%3A!(_id))%2C'7'%3A('0'%3Asource%2C'1'%3A!f)%2C'8'%3A('0'%3Afields%2C'1'%3A!(tooltipField%2CstyleField))))&token=1234`
+
+        const urlParts = tileUrl.split('?');
+        expect(urlParts[0]).toEqual('rootdir/api/maps/mvt/getTile/{z}/{x}/{y}.pbf');
+
+        const params = new URLSearchParams(urlParts[1]);
+        expect(Object.fromEntries(params)).toEqual({
+          buffer: '5',
+          geometryFieldName: 'bar',
+          hasLabels: 'false',
+          index: 'foobar-title-*',
+          requestBody: "(foobar%3AES_DSL_PLACEHOLDER%2Cparams%3A('0'%3A('0'%3Aindex%2C'1'%3A(fields%3A()%2Ctitle%3A'foobar-title-*'))%2C'1'%3A('0'%3Asize%2C'1'%3A1000)%2C'2'%3A('0'%3Afilter%2C'1'%3A!())%2C'3'%3A('0'%3Aquery)%2C'4'%3A('0'%3Aindex%2C'1'%3A(fields%3A()%2Ctitle%3A'foobar-title-*'))%2C'5'%3A('0'%3Aquery%2C'1'%3A(language%3AKQL%2Cquery%3A'tooltipField%3A%20foobar'))%2C'6'%3A('0'%3AfieldsFromSource%2C'1'%3A!(_id))%2C'7'%3A('0'%3Asource%2C'1'%3A!f)%2C'8'%3A('0'%3Afields%2C'1'%3A!(tooltipField%2CstyleField))))",
+          token: '1234',
+        });
+      });
+
+      it('Should include savedObjectId when provided', async () => {
+        const esSearchSource = new ESSearchSource({
+          geoField: geoFieldName,
+          indexPatternId: 'ipId',
+        });
+        const tileUrl = await esSearchSource.getTileUrl(
+          {
+            ...searchFilters,
+            savedObjectId: 'map1234'
+          },
+          '1234',
+          false,
+          5
         );
+        const urlParts = tileUrl.split('?');
+        const params = new URLSearchParams(urlParts[1]);
+        expect(Object.fromEntries(params).savedObjectId).toEqual('map1234');
       });
     });
   });
