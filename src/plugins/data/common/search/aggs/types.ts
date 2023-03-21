@@ -28,7 +28,6 @@ import {
   aggFilters,
   aggGeoBounds,
   aggGeoCentroid,
-  aggGeoHash,
   aggGeoTile,
   aggHistogram,
   aggIpRange,
@@ -58,7 +57,6 @@ import {
   AggParamsFilters,
   AggParamsGeoBounds,
   AggParamsGeoCentroid,
-  AggParamsGeoHash,
   AggParamsGeoTile,
   AggParamsHistogram,
   AggParamsIpRange,
@@ -182,7 +180,6 @@ interface SerializedAggParamsMapping {
   [BUCKET_TYPES.SIGNIFICANT_TERMS]: AggParamsSignificantTerms;
   [BUCKET_TYPES.SIGNIFICANT_TEXT]: AggParamsSignificantText;
   [BUCKET_TYPES.GEOTILE_GRID]: AggParamsGeoTile;
-  [BUCKET_TYPES.GEOHASH_GRID]: AggParamsGeoHash;
   [BUCKET_TYPES.HISTOGRAM]: AggParamsHistogram;
   [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
   [BUCKET_TYPES.TERMS]: AggParamsTermsSerialized;
@@ -229,7 +226,6 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.SIGNIFICANT_TERMS]: AggParamsSignificantTerms;
   [BUCKET_TYPES.SIGNIFICANT_TEXT]: AggParamsSignificantText;
   [BUCKET_TYPES.GEOTILE_GRID]: AggParamsGeoTile;
-  [BUCKET_TYPES.GEOHASH_GRID]: AggParamsGeoHash;
   [BUCKET_TYPES.HISTOGRAM]: AggParamsHistogram;
   [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
   [BUCKET_TYPES.TERMS]: AggParamsTerms;
@@ -277,7 +273,6 @@ export interface AggFunctionsMapping {
   aggDateRange: ReturnType<typeof aggDateRange>;
   aggRange: ReturnType<typeof aggRange>;
   aggGeoTile: ReturnType<typeof aggGeoTile>;
-  aggGeoHash: ReturnType<typeof aggGeoHash>;
   aggHistogram: ReturnType<typeof aggHistogram>;
   aggDateHistogram: ReturnType<typeof aggDateHistogram>;
   aggTerms: ReturnType<typeof aggTerms>;

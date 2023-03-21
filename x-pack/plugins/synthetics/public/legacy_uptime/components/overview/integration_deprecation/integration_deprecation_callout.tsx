@@ -36,6 +36,7 @@ export function IntegrationDeprecationCallout({
               values={{
                 link: (
                   <EuiLink
+                    data-test-subj="syntheticsIntegrationDeprecationCalloutSyntheticsMigrationDocsLink"
                     target="_blank"
                     href={getDocLinks()?.links?.observability?.syntheticsMigrateFromIntegration}
                     external
@@ -52,7 +53,11 @@ export function IntegrationDeprecationCallout({
         </EuiFlexItem>
         {handleDismissDeprecationNotice ? (
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={handleDismissDeprecationNotice} color="warning">
+            <EuiButton
+              data-test-subj="syntheticsIntegrationDeprecationCalloutDismissButton"
+              onClick={handleDismissDeprecationNotice}
+              color="warning"
+            >
               <FormattedMessage
                 id="xpack.synthetics.integration.deprecation.dismiss"
                 defaultMessage="Dismiss"

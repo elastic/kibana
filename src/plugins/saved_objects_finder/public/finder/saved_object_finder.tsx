@@ -8,7 +8,7 @@
 
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 import {
@@ -22,6 +22,9 @@ import {
   SearchFilterConfig,
   Query,
   PropertySort,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -69,9 +72,11 @@ interface BaseSavedObjectFinder {
     name: string,
     savedObject: SavedObjectCommon
   ) => void;
-  noItemsMessage?: React.ReactNode;
+  noItemsMessage?: ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
   showFilter?: boolean;
+  leftChildren?: ReactElement | ReactElement[];
+  helpText?: string;
 }
 
 interface SavedObjectFinderFixedPage extends BaseSavedObjectFinder {
@@ -355,23 +360,35 @@ export class SavedObjectFinderUi extends React.Component<
           ]
         : undefined,
       toolsRight: this.props.children ? <>{this.props.children}</> : undefined,
+      toolsLeft: this.props.leftChildren ? <>{this.props.leftChildren}</> : undefined,
     };
 
     return (
-      <EuiInMemoryTable
-        loading={this.state.isFetchingItems}
-        itemId="id"
-        items={this.state.items}
-        columns={columns}
-        data-test-subj="savedObjectsFinderTable"
-        message={this.props.noItemsMessage}
-        search={search}
-        pagination={pagination}
-        sorting={sorting}
-        onTableChange={({ sort }) => {
-          this.setState({ sort });
-        }}
-      />
+      <EuiFlexGroup direction="column">
+        {this.props.helpText ? (
+          <EuiFlexItem>
+            <EuiText size="s" color="subdued">
+              {this.props.helpText}
+            </EuiText>
+          </EuiFlexItem>
+        ) : undefined}
+        <EuiFlexItem>
+          <EuiInMemoryTable
+            loading={this.state.isFetchingItems}
+            itemId="id"
+            items={this.state.items}
+            columns={columns}
+            data-test-subj="savedObjectsFinderTable"
+            message={this.props.noItemsMessage}
+            search={search}
+            pagination={pagination}
+            sorting={sorting}
+            onTableChange={({ sort }) => {
+              this.setState({ sort });
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 }

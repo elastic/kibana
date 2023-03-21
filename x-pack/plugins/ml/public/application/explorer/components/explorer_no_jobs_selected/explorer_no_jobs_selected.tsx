@@ -15,7 +15,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 export const ExplorerNoJobsSelected: FC = () => {
   return (
     <EuiEmptyPrompt
-      iconType="alert"
+      iconType="warning"
       title={
         <h2>
           <FormattedMessage
