@@ -283,7 +283,7 @@ export function DiscoverLayout({
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
-          savedSearch={stateContainer.savedSearchState.get()}
+          savedSearch={stateContainer.savedSearchState.getState()}
           spaces={spaces}
           history={history}
         />

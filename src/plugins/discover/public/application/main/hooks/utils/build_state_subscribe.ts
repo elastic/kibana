@@ -42,7 +42,7 @@ export const buildStateSubscribe =
   }) =>
   async (nextState: DiscoverAppState) => {
     const prevState = appState.getPrevious();
-    const savedSearch = savedSearchState.get();
+    const savedSearch = savedSearchState.getState();
     if (isEqualState(prevState, nextState)) {
       addLog('[appstate] subscribe update ignored due to no changes', { prevState, nextState });
       return;
@@ -68,7 +68,7 @@ export const buildStateSubscribe =
         return;
       }
       savedSearch.searchSource.setField('index', nextDataView);
-      dataState.reset();
+      dataState.reset(savedSearch);
       setDataView(nextDataView);
       savedSearchDataView = nextDataView;
     }

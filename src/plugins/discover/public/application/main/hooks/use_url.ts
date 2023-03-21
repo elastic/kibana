@@ -23,7 +23,7 @@ export function useUrl({
     // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
     // to reload the page in a right way
     const unlistenHistoryBasePath = history.listen(async ({ pathname, search, hash }) => {
-      if (!search && !hash && pathname === '/' && !stateContainer.savedSearchState.get().id) {
+      if (!search && !hash && pathname === '/' && !stateContainer.savedSearchState.getState().id) {
         await stateContainer.actions.loadSavedSearch();
         stateContainer.actions.fetchData(true);
       }

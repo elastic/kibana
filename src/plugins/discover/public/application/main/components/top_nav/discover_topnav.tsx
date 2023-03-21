@@ -203,7 +203,7 @@ export const DiscoverTopNav = ({
   const onTextBasedSavedAndExit = useCallback(
     ({ onSave, onCancel }) => {
       onSaveSearch({
-        savedSearch: stateContainer.savedSearchState.get(),
+        savedSearch: stateContainer.savedSearchState.getState(),
         services,
         navigateTo,
         state: stateContainer,

@@ -73,7 +73,7 @@ function DiscoverDocumentsComponent({
 }) {
   const services = useDiscoverServices();
   const documents$ = stateContainer.dataState.data$.documents$;
-  const savedSearch = stateContainer.savedSearchState.get();
+  const savedSearch = stateContainer.savedSearchState.getState();
   const { dataViews, capabilities, uiSettings } = services;
   const [query, sort, rowHeight, rowsPerPage, grid, columns, index] = useAppStateSelector(
     (state) => {

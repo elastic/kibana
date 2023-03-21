@@ -17,7 +17,8 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 function prepareTest(savedSearch: SavedSearch, path: string) {
   const { history } = createSearchSessionMock();
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  stateContainer.savedSearchState.set(savedSearch);
   stateContainer.actions.loadSavedSearch = jest.fn();
 
   renderHook(() =>

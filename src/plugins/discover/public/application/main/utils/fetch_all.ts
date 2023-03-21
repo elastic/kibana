@@ -55,11 +55,10 @@ export function fetchAll(
   try {
     const dataView = searchSource.getField('index')!;
     const query = getAppState().query;
-    if (reset) {
-      sendResetMsg(dataSubjects, initialFetchStatus);
-    }
-
     const recordRawType = getRawRecordType(query);
+    if (reset) {
+      sendResetMsg(dataSubjects, initialFetchStatus, recordRawType);
+    }
     const useSql = recordRawType === RecordRawType.PLAIN;
 
     if (recordRawType === RecordRawType.DOCUMENT) {

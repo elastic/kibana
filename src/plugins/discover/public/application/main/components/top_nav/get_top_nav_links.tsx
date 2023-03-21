@@ -104,7 +104,7 @@ export const getTopNavLinks = ({
     emphasize: true,
     run: (anchorElement: HTMLElement) => {
       onSaveSearch({
-        savedSearch: state.savedSearchState.get(),
+        savedSearch: state.savedSearchState.getState(),
         services,
         navigateTo,
         state,
@@ -147,7 +147,7 @@ export const getTopNavLinks = ({
       if (!services.share || !updatedDataView) {
         return;
       }
-      const savedSearch = state.savedSearchState.get();
+      const savedSearch = state.savedSearchState.getState();
       const sharingData = await getSharingData(
         savedSearch.searchSource,
         state.appState.getState(),

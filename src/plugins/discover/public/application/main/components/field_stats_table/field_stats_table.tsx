@@ -219,7 +219,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
           const initializedEmbeddable = await factory.create({
             id: 'discover_data_visualizer_grid',
             dataView,
-            savedSearch: stateContainer?.savedSearchState.get(),
+            savedSearch: stateContainer?.savedSearchState.getState(),
             query,
             showPreviewByDefault,
             onAddFilter,

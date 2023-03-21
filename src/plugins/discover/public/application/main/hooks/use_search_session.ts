@@ -21,7 +21,7 @@ export function useSearchSession({
   stateContainer: DiscoverStateContainer;
 }) {
   const { data, capabilities } = services;
-  const savedSearch = stateContainer.savedSearchState.get();
+  const savedSearch = stateContainer.savedSearchState.getState();
 
   useEffect(() => {
     data.search.session.enableStorage(

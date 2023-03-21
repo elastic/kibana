@@ -107,7 +107,7 @@ export interface DiscoverDataStateContainer {
   /**
    * resetting all data observable to initial state
    */
-  reset: () => void;
+  reset: (savedSearch: SavedSearch) => void;
   /**
    * Available Inspector Adaptor allowing to get details about recent requests to ES
    */
@@ -235,7 +235,10 @@ export function getDataStateContainer({
     return refetch$;
   };
 
-  const reset = () => sendResetMsg(dataSubjects, getInitialFetchStatus());
+  const reset = (savedSearch: SavedSearch) => {
+    const recordType = getRawRecordType(savedSearch.searchSource.getField('query'));
+    sendResetMsg(dataSubjects, getInitialFetchStatus(), recordType);
+  };
 
   return {
     fetch: fetchQuery,

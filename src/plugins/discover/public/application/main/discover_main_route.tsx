@@ -55,7 +55,6 @@ export function DiscoverMainRoute(props: Props) {
     getDiscoverStateContainer({
       history,
       services,
-      savedSearch: id,
     })
   );
   const [error, setError] = useState<Error>();

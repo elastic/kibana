@@ -33,7 +33,7 @@ export const useAdHocDataViews = ({
   const { openConfirmSavePrompt, updateSavedSearch } = useConfirmPersistencePrompt(stateContainer);
   const persistDataView = useCallback(async () => {
     const currentDataView = stateContainer.internalState.getState().dataView;
-    const savedSearch = stateContainer.savedSearchState.get();
+    const savedSearch = stateContainer.savedSearchState.getState();
     if (!currentDataView || currentDataView.isPersisted()) {
       return currentDataView;
     }

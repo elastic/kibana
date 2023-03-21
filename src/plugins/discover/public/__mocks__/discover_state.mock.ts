@@ -23,12 +23,10 @@ export function getDiscoverStateMock({
   const container = getDiscoverStateContainer({
     services: discoverServiceMock,
     history,
-    savedSearch: savedSearch
-      ? savedSearch
-      : isTimeBased
-      ? savedSearchMockWithTimeField
-      : savedSearchMock,
   });
+  container.savedSearchState.set(
+    savedSearch ? savedSearch : isTimeBased ? savedSearchMockWithTimeField : savedSearchMock
+  );
 
   return container;
 }

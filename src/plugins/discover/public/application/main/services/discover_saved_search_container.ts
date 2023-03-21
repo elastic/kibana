@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getSavedSearch, SavedSearch, saveSavedSearch } from '@kbn/saved-search-plugin/public';
+import {
+  getEmptySavedSearch,
+  getSavedSearch,
+  SavedSearch,
+  saveSavedSearch,
+} from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
@@ -33,7 +38,7 @@ export interface DiscoverSavedSearchContainer {
   /**
    * Get the current state of the saved search
    */
-  get: () => SavedSearch;
+  getState: () => SavedSearch;
   /**
    * Get the id of the current saved search
    */
@@ -89,28 +94,27 @@ export interface DiscoverSavedSearchContainer {
 }
 
 export function getSavedSearchContainer({
-  savedSearch,
   services,
 }: {
-  savedSearch: SavedSearch;
   services: DiscoverServices;
 }): DiscoverSavedSearchContainer {
-  const savedSearchInitial$ = new BehaviorSubject(savedSearch);
-  const savedSearchCurrent$ = new BehaviorSubject(savedSearch);
+  const initialSavedSearch = getEmptySavedSearch(services.data);
+  const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
+  const savedSearchCurrent$ = new BehaviorSubject(initialSavedSearch);
   const hasChanged$ = new BehaviorSubject(false);
-  const set = (newSavedSearch: SavedSearch) => {
-    addLog('[savedSearch] set', newSavedSearch);
+  const set = (nextSavedSearch: SavedSearch) => {
+    addLog('[savedSearch] set', nextSavedSearch);
     hasChanged$.next(false);
-    savedSearchCurrent$.next(newSavedSearch);
+    savedSearchCurrent$.next(nextSavedSearch);
     // due to the stateful nature of searchSource it has to be copied to allow independent state transitions
     const persistedSavedSearch = {
-      ...newSavedSearch,
-      ...{ searchSource: newSavedSearch.searchSource.createCopy() },
+      ...nextSavedSearch,
+      ...{ searchSource: nextSavedSearch.searchSource.createCopy() },
     };
     savedSearchInitial$.next(persistedSavedSearch);
-    return newSavedSearch;
+    return nextSavedSearch;
   };
-  const get = () => savedSearchCurrent$.getValue();
+  const getState = () => savedSearchCurrent$.getValue();
   const getInitial$ = () => savedSearchInitial$;
   const getCurrent$ = () => savedSearchCurrent$;
   const getHasChanged$ = () => hasChanged$;
@@ -119,7 +123,7 @@ export function getSavedSearchContainer({
 
   const newSavedSearch = async (nextDataView: DataView | undefined) => {
     addLog('[savedSearch] new', { nextDataView });
-    const dataView = nextDataView ?? get().searchSource.getField('index');
+    const dataView = nextDataView ?? getState().searchSource.getField('index');
     const nextSavedSearch = await getSavedSearch('', {
       search: services.data.search,
       savedObjectsClient: services.core.savedObjects.client,
@@ -159,7 +163,7 @@ export function getSavedSearchContainer({
   const update = ({ nextDataView, nextState, filterAndQuery }: UpdateParams) => {
     addLog('[savedSearch] update', { nextDataView, nextState });
 
-    const previousSavedSearch = get();
+    const previousSavedSearch = getState();
     const dataView = nextDataView
       ? nextDataView
       : previousSavedSearch.searchSource.getField('index')!;
@@ -207,7 +211,7 @@ export function getSavedSearchContainer({
   };
 
   return {
-    get,
+    getState,
     getCurrent$,
     getHasChanged$,
     getId,

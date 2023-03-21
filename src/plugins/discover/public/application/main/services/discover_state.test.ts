@@ -32,14 +32,18 @@ const startSync = (appState: DiscoverAppStateContainer) => {
   return stop;
 };
 
-function getState(url: string, savedSearch?: SavedSearch) {
+async function getState(url: string, savedSearch?: SavedSearch) {
   const nextHistory = createBrowserHistory();
   nextHistory.push(url);
   const nextState = getDiscoverStateContainer({
     services: discoverServiceMock,
     history: nextHistory,
-    savedSearch,
   });
+  await nextState.actions.loadDataViewList();
+  if (savedSearch) {
+    nextState.savedSearchState.load = jest.fn().mockReturnValue(savedSearch);
+  }
+
   const getCurrentUrl = () => nextHistory.createHref(nextHistory.location);
   return {
     history: nextHistory,
@@ -58,7 +62,6 @@ describe('Test discover state', () => {
     history = createBrowserHistory();
     history.push('/');
     state = getDiscoverStateContainer({
-      savedSearch: savedSearchMock.id,
       services: discoverServiceMock,
       history,
     });
@@ -122,45 +125,27 @@ describe('Test discover initial state sort handling', () => {
       ...{ sort: [['bytes', 'desc']] },
     } as SavedSearch;
 
-    const { state } = getState('/#?_a=(sort:!(!(timestamp,desc)))', savedSearch);
-    state.savedSearchState.load = jest.fn(() => Promise.resolve(savedSearch));
-    await state.actions.loadSavedSearch(savedSearch.id!);
-    const stopSync = state.appState.syncState().stop;
+    const { state } = await getState('/#?_a=(sort:!(!(timestamp,desc)))', savedSearch);
+    const unsubscribe = state.actions.initializeAndSync();
     expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
-    stopSync();
+    unsubscribe();
   });
-  test('Empty sort in URL should use saved search sort for state', async () => {
+  test('Empty URL should use saved search sort for state', async () => {
     const nextSavedSearch = { ...savedSearchMock, ...{ sort: [['bytes', 'desc']] as SortOrder[] } };
-    const { state } = getState('/#?_a=(sort:!())', nextSavedSearch);
-    await state.appState.update({}, true);
-    const stopSync = startSync(state.appState);
+    const { state } = await getState('/', nextSavedSearch);
+    await state.actions.loadSavedSearch(savedSearchMock.id);
+    const unsubscribe = state.actions.initializeAndSync();
     expect(state.appState.getState().sort).toEqual([['bytes', 'desc']]);
-    stopSync();
-  });
-  test('Empty sort in URL and saved search should sort by timestamp', async () => {
-    const { state } = getState('/#?_a=(sort:!())', savedSearchMockWithTimeField);
-
-    state.savedSearchState.set(savedSearchMockWithTimeField);
-    await state.appState.update({}, true);
-    const stopSync = startSync(state.appState);
-    expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
-    stopSync();
+    unsubscribe();
   });
 });
 
 describe('Test discover state with legacy migration', () => {
-  let history: History;
-  let state: DiscoverStateContainer;
   test('migration of legacy query ', async () => {
-    history = createBrowserHistory();
-    history.push(
-      "/#?_a=(query:(query_string:(analyze_wildcard:!t,query:'type:nice%20name:%22yeah%22')))"
+    const { state } = await getState(
+      "/#?_a=(query:(query_string:(analyze_wildcard:!t,query:'type:nice%20name:%22yeah%22')))",
+      savedSearchMockWithTimeFieldNew
     );
-    state = getDiscoverStateContainer({
-      savedSearch: savedSearchMockWithTimeFieldNew,
-      services: discoverServiceMock,
-      history,
-    });
     expect(state.appState.getState().query).toMatchInlineSnapshot(`
       Object {
         "language": "lucene",
@@ -278,25 +263,25 @@ describe('actions', () => {
   });
 
   test('setDataView', async () => {
-    const { state } = getState('');
+    const { state } = await getState('');
     state.actions.setDataView(dataViewMock);
     expect(state.internalState.getState().dataView).toBe(dataViewMock);
   });
 
   test('appendAdHocDataViews', async () => {
-    const { state } = getState('');
+    const { state } = await getState('');
     state.actions.appendAdHocDataViews(dataViewMock);
     expect(state.internalState.getState().adHocDataViews).toEqual([dataViewMock]);
   });
 
   test('removeAdHocDataViewById', async () => {
-    const { state } = getState('');
+    const { state } = await getState('');
     state.actions.appendAdHocDataViews(dataViewMock);
     state.actions.removeAdHocDataViewById(dataViewMock.id!);
     expect(state.internalState.getState().adHocDataViews).toEqual([]);
   });
   test('fetchData', async () => {
-    const { state } = getState('');
+    const { state } = await getState('');
     const dataState = state.dataState;
     await state.actions.loadDataViewList();
     expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
@@ -312,13 +297,11 @@ describe('actions', () => {
     expect(dataState.data$.documents$.value.result).toEqual([]);
   });
   test('loadDataViewList', async () => {
-    const { state } = getState('');
-    expect(state.internalState.getState().savedDataViews.length).toBe(0);
-    await state.actions.loadDataViewList();
+    const { state } = await getState('');
     expect(state.internalState.getState().savedDataViews.length).toBe(3);
   });
   test('loadSavedSearch with no id given an empty URL', async () => {
-    const { state, getCurrentUrl } = getState('');
+    const { state, getCurrentUrl } = await getState('');
     await state.actions.loadDataViewList();
     const newSavedSearch = await state.actions.loadSavedSearch();
     expect(newSavedSearch?.id).toBeUndefined();
@@ -328,7 +311,7 @@ describe('actions', () => {
       `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
-    const { searchSource, ...savedSearch } = state.savedSearchState.get();
+    const { searchSource, ...savedSearch } = state.savedSearchState.getState();
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
@@ -345,7 +328,7 @@ describe('actions', () => {
   });
 
   test('loadNewSavedSearch given an empty URL using loadSavedSearch', async () => {
-    const { state, getCurrentUrl } = getState('/');
+    const { state, getCurrentUrl } = await getState('/');
 
     const newSavedSearch = await state.actions.loadSavedSearch();
     expect(newSavedSearch?.id).toBeUndefined();
@@ -358,7 +341,9 @@ describe('actions', () => {
     unsubscribe();
   });
   test('loadNewSavedSearch with URL changing interval state', async () => {
-    const { state, getCurrentUrl } = getState('/#?_a=(interval:month,columns:!(bytes))&_g=()');
+    const { state, getCurrentUrl } = await getState(
+      '/#?_a=(interval:month,columns:!(bytes))&_g=()'
+    );
     const newSavedSearch = await state.actions.loadSavedSearch();
     expect(newSavedSearch?.id).toBeUndefined();
     const unsubscribe = state.actions.initializeAndSync();
@@ -370,7 +355,9 @@ describe('actions', () => {
     unsubscribe();
   });
   test('loadSavedSearch with no id, given URL changes state', async () => {
-    const { state, getCurrentUrl } = getState('/#?_a=(interval:month,columns:!(bytes))&_g=()');
+    const { state, getCurrentUrl } = await getState(
+      '/#?_a=(interval:month,columns:!(bytes))&_g=()'
+    );
     const newSavedSearch = await state.actions.loadSavedSearch();
     expect(newSavedSearch?.id).toBeUndefined();
     const unsubscribe = state.actions.initializeAndSync();
@@ -382,7 +369,7 @@ describe('actions', () => {
     unsubscribe();
   });
   test('loadSavedSearch given an empty URL, no state changes', async () => {
-    const { state, getCurrentUrl } = getState('/');
+    const { state, getCurrentUrl } = await getState('/');
     const newSavedSearch = await state.actions.loadSavedSearch('the-saved-search-id');
     const unsubscribe = state.actions.initializeAndSync();
     state.kbnUrlStateStorage.kbnUrlControls.flush();
@@ -394,65 +381,33 @@ describe('actions', () => {
     unsubscribe();
   });
   test('loadSavedSearch given a URL with different interval and columns modifying the state', async () => {
-    const { state, getCurrentUrl } = getState('/#?_a=(interval:month,columns:!(message))&_g=()');
-    await state.actions.loadDataViewList();
-    await state.actions.loadSavedSearch('the-saved-search-id');
+    const url = '/#?_a=(interval:month,columns:!(message))&_g=()';
+    const { state, getCurrentUrl } = await getState(url, savedSearchMock);
+    await state.actions.loadSavedSearch(savedSearchMock.id);
     const unsubscribe = state.actions.initializeAndSync();
     state.kbnUrlStateStorage.kbnUrlControls.flush();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(message),hideChart:!f,index:the-data-view-id,interval:month,sort:!())&_g=()"`
+      `"/#?_a=(columns:!(message),index:the-data-view-id,interval:month,sort:!())&_g=()"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
     unsubscribe();
   });
 
   test('loadSavedSearch data view handling', async () => {
-    const { state } = getState('/');
-    await state.actions.loadDataViewList();
-    await state.actions.loadSavedSearch('the-saved-search-id');
-    expect(state.savedSearchState.get().searchSource.getField('index')?.id).toBe(
+    const { state } = await getState('/', savedSearchMock);
+    await state.actions.loadSavedSearch(savedSearchMock.id);
+    expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
       'the-data-view-id'
     );
-    const dataViewsCreateMock = discoverServiceMock.dataViews.create as jest.Mock;
-    dataViewsCreateMock.mockImplementation(() => savedSearchMockWithTimeField);
-    discoverServiceMock.data.search.searchSource.create = jest
-      .fn()
-      .mockReturnValue(savedSearchMockWithTimeField.searchSource);
-    discoverServiceMock.core.savedObjects.client.resolve = jest.fn().mockReturnValue({
-      saved_object: {
-        attributes: {
-          kibanaSavedObjectMeta: {
-            searchSourceJSON:
-              '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
-          },
-          title: 'The saved search with a timefield',
-          sort: [],
-          columns: ['test-again'],
-          description: 'description',
-          hideChart: false,
-        },
-        id: 'the-saved-search-id-with-timefield',
-        type: 'search',
-        references: [
-          {
-            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-            id: 'index-pattern-with-timefield',
-            type: 'index-pattern',
-          },
-        ],
-        namespaces: ['default'],
-      },
-      outcome: 'exactMatch',
-    });
+    state.savedSearchState.load = jest.fn().mockReturnValue(savedSearchMockWithTimeField);
     await state.actions.loadSavedSearch('the-saved-search-id-with-timefield');
-    expect(state.savedSearchState.get().searchSource.getField('index')?.id).toBe(
+    expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
       'index-pattern-with-timefield-id'
     );
   });
 
   it('loads a new saved search, updated by ad-hoc data view', async () => {
-    const { state } = getState('/');
-    await state.actions.loadDataViewList();
+    const { state } = await getState('/');
     const dataViewSpecMock = {
       id: 'mock-id',
       title: 'mock-title',
@@ -478,43 +433,43 @@ describe('actions', () => {
   });
 
   test('onChangeDataView', async () => {
-    const { state, getCurrentUrl } = getState('/');
-    await state.actions.loadDataViewList();
-    await state.actions.loadSavedSearch('the-saved-search-id');
-    expect(state.savedSearchState.get().searchSource.getField('index')!.id).toBe(dataViewMock.id);
+    const { state, getCurrentUrl } = await getState('/', savedSearchMock);
+    await state.actions.loadSavedSearch(savedSearchMock.id);
+    expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
+      dataViewMock.id
+    );
     const unsubscribe = state.actions.initializeAndSync();
     state.kbnUrlStateStorage.kbnUrlControls.flush();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(test123),hideChart:!f,index:the-data-view-id,interval:auto,sort:!())"`
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
     );
     await state.actions.onChangeDataView(dataViewComplexMock.id!);
     await waitFor(() => {
       expect(state.internalState.getState().dataView?.id).toBe(dataViewComplexMock.id);
     });
     expect(state.appState.get().index).toBe(dataViewComplexMock.id);
-    expect(state.savedSearchState.get().searchSource.getField('index')!.id).toBe(
+    expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
       dataViewComplexMock.id
     );
     unsubscribe();
   });
   test('undoChanges', async () => {
-    const { state, getCurrentUrl } = getState('/');
-    await state.actions.loadDataViewList();
-    await state.actions.loadSavedSearch('the-saved-search-id');
+    const { state, getCurrentUrl } = await getState('/', savedSearchMock);
+    await state.actions.loadSavedSearch(savedSearchMock.id);
     const unsubscribe = state.actions.initializeAndSync();
     state.kbnUrlStateStorage.kbnUrlControls.flush();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(test123),hideChart:!f,index:the-data-view-id,interval:auto,sort:!())"`
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
     );
     await state.actions.onChangeDataView(dataViewComplexMock.id!);
     state.kbnUrlStateStorage.kbnUrlControls.flush();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(test123),hideChart:!f,index:data-view-with-various-field-types-id,interval:auto,sort:!(!(data,desc)))"`
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:data-view-with-various-field-types-id,interval:auto,sort:!(!(data,desc)))"`
     );
     await state.actions.undoChanges();
     state.kbnUrlStateStorage.kbnUrlControls.flush();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(test123),hideChart:!f,index:the-data-view-id,interval:auto,sort:!())"`
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
     );
     unsubscribe();
   });
