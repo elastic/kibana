@@ -24,7 +24,6 @@ import {
   DEFAULT_METRICS_EXPLORER_VIEW_STATE,
 } from './metrics_explorer/hooks/use_metrics_explorer_options';
 import { WithMetricsExplorerOptionsUrlState } from '../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
-import { WithSource } from '../../containers/with_source';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './inventory_view';
 import { MetricDetail } from './metric_detail';
@@ -41,7 +40,7 @@ import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
 import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
-import { CreateDerivedIndexPattern } from '../../containers/metrics_source';
+import { CreateDerivedIndexPattern, useSourceContext } from '../../containers/metrics_source';
 import { NotFoundPage } from '../404';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
@@ -57,6 +56,8 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   });
 
   const kibana = useKibana();
+
+  const { source, createDerivedIndexPattern } = useSourceContext()
 
   useReadOnlyBadge(!uiCapabilities?.infrastructure?.save);
 
@@ -98,26 +99,19 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                 )}
                 <Switch>
                   <Route path={'/inventory'} component={SnapshotPage} />
-                  <Route
-                    path={'/explorer'}
-                    render={(props) => (
-                      <WithSource>
-                        {({ configuration, createDerivedIndexPattern }) => (
-                          <MetricsExplorerOptionsContainer>
-                            <WithMetricsExplorerOptionsUrlState />
-                            {configuration ? (
-                              <PageContent
-                                configuration={configuration}
-                                createDerivedIndexPattern={createDerivedIndexPattern}
-                              />
-                            ) : (
-                              <SourceLoadingPage />
-                            )}
-                          </MetricsExplorerOptionsContainer>
-                        )}
-                      </WithSource>
-                    )}
-                  />
+                  <Route path={'/explorer'}>
+                    <MetricsExplorerOptionsContainer>
+                      <WithMetricsExplorerOptionsUrlState />
+                      {source?.configuration ? (
+                        <PageContent
+                          configuration={source.configuration}
+                          createDerivedIndexPattern={createDerivedIndexPattern}
+                        />
+                      ) : (
+                        <SourceLoadingPage />
+                      )}
+                    </MetricsExplorerOptionsContainer>
+                  </Route>
                   <Route path="/detail/:type/:node" component={MetricDetail} />
                   <Route path={'/hosts'} component={HostsLandingPage} />
                   <Route path={'/settings'} component={MetricsSettingsPage} />
