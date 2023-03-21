@@ -10,6 +10,7 @@ import { makeHierarchicalExecutionContext } from './hierarchical_execution_conte
 describe('makeHierarchicalExecutionContext', () => {
   let injectedContext = {};
   beforeAll(() => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../../../kibana_services').getExecutionContext = () => ({
       get: () => injectedContext,
     });
