@@ -14,11 +14,8 @@ export {
   AbortError,
   abortSignalToPromise,
   calculateObjectHash,
-  defer,
-  Defer,
   fieldWildcardFilter,
   fieldWildcardMatcher,
-  of,
   url,
   createGetterSetter,
 } from '../common';

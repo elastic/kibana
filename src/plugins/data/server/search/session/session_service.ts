@@ -19,7 +19,7 @@ import {
   ElasticsearchClient,
 } from '@kbn/core/server';
 import type { AuthenticatedUser, SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { defer } from '@kbn/kibana-utils-plugin/common';
+import { defer } from '@kbn/utils';
 import { debounce } from 'lodash';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,

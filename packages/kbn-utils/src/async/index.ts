@@ -6,15 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { Defer } from '@kbn/utils';
-
-export interface BatchItem<Payload, Result> {
-  payload: Payload;
-  future: Defer<Result>;
-  signal?: AbortSignal;
-}
-
-export type BatchedFunc<Payload, Result> = (
-  payload: Payload,
-  signal?: AbortSignal
-) => Promise<Result>;
+export { Defer, defer } from './defer';

@@ -47,6 +47,7 @@
     "@kbn/config",
     "@kbn/config-schema",
     "@kbn/core-application-browser",
+    "@kbn/utils",
   ],
   "exclude": [
     "target/**/*",

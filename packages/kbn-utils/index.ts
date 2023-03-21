@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
+export * from './src/async';
 export * from './src/path';
 export * from './src/streams';

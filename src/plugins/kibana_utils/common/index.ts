@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { Defer, defer } from './defer';
 export { fieldWildcardMatcher, fieldWildcardFilter } from './field_wildcard';
-export { of } from './of';
 export type {
   BaseState,
   BaseStateContainer,
