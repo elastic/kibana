@@ -59,7 +59,9 @@ export function AlertsPopover({
     const savedQueryId = stateContainer.appState.getState().savedQuery;
     return {
       searchType: 'searchSource',
-      searchConfiguration: stateContainer.savedSearchState.getState().searchSource.getSerializedFields(),
+      searchConfiguration: stateContainer.savedSearchState
+        .getState()
+        .searchSource.getSerializedFields(),
       savedQueryId,
     };
   }, [stateContainer]);
