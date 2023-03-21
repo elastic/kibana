@@ -42,6 +42,20 @@ export interface DeleteAllArgs {
 }
 
 /**
+ * Parameters for deleting a file attachment.
+ */
+export interface DeleteFileArgs {
+  /**
+   * The id of the case
+   */
+  caseId: string;
+  /**
+   * The id of the file saved object
+   */
+  fileId: string;
+}
+
+/**
  * Parameters for deleting a single attachment of a case.
  */
 export interface DeleteArgs {

@@ -6,21 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
-import pMap from 'p-map';
 
-import type { SavedObject } from '@kbn/core/server';
-import type { CommentAttributes } from '../../../common/api';
 import { Actions, ActionTypes } from '../../../common/api';
-import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
-import type { DeleteAllArgs, DeleteArgs } from './types';
+import type { DeleteAllArgs, DeleteArgs, DeleteFileArgs } from './types';
 
 /**
  * Delete all comments for a case.
- *
- * @ignore
  */
 export async function deleteAll(
   { caseID }: DeleteAllArgs,
@@ -50,15 +45,9 @@ export async function deleteAll(
       })),
     });
 
-    const mapper = async (comment: SavedObject<CommentAttributes>) =>
-      attachmentService.delete({
-        attachmentId: comment.id,
-        refresh: false,
-      });
-
-    // Ensuring we don't too many concurrent deletions running.
-    await pMap(comments.saved_objects, mapper, {
-      concurrency: MAX_CONCURRENT_SEARCHES,
+    await attachmentService.bulkDelete({
+      attachmentIds: comments.saved_objects.map((so) => so.id),
+      refresh: false,
     });
 
     await userActionService.creator.bulkCreateAttachmentDeletion({
@@ -79,10 +68,57 @@ export async function deleteAll(
   }
 }
 
+export const deleteFileAttachments = async (
+  { caseId, fileId }: DeleteFileArgs,
+  clientArgs: CasesClientArgs
+) => {
+  const {
+    user,
+    services: { attachmentService, userActionService },
+    logger,
+    authorization,
+  } = clientArgs;
+
+  try {
+    const fileAttachments = await attachmentService.getter.getFileAttachmentIds({ caseId, fileId });
+
+    if (fileAttachments.length <= 0) {
+      throw Boom.notFound(`No case attachments were found using file id: ${fileId}`);
+    }
+
+    await authorization.ensureAuthorized({
+      entities: fileAttachments.map((attachment) => ({
+        id: attachment.id,
+        owner: attachment.attributes.owner,
+      })),
+      operation: Operations.deleteComment,
+    });
+
+    await attachmentService.bulkDelete({
+      attachmentIds: fileAttachments.map((so) => so.id),
+      refresh: false,
+    });
+
+    await userActionService.creator.bulkCreateAttachmentDeletion({
+      caseId,
+      attachments: fileAttachments.map((attachment) => ({
+        id: attachment.id,
+        owner: attachment.attributes.owner,
+        attachment: attachment.attributes,
+      })),
+      user,
+    });
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed to delete file attachments for case: ${caseId} file id: ${fileId}: ${error}`,
+      error,
+      logger,
+    });
+  }
+};
+
 /**
  * Deletes an attachment
- *
- * @ignore
  */
 export async function deleteComment(
   { caseID, attachmentID }: DeleteArgs,
@@ -117,8 +153,8 @@ export async function deleteComment(
       throw Boom.notFound(`This comment ${attachmentID} does not exist in ${id}.`);
     }
 
-    await attachmentService.delete({
-      attachmentId: attachmentID,
+    await attachmentService.bulkDelete({
+      attachmentIds: [attachmentID],
       refresh: false,
     });
 

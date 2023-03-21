@@ -7,6 +7,7 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -246,5 +247,60 @@ export class AttachmentGetter {
         },
       },
     };
+  }
+
+  public async getFileAttachmentIds({
+    caseId,
+    fileId,
+  }: {
+    caseId: string;
+    fileId: string;
+  }): Promise<Array<SavedObject<CommentAttributes>>> {
+    try {
+      this.context.log.debug('Attempting to find file attachments');
+
+      const references = [
+        { id: caseId, type: CASE_SAVED_OBJECT },
+        { id: fileId, type: FILE_SO_TYPE },
+      ];
+
+      /**
+       * In the event that we add the ability to attach a file to a case that has already been uploaded we'll run into a
+       * scenario where a single file id could be associated with multiple case attachments. So we need
+       * to retrieve them all.
+       */
+      const finder =
+        this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<AttachmentAttributesWithoutRefs>(
+          {
+            type: CASE_COMMENT_SAVED_OBJECT,
+            hasReference: references,
+            sortField: 'created_at',
+            sortOrder: 'asc',
+            perPage: MAX_DOCS_PER_PAGE,
+          }
+        );
+
+      const results: Array<SavedObject<CommentAttributes>> = [];
+
+      for await (const attachmentSavedObject of finder.find()) {
+        results.push(
+          ...attachmentSavedObject.saved_objects.map((attachment) => {
+            const modifiedAttachment = injectAttachmentSOAttributesFromRefs(
+              attachment,
+              this.context.persistableStateAttachmentTypeRegistry
+            );
+
+            return modifiedAttachment;
+          })
+        );
+      }
+
+      return results;
+    } catch (error) {
+      this.context.log.error(
+        `Error retrieving file attachments associated with case: [${caseId}] file id: [${fileId}]: ${error}`
+      );
+      throw error;
+    }
   }
 }
