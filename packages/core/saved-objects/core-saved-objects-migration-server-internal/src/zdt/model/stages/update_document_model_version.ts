@@ -8,6 +8,7 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import { throwBadResponse } from '../../../model/helpers';
+import { setMetaDocMigrationComplete } from '../../utils';
 import type { ModelStage } from '../types';
 
 export const updateDocumentModelVersion: ModelStage<
@@ -21,5 +22,9 @@ export const updateDocumentModelVersion: ModelStage<
   return {
     ...state,
     controlState: 'UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES',
+    currentIndexMeta: setMetaDocMigrationComplete({
+      meta: state.currentIndexMeta,
+      versions: context.typeModelVersions,
+    }),
   };
 };

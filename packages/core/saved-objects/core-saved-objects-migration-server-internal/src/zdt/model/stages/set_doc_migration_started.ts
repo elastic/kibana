@@ -8,6 +8,7 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import { throwBadResponse } from '../../../model/helpers';
+import { setMetaDocMigrationStarted } from '../../utils';
 import type { ModelStage } from '../types';
 
 export const setDocMigrationStarted: ModelStage<
@@ -21,5 +22,8 @@ export const setDocMigrationStarted: ModelStage<
   return {
     ...state,
     controlState: 'SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES',
+    currentIndexMeta: setMetaDocMigrationStarted({
+      meta: state.currentIndexMeta,
+    }),
   };
 };

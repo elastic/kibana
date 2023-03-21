@@ -12,28 +12,22 @@ import type { ModelStage } from '../types';
 
 export const outdatedDocumentsSearchClosePit: ModelStage<
   'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
-  'OUTDATED_DOCUMENTS_SEARCH_REFRESH'
+  'OUTDATED_DOCUMENTS_SEARCH_REFRESH' | 'UPDATE_DOCUMENT_MODEL_VERSIONS'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     throwBadResponse(state, res as never);
   }
 
-  /*
-   const { pitId, hasTransformedDocs, ...state } = stateP;
-    if (hasTransformedDocs) {
-      return {
-        ...state,
-        controlState: 'OUTDATED_DOCUMENTS_REFRESH',
-      };
-    }
+  const { hasTransformedDocs } = state;
+  if (hasTransformedDocs) {
     return {
       ...state,
-      controlState: 'CHECK_TARGET_MAPPINGS',
+      controlState: 'OUTDATED_DOCUMENTS_SEARCH_REFRESH',
     };
-   */
-
-  return {
-    ...state,
-    controlState: 'OUTDATED_DOCUMENTS_SEARCH_REFRESH',
-  };
+  } else {
+    return {
+      ...state,
+      controlState: 'UPDATE_DOCUMENT_MODEL_VERSIONS',
+    };
+  }
 };

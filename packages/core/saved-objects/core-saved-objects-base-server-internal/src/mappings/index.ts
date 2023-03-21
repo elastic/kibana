@@ -7,4 +7,9 @@
  */
 
 export { getTypes, getProperty, getRootProperties, getRootPropertiesObjects } from './lib';
-export type { SavedObjectsTypeMappingDefinitions, IndexMappingMeta, IndexMapping } from './types';
+export type {
+  SavedObjectsTypeMappingDefinitions,
+  IndexMappingMeta,
+  IndexMapping,
+  IndexMappingMigrationStateMeta,
+} from './types';

@@ -34,6 +34,11 @@ import type {
 import type { MigratorContext } from './context';
 import * as Actions from './actions';
 import { createDelayFn } from '../common/utils';
+import {
+  setMetaMappingMigrationComplete,
+  setMetaDocMigrationComplete,
+  setMetaDocMigrationStarted,
+} from './utils';
 
 export type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -79,7 +84,10 @@ export const nextActionMap = (context: MigratorContext) => {
       Actions.updateIndexMeta({
         client,
         index: state.currentIndex,
-        meta: state.currentIndexMeta,
+        meta: setMetaMappingMigrationComplete({
+          meta: state.currentIndexMeta,
+          versions: context.typeModelVersions,
+        }),
       }),
     UPDATE_ALIASES: (state: UpdateAliasesState) =>
       Actions.updateAliases({
@@ -92,7 +100,9 @@ export const nextActionMap = (context: MigratorContext) => {
       Actions.updateIndexMeta({
         client,
         index: state.currentIndex,
-        meta: state.currentIndexMeta,
+        meta: setMetaDocMigrationStarted({
+          meta: state.currentIndexMeta,
+        }),
       }),
     SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES: (
       state: SetDocMigrationStartedWaitForInstancesState
@@ -160,10 +170,12 @@ export const nextActionMap = (context: MigratorContext) => {
       }),
     UPDATE_DOCUMENT_MODEL_VERSIONS: (state: UpdateDocumentModelVersionsState) =>
       Actions.updateIndexMeta({
-        // TODO: update the meta in previous stage
         client,
         index: state.currentIndex,
-        meta: state.currentIndexMeta,
+        meta: setMetaDocMigrationComplete({
+          meta: state.currentIndexMeta,
+          versions: context.typeModelVersions,
+        }),
       }),
     UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES: (
       state: UpdateDocumentModelVersionsWaitForInstancesState

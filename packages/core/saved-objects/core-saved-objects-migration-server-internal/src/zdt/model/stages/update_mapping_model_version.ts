@@ -9,6 +9,7 @@
 import * as Either from 'fp-ts/lib/Either';
 import { throwBadResponse } from '../../../model/helpers';
 import type { ModelStage } from '../types';
+import { setMetaMappingMigrationComplete } from '../../utils';
 
 export const updateMappingModelVersion: ModelStage<
   'UPDATE_MAPPING_MODEL_VERSIONS',
@@ -21,5 +22,9 @@ export const updateMappingModelVersion: ModelStage<
   return {
     ...state,
     controlState: 'INDEX_STATE_UPDATE_DONE',
+    currentIndexMeta: setMetaMappingMigrationComplete({
+      meta: state.currentIndexMeta,
+      versions: context.typeModelVersions,
+    }),
   };
 };

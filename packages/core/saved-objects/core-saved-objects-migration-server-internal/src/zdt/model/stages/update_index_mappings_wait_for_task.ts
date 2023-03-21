@@ -33,11 +33,5 @@ export const updateIndexMappingsWaitForTask: ModelStage<
   return {
     ...state,
     controlState: 'UPDATE_MAPPING_MODEL_VERSIONS',
-    currentIndexMeta: {
-      ...state.currentIndexMeta,
-      mappingVersions: {
-        ...context.typeModelVersions,
-      },
-    },
   };
 };

@@ -77,6 +77,7 @@ export interface OutdatedDocumentsSearchState extends PostDocInitState {
   readonly corruptDocumentIds: string[];
   readonly transformErrors: TransformErrorObjects[];
   readonly progress: Progress;
+  readonly hasTransformedDocs: boolean;
 }
 
 export interface CreateTargetIndexState extends BaseState {

@@ -19,13 +19,16 @@ export const outdatedDocumentsSearchOpenPit: ModelStage<
     throwBadResponse(state, res as never);
   }
 
+  const pitId = res.right.pitId;
+
   return {
     ...state,
     controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
-    pitId: res.right.pitId,
+    pitId,
     lastHitSortValue: undefined,
     corruptDocumentIds: [],
     transformErrors: [],
     progress: createInitialProgress(),
+    hasTransformedDocs: false,
   };
 };
