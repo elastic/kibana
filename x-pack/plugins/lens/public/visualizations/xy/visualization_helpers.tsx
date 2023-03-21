@@ -340,8 +340,8 @@ const newLayerFn = {
       annotations: [],
       indexPatternId,
       ignoreGlobalFilters: true,
-      hide: undefined,
-      simpleView: undefined,
+      hide: false,
+      simpleView: false,
     };
 
     return newLayer;

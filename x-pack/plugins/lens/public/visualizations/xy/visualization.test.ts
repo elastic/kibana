@@ -543,7 +543,42 @@ describe('xy_visualization', () => {
       expect(layers.length).toEqual(exampleState().layers.length + 1);
       expect(layers[layers.length - 1]).toMatchObject({ layerId: 'foo' });
     });
-    // TODO test adding annotation layers
+
+    describe('adding an annotation layer', () => {
+      it('adds a by-value annotation layer', () => {
+        const state = xyVisualization.appendLayer!(
+          exampleState(),
+          '',
+          layerTypes.ANNOTATIONS,
+          'indexPattern1',
+          undefined
+        );
+
+        expect(state.layers[1]).toMatchSnapshot();
+      });
+
+      it('adds a by-reference annotation layer', () => {
+        const extraArg: ExtraAppendLayerArg = {
+          annotationGroupId: 'some-annotation-group-id',
+          annotations: [exampleAnnotation],
+          description: 'Some description',
+          indexPatternId: 'indexPattern1',
+          tags: [],
+          title: 'Title',
+          ignoreGlobalFilters: false,
+        };
+
+        const state = xyVisualization.appendLayer!(
+          exampleState(),
+          '',
+          layerTypes.ANNOTATIONS,
+          'indexPattern1',
+          extraArg
+        );
+
+        expect(state.layers[1]).toMatchSnapshot();
+      });
+    });
   });
 
   describe('#clearLayer', () => {
