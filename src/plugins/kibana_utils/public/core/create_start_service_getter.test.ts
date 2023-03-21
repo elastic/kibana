@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { StartServicesAccessor } from '@kbn/core/public';
+import { Defer } from '@kbn/utils';
+import type { StartServicesAccessor } from '@kbn/core/public';
 import { createStartServicesGetter } from './create_start_service_getter';
-import { Defer } from '../../common/defer';
 
 describe('createStartServicesGetter', () => {
   test('throws if services are accessed before accessor resolves', async () => {
