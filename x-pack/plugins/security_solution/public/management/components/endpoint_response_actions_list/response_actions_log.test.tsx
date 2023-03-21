@@ -288,6 +288,7 @@ describe('Response actions history', () => {
           statuses: [],
           userIds: [],
           withOutputs: [],
+          withRuleActions: true,
         },
         expect.anything()
       );
@@ -922,6 +923,7 @@ describe('Response actions history', () => {
           statuses: ['failed', 'pending'],
           userIds: [],
           withOutputs: [],
+          withRuleActions: true,
         },
         expect.anything()
       );
@@ -1123,6 +1125,7 @@ describe('Response actions history', () => {
           statuses: [],
           userIds: [],
           withOutputs: [],
+          withRuleActions: true,
         },
         expect.anything()
       );
