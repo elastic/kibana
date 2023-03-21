@@ -26,6 +26,7 @@ const getFileClient = (esClient: ElasticsearchClient, logger: Logger): FileClien
     blobStorageIndex: FILE_STORAGE_DATA_INDEX,
     elasticsearchClient: esClient,
     logger,
+    indexIsAlias: true,
   });
 };
 
