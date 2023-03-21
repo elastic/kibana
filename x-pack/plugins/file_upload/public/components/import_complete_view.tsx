@@ -105,7 +105,7 @@ export class ImportCompleteView extends Component<Props, {}> {
             defaultMessage: 'Unable to upload file',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
           data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
         >
           <p>
@@ -149,7 +149,7 @@ export class ImportCompleteView extends Component<Props, {}> {
             defaultMessage: 'Unable to upload file',
           })}
           color="danger"
-          iconType="alert"
+          iconType="warning"
           data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
         >
           <p>{errorMsg}</p>

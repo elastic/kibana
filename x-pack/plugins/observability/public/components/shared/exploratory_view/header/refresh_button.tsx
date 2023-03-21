@@ -20,7 +20,11 @@ export function RefreshButton() {
         <LastUpdated chartTimeRange={chartTimeRangeContext} />
       </EuiFlexItem>
       <EuiFlexItem style={{ textAlign: 'right' }}>
-        <EuiButton iconType="refresh" onClick={() => setLastRefresh(Date.now())}>
+        <EuiButton
+          data-test-subj="o11yRefreshButtonButton"
+          iconType="refresh"
+          onClick={() => setLastRefresh(Date.now())}
+        >
           {REFRESH_LABEL}
         </EuiButton>
       </EuiFlexItem>

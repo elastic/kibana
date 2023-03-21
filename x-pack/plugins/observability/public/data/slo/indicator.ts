@@ -18,6 +18,7 @@ export const buildApmAvailabilityIndicator = (
       transactionType: 'request',
       transactionName: 'GET /flaky',
       goodStatusCodes: ['2xx', '3xx', '4xx'],
+      index: 'metrics-apm*',
       ...params,
     },
   };
@@ -33,7 +34,8 @@ export const buildApmLatencyIndicator = (
       service: 'o11y-app',
       transactionType: 'request',
       transactionName: 'GET /slow',
-      threshold: 5000000,
+      threshold: 500,
+      index: 'metrics-apm*',
       ...params,
     },
   };
