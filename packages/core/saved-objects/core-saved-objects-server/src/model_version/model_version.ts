@@ -37,10 +37,7 @@ export interface SavedObjectsModelVersion {
  *
  * @public
  */
-export interface SavedObjectsModelExpansionChange<
-  PreviousAttributes = unknown,
-  NewAttributes = unknown
-> {
+export interface SavedObjectsModelExpansionChange<PreviousAttributes = any, NewAttributes = any> {
   /**
    * The type of {@link SavedObjectsModelChange | change}, used to identify them internally.
    */

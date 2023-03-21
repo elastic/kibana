@@ -59,3 +59,35 @@ export const getBarType = () => {
     },
   });
 };
+
+export const getSampleAType = () => {
+  return createType({
+    name: 'sample_a',
+    mappings: {
+      properties: {
+        keyword: { type: 'keyword' },
+        boolean: { type: 'boolean' },
+      },
+    },
+    switchToModelVersionAt: '8.7.0',
+    modelVersions: {
+      '1': dummyModelVersion,
+    },
+  });
+};
+
+export const getSampleBType = () => {
+  return createType({
+    name: 'sample_b',
+    mappings: {
+      properties: {
+        text: { type: 'text' },
+        text2: { type: 'text' },
+      },
+    },
+    switchToModelVersionAt: '8.7.0',
+    modelVersions: {
+      '1': dummyModelVersion,
+    },
+  });
+};
