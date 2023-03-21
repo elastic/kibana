@@ -42,7 +42,7 @@ describe('AnalyticsCollectionIntegrate', () => {
       <AnalyticsCollectionIntegrate collection={analyticsCollections} />
     );
     expect(wrapper.find(EuiCodeBlock).at(0).text()).toContain(
-      'data-dsn="/api/analytics/collections/1"'
+      'data-dsn="/api/analytics/collections/example"'
     );
     expect(wrapper.find(EuiCodeBlock).at(0).text()).toContain('src="/analytics.js"');
   });
