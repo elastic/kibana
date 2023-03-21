@@ -7,7 +7,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { type Defer, defer } from '@kbn/kibana-utils-plugin/common';
+import { type Defer, defer } from './@kbn/utils';
 import type { IndexMap } from './core';
 import {
   type TypeIndexMap,

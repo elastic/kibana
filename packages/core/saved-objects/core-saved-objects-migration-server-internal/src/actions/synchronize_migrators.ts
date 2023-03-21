@@ -8,7 +8,7 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type { Defer } from '@kbn/kibana-utils-plugin/common';
+import type { Defer } from '../@kbn/utils';
 
 export interface SyncFailed {
   type: 'sync_failed';

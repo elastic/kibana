@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { Defer } from '@kbn/kibana-utils-plugin/common';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -17,6 +16,7 @@ import type {
   SavedObjectsMigrationConfigType,
   MigrationResult,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { Defer } from './@kbn/utils';
 import type { TransformRawDocs } from './types';
 import { next } from './next';
 import { model } from './model';

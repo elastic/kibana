@@ -31,7 +31,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/logging-mocks",
     "@kbn/core-saved-objects-base-server-mocks",
-    "@kbn/kibana-utils-plugin",
   ],
   "exclude": [
     "target/**/*",
