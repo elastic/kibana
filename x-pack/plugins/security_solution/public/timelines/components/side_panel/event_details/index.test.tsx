@@ -144,6 +144,7 @@ describe('event details panel component', () => {
         },
         osquery: {
           OsqueryResults: jest.fn().mockReturnValue(null),
+          fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
         },
       },
     });
