@@ -107,6 +107,9 @@ export function SloEditForm({ slo }: Props) {
     }
   };
 
+  const getIconColor = (isSectionValid: boolean) =>
+    isSectionValid ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorPrimary;
+
   return (
     <FormProvider {...methods}>
       <EuiTimeline data-test-subj="sloForm">
@@ -114,11 +117,7 @@ export function SloEditForm({ slo }: Props) {
           verticalAlign="top"
           icon={
             <EuiAvatar
-              color={
-                isIndicatorSectionValid
-                  ? euiThemeVars.euiColorSuccess
-                  : euiThemeVars.euiColorPrimary
-              }
+              color={getIconColor(isIndicatorSectionValid)}
               iconType={isIndicatorSectionValid ? 'check' : ''}
               name={isIndicatorSectionValid ? 'Check' : '1'}
             />
@@ -130,11 +129,7 @@ export function SloEditForm({ slo }: Props) {
         <EuiTimelineItem
           icon={
             <EuiAvatar
-              color={
-                isObjectiveSectionValid
-                  ? euiThemeVars.euiColorSuccess
-                  : euiThemeVars.euiColorPrimary
-              }
+              color={getIconColor(isObjectiveSectionValid)}
               iconType={isObjectiveSectionValid ? 'check' : ''}
               name={isObjectiveSectionValid ? 'Check' : '2'}
             />
@@ -150,11 +145,7 @@ export function SloEditForm({ slo }: Props) {
             <EuiAvatar
               name={isDescriptionSectionValid ? 'Check' : '3'}
               iconType={isDescriptionSectionValid ? 'check' : ''}
-              color={
-                isDescriptionSectionValid
-                  ? euiThemeVars.euiColorSuccess
-                  : euiThemeVars.euiColorPrimary
-              }
+              color={getIconColor(isDescriptionSectionValid)}
             />
           }
         >

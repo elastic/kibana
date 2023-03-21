@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
-export function SloEditFormObjectivesTimeslices() {
+export function SloEditFormObjectiveSectionTimeslices() {
   const { control } = useFormContext<CreateSLOInput>();
   return (
     <EuiFlexGrid columns={3}>

@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
-import { SloEditFormObjectivesTimeslices } from './slo_edit_form_objectives_timeslices';
+import { SloEditFormObjectiveSectionTimeslices } from './slo_edit_form_objective_section_timeslices';
 import { BUDGETING_METHOD_OPTIONS, TIMEWINDOW_OPTIONS } from '../constants';
 import { maxWidth } from './slo_edit_form';
 
@@ -120,7 +120,7 @@ export function SloEditFormObjectiveSection() {
       {watch('budgetingMethod') === 'timeslices' ? (
         <>
           <EuiSpacer size="xl" />
-          <SloEditFormObjectivesTimeslices />
+          <SloEditFormObjectiveSectionTimeslices />
         </>
       ) : null}
       <EuiSpacer size="xl" />
