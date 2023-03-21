@@ -218,12 +218,17 @@ export const useDiscoverHistogram = ({
    * Total hits
    */
 
+  const setTotalHitsError = useMemo(
+    () => sendErrorTo(savedSearchData$.totalHits$),
+    [savedSearchData$.totalHits$]
+  );
+
   useEffect(() => {
     const subscription = createTotalHitsObservable(unifiedHistogram?.state$)?.subscribe(
       ({ status, result }) => {
         if (result instanceof Error) {
-          // Display the error and set totalHits$ to an error state
-          sendErrorTo(services.data, savedSearchData$.totalHits$)(result);
+          // Set totalHits$ to an error state
+          setTotalHitsError(result);
           return;
         }
 
@@ -252,7 +257,13 @@ export const useDiscoverHistogram = ({
     return () => {
       subscription?.unsubscribe();
     };
-  }, [savedSearchData$.main$, savedSearchData$.totalHits$, services.data, unifiedHistogram]);
+  }, [
+    savedSearchData$.main$,
+    savedSearchData$.totalHits$,
+    services.data,
+    setTotalHitsError,
+    unifiedHistogram,
+  ]);
 
   /**
    * Data fetching
