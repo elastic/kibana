@@ -106,7 +106,7 @@ const GroupingComponent = <T,>({
                     createGroupFilter(selectedGroup, group),
                     groupNumber
                   )}
-                  groupStatsRenderer={
+                  statRenderers={
                     groupStatsRenderer && groupStatsRenderer(selectedGroup, groupBucket)
                   }
                 />
