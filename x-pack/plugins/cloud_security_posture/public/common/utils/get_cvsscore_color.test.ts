@@ -5,30 +5,31 @@
  * 2.0.
  */
 
+import { euiThemeVars } from '@kbn/ui-theme';
 import { getCvsScoreColor } from './get_cvsscore_color';
 
 describe('getCvsScoreColor', () => {
   it('returns correct color for low severity score', () => {
-    expect(getCvsScoreColor(1.5)).toBe('#54B399');
+    expect(getCvsScoreColor(1.5)).toBe(euiThemeVars.euiColorVis0);
   });
 
   it('returns correct color for medium severity score', () => {
-    expect(getCvsScoreColor(5.5)).toBe('#D6BF57');
+    expect(getCvsScoreColor(5.5)).toBe(euiThemeVars.euiColorVis7);
   });
 
   it('returns correct color for high severity score', () => {
-    expect(getCvsScoreColor(7.9)).toBe('#DA8B45');
+    expect(getCvsScoreColor(7.9)).toBe(euiThemeVars.euiColorVis9);
   });
 
   it('returns correct color for critical severity score', () => {
-    expect(getCvsScoreColor(10.0)).toBe('#BD271E');
+    expect(getCvsScoreColor(10.0)).toBe(euiThemeVars.euiColorDanger);
   });
 
   it('returns error message for invalid score', () => {
-    expect(getCvsScoreColor(-1)).toBe('Invalid score');
+    expect(getCvsScoreColor(-1)).toBe(undefined);
   });
 
   it('returns error message for invalid score when score is 0.0', () => {
-    expect(getCvsScoreColor(0.0)).toBe('Invalid score');
+    expect(getCvsScoreColor(0.0)).toBe(undefined);
   });
 });
