@@ -191,7 +191,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // Make sure the associated package is installed
     if (enrichedPackagePolicy.package?.name) {
-      console.log('--@@DO NOT REMOVE policy.create', options.apiKeyWithCurrentUserPermission);
+      console.log('--@@DO NOT REMOVE policy.create', options?.apiKeyWithCurrentUserPermission);
       if (!options?.skipEnsureInstalled) {
         await ensureInstalledPackage({
           esClient,
@@ -200,7 +200,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           pkgName: enrichedPackagePolicy.package.name,
           pkgVersion: enrichedPackagePolicy.package.version,
           force: options?.force,
-          apiKeyWithCurrentUserPermission: options.apiKeyWithCurrentUserPermission,
+          apiKeyWithCurrentUserPermission: options?.apiKeyWithCurrentUserPermission,
         });
       }
 

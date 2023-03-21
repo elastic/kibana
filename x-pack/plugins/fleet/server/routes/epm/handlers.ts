@@ -12,6 +12,8 @@ import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
 
+import type { APIKey } from '../../services/epm/elasticsearch/transform/install';
+
 import type {
   GetInfoResponse,
   InstallPackageResponse,
@@ -54,7 +56,7 @@ import {
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
-import { checkAllowedPackages, licenseService } from '../../services';
+import { appContextService, checkAllowedPackages, licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
@@ -243,6 +245,8 @@ export const updatePackageHandler: FleetRequestHandler<
   unknown,
   TypeOf<typeof UpdatePackageRequestSchema.body>
 > = async (context, request, response) => {
+  console.log('--updatePackageHandler');
+
   try {
     const savedObjectsClient = (await context.fleet).internalSoClient;
     const { pkgName } = request.params;
@@ -284,12 +288,13 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { pkgName, pkgVersion } = request.params;
 
-  // const apiKeyWithCurrentUserPermission = await appContextService
-  //   .getSecurity()
-  //   .authc.apiKeys.grantAsInternalUser(request, {
-  //     name: `auto-generated-transform-api-key`,
-  //     role_descriptors: {},
-  //   });
+  console.log('--installPackageFromRegistryHandler');
+  const apiKeyWithCurrentUserPermission = await appContextService
+    .getSecurity()
+    .authc.apiKeys.grantAsInternalUser(request, {
+      name: `auto-generated-transform-api-key`,
+      role_descriptors: {},
+    });
 
   const spaceId = fleetContext.spaceId;
   const res = await installPackage({
@@ -301,7 +306,9 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     force: request.body?.force,
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
-    // @TODO remove apiKeyWithCurrentUserPermission,
+    apiKeyWithCurrentUserPermission: apiKeyWithCurrentUserPermission
+      ? (apiKeyWithCurrentUserPermission as APIKey)
+      : undefined,
   });
 
   if (!res.error) {
@@ -337,6 +344,8 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   TypeOf<typeof BulkInstallPackagesFromRegistryRequestSchema.query>,
   TypeOf<typeof BulkInstallPackagesFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
+  console.log('--bulkInstallPackagesFromRegistryHandler');
+
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
@@ -364,6 +373,8 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof InstallPackageByUploadRequestSchema.body>
 > = async (context, request, response) => {
+  console.log('--installPackageByUploadHandler');
+
   if (!licenseService.isEnterprise()) {
     return response.customError({
       statusCode: 403,

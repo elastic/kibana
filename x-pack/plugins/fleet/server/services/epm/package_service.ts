@@ -14,6 +14,8 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
+import { appContextService } from '..';
+
 import type { PackageList } from '../../../common';
 
 import type {
@@ -28,6 +30,7 @@ import type {
 import { checkSuperuser } from '../security';
 import { FleetUnauthorizedError } from '../../errors';
 
+import type { APIKey } from './elasticsearch/transform/install';
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
 import type { FetchFindLatestPackageOptions } from './registry';
 import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
@@ -79,6 +82,8 @@ export class PackageServiceImpl implements PackageService {
   ) {}
 
   public asScoped(request: KibanaRequest) {
+    // await this.initAPIKeyWithCurrentUserPermission(request);
+    // console.log('this.apiKey', this.apiKey);
     const preflightCheck = () => {
       if (!checkSuperuser(request)) {
         throw new FleetUnauthorizedError(
@@ -91,7 +96,8 @@ export class PackageServiceImpl implements PackageService {
       this.internalEsClient,
       this.internalSoClient,
       this.logger,
-      preflightCheck
+      preflightCheck,
+      request
     );
   }
 
@@ -101,12 +107,28 @@ export class PackageServiceImpl implements PackageService {
 }
 
 class PackageClientImpl implements PackageClient {
+  private apiKeyWithCurrentUserPermission?: APIKey = undefined;
+
   constructor(
     private readonly internalEsClient: ElasticsearchClient,
     private readonly internalSoClient: SavedObjectsClientContract,
     private readonly logger: Logger,
-    private readonly preflightCheck?: () => void | Promise<void>
+    private readonly preflightCheck?: () => void | Promise<void>,
+    private readonly request?: KibanaRequest
   ) {}
+
+  private async initAPIKeyWithCurrentUserPermission(request: KibanaRequest) {
+    if (!this.apiKeyWithCurrentUserPermission) {
+      const apiKeyWithCurrentUserPermission = await appContextService
+        .getSecurity()
+        .authc.apiKeys.grantAsInternalUser(request, {
+          name: `auto-generated-transform-api-key`,
+          role_descriptors: {},
+        });
+      this.apiKeyWithCurrentUserPermission = apiKeyWithCurrentUserPermission as APIKey;
+      return apiKeyWithCurrentUserPermission;
+    }
+  }
 
   public async getInstallation(pkgName: string) {
     await this.#runPreflight();
@@ -184,13 +206,15 @@ class PackageClientImpl implements PackageClient {
   }
 
   async #reinstallTransforms(packageInfo: InstallablePackage, paths: string[]) {
+    const apiKeyWithCurrentUserPermission = await this.initAPIKeyWithCurrentUserPermission();
+
     const { installedTransforms } = await installTransforms(
       packageInfo,
       paths,
       this.internalEsClient,
       this.internalSoClient,
-      this.logger
-      // @todo: need credentials
+      this.logger,
+      apiKeyWithCurrentUserPermission
     );
     return installedTransforms;
   }
