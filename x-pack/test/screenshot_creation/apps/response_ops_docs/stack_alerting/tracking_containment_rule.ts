@@ -29,6 +29,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
+
+      await testSubjects.click('.server-log-alerting-ActionTypeSelectOption');
+      await testSubjects.scrollIntoView('addAlertActionButton');
+      const runWhen = await testSubjects.find('addNewActionConnectorActionGroup-0');
+      await runWhen.click();
+      await commonScreenshots.takeScreenshot(
+        'alert-types-tracking-containment-action-options',
+        screenshotDirectories,
+        1400,
+        1024
+      );
       await testSubjects.click('cancelSaveRuleButton');
     });
   });
