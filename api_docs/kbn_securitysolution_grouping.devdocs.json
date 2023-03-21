@@ -27,7 +27,7 @@
         "label": "getGroupingQuery",
         "description": [],
         "signature": [
-          "({ additionalFilters, from, groupByFields, metricsAggregations, pageNumber, rootAggregations, runtimeMappings, size, sort, to, }: ",
+          "({ additionalFilters, from, groupByFields, statsAggregations, pageNumber, rootAggregations, runtimeMappings, size, sort, to, }: ",
           "GroupingQueryArgs",
           ") => ",
           "GroupingQuery"
@@ -41,7 +41,7 @@
             "id": "def-common.getGroupingQuery.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  additionalFilters = [],\n  from,\n  groupByFields,\n  metricsAggregations,\n  pageNumber,\n  rootAggregations,\n  runtimeMappings,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  sort,\n  to,\n}",
+            "label": "{\n  additionalFilters = [],\n  from,\n  groupByFields,\n  statsAggregations,\n  pageNumber,\n  rootAggregations,\n  runtimeMappings,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  sort,\n  to,\n}",
             "description": [],
             "signature": [
               "GroupingQueryArgs"
