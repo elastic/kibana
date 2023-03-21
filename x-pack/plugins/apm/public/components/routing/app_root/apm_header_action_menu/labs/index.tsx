@@ -27,7 +27,11 @@ export function Labs() {
 
   return (
     <>
-      <EuiButtonEmpty color="text" onClick={toggleFlyoutVisibility}>
+      <EuiButtonEmpty
+        data-test-subj="apmLabsLabsButton"
+        color="text"
+        onClick={toggleFlyoutVisibility}
+      >
         {i18n.translate('xpack.apm.labs', { defaultMessage: 'Labs' })}
       </EuiButtonEmpty>
       {isOpen && <LabsFlyout onClose={toggleFlyoutVisibility} />}

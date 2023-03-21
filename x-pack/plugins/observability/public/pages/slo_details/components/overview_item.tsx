@@ -6,11 +6,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 export interface Props {
   title: string;
-  subtitle: string;
+  subtitle: ReactNode;
 }
 
 export function OverviewItem({ title, subtitle }: Props) {
@@ -22,9 +22,7 @@ export function OverviewItem({ title, subtitle }: Props) {
             <strong>{title}</strong>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s">{subtitle}</EuiText>
-        </EuiFlexItem>
+        <EuiFlexItem>{subtitle}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
   );
