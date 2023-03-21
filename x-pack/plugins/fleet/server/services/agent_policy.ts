@@ -45,7 +45,6 @@ import {
   UUID_V5_NAMESPACE,
   FLEET_APM_PACKAGE,
   FLEET_ELASTIC_AGENT_PACKAGE,
-  FLEET_SERVER_PACKAGE,
 } from '../../common/constants';
 import type {
   DeleteAgentPolicyResponse,
