@@ -53,7 +53,7 @@ export const DefaultBucketContainer = ({
               color={
                 euiTheme.colors[isInvalid ? 'danger' : isNotDraggable ? 'disabled' : 'subduedText']
               }
-              type={isInvalid ? 'alert' : 'grab'}
+              type={isInvalid ? 'warning' : 'grab'}
               aria-label={
                 isInvalid
                   ? invalidMessage

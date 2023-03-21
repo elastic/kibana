@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const toasts = getService('toasts');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
   describe('errors', function describeIndexTests() {
@@ -31,8 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // this is the same test as in OSS but it catches different error message issue in different licences
     describe('invalid scripted field error', () => {
       it('is rendered', async () => {
-        const toast = await toasts.getToastElement(1);
-        const painlessStackTrace = await toast.findByTestSubject('painlessStackTrace');
+        expect(await PageObjects.discover.noResultsErrorVisible()).to.be(true);
+        const painlessStackTrace = await testSubjects.find('painlessStackTrace');
         expect(painlessStackTrace).not.to.be(undefined);
       });
     });

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import * as Option from 'fp-ts/lib/Option';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { omit } from 'lodash';
 import type {
   AllActionStates,
   CalculateExcludeFiltersState,
-  UpdateSourceMappingsState,
   CheckTargetMappingsState,
   CheckUnknownDocumentsState,
   CleanupUnknownAndExcluded,
@@ -33,6 +33,7 @@ import type {
   OutdatedDocumentsSearchRead,
   OutdatedDocumentsTransform,
   PrepareCompatibleMigration,
+  RefreshSource,
   RefreshTarget,
   ReindexSourceToTempClosePit,
   ReindexSourceToTempIndexBulk,
@@ -43,11 +44,14 @@ import type {
   SetTempWriteBlock,
   State,
   TransformedDocumentsBulkIndex,
-  UpdateTargetMappingsState,
-  UpdateTargetMappingsWaitForTaskState,
+  UpdateSourceMappingsPropertiesState,
+  UpdateTargetMappingsMeta,
+  UpdateTargetMappingsPropertiesState,
+  UpdateTargetMappingsPropertiesWaitForTaskState,
   WaitForMigrationCompletionState,
   WaitForYellowSourceState,
 } from './state';
+import { createDelayFn } from './common/utils';
 import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
 import { REMOVED_TYPES } from './core';
@@ -72,11 +76,16 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
-    UPDATE_SOURCE_MAPPINGS: (state: UpdateSourceMappingsState) =>
-      Actions.updateMappings({
+    UPDATE_SOURCE_MAPPINGS_PROPERTIES: ({
+      sourceIndex,
+      sourceIndexMappings,
+      targetIndexMappings,
+    }: UpdateSourceMappingsPropertiesState) =>
+      Actions.updateSourceMappingsProperties({
         client,
-        index: state.sourceIndex.value, // attempt to update source mappings in-place
-        mappings: omit(state.targetIndexMappings, ['_meta']), // ._meta property will be updated on a later step
+        sourceIndex: sourceIndex.value,
+        sourceMappings: sourceIndexMappings.value,
+        targetMappings: targetIndexMappings,
       }),
     CLEANUP_UNKNOWN_AND_EXCLUDED: (state: CleanupUnknownAndExcluded) =>
       Actions.cleanupUnknownAndExcluded({
@@ -98,6 +107,8 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       }),
     PREPARE_COMPATIBLE_MIGRATION: (state: PrepareCompatibleMigration) =>
       Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),
+    REFRESH_SOURCE: (state: RefreshSource) =>
+      Actions.refreshIndex({ client, index: state.sourceIndex.value }),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
       Actions.checkForUnknownDocs({
         client,
@@ -161,29 +172,31 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     CLONE_TEMP_TO_TARGET: (state: CloneTempToSource) =>
       Actions.cloneIndex({ client, source: state.tempIndex, target: state.targetIndex }),
     REFRESH_TARGET: (state: RefreshTarget) =>
-      Actions.refreshIndex({ client, targetIndex: state.targetIndex }),
+      Actions.refreshIndex({ client, index: state.targetIndex }),
     CHECK_TARGET_MAPPINGS: (state: CheckTargetMappingsState) =>
       Actions.checkTargetMappings({
-        actualMappings: state.targetIndexRawMappings,
+        actualMappings: Option.toUndefined(state.sourceIndexMappings),
         expectedMappings: state.targetIndexMappings,
       }),
-    UPDATE_TARGET_MAPPINGS: (state: UpdateTargetMappingsState) =>
+    UPDATE_TARGET_MAPPINGS_PROPERTIES: (state: UpdateTargetMappingsPropertiesState) =>
       Actions.updateAndPickupMappings({
         client,
         index: state.targetIndex,
         mappings: omit(state.targetIndexMappings, ['_meta']), // ._meta property will be updated on a later step
       }),
-    UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK: (state: UpdateTargetMappingsWaitForTaskState) =>
+    UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK: (
+      state: UpdateTargetMappingsPropertiesWaitForTaskState
+    ) =>
       Actions.waitForPickupUpdatedMappingsTask({
         client,
         taskId: state.updateTargetMappingsTaskId,
         timeout: '60s',
       }),
-    UPDATE_TARGET_MAPPINGS_META: (state: UpdateTargetMappingsState) =>
+    UPDATE_TARGET_MAPPINGS_META: (state: UpdateTargetMappingsMeta) =>
       Actions.updateMappings({
         client,
         index: state.targetIndex,
-        mappings: state.targetIndexMappings,
+        mappings: omit(state.targetIndexMappings, 'properties'),
       }),
     CHECK_VERSION_INDEX_READY_ACTIONS: () => Actions.noop,
     OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: (state: OutdatedDocumentsSearchOpenPit) =>
@@ -200,7 +213,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePit) =>
       Actions.closePit({ client, pitId: state.pitId }),
     OUTDATED_DOCUMENTS_REFRESH: (state: OutdatedDocumentsRefresh) =>
-      Actions.refreshIndex({ client, targetIndex: state.targetIndex }),
+      Actions.refreshIndex({ client, index: state.targetIndex }),
     OUTDATED_DOCUMENTS_TRANSFORM: (state: OutdatedDocumentsTransform) =>
       Actions.transformDocs({ transformRawDocs, outdatedDocuments: state.outdatedDocuments }),
     TRANSFORMED_DOCUMENTS_BULK_INDEX: (state: TransformedDocumentsBulkIndex) =>
@@ -226,7 +239,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.createIndex({
         client,
         indexName: state.sourceIndex.value,
-        mappings: state.legacyReindexTargetMappings,
+        mappings: state.sourceIndexMappings.value,
       }),
     LEGACY_REINDEX: (state: LegacyReindexState) =>
       Actions.reindex({
@@ -247,13 +260,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
 export const next = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
   const map = nextActionMap(client, transformRawDocs);
   return (state: State) => {
-    const delay = <F extends (...args: any) => any>(fn: F): (() => ReturnType<F>) => {
-      return () => {
-        return state.retryDelay > 0
-          ? new Promise((resolve) => setTimeout(resolve, state.retryDelay)).then(fn)
-          : fn();
-      };
-    };
+    const delay = createDelayFn(state);
 
     if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
       // Return null if we're in one of the terminating states

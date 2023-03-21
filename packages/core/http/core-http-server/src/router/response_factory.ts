@@ -27,14 +27,18 @@ export interface KibanaSuccessResponseFactory {
    * Status code: `200`.
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
    */
-  ok(options?: HttpResponseOptions): IKibanaResponse;
+  ok<T extends HttpResponsePayload | ResponseError = any>(
+    options?: HttpResponseOptions<T>
+  ): IKibanaResponse<T>;
 
   /**
    * The request has been accepted for processing.
    * Status code: `202`.
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
    */
-  accepted(options?: HttpResponseOptions): IKibanaResponse;
+  accepted<T extends HttpResponsePayload | ResponseError = any>(
+    options?: HttpResponseOptions<T>
+  ): IKibanaResponse<T>;
 
   /**
    * The server has successfully fulfilled the request and that there is no additional content to send in the response payload body.

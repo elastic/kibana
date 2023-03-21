@@ -14,7 +14,6 @@ import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import '../index.scss';
-import { NotFoundPage } from '../pages/404';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
@@ -86,7 +85,6 @@ const MetricsApp: React.FC<{
             {uiCapabilities?.infrastructure?.show && (
               <Route path="/" component={InfrastructurePage} />
             )}
-            <Route component={NotFoundPage} />
           </Switch>
         </Router>
       </CommonInfraProviders>

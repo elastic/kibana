@@ -10,7 +10,7 @@ import { HOSTS_URL } from '../urls/navigation';
 import { waitForPage } from './login';
 import { openTimelineUsingToggle } from './security_main';
 import { DEFAULT_ALERTS_INDEX } from '../../common/constants';
-import { createCustomRuleEnabled } from './api_calls/rules';
+import { createRule } from './api_calls/rules';
 import { getNewRule } from '../objects/rule';
 
 export const openSourcerer = (sourcererScope?: string) => {
@@ -21,6 +21,12 @@ export const openSourcerer = (sourcererScope?: string) => {
   cy.get(SOURCERER.trigger).should('be.visible');
   cy.get(SOURCERER.trigger).click();
   cy.get(SOURCERER.wrapper).should('be.visible');
+};
+
+export const selectDataView = (dataView: string, sourcererScope?: string) => {
+  openSourcerer(sourcererScope);
+  openDataViewSelection();
+  cy.get(SOURCERER.selectListOption).contains(dataView).click();
 };
 
 const openTimelineSourcerer = () => {
@@ -148,7 +154,7 @@ const refreshUntilAlertsIndexExists = async () => {
 };
 
 export const waitForAlertsIndexToExist = () => {
-  createCustomRuleEnabled(getNewRule(), '1', 100);
+  createRule({ ...getNewRule(), rule_id: '1', max_signals: 100 });
   refreshUntilAlertsIndexExists();
 };
 

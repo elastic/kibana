@@ -91,7 +91,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
     return (
       <Fragment>
         <EuiCallOut
-          iconType="alert"
+          iconType="warning"
           title={
             <FormattedMessage
               id="xpack.security.management.editRoleMapping.visualRuleEditor.switchToJSONEditorTitle"

@@ -13,8 +13,7 @@ import classNames from 'classnames';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
-import { EuiLoadingElastic, EuiLoadingSpinner, useEuiOverflowScroll } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 
 import {
   DashboardContainerFactory,
@@ -109,19 +108,13 @@ export const DashboardContainerRenderer = ({
     { 'dashboardViewport--loading': loading }
   );
 
-  const viewportStyles = css`
-    ${useEuiOverflowScroll('y', false)}
-  `;
-
   const loadingSpinner = showPlainSpinner ? (
     <EuiLoadingSpinner size="xxl" />
   ) : (
     <EuiLoadingElastic size="xxl" />
   );
   return (
-    <div className={viewportClasses} css={viewportStyles}>
-      {loading ? loadingSpinner : <div ref={dashboardRoot} />}
-    </div>
+    <div className={viewportClasses}>{loading ? loadingSpinner : <div ref={dashboardRoot} />}</div>
   );
 };
 

@@ -90,7 +90,6 @@ export const getPieVisTypeDefinition = ({
         min: 0,
         max: Infinity,
         aggFilter: [
-          '!geohash_grid',
           '!geotile_grid',
           '!filter',
           '!sampler',
@@ -110,7 +109,6 @@ export const getPieVisTypeDefinition = ({
         min: 0,
         max: 1,
         aggFilter: [
-          '!geohash_grid',
           '!geotile_grid',
           '!filter',
           '!sampler',
