@@ -1,9 +1,8 @@
 {
   "extends": "../../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target",
+    "outDir": "target/types",
     "baseUrl": ".",
-    "rootDir": ".",
   },
   "include": [
     "*.ts"
@@ -12,6 +11,5 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/repo-info",
   ]
 }
