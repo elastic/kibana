@@ -11,11 +11,12 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../../../../utils/kibana_react';
-import { paths } from '../../../../config';
-import { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
-import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloIndicatorTypeBadge } from './slo_indicator_type_badge';
+import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloTimeWindowBadge } from './slo_time_window_badge';
+import { toAlertsPageQueryFilter } from '../../helpers/alerts_page_query_filter';
+import { paths } from '../../../../config/paths';
+import type { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -31,7 +32,9 @@ export function SloBadges({ slo, activeAlerts }: Props) {
   const handleClick = () => {
     if (activeAlerts) {
       navigateToUrl(
-        `${basePath.prepend(paths.observability.alerts)}?_a=${toAlertsPageQuery(activeAlerts)}`
+        `${basePath.prepend(paths.observability.alerts)}?_a=${toAlertsPageQueryFilter(
+          activeAlerts
+        )}`
       );
     }
   };
@@ -48,7 +51,7 @@ export function SloBadges({ slo, activeAlerts }: Props) {
       {!!activeAlerts && (
         <EuiFlexItem grow={false}>
           <EuiBadge
-            iconType="alert"
+            iconType="warning"
             color="danger"
             onClick={handleClick}
             onClickAriaLabel={i18n.translate(
@@ -66,13 +69,4 @@ export function SloBadges({ slo, activeAlerts }: Props) {
       )}
     </EuiFlexGroup>
   );
-}
-
-function toAlertsPageQuery(activeAlerts: ActiveAlerts): string {
-  const kuery = activeAlerts.ruleIds
-    .map((ruleId) => `kibana.alert.rule.uuid:"${activeAlerts.ruleIds[0]}"`)
-    .join(' or ');
-
-  const query = `(kuery:'${kuery}',rangeFrom:now-15m,rangeTo:now,status:all)`;
-  return query;
 }

@@ -135,7 +135,7 @@ const TabComponent = ({ currentTime, node, nodeType }: TabProps) => {
           />
         ) : (
           <EuiEmptyPrompt
-            iconType="alert"
+            iconType="warning"
             title={
               <h4>
                 {i18n.translate('xpack.infra.metrics.nodeDetails.processListError', {
@@ -144,7 +144,12 @@ const TabComponent = ({ currentTime, node, nodeType }: TabProps) => {
               </h4>
             }
             actions={
-              <EuiButton color="primary" fill onClick={reload}>
+              <EuiButton
+                data-test-subj="infraTabComponentTryAgainButton"
+                color="primary"
+                fill
+                onClick={reload}
+              >
                 {i18n.translate('xpack.infra.metrics.nodeDetails.processListRetry', {
                   defaultMessage: 'Try again',
                 })}

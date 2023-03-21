@@ -28,6 +28,9 @@ export const bulkGet: ProcedureDefinition<Context, BulkGetIn<string>, BulkGetRes
         request: version,
         latest: contentDefinition.version.latest,
       },
+      utils: {
+        getTransforms: ctx.getTransformsFactory(contentTypeId),
+      },
     };
     const result = await crudInstance.bulkGet(storageContext, ids, options);
 

@@ -88,6 +88,7 @@ export function EnvironmentFilter({
 
   return (
     <EuiSelect
+      data-test-subj="uxEnvironmentFilterSelect"
       fullWidth
       prepend={i18n.translate('xpack.ux.filter.environment.label', {
         defaultMessage: 'Environment',
