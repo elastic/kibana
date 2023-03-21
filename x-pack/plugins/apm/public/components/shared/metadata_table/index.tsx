@@ -62,6 +62,7 @@ export function MetadataTable({ sections, isLoading }: Props) {
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiFieldSearch
+            data-test-subj="apmMetadataTableFieldSearch"
             onChange={onSearchChange}
             placeholder={i18n.translate('xpack.apm.searchInput.filter', {
               defaultMessage: 'Filter...',
@@ -72,7 +73,11 @@ export function MetadataTable({ sections, isLoading }: Props) {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink href={docLinks.links.apm.metaData} target="_blank">
+          <EuiLink
+            data-test-subj="apmMetadataTableHowToAddLabelsAndOtherDataLink"
+            href={docLinks.links.apm.metaData}
+            target="_blank"
+          >
             <EuiIcon type="help" />
             {i18n.translate('xpack.apm.metadata.help', {
               defaultMessage: 'How to add labels and other data',

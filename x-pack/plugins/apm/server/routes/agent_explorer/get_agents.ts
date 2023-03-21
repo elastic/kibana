@@ -22,6 +22,17 @@ const getOtelAgentVersion = (item: {
     : item.agentVersion;
 };
 
+export interface AgentExplorerAgentsResponse {
+  items: Array<{
+    agentDocsPageUrl: string | undefined;
+    serviceName: string;
+    environments: string[];
+    agentName: AgentName;
+    agentVersion: string[];
+    instances: number;
+  }>;
+}
+
 export async function getAgents({
   environment,
   serviceName,
@@ -40,7 +51,7 @@ export async function getAgents({
   start: number;
   end: number;
   randomSampler: RandomSampler;
-}) {
+}): Promise<AgentExplorerAgentsResponse> {
   const items = await getAgentsItems({
     environment,
     serviceName,

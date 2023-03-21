@@ -81,7 +81,13 @@ export function TransactionDetailLink({
     return (
       <TruncateWithTooltip
         text={transactionName}
-        content={<EuiLink href={href} {...rest} />}
+        content={
+          <EuiLink
+            data-test-subj="apmTransactionDetailLinkLink"
+            href={href}
+            {...rest}
+          />
+        }
       />
     );
   }
@@ -98,7 +104,7 @@ export function TransactionDetailLink({
           ariaLabel={i18n.translate('xpack.apm.transactionDetail.tooltip', {
             defaultMessage: 'Max transaction groups reached tooltip',
           })}
-          iconType="alert"
+          iconType="warning"
         >
           <EuiText style={{ width: `${unit * 28}px` }} size="s">
             <FormattedMessage

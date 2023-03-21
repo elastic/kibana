@@ -98,7 +98,7 @@ const warningMessage = i18n.translate(
 export const AdvancedPolicyForms = React.memo(({ isPlatinumPlus }: { isPlatinumPlus: boolean }) => {
   return (
     <>
-      <EuiCallOut title={calloutTitle} color="warning" iconType="alert">
+      <EuiCallOut title={calloutTitle} color="warning" iconType="warning">
         <p>{warningMessage}</p>
       </EuiCallOut>
       <EuiSpacer />

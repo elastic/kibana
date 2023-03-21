@@ -131,8 +131,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
       ELASTICSEARCH_PLUGIN.ID,
       ANALYTICS_PLUGIN.ID,
-      APP_SEARCH_PLUGIN.ID,
-      WORKPLACE_SEARCH_PLUGIN.ID,
+      ...(config.canDeployEntSearch ? [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID] : []),
       SEARCH_EXPERIENCES_PLUGIN.ID,
     ];
 
@@ -172,7 +171,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       const dependencies = { config, security, spaces, request, log, ml };
 
       const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
-      const showEnterpriseSearch = hasAppSearchAccess || hasWorkplaceSearchAccess;
+      const showEnterpriseSearch =
+        hasAppSearchAccess || hasWorkplaceSearchAccess || !config.canDeployEntSearch;
 
       return {
         navLinks: {
@@ -180,8 +180,8 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
           elasticsearch: showEnterpriseSearch,
-          appSearch: hasAppSearchAccess,
-          workplaceSearch: hasWorkplaceSearchAccess,
+          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
+          workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
           searchExperiences: showEnterpriseSearch,
         },
         catalogue: {
@@ -189,8 +189,8 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
           elasticsearch: showEnterpriseSearch,
-          appSearch: hasAppSearchAccess,
-          workplaceSearch: hasWorkplaceSearchAccess,
+          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
+          workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
           searchExperiences: showEnterpriseSearch,
         },
       };
@@ -204,12 +204,12 @@ export class EnterpriseSearchPlugin implements Plugin {
     const dependencies = { router, config, log, enterpriseSearchRequestHandler, ml };
 
     registerConfigDataRoute(dependencies);
-    registerAppSearchRoutes(dependencies);
+    if (config.canDeployEntSearch) registerAppSearchRoutes(dependencies);
     registerEnterpriseSearchRoutes(dependencies);
-    registerWorkplaceSearchRoutes(dependencies);
+    if (config.canDeployEntSearch) registerWorkplaceSearchRoutes(dependencies);
     // Enterprise Search Routes
-    registerConnectorRoutes(dependencies);
-    registerCrawlerRoutes(dependencies);
+    if (config.hasNativeConnectors) registerConnectorRoutes(dependencies);
+    if (config.hasWebCrawler) registerCrawlerRoutes(dependencies);
     registerStatsRoutes(dependencies);
 
     // Analytics Routes (stand-alone product)
@@ -225,8 +225,10 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Bootstrap the routes, saved objects, and collector for telemetry
      */
     savedObjects.registerType(enterpriseSearchTelemetryType);
-    savedObjects.registerType(appSearchTelemetryType);
-    savedObjects.registerType(workplaceSearchTelemetryType);
+    if (config.canDeployEntSearch) {
+      savedObjects.registerType(appSearchTelemetryType);
+      savedObjects.registerType(workplaceSearchTelemetryType);
+    }
     let savedObjectsStarted: SavedObjectsServiceStart;
 
     getStartServices().then(([coreStart]) => {
@@ -234,8 +236,10 @@ export class EnterpriseSearchPlugin implements Plugin {
 
       if (usageCollection) {
         registerESTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
-        registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
-        registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
+        if (config.canDeployEntSearch) {
+          registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
+          registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
+        }
       }
     });
     registerTelemetryRoute({ ...dependencies, getSavedObjectsService: () => savedObjectsStarted });
@@ -271,9 +275,15 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register a config for the search guide
      */
-    guidedOnboarding.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
-    guidedOnboarding.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
-    guidedOnboarding.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
+    if (config.canDeployEntSearch) {
+      guidedOnboarding.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
+    }
+    if (config.hasWebCrawler) {
+      guidedOnboarding.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
+    }
+    if (config.hasNativeConnectors) {
+      guidedOnboarding.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
+    }
   }
 
   public start() {}
