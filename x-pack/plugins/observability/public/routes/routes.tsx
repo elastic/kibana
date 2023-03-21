@@ -36,17 +36,17 @@ const ObservabilityExploratoryView = withSuspense(ObservabilityExploratoryViewLa
 
 export const OBSERVABILITY_BASE_PATH = '/app/observability';
 
-export const OVERVIEW_URL = '/overview';
-export const ALERTS_URL = '/alerts';
-export const ALERT_DETAIL_URL = `${ALERTS_URL}/:alertId`;
-export const CASES_URL = '/cases';
-export const EXPLORATORY_VIEW_URL = '/exploratory-view/';
-export const RULES_URL = `${ALERTS_URL}/rules`;
-export const RULE_DETAIL_URL = `${RULES_URL}/:ruleId'`;
-export const SLOS_URL = '/slos';
-export const SLOS_CREATE_URL = '/slos/create';
-export const SLOS_DETAIL_URL = '/slos/:sloId';
-export const SLOS_EDIT_URL = '/slos/edit/:sloId';
+export const OVERVIEW_URL = '/overview' as const;
+export const ALERTS_URL = '/alerts' as const;
+export const ALERT_DETAIL_URL = `${ALERTS_URL}/:alertId` as const;
+export const CASES_URL = '/cases' as const;
+export const EXPLORATORY_VIEW_URL = '/exploratory-view/' as const;
+export const RULES_URL = `${ALERTS_URL}/rules` as const;
+export const RULE_DETAIL_URL = `${RULES_URL}/:ruleId` as const;
+export const SLOS_URL = '/slos' as const;
+export const SLOS_CREATE_URL = '/slos/create' as const;
+export const SLOS_DETAIL_URL = '/slos/:sloId' as const;
+export const SLOS_EDIT_URL = '/slos/edit/:sloId' as const;
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
