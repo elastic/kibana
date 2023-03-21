@@ -383,10 +383,10 @@ spec:
             #privileged: true
           resources:
             limits:
-              memory: 500Mi
+              memory: 700Mi
             requests:
               cpu: 100m
-              memory: 200Mi
+              memory: 400Mi
           volumeMounts:
             - name: proc
               mountPath: /hostfs/proc
