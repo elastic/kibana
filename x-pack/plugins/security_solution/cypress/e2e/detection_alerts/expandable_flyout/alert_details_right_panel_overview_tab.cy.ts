@@ -67,9 +67,7 @@ describe.skip(
       });
     });
 
-    // TODO enable when the table tab PR is merged
-    //  https://github.com/elastic/kibana/pull/152303
-    it.skip('should navigate to table tab when clicking on highlighted fields view button', () => {
+    it('should navigate to table tab when clicking on highlighted fields view button', () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS).within(() => {
         cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_HEADER_EXPAND_ICON)
           .should('be.visible')

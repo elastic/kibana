@@ -122,12 +122,6 @@ export const DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_GO_TO_TABLE
 
 /* Table tab */
 
-export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW = getDataTestSubjectSelector(
-  'event-fields-table-row-event.type'
-);
-
-/* Table tab */
-
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_FILTER = getClassSelector('euiFieldSearch');
 export const DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CLEAR_FILTER =
   getDataTestSubjectSelector('clearSearchButton');
