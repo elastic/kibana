@@ -16,7 +16,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { ExploratoryView } from './exploratory_view';
-import { ObservabilityPublicPluginsStart } from '../../../plugin';
+import type { ObservabilityPublicPluginsStart } from '../../../plugin/plugin';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { DataViewContextProvider } from './hooks/use_app_data_view';
 import { UrlStorageContextProvider } from './hooks/use_series_storage';

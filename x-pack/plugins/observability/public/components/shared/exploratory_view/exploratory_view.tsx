@@ -18,7 +18,7 @@ import {
 import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { ObservabilityPublicPluginsStart } from '../../../plugin';
+import type { ObservabilityPublicPluginsStart } from '../../../plugin/plugin';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { useLensAttributes } from './hooks/use_lens_attributes';
 import { useAppDataViewContext } from './hooks/use_app_data_view';

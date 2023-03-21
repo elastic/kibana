@@ -28,7 +28,7 @@ import { parseAlert } from '../helpers/parse_alert';
 import { paths } from '../../../routes';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import type { ObservabilityRuleTypeRegistry } from '../../../..';
-import type { ConfigSchema } from '../../../../plugin';
+import type { ConfigSchema } from '../../../../plugin/plugin';
 import type { TopAlert } from '../../../../typings/alerts';
 
 const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';

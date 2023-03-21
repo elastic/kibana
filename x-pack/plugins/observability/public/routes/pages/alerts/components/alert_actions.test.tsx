@@ -14,9 +14,9 @@ import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../plugin/rule_registry/create_observability_rule_type_registry';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import * as pluginContext from '../../../../hooks/use_plugin_context';
-import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import type { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../plugin/plugin';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 

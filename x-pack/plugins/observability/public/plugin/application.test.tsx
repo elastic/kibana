@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import { createMemoryHistory } from 'history';
 import { noop } from 'lodash';
-import React from 'react';
 import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from './rule_registry/create_observability_rule_type_registry';
 import { renderApp } from './application';
+import type { ConfigSchema, ObservabilityPublicPluginsStart } from './plugin';
 
 describe('renderApp', () => {
   const originalConsole = global.console;

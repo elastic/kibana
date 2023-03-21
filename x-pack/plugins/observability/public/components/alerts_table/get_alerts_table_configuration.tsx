@@ -23,7 +23,7 @@ import {
 } from '../../routes/pages/alerts/components/alert_actions';
 import { useGetAlertFlyoutComponents } from '../use_get_alert_flyout_components';
 import type { ObservabilityRuleTypeRegistry } from '../../plugin/rule_registry/create_observability_rule_type_registry';
-import type { ConfigSchema } from '../../plugin';
+import type { ConfigSchema } from '../../plugin/plugin';
 import type { TopAlert } from '../../typings/alerts';
 
 export const getAlertsTableConfiguration = (

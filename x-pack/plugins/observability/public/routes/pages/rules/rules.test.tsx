@@ -8,14 +8,14 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { CoreStart } from '@kbn/core/public';
-import { ObservabilityPublicPluginsStart } from '../../../plugin';
-import { RulesPage } from './rules';
-import { createObservabilityRuleTypeRegistryMock } from '../../../plugin/rule_registry/create_observability_rule_type_registry';
-import { kibanaStartMock } from '../../../utils/kibana_react.mock';
-import * as pluginContext from '../../../hooks/use_plugin_context';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { AppMountParameters } from '@kbn/core/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { createObservabilityRuleTypeRegistryMock } from '../../../plugin/rule_registry/create_observability_rule_type_registry';
+import { kibanaStartMock } from '../../../utils/kibana_react.mock';
+import * as pluginContext from '../../../hooks/use_plugin_context';
+import { RulesPage } from './rules';
+import type { ObservabilityPublicPluginsStart } from '../../../plugin/plugin';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 

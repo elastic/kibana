@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewInsufficientAccessError } from '@kbn/data-views-plugin/common';
 import { AppDataType } from '../types';
-import { ObservabilityPublicPluginsStart } from '../../../../plugin';
+import type { ObservabilityPublicPluginsStart } from '../../../../plugin/plugin';
 import {
   getDataTypeIndices,
   ObservabilityDataViews,

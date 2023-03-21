@@ -31,7 +31,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { rumFieldFormats } from './configurations/rum/field_formats';
-import { ObservabilityPublicPluginsStart } from '../../../plugin';
+import type { ObservabilityPublicPluginsStart } from '../../../plugin/plugin';
 import * as useAppDataViewHook from './hooks/use_app_data_view';
 import { DataViewContext, DataViewContextProvider } from './hooks/use_app_data_view';
 import {

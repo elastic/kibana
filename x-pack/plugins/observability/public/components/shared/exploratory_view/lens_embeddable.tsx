@@ -12,10 +12,10 @@ import { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/pub
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUiTracker } from '../../../hooks/use_track_metric';
 import { useSeriesStorage } from './hooks/use_series_storage';
-import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useExpViewTimeRange } from './hooks/use_time_range';
 import { parseRelativeDate } from './components/date_range_picker';
 import { trackTelemetryOnLoad } from './utils/telemetry';
+import type { ObservabilityPublicPluginsStart } from '../../../plugin/plugin';
 import type { ChartTimeRange } from './header/last_updated';
 
 interface Props {

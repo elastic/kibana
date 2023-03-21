@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiSuperSelect } from '
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SeriesType } from '@kbn/lens-plugin/public';
-import { ObservabilityPublicPluginsStart } from '../../../../../plugin';
+import type { ObservabilityPublicPluginsStart } from '../../../../../plugin/plugin';
 import { SeriesUrl, useFetcher } from '../../../../..';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 

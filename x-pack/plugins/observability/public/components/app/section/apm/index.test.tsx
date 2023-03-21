@@ -9,7 +9,7 @@ import React from 'react';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { render, data as dataMock } from '../../../../utils/test_helper';
 import { CoreStart } from '@kbn/core/public';
-import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../plugin';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { APMSection } from '.';
 import { response } from './mock_data/apm.mock';
 import * as hasDataHook from '../../../../hooks/use_has_data';
@@ -17,7 +17,7 @@ import * as pluginContext from '../../../../hooks/use_plugin_context';
 import { HasDataContextValue } from '../../../../context/has_data_context';
 import { AppMountParameters } from '@kbn/core/public';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../plugin/rule_registry/create_observability_rule_type_registry';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import type { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../../plugin/plugin';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({

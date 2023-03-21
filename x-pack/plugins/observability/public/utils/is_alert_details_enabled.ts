@@ -6,7 +6,7 @@
  */
 
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import type { ConfigSchema } from '../plugin';
+import type { ConfigSchema } from '../plugin/plugin';
 import type { TopAlert } from '../typings/alerts';
 
 const ALLOWED_RULE_TYPES = ['apm.transaction_duration'];
