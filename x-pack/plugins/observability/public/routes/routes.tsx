@@ -35,16 +35,17 @@ const SloEditPage = withSuspense(SloEditPageLazy);
 const ObservabilityExploratoryView = withSuspense(ObservabilityExploratoryViewLazy);
 
 export const OBSERVABILITY_BASE_PATH = '/app/observability';
+
 export const OVERVIEW_URL = '/overview';
 export const ALERTS_URL = '/alerts';
-export const ALERT_DETAIL_URL = '/alerts/:alertId';
+export const ALERT_DETAIL_URL = `${ALERTS_URL}/:alertId`;
 export const CASES_URL = '/cases';
 export const EXPLORATORY_VIEW_URL = '/exploratory-view/';
 export const RULES_URL = `${ALERTS_URL}/rules`;
 export const RULE_DETAIL_URL = `${RULES_URL}/:ruleId'`;
 export const SLOS_URL = '/slos';
-export const SLOS_DETAIL_URL = '/slos/:sloId';
 export const SLOS_CREATE_URL = '/slos/create';
+export const SLOS_DETAIL_URL = '/slos/:sloId';
 export const SLOS_EDIT_URL = '/slos/edit/:sloId';
 
 // Note: React Router DOM <Redirect> component was not working here
@@ -77,7 +78,7 @@ export const paths = {
   },
 };
 
-export const routes = {
+export const routes: Record<string, any> = {
   '/': {
     handler: () => {
       return <SimpleRedirect to="/overview" />;
@@ -105,13 +106,6 @@ export const routes = {
     },
     exact: true,
   },
-  [ALERT_DETAIL_URL]: {
-    handler: () => {
-      return <AlertDetailsPage />;
-    },
-    params: {},
-    exact: true,
-  },
   [CASES_URL]: {
     handler: () => {
       return <CasesPage />;
@@ -128,13 +122,6 @@ export const routes = {
   [RULES_URL]: {
     handler: () => {
       return <RulesPage />;
-    },
-    params: {},
-    exact: true,
-  },
-  [RULE_DETAIL_URL]: {
-    handler: () => {
-      return <RuleDetailsPage />;
     },
     params: {},
     exact: true,
@@ -156,6 +143,21 @@ export const routes = {
   [SLOS_EDIT_URL]: {
     handler: () => {
       return <SloEditPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  // detail URLs
+  [ALERT_DETAIL_URL]: {
+    handler: () => {
+      return <AlertDetailsPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  [RULE_DETAIL_URL]: {
+    handler: () => {
+      return <RuleDetailsPage />;
     },
     params: {},
     exact: true,
