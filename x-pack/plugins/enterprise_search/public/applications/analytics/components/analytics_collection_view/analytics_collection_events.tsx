@@ -91,7 +91,7 @@ export const AnalyticsCollectionEvents: React.FC<AnalyticsCollectionEventsProps>
             >
               {i18n.translate(
                 'xpack.enterpriseSearch.analytics.collections.collectionsView.eventsTab.emptyState.actions',
-      {
+                {
                   defaultMessage: 'View integration instructions',
                 }
               )}
