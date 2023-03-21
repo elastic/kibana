@@ -120,7 +120,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  // const [currentCursorContent, setCurrentCursorContent] = useState(queryString);
   const { uiSettings, dataViews, expressions } = kibana.services;
 
   const styles = textBasedLanguagedEditorStyles(
