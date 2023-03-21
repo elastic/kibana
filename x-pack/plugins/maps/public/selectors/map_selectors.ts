@@ -268,7 +268,7 @@ export const getDataFilters = createSelector(
     searchSessionId,
     searchSessionMapBuffer,
     isReadOnly,
-    savedObjectId,
+    savedObjectId
   ) => {
     return {
       extent: mapExtent,
