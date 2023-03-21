@@ -47,6 +47,6 @@ export interface CasesService {
   };
   helpers: {
     groupAlertsByRule: (items?: any[]) => any[];
-    canUseCases: () => Record<string, unknown>;
+    canUseCases: (owners: string[]) => Record<string, unknown>;
   };
 }

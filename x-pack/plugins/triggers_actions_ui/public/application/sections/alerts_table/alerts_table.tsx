@@ -79,11 +79,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     getInspectQuery,
   } = alertsData;
   const queryClient = useQueryClient();
-  const {
-    data: cases,
-    isLoading: isLoadingCases,
-    showBulkActions: showCaseBulkActions,
-  } = props.cases;
+  const { data: cases, isLoading: isLoadingCases } = props.cases;
 
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
 
@@ -101,7 +97,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     clearSelection,
   } = useBulkActions({
     alerts,
-    showCaseBulkActions,
+    casesConfig: props.alertsTableConfiguration.cases,
     query: props.query,
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
     refresh: alertsRefresh,

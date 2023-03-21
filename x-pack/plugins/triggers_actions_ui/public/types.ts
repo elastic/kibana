@@ -493,7 +493,6 @@ export type AlertsTableProps = {
   cases: {
     data: Map<string, Case>;
     isLoading: boolean;
-    showBulkActions: boolean;
   };
   columns: EuiDataGridColumn[];
   // defaultCellActions: TGridCellAction[];

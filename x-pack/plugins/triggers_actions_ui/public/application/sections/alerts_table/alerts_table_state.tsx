@@ -237,7 +237,15 @@ const AlertsTableStateWithQueryProvider = ({
 
   const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
 
-  const { data: cases, isFetching: isLoadingCases } = useBulkGetCases(Array.from(caseIds.values()));
+  const casesPermissions = casesService?.helpers.canUseCases(
+    alertsTableConfiguration?.cases?.owner ?? []
+  );
+  const hasCaseReadPermissions = Boolean(casesPermissions?.read);
+
+  const { data: cases, isFetching: isLoadingCases } = useBulkGetCases(
+    Array.from(caseIds.values()),
+    hasCaseReadPermissions
+  );
 
   const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
     setPagination(_pagination);
@@ -303,7 +311,6 @@ const AlertsTableStateWithQueryProvider = ({
   ]);
 
   const CasesContext = casesService?.ui.getCasesContext();
-  const casesPermissions = casesService?.helpers.canUseCases();
   const isCasesContextAvailable = casesService && CasesContext;
 
   const tableProps: AlertsTableProps = useMemo(
@@ -312,7 +319,6 @@ const AlertsTableStateWithQueryProvider = ({
       cases: {
         data: cases ?? new Map(),
         isLoading: isLoadingCases,
-        showBulkActions: Boolean(isCasesContextAvailable && alertsTableConfiguration.cases),
       },
       columns,
       bulkActions: [],
@@ -347,7 +353,6 @@ const AlertsTableStateWithQueryProvider = ({
       alertsTableConfiguration,
       cases,
       isLoadingCases,
-      isCasesContextAvailable,
       columns,
       flyoutSize,
       pagination.pageSize,

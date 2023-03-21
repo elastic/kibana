@@ -9,6 +9,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   Alerts,
+  AlertsTableConfigurationRegistry,
   BulkActionsConfig,
   BulkActionsState,
   BulkActionsVerbs,
@@ -25,7 +26,7 @@ import { ADD_TO_CASE_DISABLED, ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './t
 interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   alerts: Alerts;
-  showCaseBulkActions: boolean;
+  casesConfig: AlertsTableConfigurationRegistry['cases'];
   useBulkActionsConfig?: UseBulkActionsRegistry;
   refresh: () => void;
 }
@@ -39,16 +40,19 @@ export interface UseBulkActions {
   clearSelection: () => void;
 }
 
-type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'showCaseBulkActions' | 'refresh'> &
+type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'casesConfig' | 'refresh'> &
   Pick<UseBulkActions, 'clearSelection'>;
 
 export const useBulkAddToCaseActions = ({
-  showCaseBulkActions,
+  casesConfig,
   refresh,
   clearSelection,
 }: UseBulkAddToCaseActionsProps): BulkActionsConfig[] => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
-  const userCasesPermissions = casesService?.helpers.canUseCases();
+
+  const userCasesPermissions = casesService?.helpers.canUseCases(casesConfig?.owner ?? []);
+  const CasesContext = casesService?.ui.getCasesContext();
+  const isCasesContextAvailable = casesService && CasesContext;
 
   const onSuccess = useCallback(() => {
     refresh();
@@ -59,8 +63,7 @@ export const useBulkAddToCaseActions = ({
   const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal({ onSuccess });
 
   return useMemo(() => {
-    return showCaseBulkActions &&
-      casesService &&
+    return isCasesContextAvailable &&
       createCaseFlyout &&
       selectCaseModal &&
       userCasesPermissions?.create &&
@@ -95,10 +98,10 @@ export const useBulkAddToCaseActions = ({
         ]
       : [];
   }, [
-    casesService,
+    casesService?.helpers,
     createCaseFlyout,
+    isCasesContextAvailable,
     selectCaseModal,
-    showCaseBulkActions,
     userCasesPermissions?.create,
     userCasesPermissions?.read,
   ]);
@@ -106,7 +109,7 @@ export const useBulkAddToCaseActions = ({
 
 export function useBulkActions({
   alerts,
-  showCaseBulkActions,
+  casesConfig,
   query,
   refresh,
   useBulkActionsConfig = () => [],
@@ -117,7 +120,7 @@ export function useBulkActions({
   const clearSelection = () => {
     updateBulkActionsState({ action: BulkActionsVerbs.clear });
   };
-  const caseBulkActions = useBulkAddToCaseActions({ showCaseBulkActions, refresh, clearSelection });
+  const caseBulkActions = useBulkAddToCaseActions({ casesConfig, refresh, clearSelection });
 
   const bulkActions = [...configBulkActions, ...caseBulkActions];
 

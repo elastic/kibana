@@ -28,7 +28,7 @@ const transformCases = (data: CasesBulkGetResponse): Map<string, Case> => {
   return casesMap;
 };
 
-export const useBulkGetCases = (caseIds: string[]) => {
+export const useBulkGetCases = (caseIds: string[], hasCaseReadPermissions: boolean) => {
   const {
     http,
     notifications: { toasts },
@@ -41,7 +41,7 @@ export const useBulkGetCases = (caseIds: string[]) => {
       return bulkGetCases(http, { ids: caseIds, fields: caseFields }, abortCtrlRef.signal);
     },
     {
-      enabled: caseIds.length > 0,
+      enabled: caseIds.length > 0 && hasCaseReadPermissions,
       select: transformCases,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
