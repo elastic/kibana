@@ -33,7 +33,7 @@ describe('SelectInterval', () => {
 
     // update
     act(() => {
-      userEvent.selectOptions(getByTestId('mlSelectInterval'), getByText('1 hour'));
+      userEvent.selectOptions(getByTestId('mlAnomalyIntervalControls'), getByText('1 hour'));
     });
 
     // assert updated state
