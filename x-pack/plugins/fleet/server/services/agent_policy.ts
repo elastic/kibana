@@ -103,20 +103,10 @@ class AgentPolicyService {
     user?: AuthenticatedUser,
     options: { bumpRevision: boolean } = { bumpRevision: true }
   ): Promise<AgentPolicy> {
-    appContextService.writeCustomAuditLog({
-      message: `User is updating ${AGENT_POLICY_SAVED_OBJECT_TYPE} [id=${id}]`,
-      event: {
-        action: 'saved_object_update',
-        category: ['database'],
-        outcome: 'unknown',
-        type: ['access'],
-      },
-      kibana: {
-        saved_object: {
-          id,
-          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-        },
-      },
+    appContextService.writeCustomSoAuditLog({
+      action: 'update',
+      id,
+      savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
     });
 
     const existingAgentPolicy = await this.get(soClient, id, true);
@@ -220,20 +210,10 @@ class AgentPolicyService {
       options.id = SavedObjectsUtils.generateId();
     }
 
-    appContextService.writeCustomAuditLog({
-      message: `User is creating ${AGENT_POLICY_SAVED_OBJECT_TYPE} [id=${options.id}]`,
-      event: {
-        action: 'saved_object_create',
-        category: ['database'],
-        outcome: 'unknown',
-        type: ['access'],
-      },
-      kibana: {
-        saved_object: {
-          id: options.id,
-          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-        },
-      },
+    appContextService.writeCustomSoAuditLog({
+      action: 'create',
+      id: options.id,
+      savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
     });
 
     await this.requireUniqueName(soClient, agentPolicy);
@@ -303,20 +283,10 @@ class AgentPolicyService {
         (await packagePolicyService.findAllForAgentPolicy(soClient, id)) || [];
     }
 
-    appContextService.writeCustomAuditLog({
-      message: `User has accessed ${AGENT_POLICY_SAVED_OBJECT_TYPE} [id=${id}]`,
-      event: {
-        action: 'saved_object_get',
-        category: ['database'],
-        outcome: 'success',
-        type: ['access'],
-      },
-      kibana: {
-        saved_object: {
-          id,
-          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-        },
-      },
+    appContextService.writeCustomSoAuditLog({
+      action: 'get',
+      id,
+      savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
     });
 
     return agentPolicy;
@@ -367,20 +337,10 @@ class AgentPolicyService {
     );
 
     for (const agentPolicy of result) {
-      appContextService.writeCustomAuditLog({
-        message: `User has accessed ${AGENT_POLICY_SAVED_OBJECT_TYPE} [id=${agentPolicy.id}]`,
-        event: {
-          action: 'saved_object_find',
-          category: ['database'],
-          outcome: 'success',
-          type: ['access'],
-        },
-        kibana: {
-          saved_object: {
-            id: agentPolicy.id,
-            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-          },
-        },
+      appContextService.writeCustomSoAuditLog({
+        action: 'get',
+        id: agentPolicy.id,
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     }
 
@@ -458,20 +418,10 @@ class AgentPolicyService {
     );
 
     for (const agentPolicy of agentPolicies) {
-      appContextService.writeCustomAuditLog({
-        message: `User has accessed ${AGENT_POLICY_SAVED_OBJECT_TYPE} [id=${agentPolicy.id}]`,
-        event: {
-          action: 'saved_object_find',
-          category: ['database'],
-          outcome: 'success',
-          type: ['access'],
-        },
-        kibana: {
-          saved_object: {
-            id: agentPolicy.id,
-            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-          },
-        },
+      appContextService.writeCustomSoAuditLog({
+        action: 'find',
+        id: agentPolicy.id,
+        savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     }
 
@@ -750,20 +700,10 @@ class AgentPolicyService {
     id: string,
     options?: { force?: boolean; removeFleetServerDocuments?: boolean; user?: AuthenticatedUser }
   ): Promise<DeleteAgentPolicyResponse> {
-    appContextService.writeCustomAuditLog({
-      message: `User is deleting ${AGENT_POLICY_SAVED_OBJECT_TYPE} [id=${id}]`,
-      event: {
-        action: 'saved_object_update',
-        category: ['database'],
-        outcome: 'unknown',
-        type: ['access'],
-      },
-      kibana: {
-        saved_object: {
-          id,
-          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-        },
-      },
+    appContextService.writeCustomSoAuditLog({
+      action: 'delete',
+      id,
+      savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
     });
 
     const agentPolicy = await this.get(soClient, id, false);
