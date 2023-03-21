@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent, SimplifiedAgentStatus } from '../../../../types';
 
@@ -25,6 +26,8 @@ export const AgentTableHeader: React.FunctionComponent<{
   setSelectionMode: (mode: SelectionMode) => void;
   selectedAgents: Agent[];
   setSelectedAgents: (agents: Agent[]) => void;
+  clearFilters: () => void;
+  isUsingFilter: boolean;
 }> = ({
   agentStatus,
   totalAgents,
@@ -34,20 +37,34 @@ export const AgentTableHeader: React.FunctionComponent<{
   selectedAgents,
   setSelectedAgents,
   showInactive,
+  clearFilters,
+  isUsingFilter,
 }) => {
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <AgentsSelectionStatus
-            totalAgents={totalAgents}
-            selectableAgents={selectableAgents}
-            selectionMode={selectionMode}
-            setSelectionMode={setSelectionMode}
-            selectedAgents={selectedAgents}
-            setSelectedAgents={setSelectedAgents}
-          />
-        </EuiFlexItem>
+        <EuiFlexGroup justifyContent="flexStart" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <AgentsSelectionStatus
+              totalAgents={totalAgents}
+              selectableAgents={selectableAgents}
+              selectionMode={selectionMode}
+              setSelectionMode={setSelectionMode}
+              selectedAgents={selectedAgents}
+              setSelectedAgents={setSelectedAgents}
+            />
+          </EuiFlexItem>
+          {isUsingFilter ? (
+            <EuiFlexItem grow={false}>
+              <EuiLink onClick={() => clearFilters()}>
+                <FormattedMessage
+                  id="xpack.fleet.agentList.header.clearFiltersLinkText"
+                  defaultMessage="Clear filters"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
         <EuiFlexItem grow={false}>
           {agentStatus && (
             <AgentStatusBadges showInactive={showInactive} agentStatus={agentStatus} />

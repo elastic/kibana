@@ -13,7 +13,7 @@ export interface EnterpriseSearchEnginesResponse {
     size: number;
     total: number;
   };
-  params: { q?: string; from: number; size: number };
+  params: { from: number; q?: string; size: number };
   results: EnterpriseSearchEngine[];
 }
 
@@ -40,6 +40,7 @@ export interface EnterpriseSearchEngineIndex {
 export interface EnterpriseSearchEngineFieldCapabilities {
   created: string;
   field_capabilities: FieldCapsResponse;
+  fields?: SchemaField[];
   name: string;
   updated: string;
 }
@@ -50,4 +51,16 @@ export interface EnterpriseSearchSchemaField {
 
 export interface EnterpriseSearchEngineUpsertResponse {
   result: string;
+
+export interface SchemaFieldIndex {
+  name: string;
+  type: string;
+}
+
+export interface SchemaField {
+  fields: SchemaField[];
+  indices: SchemaFieldIndex[];
+  name: string;
+  type: string;
+
 }

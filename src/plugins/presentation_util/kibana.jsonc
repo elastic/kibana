@@ -12,10 +12,9 @@
       "kibanaReact",
       "embeddable",
       "expressions",
-      "dataViews"
+      "dataViews",
+      "uiActions"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "extraPublicDirs": ["common"]
   }
 }
