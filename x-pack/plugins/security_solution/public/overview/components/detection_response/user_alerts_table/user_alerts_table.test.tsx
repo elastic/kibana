@@ -13,7 +13,6 @@ import { TestProviders } from '../../../../common/mock';
 import { parsedVulnerableUserAlertsResult } from './mock_data';
 import type { UseUserAlertsItems } from './use_user_alerts_items';
 import { UserAlertsTable } from './user_alerts_table';
-import { openAlertsFilter } from '../utils';
 
 const userName = 'crffn20qcs';
 const mockGetAppUrl = jest.fn();
@@ -27,12 +26,10 @@ jest.mock('../../../../common/lib/kibana/hooks', () => {
   };
 });
 
-const mockOpenTimelineWithFilters = jest.fn();
-jest.mock('../hooks/use_navigate_to_timeline', () => {
+const mockNavigateToAlertsPageWithFilters = jest.fn();
+jest.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
   return {
-    useNavigateToTimeline: () => ({
-      openTimelineWithFilters: mockOpenTimelineWithFilters,
-    }),
+    useNavigateToAlertsPageWithFilters: () => mockNavigateToAlertsPageWithFilters,
   };
 });
 
@@ -142,14 +139,8 @@ describe('UserAlertsTable', () => {
 
     fireEvent.click(getByTestId('userSeverityAlertsTable-totalAlertsLink'));
 
-    expect(mockOpenTimelineWithFilters).toHaveBeenCalledWith([
-      [
-        {
-          field: 'user.name',
-          value: userName,
-        },
-        openAlertsFilter,
-      ],
+    expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
+      { fieldName: 'user.name', selectedOptions: ['crffn20qcs'], title: 'Username' },
     ]);
   });
 
@@ -159,18 +150,13 @@ describe('UserAlertsTable', () => {
 
     fireEvent.click(getByTestId('userSeverityAlertsTable-criticalLink'));
 
-    expect(mockOpenTimelineWithFilters).toHaveBeenCalledWith([
-      [
-        {
-          field: 'user.name',
-          value: userName,
-        },
-        openAlertsFilter,
-        {
-          field: 'kibana.alert.severity',
-          value: 'critical',
-        },
-      ],
+    expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
+      { fieldName: 'user.name', selectedOptions: ['crffn20qcs'], title: 'Username' },
+      {
+        fieldName: 'kibana.alert.severity',
+        selectedOptions: ['critical'],
+        title: 'Severity',
+      },
     ]);
   });
 });
