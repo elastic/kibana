@@ -69,7 +69,7 @@ export function AddEnvironments({
   if (!canCreateJob) {
     return (
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         body={<>{ML_ERRORS.MISSING_WRITE_PRIVILEGES}</>}
       />
     );
@@ -136,7 +136,11 @@ export function AddEnvironments({
       </EuiFormRow>
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty aria-label="Cancel" onClick={onCancel}>
+          <EuiButtonEmpty
+            data-test-subj="apmAddEnvironmentsCancelButton"
+            aria-label="Cancel"
+            onClick={onCancel}
+          >
             {i18n.translate(
               'xpack.apm.settings.anomalyDetection.addEnvironments.cancelButtonText',
               {
@@ -147,6 +151,7 @@ export function AddEnvironments({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="apmAddEnvironmentsCreateJobsButton"
             isLoading={isSaving}
             isDisabled={isSaving || selectedOptions.length === 0}
             fill
