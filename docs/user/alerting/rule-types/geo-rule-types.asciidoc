@@ -33,7 +33,7 @@ Tracking containment rules have three clauses that define the condition to detec
 as well as two Kuery bars used to provide additional filtering context for each of the indices.
 
 [role="screenshot"]
-image::user/alerting/images/alert-types-tracking-containment-conditions.png[Define the condition to detect]
+image::user/alerting/images/alert-types-tracking-containment-conditions.png[Define the condition to detect,width=75%]
 
 Index (entity):: This clause requires an *index or data view*, a *time field* that will be used for the *time window*, and a *`geo_point` field* for tracking.
 When entity:: This clause specifies which crossing option to track. The values
@@ -53,4 +53,4 @@ A rule can be triggered either when a containment condition is met or when an en
 is no longer contained.
 
 [role="screenshot"]
-image::user/alerting/images/alert-types-tracking-containment-action-options.png[Action frequency options for an action]
+image::user/alerting/images/alert-types-tracking-containment-action-options.png[Action frequency options for an action,width=75%]
