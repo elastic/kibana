@@ -142,7 +142,7 @@ export const MissingSubfieldsCallout: React.FC = () => {
 
   return (
     <EuiCallOut
-      iconType="alert"
+      iconType="warning"
       color="warning"
       title={i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.schema.incompleteFields.title',
