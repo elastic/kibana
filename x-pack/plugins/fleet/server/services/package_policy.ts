@@ -616,20 +616,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     for (const packagePolicy of packagePolicies.saved_objects) {
-      appContextService.writeCustomAuditLog({
-        message: `User has accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
-        event: {
-          action: 'saved_object_find',
-          category: ['database'],
-          outcome: 'unknown',
-          type: ['access'],
-        },
-        kibana: {
-          saved_object: {
-            id: packagePolicy.id,
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          },
-        },
+      appContextService.writeCustomSoAuditLog({
+        action: 'find',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     }
 

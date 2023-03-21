@@ -287,6 +287,49 @@ class AppContextService {
 
     auditLogger.log(...args);
   }
+
+  /**
+   * Helper method for writing saved object related audit logs. Since Fleet
+   * uses an internal SO client to support its custom RBAC model around Fleet/Integrations
+   * permissions, we need to implement our own audit logging for saved objects that use the
+   * internal client. This helper reduces the boilerplate around audit logging in those cases.
+   *
+   * @example
+   * ```ts
+   * appContextService.writeCustomSoAuditLog({
+   *   action: 'find',
+   *   id: 'some-id-123',
+   *   savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE
+   * });
+   * ```
+   */
+  public writeCustomSoAuditLog({
+    action,
+    id,
+    savedObjectType,
+  }: {
+    action: 'find' | 'get' | 'create' | 'update' | 'delete';
+    id: string;
+    savedObjectType: string;
+  }) {
+    this.writeCustomAuditLog({
+      message: `User ${
+        action === 'find' || action === 'get' ? 'has accessed' : 'is accessing'
+      } ${savedObjectType} [id=${id}]`,
+      event: {
+        action: `saved_object_${action}`,
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id,
+          type: savedObjectType,
+        },
+      },
+    });
+  }
 }
 
 export const appContextService = new AppContextService();
