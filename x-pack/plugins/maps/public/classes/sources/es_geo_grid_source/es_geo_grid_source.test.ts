@@ -321,16 +321,17 @@ describe('ESGeoGridSource', () => {
         hasLabels: 'false',
         index: 'foo-*',
         renderAs: 'heatmap',
-        requestBody: "(foobar%3AES_DSL_PLACEHOLDER%2Cparams%3A('0'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'1'%3A('0'%3Asize%2C'1'%3A0)%2C'2'%3A('0'%3Afilter%2C'1'%3A!())%2C'3'%3A('0'%3Aquery)%2C'4'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'5'%3A('0'%3Aquery%2C'1'%3A(language%3AKQL%2Cquery%3A''))%2C'6'%3A('0'%3Aaggs%2C'1'%3A())))",
+        requestBody:
+          "(foobar%3AES_DSL_PLACEHOLDER%2Cparams%3A('0'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'1'%3A('0'%3Asize%2C'1'%3A0)%2C'2'%3A('0'%3Afilter%2C'1'%3A!())%2C'3'%3A('0'%3Aquery)%2C'4'%3A('0'%3Aindex%2C'1'%3A(fields%3A()))%2C'5'%3A('0'%3Aquery%2C'1'%3A(language%3AKQL%2Cquery%3A''))%2C'6'%3A('0'%3Aaggs%2C'1'%3A())))",
         token: '1234',
       });
     });
 
     it('getTileUrl should include savedObjectId when provided', async () => {
       const tileUrl = await mvtGeogridSource.getTileUrl(
-        { 
-          ...vectorSourceRequestMeta, 
-          savedObjectId: 'map1234'
+        {
+          ...vectorSourceRequestMeta,
+          savedObjectId: 'map1234',
         },
         '1234',
         false,
