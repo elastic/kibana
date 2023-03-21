@@ -33,32 +33,36 @@ export interface UpdateParams {
 /**
  * Container for the saved search state, allowing to load, update and persist the saved search
  * Can also be used to track changes to the saved search
+ * It centralizes functionality that was spread across the Discover main codebase
  */
 export interface DiscoverSavedSearchContainer {
   /**
-   * Get the current state of the saved search
+   * Get an BehaviorSubject which contains the current state of the current saved search
+   * All modifications are applied to this state
    */
-  getState: () => SavedSearch;
+  getCurrent$: () => BehaviorSubject<SavedSearch>;
   /**
    * Get the id of the current saved search
    */
   getId: () => string | undefined;
   /**
+   * Get an BehaviorSubject which contains the initial state of the current saved search
+   * This is set when a saved search is loaded or a new saved search is initialized
+   */
+  getInitial$: () => BehaviorSubject<SavedSearch>;
+  /**
    * Get the title of the current saved search
    */
   getTitle: () => string;
   /**
-   * Get an BehaviorSubject which contains the initial state of the current saved search
-   */
-  getInitial$: () => BehaviorSubject<SavedSearch>;
-  /**
-   * Get an BehaviorSubject which contains the current state of the current saved search
-   */
-  getCurrent$: () => BehaviorSubject<SavedSearch>;
-  /**
    * Get an BehaviorSubject containing the state if there have been changes to the initial state of the saved search
+   * Can be used to track if the saved search has been modified and displayed in the UI
    */
   getHasChanged$: () => BehaviorSubject<boolean>;
+  /**
+   * Get the current state of the saved search
+   */
+  getState: () => SavedSearch;
   /**
    * Load a saved search by the given id
    * Resets the initial and current state of the saved search
@@ -100,19 +104,14 @@ export function getSavedSearchContainer({
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = getEmptySavedSearch(services.data);
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
-  const savedSearchCurrent$ = new BehaviorSubject(initialSavedSearch);
+  const savedSearchCurrent$ = new BehaviorSubject(copySavedSearch(initialSavedSearch));
   const hasChanged$ = new BehaviorSubject(false);
-  const set = (nextSavedSearch: SavedSearch) => {
-    addLog('[savedSearch] set', nextSavedSearch);
+  const set = (savedSearch: SavedSearch) => {
+    addLog('[savedSearch] set', savedSearch);
     hasChanged$.next(false);
-    savedSearchCurrent$.next(nextSavedSearch);
-    // due to the stateful nature of searchSource it has to be copied to allow independent state transitions
-    const persistedSavedSearch = {
-      ...nextSavedSearch,
-      ...{ searchSource: nextSavedSearch.searchSource.createCopy() },
-    };
-    savedSearchInitial$.next(persistedSavedSearch);
-    return nextSavedSearch;
+    savedSearchCurrent$.next(savedSearch);
+    savedSearchInitial$.next(copySavedSearch(savedSearch));
+    return savedSearch;
   };
   const getState = () => savedSearchCurrent$.getValue();
   const getInitial$ = () => savedSearchInitial$;
@@ -211,17 +210,25 @@ export function getSavedSearchContainer({
   };
 
   return {
-    getState,
     getCurrent$,
     getHasChanged$,
     getId,
     getInitial$,
+    getState,
     getTitle,
     load,
     new: newSavedSearch,
     persist,
     set,
     update,
+  };
+}
+
+export function copySavedSearch(savedSearch: SavedSearch): SavedSearch {
+  // due to the stateful nature of searchSource it has to be copied separately
+  return {
+    ...savedSearch,
+    ...{ searchSource: savedSearch.searchSource.createCopy() },
   };
 }
 
