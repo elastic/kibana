@@ -8,17 +8,14 @@
 import { omit, cloneDeep } from 'lodash';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
-// import { RuleTaskState, RawAlertInstance } from '@kbn/alerting-plugin/common';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type RuleTaskState = any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type RawAlertInstance = any;
+import type {
+  RuleTaskState,
+  WrappedLifecycleRuleState,
+  RawAlertInstance,
+} from '@kbn/alerting-state-types';
 
 import { getMigrations } from './migrations';
 import { SerializedConcreteTaskInstance, TaskStatus } from '../task';
-// import { WrappedLifecycleRuleState } from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_executor';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type WrappedLifecycleRuleState<T> = any;
 
 type RawAlertInstances = Record<string, RawAlertInstance>;
 
@@ -79,7 +76,7 @@ function checkMetaInRuleTaskState(
   original: RuleTaskState,
   wrappedUUIDs?: Map<string, string>
 ) {
-  // delete the uuids from here to compare to expected
+  // delete the uuids from actual (a copy of it) to compare to original
   const copy = cloneDeep(actual);
 
   // make sure every alertInstance element has a UUID, and that's the only change
@@ -94,6 +91,7 @@ function checkMetaInRuleTaskState(
     delete copy?.alertRecoveredInstances?.[id].meta?.uuid;
   }
 
+  // after deleting the uuids, should be same as the original
   expect(copy).toStrictEqual(original);
 
   function checkAlert(id: string, alert: RawAlertInstance, instances?: RawAlertInstances) {
@@ -113,13 +111,11 @@ function checkMetaInRuleTaskStateWrapped(actual: RuleTaskState, expected: RuleTa
 
   const wrappedUUIDs = new Map<string, string>();
   for (const [id, alert] of Object.entries(wrappedState.trackedAlerts || {})) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    wrappedUUIDs.set(id, (alert as any).alertUuid);
+    wrappedUUIDs.set(id, alert.alertUuid);
   }
 
   for (const [id, alert] of Object.entries(wrappedState.trackedAlertsRecovered || {})) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    wrappedUUIDs.set(id, (alert as any).alertUuid);
+    wrappedUUIDs.set(id, alert.alertUuid);
   }
 
   checkMetaInRuleTaskState(actual, expected, wrappedUUIDs);
@@ -218,7 +214,7 @@ const RuleStateIndexThreshold: RuleTaskState = {
   // This cast is needed as RuleTaskState defines dates as Date, but
   // they are stored as strings.  There is no "serialized" version
   // of this, it's an io-ts generated type.  You can check the rest
-  // of the types by deleting the "as any as ..." bits below.
+  // of the types by deleting the "as unknown as ..." bits below.
 } as unknown as RuleTaskState;
 
 const TaskDocMetricThreshold = {

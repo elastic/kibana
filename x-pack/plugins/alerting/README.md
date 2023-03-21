@@ -791,6 +791,8 @@ When an alert executes, the first argument is the `group` of actions to execute 
 
 The templating engine is [mustache]. General definition for the [mustache variable] is a double-brace {{}}. All variables are HTML-escaped by default and if there is a requirement to render unescaped HTML, it should be applied with the triple mustache: `{{{name}}}`. Also, `&` can be used to unescape a variable.
 
+The complete list of variables available has grown, and difficult to keep in synch here as well, so refer to the published documentation for the variables available: https://www.elastic.co/guide/en/kibana/master/rule-action-variables.html
+
 ### Examples
 
 The following code would be within a rule type. As you can see `cpuUsage` will replace the state of the alert and `server` is the context for the alert to execute. The difference between the two is that `cpuUsage` will be accessible at the next execution.

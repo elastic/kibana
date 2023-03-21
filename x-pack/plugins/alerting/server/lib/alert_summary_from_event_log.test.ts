@@ -709,7 +709,7 @@ export class EventsFactory {
   addActiveAlert(
     alertId: string,
     actionGroupId: string | undefined,
-    uuid: string | undefined,
+    uuid: string,
     flapping = false
   ): EventsFactory {
     const kibanaAlerting = actionGroupId
@@ -726,7 +726,7 @@ export class EventsFactory {
     return this;
   }
 
-  addNewAlert(alertId: string, uuid?: string): EventsFactory {
+  addNewAlert(alertId: string, uuid: string): EventsFactory {
     this.events.push({
       '@timestamp': this.date,
       event: {
@@ -738,7 +738,7 @@ export class EventsFactory {
     return this;
   }
 
-  addRecoveredAlert(alertId: string, uuid?: string): EventsFactory {
+  addRecoveredAlert(alertId: string, uuid: string): EventsFactory {
     this.events.push({
       '@timestamp': this.date,
       event: {
@@ -750,7 +750,7 @@ export class EventsFactory {
     return this;
   }
 
-  addLegacyResolvedAlert(alertId: string, uuid?: string): EventsFactory {
+  addLegacyResolvedAlert(alertId: string, uuid: string): EventsFactory {
     this.events.push({
       '@timestamp': this.date,
       event: {

@@ -14,21 +14,11 @@ import {
   SavedObjectsUtils,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-
-// import { RuleTaskState } from '../../../alerting/common';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type RuleTaskState = any;
-
-// import {
-//   TrackedLifecycleAlertState,
-//   WrappedLifecycleRuleState,
-//   // eslint-disable-next-line @kbn/imports/uniform_imports
-// } from '../../../rule_registry/server/utils/create_lifecycle_executor';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type TrackedLifecycleAlertState = any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type WrappedLifecycleRuleState<T> = any;
+import type {
+  RuleTaskState,
+  TrackedLifecycleAlertState,
+  WrappedLifecycleRuleState,
+} from '@kbn/alerting-state-types';
 
 import { REMOVED_TYPES } from '../task_type_dictionary';
 import { SerializedConcreteTaskInstance, TaskStatus } from '../task';
@@ -269,11 +259,12 @@ function addAlertUUIDsToAlerts(
 ): void {
   if (!alerts) return;
 
-  for (const id of Object.keys(alerts)) {
-    const alert = alerts[id];
+  for (const [id, alert] of Object.entries(alerts)) {
     if (!alert.meta) alert.meta = {};
 
+    // get alert info from tracked map (rule registry)
     const trackedAlert = alertToTrackedMap.get(id);
+    // get uuid for current alert, if we've already seen it
     const recentUUID = currentUUIDs.get(id);
 
     if (trackedAlert?.alertUuid) {
@@ -298,19 +289,16 @@ function getAlertsToTrackedMap(
   if (!isRuleRegistryWrappedState(ruleState)) return result;
 
   return new Map([
-    ...Object.entries(
-      (ruleState.trackedAlerts as Record<string, TrackedLifecycleAlertState>) || {}
-    ),
-    ...Object.entries(
-      (ruleState.trackedAlertsRecovered as Record<string, TrackedLifecycleAlertState>) || {}
-    ),
+    ...Object.entries(ruleState.trackedAlerts || {}),
+    ...Object.entries(ruleState.trackedAlertsRecovered || {}),
   ]);
 }
 
 function isRuleRegistryWrappedState(
   ruleState: Record<string, unknown>
 ): ruleState is WrappedLifecycleRuleState<never> {
-  // specifically not checking trackedAlertsRecovered since it's
-  // "new", possibly may not be set?
-  return ruleState.wrapped != null && ruleState.trackedAlerts != null;
+  return (
+    ruleState.wrapped != null &&
+    (ruleState.trackedAlerts != null || ruleState.trackedAlertsRecovered != null)
+  );
 }

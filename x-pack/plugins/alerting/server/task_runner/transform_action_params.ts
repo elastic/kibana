@@ -24,7 +24,7 @@ interface TransformActionParamsOptions {
   spaceId: string;
   tags?: string[];
   alertInstanceId: string;
-  alertUuid?: string;
+  alertUuid: string;
   alertActionGroup: string;
   alertActionGroupName: string;
   actionParams: RuleActionParams;

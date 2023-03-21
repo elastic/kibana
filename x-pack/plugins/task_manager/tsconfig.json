@@ -9,6 +9,7 @@
     "server/**/*.json",
   ],
   "kbn_references": [
+    "@kbn/alerting-state-types",
     "@kbn/core",
     "@kbn/usage-collection-plugin",
     "@kbn/config-schema",

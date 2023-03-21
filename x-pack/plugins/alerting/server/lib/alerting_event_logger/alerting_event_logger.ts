@@ -45,7 +45,7 @@ interface DoneOpts {
 interface AlertOpts {
   action: string;
   id: string;
-  uuid?: string;
+  uuid: string;
   message: string;
   group?: string;
   state?: AlertInstanceState;

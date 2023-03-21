@@ -460,7 +460,7 @@ describe('transformActionParams', () => {
   test('rule alert variables are passed to templates', () => {
     const actionParams = {
       message:
-        'Value "{{alert.id}}", "{{alert.actionGroup}}" and "{{alert.actionGroupName}}" exist',
+        'Value "{{alert.id}}", "{{alert.actionGroup}}", "{{alert.uuid}}" and "{{alert.actionGroupName}}" exist',
     };
     const result = transformActionParams({
       actionsPlugin,
@@ -483,7 +483,7 @@ describe('transformActionParams', () => {
     });
     expect(result).toMatchInlineSnapshot(`
     Object {
-      "message": "Value \\"2\\", \\"action-group\\" and \\"Action Group\\" exist",
+      "message": "Value \\"2\\", \\"action-group\\", \\"uuid-1\\" and \\"Action Group\\" exist",
     }
   `);
   });
