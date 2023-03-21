@@ -20,6 +20,21 @@ import { excludeUnusedTypesQuery } from './core';
 import { getTempIndexName } from './model/helpers';
 import type { TypeIndexMap } from './kibana_migrator_constants';
 
+export interface CreateInitialStateParams {
+  kibanaVersion: string;
+  waitForMigrationCompletion: boolean;
+  mustRelocateDocuments: boolean;
+  typeIndexMap: TypeIndexMap;
+  targetMappings: IndexMapping;
+  preMigrationScript?: string;
+  migrationVersionPerType: SavedObjectsMigrationVersion;
+  indexPrefix: string;
+  migrationsConfig: SavedObjectsMigrationConfigType;
+  typeRegistry: ISavedObjectTypeRegistry;
+  docLinks: DocLinksServiceStart;
+  logger: Logger;
+}
+
 /**
  * Construct the initial state for the model
  */
@@ -36,20 +51,7 @@ export const createInitialState = ({
   typeRegistry,
   docLinks,
   logger,
-}: {
-  kibanaVersion: string;
-  waitForMigrationCompletion: boolean;
-  mustRelocateDocuments: boolean;
-  typeIndexMap: TypeIndexMap;
-  targetMappings: IndexMapping;
-  preMigrationScript?: string;
-  migrationVersionPerType: SavedObjectsMigrationVersion;
-  indexPrefix: string;
-  migrationsConfig: SavedObjectsMigrationConfigType;
-  typeRegistry: ISavedObjectTypeRegistry;
-  docLinks: DocLinksServiceStart;
-  logger: Logger;
-}): InitState => {
+}: CreateInitialStateParams): InitState => {
   const outdatedDocumentsQuery = {
     bool: {
       should: Object.entries(migrationVersionPerType).map(([type, latestVersion]) => ({
