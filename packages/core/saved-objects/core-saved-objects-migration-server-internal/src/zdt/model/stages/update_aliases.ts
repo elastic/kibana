@@ -11,7 +11,7 @@ import { throwBadResponse } from '../../../model/helpers';
 import { isTypeof } from '../../actions';
 import type { ModelStage } from '../types';
 
-export const updateAliases: ModelStage<'UPDATE_ALIASES', 'DONE' | 'FATAL'> = (
+export const updateAliases: ModelStage<'UPDATE_ALIASES', 'INDEX_STATE_UPDATE_DONE' | 'FATAL'> = (
   state,
   res,
   context
@@ -41,6 +41,6 @@ export const updateAliases: ModelStage<'UPDATE_ALIASES', 'DONE' | 'FATAL'> = (
 
   return {
     ...state,
-    controlState: 'DONE',
+    controlState: 'INDEX_STATE_UPDATE_DONE',
   };
 };

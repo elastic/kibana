@@ -8,12 +8,11 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import JSON5 from 'json5';
-import { LogRecord } from '@kbn/logging';
+import '../jest_matchers';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
-import { delay } from '../test_utils';
-import { getFooType, getBarType } from './base_types.fixtures';
+import { delay, parseLogFile } from '../test_utils';
+import { getBaseMigratorParams, getFooType, getBarType } from './base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'create_index.test.log');
 
@@ -47,15 +46,9 @@ describe('ZDT upgrades - running on a fresh cluster', () => {
     const barType = getBarType();
 
     const { runMigrations, client } = await getKibanaMigratorTestKit({
-      kibanaIndex: '.kibana',
-      kibanaVersion: '8.7.0',
+      ...getBaseMigratorParams(),
       logFilePath,
       types: [fooType, barType],
-      settings: {
-        migrations: {
-          algorithm: 'zdt',
-        },
-      },
     });
 
     const result = await runMigrations();
@@ -95,21 +88,16 @@ describe('ZDT upgrades - running on a fresh cluster', () => {
         foo: 2,
         bar: 1,
       },
+      migrationState: expect.objectContaining({
+        convertingDocuments: false,
+      }),
     });
 
-    const logFileContent = await fs.readFile(logFilePath, 'utf-8');
-    const records = logFileContent
-      .split('\n')
-      .filter(Boolean)
-      .map((str) => JSON5.parse(str)) as LogRecord[];
+    const records = await parseLogFile(logFilePath);
 
-    const expectLogsContains = (messagePrefix: string) => {
-      expect(records.find((entry) => entry.message.includes(messagePrefix))).toBeDefined();
-    };
-
-    expectLogsContains('INIT -> CREATE_TARGET_INDEX');
-    expectLogsContains('CREATE_TARGET_INDEX -> UPDATE_ALIASES');
-    expectLogsContains('UPDATE_ALIASES -> DONE');
-    expectLogsContains('Migration completed');
+    expect(records).toContainLogEntry('INIT -> CREATE_TARGET_INDEX');
+    expect(records).toContainLogEntry('CREATE_TARGET_INDEX -> UPDATE_ALIASES');
+    expect(records).toContainLogEntry('UPDATE_ALIASES -> INDEX_STATE_UPDATE_DONE');
+    expect(records).toContainLogEntry('Migration completed');
   });
 });

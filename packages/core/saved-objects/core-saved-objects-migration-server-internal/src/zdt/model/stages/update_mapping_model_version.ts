@@ -13,7 +13,7 @@ import { setMetaMappingMigrationComplete } from '../../utils';
 
 export const updateMappingModelVersion: ModelStage<
   'UPDATE_MAPPING_MODEL_VERSIONS',
-  'INDEX_STATE_UPDATE_DONE' | 'FATAL'
+  'UPDATE_ALIASES' | 'INDEX_STATE_UPDATE_DONE' | 'FATAL'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     throwBadResponse(state, res as never);
@@ -21,7 +21,7 @@ export const updateMappingModelVersion: ModelStage<
 
   return {
     ...state,
-    controlState: 'INDEX_STATE_UPDATE_DONE',
+    controlState: state.aliasActions.length ? 'UPDATE_ALIASES' : 'INDEX_STATE_UPDATE_DONE',
     currentIndexMeta: setMetaMappingMigrationComplete({
       meta: state.currentIndexMeta,
       versions: context.typeModelVersions,

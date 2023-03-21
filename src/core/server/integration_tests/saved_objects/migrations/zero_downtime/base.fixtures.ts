@@ -8,6 +8,20 @@
 
 import { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { createType } from '../test_utils';
+import type { KibanaMigratorTestKitParams } from '../kibana_migrator_test_kit';
+
+export const getBaseMigratorParams = (): KibanaMigratorTestKitParams => ({
+  kibanaIndex: '.kibana',
+  kibanaVersion: '8.7.0',
+  settings: {
+    migrations: {
+      algorithm: 'zdt',
+      zdt: {
+        metaPickupSyncDelaySec: 5,
+      },
+    },
+  },
+});
 
 export const dummyModelVersion: SavedObjectsModelVersion = {
   modelChange: {
