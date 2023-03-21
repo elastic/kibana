@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { FilterQuery, MetricExpressionParams } from '../../../common/alerting/metrics';
+import {
+  CustomMetricExpressionParams,
+  FilterQuery,
+  MetricExpressionParams,
+  NonCountMetricExpressionParams,
+} from '../../../common/alerting/metrics';
 import { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptions } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
@@ -18,10 +23,10 @@ export type MetricExpression = Omit<
   MetricExpressionParams,
   'metric' | 'timeSize' | 'timeUnit' | 'metrics' | 'equation' | 'customMetrics'
 > & {
-  metric?: MetricExpressionParams['metric'];
-  customMetrics?: MetricExpressionParams['customMetrics'];
-  label?: MetricExpressionParams['label'];
-  equation?: MetricExpressionParams['equation'];
+  metric?: NonCountMetricExpressionParams['metric'];
+  customMetrics?: CustomMetricExpressionParams['customMetrics'];
+  label?: CustomMetricExpressionParams['label'];
+  equation?: CustomMetricExpressionParams['equation'];
   timeSize?: MetricExpressionParams['timeSize'];
   timeUnit?: MetricExpressionParams['timeUnit'];
 };
@@ -52,11 +57,6 @@ export interface ExpressionChartRow {
 }
 
 export type ExpressionChartSeries = ExpressionChartRow[][];
-
-export interface ExpressionChartData {
-  id: string;
-  series: ExpressionChartSeries;
-}
 
 export interface AlertParams {
   criteria: MetricExpression[];
