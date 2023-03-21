@@ -13,7 +13,11 @@ import { useSyntheticsRefreshContext } from '../../../contexts';
 export function RefreshButton() {
   const { refreshApp } = useSyntheticsRefreshContext();
   return (
-    <EuiButton iconType="refresh" onClick={() => refreshApp()}>
+    <EuiButton
+      data-test-subj="syntheticsRefreshButtonButton"
+      iconType="refresh"
+      onClick={() => refreshApp()}
+    >
       {REFRESH_LABEL}
     </EuiButton>
   );

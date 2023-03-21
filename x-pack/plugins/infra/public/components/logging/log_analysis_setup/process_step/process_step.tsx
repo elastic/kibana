@@ -81,7 +81,7 @@ export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
             </EuiCallOut>
           ))}
           <EuiSpacer />
-          <EuiButton fill onClick={cleanUpAndSetUp}>
+          <EuiButton data-test-subj="infraProcessStepTryAgainButton" fill onClick={cleanUpAndSetUp}>
             <FormattedMessage
               id="xpack.infra.analysisSetup.steps.setupProcess.tryAgainButton"
               defaultMessage="Try again"
@@ -95,7 +95,7 @@ export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
             defaultMessage="The ML jobs have been set up successfully"
           />
           <EuiSpacer />
-          <EuiButton fill onClick={viewResults}>
+          <EuiButton data-test-subj="infraProcessStepViewResultsButton" fill onClick={viewResults}>
             <FormattedMessage
               id="xpack.infra.analysisSetup.steps.setupProcess.viewResultsButton"
               defaultMessage="View results"
