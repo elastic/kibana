@@ -99,7 +99,10 @@ const DataViewsInlineHelpMessage = React.memo(() => {
       defaultMessage="Data views are shared among apps in the Kibana space and can be managed via the {dataViewsManagementLink}. A single data view can target multiple indices."
       values={{
         dataViewsManagementLink: (
-          <EuiLink {...dataViewsManagementLinkProps}>
+          <EuiLink
+            data-test-subj="infraDataViewsInlineHelpMessageDataViewsManagementScreenLink"
+            {...dataViewsManagementLinkProps}
+          >
             <FormattedMessage
               id="xpack.infra.logSourceConfiguration.dataViewsManagementLinkText"
               defaultMessage="data views management screen"

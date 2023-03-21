@@ -49,6 +49,8 @@ export const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
 export const CLOUDBEAT_GCP = 'cloudbeat/cis_gcp';
 export const CLOUDBEAT_AZURE = 'cloudbeat/cis_azure';
 export const CLOUDBEAT_VULN_MGMT_AWS = 'cloudbeat/vuln_mgmt_aws';
+export const CLOUDBEAT_VULN_MGMT_GCP = 'cloudbeat/vuln_mgmt_gcp';
+export const CLOUDBEAT_VULN_MGMT_AZURE = 'cloudbeat/vuln_mgmt_azure';
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';
 export const VULN_MGMT_POLICY_TEMPLATE = 'vuln_mgmt';
@@ -64,4 +66,6 @@ export const SUPPORTED_CLOUDBEAT_INPUTS = [
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
   CLOUDBEAT_VULN_MGMT_AWS,
+  CLOUDBEAT_VULN_MGMT_GCP,
+  CLOUDBEAT_VULN_MGMT_AZURE,
 ] as const;

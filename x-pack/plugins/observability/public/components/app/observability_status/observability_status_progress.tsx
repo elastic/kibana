@@ -68,7 +68,11 @@ export function ObservabilityStatusProgress({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} direction="row" alignItems="center">
               <EuiFlexItem>
-                <EuiButtonEmpty size="s" onClick={dismissGuidedSetup}>
+                <EuiButtonEmpty
+                  data-test-subj="o11yObservabilityStatusProgressDismissButton"
+                  size="s"
+                  onClick={dismissGuidedSetup}
+                >
                   <FormattedMessage
                     id="xpack.observability.status.progressBarDismiss"
                     defaultMessage="Dismiss"
@@ -76,7 +80,11 @@ export function ObservabilityStatusProgress({
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButton size="s" onClick={showDetails}>
+                <EuiButton
+                  data-test-subj="o11yObservabilityStatusProgressViewDetailsButton"
+                  size="s"
+                  onClick={showDetails}
+                >
                   <FormattedMessage
                     id="xpack.observability.status.progressBarViewDetails"
                     defaultMessage="View details"
