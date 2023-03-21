@@ -30,7 +30,7 @@ export const FunctionHelpPopover: FC = memo(() => {
 
   const helpButton = <EuiButtonIcon onClick={onHelpClick} iconType="documentation" />;
 
-  const columnsSidebar = [
+  const columns = [
     {
       field: 'function',
       name: 'Function',
@@ -230,19 +230,20 @@ export const FunctionHelpPopover: FC = memo(() => {
       initialFocus="#mlAdFunctionsHelpTableId"
     >
       <EuiPopoverTitle paddingSize="s">
-        {i18n.translate('xpack.ml.anomalyDetection.functions.popoverTitle', {
-          defaultMessage: 'Function reference',
-        })}
+                <FormattedMessage
+          id="xpack.ml.anomalyDetection.functions.popoverTitle"
+          defaultMessage="Function reference"
+        />
       </EuiPopoverTitle>
       <EuiPanel
         className="eui-yScroll"
-        style={{ maxHeight: '40vh' }}
+        css={{ maxHeight: '40vh' }}
         color="transparent"
         paddingSize="s"
       >
         <EuiBasicTable
           id="mlAdFunctionsHelpTableId"
-          style={{ width: 400 }}
+          css={{ width: 400 }}
           tableCaption={i18n.translate('xpack.ml.anomalyDetection.functions.tableTitle', {
             defaultMessage: 'Description of functions',
           })}
@@ -255,18 +256,23 @@ export const FunctionHelpPopover: FC = memo(() => {
       </EuiPanel>
       <EuiPanel color="transparent" paddingSize="s">
         <EuiText color="subdued" size="xs">
-          <p>
-            {i18n.translate('xpack.ml.anomalyDetection.functions.learnMoreText', {
-              defaultMessage: 'Learn more about',
-            })}
-            &nbsp;
-            <EuiLink href={docLinks.links.ml.anomalyDetectionFunctions}>
-              <FormattedMessage
-                id="xpack.ml.anomalyDetection.functions.learnMoreLink"
-                defaultMessage="functions."
-              />
-            </EuiLink>
-          </p>
+           <FormattedMessage
+            id="xpack.ml.anomalyDetection.functions.learnMoreText"
+            defaultMessage="Learn more about {link}"
+            values={{
+              link: (
+                <EuiLink
+                  href={docLinks.links.ml.anomalyDetectionFunctions}
+                  target="_blank"
+                  external
+                >
+                  {i18n.translate('pack.ml.anomalyDetection.functions.learnMoreLink', {
+                    defaultMessage: 'functions',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
         </EuiText>
       </EuiPanel>
     </EuiPopover>
