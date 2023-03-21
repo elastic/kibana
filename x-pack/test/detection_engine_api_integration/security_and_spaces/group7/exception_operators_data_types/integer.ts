@@ -22,7 +22,6 @@ import {
   deleteSignalsIndex,
   getRuleForSignalTesting,
   getSignalsById,
-  waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
 } from '../../../utils';
 

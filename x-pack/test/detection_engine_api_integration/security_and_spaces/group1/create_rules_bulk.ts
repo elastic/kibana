@@ -25,7 +25,7 @@ import {
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send([simpleRule])
           .expect(200);
 
-        await waitForRuleSuccessOrStatus(supertest, log, body[0].id);
+        await waitForRuleSuccess({ supertest, log, id: body[0].id });
       });
 
       it('should create a single rule without a rule_id', async () => {
