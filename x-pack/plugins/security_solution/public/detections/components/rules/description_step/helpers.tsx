@@ -545,7 +545,7 @@ export const buildAlertSuppressionDescription = (
       />
       {!license.isAtLeast(minimumLicenseForSuppression) && (
         <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
-          <EuiIcon type={'alert'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
+          <EuiIcon type={'warning'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
         </EuiToolTip>
       )}
     </>
@@ -579,7 +579,7 @@ export const buildAlertSuppressionWindowDescription = (
       />
       {!license.isAtLeast(minimumLicenseForSuppression) && (
         <EuiToolTip position="top" content={i18n.ALERT_SUPPRESSION_INSUFFICIENT_LICENSE}>
-          <EuiIcon type={'alert'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
+          <EuiIcon type={'warning'} size="l" color="#BD271E" style={{ marginLeft: '8px' }} />
         </EuiToolTip>
       )}
     </>

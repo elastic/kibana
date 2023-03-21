@@ -11,13 +11,19 @@ export const FILTER_GROUP_CLEAR = '[data-test-subj="filter-group__clear"]';
 
 export const CONTROL_FRAMES = '[data-test-subj="control-frame"]';
 
+export const CONTROL_FRAME_TITLE = '[data-test-subj="control-frame-title"]';
+
+export const CONTROL_FRAME_DRAG_HANDLE = '.controlFrame__dragHandle';
+
 export const OPTION_LIST_LABELS = '.controlFrame__labelToolTip';
 
-export const OPTION_LIST_VALUES = '.euiFilterButton__textShift';
+export const OPTION_LIST_VALUES = (idx: number) => `[data-test-subj="optionsList-control-${idx}"]`;
 
 export const OPTION_LIST_NUMBER_OFF = '.euiFilterButton__notification';
 
 export const OPTION_LISTS_LOADING = '.optionsList--filterBtnWrapper .euiLoadingSpinner';
+
+export const OPTION_LISTS_EXISTS = '[data-test-subj="optionsList-control-selection-exists"]';
 
 export const OPTION_LIST_ACTIVE_CLEAR_SELECTION =
   '[data-test-subj="optionsList-control-clear-all-selections"]';
@@ -38,3 +44,37 @@ export const DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU = '[data-test-subj="filter
 
 export const DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON =
   '[data-test-subj="filter-group__context--reset"]';
+
+export const FILTER_GROUP_CONTEXT_EDIT_CONTROLS = '[data-test-subj="filter_group__context--edit"]';
+
+export const FILTER_GROUP_CONTEXT_SAVE_CONTROLS = '[data-test-subj="filter_group__context--save"]';
+
+export const FILTER_GROUP_ADD_CONTROL = '[data-test-subj="filter-group__add-control"]';
+
+export const FILTER_GROUP_SAVE_CHANGES = '[data-test-subj="filter-group__save"]';
+
+export const FILTER_GROUP_DISCARD_CHANGES = '[data-test-subj="filter-group__discard"]';
+
+export const FILTER_GROUP_SAVE_CHANGES_POPOVER = '[data-test-subj="filter-group__save-popover"]';
+
+export const FILTER_GROUP_EDIT_CONTROLS_PANEL = '[data-test-subj="control-editor-flyout"]';
+
+export const FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS = {
+  FIELD_SEARCH: '[data-test-subj="field-search-input"]',
+  FIELD_PICKER: (fieldName: string) => `[data-test-subj="field-picker-select-${fieldName}"]`,
+  FIELD_LABEL: '[data-test-subj="control-editor-title-input"]',
+  SAVE: '[data-test-subj="control-editor-save"]',
+};
+
+export const FILTER_GROUP_CONTROL_ACTION_DELETE = (idx: number) => {
+  return `[data-test-subj="control-action-${idx}-delete"]`;
+};
+
+export const FILTER_GROUP_CONTROL_ACTION_EDIT = (idx: number) => {
+  return `[data-test-subj="control-action-${idx}-edit"]`;
+};
+
+export const FILTER_GROUP_CONTROL_CONFIRM_DIALOG = `[data-test-subj="confirmModalTitleText"]`;
+export const FILTER_GROUP_CONTROL_CONFIRM_BTN = `[data-test-subj="confirmModalConfirmButton"]`;
+
+export const FILTER_GROUP_CHANGED_BANNER = `[data-test-subj="filter-group--changed-banner"]`;

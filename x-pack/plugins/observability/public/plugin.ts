@@ -63,9 +63,6 @@ import { registerObservabilityRuleTypes } from './rules/register_observability_r
 export interface ConfigSchema {
   unsafe: {
     alertDetails: {
-      apm: {
-        enabled: boolean;
-      };
       metrics: {
         enabled: boolean;
       };
@@ -338,13 +335,14 @@ export class Plugin
     });
 
     const getAsyncO11yAlertsTableConfiguration = async () => {
-      const { getO11yAlertsTableConfiguration } = await import(
-        './config/register_alerts_table_configuration'
+      const { getAlertsTableConfiguration } = await import(
+        './components/alerts_table/get_alerts_table_configuration'
       );
-      return getO11yAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
+      return getAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
     };
 
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
+
     getAsyncO11yAlertsTableConfiguration().then((alertsTableConfig) => {
       alertsTableConfigurationRegistry.register(alertsTableConfig);
     });

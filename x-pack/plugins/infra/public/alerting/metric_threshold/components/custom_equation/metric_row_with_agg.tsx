@@ -102,6 +102,7 @@ export const MetricRowWithAgg = ({
             isInvalid={isAggInvalid}
           >
             <EuiSelect
+              data-test-subj="infraMetricRowWithAggSelect"
               compressed
               options={aggOptions}
               value={aggType}

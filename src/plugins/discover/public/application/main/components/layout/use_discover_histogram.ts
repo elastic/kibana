@@ -16,7 +16,7 @@ import {
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { AggregateQuery, Query, isOfAggregateQueryType } from '@kbn/es-query';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import { distinctUntilChanged, map, Observable } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
@@ -250,12 +250,17 @@ export const useDiscoverHistogram = ({
    * Total hits
    */
 
+  const setTotalHitsError = useMemo(
+    () => sendErrorTo(savedSearchData$.totalHits$),
+    [savedSearchData$.totalHits$]
+  );
+
   useEffect(() => {
     const subscription = createTotalHitsObservable(unifiedHistogram?.state$)?.subscribe(
       ({ status, result }) => {
         if (result instanceof Error) {
-          // Display the error and set totalHits$ to an error state
-          sendErrorTo(services.data, savedSearchData$.totalHits$)(result);
+          // Set totalHits$ to an error state
+          setTotalHitsError(result);
           return;
         }
 
@@ -289,11 +294,12 @@ export const useDiscoverHistogram = ({
       subscription?.unsubscribe();
     };
   }, [
-    isPlainRecord,
     savedSearchData$.main$,
     savedSearchData$.totalHits$,
     services.data,
+    setTotalHitsError,
     unifiedHistogram,
+    isPlainRecord,
   ]);
 
   /**
