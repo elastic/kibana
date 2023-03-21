@@ -25,7 +25,6 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
 import { HasDataContextProvider } from '../context/has_data_context';
 import { PluginContext } from '../context/plugin_context';
-import { useRouteParams } from '../hooks/use_route_params';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { routes } from '../routes';
 import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
@@ -38,8 +37,7 @@ function App() {
           const path = key as keyof typeof routes;
           const { handler, exact } = routes[path];
           const Wrapper = () => {
-            const params = useRouteParams(path);
-            return handler(params);
+            return handler();
           };
           return <Route key={path} path={path} exact={exact} component={Wrapper} />;
         })}

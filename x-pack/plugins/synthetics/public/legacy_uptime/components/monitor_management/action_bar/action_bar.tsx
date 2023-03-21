@@ -136,6 +136,7 @@ export const ActionBar = ({
     <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          data-test-subj="syntheticsActionBarButton"
           color="ghost"
           size="s"
           href={`${basePath}/app/uptime/${MONITOR_MANAGEMENT_ROUTE}/all`}
@@ -213,6 +214,7 @@ export const ActionBar = ({
 
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="syntheticsActionBarButton"
                 color="primary"
                 fill
                 size="s"

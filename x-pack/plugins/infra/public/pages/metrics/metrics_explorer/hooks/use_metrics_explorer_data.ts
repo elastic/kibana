@@ -50,16 +50,13 @@ export function useMetricsExplorerData(
       createPromise: () => {
         setLoading(true);
         if (!from || !to) {
-          return Promise.reject(new Error('Unalble to parse timerange'));
+          return Promise.reject(new Error('Unable to parse timerange'));
         }
         if (!fetchFn) {
           return Promise.reject(new Error('HTTP service is unavailable'));
         }
         if (!source) {
           return Promise.reject(new Error('Source is unavailable'));
-        }
-        if (!fetchFn) {
-          return Promise.reject(new Error('HTTP service is unavailable'));
         }
 
         return fetchFn('/api/infra/metrics_explorer', {

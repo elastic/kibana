@@ -11,6 +11,7 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import React, { useCallback } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataTableRecord } from '../../../../types';
@@ -20,6 +21,8 @@ import { DiscoverStateContainer } from '../../services/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
+import { ErrorCallout } from '../../../../components/common/error_callout';
+import { useDataState } from '../../hooks/use_data_state';
 
 export interface DiscoverMainContentProps {
   dataView: DataView;
@@ -65,6 +68,8 @@ export const DiscoverMainContent = ({
     [trackUiMetric, stateContainer]
   );
 
+  const dataState = useDataState(stateContainer.dataState.data$.main$);
+
   return (
     <EuiFlexGroup
       className="eui-fullHeight"
@@ -77,6 +82,16 @@ export const DiscoverMainContent = ({
           <EuiHorizontalRule margin="none" />
           <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
         </EuiFlexItem>
+      )}
+      {dataState.error && (
+        <ErrorCallout
+          title={i18n.translate('discover.documentsErrorTitle', {
+            defaultMessage: 'Search error',
+          })}
+          error={dataState.error}
+          inline
+          data-test-subj="discoverMainError"
+        />
       )}
       {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
         <DiscoverDocuments

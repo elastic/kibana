@@ -34,7 +34,11 @@ export const shouldBeExcluded = (fieldName: string) => {
   );
 };
 
-export const fetchDurationFieldCandidates = async ({
+export interface DurationFieldCandidatesResponse {
+  fieldCandidates: string[];
+}
+
+export async function fetchDurationFieldCandidates({
   apmEventClient,
   eventType,
   query,
@@ -46,9 +50,7 @@ export const fetchDurationFieldCandidates = async ({
   query: estypes.QueryDslQueryContainer;
   apmEventClient: APMEventClient;
   eventType: ProcessorEvent.transaction | ProcessorEvent.span;
-}): Promise<{
-  fieldCandidates: string[];
-}> => {
+}): Promise<DurationFieldCandidatesResponse> {
   // Get all supported fields
   const [respMapping, respRandomDoc] = await Promise.all([
     apmEventClient.fieldCaps('get_field_caps', {
@@ -110,4 +112,4 @@ export const fetchDurationFieldCandidates = async ({
   return {
     fieldCandidates: [...finalFieldCandidates],
   };
-};
+}

@@ -70,6 +70,7 @@ export const GettingStartedPage = () => {
               <EuiText size="s">
                 {OR_LABEL}{' '}
                 <EuiLink
+                  data-test-subj="syntheticsGettingStartedPageLink"
                   href={history.createHref({
                     pathname: MONITOR_ADD_ROUTE,
                   })}
@@ -195,6 +196,7 @@ const CREATE_LOCATION_DESCRIPTION = (
     values={{
       link: (
         <EuiLink
+          data-test-subj="syntheticsLink"
           href="https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html"
           target="_blank"
         >
@@ -220,7 +222,11 @@ const PUBLIC_LOCATION_DESCRIPTION = (
         </strong>
       ),
       link: (
-        <EuiLink href="https://www.elastic.co/cloud/" target="_blank">
+        <EuiLink
+          data-test-subj="syntheticsElasticCloudLink"
+          href="https://www.elastic.co/cloud/"
+          target="_blank"
+        >
           {i18n.translate(
             'xpack.synthetics.gettingStarted.gettingStartedLabel.elasticCloudDeployments',
             {
