@@ -7,11 +7,15 @@
 import { ApiKey } from '@kbn/security-plugin/common/model';
 import { ApmPluginRequestHandlerContext } from '../typings';
 
+export interface AgentKeysResponse {
+  agentKeys: ApiKey[];
+}
+
 export async function getAgentKeys({
   context,
 }: {
   context: ApmPluginRequestHandlerContext;
-}) {
+}): Promise<AgentKeysResponse> {
   const body = {
     size: 1000,
     query: {

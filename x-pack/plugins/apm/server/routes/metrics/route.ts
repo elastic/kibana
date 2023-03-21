@@ -11,7 +11,7 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { FetchAndTransformMetrics } from './fetch_and_transform_metrics';
 import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
-import { getServiceNodes } from './get_service_nodes';
+import { getServiceNodes, ServiceNodesResponse } from './get_service_nodes';
 import { metricsServerlessRouteRepository } from './serverless/route';
 
 const metricsChartsRoute = createApmServerRoute({
@@ -71,16 +71,7 @@ const serviceMetricsJvm = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (
     resources
-  ): Promise<{
-    serviceNodes: Array<{
-      name: string;
-      cpu: number | null;
-      heapMemory: number | null;
-      hostName: string | null | undefined;
-      nonHeapMemory: number | null;
-      threadCount: number | null;
-    }>;
-  }> => {
+  ): Promise<{ serviceNodes: ServiceNodesResponse }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;

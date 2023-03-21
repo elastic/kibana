@@ -23,37 +23,32 @@ export type NamedAggregation = Record<string, estypes.AggregationsAggregationCon
 export interface GroupingQueryArgs {
   additionalFilters: BoolAgg[];
   from: string;
+  groupByFields: string[];
+  metricsAggregations?: NamedAggregation[];
+  pageNumber?: number;
+  rootAggregations?: NamedAggregation[];
   runtimeMappings?: MappingRuntimeFields;
-  additionalAggregationsRoot?: NamedAggregation[];
-  stackByMultipleFields0: string[];
-  stackByMultipleFields0Size?: number;
-  stackByMultipleFields0From?: number;
-  stackByMultipleFields0Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
-  additionalStatsAggregationsFields0: NamedAggregation[];
-  stackByMultipleFields1: string[] | undefined;
-  stackByMultipleFields1Size?: number;
-  stackByMultipleFields1From?: number;
-  stackByMultipleFields1Sort?: Array<{ [category: string]: { order: estypes.SortOrder } }>;
-  additionalStatsAggregationsFields1: NamedAggregation[];
+  size?: number;
+  sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
   to: string;
 }
 
 export interface MainAggregation extends NamedAggregation {
-  stackByMultipleFields0: {
-    terms?: estypes.AggregationsAggregationContainer['terms'];
-    multi_terms?: estypes.AggregationsAggregationContainer['multi_terms'];
+  groupByFields: {
     aggs: NamedAggregation;
+    multi_terms?: estypes.AggregationsAggregationContainer['multi_terms'];
+    terms?: estypes.AggregationsAggregationContainer['terms'];
   };
 }
 
 export interface GroupingQuery extends estypes.QueryDslQueryContainer {
-  size: number;
-  runtime_mappings: MappingRuntimeFields | undefined;
+  aggs: MainAggregation;
   query: {
     bool: {
       filter: Array<BoolAgg | RangeAgg>;
     };
   };
+  runtime_mappings: MappingRuntimeFields | undefined;
+  size: number;
   _source: boolean;
-  aggs: MainAggregation;
 }

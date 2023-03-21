@@ -45,7 +45,7 @@ export const MonitorStatusLegend = ({ brushable }: { brushable: boolean }) => {
       {/*
         // Hiding error for now until @elastic/chart's Heatmap chart supports annotations
         // `getErrorVizColor` can be imported from './monitor_status_data'
-        <LegendItem color={getErrorVizColor(euiTheme)} label={labels.ERROR_LABEL} iconType="alert" />
+        <LegendItem color={getErrorVizColor(euiTheme)} label={labels.ERROR_LABEL} iconType="warning" />
       */}
 
       {brushable ? (
