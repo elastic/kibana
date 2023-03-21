@@ -146,12 +146,12 @@ export const useUnifiedSearch = () => {
   }, [getDateRangeAsTimestamp, state, telemetry]);
 
   const getAllFilters = useCallback(
-    () => [...filterManagerService.getFilters(), ...state.panelFilters],
-    [filterManagerService, state.panelFilters]
+    () => [...state.filters, ...state.panelFilters],
+    [state.filters, state.panelFilters]
   );
   const buildQuery = useCallback(() => {
-    return buildEsQuery(metricsDataView, queryStringService.getQuery(), getAllFilters());
-  }, [metricsDataView, queryStringService, getAllFilters]);
+    return buildEsQuery(metricsDataView, state.query, getAllFilters());
+  }, [metricsDataView, state.query, getAllFilters]);
 
   return {
     buildQuery,

@@ -21,6 +21,7 @@ const defaultArgs = {
   defaultGroupingOptions,
   fields: [],
   groupingId,
+  tracker: jest.fn(),
 };
 
 const groupingArgs = {
@@ -36,7 +37,7 @@ const groupingArgs = {
   renderChildComponent: jest.fn(),
   runtimeMappings: {},
   signalIndexName: 'test',
-  tableId: groupingId,
+  groupingId,
   takeActionItems: jest.fn(),
   to: '2020-07-08T08:20:18.966Z',
 };
