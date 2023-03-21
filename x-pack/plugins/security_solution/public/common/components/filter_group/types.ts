@@ -6,7 +6,10 @@
  */
 
 import type { ControlGroupInput, OptionsListEmbeddableInput } from '@kbn/controls-plugin/common';
-import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
+import type {
+  AddOptionsListControlProps,
+  ControlGroupContainer,
+} from '@kbn/controls-plugin/public';
 import type { Filter } from '@kbn/es-query';
 
 export type FilterUrlFormat = Record<
@@ -25,9 +28,12 @@ export interface FilterContextType {
 export type FilterItemObj = Omit<AddOptionsListControlProps, 'controlId' | 'dataViewId'> &
   Pick<OptionsListEmbeddableInput, 'existsSelected' | 'exclude'>;
 
+export type FilterGroupHandler = ControlGroupContainer;
+
 export type FilterGroupProps = {
   dataViewId: string | null;
   onFilterChange?: (newFilters: Filter[]) => void;
   initialControls: FilterItemObj[];
   spaceId: string;
+  onInit?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
 } & Pick<ControlGroupInput, 'timeRange' | 'filters' | 'query' | 'chainingSystem'>;

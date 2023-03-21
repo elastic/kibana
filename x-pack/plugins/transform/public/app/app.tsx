@@ -7,7 +7,9 @@
 
 import React, { useContext, FC } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Route, Switch } from 'react-router-dom';
+import { Router, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { ScopedHistory } from '@kbn/core/public';
 
 import { EuiErrorBoundary } from '@elastic/eui';

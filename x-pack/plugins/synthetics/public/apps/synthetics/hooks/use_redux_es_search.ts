@@ -38,7 +38,7 @@ export const useReduxEsSearch = <
       dispatch(executeEsQueryAction.get({ params, name }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, name, JSON.stringify(params), isRequestReady]);
+  }, [dispatch, name, JSON.stringify(params), isRequestReady, ...fnDeps]);
 
   return useMemo(() => {
     return {

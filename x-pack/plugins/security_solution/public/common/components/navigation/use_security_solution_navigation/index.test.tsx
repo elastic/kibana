@@ -107,7 +107,12 @@ describe('useSecuritySolutionNavigation', () => {
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
-    expect(result?.current?.items?.[1].items?.[4].id).toEqual(SecurityPageName.kubernetes);
+
+    const dashboards = result?.current?.items?.find(({ id }) => id === 'dashboards');
+    const hasKubernetes =
+      dashboards?.items?.some(({ id }) => id === SecurityPageName.kubernetes) ?? false;
+
+    expect(hasKubernetes).toBe(true);
   });
 
   it('should omit host isolation exceptions if no authz', () => {

@@ -5,11 +5,9 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
-import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { termQuery } from '@kbn/observability-plugin/server';
 import {
@@ -36,7 +34,6 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
-import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
 import {
   ANOMALY_ALERT_SEVERITY_TYPES,
   ApmRuleType,
@@ -47,22 +44,12 @@ import { asMutableArray } from '../../../../../common/utils/as_mutable_array';
 import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { getMLJobs } from '../../../service_map/get_service_anomalies';
 import { apmActionVariables } from '../../action_variables';
-import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import {
+  ApmRuleTypeAlertDefinition,
+  RegisterRuleDependencies,
+} from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
-
-const paramsSchema = schema.object({
-  serviceName: schema.maybe(schema.string()),
-  transactionType: schema.maybe(schema.string()),
-  windowSize: schema.number(),
-  windowUnit: schema.string(),
-  environment: schema.string(),
-  anomalySeverityType: schema.oneOf([
-    schema.literal(ANOMALY_SEVERITY.CRITICAL),
-    schema.literal(ANOMALY_SEVERITY.MAJOR),
-    schema.literal(ANOMALY_SEVERITY.MINOR),
-    schema.literal(ANOMALY_SEVERITY.WARNING),
-  ]),
-});
+import { anomalyParamsSchema } from '../../../../../common/rules/schema';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 
@@ -72,7 +59,6 @@ export function registerAnomalyRuleType({
   config$,
   logger,
   ml,
-  observability,
   ruleDataClient,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
@@ -86,14 +72,9 @@ export function registerAnomalyRuleType({
       name: ruleTypeConfig.name,
       actionGroups: ruleTypeConfig.actionGroups,
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
-      validate: {
-        params: paramsSchema,
-      },
+      validate: { params: anomalyParamsSchema },
       actionVariables: {
         context: [
-          ...(observability.getAlertDetailsConfig()?.apm.enabled
-            ? [apmActionVariables.alertDetailsUrl]
-            : []),
           apmActionVariables.environment,
           apmActionVariables.reason,
           apmActionVariables.serviceName,
@@ -111,8 +92,7 @@ export function registerAnomalyRuleType({
           return { state: {} };
         }
 
-        const { savedObjectsClient, scopedClusterClient, getAlertUuid } =
-          services;
+        const { savedObjectsClient, scopedClusterClient } = services;
 
         const ruleParams = params;
         const request = {} as KibanaRequest;
@@ -302,14 +282,6 @@ export function registerAnomalyRuleType({
             relativeViewInAppUrl
           );
 
-          const alertUuid = getAlertUuid(id);
-
-          const alertDetailsUrl = getAlertDetailsUrl(
-            basePath,
-            spaceId,
-            alertUuid
-          );
-
           services
             .alertWithLifecycle({
               id,
@@ -326,7 +298,6 @@ export function registerAnomalyRuleType({
               },
             })
             .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-              alertDetailsUrl,
               environment: getEnvironmentLabel(environment),
               reason: reasonMessage,
               serviceName,
@@ -339,6 +310,7 @@ export function registerAnomalyRuleType({
 
         return { state: {} };
       },
+      alerts: ApmRuleTypeAlertDefinition,
     })
   );
 }

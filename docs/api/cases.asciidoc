@@ -8,6 +8,7 @@ these APIs:
 * <<cases-api-create>>
 * <<cases-api-delete-cases>>
 * <<cases-api-delete-comments>>
+* <<cases-api-find-case-activity>>
 * <<cases-api-find-cases>>
 * <<cases-api-find-connectors>>
 * <<cases-api-get-alerts>>
@@ -33,6 +34,7 @@ include::cases/cases-api-create.asciidoc[leveloffset=+1]
 include::cases/cases-api-delete-cases.asciidoc[leveloffset=+1]
 include::cases/cases-api-delete-comments.asciidoc[leveloffset=+1]
 //FIND
+include::cases/cases-api-find-case-activity.asciidoc[leveloffset=+1]
 include::cases/cases-api-find-cases.asciidoc[leveloffset=+1]
 include::cases/cases-api-find-connectors.asciidoc[leveloffset=+1]
 //GET

@@ -65,12 +65,19 @@ export async function startControlGroupIntegration(
     return;
   }
 
-  this.untilInitialized().then(() => startSyncingDashboardControlGroup.bind(this)());
+  this.untilInitialized().then(() => {
+    const stopSyncingControlGroup =
+      startSyncingDashboardControlGroup.bind(this)()?.stopSyncingWithControlGroup;
+    this.onDestroyControlGroup = () => {
+      stopSyncingControlGroup?.();
+      this.controlGroup?.destroy();
+    };
+  });
   await controlGroup.untilInitialized();
   return controlGroup;
 }
 
-async function startSyncingDashboardControlGroup(this: DashboardContainer) {
+function startSyncingDashboardControlGroup(this: DashboardContainer) {
   if (!this.controlGroup) return;
   const subscriptions = new Subscription();
 

@@ -69,10 +69,10 @@ describe('useLensAttributes', () => {
 
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes().state.filters,
-      ...filterFromSearchBar,
       ...getDetailsPageFilter('hosts', 'mockHost'),
       ...hostNameExistsFilter,
       ...getIndexFilters(['auditbeat-*']),
+      ...filterFromSearchBar,
     ]);
   });
 
@@ -95,10 +95,10 @@ describe('useLensAttributes', () => {
 
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes().state.filters,
-      ...filterFromSearchBar,
       ...getNetworkDetailsPageFilter('192.168.1.1'),
       ...sourceOrDestinationIpExistsFilter,
       ...getIndexFilters(['auditbeat-*']),
+      ...filterFromSearchBar,
     ]);
   });
 
@@ -121,9 +121,9 @@ describe('useLensAttributes', () => {
 
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes().state.filters,
-      ...filterFromSearchBar,
       ...getDetailsPageFilter('user', 'elastic'),
       ...getIndexFilters(['auditbeat-*']),
+      ...filterFromSearchBar,
     ]);
   });
 
@@ -198,6 +198,45 @@ describe('useLensAttributes', () => {
         useLensAttributes({
           getLensAttributes: getExternalAlertLensAttributes,
           stackByField: 'event.dataset',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current).toBeNull();
+  });
+
+  it('should return null if stackByField is an empty string', () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      dataViewId: 'security-solution-default',
+      indicesExist: false,
+      selectedPatterns: ['auditbeat-*'],
+    });
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: '',
+        }),
+      { wrapper }
+    );
+
+    expect(result?.current).toBeNull();
+  });
+
+  it('should return null if extraOptions.breakDownField is an empty string', () => {
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      dataViewId: 'security-solution-default',
+      indicesExist: false,
+      selectedPatterns: ['auditbeat-*'],
+    });
+    const { result } = renderHook(
+      () =>
+        useLensAttributes({
+          getLensAttributes: getExternalAlertLensAttributes,
+          stackByField: 'kibana.alert.rule.name',
+          extraOptions: {
+            breakdownField: '',
+          },
         }),
       { wrapper }
     );

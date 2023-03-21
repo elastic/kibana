@@ -46,7 +46,6 @@ export interface DonutChartProps {
   data: DonutChartData[] | null | undefined;
   fillColor: FillColor;
   height?: number;
-  isChartEmbeddablesEnabled?: boolean;
   label: React.ReactElement | string;
   legendItems?: LegendItem[] | null | undefined;
   onElementClick?: ElementClickListener;
@@ -67,10 +66,10 @@ export interface DonutChartWrapperProps {
 /* Make this position absolute in order to overlap the text onto the donut */
 export const DonutTextWrapper = styled(EuiFlexGroup)<
   EuiFlexGroupProps & {
-    $isChartEmbeddablesEnabled?: boolean;
     $dataExists?: boolean;
+    $donutTextWrapperStyles?: FlattenSimpleInterpolation;
+    $isChartEmbeddablesEnabled?: boolean;
     className?: string;
-    donutTextWrapperStyles?: FlattenSimpleInterpolation;
   }
 >`
   top: ${({ $isChartEmbeddablesEnabled, $dataExists }) =>
@@ -80,8 +79,8 @@ export const DonutTextWrapper = styled(EuiFlexGroup)<
   position: absolute;
   z-index: 1;
 
-  ${({ className, donutTextWrapperStyles }) =>
-    className && donutTextWrapperStyles ? `&.${className} {${donutTextWrapperStyles}}` : ''}
+  ${({ className, $donutTextWrapperStyles }) =>
+    className && $donutTextWrapperStyles ? `&.${className} {${$donutTextWrapperStyles}}` : ''}
 `;
 
 export const StyledEuiFlexItem = styled(EuiFlexItem)`
@@ -117,11 +116,11 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
       <StyledEuiFlexItem grow={isChartEmbeddablesEnabled}>
         <DonutTextWrapper
           $dataExists={dataExists}
+          $donutTextWrapperStyles={donutTextWrapperStyles}
           $isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
           alignItems="center"
           className={donutTextWrapperClassName}
           direction="column"
-          donutTextWrapperStyles={donutTextWrapperStyles}
           gutterSize="none"
           justifyContent="center"
         >
@@ -151,7 +150,6 @@ export const DonutChart = ({
   data,
   fillColor,
   height = 90,
-  isChartEmbeddablesEnabled,
   label,
   legendItems,
   onElementClick,
@@ -165,7 +163,7 @@ export const DonutChart = ({
       dataExists={data != null && data.length > 0}
       label={label}
       title={title}
-      isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
+      isChartEmbeddablesEnabled={false}
     >
       <>
         {data == null || totalCount == null || totalCount === 0 ? (

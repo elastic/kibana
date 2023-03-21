@@ -26,8 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.click('saveIndexPatternButton');
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/149256
-  describe.skip('dashboard empty state', () => {
+  describe('dashboard empty state', () => {
     const kbnDirectory = 'test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
 
     before(async function () {

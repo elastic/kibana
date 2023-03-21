@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { JSXElementConstructor } from 'react';
+import React, { JSXElementConstructor, MutableRefObject } from 'react';
 import {
   EuiButtonEmpty,
   EuiDataGridColumnCellActionProps,
+  EuiDataGridRefProps,
   type EuiDataGridColumnCellAction,
 } from '@elastic/eui';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { makeAction } from '../mocks/helpers';
 import {
@@ -35,10 +36,14 @@ const field1 = { name: 'column1', values: ['0.0', '0.1', '0.2', '0.3'], type: 't
 const field2 = { name: 'column2', values: ['1.0', '1.1', '1.2', '1.3'], type: 'keyword' };
 const columns = [{ id: field1.name }, { id: field2.name }];
 
+const mockCloseCellPopover = jest.fn();
 const useDataGridColumnsCellActionsProps: UseDataGridColumnsCellActionsProps = {
   fields: [field1, field2],
   triggerId: 'testTriggerId',
   metadata: { some: 'value' },
+  dataGridRef: {
+    current: { closeCellPopover: mockCloseCellPopover },
+  } as unknown as MutableRefObject<EuiDataGridRefProps>,
 };
 
 const renderCellAction = (
@@ -115,7 +120,9 @@ describe('useDataGridColumnsCellActions', () => {
 
     cellAction.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
 
-    expect(action1.execute).toHaveBeenCalled();
+    waitFor(() => {
+      expect(action1.execute).toHaveBeenCalled();
+    });
   });
 
   it('should execute the action with correct context', async () => {
@@ -128,23 +135,27 @@ describe('useDataGridColumnsCellActions', () => {
 
     cellAction1.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
 
-    expect(action1.execute).toHaveBeenCalledWith(
-      expect.objectContaining({
-        field: { name: field1.name, type: field1.type, value: field1.values[1] },
-        trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
-      })
-    );
+    await waitFor(() => {
+      expect(action1.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          field: { name: field1.name, type: field1.type, value: field1.values[1] },
+          trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
+        })
+      );
+    });
 
     const cellAction2 = renderCellAction(result.current[1][1], { rowIndex: 2 });
 
     cellAction2.getByTestId(`dataGridColumnCellAction-${action2.id}`).click();
 
-    expect(action2.execute).toHaveBeenCalledWith(
-      expect.objectContaining({
-        field: { name: field2.name, type: field2.type, value: field2.values[2] },
-        trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
-      })
-    );
+    await waitFor(() => {
+      expect(action2.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          field: { name: field2.name, type: field2.type, value: field2.values[2] },
+          trigger: { id: useDataGridColumnsCellActionsProps.triggerId },
+        })
+      );
+    });
   });
 
   it('should execute the action with correct page value', async () => {
@@ -157,10 +168,27 @@ describe('useDataGridColumnsCellActions', () => {
 
     cellAction.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
 
-    expect(action1.execute).toHaveBeenCalledWith(
-      expect.objectContaining({
-        field: { name: field1.name, type: field1.type, value: field1.values[1] },
-      })
-    );
+    await waitFor(() => {
+      expect(action1.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          field: { name: field1.name, type: field1.type, value: field1.values[1] },
+        })
+      );
+    });
+  });
+
+  it('should close popover then action executed', async () => {
+    const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
+      initialProps: useDataGridColumnsCellActionsProps,
+    });
+    await waitForNextUpdate();
+
+    const cellAction = renderCellAction(result.current[0][0], { rowIndex: 25 });
+
+    cellAction.getByTestId(`dataGridColumnCellAction-${action1.id}`).click();
+
+    await waitFor(() => {
+      expect(mockCloseCellPopover).toHaveBeenCalled();
+    });
   });
 });

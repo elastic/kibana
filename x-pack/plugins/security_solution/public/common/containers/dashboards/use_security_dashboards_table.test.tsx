@@ -17,8 +17,10 @@ import {
   useSecurityDashboardsTableColumns,
   useSecurityDashboardsTableItems,
 } from './use_security_dashboards_table';
+import * as telemetry from '../../lib/telemetry';
 
 jest.mock('../../lib/kibana');
+const spyTrack = jest.spyOn(telemetry, 'track');
 
 const TAG_ID = 'securityTagId';
 const DASHBOARDS_RESPONSE: DashboardTableItem[] = [
@@ -181,5 +183,23 @@ describe('Security Dashboards Table hooks', () => {
     expect(result.queryAllByTestId('dashboardTableTitleCell')).toHaveLength(2);
     expect(result.queryAllByTestId('dashboardTableDescriptionCell')).toHaveLength(2);
     expect(result.queryAllByTestId('dashboardTableTagsCell')).toHaveLength(2);
+  });
+
+  it('should send telemetry when dashboard title clicked', async () => {
+    const { result: itemsResult } = await renderUseSecurityDashboardsTableItems();
+    const { result: columnsResult } = renderUseDashboardsTableColumns();
+
+    const result = render(
+      <EuiBasicTable items={itemsResult.current.items} columns={columnsResult.current} />,
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    result.getByText('title1').click();
+    expect(spyTrack).toHaveBeenCalledWith(
+      telemetry.METRIC_TYPE.CLICK,
+      telemetry.TELEMETRY_EVENT.DASHBOARD
+    );
   });
 });

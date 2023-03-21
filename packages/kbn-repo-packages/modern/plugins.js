@@ -13,23 +13,23 @@ const Path = require('path');
  * @returns {string[]}
  */
 function getPluginSearchPaths({ rootDir }) {
-  return [Path.resolve(rootDir, '../kibana-extra')];
+  return [Path.resolve(rootDir, '../kibana-extra'), Path.resolve(rootDir, 'plugins')];
 }
 
 /**
  * @param {import('./types').PluginSelector} selector
- * @param {import('./types').PluginCategoryInfo} type
+ * @param {import('./types').PluginCategoryInfo} category
  */
-function matchType(selector, type) {
-  if (!type.oss && selector.oss) {
+function matchCategory(selector, category) {
+  if (!category.oss && selector.oss) {
     return false;
   }
 
-  if (type.example && !selector.examples) {
+  if (category.example && !selector.examples) {
     return false;
   }
 
-  if (type.testPlugin && !selector.testPlugins) {
+  if (category.testPlugin && !selector.testPlugins) {
     return false;
   }
 
@@ -72,6 +72,21 @@ function matchParentDirsLimit(selector, pkgDir) {
 
 /**
  * @param {import('./types').PluginSelector} selector
+ * @param {import('./types').PluginPackage} pkg
+ */
+function matchBrowserServer(selector, pkg) {
+  if (selector.browser && !pkg.manifest.plugin.browser) {
+    return false;
+  }
+  if (selector.server && !pkg.manifest.plugin.server) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * @param {import('./types').PluginSelector} selector
  */
 function getPluginPackagesFilter(selector = {}) {
   /**
@@ -80,8 +95,9 @@ function getPluginPackagesFilter(selector = {}) {
    */
   return (pkg) =>
     pkg.isPlugin() &&
+    matchBrowserServer(selector, pkg) &&
     matchParentDirsLimit(selector, pkg.directory) &&
-    (matchType(selector, pkg.getPluginCategories()) ||
+    (matchCategory(selector, pkg.getPluginCategories()) ||
       matchPluginPaths(selector, pkg.directory) ||
       matchPluginParentDirs(selector, pkg.directory));
 }

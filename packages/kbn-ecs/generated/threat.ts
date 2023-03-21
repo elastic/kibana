@@ -554,6 +554,10 @@ export interface EcsThreat {
        * Traffic Light Protocol sharing markings.
        */
       tlp?: string;
+      /**
+       * Traffic Light Protocol version.
+       */
+      tlp_version?: string;
     };
 
     /**
@@ -873,19 +877,6 @@ export interface EcsThreat {
        * The reference url of subtechnique used by this threat. You can use a MITRE ATT&CK® subtechnique, for example. (ex. https://attack.mitre.org/techniques/T1059/001/)
        */
       reference?: string[];
-    };
-  };
-
-  threat?: {
-    indicator?: {
-      marking?: {
-        tlp?: {
-          /**
-           * Traffic Light Protocol version.
-           */
-          version?: string;
-        };
-      };
     };
   };
 }

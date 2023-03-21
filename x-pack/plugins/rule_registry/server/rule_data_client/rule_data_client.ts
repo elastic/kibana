@@ -106,20 +106,18 @@ export class RuleDataClient implements IRuleDataClient {
     };
 
     return {
-      search: async <TSearchRequest extends ESSearchRequest>(
+      search: async <
+        TSearchRequest extends ESSearchRequest,
+        TAlertDoc = Partial<ParsedTechnicalFields & ParsedExperimentalFields>
+      >(
         request: TSearchRequest
-      ): Promise<
-        ESSearchResponse<Partial<ParsedTechnicalFields & ParsedExperimentalFields>, TSearchRequest>
-      > => {
+      ): Promise<ESSearchResponse<TAlertDoc, TSearchRequest>> => {
         try {
           const clusterClient = await waitUntilReady();
           return (await clusterClient.search({
             ...request,
             index: indexPattern,
-          })) as unknown as ESSearchResponse<
-            Partial<ParsedTechnicalFields & ParsedExperimentalFields>,
-            TSearchRequest
-          >;
+          })) as unknown as ESSearchResponse<TAlertDoc, TSearchRequest>;
         } catch (err) {
           this.options.logger.error(`Error performing search in RuleDataClient - ${err.message}`);
           throw err;

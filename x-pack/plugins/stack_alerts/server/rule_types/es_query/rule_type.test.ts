@@ -24,6 +24,7 @@ import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Comparator } from '../../../common/comparator_types';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 
 const logger = loggingSystemMock.create().get();
 const coreSetup = coreMock.createSetup();
@@ -66,6 +67,7 @@ describe('ruleType', () => {
             "description": "Navigate to Discover and show the records that triggered
              the alert when the rule is created in Discover. Otherwise, navigate to the status page for the rule.",
             "name": "link",
+            "usesPublicBaseUrl": true,
           },
         ],
         "params": Array [
@@ -724,7 +726,10 @@ async function invokeExecutor({
       updatedAt: new Date(),
       throttle: null,
       notifyWhen: null,
+      muteAll: false,
+      snoozeSchedule: [],
     },
     logger,
+    flappingSettings: DEFAULT_FLAPPING_SETTINGS,
   });
 }

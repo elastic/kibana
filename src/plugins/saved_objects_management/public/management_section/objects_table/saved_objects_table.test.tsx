@@ -121,6 +121,7 @@ describe('SavedObjectsTable', () => {
     };
 
     http.post.mockResolvedValue([]);
+    http.delete.mockResolvedValue({ id: 'test' });
 
     getSavedObjectCountsMock.mockReturnValue({
       'index-pattern': 0,
@@ -147,7 +148,7 @@ describe('SavedObjectsTable', () => {
 
     findObjectsMock.mockImplementation(() => ({
       total: 4,
-      savedObjects: [
+      saved_objects: [
         {
           id: '1',
           type: 'index-pattern',

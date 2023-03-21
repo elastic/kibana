@@ -43,9 +43,19 @@ function migrateCspRuleTemplatesToV870(
 ): SavedObjectUnsanitizedDoc<CspRuleTemplateV870> {
   // Keeps only metadata, deprecated state
   const { muted, enabled, ...attributes } = doc.attributes;
+
   return {
     ...doc,
-    attributes,
+    attributes: {
+      metadata: {
+        ...attributes.metadata,
+        benchmark: {
+          ...attributes.metadata.benchmark,
+          // CSPM introduced in 8.7, so we can assume all docs from 8.4.0 are KSPM
+          posture_type: 'kspm',
+        },
+      },
+    },
   };
 }
 

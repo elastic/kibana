@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useContext } from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { RouteComponentProps, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -42,6 +43,7 @@ import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabi
 import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { CreateDerivedIndexPattern } from '../../containers/metrics_source';
+import { NotFoundPage } from '../404';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -122,6 +124,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                     <Route path="/detail/:type/:node" component={MetricDetail} />
                     <Route path={'/hosts'} component={HostsLandingPage} />
                     <Route path={'/settings'} component={MetricsSettingsPage} />
+                    <Route render={() => <NotFoundPage title="Infrastructure" />} />
                   </Switch>
                 </InfraMLCapabilitiesProvider>
               </WaffleFiltersProvider>

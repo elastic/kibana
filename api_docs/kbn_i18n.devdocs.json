@@ -3,10 +3,26 @@
   "client": {
     "classes": [],
     "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/i18n",
-        "id": "def-public.Formats",
+        "id": "def-common.Formats",
         "type": "Interface",
         "tags": [],
         "label": "Formats",
@@ -17,13 +33,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.Formats.number",
+            "id": "def-common.Formats.number",
             "type": "Object",
             "tags": [],
             "label": "number",
             "description": [],
             "signature": [
-              "Partial<{ [key: string]: NumberFormatOptions<\"percent\" | \"currency\" | \"decimal\">; currency: NumberFormatOptions<\"currency\">; percent: NumberFormatOptions<\"percent\">; }> | undefined"
+              "Partial<{ [key: string]: NumberFormatOptions<\"decimal\" | \"percent\" | \"currency\">; currency: NumberFormatOptions<\"currency\">; percent: NumberFormatOptions<\"percent\">; }> | undefined"
             ],
             "path": "packages/kbn-i18n/src/core/formats.ts",
             "deprecated": false,
@@ -31,7 +47,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.Formats.date",
+            "id": "def-common.Formats.date",
             "type": "Object",
             "tags": [],
             "label": "date",
@@ -45,7 +61,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.Formats.time",
+            "id": "def-common.Formats.time",
             "type": "Object",
             "tags": [],
             "label": "time",
@@ -59,7 +75,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.Formats.relative",
+            "id": "def-common.Formats.relative",
             "type": "Object",
             "tags": [],
             "label": "relative",
@@ -76,7 +92,7 @@
       },
       {
         "parentPluginId": "@kbn/i18n",
-        "id": "def-public.TranslateArguments",
+        "id": "def-common.TranslateArguments",
         "type": "Interface",
         "tags": [],
         "label": "TranslateArguments",
@@ -87,7 +103,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.TranslateArguments.values",
+            "id": "def-common.TranslateArguments.values",
             "type": "Object",
             "tags": [],
             "label": "values",
@@ -101,7 +117,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.TranslateArguments.defaultMessage",
+            "id": "def-common.TranslateArguments.defaultMessage",
             "type": "string",
             "tags": [],
             "label": "defaultMessage",
@@ -112,7 +128,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.TranslateArguments.description",
+            "id": "def-common.TranslateArguments.description",
             "type": "string",
             "tags": [],
             "label": "description",
@@ -129,7 +145,7 @@
       },
       {
         "parentPluginId": "@kbn/i18n",
-        "id": "def-public.Translation",
+        "id": "def-common.Translation",
         "type": "Interface",
         "tags": [],
         "label": "Translation",
@@ -140,7 +156,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.Translation.messages",
+            "id": "def-common.Translation.messages",
             "type": "Object",
             "tags": [],
             "label": "messages",
@@ -156,7 +172,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.Translation.locale",
+            "id": "def-common.Translation.locale",
             "type": "string",
             "tags": [],
             "label": "locale",
@@ -172,7 +188,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.Translation.formats",
+            "id": "def-common.Translation.formats",
             "type": "Object",
             "tags": [],
             "label": "formats",
@@ -182,9 +198,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/i18n",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnI18nPluginApi",
-                "section": "def-public.Formats",
+                "section": "def-common.Formats",
                 "text": "Formats"
               },
               " | undefined"
@@ -202,7 +218,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/i18n",
-        "id": "def-public.i18n",
+        "id": "def-common.i18n",
         "type": "Object",
         "tags": [],
         "label": "i18n",
@@ -213,7 +229,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18n.formats",
+            "id": "def-common.i18n.formats",
             "type": "Object",
             "tags": [],
             "label": "formats",
@@ -221,9 +237,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/i18n",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnI18nPluginApi",
-                "section": "def-public.Formats",
+                "section": "def-common.Formats",
                 "text": "Formats"
               }
             ],
@@ -233,7 +249,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18n.addTranslation",
+            "id": "def-common.i18n.addTranslation",
             "type": "Function",
             "tags": [],
             "label": "addTranslation",
@@ -242,9 +258,9 @@
               "(newTranslation: ",
               {
                 "pluginId": "@kbn/i18n",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnI18nPluginApi",
-                "section": "def-public.Translation",
+                "section": "def-common.Translation",
                 "text": "Translation"
               },
               ", locale?: string | undefined) => void"
@@ -256,7 +272,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/i18n",
-                "id": "def-public.i18n.addTranslation.$1",
+                "id": "def-common.i18n.addTranslation.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "newTranslation",
@@ -264,9 +280,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/i18n",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnI18nPluginApi",
-                    "section": "def-public.Translation",
+                    "section": "def-common.Translation",
                     "text": "Translation"
                   }
                 ],
@@ -276,7 +292,7 @@
               },
               {
                 "parentPluginId": "@kbn/i18n",
-                "id": "def-public.i18n.addTranslation.$2",
+                "id": "def-common.i18n.addTranslation.$2",
                 "type": "string",
                 "tags": [],
                 "label": "locale",
@@ -292,7 +308,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18n.getTranslation",
+            "id": "def-common.i18n.getTranslation",
             "type": "Function",
             "tags": [],
             "label": "getTranslation",
@@ -301,9 +317,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/i18n",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnI18nPluginApi",
-                "section": "def-public.Translation",
+                "section": "def-common.Translation",
                 "text": "Translation"
               }
             ],
@@ -315,7 +331,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18n.setLocale",
+            "id": "def-common.i18n.setLocale",
             "type": "Function",
             "tags": [],
             "label": "setLocale",
@@ -330,7 +346,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/i18n",
-                "id": "def-public.i18n.setLocale.$1",
+                "id": "def-common.i18n.setLocale.$1",
                 "type": "string",
                 "tags": [],
                 "label": "locale",
@@ -343,7 +359,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18n.getLocale",
+            "id": "def-common.i18n.getLocale",
             "type": "Function",
             "tags": [],
             "label": "getLocale",
@@ -359,7 +375,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18n.setDefaultLocale",
+            "id": "def-common.i18n.setDefaultLocale",
             "type": "Function",
             "tags": [],
             "label": "setDefaultLocale",
@@ -374,7 +390,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/i18n",
-                "id": "def-public.i18n.setDefaultLocale.$1",
+                "id": "def-common.i18n.setDefaultLocale.$1",
                 "type": "string",
                 "tags": [],
                 "label": "locale",
@@ -387,7 +403,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18n.getDefaultLocale",
+            "id": "def-common.i18n.getDefaultLocale",
             "type": "Function",
             "tags": [],
             "label": "getDefaultLocale",
@@ -403,7 +419,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18n.setFormats",
+            "id": "def-common.i18n.setFormats",
             "type": "Function",
             "tags": [],
             "label": "setFormats",
@@ -412,9 +428,9 @@
               "(newFormats: ",
               {
                 "pluginId": "@kbn/i18n",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnI18nPluginApi",
-                "section": "def-public.Formats",
+                "section": "def-common.Formats",
                 "text": "Formats"
               },
               ") => void"
@@ -426,7 +442,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/i18n",
-                "id": "def-public.i18n.setFormats.$1",
+                "id": "def-common.i18n.setFormats.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "newFormats",
@@ -434,9 +450,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/i18n",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnI18nPluginApi",
-                    "section": "def-public.Formats",
+                    "section": "def-common.Formats",
                     "text": "Formats"
                   }
                 ],
@@ -448,7 +464,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18n.getFormats",
+            "id": "def-common.i18n.getFormats",
             "type": "Function",
             "tags": [],
             "label": "getFormats",
@@ -457,9 +473,9 @@
               "() => ",
               {
                 "pluginId": "@kbn/i18n",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnI18nPluginApi",
-                "section": "def-public.Formats",
+                "section": "def-common.Formats",
                 "text": "Formats"
               }
             ],
@@ -471,7 +487,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18n.getRegisteredLocales",
+            "id": "def-common.i18n.getRegisteredLocales",
             "type": "Function",
             "tags": [],
             "label": "getRegisteredLocales",
@@ -487,7 +503,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18n.translate",
+            "id": "def-common.i18n.translate",
             "type": "Function",
             "tags": [],
             "label": "translate",
@@ -496,9 +512,9 @@
               "(id: string, { values, defaultMessage }: ",
               {
                 "pluginId": "@kbn/i18n",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnI18nPluginApi",
-                "section": "def-public.TranslateArguments",
+                "section": "def-common.TranslateArguments",
                 "text": "TranslateArguments"
               },
               ") => any"
@@ -510,7 +526,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/i18n",
-                "id": "def-public.i18n.translate.$1",
+                "id": "def-common.i18n.translate.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
@@ -521,7 +537,7 @@
               },
               {
                 "parentPluginId": "@kbn/i18n",
-                "id": "def-public.i18n.translate.$2",
+                "id": "def-common.i18n.translate.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "__1",
@@ -529,9 +545,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/i18n",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnI18nPluginApi",
-                    "section": "def-public.TranslateArguments",
+                    "section": "def-common.TranslateArguments",
                     "text": "TranslateArguments"
                   }
                 ],
@@ -543,7 +559,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18n.init",
+            "id": "def-common.i18n.init",
             "type": "Function",
             "tags": [],
             "label": "init",
@@ -552,9 +568,9 @@
               "(newTranslation?: ",
               {
                 "pluginId": "@kbn/i18n",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnI18nPluginApi",
-                "section": "def-public.Translation",
+                "section": "def-common.Translation",
                 "text": "Translation"
               },
               " | undefined) => void"
@@ -566,7 +582,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/i18n",
-                "id": "def-public.i18n.init.$1",
+                "id": "def-common.i18n.init.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "newTranslation",
@@ -574,9 +590,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/i18n",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnI18nPluginApi",
-                    "section": "def-public.Translation",
+                    "section": "def-common.Translation",
                     "text": "Translation"
                   },
                   " | undefined"
@@ -589,7 +605,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18n.load",
+            "id": "def-common.i18n.load",
             "type": "Function",
             "tags": [],
             "label": "load",
@@ -604,7 +620,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/i18n",
-                "id": "def-public.i18n.load.$1",
+                "id": "def-common.i18n.load.$1",
                 "type": "string",
                 "tags": [],
                 "label": "translationsUrl",
@@ -617,7 +633,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18n.isPseudoLocale",
+            "id": "def-common.i18n.isPseudoLocale",
             "type": "Function",
             "tags": [],
             "label": "isPseudoLocale",
@@ -632,7 +648,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/i18n",
-                "id": "def-public.i18n.isPseudoLocale.$1",
+                "id": "def-common.i18n.isPseudoLocale.$1",
                 "type": "string",
                 "tags": [],
                 "label": "locale",
@@ -645,7 +661,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18n.translateUsingPseudoLocale",
+            "id": "def-common.i18n.translateUsingPseudoLocale",
             "type": "Function",
             "tags": [],
             "label": "translateUsingPseudoLocale",
@@ -660,7 +676,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/i18n",
-                "id": "def-public.i18n.translateUsingPseudoLocale.$1",
+                "id": "def-common.i18n.translateUsingPseudoLocale.$1",
                 "type": "string",
                 "tags": [],
                 "label": "message",
@@ -676,7 +692,7 @@
       },
       {
         "parentPluginId": "@kbn/i18n",
-        "id": "def-public.i18nLoader",
+        "id": "def-common.i18nLoader",
         "type": "Object",
         "tags": [],
         "label": "i18nLoader",
@@ -687,7 +703,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18nLoader.registerTranslationFile",
+            "id": "def-common.i18nLoader.registerTranslationFile",
             "type": "Function",
             "tags": [],
             "label": "registerTranslationFile",
@@ -702,7 +718,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/i18n",
-                "id": "def-public.i18nLoader.registerTranslationFile.$1",
+                "id": "def-common.i18nLoader.registerTranslationFile.$1",
                 "type": "string",
                 "tags": [],
                 "label": "translationFilePath",
@@ -715,7 +731,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18nLoader.registerTranslationFiles",
+            "id": "def-common.i18nLoader.registerTranslationFiles",
             "type": "Function",
             "tags": [],
             "label": "registerTranslationFiles",
@@ -730,7 +746,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/i18n",
-                "id": "def-public.i18nLoader.registerTranslationFiles.$1",
+                "id": "def-common.i18nLoader.registerTranslationFiles.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "arrayOfPaths",
@@ -746,7 +762,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18nLoader.getTranslationsByLocale",
+            "id": "def-common.i18nLoader.getTranslationsByLocale",
             "type": "Function",
             "tags": [],
             "label": "getTranslationsByLocale",
@@ -755,9 +771,9 @@
               "(locale: string) => Promise<",
               {
                 "pluginId": "@kbn/i18n",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnI18nPluginApi",
-                "section": "def-public.Translation",
+                "section": "def-common.Translation",
                 "text": "Translation"
               },
               ">"
@@ -769,7 +785,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/i18n",
-                "id": "def-public.i18nLoader.getTranslationsByLocale.$1",
+                "id": "def-common.i18nLoader.getTranslationsByLocale.$1",
                 "type": "string",
                 "tags": [],
                 "label": "locale",
@@ -782,7 +798,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18nLoader.getAllTranslations",
+            "id": "def-common.i18nLoader.getAllTranslations",
             "type": "Function",
             "tags": [],
             "label": "getAllTranslations",
@@ -791,9 +807,9 @@
               "() => Promise<{ [key: string]: ",
               {
                 "pluginId": "@kbn/i18n",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnI18nPluginApi",
-                "section": "def-public.Translation",
+                "section": "def-common.Translation",
                 "text": "Translation"
               },
               "; }>"
@@ -806,7 +822,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18nLoader.getAllTranslationsFromPaths",
+            "id": "def-common.i18nLoader.getAllTranslationsFromPaths",
             "type": "Function",
             "tags": [],
             "label": "getAllTranslationsFromPaths",
@@ -815,9 +831,9 @@
               "(paths: string[]) => Promise<{ [key: string]: ",
               {
                 "pluginId": "@kbn/i18n",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnI18nPluginApi",
-                "section": "def-public.Translation",
+                "section": "def-common.Translation",
                 "text": "Translation"
               },
               "; }>"
@@ -829,7 +845,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/i18n",
-                "id": "def-public.i18nLoader.getAllTranslationsFromPaths.$1",
+                "id": "def-common.i18nLoader.getAllTranslationsFromPaths.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "paths",
@@ -845,7 +861,7 @@
           },
           {
             "parentPluginId": "@kbn/i18n",
-            "id": "def-public.i18nLoader.getRegisteredLocales",
+            "id": "def-common.i18nLoader.getRegisteredLocales",
             "type": "Function",
             "tags": [],
             "label": "getRegisteredLocales",
@@ -863,21 +879,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

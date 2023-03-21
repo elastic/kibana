@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useState } from 'react';
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { NoDataConfigPage } from '@kbn/shared-ux-page-no-data-config';
 import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
 import { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
@@ -20,6 +20,7 @@ export const KibanaNoDataPage = ({
   onDataViewCreated,
   noDataConfig,
   allowAdHocDataView,
+  showPlainSpinner,
 }: KibanaNoDataPageProps) => {
   // These hooks are temporary, until this component is moved to a package.
   const services = useServices();
@@ -43,7 +44,11 @@ export const KibanaNoDataPage = ({
   }, [hasESData, hasUserDataView]);
 
   if (isLoading) {
-    return <EuiLoadingElastic css={{ margin: 'auto' }} size="xxl" />;
+    return showPlainSpinner ? (
+      <EuiLoadingSpinner css={{ margin: 'auto' }} size="xxl" />
+    ) : (
+      <EuiLoadingElastic css={{ margin: 'auto' }} size="xxl" />
+    );
   }
 
   if (!hasUserDataViews && dataExists) {

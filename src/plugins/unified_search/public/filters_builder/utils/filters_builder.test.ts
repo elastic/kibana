@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildEmptyFilter, type Filter, BooleanRelation } from '@kbn/es-query';
+import { buildEmptyFilter, type Filter, isCombinedFilter, BooleanRelation } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
 import {
   getFilterByPath,
@@ -188,7 +188,19 @@ describe('filters_builder', () => {
     beforeAll(() => {
       filter = filters[0];
       filtersWithOrRelationships = filters[1];
-      groupOfFilters = filters[1].meta.params[1];
+      if (Array.isArray(filters[1].meta.params)) {
+        const secondFilter = filters[1].meta.params[1];
+        if (
+          typeof secondFilter !== 'number' &&
+          typeof secondFilter !== 'string' &&
+          typeof secondFilter !== 'boolean' &&
+          isCombinedFilter(secondFilter)
+        ) {
+          groupOfFilters = secondFilter;
+        }
+      } else {
+        groupOfFilters = filters[0];
+      }
     });
 
     test('should return correct ConditionalOperationType', () => {

@@ -16,6 +16,8 @@ import type {
   ExternalReferenceComment,
   PersistableComment,
   FindCaseUserActions,
+  CaseUsers,
+  CaseUserActionsStats,
 } from '../../common/ui/types';
 import type {
   CaseConnector,
@@ -53,12 +55,14 @@ export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';
 export const caseWithAlertsId = 'case-with-alerts-id';
 export const caseWithAlertsSyncOffId = 'case-with-alerts-syncoff-id';
+export const pushConnectorId = 'servicenow-1';
 
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';
 const basicClosedAt = '2020-02-21T15:02:57.995Z';
-const laterTime = '2020-02-28T15:02:57.995Z';
+const basicPushedAt = '2023-01-17T09:46:29.813Z';
+const laterTime = '2023-01-18T09:46:29.813Z';
 
 export const elasticUser = {
   fullName: 'Leslie Knope',
@@ -370,21 +374,21 @@ export const casesMetrics: CasesMetrics = {
 };
 
 export const basicPush = {
-  connectorId: '123',
-  connectorName: 'connector name',
+  connectorId: pushConnectorId,
+  connectorName: 'My SN connector',
   externalId: 'external_id',
   externalTitle: 'external title',
   externalUrl: 'basicPush.com',
-  pushedAt: basicUpdatedAt,
+  pushedAt: basicPushedAt,
   pushedBy: elasticUser,
 };
 
 export const pushedCase: Case = {
   ...basicCase,
   connector: {
-    id: '123',
-    name: 'My Connector',
-    type: ConnectorTypes.jira,
+    id: pushConnectorId,
+    name: 'My SN connector',
+    type: ConnectorTypes.serviceNowITSM,
     fields: null,
   },
   externalService: basicPush,
@@ -539,10 +543,9 @@ export const casesStatusSnake: CasesStatusResponse = {
   count_open_cases: 20,
 };
 
-export const pushConnectorId = '123';
 export const pushSnake = {
   connector_id: pushConnectorId,
-  connector_name: 'connector name',
+  connector_name: 'My SN connector',
   external_id: 'external_id',
   external_title: 'external title',
   external_url: 'basicPush.com',
@@ -550,16 +553,16 @@ export const pushSnake = {
 
 export const basicPushSnake = {
   ...pushSnake,
-  pushed_at: basicUpdatedAt,
+  pushed_at: basicPushedAt,
   pushed_by: elasticUserSnake,
 };
 
 export const pushedCaseSnake = {
   ...basicCaseSnake,
   connector: {
-    id: '123',
-    name: 'My Connector',
-    type: ConnectorTypes.jira,
+    id: pushConnectorId,
+    name: 'My SN connector',
+    type: ConnectorTypes.serviceNowITSM,
     fields: null,
   },
   external_service: { ...basicPushSnake, connector_id: pushConnectorId },
@@ -605,11 +608,11 @@ export const getUserAction = (
 
   const externalService = {
     connectorId: pushConnectorId,
-    connectorName: 'connector name',
+    connectorName: 'My SN connector',
     externalId: 'external_id',
     externalTitle: 'external title',
     externalUrl: 'basicPush.com',
-    pushedAt: basicUpdatedAt,
+    pushedAt: basicPushedAt,
     pushedBy: elasticUser,
   };
 
@@ -667,6 +670,7 @@ export const getUserAction = (
     case ActionTypes.pushed:
       return {
         ...commonProperties,
+        createdAt: basicPushedAt,
         type: ActionTypes.pushed,
         payload: {
           externalService,
@@ -878,6 +882,12 @@ export const findCaseUserActionsResponse: FindCaseUserActions = {
   userActions: [...caseUserActionsWithRegisteredAttachments],
 };
 
+export const getCaseUserActionsStatsResponse: CaseUserActionsStats = {
+  total: 20,
+  totalComments: 10,
+  totalOtherActions: 10,
+};
+
 // components tests
 export const useGetCasesMockState = {
   data: allCases,
@@ -955,3 +965,110 @@ export const getPersistableStateAttachment = (
     ...viewObject,
   }),
 });
+
+export const getCaseUsersMockResponse = (): CaseUsers => {
+  return {
+    participants: [
+      {
+        user: {
+          email: 'participant_1@elastic.co',
+          full_name: 'Participant 1',
+          username: 'participant_1',
+        },
+      },
+      {
+        user: {
+          email: 'participant_2@elastic.co',
+          full_name: null,
+          username: 'participant_2',
+        },
+      },
+      {
+        user: {
+          email: null,
+          full_name: null,
+          username: 'participant_3',
+        },
+      },
+      {
+        user: {
+          email: null,
+          full_name: null,
+          username: 'participant_4',
+        },
+        uid: 'participant_4_uid',
+        avatar: { initials: 'P4' },
+      },
+      {
+        user: {
+          email: 'participant_5@elastic.co',
+          full_name: 'Participant 5',
+          username: 'participant_5',
+        },
+        uid: 'participant_5_uid',
+      },
+    ],
+    reporter: {
+      user: {
+        email: 'reporter_1@elastic.co',
+        full_name: 'Reporter 1',
+        username: 'reporter_1',
+      },
+      uid: 'reporter_1_uid',
+      avatar: { initials: 'R1' },
+    },
+
+    assignees: [
+      {
+        user: {
+          email: null,
+          full_name: null,
+          username: null,
+        },
+        uid: 'u_62h24XVQzG4-MuH1-DqPmookrJY23aRa9h4fyULR6I8_0',
+      },
+      {
+        user: {
+          email: null,
+          full_name: null,
+          username: 'elastic',
+        },
+        uid: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+      },
+      {
+        user: {
+          email: 'fuzzy_marten@profiles.elastic.co',
+          full_name: 'Fuzzy Marten',
+          username: 'fuzzy_marten',
+        },
+        uid: 'u_3OgKOf-ogtr8kJ5B0fnRcqzXs2aQQkZLtzKEEFnKaYg_0',
+      },
+      {
+        user: {
+          email: 'misty_mackerel@profiles.elastic.co',
+          full_name: 'Misty Mackerel',
+          username: 'misty_mackerel',
+        },
+        uid: 'u_BXf_iGxcnicv4l-3-ER7I-XPpfanAFAap7uls86xV7A_0',
+      },
+    ],
+    unassignedUsers: [
+      {
+        user: {
+          email: '',
+          full_name: '',
+          username: 'cases_no_connectors',
+        },
+        uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+      },
+      {
+        user: {
+          email: 'valid_chimpanzee@profiles.elastic.co',
+          full_name: 'Valid Chimpanzee',
+          username: 'valid_chimpanzee',
+        },
+        uid: 'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
+      },
+    ],
+  };
+};

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import { CommentResponseAlertsType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { deleteAllCaseItems, getComment } from '../../../../common/lib/utils';
+import { deleteAllCaseItems, getComment } from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -21,11 +21,16 @@ export default function createGetTests({ getService }: FtrProviderContext) {
   describe('migrations', () => {
     describe('7.11.0', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
+        );
+        await deleteAllCaseItems(es);
       });
 
       it('7.11.0 migrates cases comments', async () => {

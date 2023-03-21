@@ -23,7 +23,7 @@ import {
   createLegacyRuleAction,
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getLegacyActionSO,
   getSimpleMlRule,
@@ -31,7 +31,7 @@ import {
   getSimpleRuleOutput,
   getSlackAction,
   getWebHookAction,
-  installPrePackagedRules,
+  installMockPrebuiltRules,
   removeServerGeneratedProperties,
 } from '../../utils';
 
@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     it('should export rules', async () => {
@@ -106,6 +106,101 @@ export default ({ getService }: FtrProviderContext): void => {
         missing_exception_lists_count: 0,
         missing_rules: [],
         missing_rules_count: 0,
+        excluded_action_connection_count: 0,
+        excluded_action_connections: [],
+        exported_action_connector_count: 0,
+        missing_action_connection_count: 0,
+        missing_action_connections: [],
+      });
+    });
+    it('should export rules with actions connectors', async () => {
+      // create new actions
+      const webHookAction = await createWebHookConnector();
+
+      const defaultRuleAction = {
+        id: webHookAction.id,
+        action_type_id: '.webhook',
+        group: 'default',
+        params: {
+          body: '{"test":"a default action"}',
+        },
+      };
+
+      const ruleId = 'rule-1';
+      await createRule(supertest, log, {
+        ...getSimpleRule(ruleId),
+        actions: [defaultRuleAction],
+      });
+      const exportedConnectors = {
+        attributes: {
+          actionTypeId: '.webhook',
+          config: {
+            hasAuth: true,
+            method: 'post',
+            url: 'http://localhost',
+          },
+          isMissingSecrets: true,
+          name: 'Some connector',
+          secrets: {},
+        },
+        coreMigrationVersion: '8.7.0',
+        id: webHookAction.id,
+        migrationVersion: {
+          action: '8.3.0',
+        },
+        references: [],
+        type: 'action',
+      };
+
+      const { body } = await postBulkAction()
+        .send({ query: '', action: BulkActionType.export })
+        .expect(200)
+        .expect('Content-Type', 'application/ndjson')
+        .expect('Content-Disposition', 'attachment; filename="rules_export.ndjson"')
+        .parse(binaryToString);
+
+      const [ruleJson, connectorsJson, exportDetailsJson] = body.toString().split(/\n/);
+
+      const rule = removeServerGeneratedProperties(JSON.parse(ruleJson));
+      expect(rule).to.eql({
+        ...getSimpleRuleOutput(),
+        throttle: 'rule',
+        actions: [
+          {
+            action_type_id: '.webhook',
+            group: 'default',
+            id: webHookAction.id,
+            params: {
+              body: '{"test":"a default action"}',
+            },
+            uuid: rule.actions[0].uuid,
+          },
+        ],
+      });
+      const { attributes, id, type } = JSON.parse(connectorsJson);
+      expect(attributes.actionTypeId).to.eql(exportedConnectors.attributes.actionTypeId);
+      expect(id).to.eql(exportedConnectors.id);
+      expect(type).to.eql(exportedConnectors.type);
+      expect(attributes.name).to.eql(exportedConnectors.attributes.name);
+      expect(attributes.secrets).to.eql(exportedConnectors.attributes.secrets);
+      expect(attributes.isMissingSecrets).to.eql(exportedConnectors.attributes.isMissingSecrets);
+      const exportDetails = JSON.parse(exportDetailsJson);
+      expect(exportDetails).to.eql({
+        exported_exception_list_count: 0,
+        exported_exception_list_item_count: 0,
+        exported_count: 2,
+        exported_rules_count: 1,
+        missing_exception_list_item_count: 0,
+        missing_exception_list_items: [],
+        missing_exception_lists: [],
+        missing_exception_lists_count: 0,
+        missing_rules: [],
+        missing_rules_count: 0,
+        excluded_action_connection_count: 0,
+        excluded_action_connections: [],
+        exported_action_connector_count: 1,
+        missing_action_connection_count: 0,
+        missing_action_connections: [],
       });
     });
 
@@ -231,6 +326,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
+          uuid: ruleBody.actions[0].uuid,
         },
       ]);
     });
@@ -300,6 +396,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
+          uuid: ruleBody.actions[0].uuid,
         },
       ]);
     });
@@ -390,6 +487,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
+            uuid: rule.actions[0].uuid,
           },
         ]);
       });
@@ -1019,6 +1117,7 @@ export default ({ getService }: FtrProviderContext): void => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
+            uuid: setTagsRule.actions[0].uuid,
           },
         ]);
       });
@@ -1224,7 +1323,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ];
         cases.forEach(({ type, value }) => {
           it(`should return error when trying to apply "${type}" edit action to prebuilt rule`, async () => {
-            await installPrePackagedRules(supertest, es, log);
+            await installMockPrebuiltRules(supertest, es);
             const prebuiltRule = await fetchPrebuiltRule();
 
             const { body } = await postBulkAction()
@@ -1302,6 +1401,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 ...webHookActionMock,
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
+                uuid: body.attributes.results.updated[0].actions[0].uuid,
               },
             ];
 
@@ -1358,6 +1458,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 ...webHookActionMock,
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
+                uuid: body.attributes.results.updated[0].actions[0].uuid,
               },
             ];
 
@@ -1450,6 +1551,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 ...webHookActionMock,
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
+                uuid: body.attributes.results.updated[0].actions[0].uuid,
               },
             ];
 
@@ -1504,11 +1606,12 @@ export default ({ getService }: FtrProviderContext): void => {
               .expect(200);
 
             const expectedRuleActions = [
-              defaultRuleAction,
+              { ...defaultRuleAction, uuid: body.attributes.results.updated[0].actions[0].uuid },
               {
                 ...webHookActionMock,
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
+                uuid: body.attributes.results.updated[0].actions[1].uuid,
               },
             ];
 
@@ -1571,11 +1674,12 @@ export default ({ getService }: FtrProviderContext): void => {
               .expect(200);
 
             const expectedRuleActions = [
-              defaultRuleAction,
+              { ...defaultRuleAction, uuid: body.attributes.results.updated[0].actions[0].uuid },
               {
                 ...slackConnectorMockProps,
                 id: slackConnector.id,
                 action_type_id: '.slack',
+                uuid: body.attributes.results.updated[0].actions[1].uuid,
               },
             ];
 
@@ -1625,12 +1729,16 @@ export default ({ getService }: FtrProviderContext): void => {
               .expect(200);
 
             // Check that the updated rule is returned with the response
-            expect(body.attributes.results.updated[0].actions).to.eql([defaultRuleAction]);
+            expect(body.attributes.results.updated[0].actions).to.eql([
+              { ...defaultRuleAction, uuid: createdRule.actions[0].uuid },
+            ]);
 
             // Check that the updates have been persisted
             const { body: readRule } = await fetchRule(ruleId).expect(200);
 
-            expect(readRule.actions).to.eql([defaultRuleAction]);
+            expect(readRule.actions).to.eql([
+              { ...defaultRuleAction, uuid: createdRule.actions[0].uuid },
+            ]);
           });
 
           it('should change throttle if actions list in payload is empty', async () => {
@@ -1690,7 +1798,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ];
           cases.forEach(({ type }) => {
             it(`should apply "${type}" rule action to prebuilt rule`, async () => {
-              await installPrePackagedRules(supertest, es, log);
+              await installMockPrebuiltRules(supertest, es);
               const prebuiltRule = await fetchPrebuiltRule();
               const webHookConnector = await createWebHookConnector();
 
@@ -1722,6 +1830,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   ...webHookActionMock,
                   id: webHookConnector.id,
                   action_type_id: '.webhook',
+                  uuid: editedRule.actions[0].uuid,
                 },
               ]);
               // version of prebuilt rule should not change
@@ -1735,6 +1844,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   ...webHookActionMock,
                   id: webHookConnector.id,
                   action_type_id: '.webhook',
+                  uuid: readRule.actions[0].uuid,
                 },
               ]);
               expect(prebuiltRule.version).to.be(readRule.version);
@@ -1744,7 +1854,7 @@ export default ({ getService }: FtrProviderContext): void => {
           // if rule action is applied together with another edit action, that can't be applied to prebuilt rule (for example: tags action)
           // bulk edit request should return error
           it(`should return error if one of edit action is not eligible for prebuilt rule`, async () => {
-            await installPrePackagedRules(supertest, es, log);
+            await installMockPrebuiltRules(supertest, es);
             const prebuiltRule = await fetchPrebuiltRule();
             const webHookConnector = await createWebHookConnector();
 

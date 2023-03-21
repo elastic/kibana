@@ -5,74 +5,90 @@
  * 2.0.
  */
 
-import { checkResults } from '../../tasks/live_query';
+import {
+  addLiveQueryToCase,
+  checkActionItemsInResults,
+  viewRecentCaseAndCheckResults,
+} from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { login } from '../../tasks/login';
-import { ROLES } from '../../test';
+import { ROLE, login } from '../../tasks/login';
+import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
 
 describe('Add to Cases', () => {
-  describe('observability', () => {
-    before(() => {
-      runKbnArchiverScript(ArchiverMethod.LOAD, 'case_observability');
-      login(ROLES.soc_manager);
-      navigateTo('/app/osquery');
-    });
+  let liveQueryId: string;
+  let liveQueryQuery: string;
 
-    after(() => {
-      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'case_observability');
-    });
-    it('should add result a case and not have add to timeline in result', () => {
-      cy.waitForReact();
-      cy.react('CustomItemAction', {
-        props: { index: 1 },
-      }).click();
-      cy.contains('Live query details');
-      cy.contains('Add to Case').click();
-      cy.contains('Select case');
-      cy.contains(/Select$/).click();
-      cy.contains('Test Obs case has been updated');
-      cy.visit('/app/observability/cases');
-      cy.contains('Test Obs case').click();
-      checkResults();
-      cy.contains('attached Osquery results');
-      cy.contains('select * from uptime;');
-      cy.contains('View in Discover').should('exist');
-      cy.contains('View in Lens').should('exist');
-      cy.contains('Add to Case').should('not.exist');
-      cy.contains('Add to timeline investigation').should('not.exist');
+  before(() => {
+    loadLiveQuery({
+      agent_all: true,
+      query: "SELECT * FROM os_version where name='Ubuntu';",
+    }).then((liveQuery) => {
+      liveQueryId = liveQuery.action_id;
+      liveQueryQuery = liveQuery.queries[0].query;
     });
   });
-  describe('security', () => {
+
+  describe('observability', () => {
+    let caseId: string;
+    let caseTitle: string;
+
     before(() => {
-      runKbnArchiverScript(ArchiverMethod.LOAD, 'case_security');
-      login(ROLES.soc_manager);
+      loadCase('observability').then((caseInfo) => {
+        caseId = caseInfo.id;
+        caseTitle = caseInfo.title;
+      });
+      login(ROLE.soc_manager);
       navigateTo('/app/osquery');
     });
 
     after(() => {
-      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'case_security');
+      cleanupCase(caseId);
+    });
+
+    it('should add result a case and not have add to timeline in result', () => {
+      addLiveQueryToCase(liveQueryId, caseId);
+      cy.contains(`${caseTitle} has been updated`);
+      viewRecentCaseAndCheckResults();
+
+      cy.contains(liveQueryQuery);
+      checkActionItemsInResults({
+        lens: true,
+        discover: true,
+        cases: false,
+        timeline: false,
+      });
+    });
+  });
+
+  describe('security', () => {
+    let caseId: string;
+    let caseTitle: string;
+
+    before(() => {
+      loadCase('securitySolution').then((caseInfo) => {
+        caseId = caseInfo.id;
+        caseTitle = caseInfo.title;
+      });
+      login(ROLE.soc_manager);
+      navigateTo('/app/osquery');
+    });
+
+    after(() => {
+      cleanupCase(caseId);
     });
 
     it('should add result a case and have add to timeline in result', () => {
-      cy.waitForReact();
-      cy.react('CustomItemAction', {
-        props: { index: 1 },
-      }).click();
-      cy.contains('Live query details');
-      cy.contains('Add to Case').click();
-      cy.contains('Select case');
-      cy.contains(/Select$/).click();
-      cy.contains('Test Security Case has been updated');
-      cy.visit('/app/security/cases');
-      cy.contains('Test Security Case').click();
-      checkResults();
-      cy.contains('attached Osquery results');
-      cy.contains('select * from uptime;');
-      cy.contains('View in Discover').should('exist');
-      cy.contains('View in Lens').should('exist');
-      cy.contains('Add to Case').should('not.exist');
-      cy.contains('Add to timeline investigation').should('exist');
+      addLiveQueryToCase(liveQueryId, caseId);
+      cy.contains(`${caseTitle} has been updated`);
+      viewRecentCaseAndCheckResults();
+
+      cy.contains("SELECT * FROM os_version where name='Ubuntu';");
+      checkActionItemsInResults({
+        lens: true,
+        discover: true,
+        cases: false,
+        timeline: true,
+      });
     });
   });
 });

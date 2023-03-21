@@ -191,40 +191,130 @@ describe('orderServiceItems', () => {
   });
 
   describe('when sorting by alphabetical fields', () => {
-    const sortedItems = orderServiceItems({
-      primarySortField: ServiceInventoryFieldName.ServiceName,
-      sortDirection: 'asc',
-      tiebreakerField: ServiceInventoryFieldName.ServiceName,
-      items: [
-        {
-          serviceName: 'd-service',
-          healthStatus: ServiceHealthStatus.unknown,
-        },
-        {
-          serviceName: 'a-service',
-          healthStatus: ServiceHealthStatus.unknown,
-        },
-        {
-          serviceName: 'b-service',
-          healthStatus: ServiceHealthStatus.unknown,
-        },
-        {
-          serviceName: 'c-service',
-          healthStatus: ServiceHealthStatus.unknown,
-        },
-        {
-          serviceName: '0-service',
-          healthStatus: ServiceHealthStatus.unknown,
-        },
-      ],
+    it('sorts correctly', () => {
+      const sortedItems = orderServiceItems({
+        primarySortField: ServiceInventoryFieldName.ServiceName,
+        sortDirection: 'asc',
+        tiebreakerField: ServiceInventoryFieldName.ServiceName,
+        items: [
+          {
+            serviceName: 'd-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: 'a-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: 'b-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: 'c-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: '0-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+        ],
+      });
+
+      expect(sortedItems.map((item) => item.serviceName)).toEqual([
+        '0-service',
+        'a-service',
+        'b-service',
+        'c-service',
+        'd-service',
+      ]);
+    });
+  });
+
+  describe('when sorting by alphabetical fields, service overflow bucket always appears 1st', () => {
+    it('asc', () => {
+      const sortedItems = orderServiceItems({
+        primarySortField: ServiceInventoryFieldName.ServiceName,
+        sortDirection: 'asc',
+        tiebreakerField: ServiceInventoryFieldName.ServiceName,
+        items: [
+          {
+            serviceName: 'd-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: 'a-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: 'b-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: 'c-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: '0-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: '_other',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+        ],
+      });
+
+      expect(sortedItems.map((item) => item.serviceName)).toEqual([
+        '_other',
+        '0-service',
+        'a-service',
+        'b-service',
+        'c-service',
+        'd-service',
+      ]);
     });
 
-    expect(sortedItems.map((item) => item.serviceName)).toEqual([
-      '0-service',
-      'a-service',
-      'b-service',
-      'c-service',
-      'd-service',
-    ]);
+    it('desc', () => {
+      const sortedItems = orderServiceItems({
+        primarySortField: ServiceInventoryFieldName.ServiceName,
+        sortDirection: 'desc',
+        tiebreakerField: ServiceInventoryFieldName.ServiceName,
+        items: [
+          {
+            serviceName: 'd-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: 'a-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: 'b-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: 'c-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: '0-service',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+          {
+            serviceName: '_other',
+            healthStatus: ServiceHealthStatus.unknown,
+          },
+        ],
+      });
+
+      expect(sortedItems.map((item) => item.serviceName)).toEqual([
+        '_other',
+        'd-service',
+        'c-service',
+        'b-service',
+        'a-service',
+        '0-service',
+      ]);
+    });
   });
 });

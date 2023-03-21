@@ -30,7 +30,7 @@ export const uptimeFeature = {
     all: {
       app: ['uptime', 'kibana', 'synthetics'],
       catalogue: ['uptime'],
-      api: ['uptime-read', 'uptime-write', 'lists-all'],
+      api: ['uptime-read', 'uptime-write', 'lists-all', 'rac'],
       savedObject: {
         all: [
           umDynamicSettings.name,
@@ -57,7 +57,7 @@ export const uptimeFeature = {
     read: {
       app: ['uptime', 'kibana', 'synthetics'],
       catalogue: ['uptime'],
-      api: ['uptime-read', 'lists-read'],
+      api: ['uptime-read', 'lists-read', 'rac'],
       savedObject: {
         all: [],
         read: [

@@ -322,6 +322,10 @@ function _generateMappings(
             fieldProps.type = 'alias';
             fieldProps.path = field.path;
             break;
+          case 'date':
+            const dateMappings = generateDateMapping(field);
+            fieldProps = { ...fieldProps, ...dateMappings, type: 'date' };
+            break;
           default:
             fieldProps.type = type;
         }
@@ -419,6 +423,14 @@ function generateWildcardMapping(field: Field): IndexTemplateMapping {
   }
   if (field.ignore_above) {
     mapping.ignore_above = field.ignore_above;
+  }
+  return mapping;
+}
+
+function generateDateMapping(field: Field): IndexTemplateMapping {
+  const mapping: IndexTemplateMapping = {};
+  if (field.date_format) {
+    mapping.format = field.date_format;
   }
   return mapping;
 }

@@ -24,8 +24,6 @@ const defaultProps: Props = {
   sloList: sloList.results,
   loading: false,
   error: false,
-  onDeleted: () => {},
-  onDeleting: () => {},
 };
 
 export const SloListItems = Template.bind({});

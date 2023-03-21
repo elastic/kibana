@@ -18,11 +18,12 @@ import type { RuleToImport } from '../../../../../common/detection_engine/rule_m
 import type {
   AlertSuppression,
   RuleResponse,
+  AlertSuppressionCamel,
 } from '../../../../../common/detection_engine/rule_schema';
 
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesActionsSavedObject } from '../../rule_actions_legacy';
-import type { AlertSuppressionCamel, RuleAlertType, RuleParams } from '../../rule_schema';
+import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
@@ -95,6 +96,23 @@ export const transformAlertsToRules = (
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
 ): RuleResponse[] => {
   return rules.map((rule) => internalRuleToAPIResponse(rule, legacyRuleActions[rule.id]));
+};
+
+/**
+ * Transforms a rule object to exportable format. Exportable format shouldn't contain runtime fields like
+ * `execution_summary`
+ */
+export const transformRuleToExportableFormat = (
+  rule: RuleResponse
+): Omit<RuleResponse, 'execution_summary'> => {
+  const exportedRule = {
+    ...rule,
+  };
+
+  // Fields containing runtime information shouldn't be exported. It causes import failures.
+  delete exportedRule.execution_summary;
+
+  return exportedRule;
 };
 
 export const transformFindAlerts = (
@@ -360,6 +378,7 @@ export const convertAlertSuppressionToCamel = (
   input
     ? {
         groupBy: input.group_by,
+        duration: input.duration,
       }
     : undefined;
 
@@ -369,5 +388,6 @@ export const convertAlertSuppressionToSnake = (
   input
     ? {
         group_by: input.groupBy,
+        duration: input.duration,
       }
     : undefined;

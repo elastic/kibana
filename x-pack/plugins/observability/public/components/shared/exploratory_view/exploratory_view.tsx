@@ -115,6 +115,7 @@ export function ExploratoryView({
                 <EuiFlexGroup alignItems="center" gutterSize="none">
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-test-subj="o11yExploratoryViewButton"
                       size="xs"
                       {...(hiddenPanel === 'chartPanel'
                         ? { iconType: 'arrowRight' }

@@ -16,18 +16,19 @@ import {
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { OverviewErrorsSparklines } from './overview_errors_sparklines';
-import { useAbsoluteDate } from '../../../../../hooks';
+import { useRefreshedRange, useGetUrlParams } from '../../../../../hooks';
 import { OverviewErrorsCount } from './overview_errors_count';
-import { ErrorsLink } from '../../../../common/links/view_errors';
-import { selectOverviewStatus } from '../../../../../state';
 
 export function OverviewErrors() {
   const { status } = useSelector(selectOverviewStatus);
 
-  const loading = !status?.enabledIds || status?.enabledIds.length === 0;
+  const loading = !status?.allIds || status?.allIds.length === 0;
 
-  const { from, to } = useAbsoluteDate({ from: 'now-6h', to: 'now' });
+  const { from, to } = useRefreshedRange(6, 'hours');
+
+  const params = useGetUrlParams();
 
   return (
     <EuiPanel hasShadow={false} hasBorder>
@@ -40,13 +41,20 @@ export function OverviewErrors() {
       ) : (
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>
-            <OverviewErrorsCount from={from} to={to} monitorId={status?.enabledIds ?? []} />
+            <OverviewErrorsCount
+              from={from}
+              to={to}
+              monitorIds={status?.enabledMonitorQueryIds ?? []}
+              locations={params.locations}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
-            <OverviewErrorsSparklines from={from} to={to} monitorId={status?.enabledIds ?? []} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} css={{ alignSelf: 'center' }}>
-            <ErrorsLink disabled={true} />
+            <OverviewErrorsSparklines
+              from={from}
+              to={to}
+              monitorIds={status?.enabledMonitorQueryIds ?? []}
+              locations={params.locations}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

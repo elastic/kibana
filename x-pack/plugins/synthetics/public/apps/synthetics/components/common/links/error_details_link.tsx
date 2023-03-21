@@ -16,14 +16,20 @@ export const ErrorDetailsLink = ({
   stateId,
   configId,
   label,
+  locationId,
 }: {
   configId: string;
   stateId: string;
   label: string;
+  locationId?: string;
 }) => {
-  const link = useErrorDetailsLink({ configId, stateId });
+  const link = useErrorDetailsLink({ configId, stateId, locationId });
 
-  return <EuiLink href={link}>{label ?? VIEW_DETAILS}</EuiLink>;
+  return (
+    <EuiLink data-test-subj="syntheticsErrorDetailsLinkLink" href={link}>
+      {label ?? VIEW_DETAILS}
+    </EuiLink>
+  );
 };
 
 export const ErrorDetailsButton = ({
@@ -35,10 +41,17 @@ export const ErrorDetailsButton = ({
   stateId: string;
   label?: string;
 }) => {
-  const link = useErrorDetailsLink({ configId, stateId });
+  const selectedLocation = useSelectedLocation();
+  const link = useErrorDetailsLink({ configId, stateId, locationId: selectedLocation?.id });
 
   return (
-    <EuiButtonEmpty flush="left" iconType="alert" color="danger" href={link}>
+    <EuiButtonEmpty
+      data-test-subj="syntheticsErrorDetailsButtonButton"
+      flush="left"
+      iconType="warning"
+      color="danger"
+      href={link}
+    >
       {label ?? VIEW_DETAILS}
     </EuiButtonEmpty>
   );
@@ -47,18 +60,19 @@ export const ErrorDetailsButton = ({
 export const useErrorDetailsLink = ({
   stateId,
   configId,
+  locationId,
 }: {
   configId: string;
   stateId: string;
+  locationId?: string;
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
-  const selectedLocation = useSelectedLocation();
 
   return getErrorDetailsUrl({
     basePath,
     configId,
     stateId,
-    locationId: selectedLocation?.id,
+    locationId,
   });
 };
 

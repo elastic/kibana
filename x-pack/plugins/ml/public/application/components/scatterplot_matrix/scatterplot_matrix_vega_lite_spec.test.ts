@@ -26,7 +26,7 @@ import {
 
 describe('getColorSpec()', () => {
   it('should return only user selection conditions and the default color for non-outlier specs', () => {
-    const colorSpec = getColorSpec(euiThemeLight);
+    const colorSpec = getColorSpec(false, euiThemeLight);
 
     expect(colorSpec).toEqual({
       condition: [{ selection: USER_SELECTION }, { selection: SINGLE_POINT_CLICK }],
@@ -35,7 +35,7 @@ describe('getColorSpec()', () => {
   });
 
   it('should return user selection condition and conditional spec for outliers', () => {
-    const colorSpec = getColorSpec(euiThemeLight, 'outlier_score');
+    const colorSpec = getColorSpec(false, euiThemeLight, 'outlier_score');
 
     expect(colorSpec).toEqual({
       condition: {
@@ -53,7 +53,13 @@ describe('getColorSpec()', () => {
   it('should return user selection condition and a field based spec for non-outlier specs with legendType supplied', () => {
     const colorName = 'the-color-field';
 
-    const colorSpec = getColorSpec(euiThemeLight, undefined, colorName, LEGEND_TYPES.NOMINAL);
+    const colorSpec = getColorSpec(
+      false,
+      euiThemeLight,
+      undefined,
+      colorName,
+      LEGEND_TYPES.NOMINAL
+    );
 
     expect(colorSpec).toEqual({
       condition: {
@@ -70,10 +76,18 @@ describe('getColorSpec()', () => {
 });
 
 describe('getScatterplotMatrixVegaLiteSpec()', () => {
+  const forCustomLink = false;
+
   it('should return the default spec for non-outliers without a legend', () => {
     const data = [{ x: 1, y: 1 }];
 
-    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(data, [], ['x', 'y'], euiThemeLight);
+    const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(
+      forCustomLink,
+      data,
+      [],
+      ['x', 'y'],
+      euiThemeLight
+    );
     const specForegroundLayer = vegaLiteSpec.spec.layer[0];
 
     // A valid Vega Lite spec shouldn't throw an error when compiled.
@@ -103,6 +117,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     const data = [{ x: 1, y: 1 }];
 
     const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(
+      forCustomLink,
       data,
       [],
       ['x', 'y'],
@@ -151,6 +166,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     const data = [{ x: 1, y: 1 }];
 
     const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(
+      forCustomLink,
       data,
       [],
       ['x', 'y'],
@@ -196,6 +212,7 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     const data = [{ ['x.a']: 1, ['y[a]']: 1 }];
 
     const vegaLiteSpec = getScatterplotMatrixVegaLiteSpec(
+      forCustomLink,
       data,
       [],
       ['x.a', 'y[a]'],

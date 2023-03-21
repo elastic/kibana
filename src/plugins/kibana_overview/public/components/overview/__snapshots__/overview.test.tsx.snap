@@ -457,6 +457,7 @@ exports[`Overview renders correctly when there is no user data view 1`] = `
           "navigateToUrl": [MockFunction],
         },
         "chrome": undefined,
+        "customBranding": undefined,
         "docLinks": Object {
           "links": Object {
             "kibana": Object {

@@ -245,7 +245,8 @@ const patchQueryParams = (
     responseActions:
       params.response_actions?.map(transformRuleToAlertResponseAction) ??
       existingRule.responseActions,
-    alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -264,7 +265,8 @@ const patchSavedQueryParams = (
     responseActions:
       params.response_actions?.map(transformRuleToAlertResponseAction) ??
       existingRule.responseActions,
-    alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -690,6 +692,7 @@ export const internalRuleToAPIResponse = (
     tags: rule.tags,
     interval: rule.schedule.interval,
     enabled: rule.enabled,
+    revision: rule.revision,
     // Security solution shared rule params
     ...commonParamsCamelToSnake(rule.params),
     // Type specific security solution rule params

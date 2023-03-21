@@ -51,6 +51,7 @@ import {
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
+import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
@@ -206,7 +207,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   }, [sortingColumns]);
 
   useEffect(() => {
-    setHeaderActions?.([<RulesListDocLink />]);
+    setHeaderActions?.([<RulesSettingsLink />, <RulesListDocLink />]);
     return () => setHeaderActions?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -497,7 +498,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
             const actionErrors = runLog?.num_errored_actions as number;
             if (actionErrors) {
               return (
-                <Component onClick={() => onFlyoutOpen(runLog)} iconType="alert">
+                <Component onClick={() => onFlyoutOpen(runLog)} iconType="warning">
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.viewActionErrors"
                     defaultMessage="View action errors"

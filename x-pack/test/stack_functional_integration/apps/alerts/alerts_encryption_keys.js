@@ -77,6 +77,8 @@ export default ({ getPageObjects, getService }) => {
     await testSubjects.setValue('comboBoxInput', toWayne(process.env.REPORTING_TEST_EMAILS));
     await testSubjects.setValue('subjectInput', name);
     await testSubjects.setValue('messageTextArea', name);
+    //timing issue sometimes happens with the combobox so we just try to set the subjectInput again
+    await testSubjects.setValue('subjectInput', name);
     await find.clickByCssSelector('[data-test-subj="executeActionButton"]:not(disabled)');
   }
 };

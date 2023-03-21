@@ -1,0 +1,11 @@
+{
+  "type": "plugin",
+  "id": "@kbn/audit-log-plugin",
+  "owner": "@elastic/kibana-security",
+  "plugin": {
+    "id": "auditLog",
+    "server": true,
+    "browser": false,
+    "configPath": []
+  }
+}

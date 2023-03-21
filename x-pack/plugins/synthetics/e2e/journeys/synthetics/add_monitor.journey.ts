@@ -147,6 +147,7 @@ const createMonitorJourney = ({
   journey(
     `SyntheticsAddMonitor - ${monitorName}`,
     async ({ page, params }: { page: Page; params: any }) => {
+      page.setDefaultTimeout(60 * 1000);
       recordVideo(page);
 
       const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });

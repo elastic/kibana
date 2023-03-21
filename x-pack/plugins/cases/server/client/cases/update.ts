@@ -51,11 +51,11 @@ import { arraysDifference, getCaseToUpdate } from '../utils';
 import type { AlertService, CasesService } from '../../services';
 import { createCaseError } from '../../common/error';
 import {
-  createAlertUpdateRequest,
+  createAlertUpdateStatusRequest,
   flattenCaseSavedObject,
   isCommentRequestTypeAlert,
 } from '../../common/utils';
-import type { UpdateAlertRequest } from '../alerts/types';
+import type { UpdateAlertStatusRequest } from '../alerts/types';
 import type { CasesClientArgs } from '..';
 import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
@@ -238,14 +238,14 @@ async function updateAlerts({
 
   // create an array of requests that indicate the id, index, and status to update an alert
   const alertsToUpdate = totalAlerts.saved_objects.reduce(
-    (acc: UpdateAlertRequest[], alertComment) => {
+    (acc: UpdateAlertStatusRequest[], alertComment) => {
       if (isCommentRequestTypeAlert(alertComment.attributes)) {
         const status = getSyncStatusForComment({
           alertComment,
           casesToSyncToStatus,
         });
 
-        acc.push(...createAlertUpdateRequest({ comment: alertComment.attributes, status }));
+        acc.push(...createAlertUpdateStatusRequest({ comment: alertComment.attributes, status }));
       }
 
       return acc;

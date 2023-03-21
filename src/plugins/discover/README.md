@@ -25,9 +25,15 @@ One folder for every "route", each folder contains files and folders related onl
 
 Contains all the server-only code.
 
+* **[/sample_data](./server/sample_data)** (Registrations with the Sample Data Registry for Discover saved objects)
+* **[/capabilities_provider](./server/capabilities_provider.ts)** (CapabilitiesProvider definition of capabilities for Core)
+* **[/ui_settings](./server/ui_settings.ts)** (Settings and the default values for UiSettingsServiceSetup )
+* **[/locator](./server/locator)** (Extensions of DiscoverAppLocator for the DiscoverServerPlugin API)
+
 ### [src/plugins/discover/common](./common))
 
 Contains all code shared by client and server.
 
-
-
+* **[/constants](./common/constants.ts)** (General contants)
+* **[/field_types](./common/field_types.ts)** (Field types constants)
+* **[/locator](./common/locator)** (Registration with the URL service for BWC deep-linking to Discover views.)

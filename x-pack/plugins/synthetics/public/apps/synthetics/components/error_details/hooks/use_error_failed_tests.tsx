@@ -57,7 +57,8 @@ export function useErrorFailedTests() {
   return useMemo(() => {
     const failedTests =
       data?.hits.hits?.map((doc) => {
-        return doc._source as Ping;
+        const source = doc._source as any;
+        return { ...source, timestamp: source['@timestamp'] } as Ping;
       }) ?? [];
 
     return {

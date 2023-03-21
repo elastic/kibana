@@ -35,7 +35,7 @@ const NoCasesComponent = ({ recentCasesFilterBy }: NoCasesComp) => {
       return <span data-test-subj="no-cases-assigned-to-me">{i18n.NO_CASES_ASSIGNED_TO_ME}</span>;
     }
 
-    return (
+    return permissions.create ? (
       <>
         <span>{i18n.NO_CASES}</span>
         <LinkAnchor
@@ -45,14 +45,12 @@ const NoCasesComponent = ({ recentCasesFilterBy }: NoCasesComp) => {
         >{` ${i18n.START_A_NEW_CASE}`}</LinkAnchor>
         {'!'}
       </>
+    ) : (
+      <span data-test-subj="no-cases-readonly">{i18n.NO_CASES_READ_ONLY}</span>
     );
   };
 
-  return permissions.create ? (
-    getNoCasesMessage()
-  ) : (
-    <span data-test-subj="no-cases-readonly">{i18n.NO_CASES_READ_ONLY}</span>
-  );
+  return getNoCasesMessage();
 };
 
 NoCasesComponent.displayName = 'NoCasesComponent';

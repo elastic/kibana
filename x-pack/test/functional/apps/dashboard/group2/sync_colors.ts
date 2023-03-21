@@ -54,7 +54,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
       await PageObjects.dashboard.clickCreateDashboardPrompt();
       await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
@@ -72,7 +71,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.save('vis1', false, true);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',

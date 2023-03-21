@@ -16,7 +16,7 @@ import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
 import type { OnUpdateFields } from './types';
 
-export const useOnUpdateField = ({ caseData, caseId }: { caseData: Case; caseId: string }) => {
+export const useOnUpdateField = ({ caseData }: { caseData: Case }) => {
   const { isLoading, updateKey: loadingKey, updateCaseProperty } = useUpdateCase();
 
   const onUpdateField = useCallback(

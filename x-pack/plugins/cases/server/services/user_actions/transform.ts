@@ -113,7 +113,7 @@ function legacyTransformToExternalModel(
 }
 
 const addReferenceIdToPayload = (
-  userAction: SavedObject<CaseUserActionAttributes>,
+  userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): CaseUserActionAttributes['payload'] => {
   const connectorId = getConnectorIdFromReferences(userAction);
@@ -175,7 +175,7 @@ const addReferenceIdToPayload = (
 };
 
 function getConnectorIdFromReferences(
-  userAction: SavedObject<CaseUserActionAttributes>
+  userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>
 ): string | null {
   const { references } = userAction;
 

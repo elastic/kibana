@@ -17,7 +17,7 @@ describe('FetchEnginesAPILogic', () => {
     jest.clearAllMocks();
   });
   describe('fetchEnginesAPILogic', () => {
-    it('request list engines api', async () => {
+    it('request list engines api without search query', async () => {
       const promise = Promise.resolve({ result: 'result' });
       http.get.mockReturnValue(promise);
       const result = fetchEngines({
@@ -30,6 +30,32 @@ describe('FetchEnginesAPILogic', () => {
 
       await expect(result).resolves.toEqual({
         result: 'result',
+        params: {
+          from: 0,
+          size: 10,
+        },
+      });
+    });
+    it('request list engines api with search query', async () => {
+      const promise = Promise.resolve({ result: 'result' });
+      http.get.mockReturnValue(promise);
+      const result = fetchEngines({
+        meta: { from: 0, size: 10, total: 0 },
+        searchQuery: 'te',
+      });
+      await nextTick();
+
+      expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/engines', {
+        query: { from: 0, size: 10, q: 'te' },
+      });
+
+      await expect(result).resolves.toEqual({
+        result: 'result',
+        params: {
+          q: 'te',
+          from: 0,
+          size: 10,
+        },
       });
     });
   });

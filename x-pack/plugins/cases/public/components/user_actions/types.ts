@@ -9,8 +9,13 @@ import type { EuiCommentProps } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { ActionTypes, UserActionWithResponse } from '../../../common/api';
-import type { Case, CaseUserActions, Comment, UseFetchAlertData } from '../../containers/types';
-import type { CaseServices } from '../../containers/use_find_case_user_actions';
+import type {
+  Case,
+  CaseConnectors,
+  CaseUserActions,
+  Comment,
+  UseFetchAlertData,
+} from '../../containers/types';
 import type { AddCommentRefObject } from '../add_comment';
 import type { UserActionMarkdownRefObject } from './markdown_form';
 import type { CasesNavigation } from '../links';
@@ -19,22 +24,23 @@ import type { OnUpdateFields } from '../case_view/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import type { CurrentUserProfile } from '../types';
+import type { UserActivityFilter } from '../user_actions_activity_bar/types';
 
 export interface UserActionTreeProps {
-  caseServices: CaseServices;
+  caseConnectors: CaseConnectors;
   caseUserActions: CaseUserActions[];
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
   data: Case;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   actionsNavigation?: ActionsNavigation;
-  isLoadingDescription: boolean;
   isLoadingUserActions: boolean;
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
   onShowAlertDetails: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   statusActionButton: JSX.Element | null;
   useFetchAlertData: UseFetchAlertData;
+  filterOptions: UserActivityFilter;
 }
 
 type UnsupportedUserActionTypes = typeof UNSUPPORTED_ACTION_TYPES[number];
@@ -47,8 +53,8 @@ export interface UserActionBuilderArgs {
   currentUserProfile: CurrentUserProfile;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  caseConnectors: CaseConnectors;
   userAction: CaseUserActions;
-  caseServices: CaseServices;
   comments: Comment[];
   index: number;
   commentRefs: React.MutableRefObject<

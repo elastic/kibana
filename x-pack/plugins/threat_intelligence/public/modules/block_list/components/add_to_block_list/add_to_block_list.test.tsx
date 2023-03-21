@@ -31,10 +31,28 @@ describe('<AddToBlockListContextMenu />', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should render a disabled EuiContextMenuItem', () => {
+  it('should render a disabled EuiContextMenuItem if data is null', () => {
     const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionContextMock();
 
     const mockIndicatorFileHashValue = null;
+    const mockOnClick: () => void = () => window.alert('clicked!');
+
+    const component = render(
+      <SecuritySolutionContext.Provider value={mockSecurityContext}>
+        <BlockListProvider>
+          <AddToBlockListContextMenu data={mockIndicatorFileHashValue} onClick={mockOnClick} />
+        </BlockListProvider>
+      </SecuritySolutionContext.Provider>
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render a disabled EuiContextMenuItem if no write blocklist privilege', () => {
+    const mockSecurityContext: SecuritySolutionPluginContext = getSecuritySolutionContextMock();
+    mockSecurityContext.blockList.canWriteBlocklist = false;
+
+    const mockIndicatorFileHashValue: string = 'abc';
     const mockOnClick: () => void = () => window.alert('clicked!');
 
     const component = render(

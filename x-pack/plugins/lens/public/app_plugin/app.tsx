@@ -41,7 +41,10 @@ import {
   createIndexPatternService,
 } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
-import { filterUserMessages, getApplicationUserMessages } from './get_application_user_messages';
+import {
+  filterAndSortUserMessages,
+  getApplicationUserMessages,
+} from './get_application_user_messages';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -538,10 +541,10 @@ export function App({
   );
 
   const getUserMessages: UserMessagesGetter = (locationId, filterArgs) =>
-    filterUserMessages(
+    filterAndSortUserMessages(
       [...userMessages, ...Object.values(additionalUserMessages)],
       locationId,
-      filterArgs
+      filterArgs ?? {}
     );
 
   const addUserMessages: AddUserMessages = (messages) => {

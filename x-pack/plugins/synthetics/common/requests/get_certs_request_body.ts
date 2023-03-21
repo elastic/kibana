@@ -40,6 +40,7 @@ export const getCertsRequestBody = ({
   from = DEFAULT_FROM,
   sortBy = DEFAULT_SORT,
   direction = DEFAULT_DIRECTION,
+  filters,
 }: GetCertsParams) => {
   const sort = SortFields[sortBy as keyof typeof SortFields];
 
@@ -77,6 +78,7 @@ export const getCertsRequestBody = ({
               }
             : {}),
           filter: [
+            ...(filters ? [filters] : []),
             {
               exists: {
                 field: 'tls.server.hash.sha256',

@@ -9,15 +9,14 @@ import expect from '@kbn/expect';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { validateEvent } from '../../../../spaces_only/tests/alerting/event_log';
+import { validateEvent } from '../../../../spaces_only/tests/alerting/group1/event_log';
 
 // eslint-disable-next-line import/no-default-export
 export default function eventLogTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/147512
-  describe.skip('eventLog', () => {
+  describe('eventLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -65,13 +64,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         const errorEvents = someEvents.filter(
           (event) => event?.kibana?.alerting?.status === 'error'
         );
-        if (errorEvents.length === 0) {
-          throw new Error('no execute/error events yet');
+        if (errorEvents.length < 2) {
+          throw new Error('not enough execute/error events yet');
         }
         return errorEvents;
       });
 
-      const event = events[0];
+      const event = events[1];
       expect(event).to.be.ok();
 
       validateEvent(event, {

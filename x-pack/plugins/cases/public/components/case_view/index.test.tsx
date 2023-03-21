@@ -26,7 +26,7 @@ import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useKibana } from '../../common/lib/kibana';
 import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
-import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import CaseView from '.';
@@ -49,7 +49,7 @@ jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_find_case_user_actions');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/use_get_case_metrics');
-jest.mock('../../containers/configure/use_connectors');
+jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../user_actions/timestamp', () => ({
   UserActionTimestamp: () => <></>,
@@ -62,7 +62,7 @@ const useFetchCaseMock = useGetCase as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
-const useGetConnectorsMock = useGetConnectors as jest.Mock;
+const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useGetTagsMock = useGetTags as jest.Mock;

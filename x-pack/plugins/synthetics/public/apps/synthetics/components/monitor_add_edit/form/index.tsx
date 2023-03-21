@@ -14,11 +14,11 @@ import { getDefaultFormFields, formatDefaultFormValues } from './defaults';
 import { ActionBar } from './submit';
 import { Disclaimer } from './disclaimer';
 
-export const MonitorForm: React.FC<{ defaultValues?: SyntheticsMonitor; space?: string }> = ({
-  children,
-  defaultValues,
-  space,
-}) => {
+export const MonitorForm: React.FC<{
+  defaultValues?: SyntheticsMonitor;
+  space?: string;
+  readOnly?: boolean;
+}> = ({ children, defaultValues, space, readOnly = false }) => {
   const methods = useFormWrapped({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
@@ -43,7 +43,7 @@ export const MonitorForm: React.FC<{ defaultValues?: SyntheticsMonitor; space?: 
       >
         {children}
         <EuiSpacer />
-        <ActionBar />
+        <ActionBar readOnly={readOnly} />
       </EuiForm>
       <Disclaimer />
     </FormProvider>

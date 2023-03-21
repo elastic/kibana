@@ -16,7 +16,9 @@ import {
   EuiDataGridToolBarAdditionalControlsOptions,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { GetInspectQuery } from '../../../types';
 import icon from './assets/illustration_product_no_results_magnifying_glass.svg';
+import { InspectButton } from './toolbar/components/inspect';
 
 const heights = {
   tall: 490,
@@ -30,14 +32,19 @@ const panelStyle = {
 export const EmptyState: React.FC<{
   height?: keyof typeof heights;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
-}> = ({ height = 'tall', controls }) => {
+  getInspectQuery: GetInspectQuery;
+  showInpectButton?: boolean;
+}> = ({ height = 'tall', controls, getInspectQuery, showInpectButton }) => {
   return (
     <EuiPanel color="subdued" data-test-subj="alertsStateTableEmptyState">
-      {controls?.right && (
-        <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>{controls.right}</EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+      <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd">
+        {showInpectButton && (
+          <EuiFlexItem grow={false}>
+            <InspectButton getInspectQuery={getInspectQuery} />
+          </EuiFlexItem>
+        )}
+        {controls?.right && <EuiFlexItem grow={false}>{controls.right}</EuiFlexItem>}
+      </EuiFlexGroup>
       <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={true} style={panelStyle}>

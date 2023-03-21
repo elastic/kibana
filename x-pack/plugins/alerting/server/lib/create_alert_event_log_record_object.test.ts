@@ -191,6 +191,11 @@ describe('createAlertEventLogRecordObject', () => {
           },
         ],
         spaceId: 'default',
+        alertSummary: {
+          new: 2,
+          ongoing: 3,
+          recovered: 1,
+        },
       })
     ).toStrictEqual({
       event: {
@@ -214,6 +219,17 @@ describe('createAlertEventLogRecordObject', () => {
         alerting: {
           action_group_id: 'group 1',
           instance_id: 'test1',
+          summary: {
+            new: {
+              count: 2,
+            },
+            ongoing: {
+              count: 3,
+            },
+            recovered: {
+              count: 1,
+            },
+          },
         },
         saved_objects: [
           {

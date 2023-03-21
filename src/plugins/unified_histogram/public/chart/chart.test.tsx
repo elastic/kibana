@@ -20,7 +20,12 @@ import { HitsCounter } from '../hits_counter';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../__mocks__/data_view';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
-import { Histogram } from './histogram';
+
+let mockUseEditVisualization: jest.Mock | undefined = jest.fn();
+
+jest.mock('./hooks/use_edit_visualization', () => ({
+  useEditVisualization: () => mockUseEditVisualization,
+}));
 
 async function mountComponent({
   noChart,
@@ -28,7 +33,6 @@ async function mountComponent({
   noBreakdown,
   chartHidden = false,
   appendHistogram,
-  onEditVisualization = jest.fn(),
   dataView = dataViewWithTimefieldMock,
 }: {
   noChart?: boolean;
@@ -37,7 +41,6 @@ async function mountComponent({
   chartHidden?: boolean;
   appendHistogram?: ReactElement;
   dataView?: DataView;
-  onEditVisualization?: null | (() => void);
 } = {}) {
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: noHits ? 0 : 2 } } }))
@@ -72,7 +75,6 @@ async function mountComponent({
         },
     breakdown: noBreakdown ? undefined : { field: undefined },
     appendHistogram,
-    onEditVisualization: onEditVisualization || undefined,
     onResetChartHeight: jest.fn(),
     onChartHiddenChange: jest.fn(),
     onTimeIntervalChange: jest.fn(),
@@ -89,6 +91,10 @@ async function mountComponent({
 }
 
 describe('Chart', () => {
+  beforeEach(() => {
+    mockUseEditVisualization = jest.fn();
+  });
+
   test('render when chart is undefined', async () => {
     const component = await mountComponent({ noChart: true });
     expect(
@@ -97,7 +103,8 @@ describe('Chart', () => {
   });
 
   test('render when chart is defined and onEditVisualization is undefined', async () => {
-    const component = await mountComponent({ onEditVisualization: null });
+    mockUseEditVisualization = undefined;
+    const component = await mountComponent();
     expect(
       component.find('[data-test-subj="unifiedHistogramChartOptionsToggle"]').exists()
     ).toBeTruthy();
@@ -133,16 +140,15 @@ describe('Chart', () => {
   });
 
   test('triggers onEditVisualization on click', async () => {
-    const fn = jest.fn();
-    const component = await mountComponent({ onEditVisualization: fn });
+    expect(mockUseEditVisualization).not.toHaveBeenCalled();
+    const component = await mountComponent();
     await act(async () => {
       component
         .find('[data-test-subj="unifiedHistogramEditVisualization"]')
         .first()
         .simulate('click');
     });
-    const lensAttributes = component.find(Histogram).prop('lensAttributes');
-    expect(fn).toHaveBeenCalledWith(lensAttributes);
+    expect(mockUseEditVisualization).toHaveBeenCalled();
   });
 
   it('should render HitsCounter when hits is defined', async () => {

@@ -13,11 +13,11 @@ import { JourneyStep, SyntheticsJourneyApiResponse } from '../../../../../common
 type TabId = 'code' | 'console' | 'stackTrace';
 
 export const StepTabs = ({
-  stepsData,
+  stepsList,
   step,
   loading,
 }: {
-  stepsData?: SyntheticsJourneyApiResponse;
+  stepsList?: SyntheticsJourneyApiResponse['steps'];
   step?: JourneyStep;
   loading: boolean;
 }) => {
@@ -53,6 +53,23 @@ export const StepTabs = ({
       setSelectedTabId('code');
     }
   }, [isFailedStep]);
+
+  const getBrowserConsoles = useCallback(
+    (index: number) => {
+      return stepsList
+        ?.filter(
+          (stepF) =>
+            stepF.synthetics?.type === 'journey/browserconsole' &&
+            stepF.synthetics?.step?.index! === index
+        )
+        .map((stepF) => stepF.synthetics?.payload?.text!);
+    },
+    [stepsList]
+  );
+
+  if (!loading && stepsList?.length === 0) {
+    return null;
+  }
 
   const onSelectedTabChanged = (id: TabId) => {
     setSelectedTabId(id);
@@ -102,19 +119,6 @@ export const StepTabs = ({
         );
     }
   };
-
-  const getBrowserConsoles = useCallback(
-    (index: number) => {
-      return stepsData?.steps
-        .filter(
-          (stepF) =>
-            stepF.synthetics?.type === 'journey/browserconsole' &&
-            stepF.synthetics?.step?.index! === index
-        )
-        .map((stepF) => stepF.synthetics?.payload?.text!);
-    },
-    [stepsData?.steps]
-  );
 
   return (
     <>

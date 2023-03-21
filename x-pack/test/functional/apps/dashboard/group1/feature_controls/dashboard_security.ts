@@ -454,8 +454,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/116881
-    describe.skip('no dashboard privileges', () => {
+    describe('no dashboard privileges', () => {
       before(async () => {
         await security.role.create('no_dashboard_privileges_role', {
           elasticsearch: {

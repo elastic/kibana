@@ -106,7 +106,11 @@ export function useOnSubmit({
   // Form state
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
 
+  // Used to render extension components only when package policy is initialized
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  // Used to initialize the package policy once
   const isInitializedRef = useRef(false);
+
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
   // New package policy state
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
@@ -204,15 +208,25 @@ export function useOnSubmit({
         packageToPackagePolicy(
           packageInfo,
           agentPolicy?.id || '',
-          DEFAULT_PACKAGE_POLICY.namespace,
+          agentPolicy?.namespace || DEFAULT_PACKAGE_POLICY.namespace,
           DEFAULT_PACKAGE_POLICY.name || incrementedName,
           DEFAULT_PACKAGE_POLICY.description,
           integrationToEnable
         )
       );
+      setIsInitialized(true);
     }
     init();
-  }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable]);
+  }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable, isInitialized]);
+
+  useEffect(() => {
+    if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
+      updatePackagePolicy({
+        policy_id: agentPolicy.id,
+        namespace: agentPolicy.namespace,
+      });
+    }
+  }, [packagePolicy, agentPolicy, updatePackagePolicy]);
 
   const onSaveNavigate = useOnSaveNavigate({
     packagePolicy,
@@ -360,7 +374,7 @@ export function useOnSubmit({
     setValidationResults,
     hasAgentPolicyError,
     setHasAgentPolicyError,
-    isInitialized: isInitializedRef.current,
+    isInitialized,
     // TODO check
     navigateAddAgent,
     navigateAddAgentHelp,

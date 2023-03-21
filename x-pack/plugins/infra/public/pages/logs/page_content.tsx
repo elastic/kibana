@@ -8,7 +8,8 @@
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-plugin/public';
 import { AlertDropdown } from '../../alerting/log_threshold';
@@ -20,6 +21,7 @@ import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
+import { NotFoundPage } from '../404';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -89,6 +91,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <RedirectWithQueryParams from={'/analysis'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/log-rate'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/'} to={streamTab.pathname} exact />
+        <Route render={() => <NotFoundPage title="Logs" />} />
       </Switch>
     </>
   );

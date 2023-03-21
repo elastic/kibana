@@ -162,4 +162,25 @@ export const migrations = {
     }),
     references: doc.references || [],
   }),
+  '8.7.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
+    ...doc,
+    ...(doc.attributes && {
+      attributes: Object.keys(doc.attributes).reduce(
+        (acc, key) =>
+          [
+            // owner: Team:Uptime
+            'observability:enableNewSyntheticsView',
+          ].includes(key)
+            ? {
+                ...acc,
+              }
+            : {
+                ...acc,
+                [key]: doc.attributes[key],
+              },
+        {}
+      ),
+    }),
+    references: doc.references || [],
+  }),
 };

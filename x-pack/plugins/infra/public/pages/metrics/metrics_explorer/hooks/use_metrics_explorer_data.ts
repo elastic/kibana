@@ -50,7 +50,7 @@ export function useMetricsExplorerData(
       createPromise: () => {
         setLoading(true);
         if (!from || !to) {
-          return Promise.reject(new Error('Unalble to parse timerange'));
+          return Promise.reject(new Error('Unable to parse timerange'));
         }
         if (!fetchFn) {
           return Promise.reject(new Error('HTTP service is unavailable'));
@@ -58,22 +58,13 @@ export function useMetricsExplorerData(
         if (!source) {
           return Promise.reject(new Error('Source is unavailable'));
         }
-        if (!fetchFn) {
-          return Promise.reject(new Error('HTTP service is unavailable'));
-        }
 
         return fetchFn('/api/infra/metrics_explorer', {
           method: 'POST',
           body: JSON.stringify({
             forceInterval: options.forceInterval,
             dropLastBucket: options.dropLastBucket != null ? options.dropLastBucket : true,
-            metrics:
-              options.aggregation === 'count'
-                ? [{ aggregation: 'count' }]
-                : options.metrics.map((metric) => ({
-                    aggregation: metric.aggregation,
-                    field: metric.field,
-                  })),
+            metrics: options.aggregation === 'count' ? [{ aggregation: 'count' }] : options.metrics,
             groupBy: options.groupBy,
             afterKey,
             limit: options.limit,
@@ -117,6 +108,7 @@ export function useMetricsExplorerData(
       },
       onReject: (e: unknown) => {
         setError(e as Error);
+        setData(null);
         setLoading(false);
       },
     },

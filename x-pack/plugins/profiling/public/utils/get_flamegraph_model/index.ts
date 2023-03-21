@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { ColumnarViewModel } from '@elastic/charts';
-import d3 from 'd3';
-import { compact, sum, uniqueId, range } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import d3 from 'd3';
+import { compact, range, sum, uniqueId } from 'lodash';
 import { createColumnarViewModel } from '../../../common/columnar_view_model';
 import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../../common/flamegraph';
 import { FRAME_TYPE_COLOR_MAP, rgbToRGBA } from '../../../common/frame_type_colors';
@@ -31,6 +31,8 @@ export function getFlamegraphModel({
   colorDanger,
   colorNeutral,
   comparisonMode,
+  comparison,
+  baseline,
 }: {
   primaryFlamegraph?: ElasticFlameGraph;
   comparisonFlamegraph?: ElasticFlameGraph;
@@ -38,6 +40,8 @@ export function getFlamegraphModel({
   colorDanger: string;
   colorNeutral: string;
   comparisonMode: FlameGraphComparisonMode;
+  baseline?: number;
+  comparison?: number;
 }): {
   key: string;
   viewModel: ColumnarViewModel;
@@ -133,7 +137,7 @@ export function getFlamegraphModel({
     const weightComparisonSide =
       comparisonMode === FlameGraphComparisonMode.Relative
         ? 1
-        : primaryFlamegraph.TotalSeconds / comparisonFlamegraph.TotalSeconds;
+        : (comparison ?? 1) / (baseline ?? 1);
 
     primaryFlamegraph.ID.forEach((nodeID, index) => {
       const samples = primaryFlamegraph.CountInclusive[index];

@@ -23,7 +23,6 @@ pageLoadAssetSize:
   controls: 40000
   core: 435325
   crossClusterReplication: 65408
-  customBranding: 16693
   customIntegrations: 22034
   dashboard: 82025
   dashboardEnhanced: 65646
@@ -60,7 +59,7 @@ pageLoadAssetSize:
   files: 22673
   filesManagement: 18683
   fileUpload: 25664
-  fleet: 126917
+  fleet: 142263
   globalSearch: 29696
   globalSearchBar: 50403
   globalSearchProviders: 25554
@@ -125,7 +124,7 @@ pageLoadAssetSize:
   threatIntelligence: 44299
   timelines: 327300
   transform: 41007
-  triggersActionsUi: 120000
+  triggersActionsUi: 135613
   uiActions: 35121
   uiActionsEnhanced: 38494
   unifiedFieldList: 65500

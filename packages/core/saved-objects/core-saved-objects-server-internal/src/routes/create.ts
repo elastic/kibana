@@ -7,18 +7,27 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors, throwIfTypeNotVisibleByAPI } from './utils';
+import {
+  catchAndReturnBoomErrors,
+  logWarnOnExternalRequest,
+  throwIfTypeNotVisibleByAPI,
+} from './utils';
 
 interface RouteDependencies {
+  config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerCreateRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { config, coreUsageData, logger }: RouteDependencies
 ) => {
+  const { allowHttpApiAccess } = config;
   router.post(
     {
       path: '/{type}/{id?}',
@@ -48,6 +57,12 @@ export const registerCreateRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
+      logWarnOnExternalRequest({
+        method: 'post',
+        path: '/api/saved_objects/{type}/{id?}',
+        req,
+        logger,
+      });
       const { type, id } = req.params;
       const { overwrite } = req.query;
       const { attributes, migrationVersion, coreMigrationVersion, references, initialNamespaces } =
@@ -57,9 +72,9 @@ export const registerCreateRoute = (
       usageStatsClient.incrementSavedObjectsCreate({ request: req }).catch(() => {});
 
       const { savedObjects } = await context.core;
-
-      throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
-
+      if (!allowHttpApiAccess) {
+        throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
+      }
       const options = {
         id,
         overwrite,

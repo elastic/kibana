@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Route, Router, Switch, useParams } from 'react-router-dom';
+import { Router, Switch, useParams } from 'react-router-dom';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -18,6 +18,7 @@ import {
   RedirectAppLinks,
 } from '@kbn/kibana-react-plugin/public';
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
 
 import type { Space } from '../../common';
 import type { PluginsStart } from '../plugin';

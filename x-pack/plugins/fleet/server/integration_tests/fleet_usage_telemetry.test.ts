@@ -270,6 +270,50 @@ describe('fleet usage telemetry', () => {
         },
       ],
     });
+
+    await soClient.create(
+      'ingest-outputs',
+      {
+        name: 'output2',
+        type: 'third_type',
+        hosts: ['http://localhost:9300'],
+        is_default: false,
+        is_default_monitoring: false,
+        config_yaml: '',
+        ca_trusted_fingerprint: '',
+        proxy_id: null,
+      },
+      { id: 'output2' }
+    );
+    await soClient.create(
+      'ingest-outputs',
+      {
+        name: 'output3',
+        type: 'logstash',
+        hosts: ['http://localhost:9400'],
+        is_default: false,
+        is_default_monitoring: false,
+        config_yaml: '',
+        ca_trusted_fingerprint: '',
+        proxy_id: null,
+      },
+      { id: 'output3' }
+    );
+
+    await soClient.create('ingest-agent-policies', {
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+      name: 'Another policy',
+      description: 'Policy 2',
+      inactivity_timeout: 1209600,
+      status: 'active',
+      is_managed: false,
+      revision: 2,
+      updated_by: 'system',
+      schema_version: '1.0.0',
+      data_output_id: 'output2',
+      monitoring_output_id: 'output3',
+    });
   });
 
   afterAll(async () => {
@@ -324,7 +368,10 @@ describe('fleet usage telemetry', () => {
             },
           ],
         },
-        agent_policies: { count: 3, output_types: ['elasticsearch'] },
+        agent_policies: {
+          count: 2,
+          output_types: expect.arrayContaining(['elasticsearch', 'logstash', 'third_type']),
+        },
         agent_logs_panics_last_hour: [
           {
             timestamp: expect.any(String),

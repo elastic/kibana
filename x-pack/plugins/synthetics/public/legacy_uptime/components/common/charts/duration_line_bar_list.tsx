@@ -63,7 +63,7 @@ export const DurationAnomaliesBar = ({ anomalies, hiddenLegends }: Props) => {
     };
   };
 
-  const tooltipFormatter: AnnotationTooltipFormatter = (details?: string) => {
+  const TooltipFormatter: AnnotationTooltipFormatter = ({ details }) => {
     return <AnnotationTooltip details={details || ''} />;
   };
 
@@ -76,7 +76,7 @@ export const DurationAnomaliesBar = ({ anomalies, hiddenLegends }: Props) => {
             key={keyIndex}
             id={keyIndex}
             style={getRectStyle(rectAnnotation.color)}
-            renderTooltip={tooltipFormatter}
+            renderTooltip={TooltipFormatter}
           />
         ) : null;
       })}

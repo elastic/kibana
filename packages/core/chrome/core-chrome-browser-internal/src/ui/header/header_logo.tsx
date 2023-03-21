@@ -102,12 +102,14 @@ export function HeaderLogo({ href, navigateToApp, loadingCount$, ...observables 
         defaultMessage: 'Elastic home',
       })}
     >
-      <LoadingIndicator
-        loadingCount$={loadingCount$!}
-        showPlainSpinner={Boolean(logo || customizedLogo)}
-      />
+      <LoadingIndicator loadingCount$={loadingCount$!} customLogo={logo} />
       {customizedLogo ? (
-        <img src={customizedLogo} width="200" height="84" alt="custom mark" />
+        <img
+          src={customizedLogo}
+          className="chrHeaderLogo__mark"
+          style={{ maxWidth: '200px', maxHeight: '84px' }}
+          alt="custom mark"
+        />
       ) : (
         <ElasticMark className="chrHeaderLogo__mark" aria-hidden={true} />
       )}

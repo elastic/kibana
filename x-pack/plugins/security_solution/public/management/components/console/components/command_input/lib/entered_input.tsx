@@ -21,6 +21,8 @@ interface InputCharacter {
   argState: undefined | ArgSelectorState;
 }
 
+const ARGUMENT_NAME_VALUE_SEPARATORS: readonly string[] = ['', ' ', '='];
+
 const createInputCharacter = (overrides: Partial<InputCharacter> = {}): InputCharacter => {
   return {
     value: '',
@@ -42,8 +44,12 @@ const getInputCharacters = (input: string): InputCharacter[] => {
   });
 };
 
-const toReactJsxFragment = (prefix: string, item: InputCharacter, index: number) => {
-  return <span key={`${prefix}.${index}.${item.value ?? '$'}`}>{item.renderValue}</span>;
+const toValueDisplayElement = (prefix: string, item: InputCharacter, index: number) => {
+  return (
+    <span className="chr" key={`${prefix}.${index}.${item.value ?? '$'}`}>
+      {item.renderValue}
+    </span>
+  );
 };
 
 const toInputCharacterDisplayString = (
@@ -87,10 +93,12 @@ export class EnteredInput {
         {
           input: leftOfCursorText,
           items: this.leftOfCursorContent,
+          side: 'left',
         },
         {
           input: rightOfCursorText,
           items: this.rightOfCursorContent,
+          side: 'right',
         },
       ];
 
@@ -100,36 +108,55 @@ export class EnteredInput {
           let argIndex = 0;
 
           // Loop through the input pieces (left and right side of cursor) looking for the Argument name
-          for (const { input, items } of inputPieces) {
+          for (const { input, items, side } of inputPieces) {
             const argNameMatch = `--${argName}`;
             let pos = input.indexOf(argNameMatch);
 
             while (pos > -1) {
               const argChrLength = argNameMatch.length;
-              const replaceValues: InputCharacter[] = Array.from(
-                { length: argChrLength },
-                createInputCharacter
-              );
-              const argState = enteredCommand.argState[argName]?.at(argIndex);
+              const startSearchIndexForNextArg = pos + argChrLength;
+              const charAfterArgName = input.charAt(startSearchIndexForNextArg);
+              const argNameMatchesAsWholeWord =
+                side === 'left' &&
+                charAfterArgName === '' &&
+                // if cursor is at the end of the argument name on the left side of the cursor,
+                // then we check to ensure that the first character of the Right side of the
+                // cursor is one of the separators. Example (| === cursor): `--file|s`
+                ARGUMENT_NAME_VALUE_SEPARATORS.includes(rightOfCursorText.charAt(0));
 
-              replaceValues[0] = createInputCharacter({
-                value: argNameMatch,
-                renderValue: (
-                  <ArgumentSelectorWrapper
-                    argName={argName}
-                    argIndex={argIndex}
-                    argDefinition={argDef as ArgumentSelectorWrapperProps['argDefinition']}
-                  />
-                ),
-                isArgSelector: true,
-                argName,
-                argIndex: argIndex++,
-                argState,
-              });
+              // We need to Ensure that the argument name is not part of a longer word
+              // (example: matches `--file` not `--files`)
+              if (
+                ARGUMENT_NAME_VALUE_SEPARATORS.includes(charAfterArgName) &&
+                (argNameMatchesAsWholeWord ||
+                  (side === 'left' && charAfterArgName !== '') ||
+                  side === 'right')
+              ) {
+                const replaceValues: InputCharacter[] = Array.from(
+                  { length: argChrLength },
+                  createInputCharacter
+                );
+                const argState = enteredCommand.argState[argName]?.at(argIndex);
 
-              items.splice(pos, argChrLength, ...replaceValues);
+                replaceValues[0] = createInputCharacter({
+                  value: argNameMatch,
+                  renderValue: (
+                    <ArgumentSelectorWrapper
+                      argName={argName}
+                      argIndex={argIndex}
+                      argDefinition={argDef as ArgumentSelectorWrapperProps['argDefinition']}
+                    />
+                  ),
+                  isArgSelector: true,
+                  argName,
+                  argIndex: argIndex++,
+                  argState,
+                });
 
-              pos = input.indexOf(argNameMatch, pos + argChrLength);
+                items.splice(pos, argChrLength, ...replaceValues);
+              }
+
+              pos = input.indexOf(argNameMatch, startSearchIndexForNextArg);
             }
           }
         }
@@ -212,11 +239,11 @@ export class EnteredInput {
   }
 
   getLeftOfCursorRenderingContent(): ReactNode {
-    return <>{this.leftOfCursorContent.map(toReactJsxFragment.bind(null, 'left'))}</>;
+    return <>{this.leftOfCursorContent.map(toValueDisplayElement.bind(null, 'left'))}</>;
   }
 
   getRightOfCursorRenderingContent(): ReactNode {
-    return <>{this.rightOfCursorContent.map(toReactJsxFragment.bind(null, 'right'))}</>;
+    return <>{this.rightOfCursorContent.map(toValueDisplayElement.bind(null, 'right'))}</>;
   }
 
   getArgState(): undefined | EnteredCommand['argState'] {

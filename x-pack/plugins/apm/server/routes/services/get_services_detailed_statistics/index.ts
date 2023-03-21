@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import { getServiceDetailedStatsPeriods } from './get_service_transaction_detailed_statistics';
-import { getServiceAggregatedDetailedStatsPeriods } from './get_service_aggregated_transaction_detailed_statistics';
-import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { getServiceTransactionDetailedStatsPeriods } from './get_service_transaction_detailed_statistics';
 
 export async function getServicesDetailedStatistics({
   serviceNames,
   environment,
   kuery,
   apmEventClient,
-  searchAggregatedTransactions,
-  searchAggregatedServiceMetrics,
+  documentType,
+  rollupInterval,
+  bucketSizeInSeconds,
   offset,
   start,
   end,
@@ -26,14 +28,15 @@ export async function getServicesDetailedStatistics({
   environment: string;
   kuery: string;
   apmEventClient: APMEventClient;
-  searchAggregatedTransactions: boolean;
-  searchAggregatedServiceMetrics: boolean;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  bucketSizeInSeconds: number;
   offset?: string;
   start: number;
   end: number;
   randomSampler: RandomSampler;
 }) {
-  const commonProps = {
+  return getServiceTransactionDetailedStatsPeriods({
     serviceNames,
     environment,
     kuery,
@@ -42,14 +45,8 @@ export async function getServicesDetailedStatistics({
     end,
     randomSampler,
     offset,
-  };
-  return searchAggregatedServiceMetrics
-    ? getServiceAggregatedDetailedStatsPeriods({
-        ...commonProps,
-        searchAggregatedServiceMetrics,
-      })
-    : getServiceDetailedStatsPeriods({
-        ...commonProps,
-        searchAggregatedTransactions,
-      });
+    documentType,
+    rollupInterval,
+    bucketSizeInSeconds,
+  });
 }

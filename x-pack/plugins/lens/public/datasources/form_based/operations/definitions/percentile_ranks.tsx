@@ -80,10 +80,16 @@ export const percentileRanksOperation: OperationDefinition<
   filterable: true,
   shiftable: true,
   canReduceTimeRange: true,
-  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
+  getPossibleOperationForField: ({
+    aggregationRestrictions,
+    aggregatable,
+    type: fieldType,
+    timeSeriesMetric,
+  }) => {
     if (
       supportedFieldTypes.includes(fieldType) &&
       aggregatable &&
+      timeSeriesMetric !== 'counter' &&
       (!aggregationRestrictions || !aggregationRestrictions.percentile_ranks)
     ) {
       return {
@@ -166,7 +172,7 @@ export const percentileRanksOperation: OperationDefinition<
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
-      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+      getInvalidFieldMessage(layer, columnId, indexPattern),
       getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   paramEditor: function PercentileParamEditor({

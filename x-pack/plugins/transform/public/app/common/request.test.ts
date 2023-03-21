@@ -5,33 +5,35 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
+
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 
 import { PivotGroupByConfig } from '.';
 
-import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
+import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
+import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
-import { PivotAggsConfig } from './pivot_aggs';
+import type { PivotAggsConfig } from './pivot_aggs';
 import {
   defaultQuery,
   getPreviewTransformRequestBody,
   getCreateTransformRequestBody,
   getCreateTransformSettingsRequestBody,
-  getPivotQuery,
+  getTransformConfigQuery,
   getMissingBucketConfig,
   getRequestPayload,
   isDefaultQuery,
   isMatchAllQuery,
   isSimpleQuery,
   matchAllQuery,
-  PivotQuery,
+  type TransformConfigQuery,
 } from './request';
-import { LatestFunctionConfigUI } from '../../../common/types/transform';
+import type { LatestFunctionConfigUI } from '../../../common/types/transform';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
-const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
+const simpleQuery: TransformConfigQuery = { query_string: { query: 'airline:AAL' } };
 
 const groupByTerms: PivotGroupByConfig = {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
@@ -62,12 +64,12 @@ describe('Transform: Common', () => {
 
   test('isDefaultQuery()', () => {
     expect(isDefaultQuery(defaultQuery)).toBe(true);
-    expect(isDefaultQuery(matchAllQuery)).toBe(false);
+    expect(isDefaultQuery(matchAllQuery)).toBe(true);
     expect(isDefaultQuery(simpleQuery)).toBe(false);
   });
 
-  test('getPivotQuery()', () => {
-    const query = getPivotQuery('the-query');
+  test('getTransformConfigQuery()', () => {
+    const query = getTransformConfigQuery('the-query');
 
     expect(query).toEqual({
       query_string: {
@@ -78,14 +80,18 @@ describe('Transform: Common', () => {
   });
 
   test('getPreviewTransformRequestBody()', () => {
-    const query = getPivotQuery('the-query');
+    const query = getTransformConfigQuery('the-query');
 
-    const request = getPreviewTransformRequestBody('the-data-view-title', query, {
-      pivot: {
-        aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
-        group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
-      },
-    });
+    const request = getPreviewTransformRequestBody(
+      { getIndexPattern: () => 'the-data-view-title' } as DataView,
+      query,
+      {
+        pivot: {
+          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+        },
+      }
+    );
 
     expect(request).toEqual({
       pivot: {
@@ -99,14 +105,46 @@ describe('Transform: Common', () => {
     });
   });
 
-  test('getPreviewTransformRequestBody() with comma-separated index pattern', () => {
-    const query = getPivotQuery('the-query');
-    const request = getPreviewTransformRequestBody('the-data-view-title,the-other-title', query, {
+  test('getPreviewTransformRequestBody() with time field and default query', () => {
+    const query = { query_string: { query: '*', default_operator: 'AND' } };
+
+    const request = getPreviewTransformRequestBody(
+      {
+        getIndexPattern: () => 'the-data-view-title',
+        timeFieldName: 'the-time-field-name',
+      } as DataView,
+      query,
+      {
+        pivot: {
+          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+        },
+      }
+    );
+
+    expect(request).toEqual({
       pivot: {
         aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
         group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
       },
+      source: {
+        index: ['the-data-view-title'],
+      },
     });
+  });
+
+  test('getPreviewTransformRequestBody() with comma-separated index pattern', () => {
+    const query = getTransformConfigQuery('the-query');
+    const request = getPreviewTransformRequestBody(
+      { getIndexPattern: () => 'the-data-view-title,the-other-title' } as DataView,
+      query,
+      {
+        pivot: {
+          aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
+          group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
+        },
+      }
+    );
 
     expect(request).toEqual({
       pivot: {
@@ -172,9 +210,9 @@ describe('Transform: Common', () => {
   });
 
   test('getPreviewTransformRequestBody() with missing_buckets config', () => {
-    const query = getPivotQuery('the-query');
+    const query = getTransformConfigQuery('the-query');
     const request = getPreviewTransformRequestBody(
-      'the-data-view-title',
+      { getIndexPattern: () => 'the-data-view-title' } as DataView,
       query,
       getRequestPayload([aggsAvg], [{ ...groupByTerms, ...{ missing_bucket: true } }])
     );
@@ -194,11 +232,12 @@ describe('Transform: Common', () => {
   });
 
   test('getCreateTransformRequestBody() skips default values', () => {
-    const pivotState: StepDefineExposedState = {
+    const transformConfigState: StepDefineExposedState = {
       aggList: { 'the-agg-name': aggsAvg },
       groupByList: { 'the-group-by-name': groupByTerms },
       isAdvancedPivotEditorEnabled: false,
       isAdvancedSourceEditorEnabled: false,
+      isDatePickerApplyEnabled: false,
       sourceConfigUpdated: false,
       searchLanguage: 'kuery',
       searchString: 'the-query',
@@ -239,8 +278,8 @@ describe('Transform: Common', () => {
     };
 
     const request = getCreateTransformRequestBody(
-      'the-data-view-title',
-      pivotState,
+      { getIndexPattern: () => 'the-data-view-title' } as DataView,
+      transformConfigState,
       transformDetailsState
     );
 
@@ -278,6 +317,7 @@ describe('Transform: Common', () => {
       groupByList: { 'the-group-by-name': groupByTerms },
       isAdvancedPivotEditorEnabled: false,
       isAdvancedSourceEditorEnabled: false,
+      isDatePickerApplyEnabled: false,
       sourceConfigUpdated: false,
       searchLanguage: 'kuery',
       searchString: 'the-query',
@@ -319,7 +359,7 @@ describe('Transform: Common', () => {
     };
 
     const request = getCreateTransformRequestBody(
-      'the-data-view-title',
+      { getIndexPattern: () => 'the-data-view-title' } as DataView,
       pivotState,
       transformDetailsState
     );

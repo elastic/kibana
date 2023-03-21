@@ -66,7 +66,6 @@ export function createMockDatasource(
     getUserMessages: jest.fn((_state, _deps) => []),
     checkIntegrity: jest.fn((_state, _indexPatterns) => []),
     isTimeBased: jest.fn(),
-    isValidColumn: jest.fn(),
     isEqual: jest.fn(),
     getUsedDataView: jest.fn((state, layer) => 'mockip'),
     getUsedDataViews: jest.fn(),

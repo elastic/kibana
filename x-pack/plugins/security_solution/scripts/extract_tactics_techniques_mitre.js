@@ -19,7 +19,7 @@ const OUTPUT_DIRECTORY = resolve('public', 'detections', 'mitre');
 // Every release we should update the version of MITRE ATT&CK content and regenerate the model in our code.
 // This version must correspond to the one used for prebuilt rules in https://github.com/elastic/detection-rules.
 // This version is basically a tag on https://github.com/mitre/cti/tags, or can be a branch name like `master`.
-const MITRE_CONTENT_VERSION = 'ATT&CK-v11.3'; // last updated when preparing for 8.4.0 release
+const MITRE_CONTENT_VERSION = 'ATT&CK-v12.1'; // last updated when preparing for 8.7.0 release
 const MITRE_CONTENT_URL = `https://raw.githubusercontent.com/mitre/cti/${MITRE_CONTENT_VERSION}/enterprise-attack/enterprise-attack.json`;
 
 const getTacticsOptions = (tactics) =>

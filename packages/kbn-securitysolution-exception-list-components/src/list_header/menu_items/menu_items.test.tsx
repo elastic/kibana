@@ -108,7 +108,7 @@ describe('MenuItems', () => {
     fireEvent.click(wrapper.getByTestId('ManageRulesButton'));
     expect(onManageRules).toHaveBeenCalled();
   });
-  it('should call onExportList', () => {
+  it('should call onExportModalOpen', () => {
     const wrapper = render(
       <MenuItems
         isReadonly={false}

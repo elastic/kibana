@@ -41,12 +41,11 @@ describe('DocumentsLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // due to connect, need to pass props down to each logic
-    const indexNameProps = { indexName: 'indexName' };
-    mountIndexNameLogic(undefined, indexNameProps);
-    mountMappingsApiLogic(undefined, indexNameProps);
-    mountSearchDocumentsApiLogic(undefined, indexNameProps);
-    mount(undefined, indexNameProps);
+    const indexNameLogic = mountIndexNameLogic();
+    mountMappingsApiLogic();
+    mountSearchDocumentsApiLogic();
+    mount();
+    indexNameLogic.actions.setIndexName('indexName');
   });
 
   it('has expected default values', () => {

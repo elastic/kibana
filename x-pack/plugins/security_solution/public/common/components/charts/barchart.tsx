@@ -35,7 +35,7 @@ import {
 import { DraggableLegend } from './draggable_legend';
 import type { LegendItem } from './draggable_legend_item';
 import type { ChartData, ChartSeriesConfigs, ChartSeriesData } from './common';
-import { VisualizationActions } from '../visualization_actions';
+import { VisualizationActions } from '../visualization_actions/actions';
 import type { VisualizationActionsProps } from '../visualization_actions/types';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';

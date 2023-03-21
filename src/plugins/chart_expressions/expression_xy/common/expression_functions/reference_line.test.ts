@@ -16,6 +16,7 @@ describe('referenceLine', () => {
       value: 100,
       fill: 'above',
       position: 'bottom',
+      forAccessor: '',
     };
 
     const result = referenceLineFunction.fn(null, args, createMockExecutionContext());
@@ -47,6 +48,7 @@ describe('referenceLine', () => {
       color: '#fff',
       fill: 'below',
       textVisibility: true,
+      forAccessor: '',
     };
 
     const result = referenceLineFunction.fn(null, args, createMockExecutionContext());
@@ -71,6 +73,7 @@ describe('referenceLine', () => {
       value: 100,
       fill: 'none',
       position: 'bottom',
+      forAccessor: '',
     };
 
     const result = referenceLineFunction.fn(null, args, createMockExecutionContext());
@@ -96,6 +99,7 @@ describe('referenceLine', () => {
       textVisibility: true,
       fill: 'none',
       position: 'bottom',
+      forAccessor: '',
     };
 
     const result = referenceLineFunction.fn(null, args, createMockExecutionContext());
@@ -123,6 +127,7 @@ describe('referenceLine', () => {
         textVisibility,
         fill: 'none',
         position: 'bottom',
+        forAccessor: '',
       };
 
       const result = referenceLineFunction.fn(null, args, createMockExecutionContext());

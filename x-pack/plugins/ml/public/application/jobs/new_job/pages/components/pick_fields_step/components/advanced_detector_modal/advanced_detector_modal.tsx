@@ -16,7 +16,7 @@ import {
   EuiHorizontalRule,
   EuiTextArea,
 } from '@elastic/eui';
-import { useFieldStatsTrigger } from '../../../../../utils/use_field_stats_trigger';
+import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import {

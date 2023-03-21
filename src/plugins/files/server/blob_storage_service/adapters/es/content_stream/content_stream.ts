@@ -111,7 +111,7 @@ export class ContentStream extends Duplex {
       }
       const buffer = Buffer.concat(chunks);
       const source: undefined | FileChunkDocument = buffer.byteLength
-        ? cborx.decode(Buffer.concat(chunks))?._source
+        ? cborx.decode(buffer)?._source
         : undefined;
 
       const dataBuffer = source?.data as unknown as Buffer;

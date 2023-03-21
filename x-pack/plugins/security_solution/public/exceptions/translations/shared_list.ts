@@ -92,6 +92,19 @@ export const ALL_EXCEPTIONS = i18n.translate(
   }
 );
 
+export const ALL_EXCEPTIONS_SUBTITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allExceptions.tableSubtitle',
+  {
+    defaultMessage: "To view rule specific exceptions navigate to that rule's details page.",
+  }
+);
+
+export const allExceptionsRowPerPage = (rowSize: number) =>
+  i18n.translate('xpack.securitySolution.exceptions.allExceptionsRowPerPage', {
+    defaultMessage: 'Rows per page: {rowSize}',
+    values: { rowSize },
+  });
+
 export const NO_LISTS_BODY = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allExceptions.filters.noListsBody',
   {
@@ -99,12 +112,11 @@ export const NO_LISTS_BODY = i18n.translate(
   }
 );
 
-export const EXCEPTION_EXPORT_SUCCESS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.all.exceptions.exportSuccess',
-  {
-    defaultMessage: 'Exception list export success',
-  }
-);
+export const EXCEPTION_LIST_EXPORTED_SUCCESSFULLY = (listName: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.list.export_success', {
+    values: { listName },
+    defaultMessage: 'Exception list "{listName}" exported successfully',
+  });
 
 export const EXCEPTION_EXPORT_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.all.exceptions.exportError',
@@ -356,5 +368,33 @@ export const SORT_BY_CREATE_AT = i18n.translate(
   'xpack.securitySolution.exceptions.sortByCreateAt',
   {
     defaultMessage: 'Created At',
+  }
+);
+
+export const EXPORT_MODAL_CANCEL_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.exportModalCancelButton',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const EXPORT_MODAL_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.exportModalTitle',
+  {
+    defaultMessage: 'Export exception list',
+  }
+);
+
+export const EXPORT_MODAL_INCLUDE_SWITCH_LABEL = i18n.translate(
+  'xpack.securitySolution.exceptions.exportModalIncludeSwitchLabel',
+  {
+    defaultMessage: 'Include expired exceptions',
+  }
+);
+
+export const EXPORT_MODAL_CONFIRM_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.exportModalConfirmButton',
+  {
+    defaultMessage: 'Export',
   }
 );

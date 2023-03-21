@@ -52,43 +52,45 @@ describe('SavedObjectsFinder', () => {
     },
   ];
 
-  it('should call saved object client on startup', async () => {
+  it('should call api find on startup', async () => {
     const core = coreMock.createStart();
-    (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ savedObjects: [doc] })
+    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ saved_objects: [doc] })
     );
     core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
-        savedObjects={core.savedObjects}
+        http={core.http}
         uiSettings={core.uiSettings}
         savedObjectMetaData={searchMetaData}
       />
     );
     wrapper.instance().componentDidMount!();
 
-    expect(core.savedObjects.client.find).toHaveBeenCalledWith({
-      type: ['search'],
-      fields: ['title', 'name'],
-      search: undefined,
-      page: 1,
-      perPage: 10,
-      searchFields: ['title^3', 'description', 'name'],
-      defaultSearchOperator: 'AND',
+    expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
+      query: {
+        type: ['search'],
+        fields: ['title', 'name'],
+        search: undefined,
+        page: 1,
+        perPage: 10,
+        searchFields: ['title^3', 'description', 'name'],
+        defaultSearchOperator: 'AND',
+      },
     });
   });
 
   it('should list initial items', async () => {
     const core = coreMock.createStart();
-    (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ savedObjects: [doc] })
+    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ saved_objects: [doc] })
     );
     core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
-        savedObjects={core.savedObjects}
+        http={core.http}
         uiSettings={core.uiSettings}
         savedObjectMetaData={searchMetaData}
       />
@@ -104,14 +106,14 @@ describe('SavedObjectsFinder', () => {
   it('should call onChoose on item click', async () => {
     const chooseStub = sinon.stub();
     const core = coreMock.createStart();
-    (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ savedObjects: [doc] })
+    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ saved_objects: [doc] })
     );
     core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
-        savedObjects={core.savedObjects}
+        http={core.http}
         uiSettings={core.uiSettings}
         onChoose={chooseStub}
         savedObjectMetaData={searchMetaData}
@@ -129,14 +131,14 @@ describe('SavedObjectsFinder', () => {
   describe('sorting', () => {
     it('should list items ascending', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc, doc2] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc, doc2] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           savedObjectMetaData={searchMetaData}
         />
@@ -150,14 +152,14 @@ describe('SavedObjectsFinder', () => {
 
     it('should list items descending', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc, doc2] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc, doc2] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           savedObjectMetaData={searchMetaData}
         />
@@ -174,14 +176,14 @@ describe('SavedObjectsFinder', () => {
 
   it('should not show the saved objects which get filtered by showSavedObject', async () => {
     const core = coreMock.createStart();
-    (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ savedObjects: [doc, doc2] })
+    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ saved_objects: [doc, doc2] })
     );
     core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
-        savedObjects={core.savedObjects}
+        http={core.http}
         uiSettings={core.uiSettings}
         savedObjectMetaData={[
           {
@@ -204,14 +206,14 @@ describe('SavedObjectsFinder', () => {
   describe('search', () => {
     it('should request filtered list on search input', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc, doc2] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc, doc2] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           savedObjectMetaData={searchMetaData}
         />
@@ -223,25 +225,27 @@ describe('SavedObjectsFinder', () => {
         .first()
         .simulate('change', { target: { value: 'abc' } });
 
-      expect(core.savedObjects.client.find).toHaveBeenCalledWith({
-        type: ['search'],
-        fields: ['title', 'name'],
-        search: 'abc*',
-        page: 1,
-        perPage: 10,
-        searchFields: ['title^3', 'description', 'name'],
-        defaultSearchOperator: 'AND',
+      expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
+        query: {
+          type: ['search'],
+          fields: ['title', 'name'],
+          search: 'abc*',
+          page: 1,
+          perPage: 10,
+          searchFields: ['title^3', 'description', 'name'],
+          defaultSearchOperator: 'AND',
+        },
       });
     });
 
     it('should include additional fields in search if listed in meta data', async () => {
       const core = coreMock.createStart();
       core.uiSettings.get.mockImplementation(() => 10);
-      (core.savedObjects.client.find as jest.Mock).mockResolvedValue({ savedObjects: [] });
+      (core.http.get as jest.Mock).mockResolvedValue({ saved_objects: [] });
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           savedObjectMetaData={[
             {
@@ -266,27 +270,29 @@ describe('SavedObjectsFinder', () => {
         .first()
         .simulate('change', { target: { value: 'abc' } });
 
-      expect(core.savedObjects.client.find).toHaveBeenCalledWith({
-        type: ['type1', 'type2'],
-        fields: ['title', 'name', 'field1', 'field2', 'field3'],
-        search: 'abc*',
-        page: 1,
-        perPage: 10,
-        searchFields: ['title^3', 'description'],
-        defaultSearchOperator: 'AND',
+      expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
+        query: {
+          type: ['type1', 'type2'],
+          fields: ['title', 'name', 'field1', 'field2', 'field3'],
+          search: 'abc*',
+          page: 1,
+          perPage: 10,
+          searchFields: ['title^3', 'description'],
+          defaultSearchOperator: 'AND',
+        },
       });
     });
 
     it('should respect response order on search input', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc, doc2] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc, doc2] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           savedObjectMetaData={searchMetaData}
         />
@@ -307,14 +313,14 @@ describe('SavedObjectsFinder', () => {
 
   it('should request multiple saved object types at once', async () => {
     const core = coreMock.createStart();
-    (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ savedObjects: [doc, doc2] })
+    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ saved_objects: [doc, doc2] })
     );
     core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
-        savedObjects={core.savedObjects}
+        http={core.http}
         uiSettings={core.uiSettings}
         savedObjectMetaData={[
           {
@@ -332,14 +338,16 @@ describe('SavedObjectsFinder', () => {
     );
     wrapper.instance().componentDidMount!();
 
-    expect(core.savedObjects.client.find).toHaveBeenCalledWith({
-      type: ['search', 'vis'],
-      fields: ['title', 'name'],
-      search: undefined,
-      page: 1,
-      perPage: 10,
-      searchFields: ['title^3', 'description'],
-      defaultSearchOperator: 'AND',
+    expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
+      query: {
+        type: ['search', 'vis'],
+        fields: ['title', 'name'],
+        search: undefined,
+        page: 1,
+        perPage: 10,
+        searchFields: ['title^3', 'description'],
+        defaultSearchOperator: 'AND',
+      },
     });
   });
 
@@ -359,16 +367,16 @@ describe('SavedObjectsFinder', () => {
 
     it('should not render filter buttons if disabled', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({
-          savedObjects: [doc, doc2, doc3],
+          saved_objects: [doc, doc2, doc3],
         })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           showFilter={false}
           savedObjectMetaData={metaDataConfig}
@@ -384,16 +392,16 @@ describe('SavedObjectsFinder', () => {
 
     it('should not render filter buttons if there is only one type in the list', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({
-          savedObjects: [doc, doc2],
+          saved_objects: [doc, doc2],
         })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
@@ -409,16 +417,16 @@ describe('SavedObjectsFinder', () => {
 
     it('should apply filter if selected', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({
-          savedObjects: [doc, doc2, doc3],
+          saved_objects: [doc, doc2, doc3],
         })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           showFilter={true}
           savedObjectMetaData={metaDataConfig}
@@ -439,15 +447,15 @@ describe('SavedObjectsFinder', () => {
 
   it('should display no items message if there are no items', async () => {
     const core = coreMock.createStart();
-    (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ savedObjects: [] })
+    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ saved_objects: [] })
     );
     core.uiSettings.get.mockImplementation(() => 10);
 
     const noItemsMessage = <span id="myNoItemsMessage" />;
     const wrapper = shallow(
       <SavedObjectFinder
-        savedObjects={core.savedObjects}
+        http={core.http}
         uiSettings={core.uiSettings}
         noItemsMessage={noItemsMessage}
         savedObjectMetaData={searchMetaData}
@@ -470,14 +478,14 @@ describe('SavedObjectsFinder', () => {
 
     it('should show a table pagination with initial per page', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: longItemList })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: longItemList })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
@@ -492,14 +500,14 @@ describe('SavedObjectsFinder', () => {
 
     it('should allow switching the page size', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: longItemList })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: longItemList })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
@@ -514,14 +522,14 @@ describe('SavedObjectsFinder', () => {
 
     it('should switch page correctly', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: longItemList })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: longItemList })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           initialPageSize={15}
           savedObjectMetaData={searchMetaData}
@@ -536,14 +544,14 @@ describe('SavedObjectsFinder', () => {
 
     it('should show an ordinary pagination for fixed page sizes', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: longItemList })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: longItemList })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           fixedPageSize={33}
           savedObjectMetaData={searchMetaData}
@@ -558,14 +566,14 @@ describe('SavedObjectsFinder', () => {
 
     it('should switch page correctly for fixed page sizes', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: longItemList })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: longItemList })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           fixedPageSize={33}
           savedObjectMetaData={searchMetaData}
@@ -582,11 +590,11 @@ describe('SavedObjectsFinder', () => {
   describe('loading state', () => {
     it('should display a spinner during initial loading', () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as jest.Mock).mockResolvedValue({ savedObjects: [] });
+      (core.http.get as jest.Mock).mockResolvedValue({ saved_objects: [] });
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           savedObjectMetaData={searchMetaData}
         />
@@ -597,13 +605,13 @@ describe('SavedObjectsFinder', () => {
 
     it('should hide the spinner if data is shown', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc] })
       );
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           savedObjectMetaData={[
             {
@@ -622,13 +630,13 @@ describe('SavedObjectsFinder', () => {
 
     it('should not show the spinner if there are already items', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc] })
       );
 
       const wrapper = shallow(
         <SavedObjectFinder
-          savedObjects={core.savedObjects}
+          http={core.http}
           uiSettings={core.uiSettings}
           savedObjectMetaData={searchMetaData}
         />
@@ -649,14 +657,14 @@ describe('SavedObjectsFinder', () => {
 
   it('should render with children', async () => {
     const core = coreMock.createStart();
-    (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ savedObjects: [doc, doc2] })
+    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ saved_objects: [doc, doc2] })
     );
     core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
-        savedObjects={core.savedObjects}
+        http={core.http}
         uiSettings={core.uiSettings}
         savedObjectMetaData={[
           {

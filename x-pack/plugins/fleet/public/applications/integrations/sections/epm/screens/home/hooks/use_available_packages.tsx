@@ -5,33 +5,28 @@
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
-import { useLocation, useParams, useHistory } from 'react-router-dom';
 
-import { uniq, xorBy } from 'lodash';
+import { uniq } from 'lodash';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import type { IntegrationPreferenceType } from '../../../components/integration_preference';
-import { usePackages, useCategories, useStartServices } from '../../../../../hooks';
+import { useGetPackagesQuery, useGetCategoriesQuery } from '../../../../../hooks';
 import {
   useGetAppendCustomIntegrations,
   useGetReplacementCustomIntegrations,
-  useLink,
 } from '../../../../../hooks';
 import { useMergeEprPackagesWithReplacements } from '../../../../../hooks/use_merge_epr_with_replacements';
 
-import type { CategoryParams } from '..';
-import { getParams, mapToCard } from '..';
+import { mapToCard } from '..';
 import type { PackageList, PackageListItem } from '../../../../../types';
 
-import { doesPackageHaveIntegrations } from '../../../../../services';
+import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
 
 import {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
 } from '../../../../../../../../common/services';
-
-import { pagePathGetters } from '../../../../../constants';
 
 import type { IntegrationCardItem } from '../../../../../../../../common/types/models';
 
@@ -39,6 +34,8 @@ import { ALL_CATEGORY } from '../category_facets';
 import type { CategoryFacet } from '../category_facets';
 
 import { mergeCategoriesAndCount } from '../util';
+
+import { useBuildIntegrationsUrl } from './use_build_integrations_url';
 
 export interface IntegrationsURLParameters {
   searchString?: string;
@@ -111,14 +108,18 @@ export const useAvailablePackages = () => {
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
     boolean | undefined
   >(undefined);
-  const { http } = useStartServices();
-  const addBasePath = http.basePath.prepend;
+  const { showIntegrationsSubcategories } = ExperimentalFeaturesService.get();
 
   const {
-    selectedCategory: initialSelectedCategory,
-    selectedSubcategory: initialSubcategory,
+    initialSelectedCategory,
+    initialSubcategory,
+    setUrlandPushHistory,
+    setUrlandReplaceHistory,
+    getHref,
+    getAbsolutePath,
     searchParam,
-  } = getParams(useParams<CategoryParams>(), useLocation().search);
+    addBasePath,
+  } = useBuildIntegrationsUrl();
 
   const [selectedCategory, setCategory] = useState(initialSelectedCategory);
   const [selectedSubCategory, setSelectedSubCategory] = useState<string | undefined>(
@@ -126,50 +127,11 @@ export const useAvailablePackages = () => {
   );
   const [searchTerm, setSearchTerm] = useState(searchParam || '');
 
-  const { getHref, getAbsolutePath } = useLink();
-  const history = useHistory();
-
-  const buildUrl = ({ searchString, categoryId, subCategoryId }: IntegrationsURLParameters) => {
-    const url = pagePathGetters.integrations_all({
-      category: categoryId ? categoryId : '',
-      subCategory: subCategoryId ? subCategoryId : '',
-      searchTerm: searchString ? searchString : '',
-    })[1];
-    return url;
-  };
-
-  const setUrlandPushHistory = ({
-    searchString,
-    categoryId,
-    subCategoryId,
-  }: IntegrationsURLParameters) => {
-    const url = buildUrl({
-      categoryId,
-      searchString,
-      subCategoryId,
-    });
-    history.push(url);
-  };
-
-  const setUrlandReplaceHistory = ({
-    searchString,
-    categoryId,
-    subCategoryId,
-  }: IntegrationsURLParameters) => {
-    const url = buildUrl({
-      categoryId,
-      searchString,
-      subCategoryId,
-    });
-    // Use .replace so the browser's back button is not tied to single keystroke
-    history.replace(url);
-  };
-
   const {
     data: eprPackages,
     isLoading: isLoadingAllPackages,
     error: eprPackageLoadingError,
-  } = usePackages(prereleaseIntegrationsEnabled);
+  } = useGetPackagesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {
@@ -221,25 +183,17 @@ export const useAvailablePackages = () => {
   );
 
   const {
-    data: eprCategories,
+    data: eprCategoriesRes,
     isLoading: isLoadingCategories,
     error: eprCategoryLoadingError,
-  } = useCategories(prereleaseIntegrationsEnabled);
+  } = useGetCategoriesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
-  // Subcategories
-  const subCategories = useMemo(() => {
-    return eprCategories?.items.filter((item) => item.parent_id !== undefined);
-  }, [eprCategories?.items]);
+  const eprCategories = useMemo(() => eprCategoriesRes?.items || [], [eprCategoriesRes]);
 
   const allCategories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
       ? []
-      : mergeCategoriesAndCount(
-          eprCategories
-            ? (eprCategories.items as Array<{ id: string; title: string; count: number }>)
-            : [],
-          cards
-        );
+      : mergeCategoriesAndCount(eprCategories ? eprCategories : [], cards);
     return [
       {
         ...ALL_CATEGORY,
@@ -250,11 +204,17 @@ export const useAvailablePackages = () => {
   }, [cards, eprCategories, isLoadingCategories]);
 
   // Filter out subcategories
-  const mainCategories = xorBy(allCategories, subCategories, 'id');
+  const mainCategories = useMemo(() => {
+    return showIntegrationsSubcategories
+      ? allCategories.filter((category) => category.parent_id === undefined)
+      : allCategories;
+  }, [allCategories, showIntegrationsSubcategories]);
 
   const availableSubCategories = useMemo(() => {
-    return subCategories?.filter((c) => c.parent_id === selectedCategory);
-  }, [selectedCategory, subCategories]);
+    return showIntegrationsSubcategories
+      ? allCategories?.filter((c) => c.parent_id === selectedCategory)
+      : [];
+  }, [allCategories, selectedCategory, showIntegrationsSubcategories]);
 
   return {
     initialSelectedCategory,

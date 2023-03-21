@@ -9,6 +9,7 @@ export interface CspmUsage {
   indices: CspmIndicesStats;
   resources_stats: CspmResourcesStats[];
   accounts_stats: CspmAccountsStats[];
+  rules_stats: CspmRulesStats[];
 }
 
 export interface CspmIndicesStats {
@@ -45,4 +46,17 @@ export interface CspmAccountsStats {
   agents_count: number;
   nodes_count: number;
   pods_count: number;
+}
+export interface CspmRulesStats {
+  rule_id: string;
+  rule_name: string;
+  rule_section: string;
+  rule_version: string;
+  rule_number: string;
+  posture_type: string;
+  benchmark_id: string;
+  benchmark_name: string;
+  benchmark_version: string;
+  passed_findings_count: number;
+  failed_findings_count: number;
 }

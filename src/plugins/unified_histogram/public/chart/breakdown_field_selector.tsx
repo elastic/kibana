@@ -12,7 +12,7 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 import { UnifiedHistogramBreakdownContext } from '../types';
-import { fieldSupportsBreakdown } from './field_supports_breakdown';
+import { fieldSupportsBreakdown } from './utils/field_supports_breakdown';
 
 export interface BreakdownFieldSelectorProps {
   dataView: DataView;

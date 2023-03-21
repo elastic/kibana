@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         formula: `asdf`,
       });
 
-      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(1);
+      await PageObjects.lens.assertMessageListContains('Field asdf was not found.', 'error');
     });
 
     it('should keep the formula when entering expanded mode', async () => {

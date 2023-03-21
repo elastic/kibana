@@ -9,18 +9,25 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
-import { JourneyStep, SyntheticsJourneyApiResponse } from '../../../../../../common/runtime_types';
+import { JourneyStep } from '../../../../../../common/runtime_types';
 import {
   fetchJourneyAction,
   selectBrowserJourney,
   selectBrowserJourneyLoading,
 } from '../../../state';
 
-export const useJourneySteps = (checkGroup?: string, lastRefresh?: number) => {
-  const { stepIndex, checkGroupId: urlCheckGroup } = useParams<{
+export const useJourneySteps = (
+  checkGroup?: string,
+  lastRefresh?: number,
+  stepIndexArg?: number
+) => {
+  const { stepIndex: stepIndexUrl, checkGroupId: urlCheckGroup } = useParams<{
     stepIndex: string;
     checkGroupId: string;
   }>();
+
+  const stepIndex = stepIndexArg ?? stepIndexUrl;
+
   const checkGroupId = checkGroup ?? urlCheckGroup;
 
   const journeyData = useSelector(selectBrowserJourney(checkGroupId));
@@ -46,7 +53,7 @@ export const useJourneySteps = (checkGroup?: string, lastRefresh?: number) => {
     failedStep?.synthetics?.step && failedStep.synthetics.step.index === Number(stepIndex);
 
   return {
-    data: journeyData as SyntheticsJourneyApiResponse,
+    data: journeyData,
     loading: loading ?? false,
     stepEnds,
     stepLabels,

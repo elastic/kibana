@@ -109,6 +109,9 @@ export const buildDataViewMock = ({
     getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
     isTimeNanosBased: () => false,
     isPersisted: () => true,
+    getTimeField: () => {
+      return dataViewFields.find((field) => field.name === timeFieldName);
+    },
   } as unknown as DataView;
 
   dataView.isTimeBased = () => !!timeFieldName;

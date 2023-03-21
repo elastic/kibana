@@ -7,10 +7,10 @@
 
 import React, { FC, useContext, useState, useEffect, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { FieldStatsInfoButton } from '../../../../../common/components/field_stats_info_button';
+import { FieldStatsInfoButton } from '../../../../../../../components/field_stats_flyout/field_stats_info_button';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { Field, Aggregation, AggFieldPair } from '../../../../../../../../../common/types/fields';
-import { useFieldStatsTrigger } from '../../../../../utils/use_field_stats_trigger';
+import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
 
 // The display label used for an aggregation e.g. sum(bytes).
 export type Label = string;

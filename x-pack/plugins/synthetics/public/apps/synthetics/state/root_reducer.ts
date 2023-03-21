@@ -7,6 +7,7 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
+import { overviewStatusReducer, OverviewStatusStateReducer } from './overview_status';
 import { browserJourneyReducer } from './browser_journey';
 import { defaultAlertingReducer, DefaultAlertingState } from './alert_rules';
 import { manualTestRunsReducer, ManualTestRunsState } from './manual_test_runs';
@@ -43,6 +44,7 @@ export interface SyntheticsAppState {
   defaultAlerting: DefaultAlertingState;
   dynamicSettings: DynamicSettingsState;
   serviceLocations: ServiceLocationsState;
+  overviewStatus: OverviewStatusStateReducer;
   syntheticsEnablement: SyntheticsEnablementState;
 }
 
@@ -58,6 +60,7 @@ export const rootReducer = combineReducers<SyntheticsAppState>({
   monitorDetails: monitorDetailsReducer,
   browserJourney: browserJourneyReducer,
   manualTestRuns: manualTestRunsReducer,
+  overviewStatus: overviewStatusReducer,
   defaultAlerting: defaultAlertingReducer,
   dynamicSettings: dynamicSettingsReducer,
   serviceLocations: serviceLocationsReducer,

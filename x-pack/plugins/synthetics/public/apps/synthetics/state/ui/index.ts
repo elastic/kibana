@@ -7,6 +7,7 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
 import {
   PopoverState,
   toggleIntegrationsPopover,
@@ -16,7 +17,10 @@ import {
   setAlertFlyoutVisible,
   setSearchTextAction,
   setSelectedMonitorId,
+  setRefreshPausedAction,
+  setRefreshIntervalAction,
 } from './actions';
+const { AUTOREFRESH_INTERVAL_SECONDS, AUTOREFRESH_IS_PAUSED } = CLIENT_DEFAULTS_SYNTHETICS;
 
 export interface UiState {
   alertFlyoutVisible: boolean;
@@ -26,6 +30,8 @@ export interface UiState {
   searchText: string;
   integrationsPopoverOpen: PopoverState | null;
   monitorId: string;
+  refreshInterval: number;
+  refreshPaused: boolean;
 }
 
 const initialState: UiState = {
@@ -35,6 +41,8 @@ const initialState: UiState = {
   searchText: '',
   integrationsPopoverOpen: null,
   monitorId: '',
+  refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
+  refreshPaused: AUTOREFRESH_IS_PAUSED,
 };
 
 export const uiReducer = createReducer(initialState, (builder) => {
@@ -59,6 +67,12 @@ export const uiReducer = createReducer(initialState, (builder) => {
     })
     .addCase(setSelectedMonitorId, (state, action) => {
       state.monitorId = action.payload;
+    })
+    .addCase(setRefreshPausedAction, (state, action) => {
+      state.refreshPaused = action.payload;
+    })
+    .addCase(setRefreshIntervalAction, (state, action) => {
+      state.refreshInterval = action.payload;
     });
 });
 

@@ -6,6 +6,7 @@
  */
 
 import { get, isEmpty, isArray, isObject, isEqual, keys, map, reduce } from 'lodash/fp';
+import { css } from '@emotion/react';
 import type {
   EuiDataGridSorting,
   EuiDataGridProps,
@@ -49,7 +50,10 @@ const DataContext = createContext<ResultEdges>([]);
 
 const StyledEuiDataGrid = styled(EuiDataGrid)`
   :not(.euiDataGrid--fullScreen) {
-    max-height: 500px;
+    .euiDataGrid__virtualized {
+      height: 100% !important;
+      max-height: 500px;
+    }
   }
 `;
 
@@ -388,6 +392,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     ]
   );
 
+  if (isLoading) {
+    return <EuiLoadingContent lines={5} />;
+  }
+
   if (!hasActionResultsPrivileges) {
     return (
       <EuiCallOut
@@ -398,7 +406,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           />
         }
         color="danger"
-        iconType="alert"
+        iconType="warning"
       >
         <p>
           <FormattedMessage
@@ -415,13 +423,17 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     );
   }
 
-  if (isLoading) {
-    return <EuiLoadingContent lines={5} />;
-  }
-
   return (
     <>
-      {isLive && <EuiProgress color="primary" size="xs" />}
+      {isLive && (
+        <EuiProgress
+          color="primary"
+          size="xs"
+          css={css`
+            margin-top: -2px;
+          `}
+        />
+      )}
 
       {!allResultsData?.edges.length ? (
         <EuiPanel hasShadow={false}>

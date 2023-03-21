@@ -62,6 +62,7 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
       isEstimated: false,
     },
   },
+  tags: ['k8s', 'production', 'critical'],
   enabled: true,
   createdAt: now,
   updatedAt: now,
@@ -92,7 +93,7 @@ export const sloList: FindSLOResponse = {
     },
     {
       ...baseSlo,
-      id: 'c0f8d669-9177-4706-9098-f397a88173a6',
+      id: 'c0f8d669-9277-4706-9098-f397a88173a6',
       summary: buildViolatedSummary(),
       timeWindow: buildRollingTimeWindow({ duration: '7d' }),
     },

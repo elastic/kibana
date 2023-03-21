@@ -127,14 +127,13 @@ export const multiMetricRouteFactory = (
 // redirect route to reset the job wizard when converting to multi metric job
 export const multiMetricRouteFactoryRedirect = (): MlRoute => ({
   path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC),
-  render: (props) => (
-    <Redirect
-      to={createPath(
-        ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC,
-        props.location.search
-      )}
-    />
-  ),
+  render: (props) => {
+    return (
+      <Redirect
+        to={createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_MULTI_METRIC, props.location.search)}
+      />
+    );
+  },
 
   breadcrumbs: [],
 });
@@ -200,6 +199,7 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
     savedSearchId,
     deps.config,
     deps.dataViewsContract,
+    deps.getSavedSearchDeps,
     {
       ...basicResolvers(deps),
       privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),

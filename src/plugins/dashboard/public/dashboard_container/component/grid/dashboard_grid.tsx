@@ -18,7 +18,7 @@ import { ViewMode, EmbeddablePhaseEvent } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
-import { useDashboardContainerContext } from '../../dashboard_container_renderer';
+import { useDashboardContainerContext } from '../../dashboard_container_context';
 import { DashboardLoadedEventStatus, DashboardRenderPerformanceStats } from '../../types';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
 import { getPanelLayoutsAreEqual } from '../../embeddable/integrations/diff_state/dashboard_diffing_utils';

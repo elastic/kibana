@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { ApmDocumentType } from '../../../common/document_type';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { RollupInterval } from '../../../common/rollup';
 import {
   inspectSearchParams,
   SearchParamsMock,
@@ -55,8 +57,8 @@ describe('services queries', () => {
         getServicesItems({
           mlClient: undefined,
           apmEventClient: mockApmEventClient,
-          searchAggregatedTransactions: false,
-          searchAggregatedServiceMetrics: false,
+          documentType: ApmDocumentType.TransactionEvent,
+          rollupInterval: RollupInterval.None,
           logger: {} as any,
           environment: ENVIRONMENT_ALL.value,
           kuery: '',

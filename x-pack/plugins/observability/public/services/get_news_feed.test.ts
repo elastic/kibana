@@ -25,7 +25,7 @@ describe('getNewsFeed', () => {
       },
     } as unknown as HttpSetup;
 
-    const newsFeed = await getNewsFeed({ http });
+    const newsFeed = await getNewsFeed({ http, kibanaVersion: '8.7.0' });
     expect(newsFeed.items).toEqual([]);
   });
   it('Returns array with the news feed', async () => {
@@ -92,7 +92,7 @@ describe('getNewsFeed', () => {
       },
     } as unknown as HttpSetup;
 
-    const newsFeed = await getNewsFeed({ http });
+    const newsFeed = await getNewsFeed({ http, kibanaVersion: '8.7.0' });
     expect(newsFeed.items.length).toEqual(3);
   });
 });

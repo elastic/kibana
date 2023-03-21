@@ -7,7 +7,7 @@
 import { HttpSetup } from '@kbn/core-http-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
-import { runSoon } from './rule_api';
+import { runSoon } from './rule_api/run_soon';
 
 export async function runRule(http: HttpSetup, toasts: IToasts, id: string) {
   try {

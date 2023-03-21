@@ -16,11 +16,8 @@ import {
   useGetDownloadSources,
   useGetFleetServerHosts,
 } from '../../../../hooks';
-import {
-  LICENCE_FOR_PER_POLICY_OUTPUT,
-  FLEET_APM_PACKAGE,
-  outputType,
-} from '../../../../../../../common/constants';
+import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../../../../../common/constants';
+import { getAllowedOutputTypeForPolicy } from '../../../../../../../common/services';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 
 // The super select component do not support null or '' as a value
@@ -63,11 +60,10 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
   const licenseService = useLicense();
 
   const isLicenceAllowingPolicyPerOutput = licenseService.hasAtLeast(LICENCE_FOR_PER_POLICY_OUTPUT);
-  const isAgentPolicyUsingAPM =
-    'package_policies' in agentPolicy &&
-    agentPolicy.package_policies?.some((packagePolicy) => {
-      return typeof packagePolicy !== 'string' && packagePolicy.package?.name === FLEET_APM_PACKAGE;
-    });
+  const allowedOutputTypes = useMemo(
+    () => getAllowedOutputTypeForPolicy(agentPolicy as AgentPolicy),
+    [agentPolicy]
+  );
 
   const dataOutputOptions = useMemo(() => {
     if (outputsRequest.isLoading || !outputsRequest.data) {
@@ -81,36 +77,42 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
     const defaultOutput = outputsRequest.data.items.find((item) => item.is_default);
     const defaultOutputName = defaultOutput?.name;
     const defaultOutputDisabled =
-      isAgentPolicyUsingAPM && defaultOutput?.type === outputType.Logstash;
+      defaultOutput?.type && !allowedOutputTypes.includes(defaultOutput.type);
 
     const defaultOutputDisabledMessage = defaultOutputDisabled ? (
       <FormattedMessage
-        id="xpack.fleet.agentPolicyForm.outputOptionDisabledAPMAndLogstashText"
-        defaultMessage="Logstash output for agent integration is not supported for APM"
+        id="xpack.fleet.agentPolicyForm.outputOptionDisableOutputTypeText"
+        defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+        values={{
+          outputType: defaultOutput.type,
+        }}
       />
     ) : undefined;
 
     return [
       getDefaultOutput(defaultOutputName, defaultOutputDisabled, defaultOutputDisabledMessage),
       ...outputsRequest.data.items.map((item) => {
-        const isLogstashOutputWithAPM = isAgentPolicyUsingAPM && item.type === outputType.Logstash;
+        const isOutputTypeUnsupported = !allowedOutputTypes.includes(item.type);
 
         return {
           value: item.id,
           inputDisplay: getOutputLabel(
             item.name,
-            isLogstashOutputWithAPM ? (
+            isOutputTypeUnsupported ? (
               <FormattedMessage
-                id="xpack.fleet.agentPolicyForm.outputOptionDisabledAPMAndLogstashText"
-                defaultMessage="Logstash output for agent integration is not supported for APM"
+                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
+                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server or APM."
+                values={{
+                  outputType: item.type,
+                }}
               />
             ) : undefined
           ),
-          disabled: !isLicenceAllowingPolicyPerOutput || isLogstashOutputWithAPM,
+          disabled: !isLicenceAllowingPolicyPerOutput || isOutputTypeUnsupported,
         };
       }),
     ];
-  }, [outputsRequest, isLicenceAllowingPolicyPerOutput, isAgentPolicyUsingAPM]);
+  }, [outputsRequest, isLicenceAllowingPolicyPerOutput, allowedOutputTypes]);
 
   const monitoringOutputOptions = useMemo(() => {
     if (outputsRequest.isLoading || !outputsRequest.data) {

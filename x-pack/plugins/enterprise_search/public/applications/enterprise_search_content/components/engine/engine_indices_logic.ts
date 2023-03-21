@@ -16,15 +16,19 @@ import { EngineViewActions, EngineViewLogic, EngineViewValues } from './engine_v
 
 export interface EngineIndicesLogicActions {
   addIndicesToEngine: (indices: string[]) => { indices: string[] };
+  closeAddIndicesFlyout: () => void;
   engineUpdated: UpdateEngineApiLogicActions['apiSuccess'];
   fetchEngine: EngineViewActions['fetchEngine'];
+  openAddIndicesFlyout: () => void;
   removeIndexFromEngine: (indexName: string) => { indexName: string };
   updateEngineRequest: UpdateEngineApiLogicActions['makeRequest'];
 }
 
 export interface EngineIndicesLogicValues {
+  addIndicesFlyoutOpen: boolean;
   engineData: EngineViewValues['engineData'];
   engineName: EngineViewValues['engineName'];
+  isLoadingEngine: EngineViewValues['isLoadingEngine'];
 }
 
 export const EngineIndicesLogic = kea<
@@ -32,6 +36,8 @@ export const EngineIndicesLogic = kea<
 >({
   actions: {
     addIndicesToEngine: (indices) => ({ indices }),
+    closeAddIndicesFlyout: () => true,
+    openAddIndicesFlyout: () => true,
     removeIndexFromEngine: (indexName) => ({ indexName }),
   },
   connect: {
@@ -41,7 +47,7 @@ export const EngineIndicesLogic = kea<
       UpdateEngineApiLogic,
       ['makeRequest as updateEngineRequest', 'apiSuccess as engineUpdated'],
     ],
-    values: [EngineViewLogic, ['engineData', 'engineName']],
+    values: [EngineViewLogic, ['engineData', 'engineName', 'isLoadingEngine']],
   },
   listeners: ({ actions, values }) => ({
     addIndicesToEngine: ({ indices }) => {
@@ -68,4 +74,13 @@ export const EngineIndicesLogic = kea<
     },
   }),
   path: ['enterprise_search', 'content', 'engine_indices_logic'],
+  reducers: {
+    addIndicesFlyoutOpen: [
+      false,
+      {
+        closeAddIndicesFlyout: () => false,
+        openAddIndicesFlyout: () => true,
+      },
+    ],
+  },
 });

@@ -32,6 +32,8 @@
     "@kbn/i18n",
     "@kbn/security-plugin",
     "@kbn/safer-lodash-set",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/logging",
   ],
   "exclude": [
     "target/**/*",

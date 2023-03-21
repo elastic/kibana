@@ -7,10 +7,10 @@
  */
 
 import { ExistsFilter } from './exists_filter';
-import { PhrasesFilter } from './phrases_filter';
-import { PhraseFilter } from './phrase_filter';
-import { RangeFilter } from './range_filter';
-import { MatchAllFilter } from './match_all_filter';
+import { PhrasesFilter, PhrasesFilterMeta } from './phrases_filter';
+import { PhraseFilter, PhraseFilterMeta, PhraseFilterMetaParams } from './phrase_filter';
+import { RangeFilter, RangeFilterMeta, RangeFilterParams } from './range_filter';
+import { MatchAllFilter, MatchAllFilterMeta } from './match_all_filter';
 
 /**
  * A common type for filters supported by this package
@@ -50,6 +50,22 @@ export enum FilterStateStore {
   GLOBAL_STATE = 'globalState',
 }
 
+export type FilterMetaParams =
+  | Filter
+  | Filter[]
+  | RangeFilterMeta
+  | RangeFilterParams
+  | PhraseFilterMeta
+  | PhraseFilterMetaParams
+  | PhrasesFilterMeta
+  | MatchAllFilterMeta
+  | string
+  | string[]
+  | boolean
+  | boolean[]
+  | number
+  | number[];
+
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type FilterMeta = {
   alias?: string | null;
@@ -64,7 +80,7 @@ export type FilterMeta = {
   isMultiIndex?: boolean;
   type?: string;
   key?: string;
-  params?: any;
+  params?: FilterMetaParams;
   value?: string;
 };
 

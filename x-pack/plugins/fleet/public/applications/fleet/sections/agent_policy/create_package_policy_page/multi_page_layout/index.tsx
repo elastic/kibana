@@ -10,7 +10,11 @@ import { i18n } from '@kbn/i18n';
 
 import { splitPkgKey } from '../../../../../../../common/services';
 
-import { useGetPackageInfoByKey, useLink, useFleetServerHostsForPolicy } from '../../../../hooks';
+import {
+  useGetPackageInfoByKeyQuery,
+  useLink,
+  useFleetServerHostsForPolicy,
+} from '../../../../hooks';
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
 
@@ -70,7 +74,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion, { prerelease, full: true });
+  } = useGetPackageInfoByKeyQuery(pkgName, pkgVersion, { prerelease, full: true });
 
   const {
     agentPolicy,

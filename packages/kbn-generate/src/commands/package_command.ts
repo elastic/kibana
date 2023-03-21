@@ -171,7 +171,7 @@ export const PackageCommand: GenerateCommand = {
     addDeps[pkgId] = `link:${normalizedRepoRelativeDir}`;
     delete removeDeps[pkgId];
 
-    await Fsp.writeFile(packageJsonPath, sortPackageJson(JSON.stringify(packageJson)));
+    await Fsp.writeFile(packageJsonPath, sortPackageJson(packageJson));
     log.info('Updated package.json file');
 
     log.success(`Generated ${pkgId}! Please bootstrap to make sure it works.`);

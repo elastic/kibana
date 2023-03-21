@@ -79,6 +79,7 @@ export const useLoadRuleAggregationsQuery = (props: UseLoadRuleAggregationsQuery
     enabled,
     keepPreviousData: true,
     cacheTime: 0,
+    refetchOnWindowFocus: false,
   });
 
   const aggregation = data

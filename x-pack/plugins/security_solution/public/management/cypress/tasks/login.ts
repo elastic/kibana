@@ -11,20 +11,22 @@ import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
 import type { Role } from '@kbn/security-plugin/common';
+import { request } from './common';
 import { getT1Analyst } from '../../../../scripts/endpoint/common/roles_users/t1_analyst';
 import { getT2Analyst } from '../../../../scripts/endpoint/common/roles_users/t2_analyst';
 import { getHunter } from '../../../../scripts/endpoint/common/roles_users/hunter';
-import { getThreadIntelligenceAnalyst } from '../../../../scripts/endpoint/common/roles_users/thread_intelligence_analyst';
+import { getThreatIntelligenceAnalyst } from '../../../../scripts/endpoint/common/roles_users/threat_intelligence_analyst';
 import { getSocManager } from '../../../../scripts/endpoint/common/roles_users/soc_manager';
 import { getPlatformEngineer } from '../../../../scripts/endpoint/common/roles_users/platform_engineer';
 import { getEndpointOperationsAnalyst } from '../../../../scripts/endpoint/common/roles_users/endpoint_operations_analyst';
 import { getEndpointSecurityPolicyManager } from '../../../../scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
+import { getDetectionsEngineer } from '../../../../scripts/endpoint/common/roles_users/detections_engineer';
 
 export enum ROLE {
   t1_analyst = 't1Analyst',
   t2_analyst = 't2Analyst',
   analyst_hunter = 'hunter',
-  thread_intelligence_analyst = 'threadIntelligenceAnalyst',
+  threat_intelligence_analyst = 'threatIntelligenceAnalyst',
   detections_engineer = 'detectionsEngineer',
   soc_manager = 'socManager',
   platform_engineer = 'platformEngineer',
@@ -32,15 +34,16 @@ export enum ROLE {
   endpoint_security_policy_manager = 'endpointSecurityPolicyManager',
 }
 
-export const rolesMapping: { [id: string]: Omit<Role, 'name'> } = {
+export const rolesMapping: { [key in ROLE]: Omit<Role, 'name'> } = {
   t1Analyst: getT1Analyst(),
   t2Analyst: getT2Analyst(),
   hunter: getHunter(),
-  threadIntelligenceAnalyst: getThreadIntelligenceAnalyst(),
+  threatIntelligenceAnalyst: getThreatIntelligenceAnalyst(),
   socManager: getSocManager(),
   platformEngineer: getPlatformEngineer(),
   endpointOperationsAnalyst: getEndpointOperationsAnalyst(),
   endpointSecurityPolicyManager: getEndpointSecurityPolicyManager(),
+  detectionsEngineer: getDetectionsEngineer(),
 };
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -85,7 +88,7 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
  * @param role string role/user to log in with
  * @param route string route to visit
  */
-export const getUrlWithRoute = (role: ROLE, route: string) => {
+export const getUrlWithRoute = (role: string, route: string) => {
   const url = Cypress.config().baseUrl;
   const kibana = new URL(String(url));
   const theUrl = `${Url.format({
@@ -138,72 +141,44 @@ export const getCurlScriptEnvVars = () => ({
 });
 
 export const createRoleAndUser = (role: ROLE) => {
-  const env = getCurlScriptEnvVars();
+  createCustomRoleAndUser(role, rolesMapping[role]);
+};
 
+export const createCustomRoleAndUser = (role: string, rolePrivileges: Omit<Role, 'name'>) => {
   // post the role
-  cy.request({
+  request({
     method: 'PUT',
-    url: `${env.KIBANA_URL}/api/security/role/${role}`,
-    body: rolesMapping[role],
-    headers: {
-      'kbn-xsrf': 'cypress',
-    },
-    auth: {
-      user: Cypress.env(ELASTICSEARCH_USERNAME),
-      pass: Cypress.env(ELASTICSEARCH_PASSWORD),
-    },
+    url: `/api/security/role/${role}`,
+    body: rolePrivileges,
   });
 
   // post the user associated with the role to elasticsearch
-  cy.request({
+  request({
     method: 'POST',
-    url: `${env.KIBANA_URL}/internal/security/users/${role}`,
-    headers: {
-      'kbn-xsrf': 'cypress',
-    },
+    url: `/internal/security/users/${role}`,
     body: {
       username: role,
       password: Cypress.env(ELASTICSEARCH_PASSWORD),
       roles: [role],
     },
-    auth: {
-      user: Cypress.env(ELASTICSEARCH_USERNAME),
-      pass: Cypress.env(ELASTICSEARCH_PASSWORD),
-    },
   });
 };
 
 export const deleteRoleAndUser = (role: ROLE) => {
-  const env = getCurlScriptEnvVars();
-
-  cy.request({
+  request({
     method: 'DELETE',
-    auth: {
-      user: Cypress.env(ELASTICSEARCH_USERNAME),
-      pass: Cypress.env(ELASTICSEARCH_PASSWORD),
-    },
-    headers: {
-      'kbn-xsrf': 'cypress',
-    },
-    url: `${env.KIBANA_URL}/internal/security/users/${role}`,
+    url: `/internal/security/users/${role}`,
   });
-  cy.request({
+  request({
     method: 'DELETE',
-    auth: {
-      user: Cypress.env(ELASTICSEARCH_USERNAME),
-      pass: Cypress.env(ELASTICSEARCH_PASSWORD),
-    },
-    headers: {
-      'kbn-xsrf': 'cypress',
-    },
-    url: `${env.KIBANA_URL}/api/security/role/${role}`,
+    url: `/api/security/role/${role}`,
   });
 };
 
 export const loginWithUser = (user: User) => {
   const url = Cypress.config().baseUrl;
 
-  cy.request({
+  request({
     body: {
       providerType: 'basic',
       providerName: url && !url.includes('localhost') ? 'cloud-basic' : 'basic',
@@ -220,7 +195,11 @@ export const loginWithUser = (user: User) => {
 };
 
 export const loginWithRole = async (role: ROLE) => {
-  createRoleAndUser(role);
+  loginWithCustomRole(role, rolesMapping[role]);
+};
+
+export const loginWithCustomRole = async (role: string, rolePrivileges: Omit<Role, 'name'>) => {
+  createCustomRoleAndUser(role, rolePrivileges);
   const theUrl = Url.format({
     auth: `${role}:changeme`,
     username: role,
@@ -230,7 +209,7 @@ export const loginWithRole = async (role: ROLE) => {
     port: Cypress.env('configport'),
   } as UrlObject);
   cy.log(`origin: ${theUrl}`);
-  cy.request({
+  request({
     body: {
       providerType: 'basic',
       providerName: 'basic',
@@ -285,7 +264,7 @@ const loginViaEnvironmentCredentials = () => {
   );
 
   // programmatically authenticate without interacting with the Kibana login page
-  cy.request({
+  request({
     body: {
       providerType: 'basic',
       providerName: url && !url.includes('localhost') ? 'cloud-basic' : 'basic',
@@ -316,7 +295,7 @@ const loginViaConfig = () => {
     const config = yaml.safeLoad(kibanaDevYml);
 
     // programmatically authenticate without interacting with the Kibana login page
-    cy.request({
+    request({
       body: {
         providerType: 'basic',
         providerName: 'basic',
@@ -362,4 +341,26 @@ export const getEnvAuth = (): User => {
 export const loginAndWaitForPage = (url: string) => {
   login();
   cy.visit(url);
+};
+
+export const getRoleWithArtifactReadPrivilege = (privilegePrefix: string) => {
+  const endpointSecurityPolicyManagerRole = getEndpointSecurityPolicyManager();
+
+  return {
+    ...endpointSecurityPolicyManagerRole,
+    kibana: [
+      {
+        ...endpointSecurityPolicyManagerRole.kibana[0],
+        feature: {
+          ...endpointSecurityPolicyManagerRole.kibana[0].feature,
+          siem: [
+            ...endpointSecurityPolicyManagerRole.kibana[0].feature.siem.filter(
+              (privilege) => privilege !== `${privilegePrefix}all`
+            ),
+            `${privilegePrefix}read`,
+          ],
+        },
+      },
+    ],
+  };
 };

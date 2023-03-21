@@ -337,19 +337,12 @@ export class SyntheticsPrivateLocation {
           policyIdsToDelete.push(this.getPolicyId(config, privateLocation.id, spaceId));
         } catch (e) {
           this.server.logger.error(e);
-          throw new Error(
-            `Unable to delete Synthetics package policy for monitor ${
-              config[ConfigKey.NAME]
-            } with private location ${privateLocation.label}`
-          );
+          throw new Error(deletePolicyError(config[ConfigKey.NAME], privateLocation.label));
         }
       }
     }
     if (policyIdsToDelete.length > 0) {
-      await this.checkPermissions(
-        request,
-        `Unable to delete Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.`
-      );
+      await this.checkPermissions(request, deletePermissionError());
       await this.deletePolicyBulk(policyIdsToDelete, soClient);
     }
   }
@@ -367,6 +360,10 @@ export class SyntheticsPrivateLocation {
   }
 }
 
-const deletePermissionError = (name: string) => {
+export const deletePermissionError = (name?: string) => {
   return `Unable to delete Synthetics package policy for monitor ${name}. Fleet write permissions are needed to use Synthetics private locations.`;
+};
+
+const deletePolicyError = (name: string, location?: string) => {
+  return `Unable to delete Synthetics package policy for monitor ${name} with private location ${location}`;
 };

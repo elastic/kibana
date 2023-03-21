@@ -7,6 +7,8 @@ Object {
 }
 `;
 
+exports[`Error AGENT_ACTIVATION_METHOD 1`] = `undefined`;
+
 exports[`Error AGENT_NAME 1`] = `"java"`;
 
 exports[`Error AGENT_VERSION 1`] = `"agent version"`;
@@ -15,7 +17,15 @@ exports[`Error APP_LAUNCH_TIME 1`] = `undefined`;
 
 exports[`Error CHILD_ID 1`] = `undefined`;
 
+exports[`Error CLIENT_GEO_CITY_NAME 1`] = `undefined`;
+
 exports[`Error CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
+exports[`Error CLIENT_GEO_COUNTRY_NAME 1`] = `undefined`;
+
+exports[`Error CLIENT_GEO_REGION_ISO_CODE 1`] = `undefined`;
+
+exports[`Error CLIENT_GEO_REGION_NAME 1`] = `undefined`;
 
 exports[`Error CLOUD 1`] = `
 Object {
@@ -84,6 +94,8 @@ exports[`Error EVENT_NAME 1`] = `undefined`;
 
 exports[`Error EVENT_OUTCOME 1`] = `undefined`;
 
+exports[`Error EVENT_SUCCESS_COUNT 1`] = `undefined`;
+
 exports[`Error FAAS_BILLED_DURATION 1`] = `undefined`;
 
 exports[`Error FAAS_COLDSTART 1`] = `undefined`;
@@ -141,6 +153,8 @@ exports[`Error KUBERNETES_REPLICASET 1`] = `undefined`;
 exports[`Error KUBERNETES_REPLICASET_NAME 1`] = `undefined`;
 
 exports[`Error LABEL_NAME 1`] = `undefined`;
+
+exports[`Error LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Error METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 
@@ -209,6 +223,8 @@ exports[`Error SERVICE_LANGUAGE_VERSION 1`] = `"v1337"`;
 exports[`Error SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Error SERVICE_NODE_NAME 1`] = `undefined`;
+
+exports[`Error SERVICE_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Error SERVICE_RUNTIME_NAME 1`] = `undefined`;
 
@@ -301,6 +317,8 @@ Object {
 }
 `;
 
+exports[`Span AGENT_ACTIVATION_METHOD 1`] = `undefined`;
+
 exports[`Span AGENT_NAME 1`] = `"java"`;
 
 exports[`Span AGENT_VERSION 1`] = `"agent version"`;
@@ -309,7 +327,15 @@ exports[`Span APP_LAUNCH_TIME 1`] = `undefined`;
 
 exports[`Span CHILD_ID 1`] = `undefined`;
 
+exports[`Span CLIENT_GEO_CITY_NAME 1`] = `undefined`;
+
 exports[`Span CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
+exports[`Span CLIENT_GEO_COUNTRY_NAME 1`] = `undefined`;
+
+exports[`Span CLIENT_GEO_REGION_ISO_CODE 1`] = `undefined`;
+
+exports[`Span CLIENT_GEO_REGION_NAME 1`] = `undefined`;
 
 exports[`Span CLOUD 1`] = `
 Object {
@@ -369,6 +395,8 @@ exports[`Span EVENT_NAME 1`] = `undefined`;
 
 exports[`Span EVENT_OUTCOME 1`] = `"unknown"`;
 
+exports[`Span EVENT_SUCCESS_COUNT 1`] = `undefined`;
+
 exports[`Span FAAS_BILLED_DURATION 1`] = `undefined`;
 
 exports[`Span FAAS_COLDSTART 1`] = `undefined`;
@@ -422,6 +450,8 @@ exports[`Span KUBERNETES_REPLICASET 1`] = `undefined`;
 exports[`Span KUBERNETES_REPLICASET_NAME 1`] = `undefined`;
 
 exports[`Span LABEL_NAME 1`] = `undefined`;
+
+exports[`Span LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Span METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 
@@ -486,6 +516,8 @@ exports[`Span SERVICE_LANGUAGE_VERSION 1`] = `undefined`;
 exports[`Span SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Span SERVICE_NODE_NAME 1`] = `undefined`;
+
+exports[`Span SERVICE_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Span SERVICE_RUNTIME_NAME 1`] = `undefined`;
 
@@ -578,6 +610,8 @@ Object {
 }
 `;
 
+exports[`Transaction AGENT_ACTIVATION_METHOD 1`] = `undefined`;
+
 exports[`Transaction AGENT_NAME 1`] = `"java"`;
 
 exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
@@ -586,7 +620,15 @@ exports[`Transaction APP_LAUNCH_TIME 1`] = `undefined`;
 
 exports[`Transaction CHILD_ID 1`] = `undefined`;
 
+exports[`Transaction CLIENT_GEO_CITY_NAME 1`] = `undefined`;
+
 exports[`Transaction CLIENT_GEO_COUNTRY_ISO_CODE 1`] = `undefined`;
+
+exports[`Transaction CLIENT_GEO_COUNTRY_NAME 1`] = `undefined`;
+
+exports[`Transaction CLIENT_GEO_REGION_ISO_CODE 1`] = `undefined`;
+
+exports[`Transaction CLIENT_GEO_REGION_NAME 1`] = `undefined`;
 
 exports[`Transaction CLOUD 1`] = `
 Object {
@@ -649,6 +691,8 @@ exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 exports[`Transaction EVENT_NAME 1`] = `undefined`;
 
 exports[`Transaction EVENT_OUTCOME 1`] = `"unknown"`;
+
+exports[`Transaction EVENT_SUCCESS_COUNT 1`] = `undefined`;
 
 exports[`Transaction FAAS_BILLED_DURATION 1`] = `undefined`;
 
@@ -713,6 +757,8 @@ exports[`Transaction KUBERNETES_REPLICASET 1`] = `undefined`;
 exports[`Transaction KUBERNETES_REPLICASET_NAME 1`] = `undefined`;
 
 exports[`Transaction LABEL_NAME 1`] = `undefined`;
+
+exports[`Transaction LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Transaction METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
 
@@ -781,6 +827,8 @@ exports[`Transaction SERVICE_LANGUAGE_VERSION 1`] = `"v1337"`;
 exports[`Transaction SERVICE_NAME 1`] = `"service name"`;
 
 exports[`Transaction SERVICE_NODE_NAME 1`] = `undefined`;
+
+exports[`Transaction SERVICE_OVERFLOW_COUNT 1`] = `undefined`;
 
 exports[`Transaction SERVICE_RUNTIME_NAME 1`] = `undefined`;
 

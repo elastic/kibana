@@ -71,7 +71,7 @@ const IntegrationDetailsLink = memo<{
 
 const AgentPolicyNotFound = () => (
   <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-    <EuiIcon size="m" type="alert" color="warning" />
+    <EuiIcon size="m" type="warning" color="warning" />
     &nbsp;
     <FormattedMessage
       id="xpack.fleet.epm.packageDetails.integrationList.agentPolicyDeletedWarning"
@@ -99,6 +99,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
+
   const {
     data,
     isLoading,

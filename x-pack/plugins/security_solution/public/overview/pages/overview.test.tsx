@@ -50,7 +50,6 @@ jest.mock('../../common/lib/kibana', () => {
 });
 jest.mock('../../common/containers/source');
 jest.mock('../../common/containers/sourcerer');
-jest.mock('../../common/components/visualization_actions');
 jest.mock('../../common/components/visualization_actions/lens_embeddable');
 jest.mock('../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
@@ -89,9 +88,7 @@ jest.mock('../../common/containers/local_storage/use_messages_storage');
 
 jest.mock('../containers/overview_cti_links');
 
-jest.mock('../../common/components/visualization_actions', () => ({
-  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
-}));
+jest.mock('../../common/components/visualization_actions/actions');
 
 const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
 useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);

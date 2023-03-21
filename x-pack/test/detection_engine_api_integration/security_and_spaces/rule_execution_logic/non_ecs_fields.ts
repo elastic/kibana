@@ -6,27 +6,19 @@
  */
 
 import expect from 'expect';
-import { v4 as uuidv4 } from 'uuid';
-
 import {
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getPreviewAlerts,
   getRuleForSignalTesting,
   previewRule,
 } from '../../utils';
-import { indexDocumentsFactory } from '../../utils/data_generator';
+import { dataGeneratorFactory, enhanceDocument } from '../../utils/data_generator';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const getQueryRule = (docIdToQuery: string) => ({
   ...getRuleForSignalTesting(['ecs_non_compliant']),
   query: `id: "${docIdToQuery}"`,
-});
-
-const getDocument = (id: string, doc: Record<string, unknown>) => ({
-  id,
-  '@timestamp': new Date().toISOString(),
-  ...doc,
 });
 
 // eslint-disable-next-line import/no-default-export
@@ -36,9 +28,10 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  const indexDocuments = indexDocumentsFactory({
+  const { indexListOfDocuments } = dataGeneratorFactory({
     es,
     index: 'ecs_non_compliant',
+    log,
   });
 
   /**
@@ -48,23 +41,12 @@ export default ({ getService }: FtrProviderContext) => {
    * 3. return created preview alert and errors logs
    */
   const indexAndCreatePreviewAlert = async (document: Record<string, unknown>) => {
-    const documentId = uuidv4();
-
-    const { items } = await indexDocuments([getDocument(documentId, document)]);
-
-    // throw error if document wasn't indexed, so test will be terminated earlier and no false positives can happen
-    items.some(({ index } = {}) => {
-      if (index?.error) {
-        log.error(
-          `Failed to index document in non_ecs_fields test suits: "${index.error?.reason}"`
-        );
-        throw Error(index.error.message);
-      }
-    });
+    const enhancedDocument = enhanceDocument({ document });
+    await indexListOfDocuments([enhancedDocument]);
 
     const { previewId, logs } = await previewRule({
       supertest,
-      rule: getQueryRule(documentId),
+      rule: getQueryRule(enhancedDocument.id),
     });
     const previewAlerts = await getPreviewAlerts({ es, previewId });
 
@@ -86,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
         'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
       );
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     // source agent.name is object, ECS mapping for agent.name is keyword
@@ -331,6 +313,64 @@ export default ({ getService }: FtrProviderContext) => {
 
       // invalid ECS field is getting removed
       expect(alertSource).not.toHaveProperty('dll.code_signature.valid');
+    });
+
+    describe('multi-fields', () => {
+      it('should not add multi field .text to ecs compliant nested source', async () => {
+        const document = {
+          process: {
+            command_line: 'string longer than 10 characters',
+          },
+        };
+
+        const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
+
+        expect(errors).toEqual([]);
+
+        expect(alertSource).toHaveProperty('process', document.process);
+        expect(alertSource).not.toHaveProperty('process.command_line.text');
+      });
+
+      it('should not add multi field .text to ecs compliant flattened source', async () => {
+        const document = {
+          'process.command_line': 'string longer than 10 characters',
+        };
+
+        const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
+
+        expect(errors).toEqual([]);
+
+        expect(alertSource?.['process.command_line']).toEqual(document['process.command_line']);
+        expect(alertSource).not.toHaveProperty('process.command_line.text');
+      });
+
+      it('should not add multi field .text to ecs non compliant nested source', async () => {
+        const document = {
+          nonEcs: {
+            command_line: 'string longer than 10 characters',
+          },
+        };
+
+        const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
+
+        expect(errors).toEqual([]);
+
+        expect(alertSource).toHaveProperty('nonEcs', document.nonEcs);
+        expect(alertSource).not.toHaveProperty('nonEcs.command_line.text');
+      });
+
+      it('should not add multi field .text to ecs non compliant flattened source', async () => {
+        const document = {
+          'nonEcs.command_line': 'string longer than 10 characters',
+        };
+
+        const { errors, alertSource } = await indexAndCreatePreviewAlert(document);
+
+        expect(errors).toEqual([]);
+
+        expect(alertSource?.['nonEcs.command_line']).toEqual(document['nonEcs.command_line']);
+        expect(alertSource).not.toHaveProperty('nonEcs.command_line.text');
+      });
     });
   });
 };

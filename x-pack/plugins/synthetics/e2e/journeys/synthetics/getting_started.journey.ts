@@ -42,6 +42,7 @@ journey(`Getting Started Page`, async ({ page, params }: { page: Page; params: a
   });
 
   step('shows validation error on submit', async () => {
+    await page.locator('.euiSideNavItem').locator('text=Synthetics').click();
     await page.click('text=Create monitor');
 
     expect(await page.isVisible('text=URL is required')).toBeTruthy();

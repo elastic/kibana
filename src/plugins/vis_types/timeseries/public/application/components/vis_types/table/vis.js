@@ -46,8 +46,9 @@ function getColor(rules, colorKey, value) {
 }
 
 function sanitizeUrl(url) {
+  const { protocol } = parseUrl(url);
   // eslint-disable-next-line no-script-url
-  if (parseUrl(url).protocol === 'javascript:') {
+  if (protocol === 'javascript:' || protocol === 'data:' || protocol === 'vbscript:') {
     return '';
   }
   return url;

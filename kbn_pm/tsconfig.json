@@ -21,7 +21,8 @@
     "@kbn/sort-package-json",
     { "path": "../src/dev/tsconfig.json" },
     "@kbn/ci-stats-reporter",
-    "@kbn/ts-projects",
-    "@kbn/repo-packages"
+    "@kbn/repo-packages",
+    "@kbn/some-dev-log",
+    "@kbn/bazel-runner"
   ]
 }

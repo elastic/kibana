@@ -66,8 +66,8 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'keyword',
     },
     ecs_mapping: {
-      type: 'object',
-      enabled: false,
+      dynamic: false,
+      properties: {},
     },
   },
 };
@@ -124,8 +124,8 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'boolean',
     },
     shards: {
-      type: 'object',
-      enabled: false,
+      dynamic: false,
+      properties: {},
     },
     version: {
       type: 'long',
@@ -149,8 +149,8 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
           type: 'keyword',
         },
         ecs_mapping: {
-          type: 'object',
-          enabled: false,
+          dynamic: false,
+          properties: {},
         },
       },
     },
@@ -200,8 +200,8 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'long',
     },
     shards: {
-      type: 'object',
-      enabled: false,
+      dynamic: false,
+      properties: {},
     },
     queries: {
       dynamic: false,
@@ -222,8 +222,8 @@ export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
           type: 'keyword',
         },
         ecs_mapping: {
-          type: 'object',
-          enabled: false,
+          dynamic: false,
+          properties: {},
         },
       },
     },

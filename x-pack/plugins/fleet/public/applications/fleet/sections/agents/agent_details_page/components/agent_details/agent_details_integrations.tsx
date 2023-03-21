@@ -131,7 +131,9 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
     });
 
     filteredPackageComponents.forEach((component) => {
-      packageErrorUnits.push(...filter(component.units, { status: 'failed' }));
+      packageErrorUnits.push(
+        ...filter(component.units, (u) => u.status === 'DEGRADED' || u.status === 'FAILED')
+      );
     });
     return packageErrorUnits;
   }, [agent.components, packagePolicy]);
@@ -232,7 +234,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
               </EuiFlexItem>
               {showNeedsAttentionBadge && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={theme.euiTheme.colors.danger} iconType="alert" iconSide="left">
+                  <EuiBadge color={theme.euiTheme.colors.danger} iconType="warning" iconSide="left">
                     <FormattedMessage
                       id="xpack.fleet.agentDetailsIntegrations.needsAttention.label"
                       defaultMessage="Needs attention"

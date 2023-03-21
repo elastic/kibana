@@ -51,6 +51,10 @@ export function createDiscoverServicesMock(): DiscoverServices {
   dataPlugin.query.getState = jest.fn(() => ({
     query: { query: '', language: 'lucene' },
     filters: [],
+    time: {
+      from: 'now-15m',
+      to: 'now',
+    },
   }));
   dataPlugin.dataViews = createDiscoverDataViewsMock();
 

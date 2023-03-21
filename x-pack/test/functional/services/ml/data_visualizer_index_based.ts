@@ -258,7 +258,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
         if (expectedOption === 'dvRandomSamplerOptionOff') {
           await testSubjects.existOrFail('dvRandomSamplerOptionOff', { timeout: 1000 });
           await testSubjects.missingOrFail('dvRandomSamplerProbabilityRange', { timeout: 1000 });
-          await testSubjects.missingOrFail('dvRandomSamplerAutomaticProbabilityMsg', {
+          await testSubjects.missingOrFail('dvRandomSamplerProbabilityUsedMsg', {
             timeout: 1000,
           });
         }
@@ -280,13 +280,13 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
         if (expectedOption === 'dvRandomSamplerOptionOnAutomatic') {
           await testSubjects.existOrFail('dvRandomSamplerOptionOnAutomatic', { timeout: 1000 });
-          await testSubjects.existOrFail('dvRandomSamplerAutomaticProbabilityMsg', {
+          await testSubjects.existOrFail('dvRandomSamplerProbabilityUsedMsg', {
             timeout: 1000,
           });
 
           if (expectedProbability !== undefined) {
             const probabilityText = await testSubjects.getVisibleText(
-              'dvRandomSamplerAutomaticProbabilityMsg'
+              'dvRandomSamplerProbabilityUsedMsg'
             );
             expect(probabilityText).to.contain(
               `${expectedProbability}`,

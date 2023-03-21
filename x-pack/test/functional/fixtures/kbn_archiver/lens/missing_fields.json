@@ -1,0 +1,292 @@
+{
+  "attributes": {
+    "allowNoIndex": true,
+    "fieldAttrs": "{\"kubernetes.node.fs.available.bytes\":{\"count\":2},\"kubernetes.node.fs.capacity.bytes\":{\"count\":2},\"kubernetes.node.fs.used.bytes\":{\"count\":2},\"kubernetes.node.name\":{\"count\":2},\"event.dataset\":{\"count\":3}}",
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "name": "metrics-*",
+    "runtimeFieldMap": "{}",
+    "sourceFilters": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "metrics-*",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.7.0",
+  "created_at": "2023-02-07T14:48:09.633Z",
+  "id": "metrics-*",
+  "migrationVersion": { "index-pattern": "8.0.0" },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2023-02-07T14:48:09.633Z",
+  "version": "WzE1OSwxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "state": {
+      "adHocDataViews": {},
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "dfd1702f-213e-4fa2-98e3-5106657c62e7": {
+              "columnOrder": [
+                "f0953a4e-8498-4b22-a63a-d24e4a069ed3",
+                "5c33dcdb-21de-4bdc-b564-ba82ed037d11",
+                "62125b6d-3199-420b-9d3b-46f159e15d7f"
+              ],
+              "columns": {
+                "5c33dcdb-21de-4bdc-b564-ba82ed037d11": {
+                  "dataType": "date",
+                  "isBucketed": true,
+                  "label": "Missing field",
+                  "operationType": "date_histogram",
+                  "params": {
+                    "dropPartials": false,
+                    "includeEmptyRows": true,
+                    "interval": "30s"
+                  },
+                  "scale": "interval",
+                  "sourceField": "@timestamp"
+                },
+                "62125b6d-3199-420b-9d3b-46f159e15d7f": {
+                  "customLabel": true,
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "Total Memory",
+                  "operationType": "formula",
+                  "params": {
+                    "format": { "id": "bytes", "params": { "decimals": 2 } },
+                    "formula": "last_value(kubernetes.node.memory.allocatable.bytes, kql='kubernetes.node.status.ready:\"true\" and event.dataset :\"kubernetes.state_node\" ')",
+                    "isFormulaBroken": true
+                  },
+                  "references": [],
+                  "scale": "ratio"
+                },
+                "f0953a4e-8498-4b22-a63a-d24e4a069ed3": {
+                  "dataType": "string",
+                  "isBucketed": true,
+                  "label": "Top 100000 values of Missing field",
+                  "operationType": "terms",
+                  "params": {
+                    "missingBucket": false,
+                    "orderAgg": {
+                      "customLabel": false,
+                      "dataType": "number",
+                      "isBucketed": false,
+                      "label": "Count of records",
+                      "operationType": "count",
+                      "params": {},
+                      "scale": "ratio",
+                      "sourceField": "___records___"
+                    },
+                    "orderBy": { "type": "custom" },
+                    "orderDirection": "desc",
+                    "otherBucket": false,
+                    "parentFormat": { "id": "terms" },
+                    "secondaryFields": [],
+                    "size": 100000
+                  },
+                  "scale": "ordinal",
+                  "sourceField": "kubernetes.node.name"
+                }
+              },
+              "incompleteColumns": {}
+            },
+            "dff09473-7596-48c7-bbf4-beccee70d845": {
+              "columnOrder": [
+                "6677e92c-5874-49c1-979e-c16c0d3838cd",
+                "46082fb5-9abc-42a0-8e4d-8a8d40a66ddf",
+                "307be273-94a6-41ab-b93b-0debde733492"
+              ],
+              "columns": {
+                "307be273-94a6-41ab-b93b-0debde733492": {
+                  "customLabel": true,
+                  "dataType": "number",
+                  "filter": {
+                    "language": "kuery",
+                    "query": "event.dataset :\"kubernetes.container\"    "
+                  },
+                  "isBucketed": false,
+                  "label": "Memory Used",
+                  "operationType": "last_value",
+                  "params": {
+                    "format": { "id": "bytes", "params": { "decimals": 2 } },
+                    "showArrayValues": false,
+                    "sortField": "@timestamp"
+                  },
+                  "scale": "ratio",
+                  "sourceField": "kubernetes.container.memory.usage.bytes"
+                },
+                "46082fb5-9abc-42a0-8e4d-8a8d40a66ddf": {
+                  "dataType": "date",
+                  "isBucketed": true,
+                  "label": "@timestamp",
+                  "operationType": "date_histogram",
+                  "params": {
+                    "dropPartials": false,
+                    "includeEmptyRows": true,
+                    "interval": "30s"
+                  },
+                  "scale": "interval",
+                  "sourceField": "@timestamp"
+                },
+                "6677e92c-5874-49c1-979e-c16c0d3838cd": {
+                  "dataType": "string",
+                  "isBucketed": true,
+                  "label": "Top 100000 values of kubernetes.container.name",
+                  "operationType": "terms",
+                  "params": {
+                    "missingBucket": false,
+                    "orderAgg": {
+                      "customLabel": false,
+                      "dataType": "number",
+                      "isBucketed": false,
+                      "label": "Count of records",
+                      "operationType": "count",
+                      "params": {},
+                      "scale": "ratio",
+                      "sourceField": "___records___"
+                    },
+                    "orderBy": { "type": "custom" },
+                    "orderDirection": "desc",
+                    "otherBucket": false,
+                    "parentFormat": { "id": "terms" },
+                    "secondaryFields": [],
+                    "size": 100000
+                  },
+                  "scale": "ordinal",
+                  "sourceField": "kubernetes.container.name"
+                }
+              },
+              "incompleteColumns": {}
+            }
+          }
+        }
+      },
+      "filters": [],
+      "internalReferences": [],
+      "query": { "language": "kuery", "query": "" },
+      "visualization": {
+        "axisTitlesVisibilitySettings": {
+          "x": false,
+          "yLeft": false,
+          "yRight": true
+        },
+        "fillOpacity": 0.5,
+        "fittingFunction": "None",
+        "gridlinesVisibilitySettings": {
+          "x": true,
+          "yLeft": true,
+          "yRight": true
+        },
+        "labelsOrientation": { "x": 0, "yLeft": 0, "yRight": 0 },
+        "layers": [
+          {
+            "accessors": ["307be273-94a6-41ab-b93b-0debde733492"],
+            "collapseFn": "sum",
+            "layerId": "dff09473-7596-48c7-bbf4-beccee70d845",
+            "layerType": "data",
+            "palette": { "name": "default", "type": "palette" },
+            "seriesType": "area",
+            "splitAccessor": "6677e92c-5874-49c1-979e-c16c0d3838cd",
+            "xAccessor": "46082fb5-9abc-42a0-8e4d-8a8d40a66ddf",
+            "yConfig": [
+              {
+                "axisMode": "left",
+                "color": "#00bfb3",
+                "forAccessor": "307be273-94a6-41ab-b93b-0debde733492"
+              }
+            ]
+          },
+          {
+            "accessors": ["62125b6d-3199-420b-9d3b-46f159e15d7f"],
+            "collapseFn": "sum",
+            "layerId": "dfd1702f-213e-4fa2-98e3-5106657c62e7",
+            "layerType": "data",
+            "palette": { "name": "negative", "type": "palette" },
+            "seriesType": "line",
+            "splitAccessor": "f0953a4e-8498-4b22-a63a-d24e4a069ed3",
+            "xAccessor": "5c33dcdb-21de-4bdc-b564-ba82ed037d11",
+            "yConfig": [
+              {
+                "axisMode": "left",
+                "color": "#bd271e",
+                "forAccessor": "62125b6d-3199-420b-9d3b-46f159e15d7f"
+              }
+            ]
+          }
+        ],
+        "legend": {
+          "isVisible": true,
+          "maxLines": 1,
+          "position": "top",
+          "shouldTruncate": true,
+          "showSingleSeries": true
+        },
+        "preferredSeriesType": "bar_stacked",
+        "tickLabelsVisibilitySettings": {
+          "x": true,
+          "yLeft": true,
+          "yRight": true
+        },
+        "valueLabels": "hide",
+        "xTitle": "",
+        "yLeftExtent": { "mode": "full" },
+        "yLeftScale": "linear",
+        "yRightExtent": { "mode": "full" },
+        "yRightScale": "linear",
+        "yTitle": ""
+      }
+    },
+    "title": "vis with several missing fields",
+    "visualizationType": "lnsXY"
+  },
+  "coreMigrationVersion": "8.7.0",
+  "created_at": "2023-02-07T14:58:51.333Z",
+  "id": "eee2b040-a6f7-11ed-8332-9375ae88137b",
+  "migrationVersion": { "lens": "8.6.0" },
+  "references": [
+    {
+      "id": "metrics-*",
+      "name": "indexpattern-datasource-layer-dfd1702f-213e-4fa2-98e3-5106657c62e7",
+      "type": "index-pattern"
+    },
+    {
+      "id": "metrics-*",
+      "name": "indexpattern-datasource-layer-dff09473-7596-48c7-bbf4-beccee70d845",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "lens",
+  "updated_at": "2023-02-07T14:58:51.333Z",
+  "version": "WzM0MiwxXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"version\":\"8.7.0\",\"type\":\"lens\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"4373fcf6-6f6d-470f-b06c-92ebac15210b\"},\"panelIndex\":\"4373fcf6-6f6d-470f-b06c-92ebac15210b\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_4373fcf6-6f6d-470f-b06c-92ebac15210b\"}]",
+    "timeRestore": false,
+    "title": "dashboard containing vis with missing fields",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.7.0",
+  "created_at": "2023-02-07T14:59:20.822Z",
+  "id": "00768160-a6f8-11ed-8332-9375ae88137b",
+  "migrationVersion": { "dashboard": "8.7.0" },
+  "references": [
+    {
+      "id": "eee2b040-a6f7-11ed-8332-9375ae88137b",
+      "name": "4373fcf6-6f6d-470f-b06c-92ebac15210b:panel_4373fcf6-6f6d-470f-b06c-92ebac15210b",
+      "type": "lens"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2023-02-07T14:59:20.822Z",
+  "version": "WzM5MCwxXQ=="
+}

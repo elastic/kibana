@@ -25,7 +25,7 @@ export function getPhraseDisplayValue(
   formatter?: FieldFormat,
   fieldType?: string
 ): string {
-  const value = filter.meta.value ?? filter.meta.params.query;
+  const value = filter.meta.value ?? filter.meta.params?.query;
   const updatedValue = fieldType === 'number' && !value ? 0 : value;
   if (formatter?.convert) {
     return formatter.convert(updatedValue);

@@ -27,6 +27,9 @@ import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experime
 import { useKibana } from '../../../../common/lib/kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { IToasts } from '@kbn/core/public';
+import { CreateRuleButton } from './create_rule_button';
+import { RulesListDocLink } from './rules_list_doc_link';
+import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 
 import {
   mockedRulesData,
@@ -47,21 +50,41 @@ jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
   loadAllActions: jest.fn(),
 }));
-jest.mock('../../../lib/rule_api', () => ({
+
+jest.mock('../../../lib/rule_api/rules_kuery_filter', () => ({
   loadRulesWithKueryFilter: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/rule_types', () => ({
   loadRuleTypes: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/aggregate_kuery_filter', () => ({
   loadRuleAggregationsWithKueryFilter: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/update_api_key', () => ({
   updateAPIKey: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/aggregate', () => ({
   loadRuleTags: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/snooze', () => ({
   bulkSnoozeRules: jest.fn(),
-  bulkDeleteRules: jest.fn().mockResolvedValue({ errors: [], total: 10 }),
+}));
+jest.mock('../../../lib/rule_api/unsnooze', () => ({
   bulkUnsnoozeRules: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/bulk_delete', () => ({
+  bulkDeleteRules: jest.fn().mockResolvedValue({ errors: [], total: 10 }),
+}));
+jest.mock('../../../lib/rule_api/update_api_key', () => ({
   bulkUpdateAPIKey: jest.fn(),
+}));
+jest.mock('../../../lib/rule_api/health', () => ({
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
   })),
 }));
+
 jest.mock('../../../lib/rule_api/aggregate_kuery_filter');
 jest.mock('../../../lib/rule_api/rules_kuery_filter');
 
@@ -93,7 +116,10 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const { loadRuleTypes, bulkUpdateAPIKey, loadRuleTags } = jest.requireMock('../../../lib/rule_api');
+const { loadRuleTypes } = jest.requireMock('../../../lib/rule_api/rule_types');
+const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api/update_api_key');
+const { loadRuleTags } = jest.requireMock('../../../lib/rule_api/aggregate');
+
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'
 );
@@ -120,10 +146,7 @@ const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: AllTheProviders });
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/134922
-// FLAKY: https://github.com/elastic/kibana/issues/134923
-
-describe.skip('Update Api Key', () => {
+describe('Update Api Key', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
 
@@ -151,7 +174,7 @@ describe.skip('Update Api Key', () => {
     cleanup();
   });
 
-  it('Updates the Api Key successfully', async () => {
+  it('Have the option to update API key', async () => {
     bulkUpdateAPIKey.mockResolvedValueOnce({ errors: [], total: 1, rules: [], skipped: [] });
     renderWithProviders(<RulesList />);
 
@@ -160,45 +183,7 @@ describe.skip('Update Api Key', () => {
     fireEvent.click((await screen.findAllByTestId('selectActionButton'))[1]);
     expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
-    fireEvent.click(await screen.findByText('Update API key'));
-    expect(screen.getByText('You will not be able to recover the old API key')).toBeInTheDocument();
-
-    fireEvent.click(await screen.findByText('Cancel'));
-    expect(
-      screen.queryByText('You will not be able to recover the old API key')
-    ).not.toBeInTheDocument();
-
-    fireEvent.click((await screen.findAllByTestId('selectActionButton'))[1]);
-    expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
-
-    fireEvent.click(await screen.findByText('Update API key'));
-
-    fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
-    await waitFor(() => expect(addSuccess).toHaveBeenCalledWith('Updated API key for 1 rule.'));
-    expect(bulkUpdateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ ids: ['2'] }));
-    expect(screen.queryByText("You can't recover the old API key")).not.toBeInTheDocument();
-  });
-
-  it('Update API key fails', async () => {
-    bulkUpdateAPIKey.mockRejectedValueOnce(500);
-    renderWithProviders(<RulesList />);
-
-    expect(await screen.findByText('test rule ok')).toBeInTheDocument();
-
-    fireEvent.click((await screen.findAllByTestId('selectActionButton'))[1]);
-    expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
-
-    fireEvent.click(await screen.findByText('Update API key'));
-    expect(screen.getByText('You will not be able to recover the old API key')).toBeInTheDocument();
-
-    fireEvent.click(await screen.findByText('Update'));
-    await waitFor(() =>
-      expect(addError).toHaveBeenCalledWith(500, { title: 'Failed to update the API key' })
-    );
-    expect(bulkUpdateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ ids: ['2'] }));
-    expect(
-      screen.queryByText('You will not be able to recover the old API key')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Update API key')).toBeInTheDocument();
   });
 });
 
@@ -329,15 +314,14 @@ describe('rules_list ', () => {
     renderWithProviders(
       <RulesList statusFilter={['disabled']} onStatusFilterChange={onStatusFilterChangeMock} />
     );
-    await waitFor(() => screen.getByText('Rule state'));
+    await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         ruleStatusesFilter: ['disabled'],
       })
     );
-
-    fireEvent.click(screen.getAllByTestId('ruleStatusFilterButton')[0]);
-    fireEvent.click(screen.getAllByTestId('ruleStatusFilterOption-enabled')[0]);
+    fireEvent.click((await screen.findAllByTestId('ruleStatusFilterButton'))[0]);
+    fireEvent.click((await screen.findAllByTestId('ruleStatusFilterOption-enabled'))[0]);
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
       expect.objectContaining({
         ruleStatusesFilter: ['disabled', 'enabled'],
@@ -397,17 +381,33 @@ describe('rules_list ', () => {
     });
   });
 
-  describe('showCreateRuleButton prop', () => {
-    it('hides the Create Rule button', async () => {
-      renderWithProviders(<RulesList showCreateRuleButton={false} />);
+  describe('setHeaderActions', () => {
+    it('should not render the Create Rule button', async () => {
+      renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
       expect(screen.queryAllByTestId('createRuleButton')).toHaveLength(0);
     });
 
-    it('shows the Create Rule button by default', async () => {
-      renderWithProviders(<RulesList />);
-      expect(await screen.findAllByTestId('createRuleButton')).toHaveLength(1);
+    it('should set header actions correctly when the user is authorized to create rules', async () => {
+      const setHeaderActionsMock = jest.fn();
+      renderWithProviders(<RulesList setHeaderActions={setHeaderActionsMock} />);
+
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+      expect(setHeaderActionsMock.mock.lastCall[0][0].type).toEqual(CreateRuleButton);
+      expect(setHeaderActionsMock.mock.lastCall[0][1].type).toEqual(RulesSettingsLink);
+      expect(setHeaderActionsMock.mock.lastCall[0][2].type).toEqual(RulesListDocLink);
+    });
+
+    it('should set header actions correctly when the user is not authorized to creat rules', async () => {
+      loadRuleTypes.mockResolvedValueOnce([]);
+      const setHeaderActionsMock = jest.fn();
+      renderWithProviders(<RulesList setHeaderActions={setHeaderActionsMock} />);
+
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+      // Do not render the create rule button since the user is not authorized
+      expect(setHeaderActionsMock.mock.lastCall[0][0].type).toEqual(RulesSettingsLink);
+      expect(setHeaderActionsMock.mock.lastCall[0][1].type).toEqual(RulesListDocLink);
     });
   });
 

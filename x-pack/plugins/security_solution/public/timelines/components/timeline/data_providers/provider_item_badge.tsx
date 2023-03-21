@@ -16,6 +16,7 @@ import {
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
 import { timelineSelectors } from '../../../store/timeline';
+import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 
 import type { OnDataProviderEdited } from '../events';
 import { ProviderBadge } from './provider_badge';
@@ -44,7 +45,7 @@ interface ProviderItemBadgeProps {
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
   displayValue?: string;
-  val: string | number | Array<string | number>;
+  val: PrimitiveOrArrayOfPrimitives;
   type?: DataProviderType;
   wrapperRef?: React.MutableRefObject<HTMLDivElement | null>;
 }

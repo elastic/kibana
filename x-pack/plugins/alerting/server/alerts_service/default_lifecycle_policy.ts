@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { IlmPolicy } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 /**
  * Default alert index ILM policy
  * - _meta.managed: notify users this is a managed policy and should be modified
@@ -14,19 +16,17 @@
  * This should be used by all alerts-as-data indices
  */
 
-export const ILM_POLICY_NAME = 'alerts-default-ilm-policy';
-export const DEFAULT_ILM_POLICY = {
-  policy: {
-    _meta: {
-      managed: true,
-    },
-    phases: {
-      hot: {
-        actions: {
-          rollover: {
-            max_age: '30d',
-            max_primary_shard_size: '50gb',
-          },
+export const DEFAULT_ALERTS_ILM_POLICY_NAME = '.alerts-ilm-policy';
+export const DEFAULT_ALERTS_ILM_POLICY: IlmPolicy = {
+  _meta: {
+    managed: true,
+  },
+  phases: {
+    hot: {
+      actions: {
+        rollover: {
+          max_age: '30d',
+          max_primary_shard_size: '50gb',
         },
       },
     },

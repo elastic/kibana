@@ -205,6 +205,7 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
   loginAssistanceMessage=""
   notifications={
     Object {
+      "showErrorDialog": [MockFunction],
       "toasts": Object {
         "add": [MockFunction],
         "addDanger": [MockFunction],
@@ -243,6 +244,7 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
   loginAssistanceMessage="This is an *important* message"
   notifications={
     Object {
+      "showErrorDialog": [MockFunction],
       "toasts": Object {
         "add": [MockFunction],
         "addDanger": [MockFunction],
@@ -282,6 +284,7 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
   loginHelp="**some-help**"
   notifications={
     Object {
+      "showErrorDialog": [MockFunction],
       "toasts": Object {
         "add": [MockFunction],
         "addDanger": [MockFunction],
@@ -324,6 +327,7 @@ exports[`LoginPage page renders as expected 1`] = `
       />
       <span
         className="loginWelcome__logo"
+        style={Object {}}
       >
         <EuiIcon
           size="xxl"
@@ -365,6 +369,101 @@ exports[`LoginPage page renders as expected 1`] = `
           loginAssistanceMessage=""
           notifications={
             Object {
+              "showErrorDialog": [MockFunction],
+              "toasts": Object {
+                "add": [MockFunction],
+                "addDanger": [MockFunction],
+                "addError": [MockFunction],
+                "addInfo": [MockFunction],
+                "addSuccess": [MockFunction],
+                "addWarning": [MockFunction],
+                "get$": [MockFunction],
+                "remove": [MockFunction],
+              },
+            }
+          }
+          selector={
+            Object {
+              "enabled": false,
+              "providers": Array [
+                Object {
+                  "name": "basic1",
+                  "type": "basic",
+                  "usesLoginForm": true,
+                },
+              ],
+            }
+          }
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </div>
+</div>
+`;
+
+exports[`LoginPage page renders with custom branding 1`] = `
+<div
+  className="loginWelcome login-form"
+>
+  <header
+    className="loginWelcome__header"
+  >
+    <div
+      className="loginWelcome__content eui-textCenter"
+    >
+      <EuiSpacer
+        size="xxl"
+      />
+      <span
+        className="loginWelcome__logo"
+        style={
+          Object {
+            "padding": 0,
+          }
+        }
+      >
+        <EuiImage
+          alt="logo"
+          size={40}
+          src="logo"
+        />
+      </span>
+      <EuiTitle
+        className="loginWelcome__title"
+        data-test-subj="loginWelcomeTitle"
+        size="m"
+      >
+        <h1>
+          <FormattedMessage
+            defaultMessage="Welcome to Elastic"
+            id="xpack.security.loginPage.welcomeTitle"
+            values={Object {}}
+          />
+        </h1>
+      </EuiTitle>
+      <EuiSpacer
+        size="xl"
+      />
+    </div>
+  </header>
+  <div
+    className="loginWelcome__content loginWelcome-body"
+  >
+    <EuiFlexGroup
+      gutterSize="l"
+    >
+      <EuiFlexItem>
+        <LoginForm
+          http={
+            Object {
+              "addLoadingCountSource": [MockFunction],
+              "get": [MockFunction],
+            }
+          }
+          loginAssistanceMessage=""
+          notifications={
+            Object {
+              "showErrorDialog": [MockFunction],
               "toasts": Object {
                 "add": [MockFunction],
                 "addDanger": [MockFunction],

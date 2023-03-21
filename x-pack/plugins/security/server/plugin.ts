@@ -267,6 +267,7 @@ export class SecurityPlugin
       config,
       license,
       buildNumber: this.initializerContext.env.packageInfo.buildNum,
+      customBranding: core.customBranding,
     });
 
     registerSecurityUsageCollector({ usageCollection, config, license });
@@ -297,6 +298,7 @@ export class SecurityPlugin
       getSpacesService: () => spaces?.spacesService,
       features,
       getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
+      customBranding: core.customBranding,
     });
 
     this.userProfileService.setup({ authz: this.authorizationSetup, license });

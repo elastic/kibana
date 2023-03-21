@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useEffect, useReducer } from 'react';
-import { TimeRange } from '@kbn/es-query';
 import DateMath from '@kbn/datemath';
 import deepEqual from 'fast-deep-equal';
 import * as rt from 'io-ts';
@@ -23,25 +22,19 @@ const DEFAULT_QUERY = {
   query: '',
 };
 const DEFAULT_FROM_MINUTES_VALUE = 15;
-const INITIAL_DATE = new Date();
-export const INITIAL_DATE_RANGE = { from: `now-${DEFAULT_FROM_MINUTES_VALUE}m`, to: 'now' };
-const CALCULATED_DATE_RANGE_TO = INITIAL_DATE.getTime();
 const DEFAULT_FROM_IN_MILLISECONDS = DEFAULT_FROM_MINUTES_VALUE * 60000;
-const CALCULATED_DATE_RANGE_FROM = new Date(
-  CALCULATED_DATE_RANGE_TO - DEFAULT_FROM_IN_MILLISECONDS
-).getTime();
+
+export const INITIAL_DATE_RANGE = { from: `now-${DEFAULT_FROM_MINUTES_VALUE}m`, to: 'now' };
+
+const getDefaultFromTimestamp = () => Date.now() - DEFAULT_FROM_IN_MILLISECONDS;
+const getDefaultToTimestamp = () => Date.now();
 
 const INITIAL_HOSTS_STATE: HostsState = {
   query: DEFAULT_QUERY,
   filters: [],
   panelFilters: [],
   // for unified search
-  dateRange: { ...INITIAL_DATE_RANGE },
-  // for useSnapshot
-  dateRangeTimestamp: {
-    from: CALCULATED_DATE_RANGE_FROM,
-    to: CALCULATED_DATE_RANGE_TO,
-  },
+  dateRange: INITIAL_DATE_RANGE,
 };
 
 type Action =
@@ -56,16 +49,11 @@ const reducer = (state: HostsState, action: Action): HostsState => {
     case 'setFilter':
       return { ...state, filters: [...action.payload] };
     case 'setQuery':
-      const { filters, query, panelFilters, ...payload } = action.payload;
-      const newFilters = !filters ? state.filters : filters;
-      const newControlPanelFilters = !panelFilters ? state.panelFilters : panelFilters;
-      const newQuery = !query ? state.query : query;
+      const payload = Object.fromEntries(Object.entries(action.payload).filter(([_, v]) => !!v));
+
       return {
         ...state,
         ...payload,
-        filters: [...newFilters],
-        query: { ...newQuery },
-        panelFilters: [...newControlPanelFilters],
       };
     default:
       throw new Error();
@@ -84,15 +72,13 @@ export const useHostsUrlState = () => {
 
   const [state, dispatch] = useReducer(reducer, urlState);
 
-  const getRangeInTimestamp = useCallback(({ from, to }: TimeRange) => {
-    const fromTS = DateMath.parse(from)?.valueOf() ?? CALCULATED_DATE_RANGE_FROM;
-    const toTS = DateMath.parse(to)?.valueOf() ?? CALCULATED_DATE_RANGE_TO;
+  const getDateRangeAsTimestamp = useCallback(() => {
+    const from = DateMath.parse(state.dateRange.from)?.valueOf() ?? getDefaultFromTimestamp();
+    const to =
+      DateMath.parse(state.dateRange.to, { roundUp: true })?.valueOf() ?? getDefaultToTimestamp();
 
-    return {
-      from: fromTS,
-      to: toTS,
-    };
-  }, []);
+    return { from, to };
+  }, [state.dateRange]);
 
   useEffect(() => {
     if (!deepEqual(state, urlState)) {
@@ -102,7 +88,7 @@ export const useHostsUrlState = () => {
 
   return {
     dispatch,
-    getRangeInTimestamp,
+    getDateRangeAsTimestamp,
     getTime,
     state,
   };
@@ -144,20 +130,19 @@ const StringDateRangeRT = rt.type({
   to: rt.string,
 });
 
-const DateRangeRT = rt.type({
-  from: rt.number,
-  to: rt.number,
-});
-
 const HostsStateRT = rt.type({
   filters: HostsFiltersRT,
   panelFilters: HostsFiltersRT,
   query: HostsQueryStateRT,
   dateRange: StringDateRangeRT,
-  dateRangeTimestamp: DateRangeRT,
 });
 
 export type HostsState = rt.TypeOf<typeof HostsStateRT>;
+
+export interface StringDateRangeTimestamp {
+  from: number;
+  to: number;
+}
 
 const SetQueryType = rt.partial(HostsStateRT.props);
 

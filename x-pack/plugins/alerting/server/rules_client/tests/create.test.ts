@@ -38,6 +38,11 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
   };
 });
 
+jest.mock('uuid', () => {
+  let uuid = 100;
+  return { v4: () => `${uuid++}` };
+});
+
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -406,6 +411,7 @@ describe('create()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "102",
           },
         ],
         "alertTypeId": "123",
@@ -433,6 +439,7 @@ describe('create()', () => {
             "history": Array [],
             "last_run": Object {
               "metrics": Object {
+                "duration": 0,
                 "gap_duration_s": null,
                 "total_alerts_created": null,
                 "total_alerts_detected": null,
@@ -450,6 +457,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 0,
         "running": false,
         "schedule": Object {
           "interval": "1m",
@@ -624,6 +632,7 @@ describe('create()', () => {
             "params": Object {
               "foo": true,
             },
+            "uuid": "104",
           },
         ],
         "alertTypeId": "123",
@@ -651,6 +660,7 @@ describe('create()', () => {
             "history": Array [],
             "last_run": Object {
               "metrics": Object {
+                "duration": 0,
                 "gap_duration_s": null,
                 "total_alerts_created": null,
                 "total_alerts_detected": null,
@@ -668,6 +678,7 @@ describe('create()', () => {
         "params": Object {
           "bar": true,
         },
+        "revision": 0,
         "running": false,
         "schedule": Object {
           "interval": "1m",
@@ -1053,6 +1064,7 @@ describe('create()', () => {
             params: {
               foo: true,
             },
+            uuid: '108',
           },
           {
             group: 'default',
@@ -1061,6 +1073,7 @@ describe('create()', () => {
             params: {
               foo: true,
             },
+            uuid: '109',
           },
           {
             group: 'default',
@@ -1069,6 +1082,7 @@ describe('create()', () => {
             params: {
               foo: true,
             },
+            uuid: '110',
           },
         ],
         alertTypeId: '123',
@@ -1093,6 +1107,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: null,
         params: { bar: true },
+        revision: 0,
         running: false,
         schedule: { interval: '1m' },
         tags: ['foo'],
@@ -1272,7 +1287,13 @@ describe('create()', () => {
       'alert',
       {
         actions: [
-          { actionRef: 'action_0', actionTypeId: 'test', group: 'default', params: { foo: true } },
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            group: 'default',
+            params: { foo: true },
+            uuid: '112',
+          },
         ],
         alertTypeId: '123',
         apiKey: null,
@@ -1296,6 +1317,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: null,
         params: { bar: true, parameterThatIsSavedObjectRef: 'soRef_0' },
+        revision: 0,
         running: false,
         schedule: { interval: '1m' },
         tags: ['foo'],
@@ -1445,7 +1467,13 @@ describe('create()', () => {
       'alert',
       {
         actions: [
-          { actionRef: 'action_0', actionTypeId: 'test', group: 'default', params: { foo: true } },
+          {
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            group: 'default',
+            params: { foo: true },
+            uuid: '113',
+          },
         ],
         alertTypeId: '123',
         apiKey: null,
@@ -1469,6 +1497,7 @@ describe('create()', () => {
         name: 'abc',
         notifyWhen: null,
         params: { bar: true, parameterThatIsSavedObjectRef: 'action_0' },
+        revision: 0,
         running: false,
         schedule: { interval: '1m' },
         tags: ['foo'],
@@ -1612,6 +1641,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '115',
           },
         ],
         alertTypeId: '123',
@@ -1643,6 +1673,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
         running: false,
       },
       {
@@ -1747,6 +1778,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '116',
           },
         ],
         legacyId: null,
@@ -1778,6 +1810,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
         running: false,
       },
       {
@@ -1882,6 +1915,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '117',
           },
         ],
         legacyId: null,
@@ -1913,6 +1947,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
         running: false,
       },
       {
@@ -2044,6 +2079,7 @@ describe('create()', () => {
             },
             actionRef: 'action_0',
             actionTypeId: 'test',
+            uuid: '118',
           },
         ],
         apiKeyOwner: null,
@@ -2071,6 +2107,7 @@ describe('create()', () => {
             last_run: {
               timestamp: '2019-02-12T21:01:22.479Z',
               metrics: {
+                duration: 0,
                 gap_duration_s: null,
                 total_alerts_created: null,
                 total_alerts_detected: null,
@@ -2087,6 +2124,7 @@ describe('create()', () => {
         meta: {
           versionApiKeyLastmodified: 'v8.0.0',
         },
+        revision: 0,
         running: false,
       },
       {
@@ -2409,6 +2447,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '126',
           },
         ],
         alertTypeId: '123',
@@ -2440,6 +2479,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
         running: false,
       },
       {
@@ -2513,6 +2553,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
+            uuid: '127',
           },
         ],
         legacyId: null,
@@ -2544,6 +2585,7 @@ describe('create()', () => {
           warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
+        revision: 0,
         running: false,
       },
       {
@@ -2602,7 +2644,7 @@ describe('create()', () => {
       },
     ]);
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Invalid connectors: email connector"`
+      `"Failed to validate actions due to the following error: Invalid connectors: email connector"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2760,7 +2802,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, group2"`
+      `"Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default, group2"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2790,7 +2832,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data: data2 })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default"`
+      `"Failed to validate actions due to the following error: Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: default"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2833,7 +2875,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Actions missing frequency parameters: default"`
+      `"Failed to validate actions due to the following error: Actions missing frequency parameters: default"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2891,7 +2933,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Actions missing frequency parameters: group2"`
+      `"Failed to validate actions due to the following error: Actions missing frequency parameters: group2"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -2968,9 +3010,199 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Action throttle cannot be shorter than the schedule interval of 3h: default (1h), group2 (3m)"`
+      `"Failed to validate actions due to the following error: Action throttle cannot be shorter than the schedule interval of 3h: default (1h), group2 (3m)"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  test('throws multiple errors when actions have multiple problems', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [
+        { id: 'default', name: 'Default' },
+        { id: 'group2', name: 'Action Group 2' },
+        { id: 'group3', name: 'Action Group 3' },
+      ],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      schedule: { interval: '3h' },
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '1h',
+          },
+        },
+        {
+          group: 'group2',
+          id: '2',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '3m',
+          },
+        },
+        {
+          group: 'group3',
+          id: '3',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "Failed to validate actions due to the following 2 errors:
+      - Actions missing frequency parameters: group3
+      - Action throttle cannot be shorter than the schedule interval of 3h: default (1h), group2 (3m)"
+    `);
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+  test('should create a rule even if action is missing secret when allowMissingConnectorSecrets is true', async () => {
+    const data = getMockData({
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    actionsClient.getBulk.mockReset();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        actionTypeId: '.slack',
+        config: {},
+        isMissingSecrets: true,
+        name: 'Slack connector',
+        isPreconfigured: false,
+        isDeprecated: false,
+      },
+    ]);
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        notifyWhen: null,
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: '.slack',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_1',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_2',
+          type: 'action',
+          id: '2',
+        },
+      ],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        actions: [],
+        scheduledTaskId: 'task-123',
+      },
+      references: [],
+    });
+    const result = await rulesClient.create({ data, allowMissingConnectorSecrets: true });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": ".slack",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "id": "1",
+        "notifyWhen": null,
+        "params": Object {
+          "bar": true,
+        },
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "scheduledTaskId": "task-123",
+        "updatedAt": 2019-02-12T21:01:22.479Z,
+      }
+    `);
   });
 });

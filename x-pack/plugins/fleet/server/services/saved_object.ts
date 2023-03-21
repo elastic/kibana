@@ -16,7 +16,7 @@ import type { ListWithKuery } from '../types';
  * @param val
  */
 export function escapeSearchQueryPhrase(val: string): string {
-  return `"${val.replace(/["]/g, '"')}"`;
+  return `"${val.replace(/["]/g, '\\"')}"`;
 }
 
 // Adds `.attributes` to any kuery strings that are missing it, this comes from
@@ -25,7 +25,7 @@ export function escapeSearchQueryPhrase(val: string): string {
 // filtering SOs
 export const normalizeKuery = (savedObjectType: string, kuery: string): string => {
   return kuery.replace(
-    new RegExp(`${savedObjectType}\.(?!attributes\.)`, 'g'),
+    new RegExp(`${savedObjectType}\\.(?!attributes\\.)`, 'g'),
     `${savedObjectType}.attributes.`
   );
 };

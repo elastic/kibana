@@ -12,9 +12,10 @@ import {
   EuiPageHeaderProps,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import { omit } from 'lodash';
@@ -39,7 +40,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { BetaBadge } from '../../../shared/beta_badge';
 import { replace } from '../../../shared/links/url_helpers';
-import { SearchBar } from '../../../shared/search_bar';
+import { SearchBar } from '../../../shared/search_bar/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { ApmMainTemplate } from '../apm_main_template';
@@ -357,13 +358,20 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      prepend:
+      append:
         serviceAlertsCount.alertsCount > 0 ? (
-          <EuiBadge iconType="alert" color="danger">
-            {serviceAlertsCount.alertsCount}
-          </EuiBadge>
+          <EuiToolTip
+            position="bottom"
+            content={i18n.translate(
+              'xpack.apm.home.serviceAlertsTable.tooltip.activeAlertsExplanation',
+              {
+                defaultMessage: 'Active alerts',
+              }
+            )}
+          >
+            <EuiBadge color="danger">{serviceAlertsCount.alertsCount}</EuiBadge>
+          </EuiToolTip>
         ) : null,
-      append: <TechnicalPreviewBadge icon="beaker" />,
       label: i18n.translate('xpack.apm.home.alertsTabLabel', {
         defaultMessage: 'Alerts',
       }),

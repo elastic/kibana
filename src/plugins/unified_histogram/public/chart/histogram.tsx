@@ -27,10 +27,10 @@ import {
   UnifiedHistogramServices,
   UnifiedHistogramInputMessage,
 } from '../types';
-import { buildBucketInterval } from './build_bucket_interval';
-import { useTimeRange } from './use_time_range';
-import { useStableCallback } from './use_stable_callback';
-import { useLensProps } from './use_lens_props';
+import { buildBucketInterval } from './utils/build_bucket_interval';
+import { useTimeRange } from './hooks/use_time_range';
+import { useStableCallback } from './hooks/use_stable_callback';
+import { useLensProps } from './hooks/use_lens_props';
 
 export interface HistogramProps {
   services: UnifiedHistogramServices;

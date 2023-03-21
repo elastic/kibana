@@ -18,14 +18,6 @@ import { SwimlaneFieldsRT } from './swimlane';
 export type ActionConnector = ActionResult;
 export type ActionTypeConnector = ActionType;
 
-export const ConnectorFieldsRt = rt.union([
-  JiraFieldsRT,
-  ResilientFieldsRT,
-  ServiceNowITSMFieldsRT,
-  ServiceNowSIRFieldsRT,
-  rt.null,
-]);
-
 export enum ConnectorTypes {
   casesWebhook = '.cases-webhook',
   jira = '.jira',
@@ -114,6 +106,3 @@ export type ConnectorServiceNowITSMTypeFields = rt.TypeOf<
   typeof ConnectorServiceNowITSMTypeFieldsRt
 >;
 export type ConnectorServiceNowSIRTypeFields = rt.TypeOf<typeof ConnectorServiceNowSIRTypeFieldsRt>;
-
-// we need to change these types back and forth for storing in ES (arrays overwrite, objects merge)
-export type ConnectorFields = rt.TypeOf<typeof ConnectorFieldsRt>;

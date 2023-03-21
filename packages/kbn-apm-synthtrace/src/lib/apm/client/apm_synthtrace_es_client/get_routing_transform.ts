@@ -34,7 +34,8 @@ export function getRoutingTransform() {
           } else if (
             metricsetName === 'transaction' ||
             metricsetName === 'service_transaction' ||
-            metricsetName === 'service_destination'
+            metricsetName === 'service_destination' ||
+            metricsetName === 'service_summary'
           ) {
             index = `metrics-apm.${metricsetName}.${document['metricset.interval']!}-default`;
           } else {

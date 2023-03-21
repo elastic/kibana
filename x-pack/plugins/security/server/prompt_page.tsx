@@ -13,7 +13,7 @@ import {
   EuiProvider,
 } from '@elastic/eui';
 // @ts-expect-error no definitions in component folder
-import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/alert';
+import { icon as EuiIconWarning } from '@elastic/eui/lib/components/icon/assets/warning';
 // @ts-expect-error no definitions in component folder
 import { appendIconComponentCache } from '@elastic/eui/lib/components/icon/icon';
 import createCache from '@emotion/cache';
@@ -22,6 +22,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { Fonts } from '@kbn/core-rendering-server-internal';
 import type { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
@@ -29,11 +30,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 
-// Preload the alert icon used by `EuiEmptyPrompt` to ensure that it's loaded
+// Preload the warning icon used by `EuiEmptyPrompt` to ensure that it's loaded
 // in advance the first time this page is rendered server-side. If not, the
 // icon svg wouldn't contain any paths the first time the page was rendered.
 appendIconComponentCache({
-  alert: EuiIconAlert,
+  warning: EuiIconWarning,
 });
 
 const emotionCache = createCache({ key: 'eui' });
@@ -45,6 +46,7 @@ interface Props {
   title: ReactNode;
   body: ReactNode;
   actions: ReactNode;
+  customBranding: CustomBranding;
 }
 
 export function PromptPage({
@@ -54,6 +56,7 @@ export function PromptPage({
   title,
   body,
   actions,
+  customBranding,
 }: Props) {
   const content = (
     <I18nProvider>
@@ -62,7 +65,7 @@ export function PromptPage({
           <EuiPageBody>
             <EuiPageContent verticalPosition="center" horizontalPosition="center">
               <EuiEmptyPrompt
-                iconType="alert"
+                iconType="warning"
                 iconColor="danger"
                 title={<h2>{title}</h2>}
                 body={body}
@@ -92,7 +95,7 @@ export function PromptPage({
   return (
     <html lang={i18n.getLocale()}>
       <head>
-        <title>Elastic</title>
+        <title>{customBranding.pageTitle ? customBranding.pageTitle : 'Elastic'}</title>
         {/* eslint-disable-next-line react/no-danger */}
         <style dangerouslySetInnerHTML={{ __html: `</style>${emotionStyles}` }} />
         {styleSheetPaths.map((path) => (
@@ -100,8 +103,20 @@ export function PromptPage({
         ))}
         <Fonts url={uiPublicURL} />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
-        <link rel="alternate icon" type="image/png" href={`${uiPublicURL}/favicons/favicon.png`} />
-        <link rel="icon" type="image/svg+xml" href={`${uiPublicURL}/favicons/favicon.svg`} />
+        {customBranding.faviconPNG ? (
+          <link rel="alternate icon" type="image/png" href={customBranding.faviconPNG} />
+        ) : (
+          <link
+            rel="alternate icon"
+            type="image/png"
+            href={`${uiPublicURL}/favicons/favicon.png`}
+          />
+        )}
+        {customBranding.faviconSVG ? (
+          <link rel="icon" type="image/svg+xml" href={customBranding.faviconSVG} />
+        ) : (
+          <link rel="icon" type="image/svg+xml" href={`${uiPublicURL}/favicons/favicon.svg`} />
+        )}
         {scriptPaths.map((path) => (
           <script src={basePath.prepend(path)} key={path} />
         ))}

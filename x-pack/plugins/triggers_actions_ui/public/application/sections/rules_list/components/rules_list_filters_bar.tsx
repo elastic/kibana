@@ -28,7 +28,6 @@ import { TypeFilter, TypeFilterProps } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { RuleTagFilter } from './rule_tag_filter';
 import { RuleStatusFilter } from './rule_status_filter';
-import { CreateRuleButton } from './create_rule_button';
 
 const ENTER_KEY = 13;
 
@@ -41,11 +40,8 @@ interface RulesListFiltersBarProps {
   tags: string[];
   filterOptions: TypeFilterProps['options'];
   actionTypes: ActionType[];
-  authorizedToCreateAnyRules: boolean;
-  showCreateRuleButton: boolean;
   lastUpdate: string;
   showErrors: boolean;
-  openFlyout: () => void;
   updateFilters: (updateFiltersProps: UpdateFiltersProps) => void;
   setInputText: (text: string) => void;
   onClearSelection: () => void;
@@ -63,11 +59,8 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
     tags,
     actionTypes,
     filterOptions,
-    authorizedToCreateAnyRules,
-    showCreateRuleButton,
     lastUpdate,
     showErrors,
-    openFlyout,
     updateFilters,
     setInputText,
     onClearSelection,
@@ -155,11 +148,6 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
         }
       />
       <EuiFlexGroup gutterSize="s">
-        {authorizedToCreateAnyRules && showCreateRuleButton ? (
-          <EuiFlexItem grow={false}>
-            <CreateRuleButton openFlyout={openFlyout} />
-          </EuiFlexItem>
-        ) : null}
         <EuiFlexItem>
           <EuiFieldSearch
             fullWidth

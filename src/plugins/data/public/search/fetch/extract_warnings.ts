@@ -39,7 +39,7 @@ export function extractWarnings(rawResponse: estypes.SearchResponse): SearchResp
     );
     const text = i18n.translate(
       'data.search.searchSource.fetch.shardsFailedNotificationDescription',
-      { defaultMessage: 'The data you are seeing might be incomplete or wrong.' }
+      { defaultMessage: 'The data might be incomplete or wrong.' }
     );
 
     if (rawResponse._shards.failures) {

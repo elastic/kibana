@@ -38,7 +38,7 @@ import type {
   ListWithKuery,
   NewPackagePolicy,
 } from '../types';
-import { packageToPackagePolicy } from '../../common/services';
+import { getAllowedOutputTypeForPolicy, packageToPackagePolicy } from '../../common/services';
 import {
   agentPolicyStatuses,
   AGENT_POLICY_INDEX,
@@ -51,7 +51,6 @@ import type {
   FleetServerPolicy,
   Installation,
   Output,
-  PostDeletePackagePoliciesResponse,
   PackageInfo,
 } from '../../common/types';
 import {
@@ -122,7 +121,7 @@ class AgentPolicyService {
       soClient,
       agentPolicy,
       existingAgentPolicy,
-      this.hasAPMIntegration(existingAgentPolicy)
+      getAllowedOutputTypeForPolicy(existingAgentPolicy)
     );
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
@@ -316,8 +315,14 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     options: ListWithKuery & {
       withPackagePolicies?: boolean;
+      fields?: string[];
     }
-  ): Promise<{ items: AgentPolicy[]; total: number; page: number; perPage: number }> {
+  ): Promise<{
+    items: AgentPolicy[];
+    total: number;
+    page: number;
+    perPage: number;
+  }> {
     const {
       page = 1,
       perPage = 20,
@@ -325,6 +330,7 @@ class AgentPolicyService {
       sortOrder = 'desc',
       kuery,
       withPackagePolicies = false,
+      fields,
     } = options;
 
     const baseFindParams = {
@@ -333,6 +339,7 @@ class AgentPolicyService {
       sortOrder,
       page,
       perPage,
+      ...(fields ? { fields } : {}),
     };
     const filter = kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined;
     let agentPoliciesSO;
@@ -681,25 +688,15 @@ class AgentPolicyService {
         );
       }
 
-      await packagePolicyService.runDeleteExternalCallbacks(packagePolicies);
-
-      const deletedPackagePolicies: PostDeletePackagePoliciesResponse =
-        await packagePolicyService.delete(
-          soClient,
-          esClient,
-          packagePolicies.map((p) => p.id),
-          {
-            force: options?.force,
-            skipUnassignFromAgentPolicies: true,
-          }
-        );
-      try {
-        await packagePolicyService.runPostDeleteExternalCallbacks(deletedPackagePolicies);
-      } catch (error) {
-        const logger = appContextService.getLogger();
-        logger.error(`An error occurred executing external callback: ${error}`);
-        logger.error(error);
-      }
+      await packagePolicyService.delete(
+        soClient,
+        esClient,
+        packagePolicies.map((p) => p.id),
+        {
+          force: options?.force,
+          skipUnassignFromAgentPolicies: true,
+        }
+      );
     }
 
     if (agentPolicy.is_preconfigured && !options?.force) {

@@ -36,7 +36,10 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
 
     await addTestMonitor(params.kibanaUrl, testMonitor1);
     await addTestMonitor(params.kibanaUrl, testMonitor2);
-    await addTestMonitor(params.kibanaUrl, testMonitor3);
+    await addTestMonitor(params.kibanaUrl, testMonitor3, {
+      type: 'browser',
+      schedule: { unit: 'm', number: '5' },
+    });
   });
 
   after(async () => {
@@ -64,17 +67,17 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
   });
 
   step(
-    'Click [aria-label="Use up and down arrows to move focus over options. Enter to select. Escape to collapse options."] >> text=browser',
+    'Click [aria-label="Use up and down arrows to move focus over options. Enter to select. Escape to collapse options."] >> text="Journey / Page"',
     async () => {
       await page.click(
-        '[aria-label="Use up and down arrows to move focus over options. Enter to select. Escape to collapse options."] >> text=browser'
+        '[aria-label="Use up and down arrows to move focus over options. Enter to select. Escape to collapse options."] >> text="Journey / Page"'
       );
       await page.click('[aria-label="Apply the selected filters for Type"]');
-      expect(page.url()).toBe(`${pageBaseUrl}?monitorType=%5B%22browser%22%5D`);
+      expect(page.url()).toBe(`${pageBaseUrl}?monitorTypes=%5B%22browser%22%5D`);
       await page.click('[placeholder="Search by name, url, host, tag, project or location"]');
       await Promise.all([
         page.waitForNavigation({
-          url: `${pageBaseUrl}?monitorType=%5B%22browser%22%5D&query=3`,
+          url: `${pageBaseUrl}?monitorTypes=%5B%22browser%22%5D&query=3`,
         }),
         page.fill('[placeholder="Search by name, url, host, tag, project or location"]', '3'),
       ]);
@@ -98,5 +101,23 @@ journey(`MonitorManagementList`, async ({ page, params }) => {
     const statSummaryPanel = page.locator(byTestId('syntheticsManagementSummaryStats')); // Summary stat elements
     await expect(statSummaryPanel.locator('text=3').count()).resolves.toEqual(1); // Configurations
     await expect(statSummaryPanel.locator('text=0').count()).resolves.toEqual(1); // Disabled
+  });
+
+  step('Filter by Frequency', async () => {
+    const frequencyFilter = page.locator('.euiFilterButton__textShift', { hasText: 'Frequency' });
+    const fiveMinuteScheduleOption = page.getByText('Every 5 minutes').first();
+
+    await frequencyFilter.click();
+    await fiveMinuteScheduleOption.click();
+    await page.getByText('Apply').click();
+
+    // There should be only 1 monitor with schedule 5 minutes
+    await page.waitForSelector('text=1-1');
+
+    // Clear the filter
+    await frequencyFilter.click();
+    await fiveMinuteScheduleOption.click();
+    await page.getByText('Apply').click();
+    await page.waitForSelector('text=1-3');
   });
 });

@@ -103,7 +103,6 @@ export interface StackFrame {
   FunctionName: string;
   FunctionOffset: number;
   LineNumber: number;
-  SourceType: number;
 }
 
 export const emptyStackFrame: StackFrame = {
@@ -111,7 +110,6 @@ export const emptyStackFrame: StackFrame = {
   FunctionName: '',
   FunctionOffset: 0,
   LineNumber: 0,
-  SourceType: 0,
 };
 
 export interface Executable {
@@ -157,7 +155,6 @@ export interface StackFrameMetadata {
   // unused atm due to lack of symbolization metadata
   SourcePackageURL: string;
   // unused atm due to lack of symbolization metadata
-  SourceType: number;
 }
 
 export function createStackFrameMetadata(
@@ -179,7 +176,6 @@ export function createStackFrameMetadata(
   metadata.SourceFilename = options.SourceFilename ?? '';
   metadata.SourcePackageHash = options.SourcePackageHash ?? '';
   metadata.SourcePackageURL = options.SourcePackageURL ?? '';
-  metadata.SourceType = options.SourceType ?? 0;
 
   // Unknown/invalid offsets are currently set to 0.
   //

@@ -21,6 +21,7 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
 
 import type { BrowserFields } from '../../../common/containers/source';
+import type { PrimitiveOrArrayOfPrimitives } from '../../../common/lib/kuery';
 import type { OnDataProviderEdited } from '../timeline/events';
 import type { QueryOperator } from '../timeline/data_providers/data_provider';
 import { DataProviderType } from '../timeline/data_providers/data_provider';
@@ -57,7 +58,7 @@ interface Props {
   operator: QueryOperator;
   providerId: string;
   timelineId: string;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
   type?: DataProviderType;
 }
 
@@ -92,9 +93,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
       getInitialOperatorLabel(isExcluded, operator)
     );
 
-    const [updatedValue, setUpdatedValue] = useState<string | number | Array<string | number>>(
-      value
-    );
+    const [updatedValue, setUpdatedValue] = useState<PrimitiveOrArrayOfPrimitives>(value);
 
     const showComboBoxInput = useMemo(
       () =>
@@ -273,7 +272,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
               <>
                 <EuiCallOut
                   color="warning"
-                  iconType="alert"
+                  iconType="warning"
                   size="s"
                   title={i18n.UNAVAILABLE_OPERATOR(updatedOperator[0].label)}
                 />

@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ui-actions-examples-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Example plugin of how to register custom uiActions",
+  "plugin": {
+    "id": "uiActionsExamples",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "uiActions"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}
