@@ -267,7 +267,7 @@ describe('GET /api/reporting/jobs/download', () => {
       await supertest(httpSetup.server.listener)
         .get('/api/reporting/jobs/download/dank')
         .expect(200)
-        .expect('Content-Type', 'text/plain; charset=utf-8')
+        .expect('Content-Type', 'text/csv; charset=utf-8')
         .expect('content-disposition', 'attachment; filename="report.csv"');
     });
 
@@ -284,7 +284,7 @@ describe('GET /api/reporting/jobs/download', () => {
       await supertest(httpSetup.server.listener)
         .get('/api/reporting/jobs/download/dope')
         .expect(200)
-        .expect('Content-Type', 'text/plain; charset=utf-8')
+        .expect('Content-Type', 'text/csv; charset=utf-8')
         .expect('content-disposition', 'attachment; filename="report.csv"');
     });
 
@@ -300,7 +300,7 @@ describe('GET /api/reporting/jobs/download', () => {
       await supertest(httpSetup.server.listener)
         .get('/api/reporting/jobs/download/dank')
         .expect(200)
-        .expect('Content-Type', 'text/plain; charset=utf-8')
+        .expect('Content-Type', 'text/csv; charset=utf-8')
         .then(({ text }) => expect(text).toEqual('test'));
     });
 
