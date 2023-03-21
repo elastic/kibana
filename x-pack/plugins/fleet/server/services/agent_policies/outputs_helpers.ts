@@ -8,7 +8,11 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { AgentPolicySOAttributes } from '../../types';
-import { LICENCE_FOR_PER_POLICY_OUTPUT, outputType } from '../../../common/constants';
+import {
+  LICENCE_FOR_PER_POLICY_OUTPUT,
+  outputType,
+  FLEET_SERVER_PACKAGE,
+} from '../../../common/constants';
 import { appContextService } from '..';
 import { outputService } from '../output';
 import { OutputInvalidError, OutputLicenceError } from '../../errors';
@@ -73,6 +77,13 @@ export async function validateOutputForPolicy(
   if (data.is_managed && data.is_preconfigured) {
     return;
   }
+  // Validate output when the policy has fleet server
+  const hasFleetServer =
+    (data.package_policies &&
+      data.package_policies.some((p) => p.package?.name === FLEET_SERVER_PACKAGE)) ||
+    data.has_fleet_server;
+
+  if (hasFleetServer) return;
 
   const hasLicence = appContextService
     .getSecurityLicense()

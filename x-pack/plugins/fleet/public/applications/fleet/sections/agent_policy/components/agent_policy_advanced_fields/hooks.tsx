@@ -16,7 +16,10 @@ import {
   useGetDownloadSources,
   useGetFleetServerHosts,
 } from '../../../../hooks';
-import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../../../../../common/constants';
+import {
+  LICENCE_FOR_PER_POLICY_OUTPUT,
+  FLEET_SERVER_PACKAGE,
+} from '../../../../../../../common/constants';
 import { getAllowedOutputTypeForPolicy } from '../../../../../../../common/services';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 
@@ -59,7 +62,16 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
   const outputsRequest = useGetOutputs();
   const licenseService = useLicense();
 
-  const isLicenceAllowingPolicyPerOutput = licenseService.hasAtLeast(LICENCE_FOR_PER_POLICY_OUTPUT);
+  const hasFleetServer =
+    ((agentPolicy as AgentPolicy)?.package_policies &&
+      (agentPolicy as AgentPolicy).package_policies?.some(
+        (p) => p.package?.name === FLEET_SERVER_PACKAGE
+      )) ||
+    agentPolicy.has_fleet_server;
+
+  // Allow changing output when agent policy has fleet server
+  const isLicenceAllowingPolicyPerOutput =
+    licenseService.hasAtLeast(LICENCE_FOR_PER_POLICY_OUTPUT) || hasFleetServer;
   const allowedOutputTypes = useMemo(
     () => getAllowedOutputTypeForPolicy(agentPolicy as AgentPolicy),
     [agentPolicy]

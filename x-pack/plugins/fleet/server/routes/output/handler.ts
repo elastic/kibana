@@ -78,18 +78,7 @@ export const putOuputHandler: RequestHandler<
     await outputService.update(soClient, request.params.outputId, request.body);
     const output = await outputService.get(soClient, request.params.outputId);
     if (output.is_default || output.is_default_monitoring) {
-      // Don't allow updating policies with fleet server to logstash outputs
-      if (request.body.type === 'logstash') {
-        const policiesWithFleetServer = await agentPolicyService.policiesWithFleetServer(soClient);
-        await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, {
-          policiesToExclude: policiesWithFleetServer,
-          outputId: output.id,
-        });
-      } else {
-        await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, { outputId: output.id });
-      }
-    } else {
-      await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id);
+      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
     }
 
     const body: GetOneOutputResponse = {
@@ -121,15 +110,7 @@ export const postOuputHandler: RequestHandler<
     const output = await outputService.create(soClient, data, { id });
 
     if (output.is_default || output.is_default_monitoring) {
-      // Don't allow updating policies with fleet server to logstash outputs
-      if (request.body.type === 'logstash') {
-        const policiesWithFleetServer = await agentPolicyService.policiesWithFleetServer(soClient);
-        await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, {
-          policiesToExclude: policiesWithFleetServer,
-        });
-      } else {
-        await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
-      }
+      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
     }
 
     const body: GetOneOutputResponse = {
