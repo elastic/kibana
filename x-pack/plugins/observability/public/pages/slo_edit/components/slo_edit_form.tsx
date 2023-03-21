@@ -10,9 +10,7 @@ import {
   EuiAvatar,
   EuiButton,
   EuiFlexGroup,
-  EuiFormLabel,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
   EuiTimeline,
   EuiTimelineItem,
@@ -20,14 +18,13 @@ import {
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
 import { useSectionFormValidation } from '../helpers/use_section_form_validation';
-import { CustomKqlIndicatorTypeForm } from './custom_kql/custom_kql_indicator_type_form';
 import { SloEditFormDescription } from './slo_edit_form_description';
 import { SloEditFormObjectives } from './slo_edit_form_objectives';
 import {
@@ -36,15 +33,14 @@ import {
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
 import { paths } from '../../../config/paths';
-import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
-import { ApmLatencyIndicatorTypeForm } from './apm_latency/apm_latency_indicator_type_form';
-import { ApmAvailabilityIndicatorTypeForm } from './apm_availability/apm_availability_indicator_type_form';
+import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
+import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
 
 export interface Props {
   slo: SLOWithSummaryResponse | undefined;
 }
 
-const maxWidth = 775;
+export const maxWidth = 775;
 
 export function SloEditForm({ slo }: Props) {
   const {
@@ -58,7 +54,7 @@ export function SloEditForm({ slo }: Props) {
     values: transformSloResponseToCreateSloInput(slo),
     mode: 'all',
   });
-  const { control, watch, getFieldState, getValues, formState } = methods;
+  const { watch, getFieldState, getValues, formState } = methods;
 
   const { isIndicatorSectionValid, isDescriptionSectionValid, isObjectiveSectionValid } =
     useSectionFormValidation({
@@ -120,19 +116,6 @@ export function SloEditForm({ slo }: Props) {
     }
   };
 
-  const getIndicatorTypeForm = () => {
-    switch (watch('indicator.type')) {
-      case 'sli.kql.custom':
-        return <CustomKqlIndicatorTypeForm />;
-      case 'sli.apm.transactionDuration':
-        return <ApmLatencyIndicatorTypeForm />;
-      case 'sli.apm.transactionErrorRate':
-        return <ApmAvailabilityIndicatorTypeForm />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <FormProvider {...methods}>
       <EuiTimeline data-test-subj="sloForm">
@@ -150,42 +133,7 @@ export function SloEditForm({ slo }: Props) {
             />
           }
         >
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
-            <EuiTitle>
-              <h2>
-                {i18n.translate('xpack.observability.slo.sloEdit.definition.title', {
-                  defaultMessage: 'Define SLI',
-                })}
-              </h2>
-            </EuiTitle>
-
-            <EuiSpacer size="xl" />
-
-            <EuiFormLabel>
-              {i18n.translate('xpack.observability.slo.sloEdit.definition.sliType', {
-                defaultMessage: 'SLI type',
-              })}
-            </EuiFormLabel>
-
-            <Controller
-              name="indicator.type"
-              control={control}
-              rules={{ required: true }}
-              render={({ field: { ref, ...field } }) => (
-                <EuiSelect
-                  data-test-subj="sloFormIndicatorTypeSelect"
-                  {...field}
-                  options={SLI_OPTIONS}
-                />
-              )}
-            />
-
-            <EuiSpacer size="xxl" />
-
-            {getIndicatorTypeForm()}
-
-            <EuiSpacer size="m" />
-          </EuiPanel>
+          <SloEditFormIndicatorSection />
         </EuiTimelineItem>
 
         <EuiTimelineItem
