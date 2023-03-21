@@ -53,11 +53,6 @@ export function setupSavedObjects(
           dynamic: false,
           properties: {},
         },
-        expression: {
-          index: false,
-          doc_values: false,
-          type: 'keyword',
-        },
       },
     },
   });
