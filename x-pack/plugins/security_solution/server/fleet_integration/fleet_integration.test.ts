@@ -92,13 +92,13 @@ describe('ingest_integration tests ', () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-    const createNewEndpointPolicyInput = (manifest: ManifestSchema) => ({
+    const createNewEndpointPolicyInput = (manifest: ManifestSchema, license = 'platinum') => ({
       type: 'endpoint',
       enabled: true,
       streams: [],
       config: {
         integration_config: {},
-        policy: { value: disableProtections(policyFactory()) },
+        policy: { value: disableProtections(policyFactory(license)) },
         artifact_manifest: { value: manifest },
       },
     });
