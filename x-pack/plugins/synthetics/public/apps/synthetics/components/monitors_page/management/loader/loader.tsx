@@ -32,7 +32,7 @@ export const Loader = ({
         <>
           <EuiSpacer size="xxl" />
           <EuiEmptyPrompt
-            iconType="alert"
+            iconType="warning"
             color="danger"
             title={<h2>{errorTitle}</h2>}
             body={<p>{errorBody}</p>}

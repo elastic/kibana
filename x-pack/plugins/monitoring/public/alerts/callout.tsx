@@ -49,7 +49,7 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
       <div>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="alert" size="m" color="danger" />
+            <EuiIcon type="warning" size="m" color="danger" />
           </EuiFlexItem>
 
           <EuiFlexItem>

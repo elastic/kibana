@@ -374,7 +374,7 @@ export const NotificationsList: FC = () => {
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
           >
             <p>{queryError}</p>
           </EuiCallOut>

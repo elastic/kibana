@@ -34,7 +34,11 @@ export const ErrorPage: React.FC<Props> = ({ detailedMessage, retry, shortMessag
           <EuiFlexItem>{shortMessage}</EuiFlexItem>
           {retry ? (
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={retry} iconType="refresh">
+              <EuiButton
+                data-test-subj="infraErrorPageTryAgainButton"
+                onClick={retry}
+                iconType="refresh"
+              >
                 <FormattedMessage
                   id="xpack.infra.errorPage.tryAgainButtonLabel"
                   defaultMessage="Try again"
