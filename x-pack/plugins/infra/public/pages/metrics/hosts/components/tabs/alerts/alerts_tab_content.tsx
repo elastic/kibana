@@ -21,8 +21,6 @@ import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import {
   ALERTS_PER_PAGE,
   ALERTS_TABLE_ID,
-  casesFeatures,
-  casesOwner,
   DEFAULT_DATE_FORMAT,
   DEFAULT_INTERVAL,
   infraAlertFeatureIds,
@@ -38,14 +36,10 @@ export const AlertsTabContent = () => {
 
   const { searchCriteria } = useUnifiedSearchContext();
 
-  const { application, cases, triggersActionsUi } = services;
+  const { triggersActionsUi } = services;
 
   const { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable } =
     triggersActionsUi;
-
-  const CasesContext = cases.ui.getCasesContext();
-  const uiCapabilities = application?.capabilities;
-  const casesCapabilities = cases.helpers.getUICapabilities(uiCapabilities.observabilityCases);
 
   return (
     <HeightRetainer>
@@ -63,23 +57,17 @@ export const AlertsTabContent = () => {
         </EuiFlexItem>
         {alertsEsQueryByStatus && (
           <EuiFlexItem>
-            <CasesContext
-              features={casesFeatures}
-              owner={casesOwner}
-              permissions={casesCapabilities}
-            >
-              <AlertsStateTable
-                alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-                configurationId={AlertConsumers.OBSERVABILITY}
-                featureIds={infraAlertFeatureIds}
-                flyoutSize="s"
-                id={ALERTS_TABLE_ID}
-                pageSize={ALERTS_PER_PAGE}
-                query={alertsEsQueryByStatus}
-                showAlertStatusWithFlapping
-                showExpandToDetails={false}
-              />
-            </CasesContext>
+            <AlertsStateTable
+              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+              configurationId={AlertConsumers.OBSERVABILITY}
+              featureIds={infraAlertFeatureIds}
+              flyoutSize="s"
+              id={ALERTS_TABLE_ID}
+              pageSize={ALERTS_PER_PAGE}
+              query={alertsEsQueryByStatus}
+              showAlertStatusWithFlapping
+              showExpandToDetails={false}
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
