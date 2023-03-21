@@ -73,8 +73,8 @@ function ResponsiveGrid({
     <ReactGridLayout
       width={lastValidGridSize}
       className={classes}
-      isDraggable={!isViewMode && !maximizedPanelId}
-      isResizable={!isViewMode && !maximizedPanelId}
+      isDraggable={!maximizedPanelId}
+      isResizable={!maximizedPanelId}
       // There is a bug with d3 + firefox + elements using transforms.
       // See https://github.com/elastic/kibana/issues/16870 for more context.
       useCSSTransforms={false}
