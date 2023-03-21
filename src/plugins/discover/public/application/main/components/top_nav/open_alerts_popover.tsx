@@ -81,7 +81,7 @@ export function AlertsPopover({
 
     const onFinishFlyoutInteraction = async (metadata: EsQueryAlertMetaData) => {
       await stateContainer.actions.loadDataViewList();
-      stateContainer.actions.setAdHocDataViews(metadata.adHocDataViewList);
+      stateContainer.internalState.transitions.setAdHocDataViews(metadata.adHocDataViewList);
     };
 
     return triggersActionsUi?.getAddRuleFlyout({

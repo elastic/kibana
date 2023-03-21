@@ -25,6 +25,7 @@ import { DiscoverAppStateContainer } from './discover_app_state_container';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
 import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
+import { copySavedSearch } from './discover_saved_search_container';
 
 const startSync = (appState: DiscoverAppStateContainer) => {
   const { start, stop } = appState.syncState();
@@ -41,7 +42,15 @@ async function getState(url: string, savedSearch?: SavedSearch) {
   });
   await nextState.actions.loadDataViewList();
   if (savedSearch) {
-    nextState.savedSearchState.load = jest.fn().mockReturnValue(savedSearch);
+    nextState.savedSearchState.load = jest.fn(() => {
+      nextState.savedSearchState.set(copySavedSearch(savedSearch));
+      return Promise.resolve(savedSearch);
+    });
+  } else {
+    nextState.savedSearchState.load = jest.fn(() => {
+      nextState.savedSearchState.set(copySavedSearch(savedSearchMockWithTimeFieldNew));
+      return Promise.resolve(savedSearchMockWithTimeFieldNew);
+    });
   }
 
   const getCurrentUrl = () => nextHistory.createHref(nextHistory.location);
@@ -268,20 +277,8 @@ describe('actions', () => {
     expect(state.internalState.getState().dataView).toBe(dataViewMock);
   });
 
-  test('appendAdHocDataViews', async () => {
-    const { state } = await getState('');
-    state.actions.appendAdHocDataViews(dataViewMock);
-    expect(state.internalState.getState().adHocDataViews).toEqual([dataViewMock]);
-  });
-
-  test('removeAdHocDataViewById', async () => {
-    const { state } = await getState('');
-    state.actions.appendAdHocDataViews(dataViewMock);
-    state.actions.removeAdHocDataViewById(dataViewMock.id!);
-    expect(state.internalState.getState().adHocDataViews).toEqual([]);
-  });
   test('fetchData', async () => {
-    const { state } = await getState('');
+    const { state } = await getState('/');
     const dataState = state.dataState;
     await state.actions.loadDataViewList();
     expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
@@ -369,13 +366,13 @@ describe('actions', () => {
     unsubscribe();
   });
   test('loadSavedSearch given an empty URL, no state changes', async () => {
-    const { state, getCurrentUrl } = await getState('/');
+    const { state, getCurrentUrl } = await getState('/', savedSearchMock);
     const newSavedSearch = await state.actions.loadSavedSearch('the-saved-search-id');
     const unsubscribe = state.actions.initializeAndSync();
     state.kbnUrlStateStorage.kbnUrlControls.flush();
     expect(newSavedSearch?.id).toBe('the-saved-search-id');
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(test123),hideChart:!f,index:the-data-view-id,interval:auto,sort:!())"`
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
     unsubscribe();

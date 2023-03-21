@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
@@ -169,19 +169,6 @@ export function DiscoverLayout({
   }, [isSidebarClosed, storage]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
-  const onDataViewCreated = useCallback(
-    async (nextDataView: DataView) => {
-      if (!nextDataView.isPersisted()) {
-        stateContainer.actions.appendAdHocDataViews(nextDataView);
-      } else {
-        await stateContainer.actions.loadDataViewList();
-      }
-      if (nextDataView.id) {
-        await stateContainer.actions.onChangeDataView(nextDataView.id);
-      }
-    },
-    [stateContainer]
-  );
 
   const savedSearchTitle = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -275,7 +262,6 @@ export function DiscoverLayout({
         savedQuery={savedQuery}
         stateContainer={stateContainer}
         updateQuery={stateContainer.actions.onUpdateQuery}
-        onDataViewCreated={onDataViewCreated}
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         onFieldEdited={onFieldEdited}
@@ -302,7 +288,7 @@ export function DiscoverLayout({
               useNewFieldsApi={useNewFieldsApi}
               onFieldEdited={onFieldEdited}
               viewMode={viewMode}
-              onDataViewCreated={onDataViewCreated}
+              onDataViewCreated={stateContainer.actions.onDataViewCreated}
               availableFields$={stateContainer.dataState.data$.availableFields$}
             />
           </EuiFlexItem>

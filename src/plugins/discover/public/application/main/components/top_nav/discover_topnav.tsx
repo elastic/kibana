@@ -27,7 +27,6 @@ export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'navigateTo'> & {
     isUpdate?: boolean
   ) => void;
   stateContainer: DiscoverStateContainer;
-  onDataViewCreated: (dataView: DataView) => void;
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => Promise<void>;
@@ -41,7 +40,6 @@ export const DiscoverTopNav = ({
   stateContainer,
   updateQuery,
   navigateTo,
-  onDataViewCreated,
   isPlainRecord,
   textBasedLanguageModeErrors,
   onFieldEdited,
@@ -105,25 +103,10 @@ export const DiscoverTopNav = ({
 
   const createNewDataView = useCallback(() => {
     closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: onDataViewCreated,
+      onSave: stateContainer.actions.onDataViewCreated,
       allowAdHocDataView: true,
     });
-  }, [dataViewEditor, onDataViewCreated]);
-
-  const onCreateDefaultAdHocDataView = useCallback(
-    async (pattern: string) => {
-      const newDataView = await dataViews.create({
-        title: pattern,
-      });
-      if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
-        newDataView.timeFieldName = '@timestamp';
-      }
-
-      stateContainer.actions.appendAdHocDataViews(newDataView);
-      await stateContainer.actions.onChangeDataView(newDataView.id!);
-    },
-    [dataViews, stateContainer.actions]
-  );
+  }, [dataViewEditor, stateContainer]);
 
   const topNavMenu = useMemo(
     () =>
@@ -192,7 +175,7 @@ export const DiscoverTopNav = ({
     currentDataViewId: dataView?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
-    onCreateDefaultAdHocDataView,
+    onCreateDefaultAdHocDataView: stateContainer.actions.onCreateDefaultAdHocDataView,
     onChangeDataView: stateContainer.actions.onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
     adHocDataViews,

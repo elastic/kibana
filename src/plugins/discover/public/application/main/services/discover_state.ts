@@ -97,10 +97,6 @@ export interface DiscoverStateContainer {
    */
   actions: {
     /**
-     * Append a given ad-hoc data views to the list of ad-hoc data view
-     */
-    appendAdHocDataViews: (dataViews: DataView | DataView[]) => void;
-    /**
      * Triggers fetching of new data from Elasticsearch
      * If initial is true, then depending on the given configuration no fetch is triggered
      * @param initial
@@ -125,6 +121,21 @@ export interface DiscoverStateContainer {
       dataViewSpec?: DataViewSpec
     ) => Promise<SavedSearch | undefined>;
     /**
+     * Create and select a ad-hoc data view by a given index pattern
+     * @param pattern
+     */
+    onCreateDefaultAdHocDataView: (pattern: string) => void;
+    /**
+     * Triggered when a new data view is created
+     * @param dataView
+     */
+    onDataViewCreated: (dataView: DataView) => Promise<void>;
+    /**
+     * Triggered when a new data view is edited
+     * @param dataView
+     */
+    onDataViewEdited: (dataView: DataView) => Promise<void>;
+    /**
      * Triggered when a saved search is opened in the savedObject finder
      * @param savedSearchId
      */
@@ -144,14 +155,10 @@ export interface DiscoverStateContainer {
      */
     onChangeDataView: (id: string) => Promise<void>;
     /**
-     * Remove the ad-hoc data view of the given id from the list of ad-hoc data view
-     * @param id
+     * Triggered when an ad-hoc data view is persisted to allow sharing links and CSV
+     * @param dataView
      */
-    removeAdHocDataViewById: (id: string) => void;
-    /**
-     * Set new adhoc data view list
-     */
-    setAdHocDataViews: (dataViews: DataView[]) => void;
+    persistAdHocDataView: (dataView: DataView) => Promise<DataView>;
     /**
      * Set the currently selected data view
      */
@@ -231,12 +238,6 @@ export function getDiscoverStateContainer({
     pauseAutoRefreshInterval(dataView);
     savedSearchContainer.getState().searchSource.setField('index', dataView);
   };
-  const setAdHocDataViews = (dataViews: DataView[]) =>
-    internalStateContainer.transitions.setAdHocDataViews(dataViews);
-  const appendAdHocDataViews = (dataViews: DataView | DataView[]) =>
-    internalStateContainer.transitions.appendAdHocDataViews(dataViews);
-  const removeAdHocDataViewById = (id: string) =>
-    internalStateContainer.transitions.removeAdHocDataViewById(id);
 
   const loadDataViewList = async () => {
     const dataViewList = await services.dataViews.getIdsWithTitle(true);
@@ -287,6 +288,42 @@ export function getDiscoverStateContainer({
       addLog('[discoverState] onOpenSavedSearch open view URL');
       history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
     }
+  };
+
+  const onDataViewCreated = async (nextDataView: DataView) => {
+    if (!nextDataView.isPersisted()) {
+      internalStateContainer.transitions.appendAdHocDataViews(nextDataView);
+    } else {
+      await loadDataViewList();
+    }
+    if (nextDataView.id) {
+      await onChangeDataView(nextDataView.id);
+    }
+  };
+
+  const onDataViewEdited = async (editedDataView: DataView) => {
+    if (editedDataView.isPersisted()) {
+      // Clear the current data view from the cache and create a new instance
+      // of it, ensuring we have a new object reference to trigger a re-render
+      services.dataViews.clearInstanceCache(editedDataView.id);
+      setDataView(await services.dataViews.create(editedDataView.toSpec(), true));
+    } else {
+      await updateAdHocDataViewId();
+    }
+    loadDataViewList();
+    fetchData();
+  };
+
+  const persistAdHocDataView = async (adHocDataView: DataView) => {
+    const persistedDataView = await services.dataViews.createAndSave({
+      ...adHocDataView.toSpec(),
+      id: uuidv4(),
+    });
+    services.dataViews.clearInstanceCache(adHocDataView.id);
+    updateFiltersReferences(adHocDataView, persistedDataView);
+    internalStateContainer.transitions.removeAdHocDataViewById(adHocDataView.id!);
+    await appStateContainer.update({ index: persistedDataView.id }, true);
+    return persistedDataView;
   };
 
   const loadSavedSearch = async (
@@ -350,6 +387,18 @@ export function getDiscoverStateContainer({
     };
   };
 
+  const onCreateDefaultAdHocDataView = async (pattern: string) => {
+    const newDataView = await services.dataViews.create({
+      title: pattern,
+    });
+    if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
+      newDataView.timeFieldName = '@timestamp';
+    }
+    internalStateContainer.transitions.appendAdHocDataViews(newDataView);
+
+    await onChangeDataView(newDataView.id!);
+  };
+
   const onUpdateQuery = (
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
@@ -392,16 +441,17 @@ export function getDiscoverStateContainer({
     savedSearchState: savedSearchContainer,
     searchSessionManager,
     actions: {
-      appendAdHocDataViews,
       initializeAndSync,
       fetchData,
       loadDataViewList,
       loadSavedSearch,
       onChangeDataView,
+      onCreateDefaultAdHocDataView,
+      onDataViewCreated,
+      onDataViewEdited,
       onOpenSavedSearch,
       onUpdateQuery,
-      removeAdHocDataViewById,
-      setAdHocDataViews,
+      persistAdHocDataView,
       setDataView,
       undoChanges,
       updateAdHocDataViewId,
