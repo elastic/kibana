@@ -151,6 +151,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await PageObjects.lens.save(FIRST_VIS_TITLE);
+
+        // TODO test that saved object info gets populated on subsequent save
       });
 
       it('should add annotation group from library', async () => {

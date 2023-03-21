@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
@@ -20,6 +19,7 @@ export {
   KEEP_GLOBAL_FILTERS_ACTION_ID,
 } from './ignore_filters_action';
 
+// TODO add unit test to verify that the correct actions are shown
 export const createAnnotationActions = ({
   state,
   layer,
@@ -61,18 +61,10 @@ export const createAnnotationActions = ({
   if (isByReferenceAnnotationsLayer(layer)) {
     actions.push(
       getUnlinkLayerAction({
-        execute: () => {
-          const title = 'Annotation group name'; // TODO: pass the title from Annotation group state
-          // save to Lens Saved object state - there's nothing we should do with the Annotation group Saved Object
-          // update Lens state
-          core.notifications.toasts.addSuccess(
-            i18n.translate('xpack.lens.xyChart.annotations.notificationUnlinked', {
-              defaultMessage: `Unlinked “{title}“ from library`,
-              values: { title },
-            })
-          );
-        },
-        core,
+        state,
+        layer,
+        setState,
+        toasts: core.notifications.toasts,
       })
     );
   }
