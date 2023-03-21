@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import {
   ALERT_DURATION,
   ALERT_END,
+  ALERT_INSTANCE_ID,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
   ALERT_START,
@@ -20,6 +21,8 @@ import {
 } from '@kbn/rule-data-utils';
 import { omit } from 'lodash';
 import { Rule } from '@kbn/alerting-plugin/common';
+import { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
+import type { RuleTaskState } from '@kbn/alerting-state-types';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   getAlertsTargetIndices,
@@ -200,6 +203,7 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
             VERSION,
           ];
 
+          const alertInstanceId = alertEvent[ALERT_INSTANCE_ID]?.[0];
           const alertUuid = alertEvent[ALERT_UUID]?.[0];
           const executionUuid = alertEvent[ALERT_RULE_EXECUTION_UUID]?.[0];
           expect(typeof alertUuid).to.be('string');
@@ -209,6 +213,7 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
             getService,
             SPACE_ID,
             createResponse.alert.id,
+            alertInstanceId,
             alertUuid,
             executionUuid
           );
@@ -279,9 +284,11 @@ async function checkEventLogAlertUuids(
   getService: FtrProviderContext['getService'],
   spaceId: string,
   ruleId: string,
+  alertInstanceId: string,
   alertUuid: string,
   executionUuid: string
 ) {
+  const es = getService('es');
   const retry = getService('retry');
 
   const docs: Awaited<ReturnType<typeof getEventLog>> = [];
@@ -293,6 +300,22 @@ async function checkEventLogAlertUuids(
   expect(docs.length).to.be.greaterThan(0);
   for (const doc of docs) {
     expect(doc?.kibana?.alert?.uuid).to.be(alertUuid);
+  }
+
+  // check that the task doc has the same UUID
+  const taskDoc = await es.get<{ task: SerializedConcreteTaskInstance }>({
+    index: '.kibana_task_manager',
+    id: `task:${ruleId}`,
+  });
+
+  const ruleStateString = taskDoc._source?.task.state || 'task-state-is-missing';
+  const ruleState: RuleTaskState = JSON.parse(ruleStateString);
+  if (ruleState.alertInstances?.[alertInstanceId]) {
+    expect(ruleState.alertInstances[alertInstanceId].meta?.uuid).to.be(alertUuid);
+  } else if (ruleState.alertRecoveredInstances?.[alertInstanceId]) {
+    expect(ruleState.alertRecoveredInstances[alertInstanceId].meta?.uuid).to.be(alertUuid);
+  } else {
+    expect(false).to.be('alert instance not found in task doc');
   }
 
   function getEventLogDocs() {

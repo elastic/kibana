@@ -115,6 +115,13 @@ async function getTaskDocs() {
     Object.keys(mtRuleState.alertRecoveredInstances).length > 0
   ) {
     console.log('that last one is a keeper!');
+
+    console.log('full docs for es archive:');
+    console.log('');
+    console.log(JSON.stringify(itTaskState, null, 4));
+    console.log('');
+    console.log(JSON.stringify(mtTaskState, null, 4));
+    console.log('');
     process.exit(0);
   }
 }
