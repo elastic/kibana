@@ -15,13 +15,13 @@ import type { ServerError } from '../types';
 
 import { APP_ID } from '../../common';
 import { useCasesToast } from '../common/use_cases_toast';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { CASES_FILE_KINDS } from '../files';
 import { casesQueriesKeys } from './constants';
 import * as i18n from './translations';
 
 export interface GetCaseFilesParams {
   caseId: string;
-  owner: string;
   page: number;
   perPage: number;
   searchTerm?: string;
@@ -30,22 +30,22 @@ export interface GetCaseFilesParams {
 export const useGetCaseFiles = ({
   caseId,
   page,
-  owner,
   perPage,
   searchTerm,
 }: GetCaseFilesParams): UseQueryResult<{ files: FileJSON[]; total: number }> => {
+  const { owner } = useCasesContext();
   const { showErrorToast } = useCasesToast();
   const { client: filesClient } = useFilesContext();
 
   return useQuery(
-    casesQueriesKeys.caseFiles({ caseId, page, perPage, searchTerm, owner }),
+    casesQueriesKeys.caseFiles({ caseId, page, perPage, searchTerm, owner: owner[0] }),
     () => {
       return filesClient.list({
         kind: CASES_FILE_KINDS[APP_ID].id,
         page: page + 1,
         ...(searchTerm && { name: `*${searchTerm}*` }),
         perPage,
-        meta: { caseId, owner },
+        meta: { caseId, owner: owner[0] },
       });
     },
     {

@@ -205,10 +205,6 @@ export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.caseView.assignYourse
   defaultMessage: 'assign yourself',
 });
 
-export const SEARCH_PLACEHOLDER = i18n.translate('xpack.cases.caseViewFiles.searchPlaceholder', {
-  defaultMessage: 'Search',
-});
-
 export const TOTAL_USERS_ASSIGNED = (total: number) =>
   i18n.translate('xpack.cases.caseView.totalUsersAssigned', {
     defaultMessage: '{total} assigned',
