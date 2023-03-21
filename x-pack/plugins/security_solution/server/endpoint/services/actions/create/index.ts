@@ -15,6 +15,8 @@ import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { AuthenticationServiceStart } from '@kbn/security-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
+import type { TransportResult } from '@elastic/elasticsearch';
+import type { IndexResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ResponseActionBodySchema } from '../../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../../common/constants';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -78,8 +80,8 @@ export class ActionCreateService {
     // create an Action ID and dispatch it to ES & Fleet Server
     const actionID = uuidv4();
 
-    let fleetActionIndexResult;
-    let logsEndpointActionsResult;
+    let fleetActionIndexResult: TransportResult<IndexResponse, unknown>;
+    let logsEndpointActionsResult: TransportResult<IndexResponse, unknown>;
 
     const getActionParameters = () => {
       // set timeout to 4h (if not specified or when timeout is specified as 0) when command is `execute`
@@ -248,7 +250,7 @@ export class ActionCreateService {
       }
     }
 
-    const body = returnActionIdCommands.includes(payload.command) ? { action: actionID } : {};
+    const actionId = returnActionIdCommands.includes(payload.command) ? { action: actionID } : {};
 
     const data = await getActionDetailsById(
       this.esClient,
@@ -257,7 +259,7 @@ export class ActionCreateService {
     );
 
     return {
-      ...body,
+      ...actionId,
       ...data,
     };
   }
