@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 import { MetadataTab } from './metadata/metadata';
@@ -24,7 +24,7 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
 
   const { to, from } = getDateRangeAsTimestamp();
 
-  const currentTimeRange = useCallback(
+  const currentTimeRange = useMemo(
     () => ({
       from,
       interval: '1m',
@@ -38,7 +38,7 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
       const TabContent = m.content;
       return {
         ...m,
-        content: <TabContent node={node} currentTimeRange={currentTimeRange()} />,
+        content: <TabContent node={node} currentTimeRange={currentTimeRange} />,
       };
     });
   }, [currentTimeRange, node]);
