@@ -68,7 +68,7 @@ export const registerUrlServiceSavedObjectType = (
             },
           },
         },
-       // Information needed to load and execute a locator.
+        // Information needed to load and execute a locator.
         locatorJSON: {
           type: 'text',
           index: false,
