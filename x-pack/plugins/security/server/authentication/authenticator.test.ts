@@ -35,6 +35,7 @@ import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { securityMock } from '../mocks';
 import {
+  SessionConcurrencyLimitError,
   type SessionError,
   SessionExpiredError,
   SessionMissingError,
@@ -1356,7 +1357,12 @@ describe('Authenticator', () => {
       expectAuditEvents({ action: 'user_login', outcome: 'failure' });
     });
 
-    for (const FailureClass of [SessionMissingError, SessionExpiredError, SessionUnexpectedError]) {
+    for (const FailureClass of [
+      SessionMissingError,
+      SessionExpiredError,
+      SessionConcurrencyLimitError,
+      SessionUnexpectedError,
+    ]) {
       describe(`session.get results in ${FailureClass.name}`, () => {
         it('fails as expected for redirectable requests', async () => {
           const request = httpServerMock.createKibanaRequest();
@@ -1455,7 +1461,10 @@ describe('Authenticator', () => {
 
           const authenticationResult = await authenticator.authenticate(request);
           expect(authenticationResult.redirected()).toBe(true);
-          if (failureReason instanceof SessionExpiredError) {
+          if (
+            failureReason instanceof SessionExpiredError ||
+            failureReason instanceof SessionConcurrencyLimitError
+          ) {
             expect(authenticationResult.redirectURL).toBe(
               redirectUrl + '&msg=' + failureReason.code
             );
