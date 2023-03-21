@@ -13,11 +13,13 @@ import {
 } from '../../../common/apm_saved_object_constants';
 import { translateLegacySchemaPaths } from './translate_legacy_schema_paths';
 
+export type UnsupportedApmServerSchema = Array<{ key: string; value: unknown }>;
+
 export async function getUnsupportedApmServerSchema({
   savedObjectsClient,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-}) {
+}): Promise<UnsupportedApmServerSchema> {
   const { attributes } = await savedObjectsClient.get(
     APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
     APM_SERVER_SCHEMA_SAVED_OBJECT_ID

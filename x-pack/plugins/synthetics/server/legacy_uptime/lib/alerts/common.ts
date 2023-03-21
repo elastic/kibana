@@ -7,9 +7,12 @@
 
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { type IRuleTypeAlerts, RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
+import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../../../common/constants/synthetics_alerts';
 import { UptimeCommonState, UptimeCommonStateType } from '../../../../common/runtime_types';
 import { ALERT_DETAILS_URL } from './action_variables';
 
@@ -102,4 +105,12 @@ export const setRecoveredAlertsContext = ({
         : {}),
     });
   }
+};
+
+export const uptimeRuleTypeFieldMap = { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap };
+
+export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts = {
+  context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
+  mappings: { fieldMap: uptimeRuleTypeFieldMap },
+  useLegacyAlerts: true,
 };

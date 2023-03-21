@@ -56,7 +56,7 @@ const RiskScoreHeaderContentComponent = ({
         <SeverityFilterGroup
           selectedSeverities={selectedSeverity}
           severityCount={severityCount ?? EMPTY_SEVERITY_COUNT}
-          title={i18n.ENTITY_RISK(riskEntity)}
+          riskEntity={riskEntity}
           onSelect={onSelectSeverityFilterGroup}
         />
       </EuiFlexItem>

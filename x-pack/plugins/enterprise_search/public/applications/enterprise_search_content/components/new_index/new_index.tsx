@@ -9,6 +9,8 @@ import React, { useState } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
+import { useValues } from 'kea';
+
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -20,7 +22,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
+
+import { ProductFeatures } from '../../../../../common/types';
 import { BETA_LABEL } from '../../../shared/constants/labels';
+import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 import { parseQueryParams } from '../../../shared/query_params';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
@@ -33,21 +39,14 @@ import { MethodApi } from './method_api/method_api';
 import { MethodConnector } from './method_connector/method_connector';
 import { MethodCrawler } from './method_crawler/method_crawler';
 
-export enum IngestionMethodId {
-  api = 'api',
-  connector = 'connector',
-  crawler = 'crawler',
-  native_connector = 'native_connector',
-}
-
 const betaBadge = (
   <EuiBadge iconType="beaker">
     <EuiText size="xs">{BETA_LABEL}</EuiText>
   </EuiBadge>
 );
 
-const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
-  {
+const METHOD_BUTTON_GROUP_OPTIONS: Record<INGESTION_METHOD_IDS, ButtonGroupOption> = {
+  [INGESTION_METHOD_IDS.crawler]: {
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.description',
       {
@@ -58,12 +57,12 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       defaultMessage: 'No development required',
     }),
     icon: 'globe',
-    id: IngestionMethodId.crawler,
+    id: INGESTION_METHOD_IDS.crawler,
     label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.label', {
       defaultMessage: 'Use the web crawler',
     }),
   },
-  {
+  [INGESTION_METHOD_IDS.native_connector]: {
     badge: betaBadge,
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.nativeConnector.description',
@@ -79,7 +78,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       }
     ),
     icon: 'visVega',
-    id: IngestionMethodId.native_connector,
+    id: INGESTION_METHOD_IDS.native_connector,
     label: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.nativeConnector.label',
       {
@@ -87,7 +86,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       }
     ),
   },
-  {
+  [INGESTION_METHOD_IDS.api]: {
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.api.description',
       {
@@ -98,12 +97,12 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       defaultMessage: 'Some development required',
     }),
     icon: 'visVega',
-    id: IngestionMethodId.api,
+    id: INGESTION_METHOD_IDS.api,
     label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.label', {
       defaultMessage: 'Use the API',
     }),
   },
-  {
+  [INGESTION_METHOD_IDS.connector]: {
     badge: betaBadge,
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
@@ -116,20 +115,37 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       defaultMessage: 'Development required',
     }),
     icon: 'package',
-    id: IngestionMethodId.connector,
+    id: INGESTION_METHOD_IDS.connector,
     label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.label', {
       defaultMessage: 'Build a connector',
     }),
   },
-];
+};
+
+const getAvailableMethodOptions = (productFeatures: ProductFeatures): ButtonGroupOption[] => {
+  return [
+    ...(productFeatures.hasWebCrawler
+      ? [METHOD_BUTTON_GROUP_OPTIONS[INGESTION_METHOD_IDS.crawler]]
+      : []),
+    ...(productFeatures.hasNativeConnectors
+      ? [METHOD_BUTTON_GROUP_OPTIONS[INGESTION_METHOD_IDS.native_connector]]
+      : []),
+    METHOD_BUTTON_GROUP_OPTIONS[INGESTION_METHOD_IDS.api],
+    ...(productFeatures.hasConnectors
+      ? [METHOD_BUTTON_GROUP_OPTIONS[INGESTION_METHOD_IDS.connector]]
+      : []),
+  ];
+};
 
 export const NewIndex: React.FC = () => {
   const { search } = useLocation();
+  const { capabilities, productFeatures } = useValues(KibanaLogic);
   const { method: methodParam } = parseQueryParams(search);
+  const availableIngestionMethodOptions = getAvailableMethodOptions(productFeatures);
 
   const initialSelectedMethod =
-    METHOD_BUTTON_GROUP_OPTIONS.find((option) => option.id === methodParam) ??
-    METHOD_BUTTON_GROUP_OPTIONS[0];
+    availableIngestionMethodOptions.find((option) => option.id === methodParam) ??
+    availableIngestionMethodOptions[0];
 
   const [selectedMethod, setSelectedMethod] = useState<ButtonGroupOption>(initialSelectedMethod);
 
@@ -173,27 +189,31 @@ export const NewIndex: React.FC = () => {
             </EuiText>
             <EuiSpacer size="m" />
             <ButtonGroup
-              options={METHOD_BUTTON_GROUP_OPTIONS}
+              options={availableIngestionMethodOptions}
               selected={selectedMethod}
               onChange={setSelectedMethod}
             />
-            <EuiSpacer size="xxl" />
-            <EuiLinkTo to="/app/integrations" shouldNotCreateHref>
-              {i18n.translate('xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink', {
-                defaultMessage: 'View additional integrations',
-              })}
-            </EuiLinkTo>
+            {capabilities.navLinks.integrations && (
+              <>
+                <EuiSpacer size="xxl" />
+                <EuiLinkTo to="/app/integrations" shouldNotCreateHref>
+                  {i18n.translate('xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink', {
+                    defaultMessage: 'View additional integrations',
+                  })}
+                </EuiLinkTo>
+              </>
+            )}
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
           {selectedMethod ? (
             <>
-              {selectedMethod.id === IngestionMethodId.crawler && <MethodCrawler />}
-              {selectedMethod.id === IngestionMethodId.api && <MethodApi />}
-              {selectedMethod.id === IngestionMethodId.connector && (
+              {selectedMethod.id === INGESTION_METHOD_IDS.crawler && <MethodCrawler />}
+              {selectedMethod.id === INGESTION_METHOD_IDS.api && <MethodApi />}
+              {selectedMethod.id === INGESTION_METHOD_IDS.connector && (
                 <MethodConnector isNative={false} />
               )}
-              {selectedMethod.id === IngestionMethodId.native_connector && (
+              {selectedMethod.id === INGESTION_METHOD_IDS.native_connector && (
                 <MethodConnector isNative />
               )}
             </>

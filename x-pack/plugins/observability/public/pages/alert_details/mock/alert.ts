@@ -28,7 +28,7 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { TopAlert } from '../../alerts';
+import type { TopAlert } from '../../../typings/alerts';
 
 export const tags: string[] = ['tag1', 'tag2', 'tag3'];
 

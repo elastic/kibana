@@ -11,6 +11,7 @@ import { getPackages } from '@kbn/repo-packages';
 import { CliArgs, Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { Root } from './root';
+import { MIGRATION_EXCEPTION_CODE } from './constants';
 
 interface BootstrapArgs {
   configs: string[];
@@ -114,11 +115,13 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
 
 function onRootShutdown(reason?: any) {
   if (reason !== undefined) {
-    // There is a chance that logger wasn't configured properly and error that
-    // that forced root to shut down could go unnoticed. To prevent this we always
-    // mirror such fatal errors in standard output with `console.error`.
-    // eslint-disable-next-line no-console
-    console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
+    if (reason.code !== MIGRATION_EXCEPTION_CODE) {
+      // There is a chance that logger wasn't configured properly and error that
+      // that forced root to shut down could go unnoticed. To prevent this we always
+      // mirror such fatal errors in standard output with `console.error`.
+      // eslint-disable-next-line no-console
+      console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
+    }
 
     process.exit(reason instanceof CriticalError ? reason.processExitCode : 1);
   }

@@ -205,7 +205,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           isLoading={false}
           isDisabled={isDisabled || indexPattern == null}
           onChange={handleFieldChange}
-          acceptsCustomOptions={entry.nested == null}
+          acceptsCustomOptions={entry.nested == null && allowCustomOptions}
           data-test-subj="exceptionBuilderEntryField"
           showMappingConflicts={true}
         />
@@ -227,7 +227,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
                   <EuiIcon
                     data-test-subj="mappingConflictsAccordionIcon"
                     tabIndex={0}
-                    type="alert"
+                    type="warning"
                     size="s"
                     css={warningIconCss}
                   />
