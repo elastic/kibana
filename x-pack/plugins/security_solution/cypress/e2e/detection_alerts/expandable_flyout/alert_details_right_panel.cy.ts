@@ -14,6 +14,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT,
+  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW,
 } from '../../../screens/document_expandable_flyout';
 import {
   collapseDocumentDetailsExpandableFlyoutLeftSection,
@@ -70,7 +71,13 @@ describe.skip('Alert details expandable flyout right panel', { testIsolation: fa
     // we shouldn't need to test anything here as it's covered with the new overview_tab file
 
     openTableTab();
+    // the table component is rendered within a dom element with overflow, so Cypress isn't finding it
+    // this next line is a hack that scrolls to a specific element in the table to ensure Cypress finds it
+    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_EVENT_TYPE_ROW).scrollIntoView();
     cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_CONTENT).should('be.visible');
+
+    // scroll back up to the top to open the json tab
+    cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).scrollIntoView();
 
     openJsonTab();
     // the json component is rendered within a dom element with overflow, so Cypress isn't finding it

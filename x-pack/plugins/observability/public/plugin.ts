@@ -66,9 +66,6 @@ import { CASES_URL } from './routes/routes';
 export interface ConfigSchema {
   unsafe: {
     alertDetails: {
-      apm: {
-        enabled: boolean;
-      };
       metrics: {
         enabled: boolean;
       };
