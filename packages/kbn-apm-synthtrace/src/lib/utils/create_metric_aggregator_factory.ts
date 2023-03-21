@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { ApmFields, appendHash, Fields, parseInterval } from '@kbn/apm-synthtrace-client';
+import { appendHash, Fields, parseInterval } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
 import { Duplex, PassThrough } from 'stream';
 
-export interface TrackingMetricGroupMap {
-  tracked?: Map<keyof ApmFields, TrackingMetricGroupMap>;
-  untracked?: Map<keyof ApmFields, TrackingMetricGroupMap>;
+interface TrackingMetricGroupMap<TFields extends Fields> {
+  tracked: Map<keyof TFields & string, TrackingMetricGroupMap<TFields>>;
+  untracked: Map<keyof TFields & string, TrackingMetricGroupMap<TFields>>;
 }
 
-export interface GroupFields {
-  field: keyof ApmFields;
+interface GroupFields<TFields extends Fields> {
+  field: keyof TFields & string;
   limit: number;
 }
 
@@ -27,7 +27,7 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
     flushInterval,
     init,
     aggregatorLimit,
-    group,
+    grouping,
     reduce,
     serialize,
   }: {
@@ -35,15 +35,18 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
     getAggregateKey: (event: TFields) => string;
     flushInterval: string;
     init: (event: TFields) => TMetric;
-    aggregatorLimit?: { field: keyof ApmFields; value: number };
-    group?: GroupFields[];
+    aggregatorLimit?: { field: Array<keyof TFields & string>; value: number };
+    grouping?: GroupFields<TFields>[];
     reduce: (metric: TMetric, event: TFields) => void;
     serialize: (metric: TMetric) => TOutput;
   }) {
     let cb: (() => void) | undefined;
 
     const metrics: Map<string, TMetric & { '@timestamp'?: number }> = new Map();
-    const groupedMetricsMap: TrackingMetricGroupMap = {};
+    const groupedMetricsMap: TrackingMetricGroupMap<TFields> = {
+      tracked: new Map(),
+      untracked: new Map()
+    };
 
     const OVERFLOW_BUCKET_NAME = '_other';
 
@@ -124,85 +127,117 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
           const getMetricByKey = getMetricByKeyWrapper(truncatedTimestamp);
 
           let key = computeKey(event);
-          let set = getMetricByKey(key);
+          let metricsDocument = event;
+
+          let overflow:{ field:string; index: number } | undefined;
+
+          const hashes = [ key, ...(grouping?.map(group => appendHash('', String(event[group.field]))) ?? [])];
+
+          for(let i = 0; i < hashes.length; i++) {
+            const hash = hashes[i];
+            const isTracked = groupedMetricsMap.tracked.has(hash);
+            const isLast = i === hashes.length - 1;
+            const isUntracked = groupedMetricsMap.untracked.has(hash);
+            const isNew = !isTracked && !isUntracked;
+
+            if (isLast) {
+
+
+
+            } else {
+
+            }
+
+          }
 
           // Always check for Global aggregator Limit 1st
-          if (
-            aggregatorLimit?.field &&
-            aggregatorLimit?.value &&
-            metrics.size >= aggregatorLimit.value
-          ) {
-            // @ts-ignore
-            event[aggregatorLimit.field] = OVERFLOW_BUCKET_NAME;
-            key = computeKey(event);
+          if (aggregatorLimit?.value && metrics.size >= aggregatorLimit.value) {
+            // We update the event with soem unique values,
+            // Generate the key
+            // get the set from metric based in this key
+            // Increase the _overflow_count on the set object
+            // Reset the set inside metrics
+            overflow = { field: 'service.name', index: -1 };
+          } else if (grouping?.length) {
 
-            // We need to make sure we get back the same set which was previously set with overflow count
-            set = getMetricByKey(key);
-            // @ts-ignore
-            set._aggregator_overflow_count += 1;
-          } else {
-            // is grouping required
-            if (group?.length) {
-              let currentNode = groupedMetricsMap;
+            let mapForCurrentGroup = groupedMetricsMap;
 
-              for (let level = 0; level < group.length; level++) {
-                const field = group[level].field;
-                const limit = group[level].limit;
+            for(let i = 0; i < grouping.length; i++) {
+              const { field, limit } = grouping[i];
+              const { tracked, untracked } = mapForCurrentGroup;
 
-                // Check if current level is being untracked
-                if (!currentNode.untracked) {
-                  currentNode.untracked = new Map();
-                }
+              const fieldValue = event[field];
 
-                // Check if current level is being tracked
-                if (!currentNode.tracked) {
-                  currentNode.tracked = new Map();
-                }
+              const isTracked = tracked.has(fieldValue);
+              const isUntracked = untracked.has(fieldValue);
 
-                // Check if the current field value exists in the tracked or untracked property
-                // @ts-ignore
-                const fieldValue = event[field];
-                const trackedField = currentNode.tracked.get(fieldValue);
-                const untrackedField = currentNode.untracked.get(fieldValue);
+              const isNew = !isTracked && !isUntracked;
 
-                // If current field value does not exist in the datastructure, add it to tracked based on size
-                if (!trackedField && !untrackedField) {
-                  // check for size of tracked
-                  if (currentNode.tracked.size < limit) {
-                    // Add to tracked
-                    currentNode.tracked.set(fieldValue, {});
-                    currentNode = currentNode.tracked.get(fieldValue) as TrackingMetricGroupMap;
-                  } else {
-                    // Reached limit for current level, add document to untracked
-                    currentNode.untracked.set(fieldValue, {});
-                    currentNode = currentNode.untracked.get(fieldValue) as TrackingMetricGroupMap;
-                    // Once a parent has reached the limit, we must make all the subsequent children overflow
+              const canTrack = tracked.size >= limit;
 
-                    const remainingGroups = group.slice(level);
-                    const remainingFields = remainingGroups.map((rGroup) => rGroup.field);
-                    remainingFields.forEach((rField) => {
-                      // @ts-ignore
-                      event[rField] = OVERFLOW_BUCKET_NAME;
-                    });
-                    key = computeKey(event);
-                    set = getMetricByKey(key);
+              if (!isNew) {
+                mapForCurrentGroup = isTracked ? tracked;
+              }
+
+              // If current field value does not exist in the datastructure, add it to tracked based on size
+              if (tracked.size >= limit) {
+                // Reached limit for current level, add document to untracked
+                untracked.set(fieldValue, { tracked: new Map(), untracked: new Map() });
+                overflow = { field, index: i };
+                break;
+              } else if (isNew) {
+                tracked.set(fieldValue
+              }
+
+
+            }
+
+            for (let level = 0; level < group.length; level++) {
+
+              const isNew = !trackedField && !untrackedField;
+              // If current field value does not exist in the datastructure, add it to tracked based on size
+              if (isNew && currentNode.tracked.size >= limit) {
+                // Reached limit for current level, add document to untracked
+                currentNode.untracked.set(fieldValue, {});
+                currentNode = currentNode.untracked.get(fieldValue) as TrackingMetricGroupMap;
+
+                // check for size of tracked
+                if (currentNode.tracked.size < limit) {
+                  // Add to tracked
+                  currentNode.tracked.set(fieldValue, {});
+                  currentNode = currentNode.tracked.get(fieldValue) as TrackingMetricGroupMap;
+                } else {
+                  // Reached limit for current level, add document to untracked
+                  currentNode.untracked.set(fieldValue, {});
+                  currentNode = currentNode.untracked.get(fieldValue) as TrackingMetricGroupMap;
+                  // Once a parent has reached the limit, we must make all the subsequent children overflow
+
+                  metricsDocument = {};
+
+                  const remainingGroups = group.slice(level);
+                  const remainingFields = remainingGroups.map((rGroup) => rGroup.field);
+                  remainingFields.forEach((rField) => {
                     // @ts-ignore
-                    set._overflow_count[level] += 1;
-                  }
+                    metricsDocument[rField] = OVERFLOW_BUCKET_NAME;
+                  });
+                  // @ts-ignore
+                  set._overflow_count[level] += 1;
                 }
+              }
 
-                // If current field value exists in the tracked property, go down a level
-                if (trackedField) {
-                  currentNode = trackedField;
-                }
+              // If current field value exists in the tracked property, go down a level
+              if (trackedField) {
+                currentNode = trackedField;
+              }
 
-                // If current field value exists in the tracked property, go down a level
-                if (untrackedField) {
-                  currentNode = untrackedField;
-                }
+              // If current field value exists in the tracked property, go down a level
+              if (untrackedField) {
+                currentNode = untrackedField;
               }
             }
           }
+
+          let set = getMetricByKey(key);
 
           reduce(set, event);
           metrics.set(key, set);

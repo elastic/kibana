@@ -51,10 +51,10 @@ export function createServiceMetricsAggregator(flushInterval: string, options?: 
       };
     },
     aggregatorLimit: {
-      field: 'service.name',
+      field: ['service.name'],
       value: options?.overflowSettings?.maxGroups ?? Number.POSITIVE_INFINITY,
     },
-    group: [
+    grouping: [
       {
         field: 'service.name',
         limit: options?.overflowSettings?.transactions?.maxServices ?? Number.POSITIVE_INFINITY,
@@ -74,6 +74,12 @@ export function createServiceMetricsAggregator(flushInterval: string, options?: 
       }
 
       const summary = metric['transaction.duration.summary'];
+
+      if (event['service.name'] === '_other') {
+        for (const field of KEY_FIELDS) {
+          delete metric[field];
+        }
+      }
 
       summary.sum += duration;
       summary.value_count += 1;

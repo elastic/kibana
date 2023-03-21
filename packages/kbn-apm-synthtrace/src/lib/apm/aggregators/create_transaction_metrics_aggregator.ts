@@ -15,7 +15,6 @@ const KEY_FIELDS: Array<keyof ApmFields> = [
   'transaction.name',
   'transaction.result',
   'transaction.type',
-  'transaction.aggregation.overflow_count',
   'event.outcome',
 
   'agent.name',
@@ -90,10 +89,10 @@ export function createTransactionMetricsAggregator(
       };
     },
     aggregatorLimit: {
-      field: 'transaction.name',
+      field: ['service.name', 'transaction.name'],
       value: options?.overflowSettings?.maxGroups ?? Number.POSITIVE_INFINITY,
     },
-    group: [
+    grouping: [
       {
         field: 'service.name',
         limit: options?.overflowSettings?.transactions?.maxServices ?? Number.POSITIVE_INFINITY,
@@ -121,6 +120,12 @@ export function createTransactionMetricsAggregator(
 
       summary.sum += duration;
       summary.value_count += 1;
+
+      if (event['transaction.name'] === '_other') {
+        for (const field of KEY_FIELDS) {
+          delete metric[field];
+        }
+      }
     },
     serialize: (metric) => {
       const serialized = metric['transaction.duration.histogram'].serialize();
