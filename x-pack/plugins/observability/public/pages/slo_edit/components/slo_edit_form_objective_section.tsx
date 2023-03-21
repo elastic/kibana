@@ -11,8 +11,10 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiFormLabel,
+  EuiPanel,
   EuiSelect,
   EuiSpacer,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -21,14 +23,24 @@ import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { SloEditFormObjectivesTimeslices } from './slo_edit_form_objectives_timeslices';
 import { BUDGETING_METHOD_OPTIONS, TIMEWINDOW_OPTIONS } from '../constants';
+import { maxWidth } from './slo_edit_form';
 
-export function SloEditFormObjectives() {
+export function SloEditFormObjectiveSection() {
   const { control, watch } = useFormContext<CreateSLOInput>();
   const budgetingSelect = useGeneratedHtmlId({ prefix: 'budgetingSelect' });
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
 
   return (
-    <>
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
+      <EuiTitle>
+        <h2>
+          {i18n.translate('xpack.observability.slo.sloEdit.objectives.title', {
+            defaultMessage: 'Set objectives',
+          })}
+        </h2>
+      </EuiTitle>
+
+      <EuiSpacer size="xl" />
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
           <EuiFormLabel>
@@ -111,6 +123,7 @@ export function SloEditFormObjectives() {
           <SloEditFormObjectivesTimeslices />
         </>
       ) : null}
-    </>
+      <EuiSpacer size="xl" />
+    </EuiPanel>
   );
 }

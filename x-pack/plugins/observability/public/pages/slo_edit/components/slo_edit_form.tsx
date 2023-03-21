@@ -6,16 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiAvatar,
-  EuiButton,
-  EuiFlexGroup,
-  EuiPanel,
-  EuiSpacer,
-  EuiTimeline,
-  EuiTimelineItem,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiAvatar, EuiButton, EuiFlexGroup, EuiTimeline, EuiTimelineItem } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -25,8 +16,8 @@ import { useKibana } from '../../../utils/kibana_react';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
 import { useSectionFormValidation } from '../helpers/use_section_form_validation';
-import { SloEditFormDescription } from './slo_edit_form_description';
-import { SloEditFormObjectives } from './slo_edit_form_objectives';
+import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
+import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
 import {
   transformValuesToCreateSLOInput,
   transformSloResponseToCreateSloInput,
@@ -150,21 +141,7 @@ export function SloEditForm({ slo }: Props) {
           }
           verticalAlign="top"
         >
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
-            <EuiTitle>
-              <h2>
-                {i18n.translate('xpack.observability.slo.sloEdit.objectives.title', {
-                  defaultMessage: 'Set objectives',
-                })}
-              </h2>
-            </EuiTitle>
-
-            <EuiSpacer size="xl" />
-
-            <SloEditFormObjectives />
-
-            <EuiSpacer size="xl" />
-          </EuiPanel>
+          <SloEditFormObjectiveSection />
         </EuiTimelineItem>
 
         <EuiTimelineItem
@@ -181,53 +158,38 @@ export function SloEditForm({ slo }: Props) {
             />
           }
         >
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
-            <EuiTitle>
-              <h2>
-                {i18n.translate('xpack.observability.slo.sloEdit.description.title', {
-                  defaultMessage: 'Describe SLO',
-                })}
-              </h2>
-            </EuiTitle>
+          <SloEditFormDescriptionSection />
 
-            <EuiSpacer size="xl" />
+          <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiButton
+              color="primary"
+              data-test-subj="sloFormSubmitButton"
+              fill
+              disabled={!formState.isValid}
+              isLoading={isCreateSloLoading || isUpdateSloLoading}
+              onClick={handleSubmit}
+            >
+              {isEditMode
+                ? i18n.translate('xpack.observability.slo.sloEdit.editSloButton', {
+                    defaultMessage: 'Update SLO',
+                  })
+                : i18n.translate('xpack.observability.slo.sloEdit.createSloButton', {
+                    defaultMessage: 'Create SLO',
+                  })}
+            </EuiButton>
 
-            <SloEditFormDescription />
-
-            <EuiSpacer size="xl" />
-
-            <EuiFlexGroup direction="row" gutterSize="s">
-              <EuiButton
-                color="primary"
-                data-test-subj="sloFormSubmitButton"
-                fill
-                disabled={!formState.isValid}
-                isLoading={isCreateSloLoading || isUpdateSloLoading}
-                onClick={handleSubmit}
-              >
-                {isEditMode
-                  ? i18n.translate('xpack.observability.slo.sloEdit.editSloButton', {
-                      defaultMessage: 'Update SLO',
-                    })
-                  : i18n.translate('xpack.observability.slo.sloEdit.createSloButton', {
-                      defaultMessage: 'Create SLO',
-                    })}
-              </EuiButton>
-
-              <EuiButton
-                color="ghost"
-                data-test-subj="sloFormCancelButton"
-                fill
-                onClick={() => navigateToUrl(basePath.prepend(paths.observability.slos))}
-              >
-                {i18n.translate('xpack.observability.slo.sloEdit.cancelButton', {
-                  defaultMessage: 'Cancel',
-                })}
-              </EuiButton>
-            </EuiFlexGroup>
-
-            <EuiSpacer size="xl" />
-          </EuiPanel>
+            <EuiButton
+              color="ghost"
+              data-test-subj="sloFormCancelButton"
+              fill
+              disabled={isCreateSloLoading || isUpdateSloLoading}
+              onClick={() => navigateToUrl(basePath.prepend(paths.observability.slos))}
+            >
+              {i18n.translate('xpack.observability.slo.sloEdit.cancelButton', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButton>
+          </EuiFlexGroup>
         </EuiTimelineItem>
       </EuiTimeline>
     </FormProvider>

@@ -10,12 +10,12 @@ import { ComponentStory } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { SloEditFormDescription as Component } from './slo_edit_form_description';
+import { SloEditFormDescriptionSection as Component } from './slo_edit_form_description_section';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 
 export default {
   component: Component,
-  title: 'app/SLO/EditPage/SloEditFormDescription',
+  title: 'app/SLO/EditPage/SloEditFormDescriptionSection',
   decorators: [KibanaReactStorybookDecorator],
 };
 
