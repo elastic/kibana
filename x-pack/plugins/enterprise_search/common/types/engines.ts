@@ -51,7 +51,7 @@ export interface EnterpriseSearchSchemaField {
 
 export interface EnterpriseSearchEngineUpsertResponse {
   result: string;
-
+}
 export interface SchemaFieldIndex {
   name: string;
   type: string;

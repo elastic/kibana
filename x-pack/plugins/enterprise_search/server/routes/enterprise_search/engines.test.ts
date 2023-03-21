@@ -50,7 +50,7 @@ describe('engines routes', () => {
       });
     });
 
-    it('List engines API creates request', async () => {
+    it('GET search applications API creates request', async () => {
       mockClient.asCurrentUser.transport.request.mockImplementation(() => ({}));
       const request = { query: {} };
       await mockRouter.callRoute({});
@@ -110,7 +110,7 @@ describe('engines routes', () => {
       });
     });
 
-    it('List engine API creates request', async () => {
+    it('GET search application API creates request', async () => {
       mockClient.asCurrentUser.transport.request.mockImplementation(() => ({}));
       await mockRouter.callRoute({
         params: { engine_name: 'engine-name' },
@@ -165,7 +165,7 @@ describe('engines routes', () => {
       });
     });
 
-    it('Upsert API creates request - create', async () => {
+    it('PUT - Upsert API creates request - create', async () => {
       mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
         acknowledged: true,
       }));
@@ -189,7 +189,7 @@ describe('engines routes', () => {
         },
       });
     });
-    it('Upsert API creates request - update', async () => {
+    it('PUT - Upsert API creates request - update', async () => {
       mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
         acknowledged: true,
       }));
@@ -330,7 +330,7 @@ describe('engines routes', () => {
         router: mockRouter.router,
       });
     });
-    it('Search preview API creates a request', async () => {
+    it('POST - Search preview API creates a request', async () => {
       mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
         acknowledged: true,
       }));
