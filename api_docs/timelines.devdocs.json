@@ -2996,7 +2996,7 @@
             "label": "language",
             "description": [],
             "signature": [
-              "\"kuery\" | \"eql\" | \"lucene\""
+              "\"eql\" | \"kuery\" | \"lucene\""
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,

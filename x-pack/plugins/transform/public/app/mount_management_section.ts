@@ -25,10 +25,20 @@ export async function mountManagementSection(
   params: ManagementAppMountParams
 ) {
   const { element, setBreadcrumbs, history } = params;
-  const { http, notifications, getStartServices } = coreSetup;
+  const { http, getStartServices } = coreSetup;
   const startServices = await getStartServices();
   const [core, plugins] = startServices;
-  const { application, chrome, docLinks, i18n, overlays, theme, savedObjects, uiSettings } = core;
+  const {
+    application,
+    chrome,
+    docLinks,
+    i18n,
+    overlays,
+    theme,
+    savedObjects,
+    uiSettings,
+    notifications,
+  } = core;
   const {
     data,
     dataViews,
