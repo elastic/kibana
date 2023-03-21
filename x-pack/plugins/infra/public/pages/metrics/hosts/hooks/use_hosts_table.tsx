@@ -149,8 +149,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         actions: [
           {
             description: toggleDialogActionLabel,
-            icon: ({ uuid }) =>
-              isFlyoutOpen && uuid === clickedItemUuid ? 'minimize' : 'expand',
+            icon: ({ uuid }) => (isFlyoutOpen && uuid === clickedItemUuid ? 'minimize' : 'expand'),
             type: 'icon',
             onClick: ({ uuid }) => {
               setClickedItemUuid(uuid);
