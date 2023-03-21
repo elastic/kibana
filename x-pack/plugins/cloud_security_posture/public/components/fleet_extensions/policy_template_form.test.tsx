@@ -55,9 +55,9 @@ describe('<CspPolicyTemplateForm />', () => {
 
     rerender(<WrappedComponent newPolicy={{ ...policy, namespace: 'some-namespace' }} />);
 
-    // Listen to the 2nd triggered by the test (re-render with new policy namespace)
-    // The 1st is done on mount to ensure initial state is valid.
-    expect(onChange).toHaveBeenNthCalledWith(2, {
+    // Listen to the onChange triggered by the test (re-render with new policy namespace)
+    // It should ensure the initial state is valid.
+    expect(onChange).toHaveBeenNthCalledWith(1, {
       isValid: true,
       updatedPolicy: {
         ...policy,
