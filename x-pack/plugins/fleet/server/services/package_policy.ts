@@ -125,7 +125,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
-    options?: {
+    options: {
       spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
@@ -135,24 +135,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       overwrite?: boolean;
       packageInfo?: PackageInfo;
-    },
+    } = {},
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PackagePolicy> {
-    appContextService.writeCustomAuditLog({
-      message: `User is creating ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [name=${packagePolicy.name}]`,
-      event: {
-        action: 'saved_object_create',
-        category: ['database'],
-        outcome: 'unknown',
-        type: ['access'],
-      },
-      kibana: {
-        saved_object: {
-          id: '',
-          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        },
-      },
+    // Ensure an ID is provided, so we can include it in the audit logs below
+    if (!options.id) {
+      options.id = SavedObjectsUtils.generateId();
+    }
+
+    appContextService.writeCustomSoAuditLog({
+      action: 'create',
+      id: options.id,
+      savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     });
 
     const logger = appContextService.getLogger();
@@ -310,20 +305,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicy.id = SavedObjectsUtils.generateId();
       }
 
-      appContextService.writeCustomAuditLog({
-        message: `User is creating ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
-        event: {
-          action: 'saved_object_create',
-          category: ['database'],
-          outcome: 'unknown',
-          type: ['access'],
-        },
-        kibana: {
-          saved_object: {
-            id: packagePolicy.id,
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          },
-        },
+      appContextService.writeCustomSoAuditLog({
+        action: 'create',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     }
 
@@ -439,20 +424,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       response.package.experimental_data_stream_features = experimentalFeatures;
     }
 
-    appContextService.writeCustomAuditLog({
-      message: `User has accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${id}]`,
-      event: {
-        action: 'saved_object_get',
-        category: ['database'],
-        outcome: 'unknown',
-        type: ['access'],
-      },
-      kibana: {
-        saved_object: {
-          id,
-          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        },
-      },
+    appContextService.writeCustomSoAuditLog({
+      action: 'get',
+      id,
+      savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     });
 
     return response;
@@ -478,20 +453,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }));
 
     for (const packagePolicy of packagePolicies) {
-      appContextService.writeCustomAuditLog({
-        message: `User has accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
-        event: {
-          action: 'saved_object_find',
-          category: ['database'],
-          outcome: 'unknown',
-          type: ['access'],
-        },
-        kibana: {
-          saved_object: {
-            id: packagePolicy.id,
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          },
-        },
+      appContextService.writeCustomSoAuditLog({
+        action: 'find',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     }
 
@@ -534,20 +499,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .filter((packagePolicy): packagePolicy is PackagePolicy => packagePolicy !== null);
 
     for (const packagePolicy of packagePolicies) {
-      appContextService.writeCustomAuditLog({
-        message: `User has accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
-        event: {
-          action: 'saved_object_get',
-          category: ['database'],
-          outcome: 'unknown',
-          type: ['access'],
-        },
-        kibana: {
-          saved_object: {
-            id: packagePolicy.id,
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          },
-        },
+      appContextService.writeCustomSoAuditLog({
+        action: 'get',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     }
 
@@ -570,20 +525,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     for (const packagePolicy of packagePolicies.saved_objects) {
-      appContextService.writeCustomAuditLog({
-        message: `User has accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
-        event: {
-          action: 'saved_object_find',
-          category: ['database'],
-          outcome: 'unknown',
-          type: ['access'],
-        },
-        kibana: {
-          saved_object: {
-            id: packagePolicy.id,
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          },
-        },
+      appContextService.writeCustomSoAuditLog({
+        action: 'find',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     }
 
@@ -638,20 +583,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicyUpdate: UpdatePackagePolicy,
     options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
   ): Promise<PackagePolicy> {
-    appContextService.writeCustomAuditLog({
-      message: `User is updating ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${id}]`,
-      event: {
-        action: 'saved_object_update',
-        category: ['database'],
-        outcome: 'unknown',
-        type: ['access'],
-      },
-      kibana: {
-        saved_object: {
-          id,
-          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        },
-      },
+    appContextService.writeCustomSoAuditLog({
+      action: 'update',
+      id,
+      savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     });
 
     let enrichedPackagePolicy: UpdatePackagePolicy;
@@ -805,20 +740,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     currentVersion?: string
   ): Promise<PackagePolicy[] | null> {
     for (const packagePolicy of packagePolicyUpdates) {
-      appContextService.writeCustomAuditLog({
-        message: `User is updating ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
-        event: {
-          action: 'saved_object_update',
-          category: ['database'],
-          outcome: 'unknown',
-          type: ['access'],
-        },
-        kibana: {
-          saved_object: {
-            id: packagePolicy.id,
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          },
-        },
+      appContextService.writeCustomSoAuditLog({
+        action: 'update',
+        id: packagePolicy.id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     }
     const oldPackagePolicies = await this.getByIDs(
@@ -945,20 +870,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     request?: KibanaRequest
   ): Promise<PostDeletePackagePoliciesResponse> {
     for (const id of ids) {
-      appContextService.writeCustomAuditLog({
-        message: `User is deleting ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${id}]`,
-        event: {
-          action: 'saved_object_delete',
-          category: ['database'],
-          outcome: 'unknown',
-          type: ['access'],
-        },
-        kibana: {
-          saved_object: {
-            id,
-            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          },
-        },
+      appContextService.writeCustomSoAuditLog({
+        action: 'delete',
+        id,
+        savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     }
 
