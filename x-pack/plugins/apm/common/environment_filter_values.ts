@@ -20,7 +20,7 @@ export const allOptionText = i18n.translate(
   }
 );
 
-export function getEnvironmentLabel(environment: string) {
+export function getEnvironmentLabel(environment: string): string {
   if (!environment || environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
     return i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
       defaultMessage: 'Not defined',

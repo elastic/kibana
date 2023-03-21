@@ -40,7 +40,7 @@ export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
           opacity: 1,
         },
       }}
-      marker={<EuiIcon type="alert" color={CHART_ANNOTATION_RED_COLOR} />}
+      marker={<EuiIcon type="warning" color={CHART_ANNOTATION_RED_COLOR} />}
       markerPosition={Position.Top}
     />
   );

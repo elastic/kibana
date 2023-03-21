@@ -162,6 +162,7 @@ export function SchemaOverview({
                   })}
                 >
                   <EuiButton
+                    data-test-subj="apmSchemaOverviewSwitchToElasticAgentButton"
                     fill
                     isLoading={isLoadingConfirmation}
                     isDisabled={isDisabled}
@@ -210,7 +211,11 @@ export function SchemaOverviewHeading() {
               </strong>
             ),
             elasticAgentDocLink: (
-              <EuiLink target="_blank" href={docLinks.links.apm.elasticAgent}>
+              <EuiLink
+                data-test-subj="apmSchemaOverviewHeadingElasticAgentLink"
+                target="_blank"
+                href={docLinks.links.apm.elasticAgent}
+              >
                 {i18n.translate(
                   'xpack.apm.settings.schema.descriptionText.elasticAgentDocLinkText',
                   { defaultMessage: 'Elastic Agent' }

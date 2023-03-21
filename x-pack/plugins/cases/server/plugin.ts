@@ -46,7 +46,7 @@ import {
 } from './saved_object_types';
 
 import type { CasesClient } from './client';
-import type { CasesRequestHandlerContext, PluginSetupContract, PluginStartContract } from './types';
+import type { CasesRequestHandlerContext, CasesSetup, CasesStart } from './types';
 import { CasesClientFactory } from './client/factory';
 import { getCasesKibanaFeature } from './features';
 import { registerRoutes } from './routes/api/register_routes';
@@ -101,7 +101,7 @@ export class CasePlugin {
     this.userProfileService = new UserProfileService(this.logger);
   }
 
-  public setup(core: CoreSetup, plugins: PluginsSetup): PluginSetupContract {
+  public setup(core: CoreSetup, plugins: PluginsSetup): CasesSetup {
     this.logger.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
         core
@@ -176,7 +176,7 @@ export class CasePlugin {
     };
   }
 
-  public start(core: CoreStart, plugins: PluginsStart): PluginStartContract {
+  public start(core: CoreStart, plugins: PluginsStart): CasesStart {
     this.logger.debug(`Starting Case Workflow`);
 
     if (plugins.taskManager) {
@@ -226,6 +226,9 @@ export class CasePlugin {
 
     return {
       getCasesClientWithRequest,
+      getExternalReferenceAttachmentTypeRegistry: () =>
+        this.externalReferenceAttachmentTypeRegistry,
+      getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
     };
   }
 

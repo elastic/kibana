@@ -15,6 +15,7 @@ exports[`MostRecentError component renders properly with mock data 1`] = `
   >
     <button
       class="euiLink emotion-euiLink-primary"
+      data-test-subj="syntheticsMonitorPageLinkLink"
       type="button"
     >
       <a
