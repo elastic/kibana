@@ -32,7 +32,7 @@ export const ErrorCallout = ({ error }: { error: Error }) => {
               defaultMessage: 'We encountered an error retrieving search results',
             })}
             color="danger"
-            iconType="alert"
+            iconType="warning"
           >
             <EuiSpacer />
             <EuiButton size="s" color="danger" onClick={() => search.showError(error)}>

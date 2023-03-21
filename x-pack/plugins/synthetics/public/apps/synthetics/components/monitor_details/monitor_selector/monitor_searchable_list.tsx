@@ -93,6 +93,7 @@ export const MonitorSearchableList = ({ closePopover }: { closePopover: () => vo
       }}
       renderOption={(option, search) => (
         <EuiLink
+          data-test-subj="syntheticsMonitorSearchableListLink"
           href={`${basePath}/app/synthetics/monitor/${option.key}?locationId=${getLocationId(
             option
           )}`}
