@@ -133,7 +133,7 @@ const getMetricFormatter = (
 
   return ['bit', 'bytes'].includes(formatId)
     ? (rawValue: number) => {
-        return numeral(rawValue).format(`0,00 ${formatId === 'bytes' ? 'b' : 'bitd'}`);
+        return numeral(rawValue).format(`0,0[.]00 ${formatId === 'bytes' ? 'b' : 'bitd'}`);
       }
     : new Intl.NumberFormat(locale, intlOptions).format;
 };
