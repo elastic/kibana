@@ -88,7 +88,21 @@ export const useOsqueryTab = ({
     []
   );
 
-  if (!osquery || !rawEventData || !responseActionsEnabled || !ecsData) {
+  const shouldEarlyReturn = !rawEventData || !responseActionsEnabled || !ecsData;
+  const alertId = rawEventData?._id ?? '';
+
+  const { OsqueryResults, fetchAllLiveQueries } = osquery;
+
+  const { data: actionsData } = fetchAllLiveQueries({
+    filterQuery: { term: { alert_ids: alertId } },
+    activePage: 0,
+    limit: 100,
+    sortField: '@timestamp',
+    alertId,
+    skip: shouldEarlyReturn,
+  });
+
+  if (shouldEarlyReturn) {
     return;
   }
 
@@ -107,17 +121,6 @@ export const useOsqueryTab = ({
     return;
   }
 
-  const { OsqueryResults, fetchAllLiveQueries } = osquery;
-
-  const alertId = rawEventData._id;
-
-  const { data: actionsData } = fetchAllLiveQueries({
-    filterQuery: { term: { alert_ids: alertId } },
-    activePage: 0,
-    limit: 100,
-    sortField: '@timestamp',
-    alertId,
-  });
   const actionItems = actionsData?.data.items || [];
 
   const ruleName = expandedEventFieldsObject.kibana?.alert?.rule?.name;
