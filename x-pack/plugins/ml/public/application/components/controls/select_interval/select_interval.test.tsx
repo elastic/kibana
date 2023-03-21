@@ -5,44 +5,39 @@
  * 2.0.
  */
 
-import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import React, { useState } from 'react';
 import { render, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { SelectInterval } from './select_interval';
 
+// The following mock setup is necessary so that we can simulate
+// both triggering the update callback and the internal state update
+// to update the dropdown to the new state.
 const mockUpdateCallback = jest.fn();
-const mockUsePageUrlState = [{ display: 'Auto', val: 'auto' }, mockUpdateCallback];
-
+const mockUseState = jest.fn().mockImplementation(useState);
 jest.mock('@kbn/ml-url-state', () => ({
-  usePageUrlState: () => mockUsePageUrlState,
+  usePageUrlState: () => {
+    const [interval, setInterval] = mockUseState({ display: 'Auto', val: 'auto' });
+    return [interval, mockUpdateCallback.mockImplementation((d) => setInterval(d))];
+  },
 }));
 
 describe('SelectInterval', () => {
-  test('creates correct initial selected value', () => {
-    const { getByText } = render(
-      <MemoryRouter>
-        <SelectInterval />
-      </MemoryRouter>
-    );
+  it('updates the selected value correctly on click', () => {
+    // prepare
+    const { getByText, getByTestId } = render(<SelectInterval />);
 
-    expect((getByText('Auto') as HTMLOptionElement).selected).toBeTruthy();
-  });
-
-  test('currently selected value is updated correctly on click', () => {
-    const { getByText, getByTestId } = render(
-      <MemoryRouter>
-        <SelectInterval />
-      </MemoryRouter>
-    );
-
+    // assert initial state
     expect((getByText('Auto') as HTMLOptionElement).selected).toBeTruthy();
 
+    // update
     act(() => {
       userEvent.selectOptions(getByTestId('mlSelectInterval'), getByText('1 hour'));
     });
 
+    // assert updated state
     expect(mockUpdateCallback).toBeCalledWith({ display: '1 hour', val: 'hour' });
+    expect((getByText('1 hour') as HTMLOptionElement).selected).toBeTruthy();
   });
 });
