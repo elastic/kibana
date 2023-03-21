@@ -56,7 +56,14 @@ import { createExploratoryViewUrl } from '../components/shared/exploratory_view/
 import { createUseRulesLink } from '../hooks/create_use_rules_link';
 import getAppDataView from '../utils/observability_data_views/get_app_data_view';
 import { observabilityAppId, observabilityFeatureId } from '../../common';
-import { CASES_URL } from '../routes/routes';
+import {
+  ALERTS_URL,
+  CASES_URL,
+  OBSERVABILITY_BASE_PATH,
+  OVERVIEW_URL,
+  RULES_URL,
+  SLOS_URL,
+} from '../routes/routes';
 
 export interface ConfigSchema {
   unsafe: {
@@ -130,7 +137,7 @@ export class Plugin
         defaultMessage: 'Alerts',
       }),
       order: 8001,
-      path: '/alerts',
+      path: ALERTS_URL,
       navLinkStatus: AppNavLinkStatus.hidden,
       deepLinks: [
         {
@@ -138,7 +145,7 @@ export class Plugin
           title: i18n.translate('xpack.observability.rulesLinkTitle', {
             defaultMessage: 'Rules',
           }),
-          path: '/alerts/rules',
+          path: RULES_URL,
           navLinkStatus: AppNavLinkStatus.hidden,
         },
       ],
@@ -150,7 +157,7 @@ export class Plugin
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
       order: 8002,
-      path: '/slos',
+      path: SLOS_URL,
     },
     getCasesDeepLinks({
       basePath: CASES_URL,
@@ -210,7 +217,7 @@ export class Plugin
 
     const appUpdater$ = this.appUpdater$;
     const app = {
-      appRoute: '/app/observability',
+      appRoute: OBSERVABILITY_BASE_PATH,
       category,
       deepLinks: this.deepLinks,
       euiIconType,
@@ -267,7 +274,7 @@ export class Plugin
               defaultMessage: 'Overview',
             }),
             app: observabilityAppId,
-            path: '/overview',
+            path: OVERVIEW_URL,
           };
 
           // Reformat the visible links to be NavigationEntry objects instead of
