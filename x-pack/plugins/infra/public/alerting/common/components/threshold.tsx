@@ -1,0 +1,64 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { Chart, Metric, Settings } from '@elastic/charts';
+import { EuiIcon, useEuiBackgroundColor } from '@elastic/eui';
+import type { PartialTheme, Theme } from '@elastic/charts';
+import { Comparator } from '../../../../common/alerting/metrics';
+
+export interface ChartProps {
+  theme: PartialTheme;
+  baseTheme: Theme;
+}
+
+export interface Props {
+  chartProps: ChartProps;
+  comparator: Comparator;
+  threshold: number;
+  title: string;
+  value: number;
+  valueFormatter: (d: number) => string;
+}
+
+export const Threshold = ({
+  chartProps: { theme, baseTheme },
+  comparator,
+  threshold,
+  title,
+  value,
+  valueFormatter,
+}: Props) => {
+  const color = useEuiBackgroundColor('danger');
+
+  return (
+    <Chart>
+      <Settings theme={theme} baseTheme={baseTheme} />
+      <Metric
+        id="1"
+        data={[
+          [
+            {
+              title,
+              extra: (
+                <span>
+                  Alert when {comparator} {threshold}%
+                </span>
+              ),
+              color,
+              value,
+              valueFormatter,
+              icon: ({ width, height, color: iconColor }) => (
+                <EuiIcon width={width} height={height} color={iconColor} type="alert" />
+              ),
+            },
+          ],
+        ]}
+      />
+    </Chart>
+  );
+};
