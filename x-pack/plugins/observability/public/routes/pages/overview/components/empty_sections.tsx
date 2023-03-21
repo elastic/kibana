@@ -12,11 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core/public';
 
 import { useKibana } from '../../../../utils/kibana_react';
-import { Section } from '../../../../typings/section';
 import { paths } from '../../../routes';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
-import { EmptySection } from './empty_section';
+import { EmptySection, Section } from './empty_section';
 
 export function EmptySections() {
   const { http } = useKibana().services;

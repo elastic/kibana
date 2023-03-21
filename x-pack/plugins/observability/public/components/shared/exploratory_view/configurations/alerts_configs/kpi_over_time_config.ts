@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
-  FieldLabels,
   RECORDS_FIELD,
   REPORT_METRIC_FIELD,
   REPORT_METRIC_TIMESTAMP,
   ReportTypes,
 } from '../constants';
+import { FieldLabels } from '../constants/field_labels';
 
 export function getAlertsKPIConfig({ spaceId }: ConfigProps): SeriesConfig {
   return {
