@@ -46,6 +46,7 @@
     "@kbn/crypto-browser",
     "@kbn/config",
     "@kbn/config-schema",
+    "@kbn/core-application-browser",
   ],
   "exclude": [
     "target/**/*",
