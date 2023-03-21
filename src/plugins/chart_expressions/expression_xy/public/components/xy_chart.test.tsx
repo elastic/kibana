@@ -765,7 +765,7 @@ describe('XYChart component', () => {
       <XYChart {...defaultProps} args={{ ...args, ...markSizeRatioArg }} />
     );
     expect(component.find(Settings).at(0).prop('theme')).toEqual(
-      expect.objectContaining(markSizeRatioArg)
+      expect.arrayContaining([expect.objectContaining(markSizeRatioArg)])
     );
   });
 
