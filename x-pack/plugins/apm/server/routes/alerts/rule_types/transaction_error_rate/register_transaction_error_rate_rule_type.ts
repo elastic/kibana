@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
 import {
   formatDurationFromTimeUnitChar,
   ProcessorEvent,
@@ -51,7 +50,10 @@ import { getDocumentTypeFilterForTransactions } from '../../../../lib/helpers/tr
 import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
-import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import {
+  ApmRuleTypeAlertDefinition,
+  RegisterRuleDependencies,
+} from '../../register_apm_rule_types';
 import {
   getServiceGroupFields,
   getServiceGroupFieldsAgg,
@@ -64,7 +66,6 @@ export function registerTransactionErrorRateRuleType({
   basePath,
   config$,
   logger,
-  observability,
   ruleDataClient,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
@@ -81,9 +82,6 @@ export function registerTransactionErrorRateRuleType({
       validate: { params: transactionErrorRateParamsSchema },
       actionVariables: {
         context: [
-          ...(observability.getAlertDetailsConfig()?.apm.enabled
-            ? [apmActionVariables.alertDetailsUrl]
-            : []),
           apmActionVariables.environment,
           apmActionVariables.interval,
           apmActionVariables.reason,
@@ -100,8 +98,7 @@ export function registerTransactionErrorRateRuleType({
       executor: async ({ services, spaceId, params: ruleParams }) => {
         const config = await firstValueFrom(config$);
 
-        const { getAlertUuid, savedObjectsClient, scopedClusterClient } =
-          services;
+        const { savedObjectsClient, scopedClusterClient } = services;
 
         const indices = await getApmIndices({
           config,
@@ -243,14 +240,6 @@ export function registerTransactionErrorRateRuleType({
             .filter((name) => name)
             .join('_');
 
-          const alertUuid = getAlertUuid(id);
-
-          const alertDetailsUrl = getAlertDetailsUrl(
-            basePath,
-            spaceId,
-            alertUuid
-          );
-
           const relativeViewInAppUrl = getAlertUrlTransaction(
             serviceName,
             getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
@@ -278,7 +267,6 @@ export function registerTransactionErrorRateRuleType({
               },
             })
             .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-              alertDetailsUrl,
               environment: getEnvironmentLabel(environment),
               interval: formatDurationFromTimeUnitChar(
                 ruleParams.windowSize,
@@ -295,6 +283,7 @@ export function registerTransactionErrorRateRuleType({
 
         return { state: {} };
       },
+      alerts: ApmRuleTypeAlertDefinition,
     })
   );
 }

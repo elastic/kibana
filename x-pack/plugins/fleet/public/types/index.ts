@@ -133,6 +133,8 @@ export type {
   GetAvailableVersionsResponse,
   PostHealthCheckRequest,
   PostHealthCheckResponse,
+  PostRetrieveAgentsByActionsRequest,
+  PostRetrieveAgentsByActionsResponse,
 } from '../../common/types';
 export {
   entries,

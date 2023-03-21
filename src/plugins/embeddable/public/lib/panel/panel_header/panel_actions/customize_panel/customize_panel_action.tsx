@@ -129,6 +129,8 @@ export class CustomizePanelAction implements Action<CustomizePanelActionContext>
       {
         size: 's',
         'data-test-subj': 'customizePanel',
+        // @ts-ignore - TODO: Remove this once https://github.com/elastic/eui/pull/6645 lands in Kibana
+        focusTrapProps: { scrollLock: true },
       }
     );
     overlayTracker?.openOverlay(handle);
