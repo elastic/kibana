@@ -17,10 +17,10 @@ import { useErrorToast } from '../common/hooks/use_error_toast';
 import { Direction } from '../../common/search_strategy';
 
 export interface UseAllLiveQueriesConfig {
-  activePage: number;
+  activePage?: number;
   direction?: Direction;
-  limit: number;
-  sortField: string;
+  limit?: number;
+  sortField?: string;
   filterQuery?: ESTermQuery | ESExistsQuery | string;
   skip?: boolean;
   alertId?: string;
@@ -30,10 +30,10 @@ export interface UseAllLiveQueriesConfig {
 const ACTIONS_QUERY_KEY = 'actions';
 
 export const useAllLiveQueries = ({
-  activePage,
+  activePage = 0,
   direction = Direction.desc,
-  limit,
-  sortField,
+  limit = 100,
+  sortField = '@timestamp',
   filterQuery,
   skip = false,
   alertId,
