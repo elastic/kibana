@@ -84,7 +84,7 @@ describe('FileLimiter', () => {
             "aggregations": Object {
               "limiter": Object {
                 "value_count": Object {
-                  "field": "cases-comments.attributes.externalReferenceAttachmentTypeId",
+                  "field": "cases-comments.attributes.externalReferenceMetadata.files.name.keyword",
                 },
               },
             },
