@@ -53,6 +53,7 @@ describe('engines field_capabilities', () => {
         field_capabilities: fieldCapsResponse,
         fields: [
           {
+            fields: [],
             indices: [
               {
                 name: 'index-001',
@@ -101,6 +102,7 @@ describe('engines field_capabilities', () => {
       };
       const expectedFields: SchemaField[] = [
         {
+          fields: [],
           indices: [
             {
               name: 'index-001',
@@ -111,6 +113,7 @@ describe('engines field_capabilities', () => {
           type: 'text',
         },
         {
+          fields: [],
           indices: [
             {
               name: 'index-001',
@@ -149,6 +152,7 @@ describe('engines field_capabilities', () => {
         {
           fields: [
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-001',
@@ -205,6 +209,7 @@ describe('engines field_capabilities', () => {
         {
           fields: [
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-001',
@@ -215,6 +220,7 @@ describe('engines field_capabilities', () => {
               type: 'text',
             },
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-001',
@@ -271,6 +277,7 @@ describe('engines field_capabilities', () => {
         {
           fields: [
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-001',
@@ -281,6 +288,7 @@ describe('engines field_capabilities', () => {
               type: 'text',
             },
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-001',
@@ -327,6 +335,7 @@ describe('engines field_capabilities', () => {
       };
       const expectedFields: SchemaField[] = [
         {
+          fields: [],
           indices: [
             {
               name: 'index-001',
@@ -401,6 +410,7 @@ describe('engines field_capabilities', () => {
         {
           fields: [
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-002',
@@ -415,6 +425,7 @@ describe('engines field_capabilities', () => {
               type: 'text',
             },
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-002',
@@ -437,6 +448,126 @@ describe('engines field_capabilities', () => {
             {
               name: 'index-001',
               type: 'text',
+            },
+          ],
+          name: 'name',
+          type: 'conflict',
+        },
+      ];
+      expect(parseFieldsCapabilities(fieldCapabilities)).toEqual(expectedFields);
+    });
+    it('handles conflicts of more than two indices', () => {
+      const fieldCapabilities: FieldCapsResponse = {
+        fields: {
+          name: {
+            keyword: {
+              aggregatable: false,
+              indices: ['index-003'],
+              metadata_field: false,
+              searchable: true,
+              type: 'keyword',
+            },
+            object: {
+              aggregatable: false,
+              indices: ['index-002'],
+              metadata_field: false,
+              searchable: false,
+              type: 'object',
+            },
+            text: {
+              aggregatable: false,
+              indices: ['index-001'],
+              metadata_field: false,
+              searchable: true,
+              type: 'text',
+            },
+          },
+          'name.first': {
+            text: {
+              aggregatable: false,
+              indices: ['index-002', 'index-003'],
+              metadata_field: false,
+              searchable: true,
+              type: 'text',
+            },
+            unmapped: {
+              aggregatable: false,
+              indices: ['index-001'],
+              metadata_field: false,
+              searchable: true,
+              type: 'unmapped',
+            },
+          },
+          'name.last': {
+            text: {
+              aggregatable: false,
+              indices: ['index-002'],
+              metadata_field: false,
+              searchable: true,
+              type: 'text',
+            },
+            unmapped: {
+              aggregatable: false,
+              indices: ['index-001'],
+              metadata_field: false,
+              searchable: true,
+              type: 'unmapped',
+            },
+          },
+        },
+        indices: ['index-001', 'index-002', 'index-003'],
+      };
+
+      const expectedFields: SchemaField[] = [
+        {
+          fields: [
+            {
+              fields: [],
+              indices: [
+                {
+                  name: 'index-002',
+                  type: 'text',
+                },
+                {
+                  name: 'index-003',
+                  type: 'text',
+                },
+                {
+                  name: 'index-001',
+                  type: 'unmapped',
+                },
+              ],
+              name: 'first',
+              type: 'text',
+            },
+            {
+              fields: [],
+              indices: [
+                {
+                  name: 'index-002',
+                  type: 'text',
+                },
+                {
+                  name: 'index-001',
+                  type: 'unmapped',
+                },
+              ],
+              name: 'last',
+              type: 'text',
+            },
+          ],
+          indices: [
+            {
+              name: 'index-002',
+              type: 'object',
+            },
+            {
+              name: 'index-001',
+              type: 'text',
+            },
+            {
+              name: 'index-003',
+              type: 'keyword',
             },
           ],
           name: 'name',
@@ -524,6 +655,7 @@ describe('engines field_capabilities', () => {
       };
       const expectedFields: SchemaField[] = [
         {
+          fields: [],
           indices: [
             {
               name: 'index-003',
@@ -544,6 +676,7 @@ describe('engines field_capabilities', () => {
         {
           fields: [
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-002',
@@ -562,6 +695,7 @@ describe('engines field_capabilities', () => {
               type: 'text',
             },
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-002',
@@ -642,6 +776,7 @@ describe('engines field_capabilities', () => {
         {
           fields: [
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-001',
@@ -656,6 +791,7 @@ describe('engines field_capabilities', () => {
               type: 'text',
             },
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-001',
@@ -728,6 +864,7 @@ describe('engines field_capabilities', () => {
         {
           fields: [
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-001',
@@ -742,6 +879,7 @@ describe('engines field_capabilities', () => {
               type: 'text',
             },
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-001',
@@ -806,6 +944,7 @@ describe('engines field_capabilities', () => {
         {
           fields: [
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-001',
@@ -870,6 +1009,7 @@ describe('engines field_capabilities', () => {
         {
           fields: [
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-002',
@@ -934,6 +1074,7 @@ describe('engines field_capabilities', () => {
         {
           fields: [
             {
+              fields: [],
               indices: [
                 {
                   name: 'index-002',

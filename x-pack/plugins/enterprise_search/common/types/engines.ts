@@ -55,7 +55,7 @@ export interface SchemaFieldIndex {
 }
 
 export interface SchemaField {
-  fields?: SchemaField[];
+  fields: SchemaField[];
   indices: SchemaFieldIndex[];
   name: string;
   type: string;
