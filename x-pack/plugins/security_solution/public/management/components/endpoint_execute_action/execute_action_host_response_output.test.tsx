@@ -53,6 +53,40 @@ describe('When using the `ExecuteActionHostResponseOutput` component', () => {
     expect(accordionOutputButton.className).toContain('isOpen');
   });
 
+  it('should show `-` when no output content', async () => {
+    (renderProps.action as ActionDetails).outputs = {
+      'agent-a': {
+        type: 'json',
+        content: {
+          ...(renderProps.action as ActionDetails)?.outputs?.['agent-a'].content,
+          stdout: undefined,
+        },
+      },
+    };
+    render();
+    const accordionOutputButton = Array.from(
+      renderResult.getByTestId('test').querySelectorAll('.euiAccordion')
+    )[0];
+    expect(accordionOutputButton.textContent).toContain('Execution output (truncated)—');
+  });
+
+  it('should show `-` when no error content', async () => {
+    (renderProps.action as ActionDetails).outputs = {
+      'agent-a': {
+        type: 'json',
+        content: {
+          ...(renderProps.action as ActionDetails)?.outputs?.['agent-a'].content,
+          stderr: undefined,
+        },
+      },
+    };
+    render();
+    const accordionErrorButton = Array.from(
+      renderResult.getByTestId('test').querySelectorAll('.euiAccordion')
+    )[1];
+    expect(accordionErrorButton.textContent).toContain('Execution error (truncated)—');
+  });
+
   it('should show nothing when no output in action details', () => {
     (renderProps.action as ActionDetails).outputs = {};
     render();

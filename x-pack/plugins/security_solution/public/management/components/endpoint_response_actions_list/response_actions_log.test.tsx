@@ -717,10 +717,11 @@ describe('Response actions history', () => {
         expect(executeAccordions).toBeTruthy();
       });
 
-      it('should not contain full output download link in expanded row for `execute` action WITHOUT execute operation privilege', async () => {
+      it('should not contain full output download link in expanded row for `execute` action WITHOUT Actions Log privileges', async () => {
         useUserPrivilegesMock.mockReturnValue({
           endpointPrivileges: getEndpointAuthzInitialStateMock({
-            canWriteExecuteOperations: false,
+            canAccessEndpointActionsLogManagement: false,
+            canReadActionsLogManagement: false,
           }),
         });
 
@@ -740,6 +741,45 @@ describe('Response actions history', () => {
         expect(output).toBeTruthy();
         expect(output.textContent).toContain('execute completed successfully');
       });
+
+      it.each(['canAccessEndpointActionsLogManagement', 'canReadActionsLogManagement'])(
+        'should contain full output download link in expanded row for `execute` action WITH %s ',
+        async (privilege) => {
+          const initialActionsLogPrivileges = {
+            canAccessEndpointActionsLogManagement: false,
+            canReadActionsLogManagement: false,
+          };
+          useUserPrivilegesMock.mockReturnValue({
+            endpointPrivileges: getEndpointAuthzInitialStateMock({
+              ...initialActionsLogPrivileges,
+              [privilege]: true,
+            }),
+          });
+
+          useGetEndpointActionListMock.mockReturnValue({
+            ...getBaseMockedActionList(),
+            data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
+          });
+
+          mockUseGetFileInfo = {
+            isFetching: false,
+            error: null,
+            data: apiMocks.responseProvider.fileInfo(),
+          };
+
+          render();
+          const { getByTestId } = renderResult;
+
+          const expandButton = getByTestId(`${testPrefix}-expand-button`);
+          userEvent.click(expandButton);
+
+          const output = getByTestId(`${testPrefix}-getExecuteLink`);
+          expect(output).toBeTruthy();
+          expect(output.textContent).toEqual(
+            'Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+          );
+        }
+      );
     });
   });
 
