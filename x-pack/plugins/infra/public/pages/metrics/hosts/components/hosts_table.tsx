@@ -22,12 +22,9 @@ export const HostsTable = () => {
   const { onSubmit, searchCriteria } = useUnifiedSearchContext();
   const [properties, setProperties] = useTableProperties();
 
-  const { columns, items, isFlyoutOpen, closeFlyout, clickedItemIndex } = useHostsTable(
-    hostNodes,
-    {
-      time: searchCriteria.dateRange,
-    }
-  );
+  const { columns, items, isFlyoutOpen, closeFlyout, clickedItemIndex } = useHostsTable(hostNodes, {
+    time: searchCriteria.dateRange,
+  });
 
   const noData = items.length === 0;
 
@@ -96,12 +93,7 @@ export const HostsTable = () => {
         columns={columns}
         onTableChange={onTableChange}
       />
-      {isFlyoutOpen && (
-        <Flyout
-          node={items[clickedItemIndex]}
-          closeFlyout={closeFlyout}
-        />
-      )}
+      {isFlyoutOpen && <Flyout node={items[clickedItemIndex]} closeFlyout={closeFlyout} />}
     </>
   );
 };
