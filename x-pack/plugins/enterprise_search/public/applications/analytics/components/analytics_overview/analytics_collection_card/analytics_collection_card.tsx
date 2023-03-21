@@ -103,7 +103,7 @@ export const AnalyticsCollectionCard: React.FC<AnalyticsCollectionCardProps> = (
   const status = getChartStatus(secondaryMetric);
   const CARD_THEME = getCardTheme(euiTheme)[status];
   const collectionViewUrl = generateEncodedPath(COLLECTION_VIEW_PATH, {
-    id: collection.id,
+    name: collection.name,
     section: 'events',
   });
   const handleCardClick = (event: MouseEvent) => {
@@ -195,7 +195,7 @@ export const AnalyticsCollectionCard: React.FC<AnalyticsCollectionCardProps> = (
             tooltip="none"
           />
           <AreaSeries
-            id={collection.id}
+            id={collection.name}
             data={data}
             xAccessor={0}
             yAccessors={[1]}

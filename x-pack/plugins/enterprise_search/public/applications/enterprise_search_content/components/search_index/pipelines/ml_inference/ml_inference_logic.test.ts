@@ -46,6 +46,7 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
     sourceField: 'Field is required.',
   },
   index: null,
+  isConfigureStepValid: false,
   isLoading: true,
   isPipelineDataValid: false,
   mappingData: undefined,
