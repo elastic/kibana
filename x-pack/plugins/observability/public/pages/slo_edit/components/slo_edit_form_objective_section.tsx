@@ -55,10 +55,11 @@ export function SloEditFormObjectiveSection() {
             rules={{ required: true }}
             render={({ field: { ref, ...field } }) => (
               <EuiSelect
+                {...field}
+                required
                 id={budgetingSelect}
                 data-test-subj="sloFormBudgetingMethodSelect"
                 options={BUDGETING_METHOD_OPTIONS}
-                {...field}
               />
             )}
           />
@@ -77,10 +78,11 @@ export function SloEditFormObjectiveSection() {
             rules={{ required: true }}
             render={({ field: { ref, ...field } }) => (
               <EuiSelect
+                {...field}
+                required
                 id={timeWindowSelect}
                 data-test-subj="sloFormTimeWindowDurationSelect"
                 options={TIMEWINDOW_OPTIONS}
-                {...field}
                 value={String(field.value)}
               />
             )}
@@ -102,10 +104,12 @@ export function SloEditFormObjectiveSection() {
               min: 0.001,
               max: 99.999,
             }}
-            render={({ field: { ref, ...field } }) => (
+            render={({ field: { ref, ...field }, fieldState }) => (
               <EuiFieldNumber
-                data-test-subj="sloFormObjectiveTargetInput"
                 {...field}
+                required
+                isInvalid={fieldState.invalid}
+                data-test-subj="sloFormObjectiveTargetInput"
                 value={String(field.value)}
                 min={0.001}
                 max={99.999}

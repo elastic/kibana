@@ -55,9 +55,11 @@ export function SloEditFormDescriptionSection() {
             name="name"
             control={control}
             rules={{ required: true }}
-            render={({ field: { ref, ...field } }) => (
+            render={({ field: { ref, ...field }, fieldState }) => (
               <EuiFieldText
+                {...field}
                 fullWidth
+                isInvalid={fieldState.invalid}
                 id={sloNameId}
                 data-test-subj="sloFormNameInput"
                 placeholder={i18n.translate(
@@ -66,7 +68,6 @@ export function SloEditFormDescriptionSection() {
                     defaultMessage: 'Name for the SLO',
                   }
                 )}
-                {...field}
               />
             )}
           />
@@ -83,8 +84,10 @@ export function SloEditFormDescriptionSection() {
             name="description"
             defaultValue=""
             control={control}
+            rules={{ required: false }}
             render={({ field: { ref, ...field } }) => (
               <EuiTextArea
+                {...field}
                 fullWidth
                 id={descriptionId}
                 data-test-subj="sloFormDescriptionTextArea"
@@ -94,7 +97,6 @@ export function SloEditFormDescriptionSection() {
                     defaultMessage: 'A short description of the SLO',
                   }
                 )}
-                {...field}
               />
             )}
           />

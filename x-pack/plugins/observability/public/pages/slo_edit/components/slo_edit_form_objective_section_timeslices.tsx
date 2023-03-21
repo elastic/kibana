@@ -31,9 +31,11 @@ export function SloEditFormObjectiveSectionTimeslices() {
             min: 0.001,
             max: 99.999,
           }}
-          render={({ field: { ref, ...field } }) => (
+          render={({ field: { ref, ...field }, fieldState }) => (
             <EuiFieldNumber
               {...field}
+              required
+              isInvalid={fieldState.invalid}
               value={String(field.value)}
               data-test-subj="sloFormObjectiveTimesliceTargetInput"
               min={0.001}
@@ -58,9 +60,11 @@ export function SloEditFormObjectiveSectionTimeslices() {
           defaultValue="1"
           control={control}
           rules={{ required: true, min: 1, max: 120 }}
-          render={({ field: { ref, ...field } }) => (
+          render={({ field: { ref, ...field }, fieldState }) => (
             <EuiFieldNumber
               {...field}
+              isInvalid={fieldState.invalid}
+              required
               data-test-subj="sloFormObjectiveTimesliceWindowInput"
               value={String(field.value)}
               min={1}

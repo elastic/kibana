@@ -55,7 +55,12 @@ export function SloEditFormIndicatorSection() {
         control={control}
         rules={{ required: true }}
         render={({ field: { ref, ...field } }) => (
-          <EuiSelect data-test-subj="sloFormIndicatorTypeSelect" {...field} options={SLI_OPTIONS} />
+          <EuiSelect
+            {...field}
+            required
+            data-test-subj="sloFormIndicatorTypeSelect"
+            options={SLI_OPTIONS}
+          />
         )}
       />
 
