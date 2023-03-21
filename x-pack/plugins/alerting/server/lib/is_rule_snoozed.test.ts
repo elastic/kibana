@@ -138,7 +138,6 @@ describe('isRuleSnoozed', () => {
           tzid: 'UTC',
           count: 8761,
           dtstart: DATE_2019,
-          debug: true,
         } as RRuleRecord,
       },
     ];

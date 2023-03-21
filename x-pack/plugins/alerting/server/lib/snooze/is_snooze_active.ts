@@ -10,7 +10,7 @@ import { RuleSnoozeSchedule } from '../../types';
 
 const MAX_TIMESTAMP = 8640000000000000;
 
-export function isSnoozeActive(snooze: RuleSnoozeSchedule, debug: boolean = false) {
+export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
   const { duration, rRule, id } = snooze;
   if (duration === -1)
     return {

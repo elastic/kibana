@@ -101,7 +101,8 @@ export class RRule {
     };
 
     const { dtstart, tzid, count, until } = this.options;
-    let iter = 0;
+    let isFirstIteration = true;
+    let yieldedRecurrenceCount = 0;
     let current: Date = moment(dtstart ?? new Date())
       .tz(tzid)
       .toDate();
@@ -110,14 +111,14 @@ export class RRule {
 
     while (
       (!count && !until) ||
-      (count && iter < count) ||
+      (count && yieldedRecurrenceCount < count) ||
       (until && current.getTime() < new Date(until).getTime())
     ) {
       const next = nextRecurrences.shift()?.toDate();
       if (next) {
-        iter++;
         current = next;
         if (isInBounds(current)) {
+          yieldedRecurrenceCount++;
           yield current;
         } else if (start && current.getTime() > start.getTime()) {
           return null;
@@ -126,9 +127,10 @@ export class RRule {
         getNextRecurrences({
           refDT: moment(current).tz(tzid),
           ...this.options,
-          interval: iter === 0 ? 0 : this.options.interval,
+          interval: isFirstIteration ? 0 : this.options.interval,
           wkst: this.options.wkst ? (this.options.wkst as Weekday) : Weekday.MO,
         }).forEach((r) => nextRecurrences.push(r));
+        isFirstIteration = false;
         if (nextRecurrences.length === 0) {
           return null;
         }
@@ -346,7 +348,7 @@ const getMonthOfRecurrences = function ({
     const bymonthdayFromPos = bysetpos.map((pos, i) => {
       const correspondingWeekday = sortedByweekday[i];
       const lookup = dowLookup[correspondingWeekday];
-      // if (pos > 0) return [lookup[pos - 1], pos];
+      if (pos > 0) return [lookup[pos - 1], pos];
       return [lookup.slice(pos)[0], pos];
     });
 
