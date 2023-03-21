@@ -43,6 +43,7 @@ interface Props {
   source: MetricsSourceConfiguration | null;
   filterQuery?: string;
   groupBy?: string | string[];
+  chartType?: MetricsExplorerChartType;
 }
 
 export const ExpressionChart: React.FC<Props> = ({
@@ -51,6 +52,7 @@ export const ExpressionChart: React.FC<Props> = ({
   source,
   filterQuery,
   groupBy,
+  chartType = MetricsExplorerChartType.bar,
 }) => {
   const { uiSettings } = useKibanaContextForPlugin().services;
 
@@ -128,7 +130,7 @@ export const ExpressionChart: React.FC<Props> = ({
       <ChartContainer>
         <Chart>
           <MetricExplorerSeriesChart
-            type={MetricsExplorerChartType.bar}
+            type={chartType}
             metric={metric}
             id="0"
             series={series}

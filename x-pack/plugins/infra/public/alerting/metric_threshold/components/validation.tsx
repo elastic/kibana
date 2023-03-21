@@ -152,7 +152,7 @@ export function validateMetricThreshold({
       );
     }
 
-    if (!c.metric && c.aggType !== 'count' && c.aggType !== 'custom') {
+    if (c.aggType !== 'count' && c.aggType !== 'custom' && !c.metric) {
       errors[id].metric.push(
         i18n.translate('xpack.infra.metrics.alertFlyout.error.metricRequired', {
           defaultMessage: 'Metric is required.',

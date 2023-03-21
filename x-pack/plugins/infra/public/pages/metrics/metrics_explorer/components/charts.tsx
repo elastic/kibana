@@ -124,7 +124,12 @@ export const MetricsExplorerCharts = ({
           </EuiText>
           {hasMore ? (
             <div style={{ margin: '16px 0' }}>
-              <EuiButton isLoading={isLoading} size="s" onClick={onLoadMore}>
+              <EuiButton
+                data-test-subj="infraMetricsExplorerChartsLoadMoreChartsButton"
+                isLoading={isLoading}
+                size="s"
+                onClick={onLoadMore}
+              >
                 <FormattedMessage
                   id="xpack.infra.metricsExplorer.loadMoreChartsButton"
                   defaultMessage="Load More Charts"
