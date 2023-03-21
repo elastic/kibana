@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { ControlGroupContainer, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { Filter, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { Subscription } from 'rxjs';
 import { LazyControlsRenderer } from './lazy_controls_renderer';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
 
 interface Props {
-  timeRange: TimeRange;
   dataView: DataView;
   filters: Filter[];
-  query: {
-    language: string;
-    query: string;
-  };
-  onFilterChange: (filters: Filter[]) => void;
+  query: Query;
+  timeRange: TimeRange;
+  onFiltersChange: (filters: Filter[]) => void;
 }
 
 // Disable refresh, allow our timerange changes to refresh the embeddable.
@@ -31,31 +29,35 @@ const REFRESH_CONFIG = {
 };
 
 export const ControlsContent: React.FC<Props> = ({
-  timeRange,
   dataView,
-  query,
   filters,
-  onFilterChange,
+  query,
+  timeRange,
+  onFiltersChange,
 }) => {
-  const [controlPanel, setControlPanels] = useControlPanels(dataView);
-  const [controlGroup, setControlGroup] = useState<ControlGroupContainer | undefined>();
+  const [controlPanels, setControlPanels] = useControlPanels(dataView);
+  const inputSubscription = useRef<Subscription>();
+  const filterSubscription = useRef<Subscription>();
+
+  const loadCompleteHandler = useCallback(
+    (controlGroup: ControlGroupContainer) => {
+      inputSubscription.current = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
+        onFiltersChange(newFilters);
+      });
+
+      filterSubscription.current = controlGroup
+        .getInput$()
+        .subscribe(({ panels }) => setControlPanels(panels));
+    },
+    [onFiltersChange, setControlPanels]
+  );
 
   useEffect(() => {
-    if (!controlGroup) {
-      return;
-    }
-    const filtersSubscription = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
-      onFilterChange(newFilters);
-    });
-    const inputSubscription = controlGroup.getInput$().subscribe(({ panels }) => {
-      setControlPanels(panels);
-    });
-
     return () => {
-      filtersSubscription.unsubscribe();
-      inputSubscription.unsubscribe();
+      filterSubscription.current?.unsubscribe();
+      inputSubscription.current?.unsubscribe();
     };
-  }, [controlGroup, onFilterChange, setControlPanels]);
+  }, []);
 
   return (
     <LazyControlsRenderer
@@ -71,11 +73,9 @@ export const ControlsContent: React.FC<Props> = ({
         chainingSystem: 'HIERARCHICAL',
         controlStyle: 'oneLine',
         defaultControlWidth: 'small',
-        panels: controlPanel,
+        panels: controlPanels,
       })}
-      onLoadComplete={(newControlGroup) => {
-        setControlGroup(newControlGroup);
-      }}
+      onLoadComplete={loadCompleteHandler}
       query={query}
       timeRange={timeRange}
     />
