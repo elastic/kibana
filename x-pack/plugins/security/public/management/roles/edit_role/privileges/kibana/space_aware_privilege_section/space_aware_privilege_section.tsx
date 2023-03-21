@@ -87,7 +87,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
               defaultMessage="Insufficient Privileges"
             />
           }
-          iconType="alert"
+          iconType="warning"
           color="danger"
           data-test-subj="userCannotManageSpacesCallout"
         >

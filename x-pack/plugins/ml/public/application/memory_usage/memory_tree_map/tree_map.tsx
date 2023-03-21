@@ -183,7 +183,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
         ) : (
           <EuiEmptyPrompt
             titleSize="xs"
-            iconType="alert"
+            iconType="warning"
             data-test-subj="mlEmptyMemoryUsageTreeMap"
             title={
               <h2>

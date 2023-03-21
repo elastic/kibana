@@ -1637,6 +1637,54 @@
             "basicAuth": []
           }
         ]
+      },
+      "post": {
+        "summary": "List agents by action ids",
+        "tags": [
+          "Agents"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/agent_get_by_actions"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "get-agents-by-actions",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "actionIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "policy_id"
+                ]
+              }
+            }
+          }
+        }
       }
     },
     "/agents/bulk_upgrade": {
@@ -1743,25 +1791,43 @@
                             ]
                           },
                           "nbAgentsActioned": {
-                            "type": "number"
+                            "type": "number",
+                            "description": "number of agents actioned"
                           },
                           "nbAgentsActionCreated": {
-                            "type": "number"
+                            "type": "number",
+                            "description": "number of agents included in action from kibana"
                           },
                           "nbAgentsAck": {
-                            "type": "number"
+                            "type": "number",
+                            "description": "number of agents that acknowledged the action"
                           },
                           "nbAgentsFailed": {
-                            "type": "number"
+                            "type": "number",
+                            "description": "number of agents that failed to execute the action"
                           },
                           "version": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "agent version number (UPGRADE action)"
                           },
                           "startTime": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "start time of action (scheduled actions)"
                           },
                           "type": {
-                            "type": "string"
+                            "type": "string",
+                            "enum": [
+                              "POLICY_REASSIGN",
+                              "UPGRADE",
+                              "UNENROLL",
+                              "FORCE_UNENROLL",
+                              "UPDATE_TAGS",
+                              "CANCEL",
+                              "REQUEST_DIAGNOSTICS",
+                              "SETTINGS",
+                              "POLICY_CHANGE",
+                              "INPUT_ACTION"
+                            ]
                           },
                           "expiration": {
                             "type": "string"
@@ -1773,10 +1839,20 @@
                             "type": "string"
                           },
                           "newPolicyId": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "new policy id (POLICY_REASSIGN action)"
+                          },
+                          "policyId": {
+                            "type": "string",
+                            "description": "policy id (POLICY_CHANGE action)"
+                          },
+                          "revision": {
+                            "type": "string",
+                            "description": "new policy revision (POLICY_CHANGE action)"
                           },
                           "creationTime": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "creation time of action"
                           },
                           "latestErrors": {
                             "type": "array",
@@ -1805,7 +1881,8 @@
                           "nbAgentsAck",
                           "nbAgentsFailed",
                           "status",
-                          "creationTime"
+                          "creationTime",
+                          "type"
                         ]
                       }
                     }
@@ -6136,6 +6213,16 @@
           "page",
           "perPage"
         ]
+      },
+      "agent_get_by_actions": {
+        "title": "Agents get by action ids",
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       },
       "bulk_upgrade_agents": {
         "title": "Bulk upgrade agents",
