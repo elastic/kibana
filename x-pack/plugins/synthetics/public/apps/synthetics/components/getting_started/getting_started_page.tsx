@@ -147,6 +147,7 @@ export const GettingStartedOnPrem = () => {
               {FOR_MORE_INFO_LABEL}
             </EuiText>{' '}
             <EuiLink
+              data-test-subj="syntheticsGettingStartedOnPremLink"
               href="https://www.elastic.co/guide/en/observability/current/synthetics-get-started.html"
               target="_blank"
               className="eui-displayInline"
