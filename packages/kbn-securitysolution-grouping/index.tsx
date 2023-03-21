@@ -11,6 +11,7 @@ import {
   GroupSelector,
   GroupSelectorProps,
   RawBucket,
+  StatRenderer,
   getGroupingQuery,
   isNoneGroup,
   useGrouping,
@@ -34,4 +35,5 @@ export type {
   GroupingFieldTotalAggregation,
   NamedAggregation,
   RawBucket,
+  StatRenderer,
 };

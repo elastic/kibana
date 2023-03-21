@@ -7,8 +7,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import type { RawBucket } from '@kbn/securitysolution-grouping';
-import type { StatRenderer } from '@kbn/securitysolution-grouping/src/components/accordion_panel';
+import type { RawBucket, StatRenderer } from '@kbn/securitysolution-grouping';
 import type { AlertsGroupingAggregation } from './types';
 import * as i18n from '../translations';
 

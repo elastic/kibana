@@ -47,7 +47,7 @@ import { track } from '../../../common/lib/telemetry';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 
-interface AlertsTableComponentProps {
+export interface AlertsTableComponentProps {
   currentAlertStatusFilterValue?: Status;
   defaultFilters?: Filter[];
   from: string;
