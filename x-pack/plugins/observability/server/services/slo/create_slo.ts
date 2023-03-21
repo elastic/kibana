@@ -63,6 +63,7 @@ export class CreateSLO {
       },
       revision: 1,
       enabled: true,
+      tags: params.tags ?? [],
       createdAt: now,
       updatedAt: now,
     };

@@ -39,6 +39,7 @@ import { DiscoverTourProvider } from '../../../../components/discover_tour';
 import { DataTableRecord } from '../../../../types';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
+import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -55,7 +56,7 @@ export const onResize = (
     width: Math.round(colSettings.width),
   };
   const newGrid = { ...grid, columns: newColumns };
-  stateContainer.setAppState({ grid: newGrid });
+  stateContainer.appState.update({ grid: newGrid });
 };
 
 function DiscoverDocumentsComponent({
@@ -123,7 +124,7 @@ function DiscoverDocumentsComponent({
     config: uiSettings,
     dataView,
     dataViews,
-    setAppState: stateContainer.setAppState,
+    setAppState: stateContainer.appState.update,
     useNewFieldsApi,
     columns,
     sort,
@@ -136,21 +137,21 @@ function DiscoverDocumentsComponent({
 
   const onUpdateRowsPerPage = useCallback(
     (nextRowsPerPage: number) => {
-      stateContainer.setAppState({ rowsPerPage: nextRowsPerPage });
+      stateContainer.appState.update({ rowsPerPage: nextRowsPerPage });
     },
     [stateContainer]
   );
 
   const onSort = useCallback(
     (nextSort: string[][]) => {
-      stateContainer.setAppState({ sort: nextSort });
+      stateContainer.appState.update({ sort: nextSort });
     },
     [stateContainer]
   );
 
   const onUpdateRowHeight = useCallback(
     (newRowHeight: number) => {
-      stateContainer.setAppState({ rowHeight: newRowHeight });
+      stateContainer.appState.update({ rowHeight: newRowHeight });
     },
     [stateContainer]
   );
@@ -200,6 +201,7 @@ function DiscoverDocumentsComponent({
             onSort={!isPlainRecord ? onSort : undefined}
             useNewFieldsApi={useNewFieldsApi}
             dataTestSubj="discoverDocTable"
+            DocViewer={DocViewer}
           />
         </>
       )}

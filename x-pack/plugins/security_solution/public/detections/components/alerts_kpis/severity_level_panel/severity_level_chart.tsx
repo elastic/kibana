@@ -5,12 +5,11 @@
  * 2.0.
  */
 import React, { useCallback, useMemo } from 'react';
-import { isEmpty } from 'lodash/fp';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLoadingSpinner } from '@elastic/eui';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ShapeTreeNode, ElementClickListener } from '@elastic/charts';
+import type { ShapeTreeNode } from '@elastic/charts';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
@@ -56,17 +55,9 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
     },
   };
 
-  const onElementClick: ElementClickListener = useCallback(
-    (event) => {
-      const flattened = event.flat(2);
-      const level =
-        flattened.length > 0 &&
-        'groupByRollup' in flattened[0] &&
-        flattened[0].groupByRollup != null
-          ? `${flattened[0].groupByRollup}`
-          : '';
-
-      if (addFilter != null && !isEmpty(level.trim())) {
+  const onDonutPartitionClicked = useCallback(
+    (level: string) => {
+      if (addFilter) {
         addFilter({ field: ALERT_SEVERITY, value: level.toLowerCase() });
       }
     },
@@ -95,7 +86,7 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
             label={TOTAL_COUNT_OF_ALERTS}
             title={<ChartLabel count={count} />}
             totalCount={count}
-            onElementClick={onElementClick}
+            onPartitionClick={onDonutPartitionClicked}
           />
         )}
       </EuiFlexItem>

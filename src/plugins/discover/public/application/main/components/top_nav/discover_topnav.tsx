@@ -199,9 +199,9 @@ export const DiscoverTopNav = ({
   };
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
-    const { appState, setAppState } = stateContainer;
+    const { appState } = stateContainer;
     if (newSavedQueryId) {
-      setAppState({ savedQuery: newSavedQueryId });
+      appState.update({ savedQuery: newSavedQueryId });
     } else {
       // remove savedQueryId from state
       const newState = {

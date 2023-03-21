@@ -20,8 +20,8 @@ import {
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { SLO, APMTransactionDurationIndicator } from '../../../domain/models';
 import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
-import { DEFAULT_APM_INDEX } from './constants';
 import { Query } from './types';
+import { parseIndex } from './common';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
@@ -91,16 +91,14 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     }
 
     return {
-      index: indicator.params.index ?? DEFAULT_APM_INDEX,
+      index: parseIndex(indicator.params.index),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {
           filter: [
-            {
-              match: {
-                'transaction.root': true,
-              },
-            },
+            { terms: { 'processor.event': ['metric'] } },
+            { term: { 'metricset.name': 'transaction' } },
+            { exists: { field: 'transaction.duration.histogram' } },
             ...queryFilter,
           ],
         },

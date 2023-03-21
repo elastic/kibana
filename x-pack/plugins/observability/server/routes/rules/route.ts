@@ -20,8 +20,9 @@ const alertsDynamicIndexPatternRoute = createObservabilityServerRoute({
       namespace: t.string,
     }),
   }),
-  handler: async ({ ruleDataService, params }) => {
+  handler: async ({ dependencies, params }) => {
     const { namespace, registrationContexts } = params.query;
+    const { ruleDataService } = dependencies;
     const indexNames = registrationContexts.flatMap((registrationContext) => {
       const indexName = ruleDataService
         .findIndexByName(registrationContext, Dataset.alerts)

@@ -28,7 +28,12 @@ export const LogAnalysisSetupStatusUnknownPrompt: React.FunctionComponent<Props>
       </h2>
     }
     actions={
-      <EuiButton onClick={() => retry()} color="primary" fill>
+      <EuiButton
+        data-test-subj="infraLogAnalysisSetupStatusUnknownPromptTryAgainButton"
+        onClick={() => retry()}
+        color="primary"
+        fill
+      >
         {i18n.translate('xpack.infra.logs.analysis.setupStatusTryAgainButton', {
           defaultMessage: 'Try again',
         })}

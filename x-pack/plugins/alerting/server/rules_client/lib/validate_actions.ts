@@ -31,6 +31,15 @@ export async function validateActions(
 
   const errors = [];
 
+  const uniqueActions = new Set(actions.map((action) => action.uuid));
+  if (uniqueActions.size < actions.length) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.hasDuplicatedUuid', {
+        defaultMessage: 'Actions have duplicated UUIDs',
+      })
+    );
+  }
+
   // check for actions using connectors with missing secrets
   const actionsClient = await context.getActionsClient();
   const actionIds = [...new Set(actions.map((action) => action.id))];

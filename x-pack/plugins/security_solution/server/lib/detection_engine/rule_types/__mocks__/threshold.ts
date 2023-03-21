@@ -35,6 +35,8 @@ import {
   ALERT_ORIGINAL_EVENT,
   ALERT_THRESHOLD_RESULT,
 } from '../../../../../common/field_maps/field_names';
+import type { ThresholdSignalHistory } from '../threshold/types';
+import { getThresholdTermsHash } from '../threshold/utils';
 
 export const sampleThresholdAlert = {
   _id: 'b3ad77a4-65bd-4c4e-89cf-13c46f54bc4d',
@@ -125,4 +127,23 @@ export const sampleThresholdAlert = {
     }) as TypeOfFieldMap<RulesFieldMap>),
     'kibana.alert.depth': 1,
   },
+};
+
+export const sampleThresholdSignalHistory = (): ThresholdSignalHistory => {
+  const terms = [
+    {
+      field: 'source.ip',
+      value: '127.0.0.1',
+    },
+    {
+      field: 'host.name',
+      value: 'garden-gnomes',
+    },
+  ];
+  return {
+    [`${getThresholdTermsHash(terms)}`]: {
+      terms,
+      lastSignalTimestamp: new Date('2020-12-17T16:28:00Z').getTime(),
+    },
+  };
 };

@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 
 import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { TableId } from '../../../../common/types';
+import type { CustomBulkAction, TableId } from '../../../../common/types';
 import { dataTableActions } from '../../store/data_table';
 import { RowRendererId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
@@ -156,7 +156,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     from: startDate,
     to: endDate,
     scopeId: SourcererScopeName.default,
-  });
+  }) as CustomBulkAction;
 
   const bulkActions = useMemo<BulkActionsProp | boolean>(() => {
     return {

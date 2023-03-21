@@ -9,7 +9,7 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
-import { JourneyStep, SyntheticsJourneyApiResponse } from '../../../../../../common/runtime_types';
+import { JourneyStep } from '../../../../../../common/runtime_types';
 import {
   fetchJourneyAction,
   selectBrowserJourney,
@@ -53,7 +53,7 @@ export const useJourneySteps = (
     failedStep?.synthetics?.step && failedStep.synthetics.step.index === Number(stepIndex);
 
   return {
-    data: journeyData as SyntheticsJourneyApiResponse,
+    data: journeyData,
     loading: loading ?? false,
     stepEnds,
     stepLabels,

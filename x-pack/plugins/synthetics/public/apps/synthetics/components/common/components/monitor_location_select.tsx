@@ -57,8 +57,12 @@ export const MonitorLocationSelect = ({
 
     if (monitorLocations.length > 1 || showSelection) {
       const button = (
-        <EuiLink onClick={openLocationList} disabled={isDisabled}>
-          {selectedLocation.label} <EuiIcon type="arrowDown" />
+        <EuiLink
+          data-test-subj="syntheticsLocationListLink"
+          onClick={openLocationList}
+          disabled={isDisabled}
+        >
+          {selectedLocation.label} {!isDisabled ? <EuiIcon type="arrowDown" /> : null}
         </EuiLink>
       );
 
@@ -115,6 +119,14 @@ export const MonitorLocationSelect = ({
   ]);
 
   if (!selectedLocation || !monitorLocations) {
+    if (selectedLocation) {
+      return (
+        <EuiDescriptionList
+          compressed={compressed}
+          listItems={[{ title: LOCATION_LABEL, description: selectedLocation?.label }]}
+        />
+      );
+    }
     return (
       <EuiDescriptionList
         compressed={compressed}

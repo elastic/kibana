@@ -12,10 +12,9 @@ export type {
   ProcedureSchemas,
   ProcedureName,
   GetIn,
+  BulkGetIn,
   CreateIn,
   UpdateIn,
   DeleteIn,
   SearchIn,
 } from './rpc';
-
-export { procedureNames, schemas as rpcSchemas } from './rpc';

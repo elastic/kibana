@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
+import type { Version } from '@kbn/object-versioning';
+import { versionSchema } from './constants';
 
 import type { ProcedureSchemas } from './types';
 
@@ -13,13 +15,17 @@ export const searchSchemas: ProcedureSchemas = {
   in: schema.object(
     {
       contentTypeId: schema.string(),
+      version: versionSchema,
       // --> "query" that can be executed will be defined by each content type
       query: schema.recordOf(schema.string(), schema.any()),
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },
     { unknowns: 'forbid' }
   ),
-  out: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  out: schema.oneOf([
+    schema.object({}, { unknowns: 'allow' }),
+    schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
+  ]),
 };
 
 export interface SearchIn<
@@ -29,5 +35,6 @@ export interface SearchIn<
 > {
   contentTypeId: T;
   query: Query;
+  version?: Version;
   options?: Options;
 }

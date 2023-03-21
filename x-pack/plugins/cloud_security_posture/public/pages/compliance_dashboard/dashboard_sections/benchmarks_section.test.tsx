@@ -15,7 +15,7 @@ import { KSPM_POLICY_TEMPLATE } from '../../../../common/constants';
 import {
   DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID,
   DASHBOARD_TABLE_HEADER_SCORE_TEST_ID,
-} from '../../findings/test_subjects';
+} from '../test_subjects';
 
 describe('<BenchmarksSection />', () => {
   const renderBenchmarks = (alterMockData = {}) =>
@@ -55,7 +55,7 @@ describe('<BenchmarksSection />', () => {
       expect(getAllByTestId(DASHBOARD_TABLE_COLUMN_SCORE_TEST_ID)[2]).toHaveTextContent('95');
     });
 
-    it('toggles sort order when clicking Compliance Score', () => {
+    it('toggles sort order when clicking Posture Score', () => {
       const { getAllByTestId, getByTestId } = renderBenchmarks(mockDashboardDataCopy);
 
       userEvent.click(getByTestId(DASHBOARD_TABLE_HEADER_SCORE_TEST_ID));

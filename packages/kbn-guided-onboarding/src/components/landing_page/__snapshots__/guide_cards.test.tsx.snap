@@ -253,13 +253,13 @@ exports[`guide cards snapshots should render all cards 1`] = `
         Object {
           "navigateTo": Object {
             "appId": "integrations",
-            "path": "/detail/cloud_security_posture/overview",
+            "path": "/detail/cloud_security_posture/overview?integration=cspm",
           },
           "order": 9,
           "solution": "security",
           "telemetryId": "onboarding--security--cloud",
           "title": <FormattedMessage
-            defaultMessage="Secure my cloud assets with {lineBreak} posture management"
+            defaultMessage="Secure my cloud assets with {lineBreak} cloud security posture management (CSPM)"
             id="guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title"
             values={
               Object {

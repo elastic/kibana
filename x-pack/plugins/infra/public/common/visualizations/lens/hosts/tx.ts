@@ -54,8 +54,7 @@ export class TX implements ILensVisualization {
       'y_network_out_bytes',
       {
         formula:
-          "counter_rate(max(system.network.out.bytes), kql='system.network.out.bytes: *') * 8",
-        timeScale: 's',
+          "average(host.network.egress.bytes) * 8 / (max(metricset.period, kql='host.network.egress.bytes: *') / 1000)",
         format: {
           id: 'bits',
           params: {
@@ -96,13 +95,13 @@ export class TX implements ILensVisualization {
           negate: false,
           alias: null,
           index: '3be1e71b-4bc5-4462-a314-04539f877a19',
-          key: 'system.network.out.bytes',
+          key: 'host.network.egress.bytes',
           value: 'exists',
           type: 'exists',
         },
         query: {
           exists: {
-            field: 'system.network.out.bytes',
+            field: 'host.network.egress.bytes',
           },
         },
         $state: {

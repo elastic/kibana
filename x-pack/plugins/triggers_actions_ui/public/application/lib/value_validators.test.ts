@@ -275,6 +275,7 @@ describe('getRuleWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors: IErrorObject[] = [];
@@ -313,6 +314,7 @@ describe('getRuleWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors: IErrorObject[] = [];
@@ -345,6 +347,7 @@ describe('getRuleWithInvalidatedFields', () => {
               field: {},
             },
           },
+          uuid: '123-456',
         },
       ],
       tags: [],
@@ -362,6 +365,7 @@ describe('getRuleWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors = [{ 'incident.field.name': ['Name is required.'] }];
@@ -390,6 +394,7 @@ describe('getRuleWithInvalidatedFields', () => {
               field: {},
             },
           },
+          uuid: '111-111',
         },
         {
           actionTypeId: 'test',
@@ -402,6 +407,7 @@ describe('getRuleWithInvalidatedFields', () => {
               },
             },
           },
+          uuid: '222-222',
         },
       ],
       tags: [],
@@ -419,6 +425,7 @@ describe('getRuleWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors = [

@@ -5,8 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { schema } from '@kbn/config-schema';
-
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Core } from './core';
 import { createMemoryStorage, FooContent } from './mocks';
@@ -16,6 +14,9 @@ import type {
   GetItemStart,
   GetItemSuccess,
   GetItemError,
+  BulkGetItemStart,
+  BulkGetItemSuccess,
+  BulkGetItemError,
   CreateItemStart,
   CreateItemSuccess,
   CreateItemError,
@@ -25,17 +26,26 @@ import type {
   DeleteItemStart,
   DeleteItemSuccess,
   DeleteItemError,
+  SearchItemStart,
+  SearchItemSuccess,
+  SearchItemError,
 } from './event_types';
 import { ContentTypeDefinition, StorageContext } from './types';
 
 const logger = loggingSystemMock.createLogger();
 
 const FOO_CONTENT_ID = 'foo';
-const fooSchema = schema.object({ title: schema.string() });
 
 const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) => {
   const ctx: StorageContext = {
     requestHandlerContext: {} as any,
+    version: {
+      latest: 1,
+      request: 1,
+    },
+    utils: {
+      getTransforms: jest.fn(),
+    },
   };
 
   const core = new Core({ logger });
@@ -43,12 +53,8 @@ const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) 
   const contentDefinition: ContentTypeDefinition = {
     id: FOO_CONTENT_ID,
     storage: createMemoryStorage(),
-    schemas: {
-      content: {
-        create: { in: { data: fooSchema } },
-        update: { in: { data: fooSchema } },
-        search: { in: { query: schema.any() } },
-      },
+    version: {
+      latest: 2,
     },
   };
   const cleanUp = () => {
@@ -101,7 +107,45 @@ describe('Content Core', () => {
           // Make sure the "register" exposed by the api is indeed registring
           // the content into our "contentRegistry" instance
           expect(contentRegistry.isContentRegistered(FOO_CONTENT_ID)).toBe(true);
-          expect(contentRegistry.getDefinition(FOO_CONTENT_ID)).toBe(contentDefinition);
+          expect(contentRegistry.getDefinition(FOO_CONTENT_ID)).toEqual(contentDefinition);
+
+          cleanUp();
+        });
+
+        test('should convert the latest version to number if string is passed', () => {
+          const { coreSetup, cleanUp, contentDefinition } = setup();
+
+          const {
+            contentRegistry,
+            api: { register },
+          } = coreSetup;
+
+          register({ ...contentDefinition, version: { latest: '123' } } as any);
+
+          expect(contentRegistry.getContentType(contentDefinition.id).version).toEqual({
+            latest: 123,
+          });
+
+          cleanUp();
+        });
+
+        test('should throw if latest version passed is not valid', () => {
+          const { coreSetup, cleanUp, contentDefinition } = setup();
+
+          const {
+            contentRegistry,
+            api: { register },
+          } = coreSetup;
+
+          expect(contentRegistry.isContentRegistered(FOO_CONTENT_ID)).toBe(false);
+
+          expect(() => {
+            register({ ...contentDefinition, version: undefined } as any);
+          }).toThrowError('Invalid version [undefined]. Must be an integer.');
+
+          expect(() => {
+            register({ ...contentDefinition, version: { latest: 0 } });
+          }).toThrowError('Version must be >= 1');
 
           cleanUp();
         });
@@ -127,6 +171,37 @@ describe('Content Core', () => {
               // Options forwared in response
               options: { foo: 'bar' },
             },
+          });
+
+          cleanUp();
+        });
+
+        test('bulkGet()', async () => {
+          const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
+
+          const res = await fooContentCrud!.bulkGet(ctx, ['1', '2']);
+          expect(res.items).toEqual([]);
+
+          cleanUp();
+        });
+
+        test('bulkGet() - options are forwared to storage layer', async () => {
+          const { fooContentCrud, ctx, cleanUp } = setup({ registerFooType: true });
+
+          const res = await fooContentCrud!.bulkGet(ctx, ['1', '2'], {
+            forwardInResponse: { foo: 'bar' },
+          });
+
+          expect(res).toEqual({
+            contentTypeId: FOO_CONTENT_ID,
+            items: [
+              {
+                options: { foo: 'bar' }, // Options forwared in response
+              },
+              {
+                options: { foo: 'bar' }, // Options forwared in response
+              },
+            ],
           });
 
           cleanUp();
@@ -392,6 +467,7 @@ describe('Content Core', () => {
                 ...data,
               },
               contentTypeId: FOO_CONTENT_ID,
+              options: { someOption: 'baz' },
             };
 
             expect(listener).toHaveBeenCalledWith(getItemSuccess);
@@ -411,6 +487,80 @@ describe('Content Core', () => {
             };
 
             expect(listener).toHaveBeenLastCalledWith(getItemError);
+
+            expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
+
+            sub.unsubscribe();
+
+            cleanUp();
+          });
+
+          test('bulkGet()', async () => {
+            const { fooContentCrud, eventBus, ctx, cleanUp } = setup({
+              registerFooType: true,
+            });
+
+            const data = { title: 'Hello' };
+
+            await fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(ctx, data, {
+              id: '1234',
+            });
+            await fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(ctx, data, {
+              id: '5678',
+            });
+
+            const listener = jest.fn();
+            const sub = eventBus.events$.subscribe(listener);
+
+            const promise = fooContentCrud!.bulkGet(ctx, ['1234', '5678'], { someOption: 'baz' });
+
+            const bulkGetItemStart: BulkGetItemStart = {
+              type: 'bulkGetItemStart',
+              ids: ['1234', '5678'],
+              contentTypeId: FOO_CONTENT_ID,
+              options: { someOption: 'baz' },
+            };
+
+            expect(listener).toHaveBeenCalledWith(bulkGetItemStart);
+
+            await promise;
+
+            const bulkGetItemSuccess: BulkGetItemSuccess = {
+              type: 'bulkGetItemSuccess',
+              ids: ['1234', '5678'],
+              data: [
+                {
+                  id: '1234',
+                  ...data,
+                },
+                {
+                  id: '5678',
+                  ...data,
+                },
+              ],
+              contentTypeId: FOO_CONTENT_ID,
+              options: { someOption: 'baz' },
+            };
+
+            expect(listener).toHaveBeenCalledWith(bulkGetItemSuccess);
+
+            listener.mockReset();
+
+            const errorMessage = 'Ohhh no!';
+            const reject = jest.fn();
+            await fooContentCrud!
+              .bulkGet(ctx, ['1234', '5678'], { errorToThrow: errorMessage })
+              .catch(reject);
+
+            const bulkGetItemError: BulkGetItemError = {
+              type: 'bulkGetItemError',
+              ids: ['1234', '5678'],
+              contentTypeId: FOO_CONTENT_ID,
+              error: errorMessage,
+              options: { errorToThrow: errorMessage },
+            };
+
+            expect(listener).toHaveBeenLastCalledWith(bulkGetItemError);
 
             expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
 
@@ -616,6 +766,71 @@ describe('Content Core', () => {
             };
 
             expect(listener).toHaveBeenLastCalledWith(deleteItemError);
+
+            expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
+
+            sub.unsubscribe();
+            cleanUp();
+          });
+
+          test('search()', async () => {
+            const { fooContentCrud, ctx, eventBus, cleanUp } = setup({
+              registerFooType: true,
+            });
+
+            const myContent = { title: 'Hello' };
+
+            await fooContentCrud!.create<Omit<FooContent, 'id'>, { id: string }>(ctx, myContent, {
+              id: '1234',
+            });
+
+            const listener = jest.fn();
+            const sub = eventBus.events$.subscribe(listener);
+
+            const query = { title: 'Hell' };
+
+            const promise = await fooContentCrud!.search(ctx, query, { someOptions: 'baz' });
+
+            const searchItemStart: SearchItemStart = {
+              type: 'searchItemStart',
+              query,
+              contentTypeId: FOO_CONTENT_ID,
+              options: { someOptions: 'baz' },
+            };
+
+            expect(listener).toHaveBeenCalledWith(searchItemStart);
+
+            await promise;
+
+            const searchItemSuccess: SearchItemSuccess = {
+              type: 'searchItemSuccess',
+              query,
+              data: [{ id: '1234', ...myContent }],
+              contentTypeId: FOO_CONTENT_ID,
+              options: { someOptions: 'baz' },
+            };
+
+            expect(listener).toHaveBeenCalledWith(searchItemSuccess);
+
+            listener.mockReset();
+
+            const errorMessage = 'Ohhh no!';
+            const reject = jest.fn();
+            await fooContentCrud!
+              .search(ctx, query, {
+                errorToThrow: errorMessage,
+              })
+              .catch(reject);
+
+            const searchItemError: SearchItemError = {
+              type: 'searchItemError',
+              contentTypeId: FOO_CONTENT_ID,
+              query,
+              error: errorMessage,
+              options: { errorToThrow: errorMessage },
+            };
+
+            expect(listener).toHaveBeenLastCalledWith(searchItemError);
 
             expect(reject).toHaveBeenCalledWith(new Error(errorMessage));
 

@@ -8,7 +8,6 @@
   @include euiYScroll;
   max-height: $euiSize * 20;
   width: $euiSize * 16;
-  overflow-wrap: break-word;
 }
 
 .lnsWorkspaceWarningList__item {
@@ -17,4 +16,9 @@
   & + & {
     border-top: $euiBorderThin;
   }
+}
+
+.lnsWorkspaceWarningList__description {
+  overflow-wrap: break-word;
+  min-width: 0;
 }

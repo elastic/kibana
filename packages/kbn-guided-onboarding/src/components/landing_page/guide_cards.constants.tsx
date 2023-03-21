@@ -161,7 +161,7 @@ export const guideCards: GuideCardConstants[] = [
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title"
-        defaultMessage="Secure my cloud assets with {lineBreak} posture management"
+        defaultMessage="Secure my cloud assets with {lineBreak} cloud security posture management (CSPM)"
         values={{
           lineBreak: <br />,
         }}
@@ -169,7 +169,7 @@ export const guideCards: GuideCardConstants[] = [
     ),
     navigateTo: {
       appId: 'integrations',
-      path: '/detail/cloud_security_posture/overview',
+      path: '/detail/cloud_security_posture/overview?integration=cspm',
     },
     telemetryId: 'onboarding--security--cloud',
     order: 9,

@@ -7,10 +7,10 @@
 
 import { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/server';
 
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { registerChatRoute } from './routes';
-import { CloudChatConfigType } from './config';
+import type { CloudChatConfigType } from './config';
 
 interface CloudChatSetupDeps {
   cloud: CloudSetup;
@@ -27,10 +27,15 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps> {
   }
 
   public setup(core: CoreSetup, { cloud, security }: CloudChatSetupDeps) {
-    if (cloud.isCloudEnabled && this.config.chatIdentitySecret) {
+    const { chatIdentitySecret, trialBuffer } = this.config;
+    const { isCloudEnabled, trialEndDate } = cloud;
+
+    if (isCloudEnabled && chatIdentitySecret) {
       registerChatRoute({
         router: core.http.createRouter(),
-        chatIdentitySecret: this.config.chatIdentitySecret,
+        chatIdentitySecret,
+        trialEndDate,
+        trialBuffer,
         security,
         isDev: this.isDev,
       });

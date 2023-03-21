@@ -17,14 +17,13 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import CoreVitals from '../../../shared/core_web_vitals';
-import { BucketSize } from '../../../../pages/overview';
 import { getExploratoryViewEmbeddable } from '../../../shared/exploratory_view/embeddable';
 import { AllSeries } from '../../../shared/exploratory_view/hooks/use_series_storage';
 import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
 } from '../../../shared/exploratory_view/configurations/constants/elasticsearch_fieldnames';
-
+import type { BucketSize } from '../../../../pages/overview/helpers/calculate_bucket_size';
 interface Props {
   bucketSize: BucketSize;
 }
