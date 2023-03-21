@@ -95,9 +95,6 @@ export const useOsqueryTab = ({
 
   const { data: actionsData } = fetchAllLiveQueries({
     filterQuery: { term: { alert_ids: alertId } },
-    activePage: 0,
-    limit: 100,
-    sortField: '@timestamp',
     alertId,
     skip: shouldEarlyReturn,
   });
