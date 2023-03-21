@@ -24,6 +24,11 @@ export const LogsTabContent = () => {
 
   const hostsFilterQuery = useMemo(() => createHostsFilter(hostNodes), [hostNodes]);
 
+  const logsLinkToStreamQuery = useMemo(() => {
+    const hostsFilterQueryParam = createHostsFilterQueryParam(hostNodes);
+    return `${filterQuery.query ? filterQuery.query + ' and ' : ''}${hostsFilterQueryParam}`;
+  }, [filterQuery.query, hostNodes]);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-logs">
       <EuiFlexGroup gutterSize={'m'} alignItems={'center'} responsive={false}>
@@ -31,27 +36,27 @@ export const LogsTabContent = () => {
           <LogsSearchBar />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <LogsLinkToStream startTimestamp={from} endTimestamp={to} query={filterQuery.query} />
+          <LogsLinkToStream startTimestamp={from} endTimestamp={to} query={logsLinkToStreamQuery} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexItem>
-        {hostNodes.length ? (
+      {hostNodes.length ? (
+        <EuiFlexItem>
           <LogStream
             height={500}
             logView={{ type: 'log-view-reference', logViewId: 'default' }}
             startTimestamp={from}
             endTimestamp={to}
-            filters={hostsFilterQuery}
+            filters={[hostsFilterQuery]}
             query={filterQuery}
           />
-        ) : null}
-      </EuiFlexItem>
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 };
 
-const createHostsFilter = (hostNodes: SnapshotNode[]): Filter[] => {
-  const hostsFilter = {
+const createHostsFilter = (hostNodes: SnapshotNode[]): Filter => {
+  return {
     query: {
       terms: {
         'host.name': hostNodes.map((p) => p.name),
@@ -59,6 +64,8 @@ const createHostsFilter = (hostNodes: SnapshotNode[]): Filter[] => {
     },
     meta: {},
   };
+};
 
-  return [hostsFilter].filter(Boolean) as Filter[];
+const createHostsFilterQueryParam = (hostNodes: SnapshotNode[]): string => {
+  return hostNodes.map((p) => `host.name:${p.name}`).join(' or ');
 };
