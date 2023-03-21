@@ -27,7 +27,7 @@ const filterButtonCss = css`
   }
 `;
 export type GuideFilterValues = GuideCardSolutions | 'all';
-interface GuideFiltersProps {
+export interface GuideFiltersProps {
   activeFilter: GuideFilterValues;
   setActiveFilter: React.Dispatch<React.SetStateAction<GuideFilterValues>>;
 }

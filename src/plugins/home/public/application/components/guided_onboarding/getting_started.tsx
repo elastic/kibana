@@ -7,6 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { parse } from 'query-string';
 import {
   EuiButton,
   EuiLink,
@@ -19,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -48,7 +49,12 @@ export const GettingStarted = () => {
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
-  const [filter, setFilter] = useState<GuideFilterValues>('all');
+  const { search } = useLocation();
+  const query = parse(search);
+
+  const [filter, setFilter] = useState<GuideFilterValues>(
+    query.cloudDiscoveryUseCase ? (query.cloudDiscoveryUseCase as GuideFilterValues) : 'all'
+  );
   const history = useHistory();
 
   useEffect(() => {
@@ -196,7 +202,11 @@ export const GettingStarted = () => {
         </EuiText>
         <EuiSpacer size="s" />
         <EuiSpacer size="xxl" />
-        <GuideFilters activeFilter={filter} setActiveFilter={setFilter} />
+        <GuideFilters
+          activeFilter={filter}
+          setActiveFilter={setFilter}
+          data-test-subj="onboarding--guideFilters"
+        />
         <EuiSpacer size="xxl" />
         <GuideCards
           activateGuide={activateGuide}
