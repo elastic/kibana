@@ -94,7 +94,7 @@ export function RuleDetailsPage() {
   const history = useHistory();
   const location = useLocation();
 
-  const chartThemes = {
+  const chartProps = {
     theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
@@ -404,7 +404,7 @@ export function RuleDetailsPage() {
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
-            chartThemes={chartThemes}
+            chartProps={chartProps}
             featureIds={featureIds}
             onClick={onAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}
