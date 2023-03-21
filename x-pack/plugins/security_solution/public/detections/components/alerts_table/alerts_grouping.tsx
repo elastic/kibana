@@ -110,9 +110,9 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     [browserFields, indexPattern, uiSettings, defaultFilters, globalFilters, from, to, globalQuery]
   );
 
-  const { onGroupChangeCallback, onGroupToggle } = useMemo(
+  const { onGroupChange, onGroupToggle } = useMemo(
     () => ({
-      onGroupChangeCallback: (param: { groupByField: string; tableId: string }) => {
+      onGroupChange: (param: { groupByField: string; tableId: string }) => {
         telemetry.reportAlertsGroupingChanged(param);
       },
       onGroupToggle: (param: {
@@ -147,7 +147,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     defaultGroupingOptions: getDefaultGroupingOptions(tableId),
     fields: indexPattern.fields,
     groupingId: tableId,
-    onGroupChangeCallback,
+    onGroupChange,
     tracker: track,
   });
   const resetPagination = pagination.reset;

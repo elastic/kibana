@@ -22,7 +22,7 @@ export interface UseGetGroupSelectorArgs {
   fields: FieldSpec[];
   groupingId: string;
   groupingState: GroupMap;
-  onGroupChangeCallback?: (param: { groupByField: string; tableId: string }) => void;
+  onGroupChange?: (param: { groupByField: string; tableId: string }) => void;
   tracker?: (
     type: UiCounterMetricType,
     event: string | string[],
@@ -36,7 +36,7 @@ export const useGetGroupSelector = ({
   fields,
   groupingId,
   groupingState,
-  onGroupChangeCallback,
+  onGroupChange,
   tracker,
 }: UseGetGroupSelectorArgs) => {
   const { activeGroup: selectedGroup, options } =
@@ -63,7 +63,7 @@ export const useGetGroupSelector = ({
     [dispatch, groupingId]
   );
 
-  const onGroupChange = useCallback(
+  const onChange = useCallback(
     (groupSelection: string) => {
       if (groupSelection === selectedGroup) {
         return;
@@ -77,7 +77,7 @@ export const useGetGroupSelector = ({
         getTelemetryEvent.groupChanged({ groupingId, selected: groupSelection })
       );
 
-      onGroupChangeCallback?.({ tableId: groupingId, groupByField: groupSelection });
+      onGroupChange?.({ tableId: groupingId, groupByField: groupSelection });
 
       // only update options if the new selection is a custom field
       if (
@@ -96,7 +96,7 @@ export const useGetGroupSelector = ({
     [
       defaultGroupingOptions,
       groupingId,
-      onGroupChangeCallback,
+      onGroupChange,
       options,
       selectedGroup,
       setGroupsActivePage,
@@ -130,7 +130,7 @@ export const useGetGroupSelector = ({
     groupingId,
     groupSelected: selectedGroup,
     'data-test-subj': 'alerts-table-group-selector',
-    onGroupChange,
+    onGroupChange: onChange,
     fields,
     options,
   });
