@@ -74,8 +74,8 @@ export function createBatches({
   );
 
   // This map holds a list of temporary index names for each SO type, e.g.:
-  // 'cases': '.kibana_cases_8.8.0_reindex_temp
-  // 'task': '.kibana_task_manager_8.8.0_reindex_temp
+  // 'cases': '.kibana_cases_8.8.0_reindex_temp'
+  // 'task': '.kibana_task_manager_8.8.0_reindex_temp'
   // ...
   const tempTypeIndexMap: Record<string, string> = Object.entries(typeIndexMap || {}).reduce<
     Record<string, string>

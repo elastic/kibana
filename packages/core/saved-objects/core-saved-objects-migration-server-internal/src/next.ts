@@ -72,8 +72,8 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
 export const nextActionMap = (
   client: ElasticsearchClient,
   transformRawDocs: TransformRawDocs,
-  readyToReindex: Defer<any>,
-  doneReindexing: Defer<any>
+  readyToReindex: Defer<void>,
+  doneReindexing: Defer<void>
 ) => {
   return {
     INIT: (state: InitState) =>
