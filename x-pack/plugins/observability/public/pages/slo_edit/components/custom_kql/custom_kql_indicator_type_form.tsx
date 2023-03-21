@@ -121,7 +121,7 @@ export function CustomKqlIndicatorTypeForm() {
                   disabled={!watch('indicator.params.index')}
                   data-test-subj="sloFormAdditionalSettingsTimestampField"
                   placeholder={i18n.translate(
-                    'xpack.observability.slo.sloEdit.additionalSettings.timestampField.label',
+                    'xpack.observability.slo.sloEdit.additionalSettings.timestampField.placeholder',
                     { defaultMessage: 'Timestamp field used in the index, default to @timestamp' }
                   )}
                 />
