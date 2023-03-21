@@ -1499,6 +1499,113 @@ describe('TaskManagerRunner', () => {
     });
   });
 
+  describe('isAdHocTaskAndOutOfAttempts', () => {
+    it(`should return false if the task doesn't have a schedule`, async () => {
+      const { runner } = await pendingStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar',
+        },
+      });
+
+      expect(runner.isAdHocTaskAndOutOfAttempts).toEqual(false);
+    });
+
+    it(`should return false if the recurring task still has attempts remaining`, async () => {
+      const { runner } = await pendingStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar',
+          attempts: 4,
+        },
+      });
+
+      expect(runner.isAdHocTaskAndOutOfAttempts).toEqual(false);
+    });
+
+    it(`should return true if the recurring task is out of attempts`, async () => {
+      const { runner } = await pendingStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar',
+          attempts: 5,
+        },
+      });
+
+      expect(runner.isAdHocTaskAndOutOfAttempts).toEqual(true);
+    });
+  });
+
+  describe('removeTask()', () => {
+    it(`should remove the task saved-object`, async () => {
+      const { runner, store } = await readyToRunStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar',
+        },
+      });
+
+      await runner.run();
+      await runner.removeTask();
+      expect(store.remove).toHaveBeenCalledWith('foo');
+    });
+
+    it(`should call the task cleanup function if defined`, async () => {
+      const cleanupFn = jest.fn();
+      const { runner } = await readyToRunStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar2',
+        },
+        definitions: {
+          testbar2: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+              cancel: jest.fn(),
+              cleanup: cleanupFn,
+            }),
+          },
+        },
+      });
+
+      // Remove task is called after run() with the this.task object defined
+      await runner.run();
+      expect(cleanupFn).toHaveBeenCalledTimes(1);
+    });
+
+    it(`doesn't throw an error if the cleanup function throws an error`, async () => {
+      const cleanupFn = jest.fn().mockRejectedValue(new Error('Fail'));
+      const { runner, logger } = await readyToRunStageSetup({
+        instance: {
+          id: 'foo',
+          taskType: 'testbar2',
+        },
+        definitions: {
+          testbar2: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+              cancel: jest.fn(),
+              cleanup: cleanupFn,
+            }),
+          },
+        },
+      });
+
+      // Remove task is called after run() with the this.task object defined
+      await runner.run();
+      expect(cleanupFn).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        `Error encountered when running onTaskRemoved() hook for testbar2 "foo": Fail`
+      );
+    });
+  });
+
   interface TestOpts {
     instance?: Partial<ConcreteTaskInstance>;
     definitions?: TaskDefinitionRegistry;

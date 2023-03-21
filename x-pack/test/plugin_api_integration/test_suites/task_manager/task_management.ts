@@ -766,7 +766,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should flag non-recurring task as failed and delete the task if it is still running but maxAttempts has been reached', async () => {
+    it('should delete the task if it is still running but maxAttempts has been reached', async () => {
       await scheduleTask({
         taskType: 'sampleOneTimeTaskThrowingError',
         params: {},
