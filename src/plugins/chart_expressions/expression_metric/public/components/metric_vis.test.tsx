@@ -70,14 +70,16 @@ jest.mock('@kbn/field-formats-plugin/common', () => ({
   },
 }));
 
-jest.mock('@elastic/numeral', () => ({
-  language: jest.fn(() => 'en'),
-  languageData: jest.fn(() => ({
+jest.mock('@elastic/numeral', () => {
+  const actualNumeral = jest.requireActual('@elastic/numeral');
+  actualNumeral.language = jest.fn(() => 'en');
+  actualNumeral.languageData = jest.fn(() => ({
     currency: {
       symbol: '$',
     },
-  })),
-}));
+  }));
+  return actualNumeral;
+});
 
 type Props = MetricVisComponentProps;
 
@@ -1381,12 +1383,12 @@ describe('MetricVisComponent', function () {
       const base = 1024;
 
       const { primary: bytesValue } = getFormattedMetrics(base - 1, 0, { id: 'bytes' });
-      expect(bytesValue).toBe('1,023 byte');
+      expect(bytesValue).toBe('1,023 B');
 
       const { primary: kiloBytesValue } = getFormattedMetrics(Math.pow(base, 1), 0, {
         id: 'bytes',
       });
-      expect(kiloBytesValue).toBe('1 kB');
+      expect(kiloBytesValue).toBe('1 KB');
 
       const { primary: megaBytesValue } = getFormattedMetrics(Math.pow(base, 2), 0, {
         id: 'bytes',
@@ -1396,7 +1398,7 @@ describe('MetricVisComponent', function () {
       const { primary: moreThanPetaValue } = getFormattedMetrics(Math.pow(base, 6), 0, {
         id: 'bytes',
       });
-      expect(moreThanPetaValue).toBe('1,024 PB');
+      expect(moreThanPetaValue).toBe('1 EB');
     });
 
     it('correctly formats durations', () => {
