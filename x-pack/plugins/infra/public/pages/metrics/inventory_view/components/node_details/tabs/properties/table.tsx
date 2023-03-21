@@ -146,7 +146,7 @@ const ExpandableContent = (props: ExpandableContentProps) => {
         {shouldShowMore && (
           <>
             {' ... '}
-            <EuiLink data-test-subj="infraExpandableContentCountMoreLink" onClick={expand}>
+            <EuiLink data-test-subj="infraArrayValueCountMoreLink" onClick={expand}>
               <FormattedMessage
                 id="xpack.infra.nodeDetails.tabs.metadata.seeMore"
                 defaultMessage="+{count} more"
@@ -161,7 +161,7 @@ const ExpandableContent = (props: ExpandableContentProps) => {
       {isExpanded && others.map((item) => <EuiFlexItem key={item}>{item}</EuiFlexItem>)}
       {hasOthers && isExpanded && (
         <EuiFlexItem>
-          <EuiLink data-test-subj="infraExpandableContentShowLessLink" onClick={collapse}>
+          <EuiLink data-test-subj="infraArrayValueShowLessLink" onClick={collapse}>
             {i18n.translate('xpack.infra.nodeDetails.tabs.metadata.seeLess', {
               defaultMessage: 'Show less',
             })}
