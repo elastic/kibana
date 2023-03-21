@@ -19,12 +19,12 @@ import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
-jest.mock('../../utils/kibana_react', () => ({
+jest.mock('../../../utils/kibana_react', () => ({
   __esModule: true,
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
 
-jest.mock('../../hooks/use_breadcrumbs', () => ({
+jest.mock('../../../hooks/use_breadcrumbs', () => ({
   useBreadcrumbs: jest.fn(),
 }));
 
