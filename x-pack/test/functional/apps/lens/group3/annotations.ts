@@ -103,52 +103,73 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
     });
 
-    it('should save annotation group to library', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
+    describe('library annotation groups', () => {
+      const ANNOTATION_GROUP_TITLE = 'library annotation group';
+      const FIRST_VIS_TITLE = 'first visualization';
 
-      await PageObjects.lens.goToTimeRange();
-      await PageObjects.lens.dragFieldToWorkspace('@timestamp', 'xyVisChart');
+      it('should save annotation group to library', async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVisType('lens');
 
-      await PageObjects.lens.createLayer('annotations');
+        await PageObjects.lens.goToTimeRange();
+        await PageObjects.lens.dragFieldToWorkspace('@timestamp', 'xyVisChart');
 
-      await PageObjects.lens.performLayerAction('lnsXY_annotationLayer_saveToLibrary', 1);
+        await PageObjects.lens.createLayer('annotations');
 
-      await PageObjects.visualize.setSaveModalValues('new annotation group', {
-        description: 'my description',
+        await PageObjects.lens.performLayerAction('lnsXY_annotationLayer_saveToLibrary', 1);
+
+        await PageObjects.visualize.setSaveModalValues(ANNOTATION_GROUP_TITLE, {
+          description: 'my description',
+        });
+
+        await testSubjects.click('savedObjectTagSelector');
+        await testSubjects.click(`tagSelectorOption-action__create`);
+
+        const { tagModal } = PageObjects.tagManagement;
+
+        expect(await tagModal.isOpened()).to.be(true);
+
+        await tagModal.fillForm(
+          {
+            name: 'my-new-tag',
+            color: '#FFCC33',
+            description: '',
+          },
+          {
+            submit: true,
+          }
+        );
+
+        expect(await tagModal.isOpened()).to.be(false);
+
+        await testSubjects.click('confirmSaveSavedObjectButton');
+
+        const toastContents = await toastsService.getToastContent(1);
+
+        expect(toastContents).to.be(
+          `Saved "${ANNOTATION_GROUP_TITLE}"\nView or manage in the annotation library`
+        );
+
+        await PageObjects.lens.save(FIRST_VIS_TITLE);
       });
 
-      await testSubjects.click('savedObjectTagSelector');
-      await testSubjects.click(`tagSelectorOption-action__create`);
+      it('should add annotation group from library', async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVisType('lens');
 
-      const { tagModal } = PageObjects.tagManagement;
+        await PageObjects.lens.goToTimeRange();
+        await PageObjects.lens.dragFieldToWorkspace('@timestamp', 'xyVisChart');
 
-      expect(await tagModal.isOpened()).to.be(true);
+        await PageObjects.lens.createLayer('annotations', ANNOTATION_GROUP_TITLE);
 
-      await tagModal.fillForm(
-        {
-          name: 'my-new-tag',
-          color: '#FFCC33',
-          description: '',
-        },
-        {
-          submit: true,
-        }
-      );
-
-      expect(await tagModal.isOpened()).to.be(false);
-
-      await testSubjects.click('confirmSaveSavedObjectButton');
-
-      const toastContents = await toastsService.getToastContent(1);
-
-      expect(toastContents).to.be(
-        'Saved "new annotation group"\nView or manage in the annotation library'
-      );
+        retry.try(async () => {
+          expect(await PageObjects.lens.getLayerCount()).to.be(2);
+        });
+      });
 
       // TODO check various saving configurations (linked layer, clean by-ref, revert)
 
-      // TODO check annotation library
+      // TODO check annotation library, including delete flow
     });
   });
 }

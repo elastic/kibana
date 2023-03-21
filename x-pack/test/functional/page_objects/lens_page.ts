@@ -913,7 +913,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Adds a new layer to the chart, fails if the chart does not support new layers
      */
-    async createLayer(layerType: 'data' | 'referenceLine' | 'annotations' = 'data') {
+    async createLayer(
+      layerType: 'data' | 'referenceLine' | 'annotations' = 'data',
+      annotationFromLibraryTitle?: string
+    ) {
       await testSubjects.click('lnsLayerAddButton');
       const layerCount = await this.getLayerCount();
 
@@ -924,10 +927,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         ]);
         return fasterChecks.filter(Boolean).length > 0;
       });
+
       if (await testSubjects.exists(`lnsLayerAddButton-${layerType}`)) {
         await testSubjects.click(`lnsLayerAddButton-${layerType}`);
         if (layerType === 'annotations') {
-          await testSubjects.click('lnsAnnotationLayer_new');
+          if (!annotationFromLibraryTitle) {
+            await testSubjects.click('lnsAnnotationLayer_new');
+          } else {
+            await testSubjects.click('lnsAnnotationLayer_addFromLibrary');
+            await testSubjects.click(
+              `savedObjectTitle${annotationFromLibraryTitle.split(' ').join('-')}`
+            );
+          }
         }
       }
     },
