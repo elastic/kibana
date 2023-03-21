@@ -14,15 +14,15 @@ import type { RawBucket } from '../types';
 import { createGroupFilter } from './helpers';
 
 export interface BadgeMetric {
-  title: string;
   value: number;
   color?: string;
   width?: number;
 }
 
-export interface CustomMetric {
+export interface StatRenderer {
   title: string;
-  customStatRenderer: JSX.Element;
+  renderer?: JSX.Element;
+  badge?: BadgeMetric;
 }
 
 interface GroupPanelProps<T> {

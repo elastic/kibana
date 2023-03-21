@@ -39,10 +39,9 @@ import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/con
 import {
   getAlertsGroupingQuery,
   getDefaultGroupingOptions,
-  getBadgeMetrics,
   renderGroupPanel,
-  getCustomMetrics,
   useGroupTakeActionsItems,
+  getStats,
 } from './grouping_settings';
 import { updateGroupSelector, updateSelectedGroup } from '../../../common/store/grouping/actions';
 import { track } from '../../../common/lib/telemetry';
@@ -125,6 +124,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     defaultGroupingOptions: getDefaultGroupingOptions(tableId),
     groupingId: tableId,
     fields: indexPattern.fields,
+    groupStatsRenderer: getStats,
     onGroupChangeCallback,
     tracker: track,
   });
@@ -249,10 +249,6 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
       isNoneGroup(selectedGroup)
         ? renderChildComponent([])
         : getGrouping({
-            badgeMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
-              getBadgeMetrics(selectedGroup, fieldBucket),
-            customMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
-              getCustomMetrics(selectedGroup, fieldBucket),
             data: alertsGroupsData?.aggregations,
             groupingId: tableId,
             groupPanelRenderer: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>

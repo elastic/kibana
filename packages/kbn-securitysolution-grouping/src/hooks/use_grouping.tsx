@@ -9,8 +9,9 @@
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import React, { useCallback, useMemo, useReducer } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
+import { StatRenderer } from '../components/accordion_panel';
 import { groupsReducerWithStorage, initialState } from './state/reducer';
-import { GroupingProps, GroupSelectorProps } from '..';
+import { GroupingProps, GroupSelectorProps, RawBucket } from '..';
 import { useGroupingPagination } from './use_grouping_pagination';
 import { groupActions, groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';
@@ -19,7 +20,10 @@ import { Grouping as GroupingComponent } from '../components/grouping';
 
 interface Grouping<T> {
   getGrouping: (
-    props: Omit<GroupingProps<T>, 'groupSelector' | 'pagination' | 'selectedGroup'>
+    props: Omit<
+      GroupingProps<T>,
+      'groupStatsRenderer' | 'groupSelector' | 'pagination' | 'selectedGroup'
+    >
   ) => React.ReactElement<GroupingProps<T>>;
   groupSelector: React.ReactElement<GroupSelectorProps>;
   pagination: {
@@ -30,7 +34,7 @@ interface Grouping<T> {
   selectedGroup: string;
 }
 
-interface GroupingArgs {
+interface GroupingArgs<T> {
   // provide default groups with the metrics settings
   // available without customization
   defaultGroupingOptions: GroupOption[];
@@ -40,7 +44,7 @@ interface GroupingArgs {
   // Unique identifier of the grouping component.
   // Used in local storage
   groupingId: string;
-
+  groupStatsRenderer?: (selectedGroup: string, fieldBucket: RawBucket<T>) => StatRenderer[];
   // for tracking
   onGroupChangeCallback?: (param: { groupByField: string; tableId: string }) => void;
   tracker?: (
@@ -49,13 +53,15 @@ interface GroupingArgs {
     count?: number | undefined
   ) => void;
 }
+
 export const useGrouping = <T,>({
   defaultGroupingOptions,
   fields,
   groupingId,
+  groupStatsRenderer,
   onGroupChangeCallback,
   tracker,
-}: GroupingArgs): Grouping<T> => {
+}: GroupingArgs<T>): Grouping<T> => {
   const [groupingState, dispatch] = useReducer(groupsReducerWithStorage, initialState);
 
   const { activeGroup: selectedGroup } = useMemo(
@@ -77,16 +83,20 @@ export const useGrouping = <T,>({
 
   const getGrouping = useCallback(
     (
-      props: Omit<GroupingProps<T>, 'groupSelector' | 'pagination' | 'selectedGroup'>
+      props: Omit<
+        GroupingProps<T>,
+        'groupStatsRenderer' | 'groupSelector' | 'pagination' | 'selectedGroup'
+      >
     ): React.ReactElement<GroupingProps<T>> => (
       <GroupingComponent
         {...props}
+        groupStatsRenderer={groupStatsRenderer}
         groupSelector={groupSelector}
         pagination={pagination}
         selectedGroup={selectedGroup}
       />
     ),
-    [groupSelector, pagination, selectedGroup]
+    [groupSelector, groupStatsRenderer, pagination, selectedGroup]
   );
 
   const resetPagination = useCallback(() => {

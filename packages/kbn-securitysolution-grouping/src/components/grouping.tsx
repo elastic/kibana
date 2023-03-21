@@ -18,8 +18,7 @@ import React, { useMemo, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { defaultUnit, firstNonNullValue } from '../helpers';
 import { createGroupFilter } from './accordion_panel/helpers';
-import type { BadgeMetric, CustomMetric } from './accordion_panel';
-import { GroupPanel } from './accordion_panel';
+import { GroupPanel, StatRenderer } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
 import { groupingContainerCss, countCss } from './styles';
@@ -28,14 +27,12 @@ import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } fr
 import { getTelemetryEvent } from '../telemetry/const';
 
 export interface GroupingProps<T> {
-  // list of settings for the metrics aggregation will be rendered as badge
-  badgeMetricStats?: (fieldBucket: RawBucket<T>) => BadgeMetric[];
-  // list of custom UI components which correspond to your custom rendered metrics aggregations
-  customMetricStats?: (fieldBucket: RawBucket<T>) => CustomMetric[];
   data?: GroupingAggregation<T> & GroupingFieldTotalAggregation;
   groupingId: string;
   groupPanelRenderer?: (fieldBucket: RawBucket<T>) => JSX.Element | undefined;
   groupSelector?: JSX.Element;
+  // list of custom UI components which correspond to your custom rendered metrics aggregations
+  groupStatsRenderer?: (selectedGroup: string, fieldBucket: RawBucket<T>) => StatRenderer[];
   inspectButton?: JSX.Element;
   isLoading: boolean;
   onToggleCallback?: (params: {
@@ -63,12 +60,11 @@ export interface GroupingProps<T> {
 }
 
 const GroupingComponent = <T,>({
-  badgeMetricStats,
-  customMetricStats,
   data,
   groupingId,
   groupPanelRenderer,
   groupSelector,
+  groupStatsRenderer,
   inspectButton,
   isLoading,
   onToggleCallback,
@@ -105,13 +101,14 @@ const GroupingComponent = <T,>({
             <GroupPanel
               extraAction={
                 <GroupStats
-                  bucket={groupBucket}
+                  bucketKey={groupKey}
                   takeActionItems={takeActionItems(
                     createGroupFilter(selectedGroup, group),
                     groupNumber
                   )}
-                  badgeMetricStats={badgeMetricStats && badgeMetricStats(groupBucket)}
-                  customMetricStats={customMetricStats && customMetricStats(groupBucket)}
+                  groupStatsRenderer={
+                    groupStatsRenderer && groupStatsRenderer(selectedGroup, groupBucket)
+                  }
                 />
               }
               forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
@@ -145,10 +142,9 @@ const GroupingComponent = <T,>({
         );
       }),
     [
-      badgeMetricStats,
-      customMetricStats,
       data?.groupByFields?.buckets,
       groupPanelRenderer,
+      groupStatsRenderer,
       groupingId,
       isLoading,
       onToggleCallback,
