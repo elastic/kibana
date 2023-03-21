@@ -9,6 +9,7 @@ import createContainer from 'constate';
 import React, { useEffect, useState } from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { IHttpFetchError } from '@kbn/core-http-browser';
 import type {
   MetricsSourceConfigurationResponse,
   MetricsSourceConfiguration,
@@ -17,11 +18,8 @@ import type {
 } from '../../../common/metrics_sources';
 
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
-import {
-  MissingHttpClientException
-} from './source_errors';
+import { MissingHttpClientException } from './source_errors';
 import { useSourceNotifier } from './notifications';
-import { IHttpFetchError } from '@kbn/core-http-browser';
 
 export const pickIndexPattern = (
   source: MetricsSourceConfiguration | undefined,
@@ -39,7 +37,7 @@ export const pickIndexPattern = (
 export const useSource = ({ sourceId }: { sourceId: string }) => {
   const { services } = useKibana();
 
-  const notify = useSourceNotifier()
+  const notify = useSourceNotifier();
 
   const fetchService = services.http;
   const API_URL = `/api/metrics/source/${sourceId}`;
@@ -54,8 +52,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
           throw new MissingHttpClientException();
         }
 
-        return fetchService
-          .fetch<MetricsSourceConfigurationResponse>(API_URL, { method: 'GET' })
+        return fetchService.fetch<MetricsSourceConfigurationResponse>(API_URL, { method: 'GET' });
       },
       onResolve: (response) => {
         if (response) {
@@ -73,20 +70,19 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
           throw new MissingHttpClientException();
         }
 
-        return await fetchService
-          .patch<MetricsSourceConfigurationResponse>(API_URL, {
-            method: 'PATCH',
-            body: JSON.stringify(sourceProperties),
-          })
+        return await fetchService.patch<MetricsSourceConfigurationResponse>(API_URL, {
+          method: 'PATCH',
+          body: JSON.stringify(sourceProperties),
+        });
       },
       onResolve: (response) => {
         if (response) {
-          notify.updateSuccess()
+          notify.updateSuccess();
           setSource(response.source);
         }
       },
-      onReject: (error)=> {
-        notify.updateFailure((error as IHttpFetchError<{message: string}>).body?.message)
+      onReject: (error) => {
+        notify.updateFailure((error as IHttpFetchError<{ message: string }>).body?.message);
       },
     },
     [fetchService, sourceId]
@@ -137,12 +133,12 @@ export const [SourceProvider, useSourceContext] = createContainer(useSource);
 
 export const withSourceProvider =
   <ComponentProps,>(Component: React.FunctionComponent<ComponentProps>) =>
-    (sourceId = 'default') => {
-      return function ComponentWithSourceProvider(props: ComponentProps) {
-        return (
-          <SourceProvider sourceId={sourceId}>
-            <Component {...props} />
-          </SourceProvider>
-        );
-      };
+  (sourceId = 'default') => {
+    return function ComponentWithSourceProvider(props: ComponentProps) {
+      return (
+        <SourceProvider sourceId={sourceId}>
+          <Component {...props} />
+        </SourceProvider>
+      );
     };
+  };

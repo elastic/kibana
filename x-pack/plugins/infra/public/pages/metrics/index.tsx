@@ -56,7 +56,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
 
   const kibana = useKibana();
 
-  const { source, createDerivedIndexPattern } = useSourceContext()
+  const { source, createDerivedIndexPattern } = useSourceContext();
 
   useReadOnlyBadge(!uiCapabilities?.infrastructure?.save);
 
