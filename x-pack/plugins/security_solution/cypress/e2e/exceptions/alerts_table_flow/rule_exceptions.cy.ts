@@ -41,7 +41,7 @@ import { postDataView, deleteAlertsAndRules } from '../../../tasks/common';
 import { NO_EXCEPTIONS_EXIST_PROMPT } from '../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
-describe('Add exception to validate closing of matching alerts', () => {
+describe('Rule Exceptions workflows from Alert', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
   const ITEM_NAME = 'Sample Exception List Item';
 
@@ -74,7 +74,7 @@ describe('Add exception to validate closing of matching alerts', () => {
     esArchiverUnload('exceptions_2');
   });
 
-  it('Creates an exception item from alert actions overflow menu', () => {
+  it('Creates an exception item from alert actions overflow menu  and close all matching alerts', () => {
     cy.get(LOADING_INDICATOR).should('not.exist');
     addExceptionFromFirstAlert();
 

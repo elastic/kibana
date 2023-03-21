@@ -168,4 +168,7 @@ export const EXCEPTION_ITEM_VIEWER_CONTAINER_SHOW_COMMENTS_BTN =
 export const EXCEPTION_ITEM_COMMENTS_CONTAINER =
   '[data-test-subj="exceptionsViewerCommentAccordion"] li';
 
+export const EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT =
+  '[data-test-subj="exceptionsViewerCommentAccordion"] li div.euiCommentEvent__body';
+
 export const EXCEPTION_ITEM_COMMENT_COPY_BTN = '[data-test-subj="clipboard"]';

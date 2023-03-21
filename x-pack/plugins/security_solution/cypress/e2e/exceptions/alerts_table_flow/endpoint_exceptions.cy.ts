@@ -37,8 +37,7 @@ import {
   goToEndpointExceptionsTab,
 } from '../../../tasks/rule_details';
 
-describe('Add endpoint exception to validate closing of single alert', () => {
-  const ITEM_NAME = 'Sample Exception';
+describe('Endpoint Exceptions workflows from Alert', () => {
   const expectedNumberOfAlerts = 1;
   before(() => {
     esArchiverResetKibana();
@@ -58,9 +57,11 @@ describe('Add endpoint exception to validate closing of single alert', () => {
   });
 
   it('Should be able to create and close single Endpoint exception from overflow menu', () => {
+    // The Endpoint will populated with predefined fields
     openAddEndpointExceptionFromFirstAlert();
+
     selectCloseSingleAlerts();
-    addExceptionFlyoutItemName(ITEM_NAME);
+    addExceptionFlyoutItemName('Sample Exception');
     submitNewExceptionItem();
 
     // Alerts table should now be empty from having added exception and closed
@@ -72,7 +73,7 @@ describe('Add endpoint exception to validate closing of single alert', () => {
     cy.get(ALERTS_COUNT).should('exist');
     cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alert`);
 
-    // Validate  Endpoint Exception will move to Endpoint List under Exception tab of rule
+    // Endpoint Exception will move to Endpoint List under Exception tab of rule
     goToEndpointExceptionsTab();
 
     // Remove the exception and load an event that would have matched that exception

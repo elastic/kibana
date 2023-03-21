@@ -185,7 +185,7 @@ export const clickOnShowComments = () => {
   cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER_SHOW_COMMENTS_BTN).click();
 };
 
-export const clickCopyCommentToClipboard = (comment: string) => {
+export const clickCopyCommentToClipboard = () => {
   // Disable window prompt which is used in link creation by copy-to-clipboard library
   // as this prompt pauses test execution during `cypress open`
   cy.window().then((win) => {
