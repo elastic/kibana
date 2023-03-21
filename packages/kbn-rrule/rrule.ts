@@ -93,11 +93,12 @@ export class RRule {
   }
 
   private *dateset(start?: Date, end?: Date): Generator<Date, null> {
+    const isAfterDtStart = (current: Date) => current.getTime() >= this.options.dtstart.getTime();
     const isInBounds = (current: Date) => {
-      const afterDtStart = current.getTime() >= this.options.dtstart.getTime();
       const afterStart = !start || current.getTime() >= start.getTime();
       const beforeEnd = !end || current.getTime() <= end.getTime();
-      return afterDtStart && afterStart && beforeEnd;
+
+      return afterStart && beforeEnd;
     };
 
     const { dtstart, tzid, count, until } = this.options;
@@ -117,8 +118,9 @@ export class RRule {
       const next = nextRecurrences.shift()?.toDate();
       if (next) {
         current = next;
+        if (!isAfterDtStart(current)) continue;
+        yieldedRecurrenceCount++;
         if (isInBounds(current)) {
-          yieldedRecurrenceCount++;
           yield current;
         } else if (start && current.getTime() > start.getTime()) {
           return null;
