@@ -548,6 +548,7 @@ describe('toRaw', () => {
       meta: {
         flappingHistory: [false, true, true],
         flapping: false,
+        uuid: expect.any(String),
       },
     });
   });

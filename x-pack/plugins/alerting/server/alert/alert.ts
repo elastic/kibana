@@ -225,11 +225,12 @@ export class Alert<
   toRaw(recovered: boolean = false): RawAlertInstance {
     return recovered
       ? {
-          // for a recovered alert, we only care to track the flappingHistory
-          // and the flapping flag
+          // for a recovered alert, we only care to track the flappingHistory,
+          // the flapping flag, and the UUID
           meta: {
             flappingHistory: this.meta.flappingHistory,
             flapping: this.meta.flapping,
+            uuid: this.meta.uuid,
           },
         }
       : {

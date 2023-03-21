@@ -30,7 +30,7 @@ const path = require('path');
 const https = require('node:https');
 const fetch = require('node-fetch');
 
-const KBN_URL = process.env.KBN_URL;
+const KB_URL = process.env.KB_URL || process.env.KBN_URL;
 const ES_URL = process.env.ES_URL;
 
 const dataIndex = 'rule-task-state--dev';
@@ -218,14 +218,14 @@ async function putEs(url, body) {
 
 // eslint-disable-next-line no-unused-vars
 async function getKbn(url) {
-  return getURL(path.join(KBN_URL, url));
+  return getURL(path.join(KB_URL, url));
 }
 async function postKbn(url, body) {
-  return postURL(path.join(KBN_URL, url), body);
+  return postURL(path.join(KB_URL, url), body);
 }
 // eslint-disable-next-line no-unused-vars
 async function putKbn(url, body) {
-  return putURL(path.join(KBN_URL, url), body);
+  return putURL(path.join(KB_URL, url), body);
 }
 
 async function getURL(url) {
