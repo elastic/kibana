@@ -276,7 +276,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
           <EuiCallOut
             color="warning"
             title={changeWarning}
-            iconType="alert"
+            iconType="warning"
             size="s"
             data-test-subj="changeWarning"
           />

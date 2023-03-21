@@ -73,7 +73,13 @@ export function StepFieldTrend({
       <EmbeddableExpView
         title={title}
         appendTitle={
-          <EuiButton iconType={'visArea'} href={href} target="_blank" size="s">
+          <EuiButton
+            data-test-subj="syntheticsStepFieldTrendButton"
+            iconType={'visArea'}
+            href={href}
+            target="_blank"
+            size="s"
+          >
             {EXPLORE_LABEL}
           </EuiButton>
         }
