@@ -192,6 +192,13 @@ class AgentPolicyService {
     );
   }
 
+  public hasFleetServerIntegration(agentPolicy: AgentPolicy) {
+    return (
+      agentPolicy.package_policies &&
+      agentPolicy.package_policies.some((p) => p.package?.name === FLEET_SERVER_PACKAGE)
+    );
+  }
+
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,

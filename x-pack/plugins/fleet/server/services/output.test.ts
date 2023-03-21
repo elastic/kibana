@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import type { OutputSOAttributes } from '../types';
 
@@ -168,6 +168,8 @@ function getMockedSoClient(
 }
 
 describe('Output Service', () => {
+  const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+
   beforeEach(() => {
     mockedAgentPolicyService.list.mockClear();
     mockedAgentPolicyService.hasAPMIntegration.mockClear();
@@ -181,6 +183,7 @@ describe('Output Service', () => {
 
       await outputService.create(
         soClient,
+        esClientMock,
         {
           is_default: false,
           is_default_monitoring: false,
@@ -204,6 +207,7 @@ describe('Output Service', () => {
 
       await outputService.create(
         soClient,
+        esClientMock,
         {
           is_default: true,
           is_default_monitoring: false,
@@ -223,6 +227,7 @@ describe('Output Service', () => {
 
       await outputService.create(
         soClient,
+        esClientMock,
         {
           is_default: true,
           is_default_monitoring: false,
@@ -245,6 +250,7 @@ describe('Output Service', () => {
 
       await outputService.create(
         soClient,
+        esClientMock,
         {
           is_default: false,
           is_default_monitoring: true,
@@ -264,6 +270,7 @@ describe('Output Service', () => {
 
       await outputService.create(
         soClient,
+        esClientMock,
         {
           is_default: true,
           is_default_monitoring: true,
@@ -290,6 +297,7 @@ describe('Output Service', () => {
       await expect(
         outputService.create(
           soClient,
+          esClientMock,
           {
             is_default: true,
             is_default_monitoring: false,
@@ -310,6 +318,7 @@ describe('Output Service', () => {
 
       await outputService.create(
         soClient,
+        esClientMock,
         {
           is_default: true,
           is_default_monitoring: true,
@@ -334,6 +343,7 @@ describe('Output Service', () => {
       await expect(
         outputService.create(
           soClient,
+          esClientMock,
           {
             is_default: false,
             is_default_monitoring: false,
@@ -352,6 +362,7 @@ describe('Output Service', () => {
       } as any);
       await outputService.create(
         soClient,
+        esClientMock,
         {
           is_default: false,
           is_default_monitoring: false,
@@ -370,7 +381,7 @@ describe('Output Service', () => {
         defaultOutputId: 'existing-default-output',
       });
 
-      await outputService.update(soClient, 'output-test', {
+      await outputService.update(soClient, esClientMock, 'output-test', {
         is_default: true,
       });
 
@@ -390,7 +401,7 @@ describe('Output Service', () => {
         defaultOutputId: 'existing-default-output',
       });
 
-      await outputService.update(soClient, 'existing-default-output', {
+      await outputService.update(soClient, esClientMock, 'existing-default-output', {
         is_default: true,
         name: 'Test',
       });
@@ -408,7 +419,7 @@ describe('Output Service', () => {
         defaultOutputMonitoringId: 'existing-default-monitoring-output',
       });
 
-      await outputService.update(soClient, 'output-test', {
+      await outputService.update(soClient, esClientMock, 'output-test', {
         is_default_monitoring: true,
       });
 
@@ -427,7 +438,7 @@ describe('Output Service', () => {
     it('Do not allow to update a preconfigured output outisde from preconfiguration', async () => {
       const soClient = getMockedSoClient();
       await expect(
-        outputService.update(soClient, 'existing-preconfigured-default-output', {
+        outputService.update(soClient, esClientMock, 'existing-preconfigured-default-output', {
           config_yaml: '',
         })
       ).rejects.toThrow(
@@ -439,6 +450,7 @@ describe('Output Service', () => {
       const soClient = getMockedSoClient();
       await outputService.update(
         soClient,
+        esClientMock,
         'existing-preconfigured-default-output',
         {
           config_yaml: '',
@@ -457,7 +469,7 @@ describe('Output Service', () => {
       });
 
       await expect(
-        outputService.update(soClient, 'output-test', {
+        outputService.update(soClient, esClientMock, 'output-test', {
           is_default: true,
           is_default_monitoring: false,
           name: 'Test',
@@ -475,6 +487,7 @@ describe('Output Service', () => {
 
       await outputService.update(
         soClient,
+        esClientMock,
         'output-test',
         {
           is_default: true,
@@ -501,7 +514,7 @@ describe('Output Service', () => {
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
 
-      await outputService.update(soClient, 'existing-logstash-output', {
+      await outputService.update(soClient, esClientMock, 'existing-logstash-output', {
         type: 'elasticsearch',
         hosts: ['http://test:4343'],
       });
@@ -521,7 +534,7 @@ describe('Output Service', () => {
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
 
-      await outputService.update(soClient, 'existing-logstash-output', {
+      await outputService.update(soClient, esClientMock, 'existing-logstash-output', {
         is_default: true,
       });
 
@@ -534,7 +547,7 @@ describe('Output Service', () => {
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
 
-      await outputService.update(soClient, 'existing-logstash-output', {
+      await outputService.update(soClient, esClientMock, 'existing-logstash-output', {
         is_default: true,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
@@ -559,7 +572,7 @@ describe('Output Service', () => {
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(true);
 
       await expect(
-        outputService.update(soClient, 'existing-logstash-output', {
+        outputService.update(soClient, esClientMock, 'existing-logstash-output', {
           is_default: true,
         })
       ).rejects.toThrow(`Logstash output cannot be used with APM integration.`);
@@ -571,7 +584,7 @@ describe('Output Service', () => {
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
 
-      await outputService.update(soClient, 'existing-es-output', {
+      await outputService.update(soClient, esClientMock, 'existing-es-output', {
         type: 'logstash',
         hosts: ['test:4343'],
       });
