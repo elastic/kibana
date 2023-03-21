@@ -20,7 +20,6 @@ export function openEditControlGroupFlyout(this: ControlGroupContainer) {
     overlays: { openFlyout, openConfirm },
     theme: { theme$ },
   } = pluginServices.getServices();
-  const ControlsServicesProvider = pluginServices.getContextProvider();
   const ReduxWrapper = this.getReduxEmbeddableTools().Wrapper;
 
   const onDeleteAll = (ref: OverlayRef) => {
@@ -38,17 +37,15 @@ export function openEditControlGroupFlyout(this: ControlGroupContainer) {
 
   const flyoutInstance = openFlyout(
     toMountPoint(
-      <ControlsServicesProvider>
-        <ReduxWrapper>
-          <ControlGroupEditor
-            initialInput={this.getInput()}
-            updateInput={(changes) => this.updateInput(changes)}
-            controlCount={Object.keys(this.getInput().panels ?? {}).length}
-            onDeleteAll={() => onDeleteAll(flyoutInstance)}
-            onClose={() => flyoutInstance.close()}
-          />
-        </ReduxWrapper>
-      </ControlsServicesProvider>,
+      <ReduxWrapper>
+        <ControlGroupEditor
+          initialInput={this.getInput()}
+          updateInput={(changes) => this.updateInput(changes)}
+          controlCount={Object.keys(this.getInput().panels ?? {}).length}
+          onDeleteAll={() => onDeleteAll(flyoutInstance)}
+          onClose={() => flyoutInstance.close()}
+        />
+      </ReduxWrapper>,
       { theme$ }
     ),
     {
