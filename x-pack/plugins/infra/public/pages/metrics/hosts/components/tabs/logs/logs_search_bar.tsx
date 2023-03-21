@@ -25,6 +25,7 @@ export const LogsSearchBar = () => {
 
   return (
     <EuiFieldSearch
+      data-test-subj="infraLogsSearchBarFieldSearch"
       fullWidth
       isClearable
       placeholder={i18n.translate('xpack.infra.hostsViewPage.tabs.logs.textFieldPlaceholder', {
