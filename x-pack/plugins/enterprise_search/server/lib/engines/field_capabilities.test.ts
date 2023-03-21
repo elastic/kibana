@@ -558,16 +558,16 @@ describe('engines field_capabilities', () => {
           ],
           indices: [
             {
+              name: 'index-003',
+              type: 'keyword',
+            },
+            {
               name: 'index-002',
               type: 'object',
             },
             {
               name: 'index-001',
               type: 'text',
-            },
-            {
-              name: 'index-003',
-              type: 'keyword',
             },
           ],
           name: 'name',
