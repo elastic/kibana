@@ -110,7 +110,7 @@ export function OverviewPage() {
     [bucketSize, relativeEnd, relativeStart]
   );
 
-  const chartThemes = {
+  const chartProps = {
     theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
@@ -194,11 +194,11 @@ export function OverviewPage() {
             hasError={false}
           >
             <AlertSummaryWidget
+              chartProps={chartProps}
               featureIds={observabilityAlertFeatureIds}
               filter={esQuery}
               fullSize
               timeRange={alertSummaryTimeRange}
-              chartThemes={chartThemes}
             />
             <AlertsStateTable
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
