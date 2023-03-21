@@ -7,6 +7,8 @@
  */
 
 import { lastValueFrom, Subscription } from 'rxjs';
+import { map, distinctUntilChanged, skip, startWith } from 'rxjs/operators';
+import fastIsEqual from 'fast-deep-equal';
 import {
   onlyDisabledFiltersChanged,
   Filter,
@@ -17,10 +19,9 @@ import {
 import React from 'react';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import { Container, Embeddable, FilterableEmbeddable } from '@kbn/embeddable-plugin/public';
+import { Container, Embeddable, FilterableEmbeddable, shouldFetch$ } from '@kbn/embeddable-plugin/public';
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import {
@@ -98,17 +99,12 @@ export class SavedSearchEmbeddable
   private inspectorAdapters: Adapters;
   private panelTitle: string = '';
   private filtersSearchSource!: ISearchSource;
-  private subscription?: Subscription;
+  private subscriptions: Subscription[] = [];
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterManager: FilterManager;
   private abortController?: AbortController;
   private services: DiscoverServices;
 
-  private prevTimeRange?: TimeRange;
-  private prevFilters?: Filter[];
-  private prevQuery?: Query;
-  private prevSort?: SortOrder[];
-  private prevSearchSessionId?: string;
   private searchProps?: SearchProps;
 
   private node?: HTMLElement;
@@ -149,20 +145,46 @@ export class SavedSearchEmbeddable
     this.panelTitle = this.input.title ? this.input.title : savedSearch.title ?? '';
     this.initializeSearchEmbeddableProps();
 
-    this.subscription = this.getUpdated$().subscribe(() => {
-      const titleChanged = this.output.title && this.panelTitle !== this.output.title;
-      if (titleChanged) {
-        this.panelTitle = this.output.title || '';
-      }
-      if (!this.searchProps) {
-        return;
-      }
-      const isFetchRequired = this.isFetchRequired(this.searchProps);
-      const isRerenderRequired = this.isRerenderRequired(this.searchProps);
-      if (titleChanged || isFetchRequired || isRerenderRequired) {
-        this.reload(isFetchRequired);
-      }
-    });
+    this.setupSubscriptions();
+  }
+
+  private setupSubscriptions() {
+    this.subscriptions.push(shouldFetch$<SearchInput>(this.getUpdated$(), () => this.getInput()).subscribe(() => {
+      this.reload(true);
+    }));
+
+    this.subscriptions.push(
+      this.getInput$()
+        .pipe(
+            // wrapping distinctUntilChanged with startWith and skip to prime distinctUntilChanged with an initial sort value.
+            startWith(this.getInput()),
+            distinctUntilChanged((a, b) =>
+              fastIsEqual(a.sort, b.sort)
+            ),
+            skip(1)
+          )
+        .subscribe((sort) => {
+          this.reload(true);
+        })
+    );
+
+    this.subscriptions.push(
+      this.getUpdated$().subscribe(() => {
+        const titleChanged = this.output.title && this.panelTitle !== this.output.title;
+        if (titleChanged) {
+          this.panelTitle = this.output.title || '';
+        }
+
+        const isRerenderRequired = this.searchProps && (
+          this.input.rowsPerPage !== this.searchProps.rowsPerPageState ||
+          (this.input.columns && !fastIsEqual(this.input.columns, this.searchProps.columns))
+        );
+
+        if (titleChanged || isRerenderRequired) {
+          this.reload(false);
+        }
+      })
+    );
   }
 
   public reportsEmbeddableLoad() {
@@ -401,7 +423,7 @@ export class SavedSearchEmbeddable
 
     searchSource.setParent(this.filtersSearchSource);
 
-    this.load(props);
+    this.load(props, true);
 
     props.isLoading = true;
 
@@ -420,35 +442,10 @@ export class SavedSearchEmbeddable
       : this.input.timeRange;
   }
 
-  private isFetchRequired(searchProps?: SearchProps) {
-    if (!searchProps || !searchProps.dataView) {
-      return false;
-    }
-    return (
-      !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
-      !isEqual(this.prevQuery, this.input.query) ||
-      !isEqual(this.prevTimeRange, this.getTimeRange()) ||
-      !isEqual(this.prevSort, this.input.sort) ||
-      this.prevSearchSessionId !== this.input.searchSessionId
-    );
-  }
-
-  private isRerenderRequired(searchProps?: SearchProps) {
-    if (!searchProps) {
-      return false;
-    }
-    return (
-      this.input.rowsPerPage !== searchProps.rowsPerPageState ||
-      (this.input.columns && !isEqual(this.input.columns, searchProps.columns))
-    );
-  }
-
   private async pushContainerStateParamsToProps(
     searchProps: SearchProps,
     { forceFetch = false }: { forceFetch: boolean } = { forceFetch: false }
   ) {
-    const isFetchRequired = this.isFetchRequired(searchProps);
-
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
     searchProps.columns = handleSourceColumnState(
@@ -466,7 +463,7 @@ export class SavedSearchEmbeddable
     searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;
     searchProps.filters = this.savedSearch.searchSource.getField('filter') as Filter[];
     searchProps.savedSearchId = this.savedSearch.id;
-    if (forceFetch || isFetchRequired) {
+    if (forceFetch && searchProps.dataView) {
       this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);
       if (this.input.query?.query || this.input.filters?.length) {
@@ -475,11 +472,6 @@ export class SavedSearchEmbeddable
         this.filtersSearchSource.removeField('highlightAll');
       }
 
-      this.prevFilters = this.input.filters;
-      this.prevQuery = this.input.query;
-      this.prevTimeRange = this.getTimeRange();
-      this.prevSearchSessionId = this.input.searchSessionId;
-      this.prevSort = this.input.sort;
       this.searchProps = searchProps;
       await this.fetch();
     } else if (this.searchProps && this.node) {
@@ -620,7 +612,9 @@ export class SavedSearchEmbeddable
     if (this.node) {
       unmountComponentAtNode(this.node);
     }
-    this.subscription?.unsubscribe();
+    this.subscriptions.forEach((subscription) => {
+      subscription.unsubscribe();
+    });
 
     if (this.abortController) this.abortController.abort();
   }
