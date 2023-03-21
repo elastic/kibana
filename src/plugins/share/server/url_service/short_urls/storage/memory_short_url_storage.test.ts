@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { of } from '@kbn/kibana-utils-plugin/common';
+import { of } from '@kbn/utils';
 import { MemoryShortUrlStorage } from './memory_short_url_storage';
 
 describe('.create()', () => {

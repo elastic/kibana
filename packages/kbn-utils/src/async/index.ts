@@ -7,3 +7,4 @@
  */
 
 export { Defer, defer } from './defer';
+export { of } from './of';

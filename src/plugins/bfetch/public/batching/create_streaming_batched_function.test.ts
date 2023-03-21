@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { Subject } from 'rxjs';
+import { AbortError } from '@kbn/kibana-utils-plugin/public';
+import { defer, of } from '@kbn/utils';
 import { createStreamingBatchedFunction } from './create_streaming_batched_function';
 import { fetchStreaming as fetchStreamingReal } from '../streaming/fetch_streaming';
-import { AbortError, defer, of } from '@kbn/kibana-utils-plugin/public';
-import { Subject } from 'rxjs';
 
 const flushPromises = () =>
   new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
