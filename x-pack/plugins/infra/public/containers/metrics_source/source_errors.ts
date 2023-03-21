@@ -6,23 +6,7 @@
  */
 
 /* eslint-disable max-classes-per-file */
-
-import type { HttpFetchError } from '@kbn/core-http-browser-internal/src/http_fetch_error';
 import { i18n } from '@kbn/i18n';
-
-const NO_SUCH_REMOTE_CLUSTER = 'no_such_remote_cluster_exception';
-
-const defaultTitle = i18n.translate('xpack.infra.sourceConfiguration.failedToFetchSource', {
-  defaultMessage: 'Failed to load source configuration',
-});
-
-const noSuchRemoteClusterMessage = i18n.translate(
-  'xpack.infra.sourceConfiguration.noSuchRemoteCluster',
-  {
-    defaultMessage:
-      'A remote cluster has not been configured or is unavailable. Check the metrics indices value under Settings.',
-  }
-);
 
 const missingHttpMessage = i18n.translate('xpack.infra.sourceConfiguration.missingHttp', {
   defaultMessage: 'Failed to load source: No HTTP client available.',
@@ -31,14 +15,6 @@ const missingHttpMessage = i18n.translate('xpack.infra.sourceConfiguration.missi
 /**
  * Errors
  */
-class NoSuchRemoteClusterException extends Error {
-  constructor(message: string = noSuchRemoteClusterMessage) {
-    super(message);
-    Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'NoSuchRemoteClusterException';
-  }
-}
-
 export class MissingHttpClientException extends Error {
   constructor() {
     super(missingHttpMessage);
@@ -46,28 +22,3 @@ export class MissingHttpClientException extends Error {
     this.name = 'MissingHttpClientException';
   }
 }
-
-/**
- * Utils
- */
-export const throwLoadSourceError = (error: HttpFetchError) => {
-  const { message } = error.body;
-
-  if (isNoSuchRemoteClusterMessage(message)) {
-    throw new NoSuchRemoteClusterException();
-  }
-
-  throw error;
-};
-
-const isNoSuchRemoteClusterMessage = (message: string) => {
-  return message.includes(NO_SUCH_REMOTE_CLUSTER);
-};
-
-export const getSourceErrorToast = (body: string) => {
-  return {
-    toastLifeTimeMs: 3000,
-    title: defaultTitle,
-    body,
-  };
-};

@@ -17,10 +17,10 @@ import type {
 
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 import {
-  getSourceErrorToast,
-  MissingHttpClientException,
-  throwLoadSourceError,
+  MissingHttpClientException
 } from './source_errors';
+import { useSourceNotifier } from './notifications';
+import { IHttpFetchError } from '@kbn/core-http-browser';
 
 export const pickIndexPattern = (
   source: MetricsSourceConfiguration | undefined,
@@ -36,7 +36,9 @@ export const pickIndexPattern = (
 };
 
 export const useSource = ({ sourceId }: { sourceId: string }) => {
-  const { services, notifications } = useKibana();
+  const { services } = useKibana();
+
+  const notify = useSourceNotifier()
 
   const fetchService = services.http;
   const API_URL = `/api/metrics/source/${sourceId}`;
@@ -53,7 +55,6 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
 
         return fetchService
           .fetch<MetricsSourceConfigurationResponse>(API_URL, { method: 'GET' })
-          .catch(throwLoadSourceError);
       },
       onResolve: (response) => {
         if (response) {
@@ -76,17 +77,15 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
             method: 'PATCH',
             body: JSON.stringify(sourceProperties),
           })
-          .catch(throwLoadSourceError);
       },
       onResolve: (response) => {
         if (response) {
+          notify.updateSuccess()
           setSource(response.source);
         }
       },
-      onReject: (error) => {
-        if (error instanceof Error) {
-          notifications.toasts.danger(getSourceErrorToast(error.message));
-        }
+      onReject: (error)=> {
+        notify.updateFailure((error as IHttpFetchError<{message: string}>).body?.message)
       },
     },
     [fetchService, sourceId]
@@ -137,12 +136,12 @@ export const [SourceProvider, useSourceContext] = createContainer(useSource);
 
 export const withSourceProvider =
   <ComponentProps,>(Component: React.FunctionComponent<ComponentProps>) =>
-  (sourceId = 'default') => {
-    return function ComponentWithSourceProvider(props: ComponentProps) {
-      return (
-        <SourceProvider sourceId={sourceId}>
-          <Component {...props} />
-        </SourceProvider>
-      );
+    (sourceId = 'default') => {
+      return function ComponentWithSourceProvider(props: ComponentProps) {
+        return (
+          <SourceProvider sourceId={sourceId}>
+            <Component {...props} />
+          </SourceProvider>
+        );
+      };
     };
-  };
