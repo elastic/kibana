@@ -181,8 +181,8 @@ describe('engines routes', () => {
         body: {},
       });
       const mock = jest.fn();
-      const mockResp = mock({ result: 'created' });
-      expect(mockRouter.response.ok).toHaveReturnedWith(mockResp);
+      const mockResponse = mock({ result: 'created' });
+      expect(mockRouter.response.ok).toHaveReturnedWith(mockResponse);
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {
           acknowledged: true,
@@ -205,8 +205,8 @@ describe('engines routes', () => {
         body: {},
       });
       const mock = jest.fn();
-      const mockResp = mock({ result: 'updated' });
-      expect(mockRouter.response.ok).toHaveReturnedWith(mockResp);
+      const mockResponse = mock({ result: 'updated' });
+      expect(mockRouter.response.ok).toHaveReturnedWith(mockResponse);
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {
           acknowledged: true,
