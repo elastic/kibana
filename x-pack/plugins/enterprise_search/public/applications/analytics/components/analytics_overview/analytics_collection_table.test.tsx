@@ -11,9 +11,11 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiButtonGroup, EuiSuperDatePicker } from '@elastic/eui';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
+
+import { AnalyticsCollectionCardWithLens } from './analytics_collection_card/analytics_collection_card';
 
 import { AnalyticsCollectionTable } from './analytics_collection_table';
 
@@ -25,23 +27,43 @@ describe('AnalyticsCollectionTable', () => {
       id: 'example',
       name: 'example',
     },
+    {
+      event_retention_day_length: 180,
+      events_datastream: 'analytics-events-example2',
+      id: 'example2',
+      name: 'example2',
+    },
   ];
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders and provides navigation to the view detail pages', () => {
-    const wrapper = shallow(
-      <AnalyticsCollectionTable collections={analyticsCollections} isLoading={false} />
-    );
+  it('renders cards', () => {
+    const wrapper = shallow(<AnalyticsCollectionTable collections={analyticsCollections} />);
+    const collectionCards = wrapper.find(AnalyticsCollectionCardWithLens);
 
-    expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
+    expect(collectionCards).toHaveLength(analyticsCollections.length);
+    expect(collectionCards.at(1).prop('collection')).toMatchObject(analyticsCollections[1]);
+  });
 
-    const rows = wrapper.find(EuiBasicTable).prop('items');
-    expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject(analyticsCollections[0]);
+  it('renders filters', () => {
+    const buttonGroup = shallow(
+      <AnalyticsCollectionTable collections={analyticsCollections} />
+    ).find(EuiButtonGroup);
 
-    expect(wrapper.render().find('a').attr('href')).toContain('/collections/example/events');
+    expect(buttonGroup).toHaveLength(1);
+    expect(buttonGroup.prop('options')).toHaveLength(2);
+    expect(buttonGroup.prop('idSelected')).toEqual('Searches');
+  });
+
+  it('renders datePick', () => {
+    const datePicker = shallow(
+      <AnalyticsCollectionTable collections={analyticsCollections} />
+    ).find(EuiSuperDatePicker);
+
+    expect(datePicker).toHaveLength(1);
+    expect(datePicker.prop('start')).toEqual('now-7d');
+    expect(datePicker.prop('end')).toEqual('now');
   });
 });
