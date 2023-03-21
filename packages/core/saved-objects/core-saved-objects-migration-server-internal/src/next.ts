@@ -9,7 +9,7 @@
 import * as Option from 'fp-ts/lib/Option';
 import { omit } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Defer } from './@kbn/utils';
+import type { Defer } from './kibana_migrator_utils';
 import type {
   AllActionStates,
   CalculateExcludeFiltersState,

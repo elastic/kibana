@@ -7,7 +7,6 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { type Defer, defer } from './@kbn/utils';
 import type { IndexMap } from './core';
 import {
   type TypeIndexMap,
@@ -17,8 +16,21 @@ import {
   MAIN_SAVED_OBJECT_INDEX,
 } from './kibana_migrator_constants';
 
+// even though this utility class is present in @kbn/kibana-utils-plugin, we can't easily import it from Core
+// aka. one does not simply reuse code
+export class Defer<T> {
+  public resolve!: (data: T) => void;
+  public reject!: (error: any) => void;
+  public promise: Promise<any> = new Promise<any>((resolve, reject) => {
+    (this as any).resolve = resolve;
+    (this as any).reject = reject;
+  });
+}
+
+export const defer = () => new Defer<void>();
+
 export function createMultiPromiseDefer(indices: string[]): Record<string, Defer<void>> {
-  const defers: Array<Defer<any>> = new Array(indices.length).fill(true).map(() => defer<void>());
+  const defers: Array<Defer<void>> = new Array(indices.length).fill(true).map(defer);
   const all = Promise.all(defers.map(({ promise }) => promise));
   return indices.reduce<Record<string, Defer<any>>>((acc, indexName, i) => {
     const { resolve, reject } = defers[i];

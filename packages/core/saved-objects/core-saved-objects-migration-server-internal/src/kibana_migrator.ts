@@ -30,7 +30,7 @@ import {
   type KibanaMigratorStatus,
   type MigrationResult,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type { Defer } from './@kbn/utils';
+import type { Defer } from './kibana_migrator_utils';
 import { buildActiveMappings, buildTypesMappings } from './core';
 import { DocumentMigrator, type VersionedTransformer } from './document_migrator';
 import { createIndexMap } from './core/build_index_map';

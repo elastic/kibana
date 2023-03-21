@@ -16,7 +16,7 @@ import type {
   SavedObjectsMigrationConfigType,
   MigrationResult,
 } from '@kbn/core-saved-objects-base-server-internal';
-import type { Defer } from './@kbn/utils';
+import type { Defer } from './kibana_migrator_utils';
 import type { TransformRawDocs } from './types';
 import { next } from './next';
 import { model } from './model';
