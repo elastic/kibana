@@ -41,9 +41,11 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
         {
           method: 'GET',
           path: `/_application/search_application`,
+          querystring: request.query,
         }
       );
-      return response.ok({ body: { engines } });
+
+      return response.ok({ body: engines });
     })
   );
 
@@ -62,7 +64,7 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
         method: 'GET',
         path: `/_application/search_application/${request.params.engine_name}`,
       });
-      return response.ok({ body: { engines } });
+      return response.ok({ body: engines });
     })
   );
 
@@ -85,9 +87,9 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
         await client.asCurrentUser.transport.request<EnterpriseSearchEngineUpsertResponse>({
           method: 'PUT',
           path: `/_application/search_application/${request.params.engine_name}`,
-          body: {},
+          body: { indices: request.body.indices },
         });
-      return response.ok({ body: { engines } });
+      return response.ok({ body: engines });
     })
   );
 
@@ -104,9 +106,9 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
       const { client } = (await context.core).elasticsearch;
       const engines = await client.asCurrentUser.transport.request<AcknowledgeResponse>({
         method: 'DELETE',
-        path: `/${request.params.engine_name}`,
+        path: `_application/search_application/${request.params.engine_name}`,
       });
-      return response.ok({ body: { engines } });
+      return response.ok({ body: engines });
     })
   );
 
@@ -129,7 +131,7 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
         path: `/${request.params.engine_name}/_search/`,
         body: {},
       });
-      return response.ok({ body: { engines } });
+      return response.ok({ body: engines });
     })
   );
 

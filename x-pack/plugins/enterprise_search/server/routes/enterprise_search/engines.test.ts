@@ -50,18 +50,17 @@ describe('engines routes', () => {
       });
     });
 
-    it('List all engines creates a request to the ent-search-module', async () => {
+    it('List engines API creates request', async () => {
       mockClient.asCurrentUser.transport.request.mockImplementation(() => ({}));
-
+      const request = { query: {} };
       await mockRouter.callRoute({});
       expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
         method: 'GET',
         path: '/_application/search_application',
+        querystring: request.query,
       });
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
-        body: {
-          engines: {},
-        },
+        body: {},
       });
     });
 
@@ -111,7 +110,7 @@ describe('engines routes', () => {
       });
     });
 
-    it('List engine creates a request to the ent-search-module', async () => {
+    it('List engine API creates request', async () => {
       mockClient.asCurrentUser.transport.request.mockImplementation(() => ({}));
       await mockRouter.callRoute({
         params: { engine_name: 'engine-name' },
@@ -122,9 +121,7 @@ describe('engines routes', () => {
         path: '/_application/search_application/engine-name',
       });
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
-        body: {
-          engines: {},
-        },
+        body: {},
       });
     });
 
@@ -168,7 +165,7 @@ describe('engines routes', () => {
       });
     });
 
-    it('Upsert engine creates a request to the ent-search module', async () => {
+    it('Upsert API creates request - create', async () => {
       mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
         acknowledged: true,
       }));
@@ -183,11 +180,36 @@ describe('engines routes', () => {
         path: '/_application/search_application/engine-name',
         body: {},
       });
+      const mock = jest.fn();
+      const mockResp = mock({ result: 'created' });
+      expect(mockRouter.response.ok).toHaveReturnedWith(mockResp);
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {
-          engines: {
-            acknowledged: true,
-          },
+          acknowledged: true,
+        },
+      });
+    });
+    it('Upsert API creates request - update', async () => {
+      mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
+        acknowledged: true,
+      }));
+
+      await mockRouter.callRoute({
+        params: {
+          engine_name: 'engine-name',
+        },
+      });
+      expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+        method: 'PUT',
+        path: '/_application/search_application/engine-name',
+        body: {},
+      });
+      const mock = jest.fn();
+      const mockResp = mock({ result: 'updated' });
+      expect(mockRouter.response.ok).toHaveReturnedWith(mockResp);
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          acknowledged: true,
         },
       });
     });
@@ -248,7 +270,7 @@ describe('engines routes', () => {
       });
     });
 
-    it('Delete creates a request to the ent-search module', async () => {
+    it('Delete API creates request', async () => {
       mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
         acknowledged: true,
       }));
@@ -260,13 +282,11 @@ describe('engines routes', () => {
       });
       expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
         method: 'DELETE',
-        path: '/engine-name',
+        path: '_application/search_application/engine-name',
       });
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {
-          engines: {
-            acknowledged: true,
-          },
+          acknowledged: true,
         },
       });
     });
@@ -310,7 +330,7 @@ describe('engines routes', () => {
         router: mockRouter.router,
       });
     });
-    it('Search preview creates a request to ent-search-module', async () => {
+    it('Search preview API creates a request', async () => {
       mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
         acknowledged: true,
       }));
@@ -327,9 +347,7 @@ describe('engines routes', () => {
       });
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: {
-          engines: {
-            acknowledged: true,
-          },
+          acknowledged: true,
         },
       });
     });
