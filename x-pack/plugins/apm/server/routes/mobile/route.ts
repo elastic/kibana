@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
@@ -27,6 +27,7 @@ import {
   MobileTermsByFieldResponse,
 } from './get_mobile_terms_by_field';
 import { getMobileMainStatisticsByField } from './get_mobile_main_statistics_by_field';
+import { getMobileDetailedStatisticsByFieldPeriods } from './get_mobile_detailed_statistics_by_field';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -308,6 +309,67 @@ const mobileMainStatisticsByField = createApmServerRoute({
   },
 });
 
+const mobileDetailedStatisticsByField = createApmServerRoute({
+  endpoint:
+    'GET /internal/apm/mobile-services/{serviceName}/detailed_statistics',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      offsetRt,
+      environmentRt,
+      t.type({
+        field: t.string,
+        fieldNames: jsonRt.pipe(t.array(t.string)),
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (
+    resources
+  ): Promise<{
+    currentPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
+      fieldName: string;
+      latency: Array<import('./../../../typings/timeseries').Coordinate>;
+      throughput: Array<import('./../../../typings/timeseries').Coordinate>;
+    }>;
+    previousPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
+      latency: Array<{
+        x: number;
+        y: import('./../../../typings/common').Maybe<number>;
+      }>;
+      throughput: Array<{
+        x: number;
+        y: import('./../../../typings/common').Maybe<number>;
+      }>;
+      fieldName: string;
+    }>;
+  }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { kuery, environment, start, end, field, offset, fieldNames } =
+      params.query;
+
+    return await getMobileDetailedStatisticsByFieldPeriods({
+      kuery,
+      environment,
+      start,
+      end,
+      serviceName,
+      apmEventClient,
+      field,
+      fieldNames,
+      offset,
+    });
+  },
+});
+
 export const mobileRouteRepository = {
   ...mobileFiltersRoute,
   ...sessionsChartRoute,
@@ -316,4 +378,5 @@ export const mobileRouteRepository = {
   ...mobileLocationStatsRoute,
   ...mobileTermsByFieldRoute,
   ...mobileMainStatisticsByField,
+  ...mobileDetailedStatisticsByField,
 };
