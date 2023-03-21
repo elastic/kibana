@@ -21,10 +21,19 @@ import { useRightPanelContext } from '../context';
  */
 export const RiskScore: FC = memo(() => {
   const { getFieldsData } = useRightPanelContext();
-  const alertRiskScore = getFieldsData(ALERT_RISK_SCORE) as string;
+  const fieldsData = getFieldsData(ALERT_RISK_SCORE);
 
-  if (!alertRiskScore) {
-    return <></>;
+  if (!fieldsData) {
+    return null;
+  }
+
+  let alertRiskScore: string;
+  if (typeof fieldsData === 'string') {
+    alertRiskScore = fieldsData;
+  } else if (Array.isArray(fieldsData) && fieldsData.length > 0) {
+    alertRiskScore = fieldsData[0];
+  } else {
+    return null;
   }
 
   return (

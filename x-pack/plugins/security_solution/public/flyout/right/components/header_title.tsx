@@ -26,10 +26,6 @@ export const HeaderTitle: FC = memo(() => {
     dataFormattedForFieldBrowser
   );
 
-  if (!dataFormattedForFieldBrowser) {
-    return <></>;
-  }
-
   return (
     <>
       <EuiTitle size="s" data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>

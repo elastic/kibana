@@ -8,22 +8,34 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { SEVERITY_TITLE } from './translations';
 import { useRightPanelContext } from '../context';
 import { SeverityBadge } from '../../../detections/components/rules/severity_badge';
 import { FLYOUT_HEADER_SEVERITY_TITLE_TEST_ID } from './test_ids';
+
+const isSeverity = (x: unknown): x is Severity =>
+  x === 'low' || x === 'medium' || x === 'high' || x === 'critical';
 
 /**
  * Document details severity displayed in flyout right section header
  */
 export const DocumentSeverity: FC = memo(() => {
   const { getFieldsData } = useRightPanelContext();
-  const alertSeverity = getFieldsData(ALERT_SEVERITY) as Severity;
+  const fieldsData = getFieldsData(ALERT_SEVERITY);
 
-  if (!alertSeverity) {
-    return <></>;
+  if (!fieldsData) {
+    return null;
+  }
+
+  let alertSeverity: Severity;
+  if (typeof fieldsData === 'string' && isSeverity(fieldsData)) {
+    alertSeverity = fieldsData;
+  } else if (Array.isArray(fieldsData) && fieldsData.length > 0 && isSeverity(fieldsData[0])) {
+    alertSeverity = fieldsData[0];
+  } else {
+    return null;
   }
 
   return (

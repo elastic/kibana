@@ -17,7 +17,7 @@ import { HeaderTitle } from './header_title';
 import { DOCUMENT_DETAILS } from './translations';
 import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../common/lib/kibana';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
+import { mockDataFormattedForFieldBrowser, mockGetFieldsData } from '../mocks/mock_context';
 jest.mock('../../../common/lib/kibana');
 
 moment.suppressDeprecationWarnings = true;
@@ -36,7 +36,7 @@ describe('<HeaderTitle />', () => {
   it('should render mitre attack information', () => {
     const contextValue = {
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-      getFieldsData: () => [],
+      getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
     } as unknown as RightPanelContext;
 
     const { getByTestId } = render(
@@ -101,21 +101,5 @@ describe('<HeaderTitle />', () => {
     );
 
     expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent(DOCUMENT_DETAILS);
-  });
-
-  it('should render empty component if missing dataFormattedForFieldBrowser value', () => {
-    const contextValue = {} as unknown as RightPanelContext;
-
-    const { baseElement } = render(
-      <RightPanelContext.Provider value={contextValue}>
-        <HeaderTitle />
-      </RightPanelContext.Provider>
-    );
-
-    expect(baseElement).toMatchInlineSnapshot(`
-      <body>
-        <div />
-      </body>
-    `);
   });
 });

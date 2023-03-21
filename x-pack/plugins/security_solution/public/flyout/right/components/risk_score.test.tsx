@@ -50,4 +50,22 @@ describe('<RiskScore />', () => {
       </body>
     `);
   });
+
+  it('should render empty component if getFieldsData is invalid', () => {
+    const contextValue = {
+      getFieldsData: jest.fn().mockImplementation(() => 123),
+    } as unknown as RightPanelContext;
+
+    const { baseElement } = render(
+      <RightPanelContext.Provider value={contextValue}>
+        <RiskScore />
+      </RightPanelContext.Provider>
+    );
+
+    expect(baseElement).toMatchInlineSnapshot(`
+      <body>
+        <div />
+      </body>
+    `);
+  });
 });

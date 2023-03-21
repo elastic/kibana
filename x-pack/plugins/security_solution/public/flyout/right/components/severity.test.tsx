@@ -50,4 +50,40 @@ describe('<DocumentSeverity />', () => {
       </body>
     `);
   });
+
+  it('should render empty component if getFieldsData is invalid array', () => {
+    const contextValue = {
+      getFieldsData: jest.fn().mockImplementation(() => ['abc']),
+    } as unknown as RightPanelContext;
+
+    const { baseElement } = render(
+      <RightPanelContext.Provider value={contextValue}>
+        <DocumentSeverity />
+      </RightPanelContext.Provider>
+    );
+
+    expect(baseElement).toMatchInlineSnapshot(`
+      <body>
+        <div />
+      </body>
+    `);
+  });
+
+  it('should render empty component if getFieldsData is invalid string', () => {
+    const contextValue = {
+      getFieldsData: jest.fn().mockImplementation(() => 'abc'),
+    } as unknown as RightPanelContext;
+
+    const { baseElement } = render(
+      <RightPanelContext.Provider value={contextValue}>
+        <DocumentSeverity />
+      </RightPanelContext.Provider>
+    );
+
+    expect(baseElement).toMatchInlineSnapshot(`
+      <body>
+        <div />
+      </body>
+    `);
+  });
 });

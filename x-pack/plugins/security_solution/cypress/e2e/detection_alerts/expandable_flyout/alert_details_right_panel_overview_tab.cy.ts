@@ -51,11 +51,6 @@ describe.skip(
       openOverviewTab();
     });
 
-    it('should display mitre attack', () => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE).should('be.visible');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_DETAILS).should('be.visible');
-    });
-
     it('should display correct title in header', () => {
       cy.get(DOCUMENT_DETAILS_OVERVIEW_TAB_HEADER_TITLE)
         .should('be.visible')
@@ -74,6 +69,20 @@ describe.skip(
       cy.get(DOCUMENT_DETAILS_OVERVIEW_TAB_HEADER_SEVERITY_VALUE)
         .should('be.visible')
         .and('have.text', upperFirst(rule.severity));
+    });
+
+    it('should display mitre attack', () => {
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_TITLE)
+        .should('be.visible')
+        // @ts-ignore
+        .and('contain.text', rule.threat[0].framework);
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_MITRE_ATTACK_DETAILS)
+        .should('be.visible')
+        // @ts-ignore
+        .and('contain.text', rule.threat[0].technique[0].name)
+        // @ts-ignore
+        .and('contain.text', rule.threat[0].tactic.name);
     });
 
     it('should display highlighted fields', () => {

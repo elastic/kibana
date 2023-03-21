@@ -92,7 +92,9 @@ export const NoTimestamp: Story<void> = () => {
 };
 
 export const Emtpy: Story<void> = () => {
-  const contextValue = {} as unknown as RightPanelContext;
+  const contextValue = {
+    getFieldsData: () => [],
+  } as unknown as RightPanelContext;
 
   return (
     <RightPanelContext.Provider value={contextValue}>
