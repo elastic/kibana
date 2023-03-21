@@ -8,11 +8,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { Rule } from '@kbn/alerting-plugin/common';
+import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { MetricThresholdRuleTypeParams } from '..';
 import { generateUniqueKey } from '../lib/generate_unique_key';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { ExpressionChart } from './expression_chart';
-import { useSourceContext, withSourceProvider } from '@kbn/infra-plugin/public/containers/metrics_source';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 interface AppSectionProps {
