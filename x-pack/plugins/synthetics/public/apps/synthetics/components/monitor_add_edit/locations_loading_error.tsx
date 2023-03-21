@@ -12,7 +12,7 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 export const LocationsLoadingError = () => {
   return (
     <EuiEmptyPrompt
-      iconType="alert"
+      iconType="warning"
       color="danger"
       title={
         <h3>

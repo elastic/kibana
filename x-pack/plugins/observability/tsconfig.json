@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
@@ -9,7 +9,7 @@
     "public/**/*.json",
     "server/**/*",
     "typings/**/*",
-    "../../../typings/**/*",
+    "../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -73,8 +73,8 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/core-application-browser",
     "@kbn/files-plugin",
+    "@kbn/core-theme-browser",
+    "@kbn/core-elasticsearch-server"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

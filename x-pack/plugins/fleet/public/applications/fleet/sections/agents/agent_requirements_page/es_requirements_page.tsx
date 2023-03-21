@@ -35,7 +35,7 @@ export const RequirementItem: React.FunctionComponent<{ isMissing: boolean }> = 
       <EuiFlexItem grow={false}>
         <EuiText>
           {isMissing ? (
-            <EuiIcon type="crossInACircleFilled" color="danger" />
+            <EuiIcon type="error" color="danger" />
           ) : (
             <EuiIcon type="checkInCircleFilled" color="success" />
           )}
@@ -62,7 +62,7 @@ export const MissingESRequirementsPage: React.FunctionComponent<{
               defaultMessage: 'Missing security requirements',
             })}
             color="warning"
-            iconType="alert"
+            iconType="warning"
           >
             <FormattedMessage
               id="xpack.fleet.setupPage.missingRequirementsCalloutDescription"
