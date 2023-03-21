@@ -193,7 +193,7 @@ export class SavedSearchEmbeddable
   private fetch = async () => {
     const searchSessionId = this.input.searchSessionId;
     const useNewFieldsApi = !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
-    if (!this.searchProps) return;
+    if (!this.searchProps || !this.searchProps.dataView) return;
 
     const { searchSource } = this.savedSearch;
 
@@ -462,7 +462,7 @@ export class SavedSearchEmbeddable
     searchProps.rowsPerPageState = this.input.rowsPerPage || this.savedSearch.rowsPerPage;
     searchProps.filters = this.savedSearch.searchSource.getField('filter') as Filter[];
     searchProps.savedSearchId = this.savedSearch.id;
-    if (forceFetch && searchProps.dataView) {
+    if (forceFetch) {
       this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);
       if (this.input.query?.query || this.input.filters?.length) {
