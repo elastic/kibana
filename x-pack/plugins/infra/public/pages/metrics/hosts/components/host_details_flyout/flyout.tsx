@@ -17,7 +17,7 @@ interface Props {
   closeFlyout: () => void;
 }
 
-const flyoutTabs = [MetadataTab]
+const flyoutTabs = [MetadataTab];
 
 export const Flyout = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
