@@ -14,6 +14,8 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { defaults } from 'lodash';
 import { Duplex, Writable, Readable } from 'stream';
 
+import { GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { inspect } from 'util';
 import type { FileChunkDocument } from '../mappings';
 
 type Callback = (error?: Error) => void;
@@ -110,9 +112,20 @@ export class ContentStream extends Duplex {
         chunks.push(chunk);
       }
       const buffer = Buffer.concat(chunks);
-      const source: undefined | FileChunkDocument = buffer.byteLength
-        ? cborx.decode(buffer)?._source
+      const decodedChunkDoc: GetResponse<FileChunkDocument> | undefined = buffer.byteLength
+        ? (cborx.decode(buffer) as GetResponse<FileChunkDocument>)
         : undefined;
+
+      // Because `asStream` was used in retrieving the document, errors will also not be processes
+      // and thus are returned "as is", so we check to see if an ES error occurred while attempting
+      // to retrieve the chunk.
+      if (decodedChunkDoc && 'error' in decodedChunkDoc) {
+        const err = new Error(`Failed to retrieve chunk id [${id}] from index [${this.index}]`);
+        this.logger.error(`${err.message}\n${inspect(decodedChunkDoc, { depth: 5 })}`);
+        throw err;
+      }
+
+      const source: undefined | FileChunkDocument = decodedChunkDoc?._source;
 
       const dataBuffer = source?.data as unknown as Buffer;
       return [dataBuffer?.byteLength ? dataBuffer : null, source?.last];
