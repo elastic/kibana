@@ -33,8 +33,8 @@ import {
   GLOBAL_STATE_URL_KEY,
 } from './discover_app_state_container';
 import {
+  DiscoverInternalStateContainer,
   getInternalStateContainer,
-  InternalStateContainer,
 } from './discover_internal_state_container';
 import { DiscoverServices } from '../../../build_services';
 interface DiscoverStateContainerParams {
@@ -64,7 +64,7 @@ export interface DiscoverStateContainer {
   /**
    * Internal state that's used at several places in the UI
    */
-  internalState: InternalStateContainer;
+  internalState: DiscoverInternalStateContainer;
   /**
    * Service for handling search sessions
    */
