@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -61,11 +62,22 @@ function InternalAlertsPage() {
     },
   } = useKibana().services;
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
-  const alertSearchBarStateProps = useAlertSearchBarStateContainer(URL_STORAGE_KEY);
+  const alertSearchBarStateProps = useAlertSearchBarStateContainer(URL_STORAGE_KEY, {
+    replace: false,
+  });
 
-  const chartThemes = {
+  const onBrushEnd: BrushEndListener = (brushEvent) => {
+    const { x } = brushEvent as XYBrushEvent;
+    if (x) {
+      const [start, end] = x;
+      alertSearchBarStateProps.onRangeFromChange(new Date(start).toISOString());
+      alertSearchBarStateProps.onRangeToChange(new Date(end).toISOString());
+    }
+  };
+  const chartProps = {
     theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
+    onBrushEnd,
   };
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
   const [ruleStats, setRuleStats] = useState<RuleStatsState>({
@@ -196,7 +208,7 @@ function InternalAlertsPage() {
               filter={esQuery}
               fullSize
               timeRange={alertSummaryTimeRange}
-              chartThemes={chartThemes}
+              chartProps={chartProps}
             />
           </EuiFlexItem>
           <EuiFlexItem>
