@@ -102,6 +102,7 @@ export function LatencyChart({ height, kuery }: Props) {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSelect
+                  data-test-subj="apmLatencyChartSelect"
                   compressed
                   prepend={i18n.translate(
                     'xpack.apm.serviceOverview.latencyChartTitle.prepend',

@@ -208,7 +208,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
               values: { errorCount: errors.length },
             })}
             color="warning"
-            iconType="alert"
+            iconType="warning"
             size="s"
           >
             <EuiText size="s">

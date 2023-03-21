@@ -23,7 +23,7 @@ import { SloDetails } from './components/slo_details';
 import { HeaderTitle } from './components/header_title';
 import { HeaderControl } from './components/header_control';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from './helpers/convert_sli_apm_params_to_apm_app_deeplink_url';
-import { paths } from '../../config';
+import { paths } from '../../config/paths';
 import type { SloDetailsPathParams } from './types';
 import type { ObservabilityAppServices } from '../../application/types';
 

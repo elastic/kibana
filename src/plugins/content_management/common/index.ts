@@ -18,5 +18,3 @@ export type {
   DeleteIn,
   SearchIn,
 } from './rpc';
-
-export type { Version } from './types';

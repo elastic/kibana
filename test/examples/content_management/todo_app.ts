@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
 
-  describe('Todo app', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/152852
+  describe.skip('Todo app', () => {
     it('Todo app works', async () => {
       const appId = 'contentManagementExamples';
       await PageObjects.common.navigateToApp(appId);

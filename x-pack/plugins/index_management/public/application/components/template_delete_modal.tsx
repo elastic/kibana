@@ -124,7 +124,7 @@ export const TemplateDeleteModal = ({
               {name.startsWith('.') ? (
                 <Fragment>
                   {' '}
-                  <EuiBadge iconType="alert" color="hollow">
+                  <EuiBadge iconType="warning" color="hollow">
                     <FormattedMessage
                       id="xpack.idxMgmt.deleteTemplatesModal.systemTemplateLabel"
                       defaultMessage="System template"
@@ -144,7 +144,7 @@ export const TemplateDeleteModal = ({
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
             data-test-subj="deleteSystemTemplateCallOut"
           >
             <p>

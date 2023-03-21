@@ -128,7 +128,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
           {ingestionStatus === IngestionStatus.ERROR ? (
             <EuiCallOut
               color="warning"
-              iconType="alert"
+              iconType="warning"
               title={i18n.translate(
                 'xpack.enterpriseSearch.content.indices.connectorScheduling.error.title',
                 { defaultMessage: 'Review your connector configuration for reported errors.' }
