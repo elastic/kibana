@@ -214,7 +214,9 @@ export function LatencyAlertsHistoryChart({
                 opacity: 1,
               },
             }}
-            marker={<EuiIcon type="alert" color={CHART_ANNOTATION_RED_COLOR} />}
+            marker={
+              <EuiIcon type="warning" color={CHART_ANNOTATION_RED_COLOR} />
+            }
             markerBody={(annotationData) => (
               <>
                 <EuiBadge color={CHART_ANNOTATION_RED_COLOR}>

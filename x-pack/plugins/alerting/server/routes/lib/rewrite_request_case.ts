@@ -10,8 +10,6 @@ type RenameAlertToRule<K extends string> = K extends `alertTypeId`
   ? `ruleTypeId`
   : K extends `alertId`
   ? `ruleId`
-  : K extends `alertExecutionStatus`
-  ? `ruleExecutionStatus`
   : K extends `actionTypeId`
   ? `connectorTypeId`
   : K extends `alertInstanceId`

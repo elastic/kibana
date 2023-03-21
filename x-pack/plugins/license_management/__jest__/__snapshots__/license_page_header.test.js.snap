@@ -20,7 +20,7 @@ Array [
             <span
               class="emotion-euiPageHeaderContent__titleIcon"
               color="danger"
-              data-euiicon-type="alert"
+              data-euiicon-type="warning"
             />
             <span
               data-test-subj="licenseText"

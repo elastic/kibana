@@ -561,7 +561,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       <EuiBadge
                         color={euiTheme.colors.danger}
                         css={styles.errorsBadge}
-                        iconType="crossInACircleFilled"
+                        iconType="error"
                         iconSide="left"
                         data-test-subj="unifiedTextLangEditor-inline-errors-badge"
                       >
