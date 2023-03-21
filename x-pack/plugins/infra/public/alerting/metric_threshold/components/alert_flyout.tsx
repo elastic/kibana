@@ -26,7 +26,7 @@ export const AlertFlyout = (props: Props) => {
   const AddAlertFlyout = useMemo(
     () =>
       triggersActionsUI &&
-      triggersActionsUI.getAddAlertFlyout({
+      triggersActionsUI.getAddRuleFlyout({
         consumer: 'infrastructure',
         onClose: onCloseFlyout,
         canChangeTrigger: false,

@@ -5,10 +5,8 @@
   */
 
 // LAYOUT MODES
-
 // Adjust borders/etc... for non-spaced out and expanded panels
-.dshLayout-withoutMargins,
-.dshDashboardGrid__item--expanded {
+.dshLayout-withoutMargins {
   .embPanel {
     box-shadow: none;
     border-radius: 0;
@@ -20,5 +18,10 @@
 .dshDashboardGrid__item--expanded {
   .embPanel {
     border-color: transparent;
+  }
+
+  .embPanel--dragHandle:hover {
+    background-color: unset;
+    cursor: default;
   }
 }

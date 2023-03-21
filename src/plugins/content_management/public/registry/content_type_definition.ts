@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Version } from '@kbn/object-versioning';
 import type { CrudClient } from '../crud_client';
 
 /**
@@ -39,4 +40,9 @@ export interface ContentTypeDefinition {
    * If not provided the default CRUD client is used assuming that this type has a server-side content registry
    */
   crud?: CrudClient;
+
+  version: {
+    /** The latest version for this content */
+    latest: Version;
+  };
 }

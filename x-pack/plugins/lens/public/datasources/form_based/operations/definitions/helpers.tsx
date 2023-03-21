@@ -204,3 +204,7 @@ export function getFilter(
   }
   return filter;
 }
+
+export function isMetricCounterField(field?: IndexPatternField) {
+  return field?.timeSeriesMetric === 'counter';
+}

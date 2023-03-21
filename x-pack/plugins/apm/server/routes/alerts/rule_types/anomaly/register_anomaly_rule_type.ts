@@ -8,7 +8,6 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { KibanaRequest } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
-import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { termQuery } from '@kbn/observability-plugin/server';
 import {
@@ -45,7 +44,10 @@ import { asMutableArray } from '../../../../../common/utils/as_mutable_array';
 import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { getMLJobs } from '../../../service_map/get_service_anomalies';
 import { apmActionVariables } from '../../action_variables';
-import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import {
+  ApmRuleTypeAlertDefinition,
+  RegisterRuleDependencies,
+} from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
 import { anomalyParamsSchema } from '../../../../../common/rules/schema';
 
@@ -57,7 +59,6 @@ export function registerAnomalyRuleType({
   config$,
   logger,
   ml,
-  observability,
   ruleDataClient,
 }: RegisterRuleDependencies) {
   const createLifecycleRuleType = createLifecycleRuleTypeFactory({
@@ -74,9 +75,6 @@ export function registerAnomalyRuleType({
       validate: { params: anomalyParamsSchema },
       actionVariables: {
         context: [
-          ...(observability.getAlertDetailsConfig()?.apm.enabled
-            ? [apmActionVariables.alertDetailsUrl]
-            : []),
           apmActionVariables.environment,
           apmActionVariables.reason,
           apmActionVariables.serviceName,
@@ -94,8 +92,7 @@ export function registerAnomalyRuleType({
           return { state: {} };
         }
 
-        const { savedObjectsClient, scopedClusterClient, getAlertUuid } =
-          services;
+        const { savedObjectsClient, scopedClusterClient } = services;
 
         const ruleParams = params;
         const request = {} as KibanaRequest;
@@ -285,14 +282,6 @@ export function registerAnomalyRuleType({
             relativeViewInAppUrl
           );
 
-          const alertUuid = getAlertUuid(id);
-
-          const alertDetailsUrl = getAlertDetailsUrl(
-            basePath,
-            spaceId,
-            alertUuid
-          );
-
           services
             .alertWithLifecycle({
               id,
@@ -309,7 +298,6 @@ export function registerAnomalyRuleType({
               },
             })
             .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
-              alertDetailsUrl,
               environment: getEnvironmentLabel(environment),
               reason: reasonMessage,
               serviceName,
@@ -322,6 +310,7 @@ export function registerAnomalyRuleType({
 
         return { state: {} };
       },
+      alerts: ApmRuleTypeAlertDefinition,
     })
   );
 }

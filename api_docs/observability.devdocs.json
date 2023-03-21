@@ -55,6 +55,41 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.AlertSummary",
+        "type": "Function",
+        "tags": [],
+        "label": "AlertSummary",
+        "description": [],
+        "signature": [
+          "({ alert, alertSummaryFields }: ",
+          "AlertSummaryProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability/public/pages/alert_details/components/alert_summary.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.AlertSummary.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ alert, alertSummaryFields }",
+            "description": [],
+            "signature": [
+              "AlertSummaryProps"
+            ],
+            "path": "x-pack/plugins/observability/public/pages/alert_details/components/alert_summary.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.calculateTimeRangeBucketSize",
         "type": "Function",
         "tags": [],
@@ -80,7 +115,7 @@
           ") => ",
           "BucketSize"
         ],
-        "path": "x-pack/plugins/observability/public/pages/overview/containers/overview_page/helpers/calculate_bucket_size.ts",
+        "path": "x-pack/plugins/observability/public/pages/overview/helpers/calculate_bucket_size.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -100,7 +135,7 @@
                 "text": "TimeRange"
               }
             ],
-            "path": "x-pack/plugins/observability/public/pages/overview/containers/overview_page/helpers/calculate_bucket_size.ts",
+            "path": "x-pack/plugins/observability/public/pages/overview/helpers/calculate_bucket_size.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -121,7 +156,7 @@
                 "text": "TimeBuckets"
               }
             ],
-            "path": "x-pack/plugins/observability/public/pages/overview/containers/overview_page/helpers/calculate_bucket_size.ts",
+            "path": "x-pack/plugins/observability/public/pages/overview/helpers/calculate_bucket_size.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -669,6 +704,54 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.formatAlertEvaluationValue",
+        "type": "Function",
+        "tags": [],
+        "label": "formatAlertEvaluationValue",
+        "description": [],
+        "signature": [
+          "(ruleTypeId?: string | undefined, evaluationValue?: number | undefined) => any"
+        ],
+        "path": "x-pack/plugins/observability/public/utils/format_alert_evaluation_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.formatAlertEvaluationValue.$1",
+            "type": "string",
+            "tags": [],
+            "label": "ruleTypeId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/utils/format_alert_evaluation_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.formatAlertEvaluationValue.$2",
+            "type": "number",
+            "tags": [],
+            "label": "evaluationValue",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/utils/format_alert_evaluation_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.fromQuery",
         "type": "Function",
         "tags": [],
@@ -972,7 +1055,13 @@
         "description": [],
         "signature": [
           "React.ExoticComponent<Pick<{ alert?: ",
-          "TopAlert",
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.TopAlert",
+            "text": "TopAlert"
+          },
           "<{}> | undefined; alerts?: Record<string, unknown>[] | undefined; isInApp?: boolean | undefined; observabilityRuleTypeRegistry: { register: (type: ",
           {
             "pluginId": "observability",
@@ -991,7 +1080,7 @@
           },
           " | undefined; list: () => string[]; }; selectedAlertId?: string | undefined; } & ",
           "CommonProps",
-          " & { as?: \"div\" | undefined; } & _EuiFlyoutProps & Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof _EuiFlyoutProps> & Omit<Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, \"css\" | \"key\" | keyof React.HTMLAttributes<HTMLDivElement>> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }, \"type\" | \"prefix\" | \"id\" | \"defaultValue\" | \"children\" | \"ref\" | \"is\" | \"title\" | \"slot\" | \"style\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"css\" | \"key\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"spellCheck\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"paddingSize\" | \"size\" | \"onClose\" | \"as\" | \"maxWidth\" | \"ownFocus\" | \"hideCloseButton\" | \"closeButtonProps\" | \"closeButtonPosition\" | \"maskProps\" | \"outsideClickCloses\" | \"side\" | \"pushMinBreakpoint\" | \"focusTrapProps\" | \"includeFixedHeadersInFocusTrap\">, \"type\" | \"prefix\" | \"id\" | \"defaultValue\" | \"alert\" | \"children\" | \"is\" | \"title\" | \"alerts\" | \"slot\" | \"style\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"css\" | \"key\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"spellCheck\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"paddingSize\" | \"size\" | \"onClose\" | \"as\" | \"maxWidth\" | \"ownFocus\" | \"hideCloseButton\" | \"closeButtonProps\" | \"closeButtonPosition\" | \"maskProps\" | \"outsideClickCloses\" | \"side\" | \"pushMinBreakpoint\" | \"focusTrapProps\" | \"includeFixedHeadersInFocusTrap\" | \"isInApp\" | \"observabilityRuleTypeRegistry\" | \"selectedAlertId\"> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }> & { readonly _result: ({ alert, alerts, isInApp, observabilityRuleTypeRegistry, onClose, selectedAlertId, }: AlertsFlyoutProps) => JSX.Element | null; }"
+          " & { as?: \"div\" | undefined; } & _EuiFlyoutProps & Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof _EuiFlyoutProps> & Omit<Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, \"css\" | \"key\" | keyof React.HTMLAttributes<HTMLDivElement>> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }, \"type\" | \"prefix\" | \"id\" | \"defaultValue\" | \"children\" | \"ref\" | \"is\" | \"title\" | \"security\" | \"slot\" | \"style\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"css\" | \"key\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"spellCheck\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"paddingSize\" | \"size\" | \"onClose\" | \"as\" | \"maxWidth\" | \"ownFocus\" | \"hideCloseButton\" | \"closeButtonProps\" | \"closeButtonPosition\" | \"maskProps\" | \"outsideClickCloses\" | \"side\" | \"pushMinBreakpoint\" | \"focusTrapProps\" | \"includeFixedHeadersInFocusTrap\">, \"type\" | \"prefix\" | \"id\" | \"defaultValue\" | \"alert\" | \"children\" | \"is\" | \"title\" | \"alerts\" | \"security\" | \"slot\" | \"style\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"css\" | \"key\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"spellCheck\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"paddingSize\" | \"size\" | \"onClose\" | \"as\" | \"maxWidth\" | \"ownFocus\" | \"hideCloseButton\" | \"closeButtonProps\" | \"closeButtonPosition\" | \"maskProps\" | \"outsideClickCloses\" | \"side\" | \"pushMinBreakpoint\" | \"focusTrapProps\" | \"includeFixedHeadersInFocusTrap\" | \"isInApp\" | \"observabilityRuleTypeRegistry\" | \"selectedAlertId\"> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }> & { readonly _result: ({ alert, alerts, isInApp, observabilityRuleTypeRegistry, onClose, selectedAlertId, }: AlertsFlyoutProps) => JSX.Element | null; }"
         ],
         "path": "x-pack/plugins/observability/public/index.ts",
         "deprecated": false,
@@ -2049,6 +2138,48 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.AlertSummaryField",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertSummaryField",
+        "description": [],
+        "path": "x-pack/plugins/observability/public/pages/alert_details/components/alert_summary.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.AlertSummaryField.label",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/pages/alert_details/components/alert_summary.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.AlertSummaryField.value",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "x-pack/plugins/observability/public/pages/alert_details/components/alert_summary.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observability",
         "id": "def-public.ApmFetchDataResponse",
@@ -5423,6 +5554,102 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.TopAlert",
+        "type": "Interface",
+        "tags": [],
+        "label": "TopAlert",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "observability",
+            "scope": "public",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-public.TopAlert",
+            "text": "TopAlert"
+          },
+          "<TAdditionalMetaFields>"
+        ],
+        "path": "x-pack/plugins/observability/public/typings/alerts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.TopAlert.fields",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "OutputOf<SetOptional<{ readonly \"event.action\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.docs_count\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.field\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.suppression.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.suppression.terms.value\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"event.kind\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"@timestamp\": { readonly type: \"date\"; readonly required: true; readonly array: false; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.case_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping\": { readonly type: \"boolean\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.flapping_history\": { readonly type: \"boolean\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.instance.id\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.last_detected\": { readonly type: \"date\"; readonly required: false; readonly array: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.parameters\": { readonly array: false; readonly type: \"flattened\"; readonly ignore_above: 4096; readonly required: false; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.time_range\": { readonly type: \"date_range\"; readonly format: \"epoch_millis||strict_date_optional_time\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; }>> & OutputOf<SetOptional<{ readonly \"kibana.alert.evaluation.threshold\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; readonly \"kibana.alert.evaluation.value\": { readonly type: \"scaled_float\"; readonly scaling_factor: 100; readonly required: false; }; }>> & TAdditionalMetaFields"
+            ],
+            "path": "x-pack/plugins/observability/public/typings/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.TopAlert.start",
+            "type": "number",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.TopAlert.lastUpdated",
+            "type": "number",
+            "tags": [],
+            "label": "lastUpdated",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.TopAlert.reason",
+            "type": "string",
+            "tags": [],
+            "label": "reason",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.TopAlert.link",
+            "type": "string",
+            "tags": [],
+            "label": "link",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/typings/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.TopAlert.active",
+            "type": "boolean",
+            "tags": [],
+            "label": "active",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/alerts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.UptimeFetchDataResponse",
         "type": "Interface",
         "tags": [],
@@ -7075,33 +7302,7 @@
                   "ExistsRequest",
                   ", options?: ",
                   "TransportRequestOptions",
-                  " | undefined): Promise<boolean>; }; security: ",
-                  "default",
-                  "; ping: { (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
-                  "PingRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<boolean>; (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
-                  "PingRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<boolean, unknown>>; (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
-                  "PingRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<boolean>; }; nodes: ",
-                  "default",
-                  "; indices: ",
-                  "default",
-                  "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  " | undefined): Promise<boolean>; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -7483,7 +7684,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; info: { (this: That, params?: ",
+                  ">; }; indices: ",
+                  "default",
+                  "; info: { (this: That, params?: ",
                   "InfoRequest",
                   " | ",
                   "InfoRequest",
@@ -7661,7 +7864,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "MtermvectorsResponse",
-                  ">; }; openPointInTime: { (this: That, params: ",
+                  ">; }; nodes: ",
+                  "default",
+                  "; openPointInTime: { (this: That, params: ",
                   "OpenPointInTimeRequest",
                   " | ",
                   "OpenPointInTimeRequest",
@@ -7687,7 +7892,27 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "OpenPointInTimeResponse",
-                  ">; }; putScript: { (this: That, params: ",
+                  ">; }; ping: { (this: That, params?: ",
+                  "PingRequest",
+                  " | ",
+                  "PingRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<boolean>; (this: That, params?: ",
+                  "PingRequest",
+                  " | ",
+                  "PingRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<boolean, unknown>>; (this: That, params?: ",
+                  "PingRequest",
+                  " | ",
+                  "PingRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<boolean>; }; putScript: { (this: That, params: ",
                   "PutScriptRequest",
                   " | ",
                   "PutScriptRequest",
@@ -7950,6 +8175,8 @@
                   " | undefined): Promise<",
                   "SearchTemplateResponse",
                   "<TDocument>>; }; searchableSnapshots: ",
+                  "default",
+                  "; security: ",
                   "default",
                   "; shutdown: ",
                   "default",
@@ -8360,33 +8587,7 @@
                   "ExistsRequest",
                   ", options?: ",
                   "TransportRequestOptions",
-                  " | undefined): Promise<boolean>; }; security: ",
-                  "default",
-                  "; ping: { (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
-                  "PingRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<boolean>; (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
-                  "PingRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<boolean, unknown>>; (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
-                  "PingRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<boolean>; }; nodes: ",
-                  "default",
-                  "; indices: ",
-                  "default",
-                  "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  " | undefined): Promise<boolean>; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -8768,7 +8969,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; info: { (this: That, params?: ",
+                  ">; }; indices: ",
+                  "default",
+                  "; info: { (this: That, params?: ",
                   "InfoRequest",
                   " | ",
                   "InfoRequest",
@@ -8946,7 +9149,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "MtermvectorsResponse",
-                  ">; }; openPointInTime: { (this: That, params: ",
+                  ">; }; nodes: ",
+                  "default",
+                  "; openPointInTime: { (this: That, params: ",
                   "OpenPointInTimeRequest",
                   " | ",
                   "OpenPointInTimeRequest",
@@ -8972,7 +9177,27 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "OpenPointInTimeResponse",
-                  ">; }; putScript: { (this: That, params: ",
+                  ">; }; ping: { (this: That, params?: ",
+                  "PingRequest",
+                  " | ",
+                  "PingRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<boolean>; (this: That, params?: ",
+                  "PingRequest",
+                  " | ",
+                  "PingRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<boolean, unknown>>; (this: That, params?: ",
+                  "PingRequest",
+                  " | ",
+                  "PingRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<boolean>; }; putScript: { (this: That, params: ",
                   "PutScriptRequest",
                   " | ",
                   "PutScriptRequest",
@@ -9235,6 +9460,8 @@
                   " | undefined): Promise<",
                   "SearchTemplateResponse",
                   "<TDocument>>; }; searchableSnapshots: ",
+                  "default",
+                  "; security: ",
                   "default",
                   "; shutdown: ",
                   "default",
@@ -10024,7 +10251,79 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "{ \"PUT /api/observability/slos/{id}\"?: ",
+          "{ \"GET /internal/observability/slos/{id}/_diagnosis\": ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/observability/slos/{id}/_diagnosis\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { sloResources: { [x: string]: string; \"slo-observability.sli\": string; \"slo-observability.sli-mappings\": string; \"slo-observability.sli-settings\": string; }; sloSavedObject: string | ",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
+          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { timestampField: string; syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
+          "TransformGetTransformStatsResponse",
+          "; dataSample: string | ",
+          "SearchResponse",
+          "<unknown, Record<string, ",
+          "AggregationsAggregate",
+          ">>; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          ">; \"GET /internal/observability/slos/_diagnosis\": ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/observability/slos/_diagnosis\", undefined, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { licenseAndFeatures: ",
+          "PublicLicenseJSON",
+          "; userPrivileges: ",
+          "SecurityGetUserPrivilegesResponse",
+          "; sloResources: { [x: string]: string; \"slo-observability.sli\": string; \"slo-observability.sli-mappings\": string; \"slo-observability.sli-settings\": string; }; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          ">; \"PUT /api/observability/slos/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10080,11 +10379,11 @@
           "StringC",
           "]>; threshold: ",
           "NumberC",
+          "; index: ",
+          "StringC",
           "; }>, ",
           "PartialC",
-          "<{ index: ",
-          "StringC",
-          "; filter: ",
+          "<{ filter: ",
           "StringC",
           "; }>]>; }>, ",
           "TypeC",
@@ -10118,7 +10417,9 @@
           "LiteralC",
           "<\"*\">, ",
           "StringC",
-          "]>; }>, ",
+          "]>; index: ",
+          "StringC",
+          "; }>, ",
           "PartialC",
           "<{ goodStatusCodes: ",
           "ArrayC",
@@ -10132,9 +10433,7 @@
           "LiteralC",
           "<\"4xx\">, ",
           "LiteralC",
-          "<\"5xx\">]>>; index: ",
-          "StringC",
-          "; filter: ",
+          "<\"5xx\">]>>; filter: ",
           "StringC",
           "; }>]>; }>, ",
           "TypeC",
@@ -10232,7 +10531,11 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; }>; }>; }>, ",
+          ", string, unknown>; }>; tags: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>; }>, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10240,7 +10543,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; } & { index?: string | undefined; filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; createdAt: string; updatedAt: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10248,7 +10551,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
+          ">; \"GET /api/observability/slos/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10270,7 +10573,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; } & { index?: string | undefined; filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10278,7 +10581,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"GET /api/observability/slos\"?: ",
+          ">; \"GET /api/observability/slos\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10318,7 +10621,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; } & { index?: string | undefined; filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
+          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10326,7 +10629,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /internal/observability/slos/_historical_summary\"?: ",
+          ">; \"POST /internal/observability/slos/_historical_summary\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10358,7 +10661,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /api/observability/slos/{id}/enable\"?: ",
+          ">; \"POST /api/observability/slos/{id}/enable\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10388,7 +10691,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /api/observability/slos/{id}/disable\"?: ",
+          ">; \"POST /api/observability/slos/{id}/disable\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10418,7 +10721,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
+          ">; \"DELETE /api/observability/slos/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10448,7 +10751,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /api/observability/slos\"?: ",
+          ">; \"POST /api/observability/slos\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10502,11 +10805,11 @@
           "StringC",
           "]>; threshold: ",
           "NumberC",
+          "; index: ",
+          "StringC",
           "; }>, ",
           "PartialC",
-          "<{ index: ",
-          "StringC",
-          "; filter: ",
+          "<{ filter: ",
           "StringC",
           "; }>]>; }>, ",
           "TypeC",
@@ -10540,7 +10843,9 @@
           "LiteralC",
           "<\"*\">, ",
           "StringC",
-          "]>; }>, ",
+          "]>; index: ",
+          "StringC",
+          "; }>, ",
           "PartialC",
           "<{ goodStatusCodes: ",
           "ArrayC",
@@ -10554,9 +10859,7 @@
           "LiteralC",
           "<\"4xx\">, ",
           "LiteralC",
-          "<\"5xx\">]>>; index: ",
-          "StringC",
-          "; filter: ",
+          "<\"5xx\">]>>; filter: ",
           "StringC",
           "; }>]>; }>, ",
           "TypeC",
@@ -10656,7 +10959,11 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; }>; }>]>; }>, ",
+          ", string, unknown>; }>; tags: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>]>; }>, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10672,7 +10979,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
+          ">; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10731,7 +11038,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { slo: Readonly<{} & { enabled: boolean; }>; alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
+          "{ readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -10746,7 +11053,79 @@
         "label": "ObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"PUT /api/observability/slos/{id}\"?: ",
+          "{ \"GET /internal/observability/slos/{id}/_diagnosis\": ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/observability/slos/{id}/_diagnosis\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { sloResources: { [x: string]: string; \"slo-observability.sli\": string; \"slo-observability.sli-mappings\": string; \"slo-observability.sli-settings\": string; }; sloSavedObject: string | ",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
+          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { timestampField: string; syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
+          "TransformGetTransformStatsResponse",
+          "; dataSample: string | ",
+          "SearchResponse",
+          "<unknown, Record<string, ",
+          "AggregationsAggregate",
+          ">>; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          ">; \"GET /internal/observability/slos/_diagnosis\": ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/observability/slos/_diagnosis\", undefined, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", { licenseAndFeatures: ",
+          "PublicLicenseJSON",
+          "; userPrivileges: ",
+          "SecurityGetUserPrivilegesResponse",
+          "; sloResources: { [x: string]: string; \"slo-observability.sli\": string; \"slo-observability.sli-mappings\": string; \"slo-observability.sli-settings\": string; }; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          ">; \"PUT /api/observability/slos/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10802,11 +11181,11 @@
           "StringC",
           "]>; threshold: ",
           "NumberC",
+          "; index: ",
+          "StringC",
           "; }>, ",
           "PartialC",
-          "<{ index: ",
-          "StringC",
-          "; filter: ",
+          "<{ filter: ",
           "StringC",
           "; }>]>; }>, ",
           "TypeC",
@@ -10840,7 +11219,9 @@
           "LiteralC",
           "<\"*\">, ",
           "StringC",
-          "]>; }>, ",
+          "]>; index: ",
+          "StringC",
+          "; }>, ",
           "PartialC",
           "<{ goodStatusCodes: ",
           "ArrayC",
@@ -10854,9 +11235,7 @@
           "LiteralC",
           "<\"4xx\">, ",
           "LiteralC",
-          "<\"5xx\">]>>; index: ",
-          "StringC",
-          "; filter: ",
+          "<\"5xx\">]>>; filter: ",
           "StringC",
           "; }>]>; }>, ",
           "TypeC",
@@ -10954,7 +11333,11 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; }>; }>; }>, ",
+          ", string, unknown>; }>; tags: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>; }>, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10962,7 +11345,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; } & { index?: string | undefined; filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; createdAt: string; updatedAt: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10970,7 +11353,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
+          ">; \"GET /api/observability/slos/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10992,7 +11375,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; } & { index?: string | undefined; filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -11000,7 +11383,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"GET /api/observability/slos\"?: ",
+          ">; \"GET /api/observability/slos\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -11040,7 +11423,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; } & { index?: string | undefined; filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; index?: string | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
+          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -11048,7 +11431,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /internal/observability/slos/_historical_summary\"?: ",
+          ">; \"POST /internal/observability/slos/_historical_summary\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -11080,7 +11463,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /api/observability/slos/{id}/enable\"?: ",
+          ">; \"POST /api/observability/slos/{id}/enable\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -11110,7 +11493,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /api/observability/slos/{id}/disable\"?: ",
+          ">; \"POST /api/observability/slos/{id}/disable\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -11140,7 +11523,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
+          ">; \"DELETE /api/observability/slos/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -11170,7 +11553,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /api/observability/slos\"?: ",
+          ">; \"POST /api/observability/slos\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -11224,11 +11607,11 @@
           "StringC",
           "]>; threshold: ",
           "NumberC",
+          "; index: ",
+          "StringC",
           "; }>, ",
           "PartialC",
-          "<{ index: ",
-          "StringC",
-          "; filter: ",
+          "<{ filter: ",
           "StringC",
           "; }>]>; }>, ",
           "TypeC",
@@ -11262,7 +11645,9 @@
           "LiteralC",
           "<\"*\">, ",
           "StringC",
-          "]>; }>, ",
+          "]>; index: ",
+          "StringC",
+          "; }>, ",
           "PartialC",
           "<{ goodStatusCodes: ",
           "ArrayC",
@@ -11276,9 +11661,7 @@
           "LiteralC",
           "<\"4xx\">, ",
           "LiteralC",
-          "<\"5xx\">]>>; index: ",
-          "StringC",
-          "; filter: ",
+          "<\"5xx\">]>>; filter: ",
           "StringC",
           "; }>]>; }>, ",
           "TypeC",
@@ -11378,7 +11761,11 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          ", string, unknown>; }>; }>]>; }>, ",
+          ", string, unknown>; }>; tags: ",
+          "ArrayC",
+          "<",
+          "StringC",
+          ">; }>]>; }>, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -11394,7 +11781,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
+          ">; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -13572,7 +13959,7 @@
       "label": "ObservabilityPluginSetup",
       "description": [],
       "signature": [
-        "{ getAlertDetailsConfig(): Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
+        "{ getAlertDetailsConfig(): Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
         {
           "pluginId": "@kbn/core-http-request-handler-context-server",
           "scope": "common",
@@ -13614,6 +14001,72 @@
   "common": {
     "classes": [],
     "functions": [
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.asPercent",
+        "type": "Function",
+        "tags": [],
+        "label": "asPercent",
+        "description": [],
+        "signature": [
+          "(numerator: ",
+          "Maybe",
+          "<number>, denominator: number | undefined, fallbackResult: any) => any"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asPercent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "numerator",
+            "description": [],
+            "signature": [
+              "Maybe",
+              "<number>"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asPercent.$2",
+            "type": "number",
+            "tags": [],
+            "label": "denominator",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asPercent.$3",
+            "type": "Any",
+            "tags": [],
+            "label": "fallbackResult",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "observability",
         "id": "def-common.formatDurationFromTimeUnitChar",
@@ -13674,6 +14127,42 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.getDurationFormatter",
+        "type": "Function",
+        "tags": [],
+        "label": "getDurationFormatter",
+        "description": [],
+        "signature": [
+          "(max: number) => ",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.TimeFormatter",
+            "text": "TimeFormatter"
+          }
+        ],
+        "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getDurationFormatter.$1",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -14564,6 +15053,54 @@
         "path": "x-pack/plugins/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.TimeFormatter",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeFormatter",
+        "description": [],
+        "signature": [
+          "(value: ",
+          "Maybe",
+          "<number>, options?: FormatterOptions | undefined) => ConvertedDuration"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.TimeFormatter.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "number | null | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.TimeFormatter.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "FormatterOptions | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
