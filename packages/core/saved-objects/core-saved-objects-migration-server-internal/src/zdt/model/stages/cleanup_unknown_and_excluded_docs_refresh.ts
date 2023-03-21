@@ -10,8 +10,8 @@ import * as Either from 'fp-ts/lib/Either';
 import { throwBadResponse } from '../../../model/helpers';
 import type { ModelStage } from '../types';
 
-export const refreshIndexAfterCleanup: ModelStage<
-  'REFRESH_INDEX_AFTER_CLEANUP',
+export const cleanupUnknownAndExcludedDocsRefresh: ModelStage<
+  'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH',
   'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {

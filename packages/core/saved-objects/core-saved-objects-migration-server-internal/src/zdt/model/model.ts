@@ -33,7 +33,7 @@ export const modelStageMap: ModelStageMap = {
   SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES: Stages.setDocMigrationStartedWaitForInstances,
   CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS: Stages.cleanupUnknownAndExcludedDocs,
   CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK: Stages.cleanupUnknownAndExcludedDocsWaitForTask,
-  REFRESH_INDEX_AFTER_CLEANUP: Stages.refreshIndexAfterCleanup,
+  CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH: Stages.cleanupUnknownAndExcludedDocsRefresh,
   OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: Stages.outdatedDocumentsSearchOpenPit,
   OUTDATED_DOCUMENTS_SEARCH_READ: Stages.outdatedDocumentsSearchRead,
   OUTDATED_DOCUMENTS_SEARCH_TRANSFORM: Stages.outdatedDocumentsSearchTransform,

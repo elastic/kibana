@@ -24,7 +24,7 @@ import type {
   OutdatedDocumentsSearchOpenPitState,
   OutdatedDocumentsSearchReadState,
   OutdatedDocumentsSearchTransformState,
-  RefreshIndexAfterCleanupState,
+  CleanupUnknownAndExcludedDocsRefreshState,
   SetDocMigrationStartedState,
   SetDocMigrationStartedWaitForInstancesState,
   OutdatedDocumentsSearchRefreshState,
@@ -128,7 +128,7 @@ export const nextActionMap = (context: MigratorContext) => {
         taskId: state.deleteTaskId,
         timeout: '120s',
       }),
-    REFRESH_INDEX_AFTER_CLEANUP: (state: RefreshIndexAfterCleanupState) =>
+    CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH: (state: CleanupUnknownAndExcludedDocsRefreshState) =>
       Actions.refreshIndex({
         client,
         index: state.currentIndex,

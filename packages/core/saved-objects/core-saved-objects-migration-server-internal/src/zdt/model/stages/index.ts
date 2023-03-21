@@ -18,7 +18,7 @@ export { setDocMigrationStarted } from './set_doc_migration_started';
 export { setDocMigrationStartedWaitForInstances } from './set_doc_migration_started_wait_for_instances';
 export { cleanupUnknownAndExcludedDocs } from './cleanup_unknown_and_excluded_docs';
 export { cleanupUnknownAndExcludedDocsWaitForTask } from './cleanup_unknown_and_excluded_docs_wait_for_task';
-export { refreshIndexAfterCleanup } from './refresh_index_after_cleanup';
+export { cleanupUnknownAndExcludedDocsRefresh } from './cleanup_unknown_and_excluded_docs_refresh';
 export { outdatedDocumentsSearchOpenPit } from './outdated_documents_search_open_pit';
 export { outdatedDocumentsSearchRead } from './outdated_documents_search_read';
 export { outdatedDocumentsSearchTransform } from './outdated_documents_search_transform';

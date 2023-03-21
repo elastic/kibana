@@ -27,7 +27,7 @@ export type {
   SetDocMigrationStartedWaitForInstancesState,
   CleanupUnknownAndExcludedDocsState,
   CleanupUnknownAndExcludedDocsWaitForTaskState,
-  RefreshIndexAfterCleanupState,
+  CleanupUnknownAndExcludedDocsRefreshState,
   OutdatedDocumentsSearchOpenPitState,
   OutdatedDocumentsSearchReadState,
   OutdatedDocumentsSearchTransformState,

@@ -13,7 +13,10 @@ import type { ModelStage } from '../types';
 
 export const cleanupUnknownAndExcludedDocsWaitForTask: ModelStage<
   'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK',
-  'REFRESH_INDEX_AFTER_CLEANUP' | 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS' | 'FATAL'
+  | 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH'
+  | 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS'
+  | 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT'
+  | 'FATAL'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     if (isTypeof(res.left, 'wait_for_task_completion_timeout')) {
@@ -29,13 +32,14 @@ export const cleanupUnknownAndExcludedDocsWaitForTask: ModelStage<
         return {
           ...state,
           controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS',
+          hasDeletedDocs: true,
           retryCount,
           retryDelay,
           logs: [
             ...state.logs,
             {
               level: 'warning',
-              message: `Errors occurred whilst deleting unwanted documents. Another instance is probably updating or deleting documents in the same index. Retrying attempt ${retryCount}.`,
+              message: `Errors occurred whilst deleting unwanted documents. Retrying attempt ${retryCount}.`,
             },
           ],
         };
@@ -55,8 +59,18 @@ export const cleanupUnknownAndExcludedDocsWaitForTask: ModelStage<
     }
   }
 
-  return {
-    ...state,
-    controlState: 'REFRESH_INDEX_AFTER_CLEANUP',
-  };
+  const mustRefresh =
+    state.hasDeletedDocs || typeof res.right.deleted === 'undefined' || res.right.deleted > 0;
+
+  if (mustRefresh) {
+    return {
+      ...state,
+      controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH',
+    };
+  } else {
+    return {
+      ...state,
+      controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+    };
+  }
 };

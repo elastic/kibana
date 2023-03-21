@@ -122,15 +122,17 @@ export interface SetDocMigrationStartedWaitForInstancesState extends PostDocInit
 
 export interface CleanupUnknownAndExcludedDocsState extends PostDocInitState {
   readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS';
+  readonly hasDeletedDocs?: boolean;
 }
 
 export interface CleanupUnknownAndExcludedDocsWaitForTaskState extends PostDocInitState {
   readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK';
   readonly deleteTaskId: string;
+  readonly hasDeletedDocs?: boolean;
 }
 
-export interface RefreshIndexAfterCleanupState extends PostDocInitState {
-  readonly controlState: 'REFRESH_INDEX_AFTER_CLEANUP';
+export interface CleanupUnknownAndExcludedDocsRefreshState extends PostDocInitState {
+  readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH';
 }
 
 export interface OutdatedDocumentsSearchOpenPitState extends PostDocInitState {
@@ -195,7 +197,7 @@ export type State =
   | SetDocMigrationStartedWaitForInstancesState
   | CleanupUnknownAndExcludedDocsState
   | CleanupUnknownAndExcludedDocsWaitForTaskState
-  | RefreshIndexAfterCleanupState
+  | CleanupUnknownAndExcludedDocsRefreshState
   | OutdatedDocumentsSearchOpenPitState
   | OutdatedDocumentsSearchReadState
   | OutdatedDocumentsSearchTransformState
@@ -227,7 +229,7 @@ export interface ControlStateMap {
   SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES: SetDocMigrationStartedWaitForInstancesState;
   CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS: CleanupUnknownAndExcludedDocsState;
   CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK: CleanupUnknownAndExcludedDocsWaitForTaskState;
-  REFRESH_INDEX_AFTER_CLEANUP: RefreshIndexAfterCleanupState;
+  CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH: CleanupUnknownAndExcludedDocsRefreshState;
   OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: OutdatedDocumentsSearchOpenPitState;
   OUTDATED_DOCUMENTS_SEARCH_READ: OutdatedDocumentsSearchReadState;
   OUTDATED_DOCUMENTS_SEARCH_TRANSFORM: OutdatedDocumentsSearchTransformState;
