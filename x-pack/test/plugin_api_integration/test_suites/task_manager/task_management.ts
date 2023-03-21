@@ -10,15 +10,12 @@ import { random } from 'lodash';
 import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import TaskManagerMapping from '@kbn/task-manager-plugin/server/saved_objects/mappings.json';
-import { DEFAULT_POLL_INTERVAL } from '@kbn/task-manager-plugin/server/config';
 import { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const {
   task: { properties: taskManagerIndexMapping },
 } = TaskManagerMapping;
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export interface RawDoc {
   _id: string;
