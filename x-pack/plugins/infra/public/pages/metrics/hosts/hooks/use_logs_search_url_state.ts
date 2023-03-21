@@ -16,15 +16,6 @@ const DEFAULT_QUERY = {
   query: '',
 };
 
-export const useLogsSearchUrlState = (): [LogsUrlState, LogsUrlStateUpdater] => {
-  return useUrlState<LogsUrlState>({
-    defaultState: DEFAULT_QUERY,
-    decodeUrlState: decodeUrlState(DEFAULT_QUERY),
-    encodeUrlState,
-    urlStateKey: 'logsQuery',
-  });
-};
-
 type LogsUrlStateUpdater = (newState: LogsUrlState) => void;
 
 const LogsQueryStateRT = rt.type({
@@ -38,3 +29,12 @@ const decodeUrlState = (defaultValue: LogsUrlState) => (value: unknown) => {
 };
 
 export type LogsUrlState = rt.TypeOf<typeof LogsQueryStateRT>;
+
+export const useLogsSearchUrlState = (): [LogsUrlState, LogsUrlStateUpdater] => {
+  return useUrlState<LogsUrlState>({
+    defaultState: DEFAULT_QUERY,
+    decodeUrlState: decodeUrlState(DEFAULT_QUERY),
+    encodeUrlState,
+    urlStateKey: 'logsQuery',
+  });
+};

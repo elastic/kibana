@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch } from '@elastic/eui';
 import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state';
 
+const debounceIntervalInMs = 1000;
+
 export const LogsSearchBar = () => {
   const [filterQuery, setFilterQuery] = useLogsSearchUrlState();
   const [searchText, setSearchText] = useState(filterQuery.query);
@@ -25,6 +27,7 @@ export const LogsSearchBar = () => {
 
   return (
     <EuiFieldSearch
+      data-test-subj="hostsView-logs-text-field-search"
       fullWidth
       isClearable
       placeholder={i18n.translate('xpack.infra.hostsViewPage.tabs.logs.textFieldPlaceholder', {
@@ -35,5 +38,3 @@ export const LogsSearchBar = () => {
     />
   );
 };
-
-const debounceIntervalInMs = 1000;

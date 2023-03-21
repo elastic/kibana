@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SnapshotNode } from '../../../../../../../common/http_api';
 import { LogStream } from '../../../../../../components/log_stream';
@@ -31,7 +31,7 @@ export const LogsTabContent = () => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-logs">
-      <EuiFlexGroup gutterSize={'m'} alignItems={'center'} responsive={false}>
+      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
         <EuiFlexItem>
           <LogsSearchBar />
         </EuiFlexItem>

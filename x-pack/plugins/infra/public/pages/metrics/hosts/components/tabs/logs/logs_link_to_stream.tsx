@@ -51,7 +51,12 @@ export const LogsLinkToStream = ({
 
   return (
     <RedirectAppLinks coreStart={services}>
-      <EuiButtonEmpty href={viewInLogsUrl} iconType="popout" flush="both">
+      <EuiButtonEmpty
+        href={viewInLogsUrl}
+        data-test-subj="hostsView-logs-link-to-stream-button"
+        iconType="popout"
+        flush="both"
+      >
         <FormattedMessage
           id="xpack.infra.hostsViewPage.tabs.logs.openInLogsUiLinkText"
           defaultMessage="Open in Logs"
