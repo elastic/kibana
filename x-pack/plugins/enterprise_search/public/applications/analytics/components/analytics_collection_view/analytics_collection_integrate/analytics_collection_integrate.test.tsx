@@ -18,9 +18,7 @@ import { AnalyticsCollectionIntegrate } from './analytics_collection_integrate';
 
 describe('AnalyticsCollectionIntegrate', () => {
   const analyticsCollections: AnalyticsCollection = {
-    event_retention_day_length: 180,
     events_datastream: 'analytics-events-example',
-    id: '1',
     name: 'example',
   };
 
@@ -44,7 +42,7 @@ describe('AnalyticsCollectionIntegrate', () => {
       <AnalyticsCollectionIntegrate collection={analyticsCollections} />
     );
     expect(wrapper.find(EuiCodeBlock).at(0).text()).toContain(
-      'data-dsn="/api/analytics/collections/1"'
+      'data-dsn="/api/analytics/collections/example"'
     );
     expect(wrapper.find(EuiCodeBlock).at(0).text()).toContain('src="/analytics.js"');
   });
