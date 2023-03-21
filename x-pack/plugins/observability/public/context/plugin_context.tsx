@@ -9,7 +9,7 @@ import { AppMountParameters } from '@kbn/core/public';
 import { createContext } from 'react';
 import { ObservabilityRuleTypeRegistry } from '../plugin/rule_registry/create_observability_rule_type_registry';
 import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
-import { ConfigSchema } from '../plugin';
+import type { ConfigSchema } from '../plugin/plugin';
 
 export interface PluginContextValue {
   config: ConfigSchema;

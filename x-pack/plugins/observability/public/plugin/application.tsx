@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
@@ -21,13 +21,13 @@ import {
   RedirectAppLinks,
 } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { HasDataContextProvider } from '../context/has_data_context';
 import { PluginContext } from '../context/plugin_context';
-import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { routes } from '../routes/routes';
-import { ObservabilityRuleTypeRegistry } from './rule_registry/create_observability_rule_type_registry';
+import type { ConfigSchema, ObservabilityPublicPluginsStart } from './plugin';
+import type { ObservabilityRuleTypeRegistry } from './rule_registry/create_observability_rule_type_registry';
+import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
 
 function App() {
   return (

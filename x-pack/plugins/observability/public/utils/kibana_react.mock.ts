@@ -6,7 +6,7 @@
  */
 
 import { coreMock, notificationServiceMock, overlayServiceMock } from '@kbn/core/public/mocks';
-import { observabilityPublicPluginsStartMock } from '../plugin.mock';
+import { observabilityPublicPluginsStartMock } from '../plugin/plugin.mock';
 
 export const kibanaStartMock = {
   startContract() {

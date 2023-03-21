@@ -8,10 +8,10 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 
-import { ConfigSchema } from '../../plugin';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import { SLO_BURN_RATE_RULE_ID } from '../../../common/constants';
 import { validateBurnRateRule } from '../../components/app/burn_rate_rule_editor/validation';
+import type { ConfigSchema } from '../plugin';
 
 export const registerObservabilityRuleTypes = (
   config: ConfigSchema,

@@ -19,6 +19,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
+import { CasesDeepLinkId, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
@@ -26,7 +27,6 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CasesUiStart } from '@kbn/cases-plugin/public';
-import { CasesDeepLinkId, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
@@ -42,21 +42,21 @@ import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { RuleDetailsLocatorDefinition } from './routes/locators/rule_details';
-import { observabilityAppId, observabilityFeatureId } from '../common';
-import { createLazyObservabilityPageTemplate } from './components/shared';
-import { registerDataHandler } from './routes/pages/overview/helpers/data_handler';
-import { createObservabilityRuleTypeRegistry } from './plugin/rule_registry/create_observability_rule_type_registry';
-import type { ObservabilityRuleTypeRegistry } from './plugin/rule_registry/create_observability_rule_type_registry';
-import { createNavigationRegistry } from './plugin/navigation_registry/navigation_registry';
-import type { NavigationEntry } from './plugin/navigation_registry/navigation_registry';
-import { updateGlobalNavigation } from './plugin/navigation_registry/update_global_navigation';
-import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
-import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
-import { createUseRulesLink } from './hooks/create_use_rules_link';
-import getAppDataView from './utils/observability_data_views/get_app_data_view';
-import { registerObservabilityRuleTypes } from './plugin/rule_registry/register_observability_rule_types';
-import { CASES_URL } from './routes/routes';
+import { RuleDetailsLocatorDefinition } from '../routes/locators/rule_details';
+import { registerDataHandler } from '../routes/pages/overview/helpers/data_handler';
+import { createNavigationRegistry } from './navigation_registry/navigation_registry';
+import type { NavigationEntry } from './navigation_registry/navigation_registry';
+import { updateGlobalNavigation } from './navigation_registry/update_global_navigation';
+import { createObservabilityRuleTypeRegistry } from './rule_registry/create_observability_rule_type_registry';
+import type { ObservabilityRuleTypeRegistry } from './rule_registry/create_observability_rule_type_registry';
+import { registerObservabilityRuleTypes } from './rule_registry/register_observability_rule_types';
+import { createLazyObservabilityPageTemplate } from '../components/shared';
+import { getExploratoryViewEmbeddable } from '../components/shared/exploratory_view/embeddable';
+import { createExploratoryViewUrl } from '../components/shared/exploratory_view/configurations/exploratory_view_url';
+import { createUseRulesLink } from '../hooks/create_use_rules_link';
+import getAppDataView from '../utils/observability_data_views/get_app_data_view';
+import { observabilityAppId, observabilityFeatureId } from '../../common';
+import { CASES_URL } from '../routes/routes';
 
 export interface ConfigSchema {
   unsafe: {
@@ -189,7 +189,7 @@ export class Plugin
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
-      const { renderApp } = await import('./plugin/application');
+      const { renderApp } = await import('./application');
       // Get start services
       const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
 
@@ -333,7 +333,7 @@ export class Plugin
 
     const getAsyncO11yAlertsTableConfiguration = async () => {
       const { getAlertsTableConfiguration } = await import(
-        './components/alerts_table/get_alerts_table_configuration'
+        '../components/alerts_table/get_alerts_table_configuration'
       );
       return getAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
     };

@@ -18,10 +18,10 @@ import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { AlertDetails } from './alert_details';
-import { ConfigSchema } from '../../../plugin';
 import { alert, alertWithNoData } from '../../../data/alerts/alert';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
 import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConfigSchema } from '../../../plugin/plugin';
 import type { Subset } from '../../../typings/utils';
 
 jest.mock('react-router-dom', () => ({

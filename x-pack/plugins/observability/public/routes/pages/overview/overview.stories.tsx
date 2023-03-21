@@ -24,8 +24,8 @@ import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../../plugin/rule_registry/create_observability_rule_type_registry';
-import { ApmIndicesConfig } from '../../../../common/typings';
-import { ConfigSchema } from '../../../plugin';
+import type { ApmIndicesConfig } from '../../../../common/typings';
+import type { ConfigSchema } from '../../../plugin/plugin';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
