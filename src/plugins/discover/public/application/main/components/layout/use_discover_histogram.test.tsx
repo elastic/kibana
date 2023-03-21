@@ -409,7 +409,7 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
-      expect(sendErrorTo).toHaveBeenCalledWith(mockData, totalHits$);
+      expect(sendErrorTo).toHaveBeenCalledWith(totalHits$);
       expect(totalHits$.value).toEqual({
         fetchStatus: FetchStatus.ERROR,
         error,
