@@ -18,7 +18,7 @@ export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
 // ===================
 // Refresh aggregated monitored stats at a default rate of once a minute
 export const DEFAULT_MONITORING_REFRESH_RATE = 60 * 1000;
-export const DEFAULT_MONITORING_STATS_RUNNING_AVERGAE_WINDOW = 50;
+export const DEFAULT_MONITORING_STATS_RUNNING_AVERAGE_WINDOW = 50;
 export const DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS = 60;
 
 export const taskExecutionFailureThresholdSchema = schema.object(
@@ -98,7 +98,7 @@ export const configSchema = schema.object(
     }),
     /* The size of the running average window for monitored stats. */
     monitored_stats_running_average_window: schema.number({
-      defaultValue: DEFAULT_MONITORING_STATS_RUNNING_AVERGAE_WINDOW,
+      defaultValue: DEFAULT_MONITORING_STATS_RUNNING_AVERAGE_WINDOW,
       max: 100,
       min: 10,
     }),

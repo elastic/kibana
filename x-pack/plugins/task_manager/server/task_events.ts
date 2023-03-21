@@ -9,7 +9,7 @@ import { monitorEventLoopDelay } from 'perf_hooks';
 
 import { ConcreteTaskInstance } from './task';
 
-import { Result, Err } from './lib/result_type';
+import { Result, Err, asOk } from './lib/result_type';
 import { ClaimAndFillPoolResult } from './lib/fill_pool';
 import { PollingError } from './polling';
 import { TaskRunResult } from './task_running';
@@ -87,7 +87,8 @@ export type TaskManagerStats =
   | 'pollingDelay'
   | 'claimDuration'
   | 'queuedEphemeralTasks'
-  | 'ephemeralTaskDelay';
+  | 'ephemeralTaskDelay'
+  | 'workerUtilization';
 export type TaskManagerStat = TaskEvent<number, never, TaskManagerStats>;
 
 export type OkResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>
@@ -172,6 +173,10 @@ export function asTaskManagerStatEvent(
   };
 }
 
+export function asTaskManagerAtCapacityStatEvent(): TaskManagerStat {
+  return asTaskManagerStatEvent('workerUtilization', asOk(100));
+}
+
 export function asEphemeralTaskRejectedDueToCapacityEvent(
   id: string,
   event: Result<EphemeralTaskInstanceRequest, Error>,
@@ -210,6 +215,11 @@ export function isTaskManagerStatEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskManagerStat {
   return taskEvent.type === TaskEventType.TASK_MANAGER_STAT;
+}
+export function isTaskManagerWorkerUtilizationStatEvent(
+  taskEvent: TaskEvent<unknown, unknown>
+): taskEvent is TaskManagerStat {
+  return taskEvent.type === TaskEventType.TASK_MANAGER_STAT && taskEvent.id === 'workerUtilization';
 }
 export function isEphemeralTaskRejectedDueToCapacityEvent(
   taskEvent: TaskEvent<unknown, unknown>

@@ -64,7 +64,7 @@ export function backgroundTaskUtilizationRoute(
   function getBackgroundTaskUtilization(monitoredStats: MonitoringStats) {
     const summarizedStats = summarizeUtilizationStats({
       last_update: monitoredStats.last_update,
-      stats: monitoredStats.stats.utilization,
+      monitored_stats: monitoredStats.stats.utilization,
     });
     const now = Date.now();
     const timestamp = new Date(now).toISOString();
