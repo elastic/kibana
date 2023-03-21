@@ -46,8 +46,14 @@ export function extractDocumentation(fileNames: string[]): Map<string, DocEntry[
   function visit(node: ts.Node) {
     if (isNodeExported(node) && ts.isVariableDeclaration(node)) {
       const schemaName = node.name.getText();
-      const schemaType = checker.getTypeAtLocation(node);
-      result.set(schemaName, extractDocEntries(schemaType!));
+      try {
+        const schemaType = checker.getTypeAtLocation(node);
+        result.set(schemaName, extractDocEntries(schemaType!));
+      } catch (e) {
+        // FIXME TypeError: Cannot read properties of undefined (reading 'flags')
+        // eslint-disable-next-line no-console
+        console.error(e, 'Unable to extract type at location');
+      }
     }
 
     if (node.getChildCount() > 0) {
