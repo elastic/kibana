@@ -125,7 +125,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [clickedItemIndex, setClickedItemIndex] = useState(0);
 
-  const onFlyoutClose = () => setIsFlyoutOpen(false);
+  const closeFlyout = () => setIsFlyoutOpen(false);
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
@@ -227,5 +227,5 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
     [clickedItemIndex, isFlyoutOpen, reportHostEntryClick, time]
   );
 
-  return { columns, items, isFlyoutOpen, onFlyoutClose, clickedItemIndex };
+  return { columns, items, isFlyoutOpen, closeFlyout, clickedItemIndex };
 };

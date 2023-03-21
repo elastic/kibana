@@ -14,12 +14,12 @@ import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
 interface Props {
   node: HostNodeRow;
-  onFlyoutClose: () => void;
+  closeFlyout: () => void;
 }
 
 const flyoutTabs = [MetadataTab]
 
-export const Flyout = ({ node, onFlyoutClose }: Props) => {
+export const Flyout = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
 
   const { to, from } = getDateRangeAsTimestamp();
@@ -43,7 +43,7 @@ export const Flyout = ({ node, onFlyoutClose }: Props) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   return (
-    <EuiFlyout onClose={onFlyoutClose} ownFocus={false}>
+    <EuiFlyout onClose={closeFlyout} ownFocus={false}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="xs">
           <h2>{node.name}</h2>

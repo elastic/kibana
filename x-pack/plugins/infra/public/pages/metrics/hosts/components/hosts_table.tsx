@@ -22,7 +22,7 @@ export const HostsTable = () => {
   const { onSubmit, searchCriteria } = useUnifiedSearchContext();
   const [properties, setProperties] = useTableProperties();
 
-  const { columns, items, isFlyoutOpen, onFlyoutClose, clickedItemIndex } = useHostsTable(
+  const { columns, items, isFlyoutOpen, closeFlyout, clickedItemIndex } = useHostsTable(
     hostNodes,
     {
       time: searchCriteria.dateRange,
@@ -99,7 +99,7 @@ export const HostsTable = () => {
       {isFlyoutOpen && (
         <Flyout
           node={items[clickedItemIndex]}
-          onFlyoutClose={onFlyoutClose}
+          closeFlyout={closeFlyout}
         />
       )}
     </>
