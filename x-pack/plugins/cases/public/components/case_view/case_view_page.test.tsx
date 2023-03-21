@@ -112,6 +112,44 @@ export const caseClosedProps: CaseViewPageProps = {
 };
 
 describe('CaseViewPage', () => {
+  // eslint-disable-next-line prefer-object-spread
+  const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+
+  beforeAll(() => {
+    // The JSDOM implementation is too slow
+    // Especially for dropdowns that try to position themselves
+    // perf issue - https://github.com/jsdom/jsdom/issues/3234
+    Object.defineProperty(window, 'getComputedStyle', {
+      value: (el: HTMLElement) => {
+        /**
+         * This is based on the jsdom implementation of getComputedStyle
+         * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+         *
+         * It is missing global style parsing and will only return styles applied directly to an element.
+         * Will not return styles that are global or from emotion
+         */
+        const declaration = new CSSStyleDeclaration();
+        const { style } = el;
+
+        Array.prototype.forEach.call(style, (property: string) => {
+          declaration.setProperty(
+            property,
+            style.getPropertyValue(property),
+            style.getPropertyPriority(property)
+          );
+        });
+
+        return declaration;
+      },
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+  });
+
   const updateCaseProperty = defaultUpdateCaseState.updateCaseProperty;
   const pushCaseToExternalService = jest.fn();
   const data = caseProps.caseData;
@@ -198,9 +236,11 @@ describe('CaseViewPage', () => {
     const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
     const dropdown = result.getByTestId('case-view-status-dropdown');
-    userEvent.click(dropdown.querySelector('button')!);
+    userEvent.click(dropdown.querySelector('button')!, undefined, { skipPointerEventsCheck: true });
     await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('case-view-status-dropdown-closed'));
+    userEvent.click(result.getByTestId('case-view-status-dropdown-closed'), undefined, {
+      skipPointerEventsCheck: true,
+    });
     const updateObject = updateCaseProperty.mock.calls[0][0];
 
     await waitFor(() => {
@@ -247,10 +287,14 @@ describe('CaseViewPage', () => {
   it('should update title', async () => {
     const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
     const newTitle = 'The new title';
-    userEvent.click(result.getByTestId('editable-title-edit-icon'));
+    userEvent.click(result.getByTestId('editable-title-edit-icon'), undefined, {
+      skipPointerEventsCheck: true,
+    });
     userEvent.clear(result.getByTestId('editable-title-input-field'));
-    userEvent.type(result.getByTestId('editable-title-input-field'), newTitle);
-    userEvent.click(result.getByTestId('editable-title-submit-btn'));
+    userEvent.paste(result.getByTestId('editable-title-input-field'), newTitle);
+    userEvent.click(result.getByTestId('editable-title-submit-btn'), undefined, {
+      skipPointerEventsCheck: true,
+    });
 
     const updateObject = updateCaseProperty.mock.calls[0][0];
     await waitFor(() => {
@@ -275,7 +319,9 @@ describe('CaseViewPage', () => {
 
     expect(result.getByTestId('push-to-external-service')).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId('push-to-external-service'));
+    userEvent.click(result.getByTestId('push-to-external-service'), undefined, {
+      skipPointerEventsCheck: true,
+    });
 
     await waitFor(() => {
       expect(pushCaseToExternalService).toHaveBeenCalled();
@@ -311,16 +357,24 @@ describe('CaseViewPage', () => {
         }}
       />
     );
-    userEvent.click(result.getByTestId('connector-edit').querySelector('button')!);
-    userEvent.click(result.getByTestId('dropdown-connectors'));
+    userEvent.click(result.getByTestId('connector-edit').querySelector('button')!, undefined, {
+      skipPointerEventsCheck: true,
+    });
+    userEvent.click(result.getByTestId('dropdown-connectors'), undefined, {
+      skipPointerEventsCheck: true,
+    });
     await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('dropdown-connector-resilient-2'));
+    userEvent.click(result.getByTestId('dropdown-connector-resilient-2'), undefined, {
+      skipPointerEventsCheck: true,
+    });
 
     await waitFor(() => {
       expect(result.getByTestId('connector-fields-resilient')).toBeInTheDocument();
     });
 
-    userEvent.click(result.getByTestId('edit-connectors-submit'));
+    userEvent.click(result.getByTestId('edit-connectors-submit'), undefined, {
+      skipPointerEventsCheck: true,
+    });
 
     await waitFor(() => {
       expect(updateCaseProperty).toHaveBeenCalledTimes(1);
@@ -374,7 +428,9 @@ describe('CaseViewPage', () => {
       <CaseViewPage {...caseProps} showAlertDetails={showAlertDetails} />
     );
 
-    userEvent.click(result.getByTestId('comment-action-show-alert-alert-action-id'));
+    userEvent.click(result.getByTestId('comment-action-show-alert-alert-action-id'), undefined, {
+      skipPointerEventsCheck: true,
+    });
 
     await waitFor(() => {
       expect(showAlertDetails).toHaveBeenCalledWith('alert-id-1', 'alert-index-1');
@@ -395,7 +451,9 @@ describe('CaseViewPage', () => {
 
   it('should update settings', async () => {
     const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-    userEvent.click(result.getByTestId('sync-alerts-switch'));
+    userEvent.click(result.getByTestId('sync-alerts-switch'), undefined, {
+      skipPointerEventsCheck: true,
+    });
     const updateObject = updateCaseProperty.mock.calls[0][0];
 
     await waitFor(() => {
@@ -434,17 +492,7 @@ describe('CaseViewPage', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/149775
-  // FLAKY: https://github.com/elastic/kibana/issues/149776
-  // FLAKY: https://github.com/elastic/kibana/issues/149777
-  // FLAKY: https://github.com/elastic/kibana/issues/149778
-  // FLAKY: https://github.com/elastic/kibana/issues/149779
-  // FLAKY: https://github.com/elastic/kibana/issues/149780
-  // FLAKY: https://github.com/elastic/kibana/issues/149781
-  // FLAKY: https://github.com/elastic/kibana/issues/149782
-  // FLAKY: https://github.com/elastic/kibana/issues/153335
-  // FLAKY: https://github.com/elastic/kibana/issues/153336
-  describe.skip('Tabs', () => {
+  describe('Tabs', () => {
     jest.mock('@kbn/kibana-react-plugin/public', () => ({
       useKibana: () => ({
         services: {
@@ -482,6 +530,7 @@ describe('CaseViewPage', () => {
         },
       }),
     }));
+
     it('renders tabs correctly', async () => {
       const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
       await act(async () => {
@@ -537,7 +586,9 @@ describe('CaseViewPage', () => {
     it('navigates to the activity tab when the activity tab is clicked', async () => {
       const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
       const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-      userEvent.click(result.getByTestId('case-view-tab-title-activity'));
+      userEvent.click(result.getByTestId('case-view-tab-title-activity'), undefined, {
+        skipPointerEventsCheck: true,
+      });
       await act(async () => {
         expect(navigateToCaseViewMock).toHaveBeenCalledWith({
           detailName: caseData.id,
@@ -549,7 +600,9 @@ describe('CaseViewPage', () => {
     it('navigates to the alerts tab when the alerts tab is clicked', async () => {
       const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
       const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
-      userEvent.click(result.getByTestId('case-view-tab-title-alerts'));
+      userEvent.click(result.getByTestId('case-view-tab-title-alerts'), undefined, {
+        skipPointerEventsCheck: true,
+      });
       await act(async () => {
         expect(navigateToCaseViewMock).toHaveBeenCalledWith({
           detailName: caseData.id,
@@ -623,15 +676,23 @@ describe('CaseViewPage', () => {
 
         appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-        userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
+        userEvent.click(
+          await screen.findByTestId('user-actions-filter-activity-button-all'),
+          undefined,
+          { skipPointerEventsCheck: true }
+        );
 
-        userEvent.type(await screen.findByTestId('euiMarkdownEditorTextArea'), newComment);
+        userEvent.paste(await screen.findByTestId('euiMarkdownEditorTextArea'), newComment);
 
-        userEvent.click(await screen.findByTestId('editable-description-edit-icon'));
+        userEvent.click(await screen.findByTestId('editable-description-edit-icon'), undefined, {
+          skipPointerEventsCheck: true,
+        });
 
-        userEvent.type(screen.getAllByTestId('euiMarkdownEditorTextArea')[0], 'Edited!');
+        userEvent.paste(screen.getAllByTestId('euiMarkdownEditorTextArea')[0], 'Edited!');
 
-        userEvent.click(screen.getByTestId('user-action-save-markdown'));
+        userEvent.click(screen.getByTestId('user-action-save-markdown'), undefined, {
+          skipPointerEventsCheck: true,
+        });
 
         expect(await screen.findByTestId('euiMarkdownEditorTextArea')).toHaveTextContent(
           newComment
