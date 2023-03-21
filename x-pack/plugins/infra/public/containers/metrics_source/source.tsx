@@ -13,6 +13,7 @@ import type {
   MetricsSourceConfigurationResponse,
   MetricsSourceConfiguration,
   PartialMetricsSourceConfigurationProperties,
+  MetricsSourceStatus,
 } from '../../../common/metrics_sources';
 
 import { useTrackedPromise } from '../../utils/use_tracked_promise';

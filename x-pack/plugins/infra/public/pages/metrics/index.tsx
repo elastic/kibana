@@ -33,7 +33,6 @@ import { SourceLoadingPage } from '../../components/source_loading_page';
 import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options';
 import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters';
-
 import { MetricsAlertDropdown } from '../../alerting/common/components/metrics_alert_dropdown';
 import { SavedViewProvider } from '../../containers/saved_view/saved_view';
 import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
