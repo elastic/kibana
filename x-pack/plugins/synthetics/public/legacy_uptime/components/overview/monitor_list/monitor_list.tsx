@@ -157,7 +157,13 @@ export const MonitorListComponent: ({
         name: URL_LABEL,
         width: '30%',
         render: (url: string) => (
-          <EuiLink href={url} target="_blank" color="text" external>
+          <EuiLink
+            data-test-subj="syntheticsColumnsLink"
+            href={url}
+            target="_blank"
+            color="text"
+            external
+          >
             {url}
           </EuiLink>
         ),

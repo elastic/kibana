@@ -137,7 +137,7 @@ const ArrayValue = (props: MoreProps) => {
             {' ... '}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiLink onClick={expand}>
+            <EuiLink data-test-subj="infraArrayValueCountMoreLink" onClick={expand}>
               <FormattedMessage
                 id="xpack.infra.nodeDetails.tabs.metadata.seeMore"
                 defaultMessage="+{count} more"
@@ -154,7 +154,7 @@ const ArrayValue = (props: MoreProps) => {
           {values.map((v) => (
             <div key={v}>{v}</div>
           ))}
-          <EuiLink onClick={collapse}>
+          <EuiLink data-test-subj="infraArrayValueShowLessLink" onClick={collapse}>
             {i18n.translate('xpack.infra.nodeDetails.tabs.metadata.seeLess', {
               defaultMessage: 'Show less',
             })}

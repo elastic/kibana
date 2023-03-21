@@ -114,6 +114,7 @@ export const NodeContextPopover = ({
                   {canCreateAlerts && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
+                        data-test-subj="infraNodeContextPopoverCreateInventoryRuleButton"
                         onClick={openAlertFlyout}
                         size="xs"
                         iconSide={'left'}
@@ -129,6 +130,7 @@ export const NodeContextPopover = ({
                   )}
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-test-subj="infraNodeContextPopoverOpenAsPageButton"
                       size="xs"
                       iconSide={'left'}
                       iconType={'popout'}

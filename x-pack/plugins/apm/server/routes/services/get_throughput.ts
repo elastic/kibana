@@ -23,6 +23,7 @@ import {
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { Maybe } from '../../../typings/common';
 
 interface Options {
   environment: string;
@@ -37,6 +38,8 @@ interface Options {
   offset?: string;
 }
 
+export type ServiceThroughputResponse = Array<{ x: number; y: Maybe<number> }>;
+
 export async function getThroughput({
   environment,
   kuery,
@@ -48,7 +51,7 @@ export async function getThroughput({
   start,
   end,
   offset,
-}: Options) {
+}: Options): Promise<ServiceThroughputResponse> {
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,

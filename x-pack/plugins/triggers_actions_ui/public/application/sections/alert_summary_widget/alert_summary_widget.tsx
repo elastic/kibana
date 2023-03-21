@@ -16,12 +16,12 @@ import {
 } from './components';
 
 export const AlertSummaryWidget = ({
+  chartProps,
   featureIds,
   filter,
   fullSize,
   onClick = () => {},
   timeRange,
-  chartThemes,
 }: AlertSummaryWidgetProps) => {
   const {
     alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount },
@@ -43,19 +43,19 @@ export const AlertSummaryWidget = ({
       <AlertSummaryWidgetFullSize
         activeAlertCount={activeAlertCount}
         activeAlerts={activeAlerts}
-        recoveredAlertCount={recoveredAlertCount}
+        chartProps={chartProps}
         dateFormat={timeRange.dateFormat}
-        chartThemes={chartThemes}
+        recoveredAlertCount={recoveredAlertCount}
       />
     ) : null
   ) : (
     <AlertSummaryWidgetCompact
       activeAlertCount={activeAlertCount}
       activeAlerts={activeAlerts}
+      chartProps={chartProps}
       onClick={onClick}
       recoveredAlertCount={recoveredAlertCount}
       timeRangeTitle={timeRange.title}
-      chartThemes={chartThemes}
     />
   );
 };
