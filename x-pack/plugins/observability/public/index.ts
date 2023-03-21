@@ -52,7 +52,6 @@ export {
   LoadWhenInView,
   ObservabilityAlertSearchBar,
 } from './components/shared';
-export { ALL_VALUES_SELECTED } from './components/shared/exploratory_view/configurations/constants/url_constants';
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';
 
@@ -140,10 +139,23 @@ export {
 } from './components/shared/exploratory_view/configurations/constants';
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
+export { ALL_VALUES_SELECTED } from './components/shared/exploratory_view/configurations/constants/url_constants';
 export type { AllSeries } from './components/shared/exploratory_view/hooks/use_series_storage';
 export type { SeriesUrl, UrlFilter } from './components/shared/exploratory_view/types';
 export type { ExploratoryEmbeddableProps } from './components/shared/exploratory_view/embeddable/embeddable';
 export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_view/types';
+
+export {
+  ActionMenu,
+  ActionMenuDivider,
+  Section,
+  SectionLink,
+  SectionLinks,
+  SectionSpacer,
+  SectionSubtitle,
+  SectionTitle,
+} from './components/shared/action_menu';
+export type { SectionLinkProps } from './components/shared/action_menu';
 
 export type {
   ObservabilityRuleTypeFormatter,
