@@ -150,8 +150,8 @@ export const useUnifiedSearch = () => {
     [state.filters, state.panelFilters]
   );
   const buildQuery = useCallback(() => {
-    return buildEsQuery(metricsDataView, state.query, getAllFilters());
-  }, [metricsDataView, state.query, getAllFilters]);
+    return buildEsQuery(dataView, state.query, getAllFilters());
+  }, [dataView, state.query, getAllFilters]);
 
   return {
     buildQuery,
