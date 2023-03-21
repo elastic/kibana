@@ -202,9 +202,9 @@
               "APMPluginSetupDependencies",
               ") => { config$: ",
               "Observable",
-              "<Readonly<{} & { autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+              "<Readonly<{} & { indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
               "SearchAggregatedTransactionSetting",
-              "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; forceSyntheticSource: boolean; }>>; getApmIndices: () => Promise<Readonly<{ error: string; onboarding: string; span: string; transaction: string; metric: string; }>>; createApmEventClient: ({ request, context, debug, }: { debug?: boolean | undefined; request: ",
+              "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; }>>; getApmIndices: () => Promise<Readonly<{ error: string; onboarding: string; span: string; transaction: string; metric: string; }>>; createApmEventClient: ({ request, context, debug, }: { debug?: boolean | undefined; request: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -448,9 +448,9 @@
             "label": "config",
             "description": [],
             "signature": [
-              "{ readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
+              "{ readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
               "SearchAggregatedTransactionSetting",
-              "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; readonly forceSyntheticSource: boolean; }"
+              "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly forceSyntheticSource: boolean; }"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false,
@@ -546,7 +546,7 @@
                 "section": "def-server.LicensingPluginStart",
                 "text": "LicensingPluginStart"
               },
-              ">; }; observability: { setup: { getAlertDetailsConfig(): Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
+              ">; }; observability: { setup: { getAlertDetailsConfig(): Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
                 "scope": "common",
@@ -840,9 +840,9 @@
         "label": "APMConfig",
         "description": [],
         "signature": [
-          "{ readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
+          "{ readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
           "SearchAggregatedTransactionSetting",
-          "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; readonly forceSyntheticSource: boolean; }"
+          "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly forceSyntheticSource: boolean; }"
         ],
         "path": "x-pack/plugins/apm/server/index.ts",
         "deprecated": false,
@@ -7719,9 +7719,9 @@
           "description": [],
           "signature": [
             "Observable",
-            "<Readonly<{} & { autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+            "<Readonly<{} & { indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
             "SearchAggregatedTransactionSetting",
-            "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; forceSyntheticSource: boolean; }>>"
+            "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; }>>"
           ],
           "path": "x-pack/plugins/apm/server/types.ts",
           "deprecated": false,

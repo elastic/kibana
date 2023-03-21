@@ -5,20 +5,10 @@
  * 2.0.
  */
 
-import {
-  ClusterPutComponentTemplateRequest,
-  IndicesSimulateIndexTemplateResponse,
-  MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/types';
-import { get, isEmpty, isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { firstValueFrom, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
-import {
-  IndicesGetIndexTemplateIndexTemplateItem,
-  Metadata,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { asyncForEach } from '@kbn/std';
 import {
   DEFAULT_ALERTS_ILM_POLICY_NAME,
   DEFAULT_ALERTS_ILM_POLICY,
@@ -27,9 +17,7 @@ import {
   getComponentTemplate,
   getComponentTemplateName,
   getIndexTemplateAndPattern,
-  IIndexPatternString,
 } from './resource_installer_utils';
-import { retryTransientEsErrors } from './retry_transient_es_errors';
 import { IRuleTypeAlerts } from '../types';
 import {
   createResourceInstallationHelper,
@@ -38,9 +26,16 @@ import {
   ResourceInstallationHelper,
   successResult,
 } from './create_resource_installation_helper';
+import {
+  createOrUpdateIlmPolicy,
+  createOrUpdateComponentTemplate,
+  getIndexTemplate,
+  createOrUpdateIndexTemplate,
+  createConcreteWriteIndex,
+  installWithTimeout,
+} from './lib';
 
-const TOTAL_FIELDS_LIMIT = 2500;
-const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
+export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
 export const ECS_CONTEXT = `ecs`;
 export const ECS_COMPONENT_TEMPLATE_NAME = getComponentTemplateName({ name: ECS_CONTEXT });
@@ -50,12 +45,6 @@ interface AlertsServiceParams {
   kibanaVersion: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   timeoutMs?: number;
-}
-
-interface ConcreteIndexInfo {
-  index: string;
-  alias: string;
-  isWriteIndex: boolean;
 }
 
 interface IAlertsService {
@@ -150,37 +139,57 @@ export class AlertsService implements IAlertsService {
       this.options.logger.debug(`Initializing resources for AlertsService`);
       const esClient = await this.options.elasticsearchClientPromise;
 
-      // Common initialization installs ILM policy and shared component template
+      // Common initialization installs ILM policy and shared component templates
       const initFns = [
-        () => this.createOrUpdateIlmPolicy(esClient),
         () =>
-          this.createOrUpdateComponentTemplate(
+          createOrUpdateIlmPolicy({
+            logger: this.options.logger,
             esClient,
-            getComponentTemplate({ fieldMap: alertFieldMap, includeSettings: true })
-          ),
+            name: DEFAULT_ALERTS_ILM_POLICY_NAME,
+            policy: DEFAULT_ALERTS_ILM_POLICY,
+          }),
         () =>
-          this.createOrUpdateComponentTemplate(
+          createOrUpdateComponentTemplate({
+            logger: this.options.logger,
             esClient,
-            getComponentTemplate({
+            template: getComponentTemplate({ fieldMap: alertFieldMap, includeSettings: true }),
+            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+          }),
+        () =>
+          createOrUpdateComponentTemplate({
+            logger: this.options.logger,
+            esClient,
+            template: getComponentTemplate({
               fieldMap: legacyAlertFieldMap,
               name: LEGACY_ALERT_CONTEXT,
               includeSettings: true,
-            })
-          ),
+            }),
+            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+          }),
         () =>
-          this.createOrUpdateComponentTemplate(
+          createOrUpdateComponentTemplate({
+            logger: this.options.logger,
             esClient,
-            getComponentTemplate({
+            template: getComponentTemplate({
               fieldMap: ecsFieldMap,
               name: ECS_CONTEXT,
               includeSettings: true,
-            })
-          ),
+            }),
+            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+          }),
       ];
 
-      for (const fn of initFns) {
-        await this.installWithTimeout(async () => await fn(), timeoutMs);
-      }
+      // Install in parallel
+      await Promise.all(
+        initFns.map((fn) =>
+          installWithTimeout({
+            installFn: async () => await fn(),
+            pluginStop$: this.options.pluginStop$,
+            logger: this.options.logger,
+            timeoutMs,
+          })
+        )
+      );
 
       this.initialized = true;
       return successResult();
@@ -224,7 +233,13 @@ export class AlertsService implements IAlertsService {
         context,
       });
       initFns.push(
-        async () => await this.createOrUpdateComponentTemplate(esClient, componentTemplate)
+        async () =>
+          await createOrUpdateComponentTemplate({
+            logger: this.options.logger,
+            esClient,
+            template: componentTemplate,
+            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+          })
       );
       componentTemplateRefs.push(componentTemplate.name);
     }
@@ -240,433 +255,36 @@ export class AlertsService implements IAlertsService {
     // Context specific initialization installs index template and write index
     initFns = initFns.concat([
       async () =>
-        await this.createOrUpdateIndexTemplate(
+        await createOrUpdateIndexTemplate({
+          logger: this.options.logger,
           esClient,
-          indexTemplateAndPattern,
-          componentTemplateRefs
-        ),
-      async () => await this.createConcreteWriteIndex(esClient, indexTemplateAndPattern),
+          template: getIndexTemplate(
+            this.options.kibanaVersion,
+            DEFAULT_ALERTS_ILM_POLICY_NAME,
+            indexTemplateAndPattern,
+            componentTemplateRefs,
+            TOTAL_FIELDS_LIMIT
+          ),
+        }),
+      async () =>
+        await createConcreteWriteIndex({
+          logger: this.options.logger,
+          esClient,
+          totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+          indexPatterns: indexTemplateAndPattern,
+        }),
     ]);
 
+    // We want to install these in sequence and not in parallel because
+    // the concrete index depends on the index template which depends on
+    // the component template.
     for (const fn of initFns) {
-      await this.installWithTimeout(async () => await fn(), timeoutMs);
-    }
-  }
-
-  /**
-   * Creates ILM policy if it doesn't already exist, updates it if it does
-   */
-  private async createOrUpdateIlmPolicy(esClient: ElasticsearchClient) {
-    this.options.logger.info(`Installing ILM policy ${DEFAULT_ALERTS_ILM_POLICY_NAME}`);
-
-    try {
-      await retryTransientEsErrors(
-        () =>
-          esClient.ilm.putLifecycle({
-            name: DEFAULT_ALERTS_ILM_POLICY_NAME,
-            body: DEFAULT_ALERTS_ILM_POLICY,
-          }),
-        { logger: this.options.logger }
-      );
-    } catch (err) {
-      this.options.logger.error(
-        `Error installing ILM policy ${DEFAULT_ALERTS_ILM_POLICY_NAME} - ${err.message}`
-      );
-      throw err;
-    }
-  }
-
-  private async getIndexTemplatesUsingComponentTemplate(
-    esClient: ElasticsearchClient,
-    componentTemplateName: string
-  ) {
-    // Get all index templates and filter down to just the ones referencing this component template
-    const { index_templates: indexTemplates } = await esClient.indices.getIndexTemplate();
-    const indexTemplatesUsingComponentTemplate = (indexTemplates ?? []).filter(
-      (indexTemplate: IndicesGetIndexTemplateIndexTemplateItem) =>
-        indexTemplate.index_template.composed_of.includes(componentTemplateName)
-    );
-    await asyncForEach(
-      indexTemplatesUsingComponentTemplate,
-      async (template: IndicesGetIndexTemplateIndexTemplateItem) => {
-        await esClient.indices.putIndexTemplate({
-          name: template.name,
-          body: {
-            ...template.index_template,
-            template: {
-              ...template.index_template.template,
-              settings: {
-                ...template.index_template.template?.settings,
-                'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
-              },
-            },
-          },
-        });
-      }
-    );
-  }
-
-  private async createOrUpdateComponentTemplateHelper(
-    esClient: ElasticsearchClient,
-    template: ClusterPutComponentTemplateRequest
-  ) {
-    try {
-      await esClient.cluster.putComponentTemplate(template);
-    } catch (error) {
-      const reason = error?.meta?.body?.error?.caused_by?.caused_by?.caused_by?.reason;
-      if (reason && reason.match(/Limit of total fields \[\d+\] has been exceeded/) != null) {
-        // This error message occurs when there is an index template using this component template
-        // that contains a field limit setting that using this component template exceeds
-        // Specifically, this can happen for the ECS component template when we add new fields
-        // to adhere to the ECS spec. Individual index templates specify field limits so if the
-        // number of new ECS fields pushes the composed mapping above the limit, this error will
-        // occur. We have to update the field limit inside the index template now otherwise we
-        // can never update the component template
-        await this.getIndexTemplatesUsingComponentTemplate(esClient, template.name);
-
-        // Try to update the component template again
-        await esClient.cluster.putComponentTemplate(template);
-      } else {
-        throw error;
-      }
-    }
-  }
-
-  private async createOrUpdateComponentTemplate(
-    esClient: ElasticsearchClient,
-    template: ClusterPutComponentTemplateRequest
-  ) {
-    this.options.logger.info(`Installing component template ${template.name}`);
-
-    try {
-      await retryTransientEsErrors(
-        () => this.createOrUpdateComponentTemplateHelper(esClient, template),
-        {
-          logger: this.options.logger,
-        }
-      );
-    } catch (err) {
-      this.options.logger.error(
-        `Error installing component template ${template.name} - ${err.message}`
-      );
-      throw err;
-    }
-  }
-
-  /**
-   * Installs index template that uses installed component template
-   * Prior to installation, simulates the installation to check for possible
-   * conflicts. Simulate should return an empty mapping if a template
-   * conflicts with an already installed template.
-   */
-  private async createOrUpdateIndexTemplate(
-    esClient: ElasticsearchClient,
-    indexPatterns: IIndexPatternString,
-    componentTemplateNames: string[]
-  ) {
-    this.options.logger.info(`Installing index template ${indexPatterns.template}`);
-
-    const indexMetadata: Metadata = {
-      kibana: {
-        version: this.options.kibanaVersion,
-      },
-      managed: true,
-      namespace: 'default', // hard-coded to default here until we start supporting space IDs
-    };
-
-    const indexTemplate = {
-      name: indexPatterns.template,
-      body: {
-        index_patterns: [indexPatterns.pattern],
-        composed_of: componentTemplateNames,
-        template: {
-          settings: {
-            auto_expand_replicas: '0-1',
-            hidden: true,
-            'index.lifecycle': {
-              name: DEFAULT_ALERTS_ILM_POLICY_NAME,
-              rollover_alias: indexPatterns.alias,
-            },
-            'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
-          },
-          mappings: {
-            dynamic: false,
-            _meta: indexMetadata,
-          },
-          ...(indexPatterns.secondaryAlias
-            ? {
-                aliases: {
-                  [indexPatterns.secondaryAlias]: {
-                    is_write_index: false,
-                  },
-                },
-              }
-            : {}),
-        },
-        _meta: indexMetadata,
-
-        // TODO - set priority of this template when we start supporting spaces
-      },
-    };
-
-    let mappings: MappingTypeMapping = {};
-    try {
-      // Simulate the index template to proactively identify any issues with the mapping
-      const simulateResponse = await esClient.indices.simulateTemplate(indexTemplate);
-      mappings = simulateResponse.template.mappings;
-    } catch (err) {
-      this.options.logger.error(
-        `Failed to simulate index template mappings for ${indexPatterns.template}; not applying mappings - ${err.message}`
-      );
-      return;
-    }
-
-    if (isEmpty(mappings)) {
-      throw new Error(
-        `No mappings would be generated for ${indexPatterns.template}, possibly due to failed/misconfigured bootstrapping`
-      );
-    }
-
-    try {
-      await retryTransientEsErrors(() => esClient.indices.putIndexTemplate(indexTemplate), {
+      await installWithTimeout({
+        installFn: async () => await fn(),
+        pluginStop$: this.options.pluginStop$,
         logger: this.options.logger,
+        timeoutMs,
       });
-    } catch (err) {
-      this.options.logger.error(
-        `Error installing index template ${indexPatterns.template} - ${err.message}`
-      );
-      throw err;
-    }
-  }
-
-  /**
-   * Updates the underlying mapping for any existing concrete indices
-   */
-  private async updateIndexMappings(
-    esClient: ElasticsearchClient,
-    concreteIndices: ConcreteIndexInfo[]
-  ) {
-    this.options.logger.debug(
-      `Updating underlying mappings for ${concreteIndices.length} indices.`
-    );
-
-    // Update total field limit setting of found indices
-    // Other index setting changes are not updated at this time
-    await Promise.all(
-      concreteIndices.map((index) => this.updateTotalFieldLimitSetting(esClient, index))
-    );
-
-    // Update mappings of the found indices.
-    await Promise.all(
-      concreteIndices.map((index) => this.updateUnderlyingMapping(esClient, index))
-    );
-  }
-
-  private async updateTotalFieldLimitSetting(
-    esClient: ElasticsearchClient,
-    { index, alias }: ConcreteIndexInfo
-  ) {
-    try {
-      await retryTransientEsErrors(
-        () =>
-          esClient.indices.putSettings({
-            index,
-            body: {
-              'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
-            },
-          }),
-        {
-          logger: this.options.logger,
-        }
-      );
-      return;
-    } catch (err) {
-      this.options.logger.error(
-        `Failed to PUT index.mapping.total_fields.limit settings for alias ${alias}: ${err.message}`
-      );
-      throw err;
-    }
-  }
-
-  private async updateUnderlyingMapping(
-    esClient: ElasticsearchClient,
-    { index, alias }: ConcreteIndexInfo
-  ) {
-    let simulatedIndexMapping: IndicesSimulateIndexTemplateResponse;
-    try {
-      simulatedIndexMapping = await esClient.indices.simulateIndexTemplate({
-        name: index,
-      });
-    } catch (err) {
-      this.options.logger.error(
-        `Ignored PUT mappings for alias ${alias}; error generating simulated mappings: ${err.message}`
-      );
-      return;
-    }
-
-    const simulatedMapping = get(simulatedIndexMapping, ['template', 'mappings']);
-
-    if (simulatedMapping == null) {
-      this.options.logger.error(
-        `Ignored PUT mappings for alias ${alias}; simulated mappings were empty`
-      );
-      return;
-    }
-
-    try {
-      await retryTransientEsErrors(
-        () =>
-          esClient.indices.putMapping({
-            index,
-            body: simulatedMapping,
-          }),
-        {
-          logger: this.options.logger,
-        }
-      );
-
-      return;
-    } catch (err) {
-      this.options.logger.error(`Failed to PUT mapping for alias ${alias}: ${err.message}`);
-      throw err;
-    }
-  }
-
-  private async createConcreteWriteIndex(
-    esClient: ElasticsearchClient,
-    indexPatterns: IIndexPatternString
-  ) {
-    this.options.logger.info(`Creating concrete write index - ${indexPatterns.name}`);
-
-    // check if a concrete write index already exists
-    let concreteIndices: ConcreteIndexInfo[] = [];
-    try {
-      // Specify both the index pattern for the backing indices and their aliases
-      // The alias prevents the request from finding other namespaces that could match the -* pattern
-      const response = await esClient.indices.getAlias({
-        index: indexPatterns.pattern,
-        name: indexPatterns.basePattern,
-      });
-
-      concreteIndices = Object.entries(response).flatMap(([index, { aliases }]) =>
-        Object.entries(aliases).map(([aliasName, aliasProperties]) => ({
-          index,
-          alias: aliasName,
-          isWriteIndex: aliasProperties.is_write_index ?? false,
-        }))
-      );
-
-      this.options.logger.debug(
-        `Found ${concreteIndices.length} concrete indices for ${
-          indexPatterns.name
-        } - ${JSON.stringify(concreteIndices)}`
-      );
-    } catch (error) {
-      // 404 is expected if no concrete write indices have been created
-      if (error.statusCode !== 404) {
-        this.options.logger.error(
-          `Error fetching concrete indices for ${indexPatterns.pattern} pattern - ${error.message}`
-        );
-        throw error;
-      }
-    }
-
-    let concreteWriteIndicesExist = false;
-    // if a concrete write index already exists, update the underlying mapping
-    if (concreteIndices.length > 0) {
-      await this.updateIndexMappings(esClient, concreteIndices);
-
-      const concreteIndicesExist = concreteIndices.some(
-        (index) => index.alias === indexPatterns.alias
-      );
-      concreteWriteIndicesExist = concreteIndices.some(
-        (index) => index.alias === indexPatterns.alias && index.isWriteIndex
-      );
-
-      // If there are some concrete indices but none of them are the write index, we'll throw an error
-      // because one of the existing indices should have been the write target.
-      if (concreteIndicesExist && !concreteWriteIndicesExist) {
-        throw new Error(
-          `Indices matching pattern ${indexPatterns.pattern} exist but none are set as the write index for alias ${indexPatterns.alias}`
-        );
-      }
-    }
-
-    // check if a concrete write index already exists
-    if (!concreteWriteIndicesExist) {
-      try {
-        await retryTransientEsErrors(
-          () =>
-            esClient.indices.create({
-              index: indexPatterns.name,
-              body: {
-                aliases: {
-                  [indexPatterns.alias]: {
-                    is_write_index: true,
-                  },
-                },
-              },
-            }),
-          {
-            logger: this.options.logger,
-          }
-        );
-      } catch (error) {
-        this.options.logger.error(`Error creating concrete write index - ${error.message}`);
-        // If the index already exists and it's the write index for the alias,
-        // something else created it so suppress the error. If it's not the write
-        // index, that's bad, throw an error.
-        if (error?.meta?.body?.error?.type === 'resource_already_exists_exception') {
-          const existingIndices = await esClient.indices.get({
-            index: indexPatterns.name,
-          });
-          if (
-            !existingIndices[indexPatterns.name]?.aliases?.[indexPatterns.alias]?.is_write_index
-          ) {
-            throw Error(
-              `Attempted to create index: ${indexPatterns.name} as the write index for alias: ${indexPatterns.alias}, but the index already exists and is not the write index for the alias`
-            );
-          }
-        } else {
-          throw error;
-        }
-      }
-    }
-  }
-
-  private async installWithTimeout(
-    installFn: () => Promise<void>,
-    timeoutMs: number = INSTALLATION_TIMEOUT
-  ): Promise<void> {
-    try {
-      let timeoutId: NodeJS.Timeout;
-      const install = async (): Promise<void> => {
-        await installFn();
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-      };
-
-      const throwTimeoutException = (): Promise<void> => {
-        return new Promise((_, reject) => {
-          timeoutId = setTimeout(() => {
-            const msg = `Timeout: it took more than ${timeoutMs}ms`;
-            reject(new Error(msg));
-          }, timeoutMs);
-
-          firstValueFrom(this.options.pluginStop$).then(() => {
-            clearTimeout(timeoutId);
-            reject(new Error('Server is stopping; must stop all async operations'));
-          });
-        });
-      };
-
-      await Promise.race([install(), throwTimeoutException()]);
-    } catch (e) {
-      this.options.logger.error(e);
-
-      const reason = e?.message || 'Unknown reason';
-      throw new Error(`Failure during installation. ${reason}`);
     }
   }
 }
