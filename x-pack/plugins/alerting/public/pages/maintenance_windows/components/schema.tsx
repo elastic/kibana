@@ -26,11 +26,11 @@ export interface FormProps {
 
 export interface RecurringScheduleFormProps {
   frequency: Frequency | 'CUSTOM';
-  customFrequency: Frequency;
-  interval: number;
+  interval?: number;
   ends: string;
   until?: Moment;
   count?: number;
+  customFrequency?: Frequency;
   byweekday?: Record<string, boolean>;
   bymonth?: string;
 }

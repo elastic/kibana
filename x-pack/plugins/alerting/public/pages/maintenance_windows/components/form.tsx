@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
+import moment from 'moment';
 import {
   Form,
   getUseField,
@@ -31,6 +32,7 @@ import { DateAndTimeField } from './fields/date_and_time_field';
 import { SubmitButton } from './submit_button';
 import { convertToRRule } from '../helpers/convert_to_rrule';
 import { useCreateMaintenanceWindow } from '../../../hooks/use_create_maintenance_window';
+import { useUiSetting } from '../../../utils/kibana_react';
 
 const UseField = getUseField({ component: Field });
 
@@ -39,8 +41,16 @@ export interface CreateMaintenanceWindowFormProps {
   onSuccess: () => void;
   initialValue?: MaintenanceWindow;
 }
+
+export const useTimeZone = (): string => {
+  const timeZone = useUiSetting<string>('dateFormat:tz');
+  return timeZone === 'Browser' ? moment.tz.guess() : timeZone;
+};
+
 export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFormProps>(
   ({ onCancel, onSuccess, initialValue }) => {
+    const timezone = useTimeZone();
+
     const { mutate: createMaintenanceWindow } = useCreateMaintenanceWindow();
 
     const submitMaintenanceWindow = useCallback(
@@ -51,13 +61,13 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             {
               title: formData.title,
               duration: formData.duration,
-              rRule: convertToRRule(formData.date, formData.recurringSchedule),
+              rRule: convertToRRule(formData.date, timezone, formData.recurringSchedule),
             },
             { onSuccess }
           );
         }
       },
-      [createMaintenanceWindow, onSuccess]
+      [createMaintenanceWindow, onSuccess, timezone]
     );
 
     const { form } = useForm<FormProps>({

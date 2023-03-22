@@ -6,7 +6,7 @@
  */
 
 import { Moment } from 'moment';
-import { ISO_WEEKDAYS, ISO_WEEKDAYS_TO_STRING } from '../constants';
+import { ISO_WEEKDAYS, ISO_WEEKDAYS_TO_RRULE } from '../constants';
 
 export const getInitialByWeekday = (initialStateByweekday: string[], date: Moment | null) => {
   const dayOfWeek = date ? date.isoWeekday() : 1;
@@ -18,7 +18,7 @@ export const getInitialByWeekday = (initialStateByweekday: string[], date: Momen
           ? initialStateByweekday
               // Sanitize nth day strings, e.g. +2MO, -1FR, into just days of the week
               .map((w) => w.replace(/[0-9+\-]/g, ''))
-              .includes(ISO_WEEKDAYS_TO_STRING[n])
+              .includes(ISO_WEEKDAYS_TO_RRULE[n])
           : n === dayOfWeek,
     }),
     {} as Record<string, boolean>

@@ -7,24 +7,29 @@
 
 import { Moment } from 'moment';
 import { RRule, RRuleFrequencyMap } from '../types';
-import { Frequency, ISO_WEEKDAYS_TO_STRING } from '../constants';
+import { Frequency, ISO_WEEKDAYS_TO_RRULE } from '../constants';
 import { getNthByWeekday } from './get_nth_by_weekday';
 import { RecurringScheduleFormProps } from '../components/schema';
 import { getPresets } from './get_presets';
 
-export const convertToRRule = (startDate: Moment, form: RecurringScheduleFormProps): RRule => {
+export const convertToRRule = (
+  startDate: Moment,
+  timezone: string,
+  form?: RecurringScheduleFormProps
+): RRule => {
   const presets = getPresets(startDate);
 
   const rRule: RRule = {
     dtstart: startDate.toISOString(),
-    tzid: 'UTC',
+    tzid: timezone,
   };
 
   if (form) {
     if (form.frequency !== 'CUSTOM') {
       form = { ...form, ...presets[form.frequency] };
     }
-    const frequency = form.frequency === 'CUSTOM' ? form.customFrequency : form.frequency;
+
+    const frequency = form.customFrequency ? form.customFrequency : (form.frequency as Frequency);
     rRule.freq = RRuleFrequencyMap[frequency];
 
     rRule.interval = form.interval;
@@ -41,7 +46,7 @@ export const convertToRRule = (startDate: Moment, form: RecurringScheduleFormPro
       const byweekday = form.byweekday;
       rRule.byweekday = Object.keys(byweekday)
         .filter((k) => byweekday[k] === true)
-        .map((n) => ISO_WEEKDAYS_TO_STRING[Number(n)]);
+        .map((n) => ISO_WEEKDAYS_TO_RRULE[Number(n)]);
     }
 
     if (form.bymonth) {
@@ -52,7 +57,7 @@ export const convertToRRule = (startDate: Moment, form: RecurringScheduleFormPro
       }
     }
 
-    if (form.customFrequency === Frequency.YEARLY) {
+    if (frequency === Frequency.YEARLY) {
       rRule.bymonth = [startDate.month()];
       rRule.bymonthday = [startDate.date()];
     }

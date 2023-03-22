@@ -91,7 +91,7 @@ export const WEEKDAY_OPTIONS = ISO_WEEKDAYS.map((n) => ({
   label: moment().isoWeekday(n).format('dd'),
 }));
 
-export const ISO_WEEKDAYS_TO_STRING: Record<number, string> = {
+export const ISO_WEEKDAYS_TO_RRULE: Record<number, string> = {
   1: 'MO',
   2: 'TU',
   3: 'WE',
@@ -101,4 +101,6 @@ export const ISO_WEEKDAYS_TO_STRING: Record<number, string> = {
   7: 'SU',
 };
 
-export const STRING_TO_ISO_WEEKDAYS = mapValues(invert(ISO_WEEKDAYS_TO_STRING), (v) => Number(v));
+export const RRULE_WEEKDAYS_TO_ISO_WEEKDAYS = mapValues(invert(ISO_WEEKDAYS_TO_RRULE), (v) =>
+  Number(v)
+);

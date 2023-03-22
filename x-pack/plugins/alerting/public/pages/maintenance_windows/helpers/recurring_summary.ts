@@ -7,14 +7,14 @@
 
 import moment, { Moment } from 'moment';
 import * as i18n from '../translations';
-import { Frequency, ISO_WEEKDAYS_TO_STRING, STRING_TO_ISO_WEEKDAYS } from '../constants';
+import { Frequency, ISO_WEEKDAYS_TO_RRULE, RRULE_WEEKDAYS_TO_ISO_WEEKDAYS } from '../constants';
 import { monthDayDate } from './month_day_date';
 import { getNthByWeekday } from './get_nth_by_weekday';
 import { RecurringScheduleFormProps } from '../components/schema';
 
 export const recurringSummary = (
   startDate: Moment,
-  schedule: RecurringScheduleFormProps,
+  schedule: RecurringScheduleFormProps | undefined,
   presets: Record<Frequency, Partial<RecurringScheduleFormProps>>
 ) => {
   if (schedule) {
@@ -36,7 +36,7 @@ export const recurringSummary = (
     if (byweekday) {
       const weekdays = Object.keys(byweekday)
         .filter((k) => byweekday[k] === true)
-        .map((n) => ISO_WEEKDAYS_TO_STRING[Number(n)]);
+        .map((n) => ISO_WEEKDAYS_TO_RRULE[Number(n)]);
       const formattedWeekdays = weekdays.map((weekday) => toWeekdayName(weekday)).join(', ');
 
       weeklySummary = i18n.CREATE_FORM_WEEKLY_SUMMARY(formattedWeekdays);
@@ -80,11 +80,13 @@ export const recurringSummary = (
       ? i18n.CREATE_FORM_OCURRENCES_SUMMARY(schedule.count)
       : null;
 
-    const every = i18n.CREATE_FORM_RECURRING_SUMMARY(
-      !dailyWithWeekdays ? frequencySummary : null,
-      onSummary,
-      untilSummary
-    );
+    const every = i18n
+      .CREATE_FORM_RECURRING_SUMMARY(
+        !dailyWithWeekdays ? frequencySummary : null,
+        onSummary,
+        untilSummary
+      )
+      .trim();
 
     return every;
   }
@@ -92,4 +94,4 @@ export const recurringSummary = (
 };
 
 export const toWeekdayName = (weekday: string) =>
-  moment().isoWeekday(STRING_TO_ISO_WEEKDAYS[weekday.slice(-2)]).format('dddd');
+  moment().isoWeekday(RRULE_WEEKDAYS_TO_ISO_WEEKDAYS[weekday.slice(-2)]).format('dddd');

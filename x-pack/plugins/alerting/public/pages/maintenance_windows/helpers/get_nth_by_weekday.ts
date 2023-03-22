@@ -6,12 +6,12 @@
  */
 
 import { Moment } from 'moment';
-import { ISO_WEEKDAYS_TO_STRING } from '../constants';
+import { ISO_WEEKDAYS_TO_RRULE } from '../constants';
 import { getWeekdayInfo } from './get_weekday_info';
 
 export const getNthByWeekday = (startDate: Moment) => {
   const { isLastOfMonth, nthWeekdayOfMonth } = getWeekdayInfo(startDate);
   return `${isLastOfMonth ? '-1' : '+' + nthWeekdayOfMonth}${
-    ISO_WEEKDAYS_TO_STRING[startDate.isoWeekday()]
+    ISO_WEEKDAYS_TO_RRULE[startDate.isoWeekday()]
   }`;
 };
