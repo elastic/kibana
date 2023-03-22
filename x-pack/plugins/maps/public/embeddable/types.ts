@@ -48,6 +48,6 @@ export type MapEmbeddableOutput = EmbeddableOutput & {
 };
 
 export type MapEmbeddableType = Embeddable<MapEmbeddableInput, MapEmbeddableOutput> & {
-  getOnRenderComplete$(): Observable;
+  getOnRenderComplete$(): Observable<void>;
   setIsSharable(isSharable: boolean): void;
 };

@@ -12,7 +12,14 @@ import { Provider } from 'react-redux';
 import fastIsEqual from 'fast-deep-equal';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, skip, startWith } from 'rxjs/operators';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  filter as filterOperator,
+  map,
+  skip,
+  startWith,
+} from 'rxjs/operators';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { type Filter } from '@kbn/es-query';
@@ -155,7 +162,12 @@ export class MapEmbeddable
       distinctUntilChanged((a, b) => a.loading === b.loading),
       skip(1),
       debounceTime(RENDER_TIMEOUT),
-      filter(output => !output.loading)
+      filterOperator((output) => !output.loading),
+      map(() => {
+        // Observable notifies subscriber when rendering is complete
+        // Return void to not expose internal implemenation details of observabale
+        return;
+      })
     );
   }
 
