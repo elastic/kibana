@@ -6,15 +6,12 @@
  */
 
 import React, { Component, RefObject } from 'react';
-import { debounce } from 'lodash';
 import { Subscription } from 'rxjs';
-import { distinctUntilChanged, skip, startWith } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiLoadingChart } from '@elastic/eui';
 import { EmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common';
-import { RENDER_TIMEOUT } from '../../common/constants';
 import { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from '../embeddable';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
 
@@ -39,7 +36,7 @@ export class PassiveMap extends Component<Props, State> {
   private _isMounted = false;
   private _prevPassiveLayer = this.props.passiveLayer;
   private readonly _embeddableRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
-  private _outputSubscription: Subscription | undefined;
+  private _onRenderSubscription: Subscription | undefined;
 
   state: State = { mapEmbeddable: null };
 
@@ -53,8 +50,8 @@ export class PassiveMap extends Component<Props, State> {
     if (this.state.mapEmbeddable) {
       this.state.mapEmbeddable.destroy();
     }
-    if (this._outputSubscription) {
-      this._outputSubscription.unsubscribe();
+    if (this._onRenderSubscription) {
+      this._onRenderSubscription.unsubscribe();
     }
   }
 
@@ -64,14 +61,6 @@ export class PassiveMap extends Component<Props, State> {
       this._prevPassiveLayer = this.props.passiveLayer;
     }
   }
-
-  _onRenderComplete = debounce(() => {
-    if (!this._isMounted) {
-      return;
-    }
-
-    this.props.onRenderComplete();
-  }, RENDER_TIMEOUT);
 
   async _setupEmbeddable() {
     const basemapLayerDescriptor = createBasemapLayerDescriptor();
@@ -101,19 +90,11 @@ export class PassiveMap extends Component<Props, State> {
       return;
     }
 
-    this._outputSubscription = mapEmbeddable
-      .getOutput$()
-      .pipe(
-        // wrapping distinctUntilChanged with startWith and skip to prime distinctUntilChanged with an initial value.
-        startWith(mapEmbeddable.getOutput()),
-        distinctUntilChanged((a, b) => a.loading === b.loading),
-        skip(1)
-      )
-      .subscribe((output) => {
-        if (output.loading) {
-          this._onRenderComplete.cancel();
-        } else {
-          this._onRenderComplete();
+    this._onRenderSubscription = mapEmbeddable
+      .getOnRenderComplete$()
+      .subscribe(() => {
+        if (this._isMounted) {
+          this.props.onRenderComplete();
         }
       });
 

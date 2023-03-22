@@ -12,6 +12,7 @@ import { Provider } from 'react-redux';
 import fastIsEqual from 'fast-deep-equal';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, skip, startWith } from 'rxjs/operators';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { type Filter } from '@kbn/es-query';
@@ -68,6 +69,7 @@ import {
   getFullPath,
   MAP_SAVED_OBJECT_TYPE,
   RawValue,
+  RENDER_TIMEOUT,
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import {
@@ -130,6 +132,7 @@ export class MapEmbeddable
   private _onInitialRenderComplete?: () => void = undefined;
   private _hasInitialRenderCompleteFired = false;
   private _isSharable = true;
+  private readonly _onRenderComplete$;
 
   constructor(config: MapEmbeddableConfig, initialInput: MapEmbeddableInput, parent?: IContainer) {
     super(
@@ -147,6 +150,19 @@ export class MapEmbeddable
     this._initializeSaveMap();
     this._subscriptions.push(this.getUpdated$().subscribe(() => this.onUpdate()));
     this._controlledBy = getControlledBy(this.id);
+
+    this._onRenderComplete$ = this.getOutput$().pipe(
+      // wrapping distinctUntilChanged with startWith and skip to prime distinctUntilChanged with an initial value.
+      startWith(this.getOutput()),
+      distinctUntilChanged((a, b) => a.loading === b.loading),
+      skip(1),
+      debounceTime(RENDER_TIMEOUT),
+      filter(output => !output.loading)
+    );
+  }
+
+  public getOnRenderComplete$() {
+    return this._onRenderComplete$;
   }
 
   public reportsEmbeddableLoad() {
