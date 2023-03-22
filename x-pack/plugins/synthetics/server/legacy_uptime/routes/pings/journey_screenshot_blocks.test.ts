@@ -9,11 +9,20 @@ import { createJourneyScreenshotBlocksRoute } from './journey_screenshot_blocks'
 import { UMServerLibs } from '../../uptime_server';
 
 describe('journey screenshot blocks route', () => {
-  let handlerContext: unknown;
+  let handlerContext: any;
   let libs: UMServerLibs;
+  const data: any = [];
   beforeEach(() => {
     handlerContext = {
-      uptimeEsClient: jest.fn(),
+      uptimeEsClient: {
+        search: jest.fn().mockResolvedValue({
+          body: {
+            hits: {
+              hits: data,
+            },
+          },
+        }),
+      },
       request: {
         body: {
           hashes: ['hash1', 'hash2'],
@@ -49,6 +58,32 @@ describe('journey screenshot blocks route', () => {
   });
 
   it('returns blocks for request', async () => {
+    handlerContext.uptimeEsClient.search = jest.fn().mockResolvedValue({
+      body: {
+        hits: {
+          hits: [
+            {
+              _id: 'hash1',
+              _source: {
+                synthetics: {
+                  blob: 'blob1',
+                  blob_mime: 'image/jpeg',
+                },
+              },
+            },
+            {
+              _id: 'hash2',
+              _source: {
+                synthetics: {
+                  blob: 'blob2',
+                  blob_mime: 'image/jpeg',
+                },
+              },
+            },
+          ],
+        },
+      },
+    });
     const responseData = [
       {
         id: 'hash1',
