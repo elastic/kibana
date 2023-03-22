@@ -51,7 +51,9 @@ type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResul
 
 window.scrollTo = jest.fn();
 
-const mockGetFilesClient = jest.fn();
+const mockGetFilesClient = createMockFilesClient as unknown as (
+  scope: string
+) => ScopedFilesClient<unknown>;
 
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<TestProviderProps> = ({

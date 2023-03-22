@@ -15,7 +15,7 @@ describe('useCasesColumns ', () => {
   let appMockRender: AppMockRenderer;
 
   const useCasesColumnsProps: FilesTableColumnsProps = {
-    showModal: () => {},
+    showPreview: () => {},
     getDownloadHref: jest.fn(),
   };
 

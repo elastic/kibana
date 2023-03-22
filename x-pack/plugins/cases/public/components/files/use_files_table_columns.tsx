@@ -18,12 +18,12 @@ import * as i18n from './translations';
 import { isImage } from './utils';
 
 export interface FilesTableColumnsProps {
-  showModal: (file: FileJSON) => void;
+  showPreview: (file: FileJSON) => void;
   getDownloadHref: (args: Pick<FileJSON<unknown>, 'id' | 'fileKind'>) => string;
 }
 
 export const useFilesTableColumns = ({
-  showModal,
+  showPreview,
   getDownloadHref,
 }: FilesTableColumnsProps): Array<EuiBasicTableColumn<FileJSON>> => {
   return [
@@ -32,7 +32,7 @@ export const useFilesTableColumns = ({
       'data-test-subj': 'cases-files-table-filename',
       render: (attachment: FileJSON) => {
         if (isImage(attachment)) {
-          return <EuiLink onClick={() => showModal(attachment)}>{attachment.name}</EuiLink>;
+          return <EuiLink onClick={() => showPreview(attachment)}>{attachment.name}</EuiLink>;
         } else {
           return <span title={i18n.NO_PREVIEW}>{attachment.name}</span>;
         }

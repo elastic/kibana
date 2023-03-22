@@ -21,7 +21,7 @@ import { useFilesContext } from '@kbn/shared-ux-file-context';
 
 import * as i18n from './translations';
 import { useFilesTableColumns } from './use_files_table_columns';
-import { FilePreviewModal } from './file_preview_modal';
+import { FilePreview } from './file_preview';
 
 const EmptyFilesTable = () => (
   <EuiEmptyPrompt
@@ -47,16 +47,19 @@ interface FilesTableProps {
 
 export const FilesTable = ({ items, pagination, onChange, isLoading }: FilesTableProps) => {
   const { client: filesClient } = useFilesContext();
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [selectedFile, setSelectedFile] = useState<FileJSON>();
 
-  const closeModal = () => setIsModalVisible(false);
-  const showModal = (file: FileJSON) => {
+  const closePreview = () => setIsPreviewVisible(false);
+  const showPreview = (file: FileJSON) => {
     setSelectedFile(file);
-    setIsModalVisible(true);
+    setIsPreviewVisible(true);
   };
 
-  const columns = useFilesTableColumns({ showModal, getDownloadHref: filesClient.getDownloadHref });
+  const columns = useFilesTableColumns({
+    showPreview,
+    getDownloadHref: filesClient.getDownloadHref,
+  });
 
   const resultsCount = useMemo(
     () => (
@@ -94,9 +97,9 @@ export const FilesTable = ({ items, pagination, onChange, isLoading }: FilesTabl
         data-test-subj="cases-files-table"
         noItemsMessage={<EmptyFilesTable />}
       />
-      {isModalVisible && selectedFile !== undefined && (
-        <FilePreviewModal
-          closeModal={closeModal}
+      {isPreviewVisible && selectedFile !== undefined && (
+        <FilePreview
+          closePreview={closePreview}
           getDownloadHref={filesClient.getDownloadHref}
           selectedFile={selectedFile}
         />
