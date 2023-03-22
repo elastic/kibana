@@ -25,7 +25,7 @@ jest.mock('@kbn/ml-url-state', () => ({
 
 describe('SelectSeverity', () => {
   it('updates the severity option correctly on click', async () => {
-    // prepare
+    // arrange
     const { getByText, getAllByText, queryByText, getByTestId } = render(
       <IntlProvider locale="en">
         <SelectSeverity />

@@ -25,7 +25,7 @@ jest.mock('@kbn/ml-url-state', () => ({
 
 describe('SelectInterval', () => {
   it('updates the selected value correctly on click', () => {
-    // prepare
+    // arrange
     const { getByText, getByTestId } = render(<SelectInterval />);
 
     // assert initial state
