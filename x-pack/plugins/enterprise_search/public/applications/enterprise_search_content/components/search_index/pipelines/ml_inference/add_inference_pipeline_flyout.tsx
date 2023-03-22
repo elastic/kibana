@@ -127,6 +127,7 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
           </>
         )}
         <AddInferencePipelineHorizontalSteps />
+        <EuiSpacer size="m" />
         {step === AddInferencePipelineSteps.Configuration && <ConfigurePipeline />}
         {step === AddInferencePipelineSteps.Fields && <ConfigureFields />}
         {step === AddInferencePipelineSteps.Test && <TestPipeline />}
