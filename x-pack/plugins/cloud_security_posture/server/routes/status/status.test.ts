@@ -6,12 +6,12 @@
  */
 
 import { calculateCspStatusCode } from './status';
-import { POSTURE_TYPE_CSPM } from '../../../common/constants';
+import { CSPM_POLICY_TEMPLATE } from '../../../common/constants';
 
 describe('calculateCspStatusCode test', () => {
   it('Verify status when there are no permission', async () => {
     const statusCode = calculateCspStatusCode(
-      POSTURE_TYPE_CSPM,
+      CSPM_POLICY_TEMPLATE,
       {
         findingsLatest: 'unprivileged',
         findings: 'unprivileged',
@@ -28,7 +28,7 @@ describe('calculateCspStatusCode test', () => {
 
   it('Verify status when there are no findings, no healthy agents and no installed policy templates', async () => {
     const statusCode = calculateCspStatusCode(
-      POSTURE_TYPE_CSPM,
+      CSPM_POLICY_TEMPLATE,
       {
         findingsLatest: 'empty',
         findings: 'empty',
@@ -45,7 +45,7 @@ describe('calculateCspStatusCode test', () => {
 
   it('Verify status when there are findings and installed policies but no healthy agents', async () => {
     const statusCode = calculateCspStatusCode(
-      POSTURE_TYPE_CSPM,
+      CSPM_POLICY_TEMPLATE,
       {
         findingsLatest: 'empty',
         findings: 'not-empty',
@@ -62,7 +62,7 @@ describe('calculateCspStatusCode test', () => {
 
   it('Verify status when there are findings ,installed policies and healthy agents', async () => {
     const statusCode = calculateCspStatusCode(
-      POSTURE_TYPE_CSPM,
+      CSPM_POLICY_TEMPLATE,
       {
         findingsLatest: 'not-empty',
         findings: 'not-empty',
@@ -79,7 +79,7 @@ describe('calculateCspStatusCode test', () => {
 
   it('Verify status when there are no findings ,installed policies and no healthy agents', async () => {
     const statusCode = calculateCspStatusCode(
-      POSTURE_TYPE_CSPM,
+      CSPM_POLICY_TEMPLATE,
       {
         findingsLatest: 'empty',
         findings: 'empty',
@@ -96,7 +96,7 @@ describe('calculateCspStatusCode test', () => {
 
   it('Verify status when there are installed policies, healthy agents and no findings', async () => {
     const statusCode = calculateCspStatusCode(
-      POSTURE_TYPE_CSPM,
+      CSPM_POLICY_TEMPLATE,
       {
         findingsLatest: 'empty',
         findings: 'empty',
@@ -113,7 +113,7 @@ describe('calculateCspStatusCode test', () => {
 
   it('Verify status when there are installed policies, healthy agents and no findings and been more than 10 minutes', async () => {
     const statusCode = calculateCspStatusCode(
-      POSTURE_TYPE_CSPM,
+      CSPM_POLICY_TEMPLATE,
       {
         findingsLatest: 'empty',
         findings: 'empty',
@@ -130,7 +130,7 @@ describe('calculateCspStatusCode test', () => {
 
   it('Verify status when there are installed policies, healthy agents past findings but no recent findings', async () => {
     const statusCode = calculateCspStatusCode(
-      POSTURE_TYPE_CSPM,
+      CSPM_POLICY_TEMPLATE,
       {
         findingsLatest: 'empty',
         findings: 'not-empty',

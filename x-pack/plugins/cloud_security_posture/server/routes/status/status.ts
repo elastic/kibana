@@ -17,8 +17,8 @@ import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   FINDINGS_INDEX_PATTERN,
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  POSTURE_TYPE_KSPM,
-  POSTURE_TYPE_CSPM,
+  KSPM_POLICY_TEMPLATE,
+  CSPM_POLICY_TEMPLATE,
 } from '../../../common/constants';
 import type { CspApiRequestHandlerContext, CspRouter } from '../../types';
 import type {
@@ -81,7 +81,7 @@ export const calculateCspStatusCode = (
 ): CspStatusCode => {
   // We check privileges only for the relevant indices for our pages to appear
   const postureTypeCheck =
-    postureType === POSTURE_TYPE_CSPM ? POSTURE_TYPE_CSPM : POSTURE_TYPE_KSPM;
+    postureType === CSPM_POLICY_TEMPLATE ? CSPM_POLICY_TEMPLATE : KSPM_POLICY_TEMPLATE;
   if (indicesStatus.findingsLatest === 'unprivileged' || indicesStatus.score === 'unprivileged')
     return 'unprivileged';
   if (!installedPolicyTemplates.includes(postureTypeCheck)) return 'not-installed';
@@ -160,7 +160,7 @@ const getCspStatus = async ({
       {
         per_page: 10000,
       },
-      POSTURE_TYPE_KSPM
+      KSPM_POLICY_TEMPLATE
     ),
     getCspPackagePolicies(
       soClient,
@@ -169,7 +169,7 @@ const getCspStatus = async ({
       {
         per_page: 10000,
       },
-      POSTURE_TYPE_CSPM
+      CSPM_POLICY_TEMPLATE
     ),
     getInstalledPolicyTemplates(packagePolicyService, soClient),
   ]);
@@ -210,7 +210,7 @@ const getCspStatus = async ({
   ];
 
   const statusCspm = calculateCspStatusCode(
-    POSTURE_TYPE_CSPM,
+    CSPM_POLICY_TEMPLATE,
     {
       findingsLatest: findingsLatestIndexStatusCspm,
       findings: findingsIndexStatusCspm,
@@ -223,7 +223,7 @@ const getCspStatus = async ({
   );
 
   const statusKspm = calculateCspStatusCode(
-    POSTURE_TYPE_KSPM,
+    KSPM_POLICY_TEMPLATE,
     {
       findingsLatest: findingsLatestIndexStatusKspm,
       findings: findingsIndexStatusKspm,
