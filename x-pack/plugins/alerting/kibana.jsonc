@@ -18,7 +18,6 @@
       "encryptedSavedObjects",
       "eventLog",
       "features",
-      "kibanaReact",
       "kibanaUtils",
       "licensing",
       "taskManager",
