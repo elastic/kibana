@@ -9,3 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const DASHBOARDS_PAGE_TITLE = i18n.translate('xpack.securitySolution.dashboards.pageTitle', {
   defaultMessage: 'Dashboards',
 });
+
+export const DASHBOARD_PAGE_TITLE = i18n.translate('xpack.securitySolution.dashboard.pageTitle', {
+  defaultMessage: 'Dashboard',
+});

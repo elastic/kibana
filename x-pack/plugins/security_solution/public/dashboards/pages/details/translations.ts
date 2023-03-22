@@ -19,3 +19,10 @@ export const DASHBOARD_NO_READ_PERMISSION_DESCRIPTION = i18n.translate(
     defaultMessage: 'Contact your administrator for help.',
   }
 );
+
+export const DASHBOARD_INDICES_NOT_FOUND_TITLE = i18n.translate(
+  'xpack.securitySolution.dashboards.dashboard.viewPorpmpt.indicesNotFound.title',
+  {
+    defaultMessage: 'Indices not found',
+  }
+);

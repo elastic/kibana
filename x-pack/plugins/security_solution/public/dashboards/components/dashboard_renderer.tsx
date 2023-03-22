@@ -4,32 +4,65 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { DashboardContainer } from '@kbn/dashboard-plugin/public';
 import { LazyDashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { inputsSelectors } from '../../common/store';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import { InputsModelId } from '../../common/store/inputs/constants';
+import { useRefetch } from '../hooks/use_refetch';
 
 const DashboardRendererComponent = ({
-  from,
-  to,
   canReadDashboard,
+  from,
+  id,
+  inputId = InputsModelId.global,
   onDashboardContainerLoaded,
+  savedObjectId,
+  to,
 }: {
-  from: string;
-  to: string;
   canReadDashboard: boolean;
+  from: string;
+  id: string;
+  inputId?: InputsModelId.global | InputsModelId.timeline;
   onDashboardContainerLoaded?: (dashboardContainer: DashboardContainer) => void;
+  savedObjectId: string | undefined;
+  to: string;
 }) => {
-  const { detailName } = useParams<{ detailName?: string }>();
-  const getCreationOptions = useCallback(
-    () => Promise.resolve({ overrideInput: { timeRange: { from, to } } }),
-    [from, to]
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
   );
-  return detailName && from && to && canReadDashboard ? (
+  const query = useDeepEqualSelector(getGlobalQuerySelector);
+  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
+  const getCreationOptions = useCallback(
+    () =>
+      Promise.resolve({
+        overrideInput: { timeRange: { from, to }, viewMode: ViewMode.VIEW, query, filters },
+      }),
+    [filters, from, query, to]
+  );
+  useRefetch({
+    inputId,
+    id,
+    container: dashboardContainer,
+  });
+
+  const handleDashboardLoaded = useCallback(
+    (container: DashboardContainer) => {
+      setDashboardContainer(container);
+      onDashboardContainerLoaded?.(container);
+    },
+    [onDashboardContainerLoaded]
+  );
+  return savedObjectId && from && to && canReadDashboard ? (
     <LazyDashboardContainerRenderer
-      savedObjectId={detailName}
+      savedObjectId={savedObjectId}
       getCreationOptions={getCreationOptions}
-      onDashboardContainerLoaded={onDashboardContainerLoaded}
+      onDashboardContainerLoaded={handleDashboardLoaded}
     />
   ) : null;
 };

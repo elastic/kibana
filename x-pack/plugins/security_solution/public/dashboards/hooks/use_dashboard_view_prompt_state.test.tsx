@@ -38,4 +38,23 @@ describe('useDashboardViewPromptState', () => {
       }
     `);
   });
+
+  it('returns IndicesNotFound state', () => {
+    const { result } = renderHook<
+      DashboardViewPromptState | null,
+      Partial<EuiEmptyPromptProps> | null
+    >(() => useDashboardViewPromptState(DashboardViewPromptState.NoReadPermission));
+    expect(result.current).toMatchInlineSnapshot(`
+      Object {
+        "body": <p>
+          Contact your administrator for help.
+        </p>,
+        "color": "danger",
+        "iconType": "error",
+        "title": <h2>
+          You have no permission to read the dashboard
+        </h2>,
+      }
+    `);
+  });
 });

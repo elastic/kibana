@@ -6,6 +6,7 @@
  */
 import { render } from '@testing-library/react';
 import React from 'react';
+import { TestProviders } from '../../common/mock';
 import { DashboardRenderer } from './dashboard_renderer';
 
 jest.mock('@kbn/dashboard-plugin/public', () => {
@@ -18,21 +19,27 @@ jest.mock('@kbn/dashboard-plugin/public', () => {
   };
 });
 
-jest.mock('react-router-dom', () => ({
-  useParams: jest.fn().mockReturnValue({
-    detailName: '2d50f100-be6f-11ed-964a-ffa67304840e',
-  }),
-}));
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return {
+    ...actual,
+    useParams: jest.fn().mockReturnValue({
+      detailName: '2d50f100-be6f-11ed-964a-ffa67304840e',
+    }),
+  };
+});
 
 describe('DashboardRenderer', () => {
   const props = {
-    from: '2023-03-10T00:00:00.000Z',
-    to: '2023-03-10T23:59:59.999Z',
     canReadDashboard: true,
+    id: 'dashboard-savedObjectId',
+    from: '2023-03-10T00:00:00.000Z',
+    savedObjectId: 'savedObjectId',
+    to: '2023-03-10T23:59:59.999Z',
   };
 
   it('renders', () => {
-    const { queryByTestId } = render(<DashboardRenderer {...props} />);
+    const { queryByTestId } = render(<DashboardRenderer {...props} />, { wrapper: TestProviders });
     expect(queryByTestId(`dashboardRenderer`)).toBeInTheDocument();
   });
 
@@ -41,7 +48,9 @@ describe('DashboardRenderer', () => {
       ...props,
       canReadDashboard: false,
     };
-    const { queryByTestId } = render(<DashboardRenderer {...testProps} />);
+    const { queryByTestId } = render(<DashboardRenderer {...testProps} />, {
+      wrapper: TestProviders,
+    });
     expect(queryByTestId(`dashboardRenderer`)).not.toBeInTheDocument();
   });
 });
