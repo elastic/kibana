@@ -14,6 +14,25 @@ import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_stra
 import type { SeverityCount } from '../../../../explore/components/risk_score/severity/types';
 import { useRiskScore, useRiskScoreKpi } from '../../../../explore/containers/risk_score';
 import { openAlertsFilter } from '../../detection_response/utils';
+import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+
+const mockedTelemetry = createTelemetryServiceMock();
+const mockedUseKibana = mockUseKibana();
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      ...mockedUseKibana,
+      services: {
+        ...mockedUseKibana.services,
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
 
 const mockSeverityCount: SeverityCount = {
   [RiskSeverity.low]: 1,

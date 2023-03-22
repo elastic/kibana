@@ -56,8 +56,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
     expect(hashMap).toMatchInlineSnapshot(`
       Object {
         "action": "6cfc277ed3211639e37546ac625f4a68f2494215",
-        "action_task_params": "db2afea7d78e00e725486b791554d0d4e81956ef",
-        "alert": "2568bf6d8ba0876441c61c9e58e08016c1dc1617",
+        "action_task_params": "5f419caba96dd8c77d0f94013e71d43890e3d5d6",
+        "alert": "1e4cd6941f1eb39c729c646e91fbfb9700de84b9",
         "api_key_pending_invalidation": "16e7bcf8e78764102d7f525542d5b616809a21ee",
         "apm-indices": "d19dd7fb51f2d2cbc1f8769481721e0953f9a6d2",
         "apm-server-schema": "1d42f17eff9ec6c16d3a9324d9539e2d123d0a9a",
@@ -122,7 +122,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "osquery-pack": "edd84b2c59ef36214ece0676706da8f22175c660",
         "osquery-pack-asset": "18e08979d46ee7e5538f54c080aec4d8c58516ca",
         "osquery-saved-query": "f5e4e303f65c7607248ea8b2672f1ee30e4fb15e",
-        "query": "f94de164936da788e9215c0e9b824f8b948ea859",
+        "query": "ec6000b775f06f81470df42d23f7a88cb31d64ba",
         "rules-settings": "9854495c3b54b16a6625fb250c35e5504da72266",
         "sample-data-telemetry": "c38daf1a49ed24f2a4fb091e6e1e833fccf19935",
         "search": "01bc42d635e9ea0588741c4c7a2bbd3feb3ac5dc",
@@ -134,6 +134,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "siem-ui-timeline": "e9d6b3a9fd7af6dc502293c21cbdb309409f3996",
         "siem-ui-timeline-note": "13c9d4c142f96624a93a623c6d7cba7e1ae9b5a6",
         "siem-ui-timeline-pinned-event": "96a43d59b9e2fc11f12255a0cb47ef0a3d83af4c",
+        "slo": "06733daaa5fbe331fdf3b515171978aff483ccf2",
         "space": "9542afcd6fd71558623c09151e453c5e84b4e5e1",
         "spaces-usage-stats": "084bd0f080f94fb5735d7f3cf12f13ec92f36bad",
         "synthetics-monitor": "96cc312bfa597022f83dfb3b5d1501e27a73e8d5",

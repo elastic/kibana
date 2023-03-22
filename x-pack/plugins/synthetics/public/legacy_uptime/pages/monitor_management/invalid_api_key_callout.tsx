@@ -23,6 +23,7 @@ export const InvalidApiKeyCalloutCallout = () => {
         <p>{CALLOUT_MANAGEMENT_DESCRIPTION}</p>
         {enablement.canEnable ? (
           <EuiButton
+            data-test-subj="syntheticsInvalidApiKeyCalloutCalloutButton"
             fill
             color="primary"
             onClick={() => {
@@ -34,7 +35,11 @@ export const InvalidApiKeyCalloutCallout = () => {
         ) : (
           <p>
             {CALLOUT_MANAGEMENT_CONTACT_ADMIN}{' '}
-            <EuiLink href="#" target="_blank">
+            <EuiLink
+              data-test-subj="syntheticsInvalidApiKeyCalloutCalloutLink"
+              href="#"
+              target="_blank"
+            >
               {LEARN_MORE_LABEL}
             </EuiLink>
           </p>

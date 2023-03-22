@@ -51,7 +51,13 @@ export const useHostsView = () => {
     loading,
     error,
     nodes: hostNodes,
-  } = useSnapshot({ ...baseRequest, metrics: HOST_TABLE_METRICS });
+  } = useSnapshot(
+    {
+      ...baseRequest,
+      metrics: HOST_TABLE_METRICS,
+    },
+    { abortable: true }
+  );
 
   return {
     baseRequest,
@@ -72,11 +78,11 @@ const createSnapshotRequest = ({
   sourceId,
   dateRange,
 }: {
-  esQuery: { bool: BoolQuery } | null;
+  esQuery: { bool: BoolQuery };
   sourceId: string;
   dateRange: StringDateRangeTimestamp;
 }): UseSnapshotRequest => ({
-  filterQuery: esQuery ? JSON.stringify(esQuery) : null,
+  filterQuery: JSON.stringify(esQuery),
   metrics: [],
   groupBy: [],
   nodeType: 'host',

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { ROLES } from '../../test';
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { login } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import {
   checkResults,
   findAndClickButton,
@@ -16,48 +14,72 @@ import {
 } from '../../tasks/live_query';
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
+import { loadPack, loadRule, cleanupRule, cleanupPack } from '../../tasks/api_fixtures';
+import { preparePack } from '../../tasks/packs';
 
-describe('Alert_Test', () => {
+describe('Alert Test', () => {
+  let packName: string;
+  let packId: string;
+  let ruleName: string;
+  let ruleId: string;
+
   before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'pack');
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
+    loadPack({
+      description: '',
+      enabled: true,
+      queries: {
+        packQuery: {
+          interval: 10,
+          query: 'select * from uptime;',
+          ecs_mapping: {},
+        },
+      },
+    }).then((data) => {
+      packId = data.id;
+      packName = data.attributes.name;
+    });
+    loadRule().then((data) => {
+      ruleId = data.id;
+      ruleName = data.name;
+    });
+  });
+
+  beforeEach(() => {
+    login(ROLE.alert_test);
   });
 
   after(() => {
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'pack');
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'rule');
+    cleanupPack(packId);
+    cleanupRule(ruleId);
   });
 
   describe('alert_test role', () => {
-    it('should not be able to run live query', () => {
-      login(ROLES.alert_test);
+    beforeEach(() => {
+      login(ROLE.alert_test);
+    });
 
-      const PACK_NAME = 'testpack';
-      const RULE_NAME = 'Test-rule';
+    it('should not be able to run live query', () => {
       navigateTo('/app/osquery');
-      cy.contains('Packs').click();
-      cy.getBySel('pagination-button-next').click();
-      cy.contains(PACK_NAME).click();
+      preparePack(packName);
       findAndClickButton('Edit');
-      cy.contains(`Edit ${PACK_NAME}`);
+      cy.contains(`Edit ${packName}`);
       findFormFieldByRowsLabelAndType(
         'Scheduled agent policies (optional)',
         'fleet server {downArrow}{enter}'
       );
       findAndClickButton('Update pack');
       closeModalIfVisible();
-      cy.contains(`Successfully updated "${PACK_NAME}" pack`);
+      cy.contains(`Successfully updated "${packName}" pack`);
       closeToastIfVisible();
 
       cy.visit('/app/security/rules');
-      cy.contains(RULE_NAME).click();
+      cy.contains(ruleName).click();
       cy.wait(2000);
       cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
       cy.getBySel('ruleSwitch').click();
       cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
       cy.getBySel('ruleSwitch').click();
       cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
-      cy.visit('/app/security/alerts');
       cy.getBySel('expand-event').first().click();
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
@@ -68,31 +90,22 @@ describe('Alert_Test', () => {
   });
 
   describe('t1_analyst role', () => {
-    it('should be able to run rule investigation guide query', () => {
-      login(ROLES.t1_analyst);
+    beforeEach(() => {
+      login(ROLE.t1_analyst);
 
-      navigateTo('/app/osquery');
-
-      cy.visit('/app/security/alerts');
+      cy.visit(`/app/security/rules/id/${ruleId}/alerts`);
       cy.getBySel('expand-event').first().click();
 
       cy.wait(500);
       cy.contains('Get processes').click();
+    });
+
+    it('should be able to run rule investigation guide query', () => {
       submitQuery();
       checkResults();
     });
 
     it('should not be able to run custom query', () => {
-      login(ROLES.t1_analyst);
-
-      navigateTo('/app/osquery');
-
-      cy.visit('/app/security/alerts');
-      cy.getBySel('expand-event').first().click();
-
-      cy.wait(500);
-      cy.contains('Get processes').click();
-
       cy.intercept('POST', '/api/osquery/live_queries', (req) => {
         req.body.query = 'select * from processes limit 10';
       });

@@ -17,14 +17,12 @@ import {
 
 export interface AnalyticsCollectionDataViewIdActions {
   apiSuccess: Actions<{}, FetchAnalyticsCollectionDataViewIdApiLogicResponse>['apiSuccess'];
-  fetchAnalyticsCollectionDataViewId(id: string): { id: string };
+  fetchAnalyticsCollectionDataViewId(name: string): { name: string };
   makeRequest: Actions<{}, FetchAnalyticsCollectionDataViewIdApiLogicResponse>['makeRequest'];
 }
 export interface AnalyticsCollectionDataViewIdValues {
   data: typeof FetchAnalyticsCollectionDataViewIdAPILogic.values.data;
-
   dataViewId: string | null;
-
   status: Status;
 }
 
@@ -32,7 +30,7 @@ export const AnalyticsCollectionDataViewIdLogic = kea<
   MakeLogicType<AnalyticsCollectionDataViewIdValues, AnalyticsCollectionDataViewIdActions>
 >({
   actions: {
-    fetchAnalyticsCollectionDataViewId: (id) => ({ id }),
+    fetchAnalyticsCollectionDataViewId: (name) => ({ name }),
   },
   connect: {
     actions: [
@@ -42,8 +40,8 @@ export const AnalyticsCollectionDataViewIdLogic = kea<
     values: [FetchAnalyticsCollectionDataViewIdAPILogic, ['status', 'data']],
   },
   listeners: ({ actions }) => ({
-    fetchAnalyticsCollectionDataViewId: ({ id }) => {
-      actions.makeRequest({ id });
+    fetchAnalyticsCollectionDataViewId: ({ name }) => {
+      actions.makeRequest({ name });
     },
   }),
   path: ['enterprise_search', 'analytics', 'collection_data_view_id'],

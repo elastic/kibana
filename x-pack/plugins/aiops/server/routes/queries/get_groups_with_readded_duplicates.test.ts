@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { changePointGroups } from '../../../common/__mocks__/artificial_logs/change_point_groups';
-import { changePoints } from '../../../common/__mocks__/artificial_logs/change_points';
+import { significantTermGroups } from '../../../common/__mocks__/artificial_logs/significant_term_groups';
+import { significantTerms } from '../../../common/__mocks__/artificial_logs/significant_terms';
 
 import { duplicateIdentifier } from './duplicate_identifier';
 import { getGroupsWithReaddedDuplicates } from './get_groups_with_readded_duplicates';
@@ -16,15 +16,15 @@ import { getMarkedDuplicates } from './get_marked_duplicates';
 
 describe('getGroupsWithReaddedDuplicates', () => {
   it('gets groups with readded duplicates', () => {
-    const groupedChangePoints = groupDuplicates(changePoints, duplicateIdentifier).filter(
+    const groupedSignificantTerms = groupDuplicates(significantTerms, duplicateIdentifier).filter(
       (g) => g.group.length > 1
     );
 
-    const fieldValuePairCounts = getFieldValuePairCounts(changePointGroups);
-    const markedDuplicates = getMarkedDuplicates(changePointGroups, fieldValuePairCounts);
+    const fieldValuePairCounts = getFieldValuePairCounts(significantTermGroups);
+    const markedDuplicates = getMarkedDuplicates(significantTermGroups, fieldValuePairCounts);
     const groupsWithReaddedDuplicates = getGroupsWithReaddedDuplicates(
       markedDuplicates,
-      groupedChangePoints
+      groupedSignificantTerms
     );
 
     expect(groupsWithReaddedDuplicates).toEqual([

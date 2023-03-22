@@ -40,7 +40,7 @@ export const MonitorDetailsLink = ({ name, configId, locationId }: Props) => {
     pathname: locId ? `monitor/${configId}?locationId=${locId}` : `monitor/${configId}`,
   });
   return (
-    <EuiLink href={href}>
+    <EuiLink data-test-subj="syntheticsMonitorDetailsLinkLink" href={href}>
       <EuiIcon type="arrowLeft" /> {name}
     </EuiLink>
   );
