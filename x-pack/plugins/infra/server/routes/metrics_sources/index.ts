@@ -27,7 +27,7 @@ const defaultStatus = {
 };
 
 export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => {
-  const { framework } = libs;
+  const { framework, logger } = libs;
 
   const composeSourceStatus = async (
     requestContext: InfraPluginRequestHandlerContext,
@@ -38,6 +38,9 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       libs.fields.getFields(requestContext, sourceId, 'METRICS'),
     ]);
 
+    /**
+     * Extract values from promises settlements
+     */
     const indexFields = isFulfilled<InfraSourceIndexField[]>(indexFieldsSettled)
       ? indexFieldsSettled.value
       : defaultStatus.indexFields;
@@ -45,6 +48,17 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       ? metricIndicesExistSettled.value
       : defaultStatus.metricIndicesExist;
     const remoteClustersExist = hasRemoteCluster<boolean | InfraSourceIndexField[]>(indexFieldsSettled, metricIndicesExistSettled);
+
+
+    /**
+     * Report gracefully handled rejections
+     */
+    if (!isFulfilled<InfraSourceIndexField[]>(indexFieldsSettled)) {
+      logger.error(indexFieldsSettled.reason)
+    }
+    if (!isFulfilled<boolean>(metricIndicesExistSettled)) {
+      logger.error(metricIndicesExistSettled.reason)
+    }
 
     return {
       indexFields,
