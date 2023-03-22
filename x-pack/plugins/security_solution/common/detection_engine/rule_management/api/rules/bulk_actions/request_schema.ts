@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 
 import { NonEmptyArray, TimeDuration } from '@kbn/securitysolution-io-ts-types';
 import {
+  RuleActionFrequency,
   RuleActionGroup,
   RuleActionId,
   RuleActionParams,
@@ -100,6 +101,7 @@ const NormalizedRuleAction = t.exact(
     group: RuleActionGroup,
     id: RuleActionId,
     params: RuleActionParams,
+    frequency: RuleActionFrequency,
   })
 );
 
