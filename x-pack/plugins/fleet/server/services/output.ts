@@ -15,7 +15,7 @@ import { v5 as uuidv5 } from 'uuid';
 import { omit } from 'lodash';
 import { safeLoad } from 'js-yaml';
 
-import type { NewOutput, Output, OutputSOAttributes } from '../types';
+import type { NewOutput, Output, OutputSOAttributes, AgentPolicy } from '../types';
 import {
   DEFAULT_OUTPUT,
   DEFAULT_OUTPUT_ID,
