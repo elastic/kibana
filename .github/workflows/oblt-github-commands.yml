@@ -1,0 +1,27 @@
+---
+##
+## This the automation to let Observability team members to know what are the
+## supported GitHub commands to interact with the Observability test environments.
+##
+## Owner: @elastic/observablt-robots
+##
+name: oblt-github-commands
+
+on:
+  issues:
+    types:
+      - opened
+
+permissions:
+  contents: read
+
+jobs:
+  oblt-kibana-github-commands:
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: elastic/apm-pipeline-library/.github/actions/oblt-kibana-github-commands@current
+        with:
+          vaultUrl: ${{ secrets.OBLT_VAULT_ADDR }}
+          vaultRoleId: ${{ secrets.OBLT_VAULT_ROLE_ID }}
+          vaultSecretId: ${{ secrets.OBLT_VAULT_SECRET_ID }}
