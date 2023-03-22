@@ -7051,7 +7051,6 @@
     "xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.pValueColumnTooltip": "值的频率更改的意义；值越小表示变化越大",
     "xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.pValueLabel": "p-value",
     "xpack.aiops.explainLogRateSpikes.spikeAnalysisTable.uniqueColumnTooltip": "此字段/值对只在该分组中出现",
-    "xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupColumnTooltip": "显示对组唯一的字段/值对。展开行以查看所有字段/值对。",
     "xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupLabel": "组",
     "xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.impactLabelColumnTooltip": "组对消息速率差异的影响水平",
     "xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.logRateColumnTooltip": "组对消息速率差异的影响的视觉表示形式",
