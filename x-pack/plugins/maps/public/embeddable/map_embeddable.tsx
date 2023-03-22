@@ -129,8 +129,6 @@ export class MapEmbeddable
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
   private _controlledBy: string;
-  private _onInitialRenderComplete?: () => void = undefined;
-  private _hasInitialRenderCompleteFired = false;
   private _isSharable = true;
   private readonly _onRenderComplete$;
 
@@ -318,10 +316,6 @@ export class MapEmbeddable
   setEventHandlers = (eventHandlers: EventHandlers) => {
     this._savedMap.getStore().dispatch(setEventHandlers(eventHandlers));
   };
-
-  public setOnInitialRenderComplete(onInitialRenderComplete?: () => void): void {
-    this._onInitialRenderComplete = onInitialRenderComplete;
-  }
 
   /*
    * Set to false to exclude sharing attributes 'data-*'.
@@ -705,15 +699,6 @@ export class MapEmbeddable
   _handleStoreChanges() {
     if (!this._isActive || !getMapReady(this._savedMap.getStore().getState())) {
       return;
-    }
-
-    if (
-      this._onInitialRenderComplete &&
-      !this._hasInitialRenderCompleteFired &&
-      areLayersLoaded(this._savedMap.getStore().getState())
-    ) {
-      this._hasInitialRenderCompleteFired = true;
-      this._onInitialRenderComplete();
     }
 
     const mapExtent = getMapExtent(this._savedMap.getStore().getState());
