@@ -21,8 +21,9 @@ const versionedRouter = createVersionedRouter({ router });
 // @ts-ignore unused variable
 const versionedRoute = versionedRouter
   .post({
+    access: 'internal',
     path: '/api/my-app/foo/{id?}',
-    options: { timeout: { payload: 60000 }, access: 'public' },
+    options: { timeout: { payload: 60000 } },
   })
   .addVersion(
     {

@@ -56,20 +56,17 @@ export type CreateVersionedRouter = <Ctx extends RqCtx = RqCtx>(
 ) => VersionedRouter<Ctx>;
 
 /**
- * Versioned route access flag, required
- * - '/api/foo' is 'public'
- * - '/internal/my-foo'  is 'internal'
- * Required
- */
-type VersionedRouteConfigOptions = WithRequiredProperty<RouteConfigOptions<RouteMethod>, 'access'>;
-/**
  * Configuration for a versioned route
  * @experimental
  */
 export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   RouteConfig<unknown, unknown, unknown, Method>,
   'validate' | 'options'
-> & { options: VersionedRouteConfigOptions };
+> & {
+  options?: Omit<RouteConfigOptions<RouteMethod>, 'access'>;
+  // Make "access" required and move to top level
+  access: RouteConfigOptions<RouteMethod>['access'];
+};
 
 /**
  * Create an {@link VersionedRoute | versioned route}.
@@ -100,6 +97,8 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
   delete: VersionedRouteRegistrar<'delete', Ctx>;
   /** @experimental */
   options: VersionedRouteRegistrar<'options', Ctx>;
+  /** @experimental */
+  getRoutes: () => VersionedRoute[];
 }
 
 /** @experimental */
@@ -164,6 +163,8 @@ export interface VersionedRoute<
    */
   addVersion<P, Q, B, R>(
     options: AddVersionOpts<P, Q, B, R>,
-    handler: (...params: Parameters<RequestHandler<P, Q, B, Ctx>>) => Promise<IKibanaResponse<R>>
+    handler: (
+      ...params: Parameters<RequestHandler<P, Q, B, Ctx>>
+    ) => Promise<IKibanaResponse<R>> | IKibanaResponse<R>
   ): VersionedRoute<Method, Ctx>;
 }
