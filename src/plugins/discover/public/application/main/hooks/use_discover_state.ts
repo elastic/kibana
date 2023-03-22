@@ -19,7 +19,6 @@ import { useUrlTracking } from './use_url_tracking';
 import { getDiscoverStateContainer } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
-import { DataTableRecord } from '../../../types';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { useAdHocDataViews } from './use_adhoc_data_views';
 
@@ -27,12 +26,10 @@ export function useDiscoverState({
   services,
   history,
   savedSearch,
-  setExpandedDoc,
 }: {
   services: DiscoverServices;
   savedSearch: SavedSearch;
   history: History;
-  setExpandedDoc: (doc?: DataTableRecord) => void;
 }) {
   const { data, filterManager, dataViews, toastNotifications, trackUiMetric } = services;
 
@@ -150,9 +147,9 @@ export function useDiscoverState({
   const onChangeDataView = useCallback(
     async (id: string) => {
       await changeDataView(id, { services, discoverState: stateContainer, setUrlTracking });
-      setExpandedDoc(undefined);
+      stateContainer.internalState.transitions.setExpandedDoc(undefined);
     },
-    [services, setExpandedDoc, setUrlTracking, stateContainer]
+    [services, setUrlTracking, stateContainer]
   );
 
   /**
