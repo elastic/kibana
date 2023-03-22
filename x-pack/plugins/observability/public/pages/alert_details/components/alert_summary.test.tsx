@@ -9,8 +9,7 @@ import React from 'react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { render } from '../../../utils/test_helper';
 import { AlertSummary } from './alert_summary';
-import { asDuration } from '../../../../common/utils/formatters';
-import { alertWithTags, alertWithNoData, tags } from '../mock/alert';
+import { alertWithTags } from '../mock/alert';
 import { alertSummaryFieldsMock } from '../mock/alert_summary_fields';
 
 jest.mock('react-router-dom', () => ({
@@ -30,24 +29,11 @@ describe('Alert summary', () => {
   });
 
   it('should show alert data', async () => {
-    const alertSummary = render(
-      <AlertSummary alert={alertWithTags} alertSummaryFields={alertSummaryFieldsMock} />
-    );
+    const alertSummary = render(<AlertSummary alertSummaryFields={alertSummaryFieldsMock} />);
 
-    expect(alertSummary.queryByText('1957')).toBeInTheDocument();
-    expect(alertSummary.queryByText(asDuration(882076000))).toBeInTheDocument();
-    expect(alertSummary.queryByText('Active')).toBeInTheDocument();
-    expect(alertSummary.queryByText('Sep 2, 2021 @ 08:54:09.674')).toBeInTheDocument();
-    expect(
-      alertSummary.getByText('Sep 2, 2021 @ 09:08:51.750', { exact: false })
-    ).toBeInTheDocument();
-    expect(alertSummary.queryByText(tags[0])).toBeInTheDocument();
-  });
-
-  it('should show empty "-" for fields when no data available', async () => {
-    const alertSummary = render(<AlertSummary alert={alertWithNoData} />);
-
-    expect(alertSummary.queryByTestId('noAlertStatus')).toBeInTheDocument();
-    expect(alertSummary.queryByTestId('noAlertStatus')).toHaveTextContent('-');
+    expect(alertSummary.queryByText('Actual value')).toBeInTheDocument();
+    expect(alertSummary.queryByText(alertWithTags.fields['kibana.alert.evaluation.value']!));
+    expect(alertSummary.queryByText('Expected value')).toBeInTheDocument();
+    expect(alertSummary.queryByText(alertWithTags.fields['kibana.alert.evaluation.threshold']!));
   });
 });

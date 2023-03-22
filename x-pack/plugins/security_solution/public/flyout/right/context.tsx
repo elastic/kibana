@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { css } from '@emotion/react';
 import React, { createContext, useContext, useMemo } from 'react';
 import type { SearchHit } from '@kbn/es-types';
@@ -27,6 +28,14 @@ export interface RightPanelContext {
    * Name of the index used in the parent's page
    */
   indexName: string;
+  /**
+   * An object containing fields by type
+   */
+  browserFields: BrowserFields | null;
+  /**
+   * An array of field objects with category and value
+   */
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[] | null;
   /**
    * The actual raw document object
    */
@@ -51,7 +60,7 @@ export const RightPanelProvider = ({ id, indexName, children }: RightPanelProvid
       ? SourcererScopeName.detections
       : SourcererScopeName.default;
   const sourcererDataView = useSourcererDataView(sourcererScope);
-  const [loading, _, searchHit] = useTimelineEventsDetails({
+  const [loading, dataFormattedForFieldBrowser, searchHit] = useTimelineEventsDetails({
     indexName: eventIndex,
     eventId: id ?? '',
     runtimeMappings: sourcererDataView.runtimeMappings,
@@ -64,10 +73,12 @@ export const RightPanelProvider = ({ id, indexName, children }: RightPanelProvid
         ? {
             eventId: id,
             indexName,
+            browserFields: sourcererDataView.browserFields,
+            dataFormattedForFieldBrowser,
             searchHit: searchHit as SearchHit<object>,
           }
         : undefined,
-    [id, indexName, searchHit]
+    [id, indexName, sourcererDataView.browserFields, dataFormattedForFieldBrowser, searchHit]
   );
 
   if (loading) {
