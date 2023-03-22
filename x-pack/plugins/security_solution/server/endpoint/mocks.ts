@@ -173,6 +173,7 @@ export const createMockEndpointAppContextServiceStartContract =
       featureUsageService: createFeatureUsageServiceMock(),
       experimentalFeatures: createMockConfig().experimentalFeatures,
       messageSigningService: createMessageSigningServiceMock(),
+      actionCreateService: undefined,
     };
   };
 
