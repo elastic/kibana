@@ -22,11 +22,11 @@ import {
 import { EuiPanel } from '@elastic/eui';
 import { keyBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import { TopNSample, TopNSubchart } from '../../common/topn';
-import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
-import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
-import { asPercentage } from '../utils/formatters/as_percentage';
-import { SubChart } from './subchart';
+import { TopNSample, TopNSubchart } from '../../../common/topn';
+import { useKibanaTimeZoneSetting } from '../../hooks/use_kibana_timezone_setting';
+import { useProfilingChartsTheme } from '../../hooks/use_profiling_charts_theme';
+import { asPercentage } from '../../utils/formatters/as_percentage';
+import { SubChart } from '../subchart';
 
 // 2 * padding (16px)
 const MAX_TOOLTIP_WIDTH = 224;
@@ -37,15 +37,17 @@ export interface StackedBarChartProps {
   onBrushEnd: (range: { rangeFrom: string; rangeTo: string }) => void;
   charts: TopNSubchart[];
   showFrames: boolean;
+  onClick?: (category: string) => void;
 }
 
-export const StackedBarChart: React.FC<StackedBarChartProps> = ({
+export function StackedBarChart({
   height,
   asPercentages,
   onBrushEnd,
   charts,
   showFrames,
-}) => {
+  onClick,
+}: StackedBarChartProps) {
   const chartsbyCategoryMap = useMemo(() => {
     return keyBy(charts, 'Category');
   }, [charts]);
@@ -107,6 +109,15 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
           const [value] = events[0] as XYChartElementEvent;
           setHighlightedSample(value.datum as TopNSample);
         }}
+        onElementClick={
+          onClick
+            ? (elements) => {
+                const [value] = elements[0] as XYChartElementEvent;
+                const sample = value.datum as TopNSample;
+                onClick(sample.Category);
+              }
+            : undefined
+        }
         onElementOut={() => {
           setHighlightedSample(undefined);
         }}
@@ -135,4 +146,4 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
       />
     </Chart>
   );
-};
+}
