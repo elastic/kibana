@@ -43,7 +43,7 @@ jobs:
           github-token: ${{ env.GITHUB_TOKEN }}
           script: |
             const body = `
-              ## :robot: GitHub comments
+              ### :robot: GitHub comments
 
               <details><summary>Expand to view the GitHub comments</summary>
               <p>
