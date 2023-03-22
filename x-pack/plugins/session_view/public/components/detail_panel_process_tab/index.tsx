@@ -236,7 +236,7 @@ export const DetailPanelProcessTab = ({ selectedProcess }: DetailPanelProcessTab
             textToCopy={`${LEADER_FIELD_PREFIX[idx]}.user.id: "${userId}"`}
             tooltipContent={userId}
           >
-            {userName}
+            {userId}
           </DetailPanelCopy>
         ),
       },
@@ -258,7 +258,7 @@ export const DetailPanelProcessTab = ({ selectedProcess }: DetailPanelProcessTab
             textToCopy={`${LEADER_FIELD_PREFIX[idx]}.group.id: "${groupId}"`}
             tooltipContent={groupId}
           >
-            {groupName}
+            {groupId}
           </DetailPanelCopy>
         ),
       },
@@ -460,7 +460,7 @@ export const DetailPanelProcessTab = ({ selectedProcess }: DetailPanelProcessTab
                 textToCopy={`${PROCESS_FIELD_PREFIX}.user.id: "${userId}"`}
                 tooltipContent={userId}
               >
-                {userName}
+                {userId}
               </DetailPanelCopy>
             ),
           },
@@ -482,7 +482,7 @@ export const DetailPanelProcessTab = ({ selectedProcess }: DetailPanelProcessTab
                 textToCopy={`${PROCESS_FIELD_PREFIX}.group.id: "${groupId}"`}
                 tooltipContent={groupId}
               >
-                {groupName}
+                {groupId}
               </DetailPanelCopy>
             ),
           },
