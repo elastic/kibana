@@ -55,9 +55,9 @@ interface AnalyticsCollectionChartLensProps {
   isLoading: boolean;
 }
 
-const AnalyticsCollectionChart: React.FC<
+export const AnalyticsCollectionChart: React.FC<
   AnalyticsCollectionChartProps & AnalyticsCollectionChartLensProps
-> = ({ data, timeRange, dataViewQuery, isLoading }) => {
+> = ({ id: lensId, data, timeRange, dataViewQuery, isLoading }) => {
   const [hoverChart, setHoverChart] = useState<ChartIds | null>(null);
   const [selectedChart, setSelectedChart] = useState<ChartIds>(ChartIds.Searches);
   const { uiSettings, charts: chartSettings } = useValues(KibanaLogic);
@@ -122,7 +122,7 @@ const AnalyticsCollectionChart: React.FC<
         {charts.map(({ name, id }) => (
           <AnalyticsCollectionViewMetricWithLens
             key={id}
-            id={'metric-' + id}
+            id={`${lensId}-metric-${id}`}
             isSelected={selectedChart === id}
             name={name}
             onClick={(event) => {

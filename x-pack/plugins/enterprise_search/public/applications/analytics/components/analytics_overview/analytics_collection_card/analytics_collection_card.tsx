@@ -34,7 +34,7 @@ import { AnalyticsCollection } from '../../../../../../common/types/analytics';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
 import { KibanaLogic } from '../../../../shared/kibana';
-import { withLensData, WithLensDataInputProps } from '../../../hoc/with_lens_data';
+import { withLensData } from '../../../hoc/with_lens_data';
 import { COLLECTION_VIEW_PATH } from '../../../routes';
 
 import { FilterBy, getFormulaByFilter } from '../../../utils/get_formula_by_filter';
@@ -74,7 +74,7 @@ const getCardTheme = (euiTheme: EuiThemeComputed) => ({
   },
 });
 
-interface AnalyticsCollectionCardProps extends WithLensDataInputProps {
+interface AnalyticsCollectionCardProps {
   collection: AnalyticsCollection;
   filterBy: FilterBy;
   isCreatedByEngine?: boolean;

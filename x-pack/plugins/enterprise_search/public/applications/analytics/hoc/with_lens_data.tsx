@@ -37,7 +37,7 @@ interface WithLensDataParams<Props, OutputState> {
   initialValues: OutputState;
 }
 
-export const withLensData = <T extends WithLensDataInputProps, OutputState extends {}>(
+export const withLensData = <T extends {} = {}, OutputState extends {} = {}>(
   Component: React.FC<T & OutputState>,
   {
     dataLoadTransform,
@@ -46,7 +46,7 @@ export const withLensData = <T extends WithLensDataInputProps, OutputState exten
     initialValues,
   }: WithLensDataParams<Omit<T, keyof OutputState>, OutputState>
 ) => {
-  const ComponentWithLensData = (props: T) => {
+  const ComponentWithLensData: React.FC<T & WithLensDataInputProps> = (props) => {
     const {
       lens: { EmbeddableComponent, stateHelperApi },
       data: { dataViews },
@@ -69,9 +69,11 @@ export const withLensData = <T extends WithLensDataInputProps, OutputState exten
       })();
     }, [props]);
     useEffect(() => {
-      stateHelperApi().then((helper) => {
+      (async () => {
+        const helper = await stateHelperApi();
+
         setFormula(helper.formula);
-      });
+      })();
     }, []);
 
     return (

@@ -9,13 +9,21 @@ import React from 'react';
 
 import { css } from '@emotion/react';
 
-import { EuiFlexGroup, EuiI18nNumber, EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiI18nNumber,
+  EuiIcon,
+  EuiPanel,
+  EuiProgress,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import { withLensData, WithLensDataInputProps } from '../../hoc/with_lens_data';
+import { withLensData } from '../../hoc/with_lens_data';
 
 enum MetricStatus {
   INCREASE = 'increase',
@@ -44,7 +52,7 @@ const getMetricStatus = (metric: number): MetricStatus => {
   return MetricStatus.CONSTANT;
 };
 
-interface AnalyticsCollectionViewMetricProps extends WithLensDataInputProps {
+interface AnalyticsCollectionViewMetricProps {
   dataViewQuery: string;
   getFormula: (shift?: string) => string;
   isSelected?: boolean;
@@ -53,13 +61,14 @@ interface AnalyticsCollectionViewMetricProps extends WithLensDataInputProps {
 }
 
 interface AnalyticsCollectionViewMetricLensProps {
+  isLoading: boolean;
   metric: number | null;
   secondaryMetric: number | null;
 }
 
-const AnalyticsCollectionViewMetric: React.FC<
+export const AnalyticsCollectionViewMetric: React.FC<
   AnalyticsCollectionViewMetricProps & AnalyticsCollectionViewMetricLensProps
-> = ({ isSelected, metric, name, onClick, secondaryMetric }) => {
+> = ({ isLoading, isSelected, metric, name, onClick, secondaryMetric }) => {
   const { euiTheme } = useEuiTheme();
   const { icon, color } = getMetricTheme(euiTheme, getMetricStatus(secondaryMetric || 0));
 
@@ -74,10 +83,14 @@ const AnalyticsCollectionViewMetric: React.FC<
         isSelected
           ? css`
               border: 1px solid ${euiTheme.colors.primary};
+              position: relative;
             `
-          : undefined
+          : css`
+              position: relative;
+            `
       }
     >
+      {isLoading && <EuiProgress size="xs" color="success" position="absolute" />}
       <EuiFlexGroup direction="column">
         <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
           <EuiText size="s">
@@ -121,7 +134,7 @@ const LENS_LAYERS = {
     percentage: 'percentage',
   },
 };
-const initialValues = { metric: null, secondaryMetric: null };
+const initialValues = { isLoading: true, metric: null, secondaryMetric: null };
 
 export const AnalyticsCollectionViewMetricWithLens = withLensData<
   AnalyticsCollectionViewMetricProps,
@@ -145,7 +158,7 @@ export const AnalyticsCollectionViewMetricWithLens = withLensData<
     let metric = formulaApi.insertOrReplaceFormulaColumn(
       LENS_LAYERS.metrics.percentage,
       {
-        formula: `round(((${props.getFormula()}/${props.getFormula('previous')})-1) * 100)`,
+        formula: `round((${props.getFormula()}/${props.getFormula('previous')}-1) * 100)`,
       },
       {
         columnOrder: [],

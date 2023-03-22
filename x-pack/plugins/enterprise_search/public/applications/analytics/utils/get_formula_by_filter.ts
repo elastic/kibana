@@ -11,7 +11,7 @@ export enum FilterBy {
   Clicks = 'Clicks',
   Sessions = 'Sessions',
 }
-export const getFormulaByFilter = (filter: FilterBy, shift?: string | null): string => {
+export const getFormulaByFilter = (filter: FilterBy, shift?: string): string => {
   const mapFilterByToFormula: { [key in FilterBy]: string } = {
     [FilterBy.Searches]: "count(kql='event.action: search'",
     [FilterBy.NoResults]: "count(kql='event.customer_data.totalResults : 0'",
