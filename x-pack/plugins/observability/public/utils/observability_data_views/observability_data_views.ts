@@ -132,6 +132,7 @@ export class ObservabilityDataViews {
           timeFieldName: '@timestamp',
           fieldFormats: this.getFieldFormats(app),
           name: DataTypesLabels[app],
+          allowNoIndex: true,
         },
         false,
         false
@@ -162,6 +163,7 @@ export class ObservabilityDataViews {
       timeFieldName: '@timestamp',
       fieldFormats: this.getFieldFormats(app),
       name: DataTypesLabels[app],
+      allowNoIndex: true,
     });
   }
   // we want to make sure field formats remain same
