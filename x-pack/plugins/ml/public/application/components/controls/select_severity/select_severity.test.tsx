@@ -24,6 +24,10 @@ jest.mock('@kbn/ml-url-state', () => ({
 }));
 
 describe('SelectSeverity', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('updates the severity option correctly on click', async () => {
     // arrange
     const { getByText, getAllByText, queryByText, getByTestId } = render(

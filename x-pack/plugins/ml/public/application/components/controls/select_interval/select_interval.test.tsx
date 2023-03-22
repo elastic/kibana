@@ -24,6 +24,10 @@ jest.mock('@kbn/ml-url-state', () => ({
 }));
 
 describe('SelectInterval', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('updates the selected value correctly on click', () => {
     // arrange
     const { getByText, getByTestId } = render(<SelectInterval />);
