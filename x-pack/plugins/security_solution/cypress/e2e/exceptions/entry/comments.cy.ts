@@ -23,6 +23,7 @@ import {
   goToExceptionsTab,
   openEditException,
   openExceptionFlyoutFromEmptyViewerPrompt,
+  removeException,
 } from '../../../tasks/rule_details';
 import {
   addExceptionComment,
@@ -214,6 +215,34 @@ describe('Add, copy comments in different exceptions type and validate sharing t
         .eq(0)
         .should('have.text', 'new comment- on edit');
     });
+    it('Add comment has unicode character', () => {
+      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
+
+      // open add exception modal
+      addExceptionFlyoutFromViewerHeader();
+
+      // add exception item conditions
+      addExceptionConditions(getException());
+
+      // add exception item name
+      addExceptionFlyoutItemName('My item name');
+
+      // add exception comment
+      addExceptionComment('new comment @ using unicode');
+
+      // submit
+      submitNewExceptionItem();
+
+      // new exception item displays
+      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
+
+      // click on show comments
+      clickOnShowComments();
+
+      cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT)
+        .eq(0)
+        .should('have.text', 'new comment @ using unicode');
+    });
   });
   describe('Endpoint exceptions', () => {
     before(() => {
@@ -306,6 +335,39 @@ describe('Add, copy comments in different exceptions type and validate sharing t
       cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT).eq(0).should('have.text', 'User 1 comment');
 
       cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT).eq(1).should('have.text', 'User 2 comment');
+      removeException();
+    });
+    it('Add comment has unicode character', () => {
+      // open add exception modal
+      addExceptionFlyoutFromViewerHeader();
+
+      // for endpoint exceptions, must specify OS
+      selectOs('windows');
+
+      // add exception item conditions
+      addExceptionConditions({
+        field: 'event.code',
+        operator: 'is',
+        values: ['foo'],
+      });
+      // add exception comment
+      addExceptionComment('comment @ using unicode');
+
+      // add exception item name
+      addExceptionFlyoutItemName('Endpoint exception');
+
+      // submit
+      submitNewExceptionItem();
+
+      // Endpoint Exception will move to Endpoint List under Exception tab of rule
+      goToEndpointExceptionsTab();
+
+      // click on show comments
+      clickOnShowComments();
+
+      cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER_TEXT)
+        .eq(0)
+        .should('have.text', 'comment @ using unicode');
     });
   });
 });
