@@ -56,7 +56,7 @@ export const SessionView = ({
   canAccessEndpointManagement,
 }: SessionViewDeps) => {
   // don't engage jumpTo if jumping to session leader.
-  if (true || jumpToEntityId === sessionEntityId) {
+  if (jumpToEntityId === sessionEntityId) {
     jumpToEntityId = undefined;
     jumpToCursor = undefined;
   }
