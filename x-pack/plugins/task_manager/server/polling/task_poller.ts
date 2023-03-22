@@ -17,14 +17,14 @@ import { Logger } from '@kbn/core/server';
 import { Result, map as mapResult, asOk, asErr, promiseResult } from '../lib/result_type';
 import { timeoutPromiseAfter } from './timeout_promise_after';
 
-type WorkFn<T, H> = (...params: T[]) => Promise<H>;
+type WorkFn<H> = () => Promise<H>;
 
-interface Opts<T, H> {
+interface Opts<H> {
   logger: Logger;
   pollInterval$: Observable<number>;
   pollIntervalDelay$: Observable<number>;
   getCapacity: () => number;
-  work: WorkFn<T, H>;
+  work: WorkFn<H>;
   workTimeout: number;
 }
 
@@ -34,7 +34,7 @@ interface Opts<T, H> {
  * @param opts
  * @prop {number} pollInterval - How often, in milliseconds, we will an event be emnitted, assuming there's capacity to do so
  * @prop {() => number} getCapacity - A function specifying whether there is capacity to emit new events
- * @prop {(...params: T[]) => Promise<H>} work - The work we wish to execute in order to `poll`, this is the operation we're actually executing on request
+ * @prop {() => Promise<H>} work - The work we wish to execute in order to `poll`, this is the operation we're actually executing on request
  *
  * @returns {Observable<Set<T>>} - An observable which emits an event whenever a polling event is due to take place, providing access to a singleton Set representing a queue
  *  of unique request argumets of type T.
@@ -46,7 +46,7 @@ export function createTaskPoller<T, H>({
   getCapacity,
   work,
   workTimeout,
-}: Opts<T, H>): Observable<Result<H, PollingError<T>>> {
+}: Opts<H>): Observable<Result<H, PollingError<T>>> {
   const hasCapacity = () => getCapacity() > 0;
 
   const requestWorkProcessing$ = combineLatest([
