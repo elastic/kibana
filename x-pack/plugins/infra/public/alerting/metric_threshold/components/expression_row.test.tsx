@@ -13,6 +13,7 @@ import { MetricExpression } from '../types';
 import { ExpressionRow } from './expression_row';
 
 jest.mock('../../../containers/metrics_source/source', () => ({
+  withSourceProvider: () => jest.fn,
   useSourceContext: () => ({
     source: { id: 'default' },
     createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
