@@ -141,7 +141,11 @@ export const SourceStatusWrapper: React.FC = ({ children }) => {
           color="danger"
           iconType="warning"
         >
-          <EuiButton onClick={load} iconType="refresh">
+          <EuiButton
+            data-test-subj="infraSourceStatusWrapperTryAgainButton"
+            onClick={load}
+            iconType="refresh"
+          >
             {i18n.translate('xpack.infra.logs.alertFlyout.sourceStatusErrorTryAgain', {
               defaultMessage: 'Try again',
             })}

@@ -57,7 +57,9 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
      * Override the default concurrent upload limit by passing in a different
      * semaphore
      */
-    private readonly uploadSemaphore = ElasticsearchBlobStorageClient.defaultSemaphore
+    private readonly uploadSemaphore = ElasticsearchBlobStorageClient.defaultSemaphore,
+    /** Indicates that the index provided is an alias (changes how content is retrieved internally) */
+    private readonly indexIsAlias: boolean = false
   ) {
     assert(this.uploadSemaphore, `No default semaphore provided and no semaphore was passed in.`);
   }
@@ -166,6 +168,7 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
       parameters: {
         size,
       },
+      indexIsAlias: this.indexIsAlias,
     });
   }
 

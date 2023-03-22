@@ -135,6 +135,8 @@ export const METRICSET_NAME = 'metricset.name';
 export const METRICSET_INTERVAL = 'metricset.interval';
 
 export const LABEL_NAME = 'labels.name';
+export const LABEL_GC = 'labels.gc';
+export const LABEL_TYPE = 'labels.type';
 export const LABEL_TELEMETRY_AUTO_VERSION = 'labels.telemetry_auto_version';
 
 export const HOST = 'host';
@@ -159,6 +161,27 @@ export const FAAS_TRIGGER_TYPE = 'faas.trigger.type';
 export const FAAS_DURATION = 'faas.duration';
 export const FAAS_COLDSTART_DURATION = 'faas.coldstart_duration';
 export const FAAS_BILLED_DURATION = 'faas.billed_duration';
+
+// OpenTelemetry Metrics
+export const METRIC_OTEL_SYSTEM_CPU_UTILIZATION = 'system.cpu.utilization';
+export const METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION =
+  'system.memory.utilization';
+
+export const METRIC_OTEL_JVM_PROCESS_CPU_PERCENT =
+  'process.runtime.jvm.cpu.utilization';
+export const METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE =
+  'process.runtime.jvm.memory.usage';
+export const METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED =
+  'process.runtime.jvm.memory.committed';
+export const METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT =
+  'process.runtime.jvm.memory.limit';
+export const METRIC_OTEL_JVM_PROCESS_THREADS_COUNT =
+  'process.runtime.jvm.threads.count';
+export const METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT =
+  'process.runtime.jvm.system.cpu.utilization';
+export const METRIC_OTEL_JVM_GC_DURATION = 'process.runtime.jvm.gc.duration';
+export const VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP = 'heap';
+export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
 
 // Metadata
 export const TIER = '_tier';
