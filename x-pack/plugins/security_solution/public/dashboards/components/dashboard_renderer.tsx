@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DashboardContainer } from '@kbn/dashboard-plugin/public';
 import { LazyDashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { useHistory } from 'react-router-dom';
+import { startSyncingDashboardUrlState } from '@kbn/dashboard-plugin/public/dashboard_app/url/sync_dashboard_url_state';
 import { inputsSelectors } from '../../common/store';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { InputsModelId } from '../../common/store/inputs/constants';
@@ -52,6 +53,7 @@ const DashboardRendererComponent = ({
   const toasts = useAppToasts();
   const history = useHistory();
   console.log('history', history);
+
   const kbnUrlStateStorage = useMemo(
     () =>
       createKbnUrlStateStorage({
@@ -86,6 +88,18 @@ const DashboardRendererComponent = ({
     id,
     container: dashboardContainer,
   });
+
+  /**
+   * When the dashboard container is created, or re-created, start syncing dashboard state with the URL
+   */
+  useEffect(() => {
+    if (!dashboardContainer) return;
+    const { stopWatchingAppStateInUrl } = startSyncingDashboardUrlState({
+      kbnUrlStateStorage,
+      dashboardContainer,
+    });
+    return () => stopWatchingAppStateInUrl();
+  }, [dashboardContainer, kbnUrlStateStorage]);
 
   const handleDashboardLoaded = useCallback(
     (container: DashboardContainer) => {
