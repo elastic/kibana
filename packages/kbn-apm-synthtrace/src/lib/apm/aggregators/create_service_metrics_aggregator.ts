@@ -45,21 +45,19 @@ export function createServiceMetricsAggregator(flushInterval: string, options?: 
           sum: 0,
           value_count: 0,
         },
-        'service_transaction.aggregation.overflow_count': 0,
-        _overflow_count: [0], // [service]
-        _aggregator_overflow_count: 0, // transaction
       };
     },
-    aggregatorLimit: {
-      field: ['service.name'],
-      value: options?.overflowSettings?.maxGroups ?? Number.POSITIVE_INFINITY,
+    grouping: {
+      maxTotalGroups: options?.overflowSettings?.maxGroups ?? Number.POSITIVE_INFINITY,
+      overflowGroupingKey: 'service.name',
+      overflowCountField: 'service_transaction.aggregation.overflow_count',
+      groups: [
+        {
+          field: 'service.name',
+          limit: options?.overflowSettings?.transactions?.maxServices ?? Number.POSITIVE_INFINITY,
+        },
+      ],
     },
-    grouping: [
-      {
-        field: 'service.name',
-        limit: options?.overflowSettings?.transactions?.maxServices ?? Number.POSITIVE_INFINITY,
-      },
-    ],
     reduce: (metric, event) => {
       const duration = event['transaction.duration.us']!;
 
@@ -75,12 +73,6 @@ export function createServiceMetricsAggregator(flushInterval: string, options?: 
 
       const summary = metric['transaction.duration.summary'];
 
-      if (event['service.name'] === '_other') {
-        for (const field of KEY_FIELDS) {
-          delete metric[field];
-        }
-      }
-
       summary.sum += duration;
       summary.value_count += 1;
     },
@@ -91,14 +83,6 @@ export function createServiceMetricsAggregator(flushInterval: string, options?: 
         counts: serialized.counts,
       };
       metric._doc_count = serialized.total;
-
-      if (metric['service.name'] === '_other') {
-        metric['service_transaction.aggregation.overflow_count'] =
-          metric._aggregator_overflow_count || metric._overflow_count[0];
-      }
-
-      delete metric._overflow_count;
-      delete metric._aggregator_overflow_count;
 
       return metric;
     },

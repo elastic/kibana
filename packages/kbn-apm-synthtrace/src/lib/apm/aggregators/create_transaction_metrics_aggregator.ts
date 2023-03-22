@@ -83,27 +83,25 @@ export function createTransactionMetricsAggregator(
           sum: 0,
           value_count: 0,
         },
-        'transaction.aggregation.overflow_count': 0,
-        _overflow_count: [0, 0], // [service, transaction]
-        _aggregator_overflow_count: 0, // transaction
       };
     },
-    aggregatorLimit: {
-      field: ['service.name', 'transaction.name'],
-      value: options?.overflowSettings?.maxGroups ?? Number.POSITIVE_INFINITY,
+    grouping: {
+      maxTotalGroups: options?.overflowSettings?.maxGroups ?? Number.POSITIVE_INFINITY,
+      overflowGroupingKey: 'service.name',
+      overflowCountField: 'transaction.aggregation.overflow_count',
+      groups: [
+        {
+          field: 'service.name',
+          limit: options?.overflowSettings?.transactions?.maxServices ?? Number.POSITIVE_INFINITY,
+        },
+        {
+          field: 'transaction.name',
+          limit:
+            options?.overflowSettings?.transactions?.maxTransactionGroupsPerService ??
+            Number.POSITIVE_INFINITY,
+        },
+      ],
     },
-    grouping: [
-      {
-        field: 'service.name',
-        limit: options?.overflowSettings?.transactions?.maxServices ?? Number.POSITIVE_INFINITY,
-      },
-      {
-        field: 'transaction.name',
-        limit:
-          options?.overflowSettings?.transactions?.maxTransactionGroupsPerService ??
-          Number.POSITIVE_INFINITY,
-      },
-    ],
     reduce: (metric, event) => {
       const duration = event['transaction.duration.us']!;
       metric['transaction.duration.histogram'].record(duration);
@@ -134,14 +132,6 @@ export function createTransactionMetricsAggregator(
         counts: serialized.counts,
       };
       metric._doc_count = serialized.total;
-
-      if (metric['transaction.name'] === '_other') {
-        metric['transaction.aggregation.overflow_count'] =
-          metric._aggregator_overflow_count || metric._overflow_count[1];
-      }
-
-      delete metric._overflow_count;
-      delete metric._aggregator_overflow_count;
 
       return metric;
     },

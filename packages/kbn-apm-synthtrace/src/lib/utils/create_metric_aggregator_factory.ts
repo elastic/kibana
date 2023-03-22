@@ -14,12 +14,12 @@ import { hashObject } from '@kbn/apm-synthtrace-client/src/lib/utils/hash';
 interface MetricGroupTracker {
   tracked: Map<any, MetricGroupTracker>;
   untracked: Set<any>;
-  overflowGroupCount: number;
 }
 
 interface GroupingOptions<TFields extends Fields> {
   maxTotalGroups: number;
   overflowGroupingKey: string;
+  overflowCountField: string;
   groups?: Array<{ field: keyof TFields & string; limit: number }>;
 }
 
@@ -27,7 +27,6 @@ function createMetricGroupTracker(): MetricGroupTracker {
   return {
     tracked: new Map(),
     untracked: new Set(),
-    overflowGroupCount: 0,
   };
 }
 
@@ -47,7 +46,7 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
     getAggregateKey: (event: TFields) => string;
     flushInterval: string;
     init: (event: TFields) => TMetric;
-    grouping: GroupingOptions<TFields>;
+    grouping?: GroupingOptions<TFields>;
     reduce: (metric: TMetric, event: TFields) => void;
     serialize: (metric: TMetric) => TOutput;
   }) {
@@ -55,7 +54,8 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
     const metrics: Map<string, TMetric & { '@timestamp'?: number }> = new Map();
 
-    const groups = grouping.groups ?? [];
+    const groups = grouping?.groups ?? [];
+    const overflowFieldName = grouping?.overflowCountField;
 
     const tracker = createMetricGroupTracker();
 
@@ -98,30 +98,40 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
       return Math.ceil(timestamp / flushEveryMs) * flushEveryMs;
     }
 
-    function getMetricSet(key: string, event: TFields, timestamp: number) {
+    function getOrCreateOverflowSet(id: string, event: TFields, timestamp: number) {
+      let set = metrics.get(id);
+      if (!set) {
+        set = init(event);
+        set['@timestamp'] = timestamp;
+        set[overflowFieldName] = 0;
+        metrics.set(id, set);
+      }
+
+      return set;
+    }
+
+    function getOrCreateMetricSet(key: string, event: TFields, timestamp: number) {
       let set = metrics.get(key);
 
       if (set) {
         return set;
       }
 
-      if (metrics.size >= grouping.maxTotalGroups) {
+      if (grouping && metrics.size >= grouping.maxTotalGroups) {
         const metric: TFields = {
           [grouping.overflowGroupingKey]: OVERFLOW_BUCKET_NAME,
         } as unknown as TFields;
 
         const trackingKey = hashObject(metric);
-        metric['@timestamp'] = timestamp;
+        set = getOrCreateOverflowSet(trackingKey, metric, timestamp);
 
-        set = init(metric);
-        metrics.set(trackingKey, set);
+        const isUntracked = tracker.untracked.has(trackingKey);
 
-        return set;
-      }
+        if (!isUntracked) {
+          tracker.untracked.add(trackingKey);
+          set[overflowFieldName]!++;
+        }
 
-      if (!groups.length) {
-        set = init(event);
-        metrics.set(key, init(event));
         return set;
       }
 
@@ -129,7 +139,7 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
       const trackingObject: TFields = {} as TFields;
 
-      for (let i = 0; i <= groups.length; i++) {
+      for (let i = 0; i < groups.length; i++) {
         const { field, limit } = groups[i];
         const fieldValue = event[field];
         trackingObject[field] = fieldValue;
@@ -137,7 +147,9 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
         if (groupTrackingMap.untracked.has(fieldValue)) {
           // we know that this group is untracked and we already have a matching
           // metric document
-          return metrics.get(hashObject(trackingObject));
+          trackingObject[field] = OVERFLOW_BUCKET_NAME as unknown as TFields[keyof TFields &
+            string];
+          return metrics.get(hashObject(trackingObject))!;
         }
 
         // we're going to add a new value to track/untrack to this group
@@ -151,15 +163,10 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
           const overflowBucketKey = hashObject(trackingObject);
 
           // an overflow bucket metricset might already exist
-          set = metrics.get(overflowBucketKey);
-
-          if (!set) {
-            set = init(trackingObject);
-            metrics.set(overflowBucketKey, set);
-          }
+          set = getOrCreateOverflowSet(overflowBucketKey, trackingObject, timestamp);
 
           // increase the overflow count
-          set._overflow[i]++;
+          set[overflowFieldName]!++;
 
           return set;
         }
@@ -173,9 +180,9 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
         groupTrackingMap = nextGroupTrackingMap;
       }
-
       // metric fits within all limits
       set = init(event);
+      set['@timestamp'] = timestamp;
       metrics.set(key, set);
       return set;
     }
@@ -201,11 +208,7 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
           const key = appendHash(getAggregateKey(event), truncatedTimestamp.toString());
 
-          let set = getMetricSet(key, event, truncatedTimestamp);
-
-          if (!set) {
-            set = init(event);
-          }
+          let set = getOrCreateMetricSet(key, event, truncatedTimestamp);
 
           reduce(set, event);
 
