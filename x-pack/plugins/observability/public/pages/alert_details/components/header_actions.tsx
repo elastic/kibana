@@ -28,7 +28,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
     cases: {
       hooks: { getUseCasesAddToExistingCaseModal },
     },
-    triggersActionsUi: { getEditAlertFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
+    triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
   } = useKibana<ObservabilityAppServices>().services;
 
   const { rule, reloadRule } = useFetchRule({

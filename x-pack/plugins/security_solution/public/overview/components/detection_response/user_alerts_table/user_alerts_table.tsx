@@ -19,6 +19,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
@@ -26,9 +28,8 @@ import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/componen
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import * as i18n from '../translations';
-import { ITEMS_PER_PAGE, openAlertsFilter, SEVERITY_COLOR } from '../utils';
+import { ITEMS_PER_PAGE, SEVERITY_COLOR } from '../utils';
 import type { UserAlertsItem } from './use_user_alerts_items';
 import { useUserAlertsItems } from './use_user_alerts_items';
 
@@ -43,23 +44,30 @@ type GetTableColumns = (
 const DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID = 'vulnerableUsersBySeverityQuery';
 
 export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableProps) => {
-  const { openTimelineWithFilters } = useNavigateToTimeline();
+  const openAlertsPageWithFilters = useNavigateToAlertsPageWithFilters();
 
-  const openUserInTimeline = useCallback(
-    ({ userName, severity }: { userName: string; severity?: string }) => {
-      const userNameFilter = { field: 'user.name', value: userName };
-      const severityFilter = severity
-        ? { field: 'kibana.alert.severity', value: severity }
-        : undefined;
+  const openUserInAlerts = useCallback(
+    ({ userName, severity }: { userName: string; severity?: string }) =>
+      openAlertsPageWithFilters([
+        {
+          title: i18n.OPEN_IN_ALERTS_TITLE_USERNAME,
+          selectedOptions: [userName],
+          fieldName: 'user.name',
+        },
 
-      openTimelineWithFilters(
-        severityFilter
-          ? [[userNameFilter, openAlertsFilter, severityFilter]]
-          : [[userNameFilter, openAlertsFilter]]
-      );
-    },
-    [openTimelineWithFilters]
+        ...(severity
+          ? [
+              {
+                title: i18n.OPEN_IN_ALERTS_TITLE_SEVERITY,
+                selectedOptions: [severity],
+                fieldName: ALERT_SEVERITY,
+              },
+            ]
+          : []),
+      ]),
+    [openAlertsPageWithFilters]
   );
+
   const { toggleStatus, setToggleStatus } = useQueryToggle(
     DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID
   );
@@ -69,7 +77,7 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
     signalIndexName,
   });
 
-  const columns = useMemo(() => getTableColumns(openUserInTimeline), [openUserInTimeline]);
+  const columns = useMemo(() => getTableColumns(openUserInAlerts), [openUserInAlerts]);
 
   return (
     <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>

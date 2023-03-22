@@ -152,7 +152,11 @@ exports[`Error KUBERNETES_REPLICASET 1`] = `undefined`;
 
 exports[`Error KUBERNETES_REPLICASET_NAME 1`] = `undefined`;
 
+exports[`Error LABEL_GC 1`] = `undefined`;
+
 exports[`Error LABEL_NAME 1`] = `undefined`;
+
+exports[`Error LABEL_TYPE 1`] = `undefined`;
 
 exports[`Error LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
@@ -177,6 +181,24 @@ exports[`Error METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
 exports[`Error METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
 
 exports[`Error METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
+exports[`Error METRIC_OTEL_JVM_GC_DURATION 1`] = `undefined`;
+
+exports[`Error METRIC_OTEL_JVM_PROCESS_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Error METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Error METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT 1`] = `undefined`;
+
+exports[`Error METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE 1`] = `undefined`;
+
+exports[`Error METRIC_OTEL_JVM_PROCESS_THREADS_COUNT 1`] = `undefined`;
+
+exports[`Error METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Error METRIC_OTEL_SYSTEM_CPU_UTILIZATION 1`] = `undefined`;
+
+exports[`Error METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION 1`] = `undefined`;
 
 exports[`Error METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
 
@@ -309,6 +331,10 @@ exports[`Error USER_AGENT_NAME 1`] = `undefined`;
 exports[`Error USER_AGENT_ORIGINAL 1`] = `undefined`;
 
 exports[`Error USER_ID 1`] = `undefined`;
+
+exports[`Error VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP 1`] = `undefined`;
+
+exports[`Error VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP 1`] = `undefined`;
 
 exports[`Span AGENT 1`] = `
 Object {
@@ -449,7 +475,11 @@ exports[`Span KUBERNETES_REPLICASET 1`] = `undefined`;
 
 exports[`Span KUBERNETES_REPLICASET_NAME 1`] = `undefined`;
 
+exports[`Span LABEL_GC 1`] = `undefined`;
+
 exports[`Span LABEL_NAME 1`] = `undefined`;
+
+exports[`Span LABEL_TYPE 1`] = `undefined`;
 
 exports[`Span LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
@@ -474,6 +504,24 @@ exports[`Span METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
 exports[`Span METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
 
 exports[`Span METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
+exports[`Span METRIC_OTEL_JVM_GC_DURATION 1`] = `undefined`;
+
+exports[`Span METRIC_OTEL_JVM_PROCESS_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Span METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Span METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT 1`] = `undefined`;
+
+exports[`Span METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE 1`] = `undefined`;
+
+exports[`Span METRIC_OTEL_JVM_PROCESS_THREADS_COUNT 1`] = `undefined`;
+
+exports[`Span METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Span METRIC_OTEL_SYSTEM_CPU_UTILIZATION 1`] = `undefined`;
+
+exports[`Span METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION 1`] = `undefined`;
 
 exports[`Span METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
 
@@ -602,6 +650,10 @@ exports[`Span USER_AGENT_NAME 1`] = `undefined`;
 exports[`Span USER_AGENT_ORIGINAL 1`] = `undefined`;
 
 exports[`Span USER_ID 1`] = `undefined`;
+
+exports[`Span VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP 1`] = `undefined`;
+
+exports[`Span VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP 1`] = `undefined`;
 
 exports[`Transaction AGENT 1`] = `
 Object {
@@ -756,7 +808,11 @@ exports[`Transaction KUBERNETES_REPLICASET 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES_REPLICASET_NAME 1`] = `undefined`;
 
+exports[`Transaction LABEL_GC 1`] = `undefined`;
+
 exports[`Transaction LABEL_NAME 1`] = `undefined`;
+
+exports[`Transaction LABEL_TYPE 1`] = `undefined`;
 
 exports[`Transaction LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
@@ -781,6 +837,24 @@ exports[`Transaction METRIC_JAVA_NON_HEAP_MEMORY_MAX 1`] = `undefined`;
 exports[`Transaction METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
 
 exports[`Transaction METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
+
+exports[`Transaction METRIC_OTEL_JVM_GC_DURATION 1`] = `undefined`;
+
+exports[`Transaction METRIC_OTEL_JVM_PROCESS_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Transaction METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Transaction METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT 1`] = `undefined`;
+
+exports[`Transaction METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE 1`] = `undefined`;
+
+exports[`Transaction METRIC_OTEL_JVM_PROCESS_THREADS_COUNT 1`] = `undefined`;
+
+exports[`Transaction METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Transaction METRIC_OTEL_SYSTEM_CPU_UTILIZATION 1`] = `undefined`;
+
+exports[`Transaction METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION 1`] = `undefined`;
 
 exports[`Transaction METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
 
@@ -913,3 +987,7 @@ exports[`Transaction USER_AGENT_NAME 1`] = `"Other"`;
 exports[`Transaction USER_AGENT_ORIGINAL 1`] = `"test original"`;
 
 exports[`Transaction USER_ID 1`] = `"1337"`;
+
+exports[`Transaction VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP 1`] = `undefined`;
+
+exports[`Transaction VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP 1`] = `undefined`;
