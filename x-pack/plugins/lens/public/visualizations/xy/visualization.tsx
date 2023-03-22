@@ -258,10 +258,10 @@ export const getXyVisualization = ({
     return state?.layers.find(({ layerId: id }) => id === layerId)?.layerType;
   },
 
-  getSupportedLayers(state, frame) {
+  getSupportedLayers(state, frame, extraArg) {
     return [
       supportedDataLayer,
-      getAnnotationsSupportedLayer(state, frame),
+      getAnnotationsSupportedLayer(Boolean(extraArg), state, frame),
       getReferenceSupportedLayer(state, frame),
     ];
   },
@@ -274,7 +274,6 @@ export const getXyVisualization = ({
       actions.push(
         ...createAnnotationActions({
           state,
-          layerIndex,
           layer,
           setState,
           core,

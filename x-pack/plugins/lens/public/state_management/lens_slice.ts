@@ -1065,7 +1065,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
       const { noDatasource } =
         activeVisualization
-          .getSupportedLayers(visualizationState, framePublicAPI)
+          .getSupportedLayers(visualizationState, framePublicAPI, extraArg)
           .find(({ type }) => type === layerType) || {};
 
       const layersToLinkTo =
@@ -1088,6 +1088,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         activeDatasource,
         layerId,
         layerType,
+        extraArg,
       });
 
       state.visualization.state = activeVisualizationState;
@@ -1132,6 +1133,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         layerType,
         columnId,
         groupId,
+        extraArg: undefined,
       });
 
       state.visualization.state = activeVisualizationState;
@@ -1216,6 +1218,7 @@ function addInitialValueIfAvailable({
   layerId,
   columnId,
   groupId,
+  extraArg,
 }: {
   framePublicAPI: FramePublicAPI;
   visualizationState: unknown;
@@ -1226,10 +1229,11 @@ function addInitialValueIfAvailable({
   layerType: string;
   columnId?: string;
   groupId?: string;
+  extraArg: unknown;
 }) {
   const { initialDimensions, noDatasource } =
     activeVisualization
-      .getSupportedLayers(visualizationState, framePublicAPI)
+      .getSupportedLayers(visualizationState, framePublicAPI, extraArg)
       .find(({ type }) => type === layerType) || {};
 
   if (initialDimensions) {

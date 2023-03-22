@@ -1093,7 +1093,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   /** Retrieve a list of supported layer types with initialization data */
   getSupportedLayers: (
     state?: T,
-    frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
+    frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>,
+    extraArg?: ExtraAppendLayerArg // included so the visualization can decide whether initial values make sense
   ) => Array<{
     type: LayerType;
     label: string;
