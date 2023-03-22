@@ -15,6 +15,7 @@ import {
 import type { UpdateMappingModelVersionState } from '../../state';
 import type { StateActionResponse } from '../types';
 import { updateMappingModelVersion } from './update_mapping_model_version';
+import { setMetaMappingMigrationComplete } from '../../utils';
 
 describe('Stage: updateMappingModelVersion', () => {
   let context: MockedMigratorContext;
@@ -31,8 +32,25 @@ describe('Stage: updateMappingModelVersion', () => {
     context = createContextMock();
   });
 
-  it('UPDATE_MAPPING_MODEL_VERSIONS -> INDEX_STATE_UPDATE_DONE when successful', () => {
-    const state = createState();
+  it('updates state.currentIndexMeta', () => {
+    const state = createState({});
+    const res: StateActionResponse<'UPDATE_MAPPING_MODEL_VERSIONS'> = Either.right(
+      'update_mappings_succeeded'
+    );
+
+    const newState = updateMappingModelVersion(state, res, context);
+    expect(newState.currentIndexMeta).toEqual(
+      setMetaMappingMigrationComplete({
+        meta: state.currentIndexMeta,
+        versions: context.typeModelVersions,
+      })
+    );
+  });
+
+  it('UPDATE_MAPPING_MODEL_VERSIONS -> UPDATE_ALIASES when at least one aliasActions', () => {
+    const state = createState({
+      aliasActions: [{ add: { alias: '.kibana', index: '.kibana_1' } }],
+    });
     const res: StateActionResponse<'UPDATE_MAPPING_MODEL_VERSIONS'> = Either.right(
       'update_mappings_succeeded'
     );
@@ -40,6 +58,23 @@ describe('Stage: updateMappingModelVersion', () => {
     const newState = updateMappingModelVersion(state, res, context);
     expect(newState).toEqual({
       ...state,
+      currentIndexMeta: expect.any(Object),
+      controlState: 'UPDATE_ALIASES',
+    });
+  });
+
+  it('UPDATE_MAPPING_MODEL_VERSIONS -> INDEX_STATE_UPDATE_DONE when no aliasActions', () => {
+    const state = createState({
+      aliasActions: [],
+    });
+    const res: StateActionResponse<'UPDATE_MAPPING_MODEL_VERSIONS'> = Either.right(
+      'update_mappings_succeeded'
+    );
+
+    const newState = updateMappingModelVersion(state, res, context);
+    expect(newState).toEqual({
+      ...state,
+      currentIndexMeta: expect.any(Object),
       controlState: 'INDEX_STATE_UPDATE_DONE',
     });
   });

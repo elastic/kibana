@@ -13,7 +13,7 @@ import { setMetaMappingMigrationComplete } from '../../utils';
 
 export const updateMappingModelVersion: ModelStage<
   'UPDATE_MAPPING_MODEL_VERSIONS',
-  'UPDATE_ALIASES' | 'INDEX_STATE_UPDATE_DONE' | 'FATAL'
+  'UPDATE_ALIASES' | 'INDEX_STATE_UPDATE_DONE'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     throwBadResponse(state, res as never);
