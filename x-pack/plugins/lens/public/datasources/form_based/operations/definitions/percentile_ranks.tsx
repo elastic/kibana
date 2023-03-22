@@ -80,10 +80,16 @@ export const percentileRanksOperation: OperationDefinition<
   filterable: true,
   shiftable: true,
   canReduceTimeRange: true,
-  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
+  getPossibleOperationForField: ({
+    aggregationRestrictions,
+    aggregatable,
+    type: fieldType,
+    timeSeriesMetric,
+  }) => {
     if (
       supportedFieldTypes.includes(fieldType) &&
       aggregatable &&
+      timeSeriesMetric !== 'counter' &&
       (!aggregationRestrictions || !aggregationRestrictions.percentile_ranks)
     ) {
       return {

@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ToolingLog } from '@kbn/tooling-log';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
-import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/enrichments/types';
+import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
 import {
   getRuleForSignalTesting,
   createRule,

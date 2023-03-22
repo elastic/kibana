@@ -111,6 +111,7 @@ describe('DonutChart', () => {
           outerSizeRatio: 1,
         },
       },
+      onElementClick: expect.any(Function),
     });
   });
 

@@ -27,6 +27,7 @@ import {
   ThresholdExpression,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { DataViewBase } from '@kbn/es-query';
 import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
 import { DerivedIndexPattern } from '../../../containers/metrics_source';
@@ -54,6 +55,7 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setRuleParams(id: number, params: MetricExpression): void;
+  dataView: DataViewBase;
 }
 
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`
@@ -74,8 +76,17 @@ const StyledHealth = euiStyled(EuiHealth)`
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const [isExpanded, setRowState] = useState(true);
   const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
-  const { children, setRuleParams, expression, errors, expressionId, remove, fields, canDelete } =
-    props;
+  const {
+    dataView,
+    children,
+    setRuleParams,
+    expression,
+    errors,
+    expressionId,
+    remove,
+    fields,
+    canDelete,
+  } = props;
 
   const {
     aggType = AGGREGATION_TYPES.MAX,
@@ -244,6 +255,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                       values={{
                         documentationLink: (
                           <EuiLink
+                            data-test-subj="infraExpressionRowLearnHowToAddMoreDataLink"
                             href="https://www.elastic.co/guide/en/observability/current/configure-settings.html"
                             target="BLANK"
                           >
@@ -266,6 +278,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 <EuiSpacer size={'xs'} />
                 <StyledExpressionRow>
                   <EuiButtonEmpty
+                    data-test-subj="infraExpressionRowAddWarningThresholdButton"
                     color={'primary'}
                     flush={'left'}
                     size="xs"
@@ -309,7 +322,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   )}
                   iconSize="s"
                   color="text"
-                  iconType={'crossInACircleFilled'}
+                  iconType={'minusInCircleFilled'}
                   onClick={toggleWarningThreshold}
                 />
               </StyledExpressionRow>
@@ -325,6 +338,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   aggregationTypes={aggregationType}
                   onChange={handleCustomMetricChange}
                   errors={errors}
+                  dataView={dataView}
                 />
               </StyledExpressionRow>
               <EuiSpacer size={'s'} />

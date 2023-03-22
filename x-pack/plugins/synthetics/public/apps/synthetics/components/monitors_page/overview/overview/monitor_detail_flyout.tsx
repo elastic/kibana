@@ -306,6 +306,7 @@ export function MonitorDetailFlyout(props: Props) {
                       position="default"
                       iconHasPanel={false}
                       iconSize="xs"
+                      locationId={locationId}
                     />
                   )}
                 </EuiFlexItem>
@@ -324,6 +325,7 @@ export function MonitorDetailFlyout(props: Props) {
           <EuiFlyoutBody>
             <DetailFlyoutDurationChart {...props} location={props.location} />
             <MonitorDetailsPanel
+              hasBorder={false}
               hideEnabled
               latestPing={monitorDetail.data}
               configId={configId}
@@ -340,10 +342,16 @@ export function MonitorDetailFlyout(props: Props) {
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l" color="transparent">
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={props.onClose}>{CLOSE_FLYOUT_TEXT}</EuiButtonEmpty>
+                  <EuiButtonEmpty
+                    data-test-subj="syntheticsMonitorDetailFlyoutButton"
+                    onClick={props.onClose}
+                  >
+                    {CLOSE_FLYOUT_TEXT}
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    data-test-subj="syntheticsMonitorDetailFlyoutButton"
                     // `detailLink` can be undefined, in this case, disable the button
                     isDisabled={!detailLink}
                     href={detailLink}

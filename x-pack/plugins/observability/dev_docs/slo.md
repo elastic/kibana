@@ -1,16 +1,16 @@
 # SLO
 
-Add the feature flag: `xpack.observability.unsafe.slo.enabled: true` in your Kibana config to enable the various SLO APIs.
+Starting in 8.8, SLO is enabled by default.
 
 ## Supported SLI
 
 We currently support the following SLI:
 
-- APM Transaction Error Rate (Availability)
-- APM Transaction Duration (Latency)
+- APM Transaction Error Rate, known as APM Availability
+- APM Transaction Duration, known as APM Latency
 - Custom KQL
 
-For the APM SLIs, customer can provide the service, environment, transaction name and type to configure them. For the **Duration** SLI, a threshold in microsecond needs to be provided to discriminate the good and bad responses (events). For the **Error Rate** SLI, a list of good status codes needs to be provided to discriminate the good and bad responses (events).
+For the APM SLIs, customer can provide the service, environment, transaction name and type to configure them. For the **APM Latency** SLI, a threshold in milliseconds needs to be provided to discriminate the good and bad responses (events). For the **APM Availability** SLI, a list of good status codes needs to be provided to discriminate the good and bad responses (events). The API supports an optional kql filter to further filter the apm data.
 
 The **custom KQL** SLI requires an index pattern, an optional filter query, a numerator query, and denominator query.
 
@@ -43,9 +43,9 @@ If a **timeslices** budgeting method is used, we also need to define the **times
 
 The default settings should be sufficient for most users, but if needed, the following properties can be overwritten:
 
-- timestampField: The date time field to use from the source index
-- syncDelay: The ingest delay in the source data
-- frequency: How often do we query the source data
+- **timestampField**: The date time field to use from the source index
+- **syncDelay**: The ingest delay in the source data
+- **frequency**: How often do we query the source data
 
 ## Example
 
@@ -70,7 +70,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"goodStatusCodes": ["2xx", "3xx", "4xx"]
+			"goodStatusCodes": ["2xx", "3xx", "4xx"],
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -105,7 +106,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"goodStatusCodes": ["2xx", "3xx", "4xx"]
+			"goodStatusCodes": ["2xx", "3xx", "4xx"],
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -142,7 +144,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"goodStatusCodes": ["2xx", "3xx", "4xx"]
+			"goodStatusCodes": ["2xx", "3xx", "4xx"],
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -181,7 +184,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"threshold": 500000
+			"threshold": 500,
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -216,7 +220,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"threshold": 500000
+			"threshold": 500,
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -253,7 +258,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"threshold": 500000
+			"threshold": 500,
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {

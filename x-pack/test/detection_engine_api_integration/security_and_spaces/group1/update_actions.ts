@@ -9,10 +9,11 @@ import expect from '@kbn/expect';
 import { omit } from 'lodash';
 
 import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   removeServerGeneratedProperties,
   getRuleWithWebHookAction,
@@ -21,15 +22,14 @@ import {
   createRule,
   getSimpleRule,
   updateRule,
-  installPrePackagedRules,
+  installMockPrebuiltRules,
   getRule,
   createNewAction,
   findImmutableRuleById,
-  getPrePackagedRulesStatus,
+  getPrebuiltRulesAndTimelinesStatus,
   getSimpleRuleOutput,
   ruleToUpdateSchema,
 } from '../../utils';
-import { ELASTIC_SECURITY_RULE_ID } from '../../utils/create_prebuilt_rule_saved_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
 
   const getImmutableRule = async () => {
-    await installPrePackagedRules(supertest, es, log);
+    await installMockPrebuiltRules(supertest, es);
     return getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
   };
 
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should be able to create a new webhook action and update a rule with the webhook action', async () => {
@@ -75,6 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
             `${bodyToCompare.actions?.[0].id}`,
             `${bodyToCompare.actions?.[0].uuid}`
           ),
+          revision: 1, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
           version: 2, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
         };
         expect(bodyToCompare).to.eql(expected);
@@ -90,6 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare = removeServerGeneratedProperties(ruleAfterActionRemoved);
         const expected = {
           ...getSimpleRuleOutput(),
+          revision: 2, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
           version: 3, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
         };
         expect(bodyToCompare).to.eql(expected);
@@ -130,10 +132,10 @@ export default ({ getService }: FtrProviderContext) => {
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
         const expected = omit(removeServerGeneratedProperties(updatedRule), actionsProps);
 
-        const immutableRuleToAssert = omit(
-          removeServerGeneratedProperties(immutableRule),
-          actionsProps
-        );
+        const immutableRuleToAssert = {
+          ...omit(removeServerGeneratedProperties(immutableRule), actionsProps),
+          revision: 1, // Unlike `version` which is static for immutable rules, `revision` will increment when an action/exception is added
+        };
 
         expect(immutableRuleToAssert).to.eql(expected);
         expect(expected.immutable).to.be(true); // It should stay immutable true when returning
@@ -169,7 +171,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await updateRule(supertest, log, ruleToUpdate);
 
-        const status = await getPrePackagedRulesStatus(supertest, log);
+        const status = await getPrebuiltRulesAndTimelinesStatus(supertest);
         expect(status.rules_not_installed).to.eql(0);
       });
 

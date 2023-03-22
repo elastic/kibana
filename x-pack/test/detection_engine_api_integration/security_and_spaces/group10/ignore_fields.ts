@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getEqlRuleForSignalTesting,
   getSignalsById,
@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     it('should ignore the field of "testing_ignored"', async () => {

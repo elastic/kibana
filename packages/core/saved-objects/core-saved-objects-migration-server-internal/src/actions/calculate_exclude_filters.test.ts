@@ -28,7 +28,7 @@ describe('calculateExcludeFilters', () => {
     expect(hook2).toHaveBeenCalledWith({ readonlyEsClient: { search: expect.any(Function) } });
     expect(Either.isRight(result)).toBe(true);
     expect((result as Either.Right<any>).right).toEqual({
-      mustNotClauses: [
+      filterClauses: [
         { bool: { must: { term: { fieldA: '123' } } } },
         { bool: { must: { term: { fieldB: 'abc' } } } },
       ],
@@ -49,7 +49,7 @@ describe('calculateExcludeFilters', () => {
 
     expect(Either.isRight(result)).toBe(true);
     expect((result as Either.Right<any>).right).toEqual({
-      mustNotClauses: [{ bool: { must: { term: { fieldB: 'abc' } } } }],
+      filterClauses: [{ bool: { must: { term: { fieldB: 'abc' } } } }],
       errorsByType: { type1: error },
     });
   });
@@ -91,7 +91,7 @@ describe('calculateExcludeFilters', () => {
 
     expect(Either.isRight(result)).toBe(true);
     expect((result as Either.Right<any>).right).toEqual({
-      mustNotClauses: [{ bool: { must: { term: { fieldB: 'abc' } } } }],
+      filterClauses: [{ bool: { must: { term: { fieldB: 'abc' } } } }],
       errorsByType: expect.any(Object),
     });
     expect((result as Either.Right<any>).right.errorsByType.type1.toString()).toMatchInlineSnapshot(

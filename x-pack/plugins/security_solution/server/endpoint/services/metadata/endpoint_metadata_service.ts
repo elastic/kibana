@@ -35,6 +35,7 @@ import {
   getESQueryHostMetadataByFleetAgentIds,
   getESQueryHostMetadataByID,
   buildUnitedIndexQuery,
+  getESQueryHostMetadataByIDs,
 } from '../../routes/metadata/query_builders';
 import {
   queryResponseToHostListResult,
@@ -450,5 +451,17 @@ export class EndpointMetadataService {
       this.packagePolicyService,
       this.DANGEROUS_INTERNAL_SO_CLIENT
     );
+  }
+
+  async getMetadataForEndpoints(
+    esClient: ElasticsearchClient,
+    endpointIDs: string[]
+  ): Promise<HostMetadata[]> {
+    const query = getESQueryHostMetadataByIDs(endpointIDs);
+    const { body } = await esClient.search<HostMetadata>(query, {
+      meta: true,
+    });
+    const hosts = queryResponseToHostListResult(body);
+    return hosts.resultList;
   }
 }

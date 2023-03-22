@@ -43,6 +43,7 @@ export function useFetchSloDetails(sloId: string): UseFetchSloDetailsResponse {
         }
       },
       enabled: Boolean(sloId),
+      refetchOnWindowFocus: false,
     }
   );
 

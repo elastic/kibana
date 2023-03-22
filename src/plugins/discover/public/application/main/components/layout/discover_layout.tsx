@@ -44,6 +44,7 @@ import { useDataState } from '../../hooks/use_data_state';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import { ErrorCallout } from '../../../../components/common/error_callout';
 
 /**
  * Local storage key for sidebar persistence state
@@ -66,7 +67,6 @@ export function DiscoverLayout({
   stateContainer,
   persistDataView,
   updateAdHocDataViewId,
-  searchSessionManager,
   updateDataViewList,
 }: DiscoverLayoutProps) {
   const {
@@ -137,7 +137,7 @@ export function DiscoverLayout({
     config: uiSettings,
     dataView,
     dataViews,
-    setAppState: stateContainer.setAppState,
+    setAppState: stateContainer.appState.update,
     useNewFieldsApi,
     columns,
     sort,
@@ -218,8 +218,6 @@ export function DiscoverLayout({
           isTimeBased={isTimeBased}
           query={globalQueryState.query}
           filters={globalQueryState.filters}
-          data={data}
-          error={dataState.error}
           dataView={dataView}
           onDisableFilters={onDisableFilters}
         />
@@ -251,7 +249,6 @@ export function DiscoverLayout({
           onFieldEdited={onFieldEdited}
           resizeRef={resizeRef}
           inspectorAdapters={inspectorAdapters}
-          searchSessionManager={searchSessionManager}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -259,7 +256,6 @@ export function DiscoverLayout({
   }, [
     currentColumns,
     data,
-    dataState.error,
     dataView,
     expandedDoc,
     inspectorAdapters,
@@ -272,12 +268,10 @@ export function DiscoverLayout({
     resetSavedSearch,
     resultState,
     savedSearch,
-    searchSessionManager,
     setExpandedDoc,
     stateContainer,
     viewMode,
   ]);
-
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
       <h1
@@ -362,19 +356,29 @@ export function DiscoverLayout({
             </EuiFlexItem>
           </EuiHideFor>
           <EuiFlexItem className="dscPageContent__wrapper">
-            <EuiPageContent
-              panelRef={resizeRef}
-              verticalPosition={contentCentered ? 'center' : undefined}
-              horizontalPosition={contentCentered ? 'center' : undefined}
-              paddingSize="none"
-              hasShadow={false}
-              className={classNames('dscPageContent', {
-                'dscPageContent--centered': contentCentered,
-                'dscPageContent--emptyPrompt': resultState === 'none',
-              })}
-            >
-              {mainDisplay}
-            </EuiPageContent>
+            {resultState === 'none' && dataState.error ? (
+              <ErrorCallout
+                title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
+                  defaultMessage: 'Unable to retrieve search results',
+                })}
+                error={dataState.error}
+                data-test-subj="discoverNoResultsError"
+              />
+            ) : (
+              <EuiPageContent
+                panelRef={resizeRef}
+                verticalPosition={contentCentered ? 'center' : undefined}
+                horizontalPosition={contentCentered ? 'center' : undefined}
+                paddingSize="none"
+                hasShadow={false}
+                className={classNames('dscPageContent', {
+                  'dscPageContent--centered': contentCentered,
+                  'dscPageContent--emptyPrompt': resultState === 'none',
+                })}
+              >
+                {mainDisplay}
+              </EuiPageContent>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageBody>

@@ -12,43 +12,45 @@ export const PLUGIN_NAME = 'customIntegrations';
  * A map of category names and their corresponding titles.
  */
 // TODO: consider i18n
-export const INTEGRATION_CATEGORY_DISPLAY = {
-  aws: 'AWS',
-  azure: 'Azure',
-  cloud: 'Cloud',
-  config_management: 'Config management',
-  containers: 'Containers',
-  crm: 'CRM',
-  custom: 'Custom',
-  datastore: 'Datastore',
-  elastic_stack: 'Elastic Stack',
-  google_cloud: 'Google Cloud',
-  infrastructure: 'Infrastructure',
-  kubernetes: 'Kubernetes',
-  languages: 'Languages',
-  message_queue: 'Message queue',
-  microsoft_365: 'Microsoft 365',
-  monitoring: 'Monitoring',
-  network: 'Network',
-  notification: 'Notification',
-  os_system: 'OS & System',
-  productivity: 'Productivity',
-  security: 'Security',
-  sample_data: 'Sample data',
-  support: 'Support',
-  threat_intel: 'Threat intelligence',
-  ticketing: 'Ticketing',
-  version_control: 'Version control',
-  web: 'Web',
+export const INTEGRATION_CATEGORY_DISPLAY: {
+  [key: string]: { title: string; parent_id?: string };
+} = {
+  aws: { title: 'AWS', parent_id: undefined },
+  azure: { title: 'Azure', parent_id: undefined },
+  cloud: { title: 'Cloud', parent_id: undefined },
+  config_management: { title: 'Config management', parent_id: undefined },
+  containers: { title: 'Containers', parent_id: undefined },
+  crm: { title: 'CRM', parent_id: undefined },
+  custom: { title: 'Custom', parent_id: undefined },
+  datastore: { title: 'Datastore', parent_id: undefined },
+  elastic_stack: { title: 'Elastic Stack', parent_id: undefined },
+  google_cloud: { title: 'Google Cloud', parent_id: undefined },
+  infrastructure: { title: 'Infrastructure', parent_id: undefined },
+  kubernetes: { title: 'Kubernetes', parent_id: undefined },
+  languages: { title: 'Languages', parent_id: undefined },
+  message_queue: { title: 'Message queue', parent_id: undefined },
+  microsoft_365: { title: 'Microsoft 365', parent_id: undefined },
+  monitoring: { title: 'Monitoring', parent_id: undefined },
+  network: { title: 'Network', parent_id: undefined },
+  notification: { title: 'Notification', parent_id: undefined },
+  os_system: { title: 'OS & System', parent_id: undefined },
+  productivity: { title: 'Productivity', parent_id: undefined },
+  security: { title: 'Security', parent_id: undefined },
+  sample_data: { title: 'Sample data', parent_id: undefined },
+  support: { title: 'Support', parent_id: undefined },
+  threat_intel: { title: 'Threat intelligence', parent_id: undefined },
+  ticketing: { title: 'Ticketing', parent_id: undefined },
+  version_control: { title: 'Version control', parent_id: undefined },
+  web: { title: 'Web', parent_id: undefined },
 
   // Kibana added
-  communications: 'Communications',
-  enterprise_search: 'Enterprise search',
-  file_storage: 'File storage',
-  language_client: 'Language client',
-  upload_file: 'Upload a file',
-  website_search: 'Website search',
-  geo: 'Geo',
+  communications: { title: 'Communications', parent_id: undefined },
+  enterprise_search: { title: 'Enterprise search', parent_id: undefined },
+  file_storage: { title: 'File storage', parent_id: undefined },
+  language_client: { title: 'Language client', parent_id: undefined },
+  upload_file: { title: 'Upload a file', parent_id: undefined },
+  website_search: { title: 'Website search', parent_id: undefined },
+  geo: { title: 'Geo', parent_id: undefined },
 };
 
 // featured integrations will be brought to the top of the search results for
@@ -61,7 +63,7 @@ export const FEATURED_INTEGRATIONS_BY_CATEGORY = {
 /**
  * A category applicable to an Integration.
  */
-export type IntegrationCategory = keyof typeof INTEGRATION_CATEGORY_DISPLAY;
+export type IntegrationCategory = string;
 
 /**
  * The list of all available categories.

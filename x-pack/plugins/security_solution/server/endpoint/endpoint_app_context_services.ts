@@ -7,12 +7,9 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
-import type {
-  CasesClient,
-  PluginStartContract as CasesPluginStartContract,
-} from '@kbn/cases-plugin/server';
+import type { CasesClient, CasesStart } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { FleetStartContract, MessageSigningServiceInterface } from '@kbn/fleet-plugin/server';
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import {
@@ -40,6 +37,7 @@ import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import { doesArtifactHaveData } from './services';
+import type { ActionCreateService } from './services/actions';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -58,9 +56,11 @@ export interface EndpointAppContextServiceStartContract {
   registerListsServerExtension?: ListsServerExtensionRegistrar;
   licenseService: LicenseService;
   exceptionListsClient: ExceptionListClient | undefined;
-  cases: CasesPluginStartContract | undefined;
+  cases: CasesStart | undefined;
   featureUsageService: FeatureUsageService;
   experimentalFeatures: ExperimentalFeatures;
+  messageSigningService: MessageSigningServiceInterface | undefined;
+  actionCreateService: ActionCreateService | undefined;
 }
 
 /**
@@ -222,5 +222,21 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.exceptionListsClient;
+  }
+
+  public getMessageSigningService(): MessageSigningServiceInterface {
+    if (!this.startDependencies?.messageSigningService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.messageSigningService;
+  }
+
+  public getActionCreateService(): ActionCreateService {
+    if (!this.startDependencies?.actionCreateService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.actionCreateService;
   }
 }

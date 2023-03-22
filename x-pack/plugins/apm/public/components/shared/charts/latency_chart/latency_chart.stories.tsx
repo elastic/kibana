@@ -84,6 +84,7 @@ const stories: Meta<Args> = {
                   value={{
                     serviceName,
                     transactionType,
+                    transactionTypeStatus: FETCH_STATUS.SUCCESS,
                     transactionTypes: [],
                     fallbackToTransactions: false,
                     serviceAgentStatus: FETCH_STATUS.SUCCESS,

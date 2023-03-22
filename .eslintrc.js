@@ -779,6 +779,11 @@ module.exports = {
             message: 'Please use @kbn/safer-lodash-set/fp/assocPath instead',
           },
           {
+            name: 'lodash/fp/template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
+          },
+          {
             name: 'lodash/template',
             message:
               'lodash.template is unsafe, and not compatible with our content security policy.',
@@ -890,6 +895,18 @@ module.exports = {
             unnamedComponents: 'arrow-function',
           },
         ],
+      },
+    },
+    {
+      files: [
+        'x-pack/plugins/apm/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/ux/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/synthetics/**/*.{js,mjs,ts,tsx}',
+        'x-pack/plugins/infra/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
       },
     },
     {

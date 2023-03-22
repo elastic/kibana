@@ -7,19 +7,21 @@
 
 import { Logger } from '@kbn/core/server';
 import { chunk } from 'lodash';
-
-import { withApmSpan } from '../../utils/with_apm_span';
+import { APMConfig } from '../..';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { MlClient } from '../../lib/helpers/get_ml_client';
+import { withApmSpan } from '../../utils/with_apm_span';
 import {
   DEFAULT_ANOMALIES,
   getServiceAnomalies,
 } from './get_service_anomalies';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
-import { getTraceSampleIds } from './get_trace_sample_ids';
-import { transformServiceMapResponses } from './transform_service_map_responses';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { APMConfig } from '../..';
 import { getServiceStats } from './get_service_stats';
+import { getTraceSampleIds } from './get_trace_sample_ids';
+import {
+  TransformServiceMapResponse,
+  transformServiceMapResponses,
+} from './transform_service_map_responses';
 
 export interface IEnvOptions {
   mlClient?: MlClient;
@@ -99,7 +101,7 @@ export type ServicesResponse = Awaited<ReturnType<typeof getServiceStats>>;
 
 export function getServiceMap(
   options: IEnvOptions & { maxNumberOfServices: number }
-) {
+): Promise<TransformServiceMapResponse> {
   return withApmSpan('get_service_map', async () => {
     const { logger } = options;
     const anomaliesPromise = getServiceAnomalies(
@@ -118,9 +120,11 @@ export function getServiceMap(
       anomaliesPromise,
     ]);
     return transformServiceMapResponses({
-      ...connectionData,
-      services: servicesData,
-      anomalies,
+      response: {
+        ...connectionData,
+        services: servicesData,
+        anomalies,
+      },
     });
   });
 }

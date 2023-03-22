@@ -23,14 +23,6 @@ export function loginPageProvider({
       await waitForLoadingToFinish({ page });
     },
     async loginToKibana(usernameT?: 'editor' | 'viewer', passwordT?: string) {
-      try {
-        // Close Monitor Management tour added in 8.2.0
-        await page.addInitScript(() => {
-          window.localStorage.setItem('xpack.synthetics.monitorManagement.openTour', 'false');
-        });
-      } catch (e) {
-        // ignore
-      }
       if (isRemote) {
         await page.click('text="Log in with Elasticsearch"');
       }

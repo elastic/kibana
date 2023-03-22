@@ -61,6 +61,9 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
       });
       expect(taskRecord.task.enabled).to.eql(true);
 
+      // Ensure revision was not updated
+      expect(updatedAlert.revision).to.eql(0);
+
       // Ensure AAD isn't broken
       await checkAAD({
         supertest: supertestWithoutAuth,
@@ -113,6 +116,9 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
           consumer: 'alertsFixture',
         });
         expect(taskRecord.task.enabled).to.eql(true);
+
+        // Ensure revision was not updated
+        expect(updatedAlert.revision).to.eql(0);
 
         // Ensure AAD isn't broken
         await checkAAD({

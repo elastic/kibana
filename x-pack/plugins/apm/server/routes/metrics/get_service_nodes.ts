@@ -27,7 +27,16 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { hasOTelMetrics } from './has_otel_metrics';
 
-const getServiceNodes = async ({
+export type ServiceNodesResponse = Array<{
+  name: string;
+  cpu: number | null;
+  heapMemory: number | null;
+  hostName: string | null | undefined;
+  nonHeapMemory: number | null;
+  threadCount: number | null;
+}>;
+
+async function getServiceNodes({
   kuery,
   apmEventClient,
   serviceName,
@@ -41,7 +50,7 @@ const getServiceNodes = async ({
   environment: string;
   start: number;
   end: number;
-}) => {
+}): Promise<ServiceNodesResponse> {
   const useOTelMetrics = await hasOTelMetrics({
     kuery,
     apmEventClient,
@@ -65,7 +74,7 @@ const getServiceNodes = async ({
   });
 };
 
-const getElasticServiceNodes = async ({
+async function getElasticServiceNodes({
   kuery,
   apmEventClient,
   serviceName,
@@ -79,7 +88,8 @@ const getElasticServiceNodes = async ({
   environment: string;
   start: number;
   end: number;
-}) => {
+}): Promise<ServiceNodesResponse> {
+
   const params = {
     apm: {
       events: [ProcessorEvent.metric],
@@ -164,9 +174,9 @@ const getElasticServiceNodes = async ({
         item.nonHeapMemory !== null ||
         item.threadCount != null
     );
-};
+}
 
-const getOTelServiceNodes = async ({
+async function getOTelServiceNodes({
   kuery,
   apmEventClient,
   serviceName,
@@ -180,7 +190,7 @@ const getOTelServiceNodes = async ({
   environment: string;
   start: number;
   end: number;
-}) => {
+}): Promise<ServiceNodesResponse> {
   const params = {
     apm: {
       events: [ProcessorEvent.metric],

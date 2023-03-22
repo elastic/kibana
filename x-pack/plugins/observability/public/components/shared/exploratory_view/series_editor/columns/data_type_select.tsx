@@ -65,6 +65,7 @@ export function DataTypesSelect({ seriesId, series }: Props) {
         <EuiPopover
           button={
             <EuiButton
+              data-test-subj="o11yDataTypesSelectButton"
               iconType="plusInCircle"
               onClick={() => setShowOptions((prevState) => !prevState)}
               fill
