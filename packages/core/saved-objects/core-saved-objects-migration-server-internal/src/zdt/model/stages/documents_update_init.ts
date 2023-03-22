@@ -20,13 +20,6 @@ export const documentsUpdateInit: ModelStage<
     throwBadResponse(state, res as never);
   }
 
-  const newIndexMeta = {
-    ...state.currentIndexMeta,
-    migrationState: {
-      convertingDocuments: true,
-    },
-  };
-
   const excludeFilterHooks = Object.fromEntries(
     context.types
       .map((name) => context.typeRegistry.getType(name)!)
@@ -44,7 +37,6 @@ export const documentsUpdateInit: ModelStage<
 
   return {
     ...state,
-    currentIndexMeta: newIndexMeta,
     excludeOnUpgradeQuery: excludeUnusedTypesQuery,
     excludeFromUpgradeFilterHooks: excludeFilterHooks,
     outdatedDocumentsQuery,

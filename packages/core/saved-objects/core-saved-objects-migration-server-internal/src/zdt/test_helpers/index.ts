@@ -7,6 +7,6 @@
  */
 
 export { createContextMock, type MockedMigratorContext } from './context';
-export { createPostInitState } from './state';
+export { createPostInitState, createPostDocInitState } from './state';
 export { createType } from './saved_object_type';
 export { createDocumentMigrator } from './document_migrator';

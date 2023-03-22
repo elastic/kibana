@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PostInitState } from '../state/types';
+import { PostInitState, PostDocInitState } from '../state/types';
 
 export const createPostInitState = (): PostInitState => ({
   controlState: 'INIT',
@@ -18,4 +18,12 @@ export const createPostInitState = (): PostInitState => ({
   aliasActions: [],
   previousMappings: { properties: {} },
   currentIndexMeta: {},
+});
+
+export const createPostDocInitState = (): PostDocInitState => ({
+  ...createPostInitState(),
+  excludeOnUpgradeQuery: { bool: {} },
+  excludeFromUpgradeFilterHooks: {},
+  outdatedDocumentsQuery: { bool: {} },
+  transformRawDocs: jest.fn(),
 });
