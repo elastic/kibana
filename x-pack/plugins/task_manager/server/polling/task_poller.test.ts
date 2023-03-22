@@ -20,7 +20,6 @@ describe('TaskPoller', () => {
     'intializes the poller with the provided interval',
     fakeSchedulers(async (advance) => {
       const pollInterval = 100;
-      const bufferCapacity = 5;
       const halfInterval = Math.floor(pollInterval / 2);
 
       const work = jest.fn(async () => true);
@@ -28,7 +27,6 @@ describe('TaskPoller', () => {
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
         pollIntervalDelay$: of(0),
-        bufferCapacity,
         getCapacity: () => 1,
         work,
         workTimeout: pollInterval * 5,
@@ -56,14 +54,12 @@ describe('TaskPoller', () => {
     fakeSchedulers(async (advance) => {
       const pollInterval = 100;
       const pollInterval$ = new BehaviorSubject(pollInterval);
-      const bufferCapacity = 5;
 
       const work = jest.fn(async () => true);
       createTaskPoller<void, boolean>({
         logger: loggingSystemMock.create().get(),
         pollInterval$,
         pollIntervalDelay$: of(0),
-        bufferCapacity,
         getCapacity: () => 1,
         work,
         workTimeout: pollInterval * 5,
@@ -96,7 +92,6 @@ describe('TaskPoller', () => {
     'filters interval polling on capacity',
     fakeSchedulers(async (advance) => {
       const pollInterval = 100;
-      const bufferCapacity = 2;
 
       const work = jest.fn(async () => true);
 
@@ -105,7 +100,6 @@ describe('TaskPoller', () => {
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
         pollIntervalDelay$: of(0),
-        bufferCapacity,
         work,
         workTimeout: pollInterval * 5,
         getCapacity: () => (hasCapacity ? 1 : 0),
@@ -154,7 +148,6 @@ describe('TaskPoller', () => {
     'waits for work to complete before emitting the next event',
     fakeSchedulers(async (advance) => {
       const pollInterval = 100;
-      const bufferCapacity = 2;
 
       const worker = resolvable();
 
@@ -163,7 +156,6 @@ describe('TaskPoller', () => {
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
         pollIntervalDelay$: of(0),
-        bufferCapacity,
         work: async (...args) => {
           await worker;
           return args;
@@ -199,7 +191,6 @@ describe('TaskPoller', () => {
     fakeSchedulers(async (advance) => {
       const pollInterval = 100;
       const workTimeout = pollInterval * 2;
-      const bufferCapacity = 2;
 
       const handler = jest.fn();
 
@@ -208,7 +199,6 @@ describe('TaskPoller', () => {
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
         pollIntervalDelay$: of(0),
-        bufferCapacity,
         work: async (...resolvables) => {
           await Promise.all(resolvables.map(([, future]) => future));
           return resolvables.map(([name]) => name);
@@ -257,14 +247,12 @@ describe('TaskPoller', () => {
     'returns an error when polling for work fails',
     fakeSchedulers(async (advance) => {
       const pollInterval = 100;
-      const bufferCapacity = 2;
 
       const handler = jest.fn();
       createTaskPoller<string, string[]>({
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
         pollIntervalDelay$: of(0),
-        bufferCapacity,
         work: async (...args) => {
           throw new Error('failed to work');
         },
@@ -289,7 +277,6 @@ describe('TaskPoller', () => {
     'continues polling after work fails',
     fakeSchedulers(async (advance) => {
       const pollInterval = 100;
-      const bufferCapacity = 2;
 
       const handler = jest.fn();
       let callCount = 0;
@@ -304,7 +291,6 @@ describe('TaskPoller', () => {
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
         pollIntervalDelay$: of(0),
-        bufferCapacity,
         work,
         workTimeout: pollInterval * 5,
         getCapacity: () => 5,

@@ -172,7 +172,6 @@ export class TaskPollingLifecycle {
             logger,
             pollInterval$: pollIntervalConfiguration$,
             pollIntervalDelay$,
-            bufferCapacity: config.request_capacity,
             getCapacity: () => {
               const capacity = this.pool.availableWorkers;
               if (!capacity) {
@@ -243,7 +242,7 @@ export class TaskPollingLifecycle {
     return !this.pollingSubscription.closed;
   }
 
-  private pollForWork = async (...tasksToClaim: string[]): Promise<TimedFillPoolResult> => {
+  private pollForWork = async (): Promise<TimedFillPoolResult> => {
     return fillPool(
       // claim available tasks
       () => {
