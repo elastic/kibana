@@ -51,7 +51,7 @@ function DevicesTab({
 export const devicesTab = {
   dataTestSubj: 'apmDevicesTab',
   key: 'devices_tab',
-  label: i18n.translate('xpack.apm.transactions.overview.tabs.devices', {
+  label: i18n.translate('xpack.apm.mobile.transactions.overview.tabs.devices', {
     defaultMessage: 'Devices',
   }),
   component: DevicesTab,

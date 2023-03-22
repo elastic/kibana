@@ -35,8 +35,11 @@ function TransactionsTab({
 export const transactionsTab = {
   dataTestSubj: 'apmTransactionsTab',
   key: 'transactions',
-  label: i18n.translate('xpack.apm.transactions.overview.tabs.transactions', {
-    defaultMessage: 'Transactions',
-  }),
+  label: i18n.translate(
+    'xpack.apm.mobile.transactions.overview.tabs.transactions',
+    {
+      defaultMessage: 'Transactions',
+    }
+  ),
   component: TransactionsTab,
 };

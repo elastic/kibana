@@ -51,8 +51,11 @@ function OSVersionTab({
 export const osVersionTab = {
   dataTestSubj: 'apmOsVersionTab',
   key: 'os_version_tab',
-  label: i18n.translate('xpack.apm.transactions.overview.tabs.os.version', {
-    defaultMessage: 'OS version',
-  }),
+  label: i18n.translate(
+    'xpack.apm.mobile.transactions.overview.tabs.os.version',
+    {
+      defaultMessage: 'OS version',
+    }
+  ),
   component: OSVersionTab,
 };

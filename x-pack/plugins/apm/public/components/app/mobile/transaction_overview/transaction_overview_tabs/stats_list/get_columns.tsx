@@ -46,15 +46,18 @@ export function getColumns({
     // version/device
     {
       field: 'name',
-      name: i18n.translate('xpack.apm.transactions.overview.table.nameLabel', {
-        defaultMessage: 'Name',
-      }),
+      name: i18n.translate(
+        'xpack.apm.mobile.transactions.overview.table.nameLabel',
+        {
+          defaultMessage: 'Name',
+        }
+      ),
     },
     // latency
     {
       field: 'latency',
       name: i18n.translate(
-        'xpack.apm.transactions.overview.table.latencyColumnAvgLabel',
+        'xpack.apm.mobile.transactions.overview.table.latencyColumnAvgLabel',
         {
           defaultMessage: 'Latency (avg.)',
         }
@@ -90,7 +93,7 @@ export function getColumns({
     {
       field: 'throughput',
       name: i18n.translate(
-        'xpack.apm.transactions.overview.table.throughputColumnAvgLabel',
+        'xpack.apm.mobile.transactions.overview.table.throughputColumnAvgLabel',
         { defaultMessage: 'Throughput' }
       ),
       align: RIGHT_ALIGNMENT,
@@ -124,7 +127,7 @@ export function getColumns({
     {
       field: 'appLaunchTime',
       name: i18n.translate(
-        'xpack.apm.transactions.overview.table.appLaunchTime',
+        'xpack.apm.mobile.transactions.overview.table.appLaunchTime',
         {
           defaultMessage: 'App launch time',
         }
@@ -141,9 +144,12 @@ export function getColumns({
     // crash rate
     {
       field: 'crashRate',
-      name: i18n.translate('xpack.apm.transactions.overview.table.crashRate', {
-        defaultMessage: 'Crash rate',
-      }),
+      name: i18n.translate(
+        'xpack.apm.mobile.transactions.overview.table.crashRate',
+        {
+          defaultMessage: 'Crash rate',
+        }
+      ),
       align: RIGHT_ALIGNMENT,
       render: (_, { crashRate }) => {
         return (

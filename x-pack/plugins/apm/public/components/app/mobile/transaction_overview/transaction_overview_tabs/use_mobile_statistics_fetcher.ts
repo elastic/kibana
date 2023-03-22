@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { number } from 'joi';
 import { v4 as uuidv4 } from 'uuid';
 import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 import { useFetcher } from '../../../../../hooks/use_fetcher';
@@ -14,7 +13,7 @@ import { isTimeComparison } from '../../../../shared/time_comparison/get_compari
 const INITIAL_STATE_MAIN_STATISTICS = {
   mainStatistics: [],
   requestId: undefined,
-  totalItems: number,
+  totalItems: 0,
 };
 
 const INITIAL_STATE_DETAILED_STATISTICS = {
@@ -81,7 +80,7 @@ export function useMobileStatisticsFetcher({
     status: detailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
-      if (totalItems > 0 && start && end) {
+      if (totalItems && start && end) {
         return callApmApi(
           'GET /internal/apm/mobile-services/{serviceName}/detailed_statistics',
           {

@@ -16,7 +16,6 @@ import {
   SERVICE_NAME,
   SESSION_ID,
   TRANSACTION_DURATION,
-  SPAN_SUBTYPE,
   ERROR_TYPE,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -93,13 +92,6 @@ export async function getMobileMainStatisticsByField({
                   field: APP_LAUNCH_TIME,
                 },
               },
-              http_requests: {
-                filter: {
-                  term: {
-                    [SPAN_SUBTYPE]: 'http',
-                  },
-                },
-              },
             },
           },
         },
@@ -122,7 +114,6 @@ export async function getMobileMainStatisticsByField({
         }),
         crashRate: (bucket.crashes.doc_count / bucket.sessions.value) * 100,
         appLaunchTime: bucket.launches.value,
-        httpRequests: bucket.http_requests.doc_count,
       };
     }) ?? [];
 

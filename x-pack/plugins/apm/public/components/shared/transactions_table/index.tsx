@@ -283,7 +283,6 @@ export function TransactionsTable({
       gutterSize="s"
       data-test-subj="transactionsGroupTable"
     >
-      {/* hide the transactions table title for mobile transactions tabs */}
       {!hideTitle && (
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
