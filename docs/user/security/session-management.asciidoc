@@ -57,10 +57,13 @@ To add a limit, use the `xpack.security.session.сoncurrentSessions.maxSessions`
 If set, the value of this option should be an integer between `1` and `1000`.
 When the limit is exceeded, the oldest session is automatically invalidated.
 
+NOTE: Due to the rate at which session information is refreshed, there might be a few seconds where the concurrent session limit is not enforced.
+This is something to consider for use cases where it is common to create multiple sessions simultaneously.
+
 --
 [source,yaml]
 --------------------------------------------------------------------------------
-xpack.security.session.сoncurrentSessions:
+xpack.security.session.concurrentSessions:
   maxSessions: 3
 --------------------------------------------------------------------------------
 --

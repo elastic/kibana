@@ -42,6 +42,7 @@ export const AddParamForm = ({
         error={errors?.key?.message}
       >
         <EuiFieldText
+          data-test-subj="syntheticsAddParamFormFieldText"
           fullWidth
           aria-label={KEY_LABEL}
           {...register('key', {
@@ -66,6 +67,7 @@ export const AddParamForm = ({
         error={errors?.value?.message}
       >
         <EuiTextArea
+          data-test-subj="syntheticsAddParamFormTextArea"
           fullWidth
           aria-label={VALUE_LABEL}
           {...register('value', {
@@ -100,7 +102,12 @@ export const AddParamForm = ({
         />
       </EuiFormRow>
       <EuiFormRow fullWidth label={DESCRIPTION_LABEL}>
-        <EuiFieldText fullWidth aria-label={DESCRIPTION_LABEL} {...register('description', {})} />
+        <EuiFieldText
+          data-test-subj="syntheticsAddParamFormFieldText"
+          fullWidth
+          aria-label={DESCRIPTION_LABEL}
+          {...register('description', {})}
+        />
       </EuiFormRow>
       <EuiFormRow fullWidth label={NAMESPACES_LABEL}>
         <Controller

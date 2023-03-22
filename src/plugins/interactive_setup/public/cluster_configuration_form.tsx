@@ -222,7 +222,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
         <>
           <EuiCallOut
             color="warning"
-            iconType="alert"
+            iconType="warning"
             title={i18n.translate(
               'interactiveSetup.clusterConfigurationForm.insecureClusterTitle',
               {

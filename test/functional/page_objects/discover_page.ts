@@ -462,6 +462,18 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
   }
 
+  public noResultsErrorVisible() {
+    return this.testSubjects.exists('discoverNoResultsError');
+  }
+
+  public mainErrorVisible() {
+    return this.testSubjects.exists('discoverMainError');
+  }
+
+  public getDiscoverErrorMessage() {
+    return this.testSubjects.getVisibleText('discoverErrorCalloutMessage');
+  }
+
   public async expandTimeRangeAsSuggestedInNoResultsMessage() {
     await this.retry.waitFor('the button before pressing it', async () => {
       return await this.testSubjects.exists('discoverNoResultsViewAllMatches');

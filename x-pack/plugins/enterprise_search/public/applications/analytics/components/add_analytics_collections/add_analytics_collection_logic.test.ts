@@ -166,9 +166,7 @@ describe('addAnalyticsCollectionLogic', () => {
 
       it('updates when apiSuccess listener triggered', () => {
         AddAnalyticsCollectionLogic.actions.apiSuccess({
-          event_retention_day_length: 180,
           events_datastream: 'logs-elastic_analytics.events-test',
-          id: 'bla',
           name: 'test',
         });
 
