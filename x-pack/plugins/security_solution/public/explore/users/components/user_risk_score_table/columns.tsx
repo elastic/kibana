@@ -18,9 +18,10 @@ import type { UserRiskScoreColumns } from '.';
 import * as i18n from './translations';
 import { RiskScore } from '../../../components/risk_score/severity/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScoreFields } from '../../../../../common/search_strategy';
+import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_strategy';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { UsersTableType } from '../../store/model';
+import { ENTITY_RISK_CLASSIFICATION } from '../../../components/risk_score/translations';
 
 export const getUserRiskScoreColumns = ({
   dispatchSeverityUpdate,
@@ -79,7 +80,8 @@ export const getUserRiskScoreColumns = ({
     name: (
       <EuiToolTip content={i18n.USER_RISK_TOOLTIP}>
         <>
-          {i18n.USER_RISK} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+          {ENTITY_RISK_CLASSIFICATION(RiskScoreEntity.user)}{' '}
+          <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
         </>
       </EuiToolTip>
     ),

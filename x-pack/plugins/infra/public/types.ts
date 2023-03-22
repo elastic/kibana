@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiDraggable, EuiDragDropContext } from '@elastic/eui';
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -110,3 +111,12 @@ export type LensAttributes = TypedLensByValueInput['attributes'];
 export interface LensOptions {
   breakdownSize: number;
 }
+
+type PropsOf<T> = T extends React.ComponentType<infer ComponentProps> ? ComponentProps : never;
+type FirstArgumentOf<Func> = Func extends (arg1: infer FirstArgument, ...rest: any[]) => any
+  ? FirstArgument
+  : never;
+export type DragHandleProps = FirstArgumentOf<
+  Exclude<PropsOf<typeof EuiDraggable>['children'], React.ReactElement>
+>['dragHandleProps'];
+export type DropResult = FirstArgumentOf<FirstArgumentOf<typeof EuiDragDropContext>['onDragEnd']>;
