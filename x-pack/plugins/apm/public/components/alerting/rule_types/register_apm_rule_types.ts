@@ -53,9 +53,6 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
-    alertDetailsAppSection: lazy(
-      () => import('../ui_components/alert_details_app_section')
-    ),
     requiresAppContext: false,
     defaultActionMessage: errorCountMessage,
   });
@@ -69,7 +66,7 @@ export function registerApmRuleTypes(
           'Alert when the latency of a specific transaction type in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ fields, formatters: { asDuration } }) => {
+    format: ({ fields }) => {
       return {
         reason: fields[ALERT_REASON]!,
         link: getAlertUrlTransaction(
@@ -106,7 +103,7 @@ export function registerApmRuleTypes(
           'Alert when the rate of transaction errors in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ fields, formatters: { asPercent } }) => ({
+    format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
       link: getAlertUrlTransaction(
         // TODO:fix SERVICE_NAME when we move it to initializeIndex
@@ -125,9 +122,6 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
-    alertDetailsAppSection: lazy(
-      () => import('../ui_components/alert_details_app_section')
-    ),
     requiresAppContext: false,
     defaultActionMessage: transactionErrorRateMessage,
   });
@@ -157,9 +151,6 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
-    alertDetailsAppSection: lazy(
-      () => import('../ui_components/alert_details_app_section')
-    ),
     requiresAppContext: false,
     defaultActionMessage: anomalyMessage,
   });
