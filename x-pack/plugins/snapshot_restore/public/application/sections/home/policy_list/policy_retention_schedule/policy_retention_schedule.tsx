@@ -144,7 +144,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
           />
         }
         color="warning"
-        iconType="alert"
+        iconType="warning"
       >
         <p>
           <FormattedMessage
@@ -255,7 +255,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
             />
           }
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           {error.data && error.data.message ? <p>{error.data.message}</p> : null}
           <EuiButton iconType="refresh" color="danger" onClick={onRetentionScheduleUpdated}>

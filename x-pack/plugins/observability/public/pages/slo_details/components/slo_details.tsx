@@ -5,14 +5,47 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
+
+import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
+import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
+import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
+import { Overview as Overview } from './overview';
+import { SliChartPanel } from './sli_chart_panel';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
 }
 
-export function SloDetails(props: Props) {
-  const { slo } = props;
-  return <pre data-test-subj="sloDetails">{JSON.stringify(slo, null, 2)}</pre>;
+export function SloDetails({ slo }: Props) {
+  const { isLoading: historicalSummaryLoading, sloHistoricalSummaryResponse = {} } =
+    useFetchHistoricalSummary({ sloIds: [slo.id] });
+
+  const errorBudgetBurnDownData = formatHistoricalData(
+    sloHistoricalSummaryResponse[slo.id],
+    'error_budget_remaining'
+  );
+  const historicalSliData = formatHistoricalData(sloHistoricalSummaryResponse[slo.id], 'sli_value');
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="xl">
+      <EuiFlexItem>
+        <Overview slo={slo} />
+      </EuiFlexItem>
+      <EuiFlexGroup direction="column" gutterSize="l">
+        <EuiFlexItem>
+          <SliChartPanel data={historicalSliData} isLoading={historicalSummaryLoading} slo={slo} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ErrorBudgetChartPanel
+            data={errorBudgetBurnDownData}
+            isLoading={historicalSummaryLoading}
+            slo={slo}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexGroup>
+  );
 }

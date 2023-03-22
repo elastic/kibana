@@ -6,19 +6,21 @@
  */
 import { HttpSetup } from '@kbn/core/public';
 import { AsApiContract } from '@kbn/actions-plugin/common';
-import { RuleAggregations } from '../../../types';
+import {
+  RuleAggregationFormattedResult,
+  RuleTagsAggregationFormattedResult,
+} from '@kbn/alerting-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { mapFiltersToKql } from './map_filters_to_kql';
-import {
-  LoadRuleAggregationsProps,
-  rewriteBodyRes,
-  rewriteTagsBodyRes,
-  RuleTagsAggregations,
-} from './aggregate_helpers';
+import { LoadRuleAggregationsProps, rewriteBodyRes, rewriteTagsBodyRes } from './aggregate_helpers';
 
 // TODO: https://github.com/elastic/kibana/issues/131682
-export async function loadRuleTags({ http }: { http: HttpSetup }): Promise<RuleTagsAggregations> {
-  const res = await http.get<AsApiContract<RuleAggregations>>(
+export async function loadRuleTags({
+  http,
+}: {
+  http: HttpSetup;
+}): Promise<RuleTagsAggregationFormattedResult> {
+  const res = await http.get<AsApiContract<RuleTagsAggregationFormattedResult>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`
   );
   return rewriteTagsBodyRes(res);
@@ -32,7 +34,7 @@ export async function loadRuleAggregations({
   ruleExecutionStatusesFilter,
   ruleStatusesFilter,
   tagsFilter,
-}: LoadRuleAggregationsProps): Promise<RuleAggregations> {
+}: LoadRuleAggregationsProps): Promise<RuleAggregationFormattedResult> {
   const filters = mapFiltersToKql({
     typesFilter,
     actionTypesFilter,
@@ -40,7 +42,7 @@ export async function loadRuleAggregations({
     ruleStatusesFilter,
     tagsFilter,
   });
-  const res = await http.post<AsApiContract<RuleAggregations>>(
+  const res = await http.post<AsApiContract<RuleAggregationFormattedResult>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {
       body: JSON.stringify({

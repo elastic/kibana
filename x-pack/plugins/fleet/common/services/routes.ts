@@ -220,6 +220,7 @@ export const agentRouteService = {
       '{fileName}',
       fileName
     ),
+  getAgentsByActionsPath: () => AGENT_API_ROUTES.LIST_PATTERN,
 };
 
 export const outputRoutesService = {
