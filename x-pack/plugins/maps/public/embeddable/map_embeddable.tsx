@@ -747,10 +747,6 @@ export class MapEmbeddable
       });
     }
 
-    if (!areLayersLoaded(this._savedMap.getStore().getState())) {
-
-    }
-
     const layers = getLayerList(this._savedMap.getStore().getState());
     const isLoading =
       !areLayersLoaded(this._savedMap.getStore().getState()) ||
