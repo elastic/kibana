@@ -8,10 +8,18 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { DashboardContainer } from '@kbn/dashboard-plugin/public';
 import { LazyDashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { useHistory } from 'react-router-dom';
 import { inputsSelectors } from '../../common/store';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useRefetch } from '../hooks/use_refetch';
+import { useKibana } from '../../common/lib/kibana';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import {
+  RESTORE_URL_ERROR_TITLE,
+  SAVE_STATE_IN_URL_ERROR_TITLE,
+} from '../pages/details/translations';
 
 const DashboardRendererComponent = ({
   canReadDashboard,
@@ -38,13 +46,40 @@ const DashboardRendererComponent = ({
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
-
+  const {
+    services: { uiSettings },
+  } = useKibana();
+  const toasts = useAppToasts();
+  const history = useHistory();
+  console.log('history', history);
+  const kbnUrlStateStorage = useMemo(
+    () =>
+      createKbnUrlStateStorage({
+        history,
+        useHash: uiSettings.get('state:storeInSessionStorage'),
+        onGetError: (error: Error) => {
+          toasts.addError(error, {
+            title: RESTORE_URL_ERROR_TITLE,
+          });
+        },
+        onSetError: (error: Error) => {
+          toasts.addError(error, {
+            title: SAVE_STATE_IN_URL_ERROR_TITLE,
+          });
+        },
+      }),
+    [toasts, history, uiSettings]
+  );
   const getCreationOptions = useCallback(
     () =>
       Promise.resolve({
+        useUnifiedSearchIntegration: true,
+        unifiedSearchSettings: {
+          kbnUrlStateStorage,
+        },
         overrideInput: { timeRange: { from, to }, viewMode: ViewMode.VIEW, query, filters },
       }),
-    [filters, from, query, to]
+    [filters, from, kbnUrlStateStorage, query, to]
   );
   useRefetch({
     inputId,

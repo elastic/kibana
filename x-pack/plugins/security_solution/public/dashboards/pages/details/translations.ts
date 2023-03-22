@@ -26,3 +26,17 @@ export const DASHBOARD_INDICES_NOT_FOUND_TITLE = i18n.translate(
     defaultMessage: 'Indices not found',
   }
 );
+
+export const RESTORE_URL_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.dashboards.dashboard.restoreUrlErrorTitle',
+  {
+    defaultMessage: `Error restoring state from URL`,
+  }
+);
+
+export const SAVE_STATE_IN_URL_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.dashboards.dashboard.saveStateInUrlErrorTitle',
+  {
+    defaultMessage: `Error saving state in URL`,
+  }
+);
