@@ -130,6 +130,7 @@ describe('output preconfiguration', () => {
     expect(mockedOutputService.create).toBeCalled();
     expect(mockedOutputService.create).toBeCalledWith(
       expect.anything(),
+      expect.anything(),
       expect.objectContaining({
         ca_trusted_fingerprint: 'testfingerprint',
       }),
@@ -207,11 +208,12 @@ describe('output preconfiguration', () => {
     expect(mockedOutputService.update).toBeCalled();
     expect(mockedOutputService.update).toBeCalledWith(
       expect.anything(),
+      expect.anything(),
       'existing-output-1',
       expect.objectContaining({
         is_preconfigured: true,
       }),
-      { fromPreconfiguration: true }
+      {fromPreconfiguration: true,}
     );
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
   });
@@ -374,6 +376,7 @@ describe('output preconfiguration', () => {
       expect(mockedOutputService.update).toBeCalledTimes(2);
       expect(mockedOutputService.update).toBeCalledWith(
         expect.anything(),
+        expect.anything(),
         'output1',
         expect.objectContaining({
           is_preconfigured: false,
@@ -381,6 +384,7 @@ describe('output preconfiguration', () => {
         { fromPreconfiguration: true }
       );
       expect(mockedOutputService.update).toBeCalledWith(
+        expect.anything(),
         expect.anything(),
         'output2',
         expect.objectContaining({
