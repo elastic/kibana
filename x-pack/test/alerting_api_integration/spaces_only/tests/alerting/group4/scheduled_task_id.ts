@@ -25,7 +25,7 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
 
-  describe.only('scheduled task id', () => {
+  describe('scheduled task id', () => {
     const objectRemover = new ObjectRemover(supertest);
     async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
       const scheduledTask = await es.get<TaskManagerDoc>({
