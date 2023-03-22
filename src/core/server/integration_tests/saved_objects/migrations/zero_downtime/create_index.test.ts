@@ -98,6 +98,7 @@ describe('ZDT upgrades - running on a fresh cluster', () => {
     expect(records).toContainLogEntry('INIT -> CREATE_TARGET_INDEX');
     expect(records).toContainLogEntry('CREATE_TARGET_INDEX -> UPDATE_ALIASES');
     expect(records).toContainLogEntry('UPDATE_ALIASES -> INDEX_STATE_UPDATE_DONE');
+    expect(records).toContainLogEntry('INDEX_STATE_UPDATE_DONE -> DONE');
     expect(records).toContainLogEntry('Migration completed');
   });
 });

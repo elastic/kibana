@@ -12,14 +12,21 @@ import type { ModelStage } from '../types';
 
 export const indexStateUpdateDone: ModelStage<
   'INDEX_STATE_UPDATE_DONE',
-  'DOCUMENTS_UPDATE_INIT'
+  'DOCUMENTS_UPDATE_INIT' | 'DONE'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     throwBadResponse(state, res as never);
   }
 
-  return {
-    ...state,
-    controlState: 'DOCUMENTS_UPDATE_INIT',
-  };
+  if (state.newIndexCreation) {
+    return {
+      ...state,
+      controlState: 'DONE',
+    };
+  } else {
+    return {
+      ...state,
+      controlState: 'DOCUMENTS_UPDATE_INIT',
+    };
+  }
 };
