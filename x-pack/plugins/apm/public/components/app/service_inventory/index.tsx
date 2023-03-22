@@ -57,7 +57,7 @@ function useServicesMainStatisticsFetcher() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const dataSourceOptions = usePreferredDataSourceAndBucketSize({
+  const preferred = usePreferredDataSourceAndBucketSize({
     start,
     end,
     kuery,
