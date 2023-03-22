@@ -41,15 +41,11 @@ describe('createApiKey lib function', () => {
       name: 'Search alias read only key',
       role_descriptors: {
         'my-index-key-role': {
-          applications: [
+          cluster: [],
+          indices: [
             {
-              cluster: [],
-              indices: [
-                {
-                  names: [`${engineName}`],
-                  privileges: ['read'],
-                },
-              ],
+              names: [`${engineName}`],
+              privileges: ['read']
             },
           ],
         },
