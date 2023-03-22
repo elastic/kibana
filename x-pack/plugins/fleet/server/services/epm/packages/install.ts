@@ -670,6 +670,12 @@ export const updateVersion = async (
   pkgName: string,
   pkgVersion: string
 ) => {
+  appContextService.writeCustomSoAuditLog({
+    action: 'update',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
   return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     version: pkgVersion,
   });
@@ -684,6 +690,12 @@ export const updateInstallStatus = async ({
   pkgName: string;
   status: EpmPackageInstallStatus;
 }) => {
+  appContextService.writeCustomSoAuditLog({
+    action: 'update',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
   return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     install_status: status,
   });
@@ -712,6 +724,12 @@ export async function restartInstallation(options: {
       ...formatVerificationResultForSO(verificationResult),
     };
   }
+
+  appContextService.writeCustomSoAuditLog({
+    action: 'update',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
 
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, savedObjectUpdate);
 }
@@ -757,6 +775,12 @@ export async function createInstallation(options: {
     savedObject = { ...savedObject, ...formatVerificationResultForSO(verificationResult) };
   }
 
+  appContextService.writeCustomSoAuditLog({
+    action: 'create',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
   const created = await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     savedObject,
@@ -771,6 +795,12 @@ export const saveKibanaAssetsRefs = async (
   pkgName: string,
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
 ) => {
+  appContextService.writeCustomSoAuditLog({
+    action: 'update',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
   const assetRefs = Object.values(kibanaAssets).flat().map(toAssetReference);
   // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
   // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe
@@ -829,6 +859,12 @@ export const updateEsAssetReferences = async (
     ({ type, id }) => `${type}-${id}`
   );
 
+  appContextService.writeCustomSoAuditLog({
+    action: 'update',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
   const {
     attributes: { installed_es: updatedAssets },
   } =
@@ -864,7 +900,13 @@ export const optimisticallyAddEsAssetReferences = async (
   assetsToAdd: EsAssetReference[]
 ): Promise<EsAssetReference[]> => {
   const addEsAssets = async () => {
+    // TODO: Should this be replaced by a `get()` call from epm/get.ts?
     const so = await savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
+    appContextService.writeCustomSoAuditLog({
+      action: 'get',
+      id: pkgName,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
 
     const installedEs = so.attributes.installed_es ?? [];
 
@@ -872,6 +914,12 @@ export const optimisticallyAddEsAssetReferences = async (
       [...installedEs, ...assetsToAdd],
       ({ type, id }) => `${type}-${id}`
     );
+
+    appContextService.writeCustomSoAuditLog({
+      action: 'update',
+      id: pkgName,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
 
     const {
       attributes: { installed_es: updatedAssets },

@@ -8,6 +8,8 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import { appContextService } from '../../app_context';
+
 import type { ExperimentalIndexingFeature } from '../../../../common/types';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
@@ -30,6 +32,12 @@ export async function updatePackage(
     throw new FleetError(`package ${pkgName} is not installed`);
   }
 
+  appContextService.writeCustomSoAuditLog({
+    action: 'update',
+    id: installedPackage.id,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
   await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
     keep_policies_up_to_date: keepPoliciesUpToDate ?? false,
   });
@@ -51,6 +59,12 @@ export async function updateDatastreamExperimentalFeatures(
     features: Record<ExperimentalIndexingFeature, boolean>;
   }>
 ) {
+  appContextService.writeCustomSoAuditLog({
+    action: 'update',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
   await savedObjectsClient.update<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     pkgName,

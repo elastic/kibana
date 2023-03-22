@@ -289,6 +289,12 @@ export async function _installPackage({
       })
     );
 
+    appContextService.writeCustomSoAuditLog({
+      action: 'update',
+      id: pkgName,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
+
     const updatedPackage = await withPackageSpan('Update install status', () =>
       savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
         version: pkgVersion,
