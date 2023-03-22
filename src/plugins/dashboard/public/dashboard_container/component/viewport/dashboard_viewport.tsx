@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
+import { useDebounce } from 'react-use/lib';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { css } from '@emotion/react';
-import { EuiPortal } from '@elastic/eui';
+import { EuiPortal, useResizeObserver } from '@elastic/eui';
 import { DashboardGrid } from '../grid';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
@@ -50,6 +51,12 @@ export const DashboardViewportComponent = () => {
   `;
   const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
 
+  // track and debounce container width
+  const resizeRef = useRef<HTMLDivElement>(null);
+  const viewportWidth = useResizeObserver(resizeRef.current).width;
+  const [debouncedViewportWidth, setDebouncedViewPortWidth] = useState<number | undefined>();
+  useDebounce(() => setDebouncedViewPortWidth(viewportWidth), 200, [viewportWidth]);
+
   return (
     <>
       {controlsEnabled && controlGroup && viewMode !== ViewMode.PRINT ? (
@@ -59,6 +66,7 @@ export const DashboardViewportComponent = () => {
         />
       ) : null}
       <div
+        ref={resizeRef}
         data-shared-items-count={panelCount}
         data-shared-items-container
         data-title={dashboardTitle}
@@ -71,7 +79,7 @@ export const DashboardViewportComponent = () => {
             <DashboardEmptyScreen isEditMode={viewMode === ViewMode.EDIT} />
           </div>
         )}
-        <DashboardGrid />
+        <DashboardGrid viewportWidth={debouncedViewportWidth || viewportWidth} />
       </div>
     </>
   );

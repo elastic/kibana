@@ -66,6 +66,7 @@ export function syncUnifiedSearchState(
       set: ({ filters: newFilters, query: newQuery }) => {
         intermediateFilterState.filters = cleanFiltersForSerialize(newFilters);
         intermediateFilterState.query = newQuery;
+        console.log(newQuery);
         dispatch(setFiltersAndQuery(intermediateFilterState));
       },
       state$: OnFiltersChange$.pipe(distinctUntilChanged()),

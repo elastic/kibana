@@ -28,6 +28,14 @@
 }
 
 /**
+ * turn off panel transforms initially so that the dashboard panels don't swoop in on first load.
+ */
+.dshLayout--noanimation .react-grid-item.cssTransforms {
+  transition-property: none !important;
+}
+
+
+/**
  * 1. Need to override the react grid layout height when a single panel is expanded. Important is required because
  * otherwise the height is set inline.
  */
