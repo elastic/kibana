@@ -44,8 +44,8 @@ type StaticGroupingProps<T> = Pick<
   | 'unit'
 >;
 
-/** Type for static grouping component props where T is the `GroupingAggregation`
- *  @interface StaticGroupingProps<T>
+/** Type for dynamic grouping component props where T is the `GroupingAggregation`
+ *  @interface DynamicGroupingProps<T>
  */
 type DynamicGroupingProps<T> = Pick<GroupingProps<T>, 'data' | 'isLoading' | 'takeActionItems'>;
 
@@ -53,9 +53,6 @@ type DynamicGroupingProps<T> = Pick<GroupingProps<T>, 'data' | 'isLoading' | 'ta
  *  @interface GroupingArgs<T>
  */
 interface GroupingArgs<T> {
-  /**
-   * Props passed to the grouping component
-   */
   componentProps: StaticGroupingProps<T>;
   defaultGroupingOptions: GroupOption[];
   fields: FieldSpec[];
