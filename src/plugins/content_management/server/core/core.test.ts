@@ -5,8 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { schema } from '@kbn/config-schema';
-
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Core } from './core';
 import { createMemoryStorage, FooContent } from './mocks';
@@ -37,11 +35,17 @@ import { ContentTypeDefinition, StorageContext } from './types';
 const logger = loggingSystemMock.createLogger();
 
 const FOO_CONTENT_ID = 'foo';
-const fooSchema = schema.object({ title: schema.string() });
 
 const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) => {
   const ctx: StorageContext = {
     requestHandlerContext: {} as any,
+    version: {
+      latest: 1,
+      request: 1,
+    },
+    utils: {
+      getTransforms: jest.fn(),
+    },
   };
 
   const core = new Core({ logger });
@@ -49,12 +53,8 @@ const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) 
   const contentDefinition: ContentTypeDefinition = {
     id: FOO_CONTENT_ID,
     storage: createMemoryStorage(),
-    schemas: {
-      content: {
-        create: { in: { data: fooSchema } },
-        update: { in: { data: fooSchema } },
-        search: { in: { query: schema.any() } },
-      },
+    version: {
+      latest: 2,
     },
   };
   const cleanUp = () => {
@@ -107,7 +107,45 @@ describe('Content Core', () => {
           // Make sure the "register" exposed by the api is indeed registring
           // the content into our "contentRegistry" instance
           expect(contentRegistry.isContentRegistered(FOO_CONTENT_ID)).toBe(true);
-          expect(contentRegistry.getDefinition(FOO_CONTENT_ID)).toBe(contentDefinition);
+          expect(contentRegistry.getDefinition(FOO_CONTENT_ID)).toEqual(contentDefinition);
+
+          cleanUp();
+        });
+
+        test('should convert the latest version to number if string is passed', () => {
+          const { coreSetup, cleanUp, contentDefinition } = setup();
+
+          const {
+            contentRegistry,
+            api: { register },
+          } = coreSetup;
+
+          register({ ...contentDefinition, version: { latest: '123' } } as any);
+
+          expect(contentRegistry.getContentType(contentDefinition.id).version).toEqual({
+            latest: 123,
+          });
+
+          cleanUp();
+        });
+
+        test('should throw if latest version passed is not valid', () => {
+          const { coreSetup, cleanUp, contentDefinition } = setup();
+
+          const {
+            contentRegistry,
+            api: { register },
+          } = coreSetup;
+
+          expect(contentRegistry.isContentRegistered(FOO_CONTENT_ID)).toBe(false);
+
+          expect(() => {
+            register({ ...contentDefinition, version: undefined } as any);
+          }).toThrowError('Invalid version [undefined]. Must be an integer.');
+
+          expect(() => {
+            register({ ...contentDefinition, version: { latest: 0 } });
+          }).toThrowError('Version must be >= 1');
 
           cleanUp();
         });

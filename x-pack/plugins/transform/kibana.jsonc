@@ -18,12 +18,13 @@
       "licensing",
       "management",
       "features",
-      "savedObjects",
       "share",
       "triggersActionsUi",
       "fieldFormats",
       "unifiedSearch",
-      "charts"
+      "charts",
+      "savedObjectsFinder",
+      "savedObjectsManagement"
     ],
     "optionalPlugins": [
       "security",

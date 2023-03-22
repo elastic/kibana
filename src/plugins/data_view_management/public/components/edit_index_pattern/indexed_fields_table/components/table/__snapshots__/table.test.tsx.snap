@@ -113,7 +113,7 @@ exports[`Table should render conflicting type 1`] = `
       color="warning"
       iconOnClick={[Function]}
       iconOnClickAriaLabel="Conflict Detail"
-      iconType="alert"
+      iconType="warning"
       onClick={[Function]}
       onClickAriaLabel="Conflict Detail"
     >

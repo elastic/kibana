@@ -35,7 +35,7 @@ import type { State, SubPluginsInitReducer } from '../common/store';
 import type { Immutable } from '../../common/endpoint/types';
 import type { AppAction } from '../common/store/actions';
 import type { TableState } from '../common/store/data_table/types';
-import type { GroupMap } from '../common/store/grouping';
+import type { GroupModel } from '../common/store/grouping';
 
 export { SecurityPageName } from '../../common/constants';
 
@@ -50,7 +50,7 @@ export type SecuritySubPluginRoutes = RouteProps[];
 export interface SecuritySubPlugin {
   routes: SecuritySubPluginRoutes;
   storageDataTables?: Pick<TableState, 'tableById'>;
-  groups?: Pick<GroupMap, 'groupById'>;
+  groups?: GroupModel;
   exploreDataTables?: {
     network: Pick<TableState, 'tableById'>;
     hosts: Pick<TableState, 'tableById'>;

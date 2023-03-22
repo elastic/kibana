@@ -1,6 +1,6 @@
 # SLO
 
-Add the feature flag: `xpack.observability.unsafe.slo.enabled: true` in your Kibana config to enable the various SLO APIs.
+Starting in 8.8, SLO is enabled by default.
 
 ## Supported SLI
 
@@ -70,7 +70,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"goodStatusCodes": ["2xx", "3xx", "4xx"]
+			"goodStatusCodes": ["2xx", "3xx", "4xx"],
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -105,7 +106,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"goodStatusCodes": ["2xx", "3xx", "4xx"]
+			"goodStatusCodes": ["2xx", "3xx", "4xx"],
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -142,7 +144,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"goodStatusCodes": ["2xx", "3xx", "4xx"]
+			"goodStatusCodes": ["2xx", "3xx", "4xx"],
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -181,7 +184,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"threshold": 500000
+			"threshold": 500,
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -216,7 +220,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"threshold": 500000
+			"threshold": 500,
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {
@@ -253,7 +258,8 @@ curl --request POST \
 			"service": "o11y-app",
 			"transactionType": "request",
 			"transactionName": "GET /api",
-			"threshold": 500000
+			"threshold": 500,
+			"index": "metrics-apm*"
 		}
 	},
 	"timeWindow": {

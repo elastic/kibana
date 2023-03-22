@@ -1900,7 +1900,13 @@
           ") => Promise<{ new: { count: number; data: { _id: string; _index: string; }[]; }; ongoing: { count: number; data: { _id: string; _index: string; }[]; }; recovered: { count: number; data: { _id: string; _index: string; }[]; }; }>; id: string; name: string; validate?: { params?: ",
           "RuleTypeParamsValidator",
           "<TParams> | undefined; } | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; alerts?: ",
-          "IRuleTypeAlerts",
+          {
+            "pluginId": "alerting",
+            "scope": "server",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-server.IRuleTypeAlerts",
+            "text": "IRuleTypeAlerts"
+          },
           " | undefined; producer: string; actionGroups: ",
           {
             "pluginId": "alerting",

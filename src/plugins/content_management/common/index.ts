@@ -18,5 +18,3 @@ export type {
   DeleteIn,
   SearchIn,
 } from './rpc';
-
-export { procedureNames, schemas as rpcSchemas } from './rpc';

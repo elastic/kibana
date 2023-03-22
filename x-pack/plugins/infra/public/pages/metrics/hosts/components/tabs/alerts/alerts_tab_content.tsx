@@ -36,7 +36,7 @@ export const AlertsTabContent = () => {
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
 
-  const { unifiedSearchDateRange } = useUnifiedSearchContext();
+  const { searchCriteria } = useUnifiedSearchContext();
 
   const { application, cases, triggersActionsUi } = services;
 
@@ -49,7 +49,7 @@ export const AlertsTabContent = () => {
 
   return (
     <HeightRetainer>
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-alerts">
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={false}>
             <AlertsStatusFilter onChange={setAlertStatus} status={alertStatus} />
@@ -58,7 +58,7 @@ export const AlertsTabContent = () => {
         <EuiFlexItem>
           <MemoAlertSummaryWidget
             alertsQuery={alertsEsQueryByStatus}
-            dateRange={unifiedSearchDateRange}
+            dateRange={searchCriteria.dateRange}
           />
         </EuiFlexItem>
         {alertsEsQueryByStatus && (
@@ -101,14 +101,14 @@ const MemoAlertSummaryWidget = React.memo(
     const { charts, triggersActionsUi } = services;
     const { getAlertSummaryWidget: AlertSummaryWidget } = triggersActionsUi;
 
-    const chartThemes = {
+    const chartProps = {
       theme: charts.theme.useChartsTheme(),
       baseTheme: charts.theme.useChartsBaseTheme(),
     };
 
     return (
       <AlertSummaryWidget
-        chartThemes={chartThemes}
+        chartProps={chartProps}
         featureIds={infraAlertFeatureIds}
         filter={alertsQuery}
         fullSize

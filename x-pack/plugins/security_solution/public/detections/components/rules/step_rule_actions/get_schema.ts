@@ -27,6 +27,7 @@ export const getSchema = ({
       },
     ],
   },
+  responseActions: {},
   enabled: {},
   kibanaSiemAppUrl: {},
   throttle: {

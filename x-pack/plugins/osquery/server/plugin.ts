@@ -42,6 +42,7 @@ import { createDataViews } from './create_data_views';
 import { createActionHandler } from './handlers/action';
 
 import { registerFeatures } from './utils/register_features';
+import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -92,6 +93,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     });
 
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
+
+    plugins.cases.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
 
     return {
       osqueryCreateAction: (
