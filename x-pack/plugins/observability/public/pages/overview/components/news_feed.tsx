@@ -75,7 +75,12 @@ function NewsItem({ item }: { item: INewsItem }) {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText size="s">
-                    <EuiLink href={item.link_url.en} target="_blank" external>
+                    <EuiLink
+                      data-test-subj="o11yNewsItemReadFullStoryLink"
+                      href={item.link_url.en}
+                      target="_blank"
+                      external
+                    >
                       {i18n.translate('xpack.observability.news.readFullStory', {
                         defaultMessage: 'Read full story',
                       })}
