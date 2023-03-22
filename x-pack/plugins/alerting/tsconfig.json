@@ -41,6 +41,12 @@
     "@kbn/safer-lodash-set",
     "@kbn/alerts-as-data-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
+    "@kbn/shared-ux-router",
+    "@kbn/kibana-react-plugin",
+    "@kbn/management-plugin",
+    "@kbn/core-doc-links-browser",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/home-plugin",
   ],
   "exclude": [
     "target/**/*",
