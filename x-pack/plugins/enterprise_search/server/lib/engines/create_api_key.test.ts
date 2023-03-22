@@ -45,7 +45,7 @@ describe('createApiKey lib function', () => {
           indices: [
             {
               names: [`${engineName}`],
-              privileges: ['read']
+              privileges: ['read'],
             },
           ],
         },
