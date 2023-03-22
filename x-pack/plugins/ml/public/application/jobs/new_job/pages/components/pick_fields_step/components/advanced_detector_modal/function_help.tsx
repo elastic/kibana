@@ -257,7 +257,7 @@ export const FunctionHelpPopover: FC = memo(() => {
                   target="_blank"
                   external
                 >
-                  {i18n.translate('pack.ml.anomalyDetection.functions.learnMoreLink', {
+                  {i18n.translate('xpack.ml.anomalyDetection.functions.learnMoreLink', {
                     defaultMessage: 'functions',
                   })}
                 </EuiLink>
