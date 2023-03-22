@@ -61,6 +61,9 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * The current time range
    */
   timeRange?: TimeRange;
+  /**
+   * The current columns
+   */
   columns?: string[];
   /**
    * Context object for requests made by Unified Histogram components -- optional
