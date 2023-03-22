@@ -32,6 +32,7 @@ import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-action
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { GetMlSharedImportsReturnType } from '../shared_imports';
 
 export interface AppDependencies {
@@ -58,6 +59,7 @@ export interface AppDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection?: UsageCollectionStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export const useAppDependencies = () => {
