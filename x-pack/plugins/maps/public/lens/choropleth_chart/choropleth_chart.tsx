@@ -133,7 +133,7 @@ export function ChoroplethChart({
   return (
     <PassiveMap
       passiveLayer={choroplethLayer}
-      factory={mapEmbeddableFactory} 
+      factory={mapEmbeddableFactory}
       onRenderComplete={onRenderComplete}
     />
   );
