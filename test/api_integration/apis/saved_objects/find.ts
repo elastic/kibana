@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return 200 with individual responses', async () =>
       await supertest
-        .get(`/s/${SPACE_ID}/api/saved_objects/_find?type=visualization&fields=title`)
+        .get(`/s/${SPACE_ID}/api/saved_objects/_find?type=visualization`)
         .expect(200)
         .then((resp) => {
           expect(resp.body.saved_objects.map((so: { id: string }) => so.id)).to.eql([
@@ -115,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('known namespace', () => {
       it('should return 200 with individual responses', async () =>
         await supertest
-          .get(`/api/saved_objects/_find?type=visualization&fields=title&namespaces=${SPACE_ID}`)
+          .get(`/api/saved_objects/_find?type=visualization&namespaces=${SPACE_ID}`)
           .expect(200)
           .then((resp) => {
             expect(
@@ -131,9 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('wildcard namespace', () => {
       it('should return 200 with individual responses from the all namespaces', async () =>
         await supertest
-          .get(
-            `/api/saved_objects/_find?type=visualization&fields=title&fields=originId&namespaces=*`
-          )
+          .get(`/api/saved_objects/_find?type=visualization&namespaces=*`)
           .expect(200)
           .then((resp) => {
             const knownDocuments = resp.body.saved_objects.filter((so: { namespaces: string[] }) =>

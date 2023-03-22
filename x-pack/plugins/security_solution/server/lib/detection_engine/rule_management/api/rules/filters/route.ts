@@ -25,7 +25,6 @@ const DEFAULT_FIND_RULES_COUNT_PARAMS = {
   page: 1,
   sortField: undefined,
   sortOrder: undefined,
-  fields: undefined,
 };
 
 async function fetchRulesCount(rulesClient: RulesClient): Promise<RulesCount> {

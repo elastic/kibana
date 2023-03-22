@@ -88,7 +88,6 @@ export async function getIndexPatternTelemetry(savedObjectsService: SavedObjects
   const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
     type: DATA_VIEW_SAVED_OBJECT_TYPE,
     perPage: 1000,
-    fields: ['fields', 'runtimeFieldMap'],
   };
 
   const finder = savedObjectsService.createPointInTimeFinder<DataViewFieldAttrs>(findOptions);

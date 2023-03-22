@@ -23,9 +23,6 @@ export const registerFindRoute = (router: SavedObjectsRouter) => {
           defaultSearchOperator: schema.oneOf([schema.literal('AND'), schema.literal('OR')]),
           sortField: schema.maybe(schema.string()),
           sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
-          fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-            defaultValue: [],
-          }),
           searchFields: schema.maybe(schema.arrayOf(schema.string())),
           hasReference: schema.maybe(schema.string()),
         }),
@@ -39,12 +36,10 @@ export const registerFindRoute = (router: SavedObjectsRouter) => {
       const { query } = req;
 
       const searchTypes = Array.isArray(query.type) ? query.type : [query.type];
-      const includedFields = Array.isArray(query.fields) ? query.fields : [query.fields];
 
       const findResponse = await savedObjectsClient.find<SavedObjectCommon<any>>({
         ...query,
         type: searchTypes,
-        fields: includedFields,
         hasReference: query.hasReference ? JSON.parse(query.hasReference) : undefined,
       });
 

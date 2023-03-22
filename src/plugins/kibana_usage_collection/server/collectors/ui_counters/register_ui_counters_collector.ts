@@ -59,7 +59,6 @@ export function transformRawUsageCounterObject(
 export async function fetchUiCounters({ soClient }: CollectorFetchContext) {
   const finder = soClient.createPointInTimeFinder<UsageCountersSavedObjectAttributes>({
     type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-    fields: ['count', 'counterName', 'counterType', 'domainId'],
     filter: `${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.domainId: uiCounter`,
     perPage: 1000,
   });

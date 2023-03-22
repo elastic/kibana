@@ -76,7 +76,6 @@ export const registerFindRoute = (
 
       const findResponse = await client.find<any>({
         ...query,
-        fields: undefined,
         searchFields: [...searchFields],
       });
 

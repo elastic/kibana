@@ -26,7 +26,6 @@ export const QuerySchema = schema.object({
   projects: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   schedules: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   status: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  fields: schema.maybe(schema.arrayOf(schema.string())),
   searchAfter: schema.maybe(schema.arrayOf(schema.string())),
 });
 
@@ -69,7 +68,6 @@ export const getMonitors = async (
     monitorTypes,
     locations,
     filter = '',
-    fields,
     searchAfter,
     projects,
     schedules,
@@ -94,7 +92,6 @@ export const getMonitors = async (
     searchFields: SEARCH_FIELDS,
     search: query ? `${query}*` : undefined,
     filter: filterStr,
-    fields,
     searchAfter,
   });
 };

@@ -57,7 +57,6 @@ export async function migrateLegacyAPMIndicesToSpaceAware({
       type: 'space',
       page: 1,
       perPage: 10_000, // max number of spaces as of 8.2
-      fields: ['name'], // to avoid fetching *all* fields
     });
 
     const savedObjectAttributes = {

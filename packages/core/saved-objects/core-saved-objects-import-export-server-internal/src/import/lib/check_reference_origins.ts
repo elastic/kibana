@@ -43,7 +43,6 @@ async function checkOrigin(
     rootSearchFields: ['_id', 'originId'],
     page: 1,
     perPage: 1, // we only need one result for now
-    fields: ['title'], // we don't actually need the object's title, we just specify one field so we don't fetch *all* fields
     sortField: 'updated_at',
     sortOrder: 'desc' as const,
     ...(namespace && { namespaces: [namespace] }),

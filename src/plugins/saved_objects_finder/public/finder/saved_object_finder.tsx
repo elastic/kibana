@@ -110,10 +110,6 @@ export class SavedObjectFinderUi extends React.Component<
     const metaDataMap = this.getSavedObjectMetaDataMap();
     const { savedObjectsManagement, uiSettings, http } = this.props.services;
 
-    const fields = Object.values(metaDataMap)
-      .map((metaData) => metaData.includeFields || [])
-      .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title', 'name']);
-
     const additionalSearchFields = Object.values(metaDataMap).reduce<string[]>((col, item) => {
       if (item.defaultSearchField) {
         col.push(item.defaultSearchField);
@@ -138,7 +134,6 @@ export class SavedObjectFinderUi extends React.Component<
     const params: FindQueryHTTP = {
       type: visibleTypes ?? Object.keys(metaDataMap),
       search: queryText ? `${queryText}*` : undefined,
-      fields: [...new Set(fields)],
       page: 1,
       perPage,
       searchFields: ['title^3', 'description', ...additionalSearchFields],

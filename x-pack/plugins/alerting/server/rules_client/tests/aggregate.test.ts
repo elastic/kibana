@@ -325,7 +325,6 @@ describe('aggregate()', () => {
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toEqual([
       {
-        fields: undefined,
         filter: nodeTypes.function.buildNode('and', [
           fromKueryExpression('foo: someTerm'),
           authFilter,

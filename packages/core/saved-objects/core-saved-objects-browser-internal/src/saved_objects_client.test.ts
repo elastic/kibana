@@ -610,7 +610,6 @@ describe('SavedObjectsClient', () => {
     test('makes HTTP call correctly mapping options into snake case query parameters', () => {
       const options = {
         defaultSearchOperator: 'OR' as const,
-        fields: ['title'],
         hasReference: { id: '1', type: 'reference' },
         hasNoReference: { id: '1', type: 'reference' },
         page: 10,
@@ -631,9 +630,6 @@ describe('SavedObjectsClient', () => {
               "method": "GET",
               "query": Object {
                 "default_search_operator": "OR",
-                "fields": Array [
-                  "title",
-                ],
                 "has_no_reference": "{\\"id\\":\\"1\\",\\"type\\":\\"reference\\"}",
                 "has_reference": "{\\"id\\":\\"1\\",\\"type\\":\\"reference\\"}",
                 "page": 10,

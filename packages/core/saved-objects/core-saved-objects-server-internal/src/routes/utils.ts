@@ -150,7 +150,6 @@ export function throwIfAnyTypeNotVisibleByAPI(
 export interface BulkGetItem {
   type: string;
   id: string;
-  fields?: string[];
   namespaces?: string[];
 }
 

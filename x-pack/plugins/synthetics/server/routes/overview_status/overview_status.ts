@@ -7,7 +7,6 @@
 import { intersection } from 'lodash';
 import datemath, { Unit } from '@kbn/datemath';
 import moment from 'moment';
-import { ConfigKey } from '../../../common/runtime_types';
 import {
   getAllMonitors,
   processMonitors,
@@ -56,14 +55,6 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
     soClient: savedObjectsClient,
     search: query ? `${query}*` : undefined,
     filter: filtersStr,
-    fields: [
-      ConfigKey.ENABLED,
-      ConfigKey.LOCATIONS,
-      ConfigKey.MONITOR_QUERY_ID,
-      ConfigKey.CONFIG_ID,
-      ConfigKey.SCHEDULE,
-      ConfigKey.MONITOR_SOURCE_TYPE,
-    ],
   });
 
   const {

@@ -99,14 +99,14 @@ export const getTestCases = (
   return {
     singleNamespaceType: {
       title: buildTitle('find single-namespace type'),
-      query: `type=isolatedtype&fields=title${namespacesQueryParam}`,
+      query: `type=isolatedtype${namespacesQueryParam}`,
       successResult: {
         savedObjects: getExpectedSavedObjects((t) => t.type === 'isolatedtype'),
       },
     } as FindTestCase,
     multiNamespaceType: {
       title: buildTitle('find multi-namespace type'),
-      query: `type=sharedtype&fields=title${namespacesQueryParam}`,
+      query: `type=sharedtype${namespacesQueryParam}`,
       successResult: {
         // expected depends on which spaces the user is authorized against...
         savedObjects: getExpectedSavedObjects((t) => t.type === 'sharedtype'),
@@ -114,19 +114,19 @@ export const getTestCases = (
     } as FindTestCase,
     multiNamespaceIsolatedType: {
       title: buildTitle('find multi-namespace isolated type'),
-      query: `type=sharecapabletype&fields=title${namespacesQueryParam}`,
+      query: `type=sharecapabletype${namespacesQueryParam}`,
       successResult: {
         savedObjects: getExpectedSavedObjects((t) => t.type === 'sharecapabletype'),
       },
     } as FindTestCase,
     namespaceAgnosticType: {
       title: buildTitle('find namespace-agnostic type'),
-      query: `type=globaltype&fields=title${namespacesQueryParam}`,
+      query: `type=globaltype${namespacesQueryParam}`,
       successResult: { savedObjects: SAVED_OBJECT_TEST_CASES.NAMESPACE_AGNOSTIC },
     } as FindTestCase,
     hiddenType: {
       title: buildTitle('find hidden type'),
-      query: `type=hiddentype&fields=name${namespacesQueryParam}`,
+      query: `type=hiddentype${namespacesQueryParam}`,
     } as FindTestCase,
     unknownType: {
       title: buildTitle('find unknown type'),
@@ -162,7 +162,7 @@ export const getTestCases = (
     } as FindTestCase,
     filterWithHiddenType: {
       title: buildTitle('filter with hidden type'),
-      query: `type=hiddentype&fields=name&filter=hiddentype.attributes.title:'hello'${namespacesQueryParam}`,
+      query: `type=hiddentype&filter=hiddentype.attributes.title:'hello'${namespacesQueryParam}`,
     } as FindTestCase,
     filterWithUnknownType: {
       title: buildTitle('filter with unknown type'),

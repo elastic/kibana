@@ -41,7 +41,6 @@ export class LoadListAndRender extends Component<Props> {
       const results = await getSavedObjectsClient().find({
         type: MAP_SAVED_OBJECT_TYPE,
         perPage: 1,
-        fields: ['title'],
       });
       if (this._isMounted) {
         this.setState({ mapsLoaded: true, hasSavedMaps: !!results.savedObjects.length });

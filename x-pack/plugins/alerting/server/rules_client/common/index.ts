@@ -16,7 +16,6 @@ export * from './mapped_params_utils';
 export { apiKeyAsAlertAttributes } from './api_key_as_alert_attributes';
 export * from './inject_references';
 export { parseDate } from './parse_date';
-export { includeFieldsRequiredForAuthentication } from './include_fields_required_for_authentication';
 export { getAndValidateCommonBulkOptions } from './get_and_validate_common_bulk_options';
 export * from './snooze_utils';
 export { tryToRemoveTasks } from './try_to_remove_tasks';

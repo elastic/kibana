@@ -129,7 +129,6 @@ describe('SavedObjectsFinder', () => {
     expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
       query: {
         type: ['search'],
-        fields: ['title', 'name'],
         search: undefined,
         hasReference: undefined,
         page: 1,
@@ -518,61 +517,11 @@ describe('SavedObjectsFinder', () => {
       expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
         query: {
           type: ['search'],
-          fields: ['title', 'name'],
           search: 'abc*',
           hasReference: undefined,
           page: 1,
           perPage: 10,
           searchFields: ['title^3', 'description', 'name'],
-          defaultSearchOperator: 'AND',
-        },
-      });
-    });
-
-    it('should include additional fields in search if listed in meta data', async () => {
-      const core = coreMock.createStart();
-      (core.http.get as jest.Mock).mockResolvedValue({ saved_objects: [] });
-      core.uiSettings.get.mockImplementation(() => 10);
-
-      const wrapper = mount(
-        <SavedObjectFinder
-          services={{
-            http: core.http,
-            uiSettings: core.uiSettings,
-            savedObjectsManagement,
-            savedObjectsTagging,
-          }}
-          savedObjectMetaData={[
-            {
-              type: 'type1',
-              name: '',
-              getIconForSavedObject: () => 'search',
-              includeFields: ['field1', 'field2'],
-            },
-            {
-              type: 'type2',
-              name: '',
-              getIconForSavedObject: () => 'search',
-              includeFields: ['field2', 'field3'],
-            },
-          ]}
-        />
-      );
-
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      wrapper
-        .find('[data-test-subj="savedObjectFinderSearchInput"] input')
-        .simulate('keyup', { key: 'Enter', target: { value: 'abc' } });
-      expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
-        query: {
-          type: ['type1', 'type2'],
-          fields: ['title', 'name', 'field1', 'field2', 'field3'],
-          search: 'abc*',
-          hasReference: undefined,
-          page: 1,
-          perPage: 10,
-          searchFields: ['title^3', 'description'],
           defaultSearchOperator: 'AND',
         },
       });
@@ -643,7 +592,6 @@ describe('SavedObjectsFinder', () => {
     expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
       query: {
         type: ['search', 'vis'],
-        fields: ['title', 'name'],
         search: undefined,
         page: 1,
         perPage: 10,
@@ -796,7 +744,6 @@ describe('SavedObjectsFinder', () => {
       expect(core.http.get).toHaveBeenLastCalledWith('/internal/saved-objects-finder/find', {
         query: {
           type: ['vis'],
-          fields: ['title', 'name'],
           search: undefined,
           hasReference: undefined,
           page: 1,
@@ -809,7 +756,6 @@ describe('SavedObjectsFinder', () => {
       expect(core.http.get).toHaveBeenLastCalledWith('/internal/saved-objects-finder/find', {
         query: {
           type: ['search', 'vis'],
-          fields: ['title', 'name'],
           search: undefined,
           hasReference: undefined,
           page: 1,
@@ -850,7 +796,6 @@ describe('SavedObjectsFinder', () => {
       expect(core.http.get).toHaveBeenLastCalledWith('/internal/saved-objects-finder/find', {
         query: {
           type: ['search', 'vis'],
-          fields: ['title', 'name'],
           search: undefined,
           hasReference: JSON.stringify(['tag1']),
           page: 1,
@@ -863,7 +808,6 @@ describe('SavedObjectsFinder', () => {
       expect(core.http.get).toHaveBeenLastCalledWith('/internal/saved-objects-finder/find', {
         query: {
           type: ['search', 'vis'],
-          fields: ['title', 'name'],
           search: undefined,
           hasReference: JSON.stringify(['tag1', 'tag2']),
           page: 1,

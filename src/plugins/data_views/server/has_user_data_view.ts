@@ -23,7 +23,6 @@ export const getDataViews = async ({
 }: Deps): Promise<SavedObjectsFindResponse<DataViewSavedObjectAttrs, unknown>> =>
   soClient.find<DataViewSavedObjectAttrs>({
     type: 'index-pattern',
-    fields: ['title'],
     search: `*`,
     searchFields: ['title'],
     perPage: 100,

@@ -93,7 +93,6 @@ export interface SavedObjectsClientContract {
    *                                        Query field argument for more information
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
-   * @property {array} options.fields
    * @property {object} [options.hasReference] - { type, id }
    * @returns A find result with objects matching the specified search.
    * @deprecated See https://github.com/elastic/kibana/issues/149098

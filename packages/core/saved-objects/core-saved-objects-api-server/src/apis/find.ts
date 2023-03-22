@@ -55,12 +55,6 @@ export interface SavedObjectsFindOptions {
   sortField?: string;
   /** sort order, ascending or descending */
   sortOrder?: SortOrder;
-  /**
-   * An array of fields to include in the results
-   * @example
-   * SavedObjects.find({type: 'dashboard', fields: ['attributes.name', 'attributes.location']})
-   */
-  fields?: string[];
   /** Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String `query` argument for more information */
   search?: string;
   /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */

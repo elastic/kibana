@@ -55,7 +55,6 @@ export const validateRuleDefaultExceptionList = async ({
     rulesClient,
     filter: `alert.attributes.params.exceptionsList.list_id: "${newDefaultExceptionsList.list_id}"`,
     page: 1,
-    fields: undefined,
     perPage: undefined,
     sortField: undefined,
     sortOrder: undefined,

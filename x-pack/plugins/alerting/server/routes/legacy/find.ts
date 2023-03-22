@@ -38,7 +38,6 @@ const querySchema = schema.object({
       })
     )
   ),
-  fields: schema.maybe(schema.arrayOf(schema.string())),
   filter: schema.maybe(schema.string()),
 });
 
@@ -71,7 +70,6 @@ export const findAlertRoute = (
       const query = req.query;
       const renameMap = {
         default_search_operator: 'defaultSearchOperator',
-        fields: 'fields',
         has_reference: 'hasReference',
         page: 'page',
         per_page: 'perPage',
@@ -87,14 +85,6 @@ export const findAlertRoute = (
         options.searchFields = Array.isArray(query.search_fields)
           ? query.search_fields
           : [query.search_fields];
-      }
-
-      if (query.fields) {
-        usageCounter?.incrementCounter({
-          counterName: `legacyAlertingFieldsUsage`,
-          counterType: 'alertingFieldsUsage',
-          incrementBy: 1,
-        });
       }
 
       const findResult = await rulesClient.find({ options, excludeFromPublicApi: true });

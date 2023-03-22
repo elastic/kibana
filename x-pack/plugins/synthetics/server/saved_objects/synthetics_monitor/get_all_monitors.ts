@@ -27,7 +27,6 @@ import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_mon
 export const getAllMonitors = async ({
   soClient,
   search,
-  fields,
   filter,
   sortField = 'name.keyword',
   sortOrder = 'asc',
@@ -36,14 +35,13 @@ export const getAllMonitors = async ({
   soClient: SavedObjectsClientContract;
   search?: string;
   filter?: string;
-} & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) => {
+} & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'searchFields'>) => {
   const finder = soClient.createPointInTimeFinder({
     type: syntheticsMonitorType,
     perPage: 1000,
     search,
     sortField,
     sortOrder,
-    fields,
     filter,
     searchFields,
   });

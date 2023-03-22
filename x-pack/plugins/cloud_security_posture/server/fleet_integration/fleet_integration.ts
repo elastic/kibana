@@ -23,7 +23,6 @@ export const onPackagePolicyPostCreateCallback = async (
 async function addDataViewToAllSpaces(savedObjectsClient: SavedObjectsClientContract) {
   const cspmDataViews = await savedObjectsClient.find<DataViewSavedObjectAttrs>({
     type: 'index-pattern',
-    fields: ['title'],
     search: CLOUD_SECURITY_POSTURE_PACKAGE_NAME + '*',
     searchFields: ['title'],
     perPage: 100,

@@ -24,7 +24,6 @@ export async function findObjectByTitle<T>(
     perPage: 10,
     search: `"${title}"`,
     searchFields: ['title'],
-    fields: ['title'],
   });
   return response.savedObjects.find(
     (obj) => obj.get('title').toLowerCase() === title.toLowerCase()

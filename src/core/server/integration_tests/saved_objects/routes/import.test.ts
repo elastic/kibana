@@ -347,7 +347,7 @@ describe(`POST ${URL}`, () => {
     });
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
-      [{ fields: ['id'], id: 'my-pattern', type: 'index-pattern' }],
+      [{ id: 'my-pattern', type: 'index-pattern' }],
       expect.any(Object) // options
     );
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
@@ -416,7 +416,7 @@ describe(`POST ${URL}`, () => {
     });
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
-      [{ fields: ['id'], id: 'my-pattern', type: 'index-pattern' }],
+      [{ id: 'my-pattern', type: 'index-pattern' }],
       expect.any(Object) // options
     );
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
@@ -480,7 +480,7 @@ describe(`POST ${URL}`, () => {
     });
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
-      [{ fields: ['id'], id: 'my-pattern', type: 'index-pattern' }],
+      [{ id: 'my-pattern', type: 'index-pattern' }],
       expect.any(Object) // options
     );
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created

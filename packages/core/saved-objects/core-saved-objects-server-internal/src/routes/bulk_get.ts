@@ -36,7 +36,6 @@ export const registerBulkGetRoute = (
           schema.object({
             type: schema.string(),
             id: schema.string(),
-            fields: schema.maybe(schema.arrayOf(schema.string())),
             namespaces: schema.maybe(schema.arrayOf(schema.string())),
           })
         ),

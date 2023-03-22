@@ -44,7 +44,6 @@ export async function removeOldAssets(options: {
   const packageAssetRefsRes = await soClient.find({
     type: PACKAGES_SAVED_OBJECT_TYPE,
     filter: `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.name:${pkgName}`,
-    fields: [`${PACKAGES_SAVED_OBJECT_TYPE}.package_assets`],
   });
 
   const packageAssetRefs = (
@@ -81,7 +80,6 @@ async function removeAssetsFromVersion(
     type: ASSETS_SAVED_OBJECT_TYPE,
     filter: `${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_name:${pkgName} AND ${ASSETS_SAVED_OBJECT_TYPE}.attributes.package_version:${oldVersion}`,
     perPage: 1000,
-    fields: ['id'],
   });
 
   for await (const assets of finder.find()) {

@@ -102,7 +102,6 @@ export function registerHiddenSORoutes(
               id: schema.string(),
             })
           ),
-          fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           filter: schema.maybe(schema.string()),
         }),
       },
@@ -123,7 +122,6 @@ export function registerHiddenSORoutes(
               typeof query.search_fields === 'string' ? [query.search_fields] : query.search_fields,
             sortField: query.sort_field,
             hasReference: query.has_reference,
-            fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
             filter: query.filter,
           }),
       });

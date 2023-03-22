@@ -290,7 +290,6 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     const path = this.getPath(['_find']);
     const renameMap = {
       defaultSearchOperator: 'default_search_operator',
-      fields: 'fields',
       hasReference: 'has_reference',
       hasReferenceOperator: 'has_reference_operator',
       hasNoReference: 'has_no_reference',

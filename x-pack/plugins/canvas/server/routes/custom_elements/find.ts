@@ -34,16 +34,6 @@ export function initializeFindCustomElementsRoute(deps: RouteInitializerDeps) {
           sortOrder: 'desc',
           search: name ? `${name}* | ${name}` : '*',
           searchFields: ['name'],
-          fields: [
-            'id',
-            'name',
-            'displayName',
-            'help',
-            'image',
-            'content',
-            '@created',
-            '@timestamp',
-          ],
           page,
           perPage,
         });

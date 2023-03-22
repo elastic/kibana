@@ -99,11 +99,11 @@ describe('validateReferences()', () => {
     expect(params.savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(params.savedObjectsClient.bulkGet).toHaveBeenCalledWith(
       [
-        { type: 'index-pattern', id: '3', fields: ['id'] },
-        { type: 'index-pattern', id: '5', fields: ['id'] },
-        { type: 'index-pattern', id: '6', fields: ['id'] },
-        { type: 'search', id: '7', fields: ['id'] },
-        { type: 'search', id: '8', fields: ['id'] },
+        { type: 'index-pattern', id: '3' },
+        { type: 'index-pattern', id: '5' },
+        { type: 'index-pattern', id: '6' },
+        { type: 'search', id: '7' },
+        { type: 'search', id: '8' },
       ],
       { namespace: undefined }
     );
@@ -154,7 +154,7 @@ describe('validateReferences()', () => {
     expect(result).toEqual([]);
     expect(params.savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(params.savedObjectsClient.bulkGet).toHaveBeenCalledWith(
-      [{ type: 'index-pattern', id: '1', fields: ['id'] }],
+      [{ type: 'index-pattern', id: '1' }],
       { namespace: undefined }
     );
   });
@@ -211,9 +211,9 @@ describe('validateReferences()', () => {
     expect(params.savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(params.savedObjectsClient.bulkGet).toHaveBeenCalledWith(
       [
-        { type: 'index-pattern', id: '1', fields: ['id'] },
+        { type: 'index-pattern', id: '1' },
         // foo:2 is not included in the cluster call
-        { type: 'search', id: '3', fields: ['id'] },
+        { type: 'search', id: '3' },
       ],
       { namespace: undefined }
     );

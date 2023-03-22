@@ -175,7 +175,6 @@ describe('find()', () => {
     expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "fields": undefined,
           "filter": null,
           "sortField": undefined,
           "type": "alert",
@@ -276,7 +275,6 @@ describe('find()', () => {
     expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "fields": undefined,
           "filter": null,
           "sortField": undefined,
           "type": "alert",
@@ -715,11 +713,13 @@ describe('find()', () => {
       });
 
       const rulesClient = new RulesClient(rulesClientParams);
-      expect(await rulesClient.find({ options: { fields: ['tags'] } })).toMatchInlineSnapshot(`
+      expect(await rulesClient.find({ options: {} })).toMatchInlineSnapshot(`
         Object {
           "data": Array [
             Object {
               "actions": Array [],
+              "alertTypeId": "myType",
+              "consumer": "myApp",
               "id": "1",
               "notifyWhen": undefined,
               "params": undefined,
@@ -737,7 +737,6 @@ describe('find()', () => {
       `);
 
       expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
-        fields: ['tags', 'alertTypeId', 'consumer'],
         filter: null,
         sortField: undefined,
         type: 'alert',

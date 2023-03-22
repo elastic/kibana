@@ -28,14 +28,12 @@ export const legacyFindNotifications = async ({
   rulesClient,
   perPage,
   page,
-  fields,
   filter,
   sortField,
   sortOrder,
 }: LegacyFindNotificationParams): Promise<FindResult<RuleTypeParams>> =>
   rulesClient.find({
     options: {
-      fields,
       page,
       perPage,
       filter: legacyGetFilter(filter),

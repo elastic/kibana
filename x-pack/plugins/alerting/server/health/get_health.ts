@@ -28,7 +28,6 @@ export const getHealth = async (
 
   const { saved_objects: decryptErrorData } = await internalSavedObjectsRepository.find<RawRule>({
     filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${RuleExecutionStatusErrorReasons.Decrypt}`,
-    fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
@@ -46,7 +45,6 @@ export const getHealth = async (
 
   const { saved_objects: executeErrorData } = await internalSavedObjectsRepository.find<RawRule>({
     filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${RuleExecutionStatusErrorReasons.Execute}`,
-    fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
@@ -64,7 +62,6 @@ export const getHealth = async (
 
   const { saved_objects: readErrorData } = await internalSavedObjectsRepository.find<RawRule>({
     filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${RuleExecutionStatusErrorReasons.Read}`,
-    fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
@@ -82,7 +79,6 @@ export const getHealth = async (
 
   const { saved_objects: noErrorData } = await internalSavedObjectsRepository.find<RawRule>({
     filter: 'not alert.attributes.executionStatus.status:error',
-    fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',

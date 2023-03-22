@@ -34,7 +34,6 @@ export function initializeFindWorkpadsRoute(deps: RouteInitializerDeps) {
           sortOrder: 'desc',
           search: name ? `${name}* | ${name}` : '*',
           searchFields: ['name'],
-          fields: ['id', 'name', '@created', '@timestamp'],
           page,
           perPage,
         });

@@ -161,6 +161,4 @@ export class AssignmentService {
 const referenceToBulkGet = ({ type, id }: ObjectReference): SavedObjectsBulkGetObject => ({
   type,
   id,
-  // we only need `type`, `id` and `references` that are included by default.
-  fields: [],
 });

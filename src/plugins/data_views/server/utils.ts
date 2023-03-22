@@ -31,7 +31,6 @@ export const findIndexPatternById = async (
 ): Promise<SavedObject<DataViewAttributes> | undefined> => {
   const savedObjectsResponse = await savedObjectsClient.find<DataViewAttributes>({
     type: DATA_VIEW_SAVED_OBJECT_TYPE,
-    fields: ['fields'],
     search: `"${index}"`,
     searchFields: ['title'],
   });

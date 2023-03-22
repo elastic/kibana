@@ -79,7 +79,6 @@ export function loadSavedDashboards(maxNumber) {
     savedObjectsClient
       .find({
         type: 'dashboard',
-        fields: ['title'],
         perPage: maxNumber,
       })
       .then((resp) => {

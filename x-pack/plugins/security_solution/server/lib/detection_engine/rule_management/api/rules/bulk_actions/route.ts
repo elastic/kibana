@@ -219,7 +219,6 @@ const fetchRulesByQueryOrIds = async ({
     page: undefined,
     sortField: undefined,
     sortOrder: undefined,
-    fields: undefined,
   });
 
   if (total > MAX_RULES_TO_PROCESS_TOTAL) {

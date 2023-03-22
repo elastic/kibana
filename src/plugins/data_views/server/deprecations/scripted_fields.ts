@@ -25,7 +25,6 @@ export const createScriptedFieldsDeprecationsConfig: (
       context.savedObjectsClient.createPointInTimeFinder<IndexPatternAttributesWithFields>({
         type: 'index-pattern',
         perPage: 1000,
-        fields: ['title', 'fields'],
       });
 
     const indexPatternsWithScriptedFields: IndexPatternAttributesWithFields[] = [];

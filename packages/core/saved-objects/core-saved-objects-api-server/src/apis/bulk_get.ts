@@ -16,8 +16,6 @@ export interface SavedObjectsBulkGetObject {
   id: string;
   /** Type of the object to get */
   type: string;
-  /** SavedObject fields to include in the response */
-  fields?: string[];
   /**
    * Optional namespace(s) for the object to be retrieved in. If this is defined, it will supersede the namespace ID that is in the
    * top-level options.

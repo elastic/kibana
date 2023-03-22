@@ -600,12 +600,6 @@ export class CaseUserActionService {
         hasReference: caseIds.map((id) => ({ id, type: CASE_SAVED_OBJECT })),
         sortField: 'created_at',
         sortOrder: 'asc',
-        /**
-         * We only care about the ids so to reduce the data returned we should limit the fields in the response. Core
-         * doesn't support retrieving no fields (id would always be returned anyway) so to limit it we'll only request
-         * the owner even though we don't need it.
-         */
-        fields: ['owner'],
         perPage: MAX_DOCS_PER_PAGE,
       });
 

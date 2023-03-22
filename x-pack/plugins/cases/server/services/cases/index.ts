@@ -41,7 +41,6 @@ import type { CaseSavedObject, SavedObjectFindOptionsKueryNode } from '../../com
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { combineFilters } from '../../client/utils';
-import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import {
   transformSavedObjectToExternalModel,
   transformAttributesToESModel,
@@ -188,7 +187,6 @@ export class CasesService {
         GetCaseIdsByAlertIdAggs
       >({
         type: CASE_COMMENT_SAVED_OBJECT,
-        fields: includeFieldsRequiredForAuthentication(),
         page: 1,
         perPage: 1,
         sortField: defaultSortField,

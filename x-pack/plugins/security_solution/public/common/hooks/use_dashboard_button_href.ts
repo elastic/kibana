@@ -11,7 +11,6 @@ import { useKibana } from '../lib/kibana';
 export const dashboardRequestBody = (title: string) => ({
   type: 'dashboard',
   search: `"${title}"`,
-  fields: ['title'],
 });
 
 export const useDashboardButtonHref = ({

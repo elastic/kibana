@@ -129,7 +129,6 @@ const checkOriginConflict = async (
     rootSearchFields: ['_id', 'originId'],
     page: 1,
     perPage: 10,
-    fields: ['title'],
     sortField: 'updated_at',
     sortOrder: 'desc' as const,
     ...(namespace && { namespaces: [namespace] }),

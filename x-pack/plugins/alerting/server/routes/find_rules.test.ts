@@ -188,40 +188,4 @@ describe('findRulesRoute', () => {
       'alertTypeId',
     ]);
   });
-
-  it('should track calls to deprecated functionality', async () => {
-    const licenseState = licenseStateMock.create();
-    const router = httpServiceMock.createRouter();
-
-    findRulesRoute(router, licenseState, mockUsageCounter);
-
-    const findResult = {
-      page: 1,
-      perPage: 1,
-      total: 0,
-      data: [],
-    };
-    rulesClient.find.mockResolvedValueOnce(findResult);
-
-    const [, handler] = router.get.mock.calls[0];
-    const [context, req, res] = mockHandlerArguments(
-      { rulesClient },
-      {
-        params: {},
-        query: {
-          fields: ['foo', 'bar'],
-          per_page: 1,
-          page: 1,
-          default_search_operator: 'OR',
-        },
-      },
-      ['ok']
-    );
-    await handler(context, req, res);
-    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({
-      counterName: `alertingFieldsUsage`,
-      counterType: 'alertingFieldsUsage',
-      incrementBy: 1,
-    });
-  });
 });

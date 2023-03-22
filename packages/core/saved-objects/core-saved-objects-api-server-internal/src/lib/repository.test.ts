@@ -3525,31 +3525,6 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
-      it(`can filter by fields`, async () => {
-        await findSuccess(client, repository, { type, fields: ['title'] });
-        expect(client.search).toHaveBeenCalledWith(
-          expect.objectContaining({
-            body: expect.objectContaining({
-              _source: [
-                `${type}.title`,
-                'namespace',
-                'namespaces',
-                'type',
-                'references',
-                'migrationVersion',
-                'coreMigrationVersion',
-                'typeMigrationVersion',
-                'updated_at',
-                'created_at',
-                'originId',
-                'title',
-              ],
-            }),
-          }),
-          expect.anything()
-        );
-      });
-
       it(`should set rest_total_hits_as_int to true on a request`, async () => {
         await findSuccess(client, repository, { type });
         expect(client.search).toHaveBeenCalledWith(
@@ -3593,14 +3568,6 @@ describe('SavedObjectsRepository', () => {
           // @ts-expect-error searchFields is an array
           repository.find({ type, searchFields: 'string' })
         ).rejects.toThrowError('options.searchFields must be an array');
-        expect(client.search).not.toHaveBeenCalled();
-      });
-
-      it(`throws when fields is defined but not an array`, async () => {
-        // @ts-expect-error fields is an array
-        await expect(repository.find({ type, fields: 'string' })).rejects.toThrowError(
-          'options.fields must be an array'
-        );
         expect(client.search).not.toHaveBeenCalled();
       });
 

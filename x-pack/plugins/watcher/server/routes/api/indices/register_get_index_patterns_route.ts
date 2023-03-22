@@ -23,7 +23,6 @@ export function registerGetIndexPatternsRoute({
         const { savedObjects } = await core;
         const finder = savedObjects.client.createPointInTimeFinder({
           type: 'index-pattern',
-          fields: ['title'],
           perPage: 1000,
         });
 

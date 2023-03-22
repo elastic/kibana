@@ -348,36 +348,6 @@ describe('GET /api/saved_objects/_find', () => {
     );
   });
 
-  it('accepts the query parameter fields as a string', async () => {
-    await supertest(httpSetup.server.listener)
-      .get('/api/saved_objects/_find?type=foo&fields=title')
-      .expect(200);
-
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
-
-    const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual(
-      expect.objectContaining({
-        fields: ['title'],
-      })
-    );
-  });
-
-  it('accepts the query parameter fields as an array', async () => {
-    await supertest(httpSetup.server.listener)
-      .get('/api/saved_objects/_find?type=foo&fields=title&fields=description')
-      .expect(200);
-
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
-
-    const options = savedObjectsClient.find.mock.calls[0][0];
-    expect(options).toEqual(
-      expect.objectContaining({
-        fields: ['title', 'description'],
-      })
-    );
-  });
-
   it('accepts the query parameter type as a string', async () => {
     await supertest(httpSetup.server.listener)
       .get('/api/saved_objects/_find?type=index-pattern')

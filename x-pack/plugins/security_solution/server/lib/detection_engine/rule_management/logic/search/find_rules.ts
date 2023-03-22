@@ -9,7 +9,6 @@ import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import type { FindRulesSortFieldOrUndefined } from '../../../../../../common/detection_engine/rule_management';
 
 import type {
-  FieldsOrUndefined,
   PageOrUndefined,
   PerPageOrUndefined,
   QueryFilterOrUndefined,
@@ -23,7 +22,6 @@ import { transformSortField } from './transform_sort_field';
 export interface FindRuleOptions {
   rulesClient: RulesClient;
   filter: QueryFilterOrUndefined;
-  fields: FieldsOrUndefined;
   sortField: FindRulesSortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
   page: PageOrUndefined;
@@ -34,14 +32,12 @@ export const findRules = ({
   rulesClient,
   perPage,
   page,
-  fields,
   filter,
   sortField,
   sortOrder,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
   return rulesClient.find({
     options: {
-      fields,
       page,
       perPage,
       filter: enrichFilterWithRuleTypeMapping(filter),

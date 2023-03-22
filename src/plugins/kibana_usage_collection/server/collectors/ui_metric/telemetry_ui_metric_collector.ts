@@ -50,7 +50,6 @@ export function registerUiMetricUsageCollector(
 
       const finder = savedObjectsClient.createPointInTimeFinder<UIMetricsSavedObjects>({
         type: 'ui-metric',
-        fields: ['count'],
         perPage: 1000,
       });
 

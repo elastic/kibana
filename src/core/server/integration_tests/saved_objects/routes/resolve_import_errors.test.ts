@@ -287,7 +287,7 @@ describe(`POST ${URL}`, () => {
     );
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
-      [{ fields: ['id'], id: 'existing', type: 'index-pattern' }],
+      [{ id: 'existing', type: 'index-pattern' }],
       expect.any(Object) // options
     );
   });

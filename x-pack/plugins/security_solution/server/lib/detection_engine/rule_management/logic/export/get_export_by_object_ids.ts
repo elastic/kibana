@@ -115,7 +115,6 @@ export const getRulesFromObjects = async (
     rulesClient,
     filter,
     page: 1,
-    fields: undefined,
     perPage: 10000,
     sortField: undefined,
     sortOrder: undefined,

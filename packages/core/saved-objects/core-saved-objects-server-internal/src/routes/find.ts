@@ -53,7 +53,6 @@ export const registerFindRoute = (
             schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
           ),
           has_no_reference_operator: searchOperatorSchema,
-          fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
           filter: schema.maybe(schema.string()),
           aggs: schema.maybe(schema.string()),
           namespaces: schema.maybe(
@@ -119,7 +118,6 @@ export const registerFindRoute = (
         hasReferenceOperator: query.has_reference_operator,
         hasNoReference: query.has_no_reference,
         hasNoReferenceOperator: query.has_no_reference_operator,
-        fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
         filter: query.filter,
         aggs,
         namespaces,

@@ -81,7 +81,6 @@ async function findMaps(
     page: 1,
     searchFields: ['title^3', 'description'],
     defaultSearchOperator: 'AND',
-    fields: ['description', 'title'],
     hasReference: references,
     hasNoReference: referencesToExclude,
   });

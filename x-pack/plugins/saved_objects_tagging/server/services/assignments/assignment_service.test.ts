@@ -101,8 +101,8 @@ describe('AssignmentService', () => {
 
         expect(savedObjectClient.bulkGet).toHaveBeenCalledTimes(1);
         expect(savedObjectClient.bulkGet).toHaveBeenCalledWith([
-          { type: 'dashboard', id: 'dash-1', fields: [] },
-          { type: 'map', id: 'map-1', fields: [] },
+          { type: 'dashboard', id: 'dash-1' },
+          { type: 'map', id: 'map-1' },
         ]);
       });
 
@@ -354,8 +354,8 @@ describe('AssignmentService', () => {
         expect(getUpdatableSavedObjectTypesMock).not.toHaveBeenCalled();
         expect(savedObjectClient.bulkGet).toHaveBeenCalledTimes(1);
         expect(savedObjectClient.bulkGet).toHaveBeenCalledWith([
-          { type: 'dashboard', id: 'dash-1', fields: [] },
-          { type: 'map', id: 'map-1', fields: [] },
+          { type: 'dashboard', id: 'dash-1' },
+          { type: 'map', id: 'map-1' },
         ]);
       });
     });

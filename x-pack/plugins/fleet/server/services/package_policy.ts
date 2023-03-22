@@ -488,7 +488,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       sortOrder,
       page,
       perPage,
-      fields: [],
       filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
     });
 

@@ -174,7 +174,6 @@ export class LogViewsClient implements ILogViewsClient {
       sortField: 'updated_at',
       sortOrder: 'desc',
       perPage: 1,
-      fields: [],
     });
 
     const [newestSavedLogView] = response.saved_objects;

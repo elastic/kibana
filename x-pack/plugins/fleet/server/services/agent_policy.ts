@@ -529,7 +529,6 @@ class AgentPolicyService {
     const agentPolicies = (
       await soClient.find<AgentPolicySOAttributes>({
         type: SAVED_OBJECT_TYPE,
-        fields: ['revision', 'data_output_id', 'monitoring_output_id'],
         searchFields: ['data_output_id', 'monitoring_output_id'],
         search: escapeSearchQueryPhrase(outputId),
         perPage: SO_SEARCH_LIMIT,
@@ -569,7 +568,6 @@ class AgentPolicyService {
     const agentPolicies = (
       await soClient.find<AgentPolicySOAttributes>({
         type: SAVED_OBJECT_TYPE,
-        fields: ['revision', 'fleet_server_host_id'],
         searchFields: ['fleet_server_host_id'],
         search: escapeSearchQueryPhrase(fleetServerHostId),
         perPage: SO_SEARCH_LIMIT,
@@ -601,7 +599,6 @@ class AgentPolicyService {
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
-      fields: ['revision', 'data_output_id', 'monitoring_output_id'],
       searchFields: ['data_output_id', 'monitoring_output_id'],
       search: escapeSearchQueryPhrase(outputId),
       perPage: SO_SEARCH_LIMIT,
@@ -632,7 +629,6 @@ class AgentPolicyService {
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
-      fields: ['revision'],
       perPage: SO_SEARCH_LIMIT,
     });
     const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {
@@ -946,7 +942,6 @@ class AgentPolicyService {
     const agentPolicies = (
       await soClient.find<AgentPolicySOAttributes>({
         type: SAVED_OBJECT_TYPE,
-        fields: ['revision', 'download_source_id'],
         searchFields: ['download_source_id'],
         search: escapeSearchQueryPhrase(downloadSourceId),
         perPage: SO_SEARCH_LIMIT,
@@ -981,7 +976,6 @@ class AgentPolicyService {
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
-      fields: ['revision', 'download_source_id'],
       searchFields: ['download_source_id'],
       search: escapeSearchQueryPhrase(downloadSourceId),
       perPage: SO_SEARCH_LIMIT,
@@ -1013,7 +1007,6 @@ class AgentPolicyService {
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
-      fields: ['revision', 'fleet_server_host_id'],
       searchFields: ['fleet_server_host_id'],
       search: escapeSearchQueryPhrase(fleetServerHostId),
       perPage: SO_SEARCH_LIMIT,
@@ -1045,7 +1038,6 @@ class AgentPolicyService {
       page: 1,
       perPage: SO_SEARCH_LIMIT,
       filter: `${SAVED_OBJECT_TYPE}.attributes.inactivity_timeout > 0`,
-      fields: [`inactivity_timeout`],
     });
 
     const groupedResults = groupBy(findRes.saved_objects, (so) => so.attributes.inactivity_timeout);

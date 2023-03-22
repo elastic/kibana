@@ -7,17 +7,11 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { pick } from 'lodash';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { RawRule, RuleTypeParams, SanitizedRule } from '../../types';
 import { AlertingAuthorizationEntity } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import {
-  mapSortField,
-  validateOperationOnAttributes,
-  buildKueryNodeFilter,
-  includeFieldsRequiredForAuthentication,
-} from '../common';
+import { mapSortField, validateOperationOnAttributes, buildKueryNodeFilter } from '../common';
 import {
   getModifiedField,
   getModifiedSearchFields,
@@ -46,7 +40,6 @@ export interface FindOptions extends IndexType {
     type: string;
     id: string;
   };
-  fields?: string[];
   filter?: string | KueryNode;
 }
 
@@ -59,11 +52,7 @@ export interface FindResult<Params extends RuleTypeParams> {
 
 export async function find<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  {
-    options: { fields, ...options } = {},
-    excludeFromPublicApi = false,
-    includeSnoozeData = false,
-  }: FindParams = {}
+  { options = {}, excludeFromPublicApi = false, includeSnoozeData = false }: FindParams = {}
 ): Promise<FindResult<Params>> {
   let authorizationTuple;
   try {
@@ -128,7 +117,6 @@ export async function find<Params extends RuleTypeParams = never>(
       (authorizationFilter && filterKueryNode
         ? nodeBuilder.and([filterKueryNode, authorizationFilter as KueryNode])
         : authorizationFilter) ?? filterKueryNode,
-    fields: fields ? includeFieldsRequiredForAuthentication(fields) : fields,
     type: 'alert',
   });
 
@@ -153,7 +141,7 @@ export async function find<Params extends RuleTypeParams = never>(
       context,
       id,
       attributes.alertTypeId,
-      fields ? (pick(attributes, fields) as RawRule) : attributes,
+      attributes,
       references,
       false,
       excludeFromPublicApi,

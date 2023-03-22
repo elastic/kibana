@@ -46,7 +46,6 @@ export async function checkForDuplicateDashboardTitle(
   }
   const response = await savedObjectsClient.find<DashboardAttributes>({
     perPage: 10,
-    fields: ['title'],
     search: `"${title}"`,
     searchFields: ['title'],
     type: DASHBOARD_SAVED_OBJECT_TYPE,

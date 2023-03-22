@@ -42,7 +42,6 @@ export interface LegacyFindNotificationParams {
   page?: number;
   sortField?: string;
   filter?: string;
-  fields?: string[];
   sortOrder?: 'asc' | 'desc';
 }
 

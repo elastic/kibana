@@ -45,7 +45,6 @@ const querySchema = schema.object({
       })
     )
   ),
-  fields: schema.maybe(schema.arrayOf(schema.string())),
   filter: schema.maybe(schema.string()),
 });
 
@@ -117,14 +116,6 @@ const buildFindRulesRoute = ({
           search_fields: searchFieldsAsArray(req.query.search_fields),
         });
 
-        if (req.query.fields) {
-          usageCounter?.incrementCounter({
-            counterName: `alertingFieldsUsage`,
-            counterType: 'alertingFieldsUsage',
-            incrementBy: 1,
-          });
-        }
-
         const findResult = await rulesClient.find({
           options,
           excludeFromPublicApi,
@@ -160,14 +151,6 @@ const buildFindRulesRoute = ({
             has_reference: req.body.has_reference || undefined,
             search_fields: searchFieldsAsArray(req.body.search_fields),
           });
-
-          if (req.body.fields) {
-            usageCounter?.incrementCounter({
-              counterName: `alertingFieldsUsage`,
-              counterType: 'alertingFieldsUsage',
-              incrementBy: 1,
-            });
-          }
 
           const findResult = await rulesClient.find({
             options,

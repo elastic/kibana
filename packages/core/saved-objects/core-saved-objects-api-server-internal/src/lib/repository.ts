@@ -100,7 +100,6 @@ import pMap from 'p-map';
 import { PointInTimeFinder } from './point_in_time_finder';
 import { createRepositoryEsClient, type RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
-import { includedFields } from './included_fields';
 import { internalBulkResolve, isBulkResolveError } from './internal_bulk_resolve';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import { validateAndConvertAggregations } from './aggregations';
@@ -1290,7 +1289,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       searchAfter,
       sortField,
       sortOrder,
-      fields,
       type,
       filter,
       preference,
@@ -1315,10 +1313,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
     if (searchFields && !Array.isArray(searchFields)) {
       throw SavedObjectsErrorHelpers.createBadRequestError('options.searchFields must be an array');
-    }
-
-    if (fields && !Array.isArray(fields)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('options.fields must be an array');
     }
 
     let kueryNode;
@@ -1389,7 +1383,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       index: pit ? undefined : this.getIndicesForTypes(allowedTypes),
       // If `searchAfter` is provided, we drop `from` as it will not be used for pagination.
       from: searchAfter ? undefined : perPage * (page - 1),
-      _source: includedFields(allowedTypes, fields),
       preference,
       rest_total_hits_as_int: true,
       size: perPage,
@@ -1397,7 +1390,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         size: perPage,
         seq_no_primary_term: true,
         from: perPage * (page - 1),
-        _source: includedFields(allowedTypes, fields),
         ...(aggsObject ? { aggs: aggsObject } : {}),
         ...getSearchDsl(this._mappings, this._registry, {
           search,
@@ -1508,11 +1500,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     let bulkGetRequestIndexCounter = 0;
     type ExpectedBulkGetResult = Either<
       { type: string; id: string; error: Payload },
-      { type: string; id: string; fields?: string[]; namespaces?: string[]; esRequestIndex: number }
+      { type: string; id: string; namespaces?: string[]; esRequestIndex: number }
     >;
     const expectedBulkGetResults = await Promise.all(
       objects.map<Promise<ExpectedBulkGetResult>>(async (object) => {
-        const { type, id, fields } = object;
+        const { type, id } = object;
 
         let error: DecoratedError | undefined;
         if (!this._allowedTypes.includes(type)) {
@@ -1541,7 +1533,6 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           value: {
             type,
             id,
-            fields,
             namespaces,
             esRequestIndex: bulkGetRequestIndexCounter++,
           },
@@ -1562,10 +1553,9 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
 
     const getNamespaceId = (namespaces?: string[]) =>
       namespaces !== undefined ? SavedObjectsUtils.namespaceStringToId(namespaces[0]) : namespace;
-    const bulkGetDocs = validObjects.map(({ value: { type, id, fields, namespaces } }) => ({
+    const bulkGetDocs = validObjects.map(({ value: { type, id, namespaces } }) => ({
       _id: this._serializer.generateRawId(getNamespaceId(namespaces), type, id), // the namespace prefix is only used for single-namespace object types
       _index: this.getIndexForType(type),
-      _source: { includes: includedFields(type, fields) },
     }));
     const bulkGetResponse = bulkGetDocs.length
       ? await this.client.mget<SavedObjectsRawDocSource>(

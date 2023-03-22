@@ -58,7 +58,6 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
           sortField: query.sort_field,
           sortOrder: query.sort_order,
           filter: query.filter,
-          fields: query.fields,
         });
 
         const ruleIds = rules.data.map((rule) => rule.id);

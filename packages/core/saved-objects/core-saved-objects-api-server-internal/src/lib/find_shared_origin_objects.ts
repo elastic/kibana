@@ -39,7 +39,6 @@ export async function findSharedOriginObjects(
       type: [...uniqueObjectTypes],
       perPage,
       filter,
-      fields: ['not-a-field'], // Specify a non-existent field to avoid fetching all type-level fields (we only care about root-level fields)
       namespaces: [ALL_NAMESPACES_STRING], // We need to search across all spaces to have accurate results
     },
     undefined,

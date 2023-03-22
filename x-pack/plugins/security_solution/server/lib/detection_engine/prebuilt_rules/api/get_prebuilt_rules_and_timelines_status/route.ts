@@ -58,7 +58,6 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (
           sortField: 'enabled',
           sortOrder: 'desc',
           filter: 'alert.attributes.params.immutable: false',
-          fields: undefined,
         });
 
         const installedPrebuiltRules = rulesToMap(

@@ -23,7 +23,6 @@ export const registerFindRoute = (router: IRouter) => {
           page: schema.number({ min: 0, defaultValue: 1 }),
           type: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
           search: schema.maybe(schema.string()),
-          fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
         }),
       },
     },
@@ -39,7 +38,6 @@ export const registerFindRoute = (router: IRouter) => {
         page: query.page,
         type: Array.isArray(query.type) ? query.type : [query.type],
         search: query.search,
-        fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
       });
 
       return res.ok({ body: result });

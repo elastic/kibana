@@ -29,7 +29,6 @@ export function initializeListTemplates(deps: RouteInitializerDeps) {
         sortOrder: 'desc',
         search: '*',
         searchFields: ['name', 'help'],
-        fields: ['id', 'name', 'help', 'tags'],
       });
 
       return response.ok({

@@ -31,7 +31,6 @@ const hasDuplicatedTitle = async (
     perPage: 10,
     search: `"${title}"`,
     searchFields: ['title'],
-    fields: ['title'],
   });
 
   return response.savedObjects.some(

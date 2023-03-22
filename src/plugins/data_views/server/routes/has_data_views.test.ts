@@ -60,9 +60,6 @@ describe('preview has_data_views route', () => {
 
     expect(mockSOClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
-        "fields": Array [
-          "title",
-        ],
         "perPage": 100,
         "search": "*",
         "searchFields": Array [

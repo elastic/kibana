@@ -120,7 +120,6 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
       const similarSavedObjects = await this.savedObjects.client.find<SavedObject>({
         type: embeddable.type,
         perPage,
-        fields: ['title'],
         searchFields: ['title'],
         search: `"${baseTitle}"`,
       });
