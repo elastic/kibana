@@ -8,26 +8,18 @@
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
 
-import { ANALYTICS_COLLECTIONS_INDEX } from '../..';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { addAnalyticsCollection } from './add_analytics_collection';
-import { fetchAnalyticsCollectionById } from './fetch_analytics_collection';
-import { setupAnalyticsCollectionIndex } from './setup_indices';
+import { fetchAnalyticsCollections } from './fetch_analytics_collection';
 
-jest.mock('./fetch_analytics_collection', () => ({ fetchAnalyticsCollectionById: jest.fn() }));
-jest.mock('./setup_indices', () => ({
-  setupAnalyticsCollectionIndex: jest.fn(),
-}));
+jest.mock('./fetch_analytics_collection', () => ({ fetchAnalyticsCollections: jest.fn() }));
 
 describe('add analytics collection lib function', () => {
   const mockClient = {
     asCurrentUser: {
-      index: jest.fn(),
-      indices: {
-        create: jest.fn(),
-        exists: jest.fn(),
-        refresh: jest.fn(),
+      transport: {
+        request: jest.fn(),
       },
     },
     asInternalUser: {},
@@ -42,114 +34,65 @@ describe('add analytics collection lib function', () => {
   });
 
   it('should add analytics collection', async () => {
-    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'example' }));
-    mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
+    mockClient.asCurrentUser.transport.request.mockImplementation(() => ({
+      acknowledged: true,
+      name: `example`,
+    }));
+
+    (fetchAnalyticsCollections as jest.Mock).mockImplementation(() => [
+      {
+        events_datastream: 'example-datastream',
+        name: 'example',
+      },
+    ]);
 
     await expect(
       addAnalyticsCollection(
         mockClient as unknown as IScopedClusterClient,
         mockDataViewsService as unknown as DataViewsService,
-        {
-          name: 'example',
-        }
+        'example'
       )
     ).resolves.toEqual({
-      event_retention_day_length: 180,
-      events_datastream: 'logs-elastic_analytics.events-example',
-      id: 'example',
+      events_datastream: 'example-datastream',
       name: 'example',
     });
 
-    expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
-      document: {
-        event_retention_day_length: 180,
-        events_datastream: 'logs-elastic_analytics.events-example',
-        name: 'example',
-      },
-      id: 'example',
-      index: ANALYTICS_COLLECTIONS_INDEX,
+    expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+      method: 'PUT',
+      path: '/_application/analytics/example',
     });
 
     expect(mockDataViewsService.createAndSave).toHaveBeenCalledWith(
       {
         allowNoIndex: true,
-        name: 'elastic_analytics.events-example',
-        title: 'logs-elastic_analytics.events-example',
+        name: 'behavioral_analytics.events-example',
+        title: 'example-datastream',
         timeFieldName: '@timestamp',
       },
       true
     );
   });
 
-  it('should reject if index already exists', async () => {
-    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
-    (fetchAnalyticsCollectionById as jest.Mock).mockImplementation(() => true);
+  it('should reject if analytics collection already exists', async () => {
+    mockClient.asCurrentUser.transport.request.mockImplementation(() =>
+      Promise.reject({
+        meta: {
+          body: {
+            error: {
+              type: 'resource_already_exists_exception',
+            },
+          },
+        },
+      })
+    );
 
     await expect(
       addAnalyticsCollection(
         mockClient as unknown as IScopedClusterClient,
         mockDataViewsService as unknown as DataViewsService,
-        {
-          name: 'index_name',
-        }
+        'index_name'
       )
     ).rejects.toEqual(new Error(ErrorCode.ANALYTICS_COLLECTION_ALREADY_EXISTS));
-    expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
-    expect(mockDataViewsService.createAndSave).not.toHaveBeenCalled();
-  });
-
-  it('should create index if no analytics collection index exists', async () => {
-    mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
-
-    (fetchAnalyticsCollectionById as jest.Mock).mockImplementation(() => undefined);
-
-    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'example' }));
-
-    await expect(
-      addAnalyticsCollection(
-        mockClient as unknown as IScopedClusterClient,
-        mockDataViewsService as unknown as DataViewsService,
-        {
-          name: 'example',
-        }
-      )
-    ).resolves.toEqual({
-      event_retention_day_length: 180,
-      events_datastream: 'logs-elastic_analytics.events-example',
-      id: 'example',
-      name: 'example',
-    });
-
-    expect(mockClient.asCurrentUser.index).toHaveBeenCalledWith({
-      document: {
-        event_retention_day_length: 180,
-        events_datastream: 'logs-elastic_analytics.events-example',
-        name: 'example',
-      },
-      id: 'example',
-      index: ANALYTICS_COLLECTIONS_INDEX,
-    });
-
-    expect(setupAnalyticsCollectionIndex).toHaveBeenCalledWith(mockClient.asCurrentUser);
-  });
-
-  it('should not create index if status code is not 404', async () => {
-    mockClient.asCurrentUser.index.mockImplementationOnce(() => {
-      return Promise.reject({ statusCode: 500 });
-    });
-    mockClient.asCurrentUser.indices.exists.mockImplementation(() => true);
-    (fetchAnalyticsCollectionById as jest.Mock).mockImplementation(() => false);
-    await expect(
-      addAnalyticsCollection(
-        mockClient as unknown as IScopedClusterClient,
-        mockDataViewsService as unknown as DataViewsService,
-        {
-          name: 'example',
-        }
-      )
-    ).rejects.toEqual({ statusCode: 500 });
-    expect(setupAnalyticsCollectionIndex).not.toHaveBeenCalled();
-    expect(mockClient.asCurrentUser.index).toHaveBeenCalledTimes(1);
     expect(mockDataViewsService.createAndSave).not.toHaveBeenCalled();
   });
 });
