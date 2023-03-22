@@ -33,7 +33,7 @@ import { getTelemetryEvent } from '../telemetry/const';
 import { GroupStatsRenderer, OnGroupToggle } from './types';
 
 export interface GroupingProps<T> {
-  data?: GroupingAggregation<T> & GroupingFieldTotalAggregation;
+  data?: GroupingAggregation<T> & GroupingFieldTotalAggregation<T>;
   groupingId: string;
   groupPanelRenderer?: GroupPanelRenderer<T>;
   groupSelector?: JSX.Element;

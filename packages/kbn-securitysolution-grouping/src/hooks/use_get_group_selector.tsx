@@ -7,10 +7,10 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { getGroupSelector, isNoneGroup } from '../..';
+import { GroupSelector, isNoneGroup } from '..';
 import { groupActions, groupByIdSelector } from './state';
 import type { GroupOption } from './types';
 import { Action, defaultGroup, GroupMap } from './types';
@@ -126,12 +126,16 @@ export const useGetGroupSelector = ({
     );
   }, [defaultGroupingOptions, options.length, selectedGroup, setOptions]);
 
-  return getGroupSelector({
-    groupingId,
-    groupSelected: selectedGroup,
-    'data-test-subj': 'alerts-table-group-selector',
-    onGroupChange: onChange,
-    fields,
-    options,
-  });
+  return (
+    <GroupSelector
+      {...{
+        groupingId,
+        groupSelected: selectedGroup,
+        'data-test-subj': 'alerts-table-group-selector',
+        onGroupChange: onChange,
+        fields,
+        options,
+      }}
+    />
+  );
 };

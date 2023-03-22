@@ -31,9 +31,12 @@ export interface GroupingAggregation<T> {
   };
 }
 
-export type GroupingFieldTotalAggregation = Record<
+export type GroupingFieldTotalAggregation<T> = Record<
   string,
-  { value?: number | null; buckets?: Array<{ doc_count?: number | null }> }
+  {
+    value?: number | null;
+    buckets?: Array<RawBucket<T>>;
+  }
 >;
 
 export interface BadgeMetric {

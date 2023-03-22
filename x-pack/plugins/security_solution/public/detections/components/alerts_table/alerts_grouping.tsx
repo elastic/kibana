@@ -215,7 +215,8 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     setQuery: setAlertsQuery,
   } = useQueryAlerts<
     {},
-    GroupingAggregation<AlertsGroupingAggregation> & GroupingFieldTotalAggregation
+    GroupingAggregation<AlertsGroupingAggregation> &
+      GroupingFieldTotalAggregation<AlertsGroupingAggregation>
   >({
     query: queryGroups,
     indexName: signalIndexName,
