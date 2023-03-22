@@ -42,21 +42,26 @@ export async function downloadJobResponseHandler(
     }
 
     const payload = await getDocumentPayload(doc);
+    const { contentType, content, filename, statusCode } = payload;
 
-    if (!payload.contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(payload.contentType)) {
+    if (!contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(contentType)) {
       return res.badRequest({
-        body: `Unsupported content-type of ${payload.contentType} specified by job output`,
+        body: `Unsupported content-type of ${contentType} specified by job output`,
       });
     }
 
-    return res.custom({
-      body: typeof payload.content === 'string' ? Buffer.from(payload.content) : payload.content,
-      statusCode: payload.statusCode,
-      headers: {
-        ...payload.headers,
-        'content-type': payload.contentType,
-      },
-    });
+    const body = typeof content === 'string' ? Buffer.from(content) : content;
+
+    const headers = {
+      ...payload.headers,
+      'content-type': contentType,
+    };
+
+    if (filename) {
+      return res.file({ body, headers, filename });
+    }
+
+    return res.custom({ body, headers, statusCode });
   } catch (err) {
     const { logger } = reporting.getPluginSetupDeps();
     logger.error(err);
