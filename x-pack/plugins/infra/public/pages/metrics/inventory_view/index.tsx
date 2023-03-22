@@ -29,7 +29,7 @@ import { NoRemoteCluster } from '../../../components/empty_states';
 
 export const SnapshotPage = () => {
   const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
-  
+
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
   const { source: optionsSource } = useWaffleOptionsContext();
@@ -74,9 +74,9 @@ export const SnapshotPage = () => {
             pageSectionProps={{
               contentProps: {
                 css: css`
-                      ${fullHeightContentStyles};
-                      padding-bottom: 0;
-                    `,
+                  ${fullHeightContentStyles};
+                  padding-bottom: 0;
+                `,
               },
             }}
           >
@@ -84,12 +84,7 @@ export const SnapshotPage = () => {
               render={({ loading, nodes, reload, interval }) => (
                 <>
                   <FilterBar interval={interval} />
-                  <LayoutView
-                    loading={loading}
-                    nodes={nodes}
-                    reload={reload}
-                    interval={interval}
-                  />
+                  <LayoutView loading={loading} nodes={nodes} reload={reload} interval={interval} />
                 </>
               )}
             />

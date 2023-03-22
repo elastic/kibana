@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import styled from '@emotion/styled'
+import styled from '@emotion/styled';
 import { EuiEmptyPromptProps } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { PageTemplate } from '../page_template';
@@ -26,4 +26,4 @@ export const NoIndices: React.FC<EuiEmptyPromptProps> = ({ body, title, ...rest 
 
 const PreLineText = styled.p`
   white-space: pre-line;
-`
+`;
