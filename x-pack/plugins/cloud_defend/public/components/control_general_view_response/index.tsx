@@ -38,6 +38,8 @@ import { getSelectorTypeIcon } from '../../common/utils';
 const titleThreshold = 4;
 const titleThresholdCollapsed = 2;
 
+const ACTION_ID_REGEX = /response_\d+_(.*)/;
+
 export const ControlGeneralViewResponse = ({
   response,
   selectors,
@@ -149,7 +151,7 @@ export const ControlGeneralViewResponse = ({
 
   const onToggleAction = useCallback(
     (e: ChangeEvent) => {
-      const action = e.currentTarget.id as ResponseAction;
+      const action = e.currentTarget?.id?.match(ACTION_ID_REGEX)?.[1] as ResponseAction;
       const updatedResponse = JSON.parse(JSON.stringify(response));
       const actionIndex = updatedResponse.actions.indexOf(action);
 
@@ -231,13 +233,15 @@ export const ControlGeneralViewResponse = ({
         <EuiFlexGroup alignItems="center" gutterSize="none" wrap={false}>
           {accordionState === 'closed' && (
             <EuiText color="subdued" css={selectorStyles.conditionsBadge} size="xs">
-              <b>{i18n.exclude}: </b>
               {response?.exclude?.length && (
-                <EuiBadge title={response.exclude.join(',')} color="hollow">
-                  {response.exclude.length}
-                </EuiBadge>
+                <>
+                  <b>{i18n.exclude}: </b>
+                  <EuiBadge title={response.exclude.join(',')} color="hollow">
+                    {response.exclude.length}
+                  </EuiBadge>
+                  <div css={selectorStyles.verticalDivider} />
+                </>
               )}
-              <div css={selectorStyles.verticalDivider} />
               <b>{i18n.actions}: </b>
               {response.actions.map((action, i) => (
                 <span key={action}>
@@ -333,7 +337,7 @@ export const ControlGeneralViewResponse = ({
           <EuiFlexGroup direction="row" gutterSize="l">
             <EuiFlexItem grow={false}>
               <EuiCheckbox
-                id="log"
+                id={`response_${index}_log`}
                 data-test-subj="cloud-defend-chklogaction"
                 label={i18n.actionLog}
                 checked={logSelected}
@@ -342,7 +346,7 @@ export const ControlGeneralViewResponse = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiCheckbox
-                id="alert"
+                id={`response_${index}_alert`}
                 data-test-subj="cloud-defend-chkalertaction"
                 label={i18n.actionAlert}
                 checked={alertSelected}
@@ -353,7 +357,7 @@ export const ControlGeneralViewResponse = ({
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={i18n.actionBlockHelp}>
                   <EuiCheckbox
-                    id="block"
+                    id={`response_${index}_block`}
                     data-test-subj="cloud-defend-chkblockaction"
                     label={i18n.actionBlock}
                     checked={blockSelected}

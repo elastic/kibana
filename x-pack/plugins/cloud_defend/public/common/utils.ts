@@ -75,10 +75,10 @@ export function getSelectorConditions(type: SelectorType): SelectorCondition[] {
 export function getDefaultSelectorByType(type: SelectorType): Selector {
   switch (type) {
     case 'process':
-      return { ...DefaultProcessSelector };
+      return JSON.parse(JSON.stringify(DefaultProcessSelector));
     case 'file':
     default:
-      return { ...DefaultFileSelector };
+      return JSON.parse(JSON.stringify(DefaultFileSelector));
   }
 }
 

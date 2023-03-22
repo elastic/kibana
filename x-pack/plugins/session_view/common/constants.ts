@@ -25,7 +25,7 @@ export const PROCESS_EVENTS_INDEX = `${ENDPOINT_PROCESS_EVENTS_INDEX},${CLOUD_DE
 export const PREVIEW_ALERTS_INDEX = '.preview.alerts-security.alerts-default';
 
 // field properties
-export const ENTRY_SESSION_ENTITY_ID_PROPERTY = 'process.entry_leader.entity_id';
+export const ENTRY_SESSION_ENTITY_ID_PROPERTY = 'process.session_leader.entity_id';
 export const PROCESS_ENTITY_ID_PROPERTY = 'process.entity_id';
 export const ALERT_UUID_PROPERTY = 'kibana.alert.uuid';
 export const ALERT_ORIGINAL_TIME_PROPERTY = 'kibana.alert.original_time';
