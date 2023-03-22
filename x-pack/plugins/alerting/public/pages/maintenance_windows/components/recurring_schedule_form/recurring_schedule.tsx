@@ -23,7 +23,7 @@ import { CustomRecurringSchedule } from './custom_recurring_schedule';
 
 import './recurring_schedule.scss';
 import { recurringSummary } from '../../helpers/recurring_summary';
-import { getInitialByWeekday } from '../../helpers/get_initial_by_weekday';
+import { getPresets } from '../../helpers/get_presets';
 
 const UseField = getUseField({ component: Field });
 
@@ -77,22 +77,7 @@ export const RecurringSchedule: React.FC = React.memo(() => {
           value: 'CUSTOM',
         },
       ],
-      presets: {
-        [Frequency.DAILY]: {
-          interval: 1,
-        },
-        [Frequency.WEEKLY]: {
-          interval: 1,
-          byweekday: getInitialByWeekday([], startDate),
-        },
-        [Frequency.MONTHLY]: {
-          interval: 1,
-          bymonth: 'weekday',
-        },
-        [Frequency.YEARLY]: {
-          interval: 1,
-        },
-      },
+      presets: getPresets(startDate),
     };
   }, [startDate]);
 

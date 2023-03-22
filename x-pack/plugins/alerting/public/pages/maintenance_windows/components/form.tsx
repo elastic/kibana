@@ -29,6 +29,9 @@ import * as i18n from '../translations';
 import { RecurringSchedule } from './recurring_schedule_form/recurring_schedule';
 import { DateAndTimeField } from './fields/date_and_time_field';
 import { SubmitButton } from './submit_button';
+import { convertToRRule } from '../helpers/convert_to_rrule';
+import { useCreateMaintenanceWindow } from '../../../hooks/use_create_maintenance_window';
+
 const UseField = getUseField({ component: Field });
 
 export interface CreateMaintenanceWindowFormProps {
@@ -38,12 +41,24 @@ export interface CreateMaintenanceWindowFormProps {
 }
 export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFormProps>(
   ({ onCancel, onSuccess, initialValue }) => {
-    const submitMaintenanceWindow = useCallback(async ({ fields, ...data }, isValid) => {
-      if (isValid) {
-        // const { ...userFormData } = data;
-        // // console.log('userFormData:', userFormData);
-      }
-    }, []);
+    const { mutate: createMaintenanceWindow } = useCreateMaintenanceWindow();
+
+    const submitMaintenanceWindow = useCallback(
+      async ({ fields, ...data }, isValid) => {
+        if (isValid) {
+          const { ...formData } = data;
+          await createMaintenanceWindow(
+            {
+              title: formData.title,
+              duration: formData.duration,
+              rRule: convertToRRule(formData.date, formData.recurringSchedule),
+            },
+            { onSuccess }
+          );
+        }
+      },
+      [createMaintenanceWindow, onSuccess]
+    );
 
     const { form } = useForm<FormProps>({
       defaultValue: { ...initialValue },
