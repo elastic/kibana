@@ -20,6 +20,7 @@ import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-action
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public/plugin';
 import { registerFeature } from './register_feature';
 import { getTransformHealthRuleType } from './alerting';
 
@@ -36,6 +37,7 @@ export interface PluginsDependencies {
   alerting?: AlertingSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   fieldFormats: FieldFormatsStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export class TransformUiPlugin {

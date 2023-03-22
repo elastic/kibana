@@ -32,7 +32,7 @@ export const TargetFieldHelpText: React.FC<TargetFieldHelpTextProps> = ({
 }) => {
   const baseText = targetField
     ? i18n.translate(
-        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.targetField.helpText.userProvided',
+        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText.userProvided',
         {
           defaultMessage:
             'This names the field that holds the inference result. It will be prefixed with "ml.inference", ml.inference.{targetField}',
@@ -42,7 +42,7 @@ export const TargetFieldHelpText: React.FC<TargetFieldHelpTextProps> = ({
         }
       )
     : i18n.translate(
-        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.targetField.helpText.default',
+        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText.default',
         {
           defaultMessage:
             'This names the field that holds the inference result. It will be prefixed with "ml.inference", if not set it will be defaulted to "ml.inference.{pipelineName}"',
@@ -59,7 +59,7 @@ export const TargetFieldHelpText: React.FC<TargetFieldHelpTextProps> = ({
         <p>{baseText}</p>
         <p>
           <FormattedMessage
-            id="xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.targetField.helpText.textClassificationModel"
+            id="xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText.textClassificationModel"
             defaultMessage='Additionally the predicted_value will be copied to "{fieldName}", if the prediction_probability is greater than {probabilityThreshold}'
             values={{
               fieldName,
@@ -76,7 +76,7 @@ export const TargetFieldHelpText: React.FC<TargetFieldHelpTextProps> = ({
         <p>{baseText}</p>
         <p>
           {i18n.translate(
-            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.targetField.helpText.textEmbeddingModel',
+            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText.textEmbeddingModel',
             {
               defaultMessage: 'Additionally the predicted_value will be copied to "{fieldName}"',
               values: {

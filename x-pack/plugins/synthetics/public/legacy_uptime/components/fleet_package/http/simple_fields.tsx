@@ -110,6 +110,7 @@ export const HTTPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
         }
       >
         <EuiFieldNumber
+          data-test-subj="syntheticsHTTPSimpleFieldsFieldNumber"
           min={0}
           value={fields[ConfigKey.MAX_REDIRECTS]}
           onChange={(event) =>

@@ -111,6 +111,7 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({
           aria-label={labels.ENTER_AVAILABILITY_THRESHOLD_ARIA_LABEL}
           content={
             <EuiFieldText
+              data-test-subj="syntheticsAvailabilityExpressionSelectFieldText"
               isInvalid={thresholdIsInvalid}
               value={threshold}
               onChange={(e) => {
