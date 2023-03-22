@@ -71,9 +71,9 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
           if (err.status === 404) {
             return 'missing';
           }
-          
-          if(isNoSuchRemoteClusterMessage(err.message)) {
-            throw new NoSuchRemoteClusterError()
+
+          if (isNoSuchRemoteClusterMessage(err.message)) {
+            throw new NoSuchRemoteClusterError();
           }
 
           throw err;
