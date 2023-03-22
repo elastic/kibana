@@ -35,6 +35,17 @@ describe('getMissingSignificantTerms', () => {
 
     expect(missingSignificantTerms).toEqual([
       {
+        bg_count: 632,
+        doc_count: 1738,
+        fieldName: 'url',
+        fieldValue: 'login.php',
+        normalizedScore: 0.10333028878375965,
+        pValue: 0.010770456205312423,
+        score: 4.53094842981472,
+        total_bg_count: 1975,
+        total_doc_count: 4671,
+      },
+      {
         bg_count: 553,
         doc_count: 1981,
         fieldName: 'user',

@@ -14,10 +14,10 @@ export const significantTermGroups: SignificantTermGroup[] = [
       {
         fieldName: 'response_code',
         fieldValue: '500',
-        docCount: 1821,
+        docCount: 1819,
         pValue: 2.9589053032077285e-12,
       },
-      { fieldName: 'url', fieldValue: 'home.php', docCount: 1742, pValue: 0.010770456205312423 },
+      { fieldName: 'url', fieldValue: 'home.php', docCount: 1744, pValue: 0.010770456205312423 },
     ],
     docCount: 792,
     pValue: 0.010770456205312423,

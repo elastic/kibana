@@ -77,7 +77,10 @@ export default ({ getService }: FtrProviderContext) => {
             const ecp = testData.expected.significantTerms[index];
             expect(cp.fieldName).to.eql(ecp.fieldName);
             expect(cp.fieldValue).to.eql(ecp.fieldValue);
-            expect(cp.doc_count).to.eql(ecp.doc_count);
+            expect(cp.doc_count).to.eql(
+              ecp.doc_count,
+              `Expected doc_count for '${cp.fieldName}:${cp.fieldValue}' to be ${ecp.doc_count}, got ${cp.doc_count}`
+            );
             expect(cp.bg_count).to.eql(ecp.bg_count);
           });
 
