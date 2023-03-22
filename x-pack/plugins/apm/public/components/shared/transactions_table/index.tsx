@@ -131,7 +131,7 @@ export function TransactionsTable({
 
   const { transactionType, serviceName } = useApmServiceContext();
 
-  const dataSource = usePreferredDataSourceAndBucketSize({
+  const preferred = usePreferredDataSourceAndBucketSize({
     start,
     end,
     kuery,
