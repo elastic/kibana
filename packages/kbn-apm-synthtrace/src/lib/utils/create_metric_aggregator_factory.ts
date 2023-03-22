@@ -75,6 +75,8 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
       if (includeCurrentMetrics) {
         allItems.push(...metrics.values());
         metrics.clear();
+        tracker.tracked.clear();
+        tracker.untracked.clear();
       }
 
       while (allItems.length) {
@@ -137,30 +139,41 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
       let groupTrackingMap = tracker;
 
-      const trackingObject: TFields = {} as TFields;
+      const trackingObject: TFields = {
+        '@timestamp': timestamp,
+      } as TFields;
 
       for (let i = 0; i < groups.length; i++) {
         const { field, limit } = groups[i];
         const fieldValue = event[field];
         trackingObject[field] = fieldValue;
 
-        if (groupTrackingMap.untracked.has(fieldValue)) {
-          // we know that this group is untracked and we already have a matching
-          // metric document
-          trackingObject[field] = OVERFLOW_BUCKET_NAME as unknown as TFields[keyof TFields &
-            string];
-          return metrics.get(hashObject(trackingObject))!;
-        }
+        const isUntracked = groupTrackingMap.untracked.has(fieldValue);
+        const isOverLimit = groupTrackingMap.tracked.size >= limit;
 
-        // we're going to add a new value to track/untrack to this group
-
-        if (groupTrackingMap.tracked.size >= limit) {
-          // we are over the limit, untrack it
-          groupTrackingMap.untracked.add(fieldValue);
+        if (isUntracked || isOverLimit) {
           trackingObject[field] = OVERFLOW_BUCKET_NAME as unknown as TFields[keyof TFields &
             string];
 
           const overflowBucketKey = hashObject(trackingObject);
+
+          if (isUntracked) {
+            // we know that this group is untracked and we already have a matching
+            // metric document
+            set = metrics.get(overflowBucketKey);
+            if (!set) {
+              throw new Error(
+                `Expected existing metricset for ${JSON.stringify({
+                  trackingObject,
+                  fieldValue,
+                })}`
+              );
+            }
+            return set;
+          }
+
+          // we are over the limit, untrack it
+          groupTrackingMap.untracked.add(fieldValue);
 
           // an overflow bucket metricset might already exist
           set = getOrCreateOverflowSet(overflowBucketKey, trackingObject, timestamp);
@@ -172,6 +185,7 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
         }
 
         let nextGroupTrackingMap = groupTrackingMap.tracked.get(fieldValue);
+
         // we're not tracking this group yet, so we create a group tracker
         if (!nextGroupTrackingMap) {
           nextGroupTrackingMap = createMetricGroupTracker();
@@ -210,7 +224,11 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
           const set = getOrCreateMetricSet(key, event, truncatedTimestamp);
 
-          reduce(set, event);
+          try {
+            reduce(set, event);
+          } catch (err) {
+            throw err;
+          }
 
           callback();
         }

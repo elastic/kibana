@@ -22,9 +22,9 @@ import { Logger } from '../../../utils/create_logger';
 import { fork, sequential } from '../../../utils/stream_utils';
 import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';
 import { createServiceMetricsAggregator } from '../../aggregators/create_service_metrics_aggregator';
-// import { createServiceSummaryMetricsAggregator } from '../../aggregators/create_service_summary_metrics_aggregator';
-// import { createSpanMetricsAggregator } from '../../aggregators/create_span_metrics_aggregator';
-// import { createTransactionMetricsAggregator } from '../../aggregators/create_transaction_metrics_aggregator';
+import { createServiceSummaryMetricsAggregator } from '../../aggregators/create_service_summary_metrics_aggregator';
+import { createSpanMetricsAggregator } from '../../aggregators/create_span_metrics_aggregator';
+import { createTransactionMetricsAggregator } from '../../aggregators/create_transaction_metrics_aggregator';
 import { getApmServerMetadataTransform } from './get_apm_server_metadata_transform';
 import { getDedotTransform } from './get_dedot_transform';
 import { getIntakeDefaultsTransform } from './get_intake_defaults_transform';
@@ -120,18 +120,18 @@ export class ApmSynthtraceEsClient {
   getDefaultPipeline(includeSerialization: boolean = true) {
     return (base: Readable, options?: ScenarioOptions) => {
       const aggregators = [
-        // createTransactionMetricsAggregator('1m', options),
-        // createTransactionMetricsAggregator('10m', options),
-        // createTransactionMetricsAggregator('60m', options),
+        createTransactionMetricsAggregator('1m', options),
+        createTransactionMetricsAggregator('10m', options),
+        createTransactionMetricsAggregator('60m', options),
         createServiceMetricsAggregator('1m', options),
-        // createServiceMetricsAggregator('10m', options),
-        // createServiceMetricsAggregator('60m', options),
-        // createServiceSummaryMetricsAggregator('1m'),
-        // createServiceSummaryMetricsAggregator('10m'),
-        // createServiceSummaryMetricsAggregator('60m'),
-        // createSpanMetricsAggregator('1m'),
-        // createSpanMetricsAggregator('10m'),
-        // createSpanMetricsAggregator('60m'),
+        createServiceMetricsAggregator('10m', options),
+        createServiceMetricsAggregator('60m', options),
+        createServiceSummaryMetricsAggregator('1m', options),
+        createServiceSummaryMetricsAggregator('10m', options),
+        createServiceSummaryMetricsAggregator('60m', options),
+        createSpanMetricsAggregator('1m'),
+        createSpanMetricsAggregator('10m'),
+        createSpanMetricsAggregator('60m'),
       ];
 
       const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
@@ -142,7 +142,7 @@ export class ApmSynthtraceEsClient {
         ...serializationTransform,
         getIntakeDefaultsTransform(),
         fork(new PassThrough({ objectMode: true }), ...aggregators),
-        createBreakdownMetricsAggregator('30s'),
+        // createBreakdownMetricsAggregator('30s'),
         getApmServerMetadataTransform(this.version),
         getRoutingTransform(),
         getDedotTransform(),
