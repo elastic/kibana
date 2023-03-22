@@ -81,5 +81,8 @@
     "@kbn/unified-field-list-plugin",
     "@kbn/shared-ux-router",
     "@kbn/saved-search-plugin",
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/saved-objects-finder-plugin",
+    "@kbn/monaco",
   ],
 }

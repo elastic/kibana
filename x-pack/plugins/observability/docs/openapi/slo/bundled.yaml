@@ -145,7 +145,7 @@ paths:
         - $ref: '#/components/parameters/slo_id'
       responses:
         '200':
-          description: Succesful request
+          description: Successful request
           content:
             application/json:
               schema:
@@ -181,7 +181,7 @@ paths:
               $ref: '#/components/schemas/update_slo_request'
       responses:
         '200':
-          description: Succesful request
+          description: Successful request
           content:
             application/json:
               schema:
@@ -211,7 +211,7 @@ paths:
         - $ref: '#/components/parameters/slo_id'
       responses:
         '204':
-          description: Succesful request
+          description: Successful request
         '400':
           description: Bad request
           content:
@@ -238,7 +238,7 @@ paths:
         - $ref: '#/components/parameters/slo_id'
       responses:
         '204':
-          description: Succesful request
+          description: Successful request
         '400':
           description: Bad request
           content:
@@ -265,7 +265,7 @@ paths:
         - $ref: '#/components/parameters/slo_id'
       responses:
         '200':
-          description: Succesful request
+          description: Successful request
         '400':
           description: Bad request
           content:
@@ -400,6 +400,7 @@ components:
             - environment
             - transactionType
             - transactionName
+            - index
           properties:
             service:
               description: The APM service name
@@ -455,6 +456,7 @@ components:
             - environment
             - transactionType
             - transactionName
+            - index
           properties:
             service:
               description: The APM service name

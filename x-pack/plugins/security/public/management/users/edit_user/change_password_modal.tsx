@@ -180,7 +180,7 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
                     { defaultMessage: 'Kibana will lose connection to Elasticsearch' }
                   )}
                   color="danger"
-                  iconType="alert"
+                  iconType="warning"
                   style={{ maxWidth: euiThemeVars.euiFormMaxWidth }}
                 >
                   <p>

@@ -40,6 +40,7 @@ export function SeriesChartTypes({ seriesId, series, seriesConfig }: Props) {
       button={
         <EuiToolTip content={EDIT_CHART_TYPE_LABEL}>
           <EuiButtonEmpty
+            data-test-subj="o11ySeriesChartTypesButton"
             size="s"
             aria-label={CHART_TYPE_LABEL}
             onClick={() => setIsPopoverOpen((prevState) => !prevState)}
