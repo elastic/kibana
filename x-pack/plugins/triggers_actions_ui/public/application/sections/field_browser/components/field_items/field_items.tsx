@@ -55,9 +55,11 @@ export const getFieldItemsData = ({
             return {
               name,
               type: field.type,
-              description: `https://www.elastic.co/guide/en/ecs/current/ecs-${categoryId}.html`, // field.description ?? '',
+              description: `https://www.elastic.co/guide/en/ecs/current/ecs-${
+                name.split('.')[0]
+              }.html`, // field.description ?? '',
               example: field.example?.toString(),
-              category: categoryId,
+              category: name.split('.')[0],
               selected: selectedFieldIds.has(name),
               isRuntime: !!field.runtimeField,
             };
