@@ -16,11 +16,11 @@ import {
   useGetDownloadSources,
   useGetFleetServerHosts,
 } from '../../../../hooks';
+import { LICENCE_FOR_PER_POLICY_OUTPUT } from '../../../../../../../common/constants';
 import {
-  LICENCE_FOR_PER_POLICY_OUTPUT,
-  FLEET_SERVER_PACKAGE,
-} from '../../../../../../../common/constants';
-import { getAllowedOutputTypeForPolicy } from '../../../../../../../common/services';
+  getAllowedOutputTypeForPolicy,
+  policyHasFleetServer,
+} from '../../../../../../../common/services';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 
 // The super select component do not support null or '' as a value
@@ -62,12 +62,7 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
   const outputsRequest = useGetOutputs();
   const licenseService = useLicense();
 
-  const hasFleetServer =
-    ((agentPolicy as AgentPolicy)?.package_policies &&
-      (agentPolicy as AgentPolicy).package_policies?.some(
-        (p) => p.package?.name === FLEET_SERVER_PACKAGE
-      )) ||
-    agentPolicy.has_fleet_server;
+  const hasFleetServer = policyHasFleetServer(agentPolicy as AgentPolicy);
 
   // Allow changing output when agent policy has fleet server
   const isLicenceAllowingPolicyPerOutput =

@@ -133,7 +133,11 @@ async function findPoliciesWithFleetServer(
   outputId?: string,
   isDefault?: boolean
 ) {
-  const agentPolicies = await getAgentPoliciesPerOutput(soClient, outputId, isDefault);
+  // find agent policies by outputId
+  // otherwise query all the policies
+  const agentPolicies = outputId
+    ? await getAgentPoliciesPerOutput(soClient, outputId, isDefault)
+    : (await agentPolicyService.list(soClient, { withPackagePolicies: true }))?.items;
 
   if (agentPolicies) {
     const policiesWithFleetServer = agentPolicies.filter((policy) =>
@@ -247,6 +251,28 @@ class OutputService {
         throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
           'Logstash output needs encrypted saved object api key to be set'
         );
+      }
+    }
+
+    if (data.type === outputType.Logstash) {
+      const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
+      const fleetServerPolicies = await findPoliciesWithFleetServer(soClient);
+      // if a logstash output is updated to become default, update the fleet server policies to use the previous ES output or default output
+      if (data.is_default) {
+        for (const policy of fleetServerPolicies) {
+          await agentPolicyService.update(
+            soClient,
+            esClient,
+            policy.id,
+            { data_output_id: defaultDataOutputId },
+            {
+              force: true,
+            }
+          );
+        }
+      } else {
+        // prevent changing an ES output to logstash if it's used by fleet server policies
+        validateLogstashOutputNotUsedInFleetServerPolicy(fleetServerPolicies);
       }
     }
 
@@ -441,15 +467,12 @@ class OutputService {
       const fleetServerPolicies = await findPoliciesWithFleetServer(soClient, id, mergedIsDefault);
       // if a logstash output is updated to become default, update the fleet server policies to use the previous ES output or default output
       if (data.is_default) {
-        const dataOutputId =
-          originalOutput.type === 'elasticsearch' ? originalOutput.id : defaultDataOutputId;
-
         for (const policy of fleetServerPolicies) {
           await agentPolicyService.update(
             soClient,
             esClient,
             policy.id,
-            { data_output_id: dataOutputId },
+            { data_output_id: defaultDataOutputId },
             {
               force: true,
             }
