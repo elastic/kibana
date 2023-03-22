@@ -19,6 +19,7 @@ import {
   manualTestMonitorAction,
   manualTestRunInProgressSelector,
 } from '../../state/manual_test_runs';
+import { useGetUrlParams } from '../../hooks/use_url_params';
 
 export const RunTestManually = () => {
   const dispatch = useDispatch();
@@ -27,13 +28,20 @@ export const RunTestManually = () => {
 
   const hasPublicLocation = monitor?.locations.some((loc) => loc.isServiceManaged);
 
+  const { locationId } = useGetUrlParams();
+
+  const isSelectedLocationPrivate = monitor?.locations.some(
+    (loc) => loc.isServiceManaged === false && loc.id === locationId
+  );
+
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor?.config_id));
 
-  const content = !hasPublicLocation
-    ? PRIVATE_AVAILABLE_LABEL
-    : testInProgress
-    ? TEST_SCHEDULED_LABEL
-    : TEST_NOW_ARIA_LABEL;
+  const content =
+    !hasPublicLocation || isSelectedLocationPrivate
+      ? PRIVATE_AVAILABLE_LABEL
+      : testInProgress
+      ? TEST_SCHEDULED_LABEL
+      : TEST_NOW_ARIA_LABEL;
 
   return (
     <EuiToolTip content={content} key={content}>
@@ -41,7 +49,7 @@ export const RunTestManually = () => {
         data-test-subj="syntheticsRunTestManuallyButton"
         color="success"
         iconType="beaker"
-        isDisabled={!hasPublicLocation}
+        isDisabled={!hasPublicLocation || isSelectedLocationPrivate}
         isLoading={!Boolean(monitor) || testInProgress}
         onClick={() => {
           if (monitor) {

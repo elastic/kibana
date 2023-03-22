@@ -57,8 +57,8 @@ export const useRetrieveStepImage = ({
   const isImageUrlAvailable = dataResult?.[imgPath]?.url ?? false;
 
   useFetcher(() => {
-    const is10MinutesOld = timestamp
-      ? moment(timestamp).isBefore(moment().subtract(10, 'minutes'))
+    const is5MinutesOld = timestamp
+      ? moment(timestamp).isBefore(moment().subtract(5, 'minutes'))
       : false;
     const retrieveAttemptedBefore = (imgState[imgPath]?.attempts ?? 0) > 0;
     const shouldRetry = retryFetchOnRevisit || !retrieveAttemptedBefore;
@@ -67,7 +67,7 @@ export const useRetrieveStepImage = ({
       setImgState((prevState) => {
         return getUpdatedState({ prevState, imgPath, increment: true, loading: true });
       });
-      return getJourneyScreenshot(imgPath, !is10MinutesOld)
+      return getJourneyScreenshot(imgPath, !is5MinutesOld)
         .then((data) => {
           setImgState((prevState) => {
             return getUpdatedState({ prevState, imgPath, increment: false, data, loading: false });
