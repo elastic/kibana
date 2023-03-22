@@ -3165,7 +3165,6 @@
     "expressionXY.reusable.function.xyVis.errors.valueLabelsForNotBarChartsError": "`valueLabels` 参数仅适用于条形图",
     "expressionXY.tooltipActions.emptyFilterSelection": "至少选择一个要筛选的序列",
     "expressionXY.xAxisConfigFn.help": "配置 xy 图表的 x 轴配置",
-    "expressionXY.xyChart.emptyXLabel": "（空）",
     "expressionXY.xyChart.iconSelect.alertIconLabel": "告警",
     "expressionXY.xyChart.iconSelect.asteriskIconLabel": "星号",
     "expressionXY.xyChart.iconSelect.bellIconLabel": "钟铃",
