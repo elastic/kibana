@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-const start = '2021-10-10T00:00:00.000Z';
-const end = '2021-10-10T00:15:00.000Z';
-
 describe('Home page with empty state', () => {
   beforeEach(() => {
     cy.loginAsElastic();
