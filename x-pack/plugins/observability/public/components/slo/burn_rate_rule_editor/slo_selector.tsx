@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React, { useEffect, useMemo, useState } from 'react';
+import { debounce } from 'lodash';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOResponse } from '@kbn/slo-schema';
-import { debounce } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
 
-import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
+import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 
 interface Props {
   initialSlo?: SLOResponse;

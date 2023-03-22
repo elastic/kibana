@@ -8,6 +8,16 @@
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useState } from 'react';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { Duration } from '../../../typings/slos';
+
+export interface BurnRateRuleParams extends RuleTypeParams {
+  sloId: string;
+  burnRateThreshold: number;
+  maxBurnRateThreshold: number;
+  longWindow: Duration;
+  shortWindow: Duration;
+}
 
 interface Props {
   initialBurnRate?: number;

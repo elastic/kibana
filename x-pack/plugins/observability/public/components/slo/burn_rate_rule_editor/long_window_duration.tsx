@@ -15,9 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useState } from 'react';
-
-import { toMinutes } from '../../../../utils/slo/duration';
-import { Duration } from '../../../../typings/slos';
+import { toMinutes } from '../../../utils/slo/duration';
+import type { Duration } from '../../../typings/slos';
 
 interface Props {
   shortWindowDuration: Duration;

@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { ComponentStory } from '@storybook/react';
-import { SLOResponse } from '@kbn/slo-schema';
 
-import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
-import { SloSelector as Component } from './slo_selector';
+import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
+import { BurnRateRuleEditor as Component } from './burn_rate_rule_editor';
+import type { BurnRateRuleParams } from './burn_rate';
 
 export default {
   component: Component,
@@ -19,9 +19,14 @@ export default {
 };
 
 const Template: ComponentStory<typeof Component> = () => (
-  <Component onSelected={(slo: SLOResponse | undefined) => console.log(slo)} />
+  <Component
+    ruleParams={{} as BurnRateRuleParams}
+    setRuleParams={() => {}}
+    errors={{ sloId: [], longWindow: [], burnRateThreshold: [] }}
+  />
 );
+
 const defaultProps = {};
 
-export const SloSelector = Template.bind({});
-SloSelector.args = defaultProps;
+export const BurnRateRuleEditor = Template.bind({});
+BurnRateRuleEditor.args = defaultProps;

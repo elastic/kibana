@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BurnRateRuleParams } from '../../../../typings/slos';
 import { validateBurnRateRule } from './validation';
+import type { BurnRateRuleParams } from './burn_rate';
 
 const VALID_PARAMS: BurnRateRuleParams = {
   sloId: 'irrelevant',

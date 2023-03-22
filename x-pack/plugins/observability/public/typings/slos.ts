@@ -5,26 +5,14 @@
  * 2.0.
  */
 
-import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+export type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M' | 'Y';
 
-type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M' | 'Y';
-
-interface Duration {
+export interface Duration {
   value: number;
   unit: DurationUnit;
 }
 
-interface BurnRateRuleParams extends RuleTypeParams {
-  sloId: string;
-  burnRateThreshold: number;
-  maxBurnRateThreshold: number;
-  longWindow: Duration;
-  shortWindow: Duration;
-}
-
-interface ChartData {
+export interface ChartData {
   key: number;
   value: number | undefined;
 }
-
-export type { BurnRateRuleParams, ChartData, Duration, DurationUnit };
