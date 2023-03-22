@@ -37,7 +37,7 @@ import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import { doesArtifactHaveData } from './services';
-import type { ActionCreateService } from './services/action_create/action_create_service';
+import type { ActionCreateService } from './services/actions';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;

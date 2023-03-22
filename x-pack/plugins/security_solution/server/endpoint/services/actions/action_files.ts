@@ -26,6 +26,7 @@ const getFileClient = (esClient: ElasticsearchClient, logger: Logger): FileClien
     blobStorageIndex: FILE_STORAGE_DATA_INDEX,
     elasticsearchClient: esClient,
     logger,
+    indexIsAlias: true,
   });
 };
 
@@ -41,6 +42,10 @@ const getFileRetrievalError = (
     if (statusCode === 404) {
       return new NotFoundError(`File with id [${fileId}] not found`, error);
     }
+  }
+
+  if (error instanceof EndpointError) {
+    return error;
   }
 
   return new EndpointError(`Failed to get file using id [${fileId}]: ${error.message}`, error);
@@ -85,10 +90,19 @@ export const getFileInfo = async (
   fileId: string
 ): Promise<UploadedFileInfo> => {
   try {
-    const { _id: id, _source: fileDoc } = await esClient.get<FileUploadMetadata>({
+    const fileDocSearchResult = await esClient.search<FileUploadMetadata>({
       index: FILE_STORAGE_METADATA_INDEX,
-      id: fileId,
+      body: {
+        size: 1,
+        query: {
+          term: {
+            _id: fileId,
+          },
+        },
+      },
     });
+
+    const { _id: id, _source: fileDoc } = fileDocSearchResult.hits.hits[0] ?? {};
 
     if (!fileDoc) {
       throw new NotFoundError(`File with id [${fileId}] not found`);
