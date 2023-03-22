@@ -10,7 +10,7 @@
  */
 
 import { merge, of, Observable, combineLatest, timer } from 'rxjs';
-import { mapTo, filter, concatMap, tap, catchError, switchMap } from 'rxjs/operators';
+import { map, filter, concatMap, tap, catchError, switchMap } from 'rxjs/operators';
 
 import { Option, none } from 'fp-ts/lib/Option';
 import { Logger } from '@kbn/core/server';
@@ -67,7 +67,7 @@ export function createTaskPoller<T, H>({
       // polling for a far longer duration that we intended.
       // Since the goal is to shift it within the range of `period`, we use modulo as a safe guard to ensure this doesn't happen.
       switchMap(([period, pollDelay]) => timer(period + (pollDelay % period), period)),
-      mapTo(none)
+      map(() => none)
     )
     .pipe(
       // only emit polling events when there's capacity to handle them
