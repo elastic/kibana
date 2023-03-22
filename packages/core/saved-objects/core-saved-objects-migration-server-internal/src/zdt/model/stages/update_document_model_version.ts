@@ -13,7 +13,7 @@ import type { ModelStage } from '../types';
 
 export const updateDocumentModelVersion: ModelStage<
   'UPDATE_DOCUMENT_MODEL_VERSIONS',
-  'UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES' | 'FATAL'
+  'UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     throwBadResponse(state, res as never);
