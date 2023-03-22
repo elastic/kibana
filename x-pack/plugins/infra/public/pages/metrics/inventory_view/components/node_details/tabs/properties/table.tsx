@@ -78,8 +78,7 @@ export const Table = (props: Props) => {
                   </EuiToolTip>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  {!Array.isArray(item.value) && item.value}
-                  {Array.isArray(item.value) && <ExpandableContent values={item.value} />}
+                  <ExpandableContent values={item.value} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </span>
@@ -114,7 +113,7 @@ class TableWithoutHeader extends EuiBasicTable {
 }
 
 interface ExpandableContentProps {
-  values: string[];
+  values: string | string[] | undefined;
 }
 
 const ExpandableContent = (props: ExpandableContentProps) => {
