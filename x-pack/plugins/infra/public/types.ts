@@ -125,4 +125,3 @@ export type DragHandleProps = FirstArgumentOf<
   Exclude<PropsOf<typeof EuiDraggable>['children'], React.ReactElement>
 >['dragHandleProps'];
 export type DropResult = FirstArgumentOf<FirstArgumentOf<typeof EuiDragDropContext>['onDragEnd']>;
-
