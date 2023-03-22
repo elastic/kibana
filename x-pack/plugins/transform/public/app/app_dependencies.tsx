@@ -12,7 +12,7 @@ import type {
   HttpSetup,
   I18nStart,
   IUiSettingsClient,
-  NotificationsSetup,
+  NotificationsStart,
   OverlayStart,
   SavedObjectsStart,
   ThemeServiceStart,
@@ -45,7 +45,7 @@ export interface AppDependencies {
   fieldFormats: FieldFormatsStart;
   http: HttpSetup;
   i18n: I18nStart;
-  notifications: NotificationsSetup;
+  notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
   savedObjects: SavedObjectsStart;
   storage: Storage;

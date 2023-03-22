@@ -44,7 +44,7 @@ const appDependencies: AppDependencies = {
   docLinks: coreStart.docLinks,
   i18n: coreStart.i18n,
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
-  notifications: coreSetup.notifications,
+  notifications: coreStart.notifications,
   uiSettings: coreStart.uiSettings,
   savedObjects: coreStart.savedObjects,
   storage: { get: jest.fn() } as unknown as Storage,

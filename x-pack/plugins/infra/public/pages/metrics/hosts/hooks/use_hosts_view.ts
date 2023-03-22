@@ -78,11 +78,11 @@ const createSnapshotRequest = ({
   sourceId,
   dateRange,
 }: {
-  esQuery: { bool: BoolQuery } | null;
+  esQuery: { bool: BoolQuery };
   sourceId: string;
   dateRange: StringDateRangeTimestamp;
 }): UseSnapshotRequest => ({
-  filterQuery: esQuery ? JSON.stringify(esQuery) : null,
+  filterQuery: JSON.stringify(esQuery),
   metrics: [],
   groupBy: [],
   nodeType: 'host',

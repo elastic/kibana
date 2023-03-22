@@ -36,10 +36,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'infraHome']);
   const testSubjects = getService('testSubjects');
 
-  describe('Infra Not Found page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/153207
+  describe.skip('Infra Not Found page', function () {
     this.tags('includeFirefox');
 
-    describe('Logs', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/153295
+    describe.skip('Logs', () => {
       it('should render the not found page when the route does not exist', async () => {
         await pageObjects.common.navigateToApp('logs/broken-link');
         await testSubjects.existOrFail('infraNotFoundPage');
