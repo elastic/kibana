@@ -15,8 +15,8 @@ export const getFormulaByFilter = (filter: FilterBy, shift?: string | null): str
   const mapFilterByToFormula: { [key in FilterBy]: string } = {
     [FilterBy.Searches]: "count(kql='event.action: search'",
     [FilterBy.NoResults]: "count(kql='event.customer_data.totalResults : 0'",
-    [FilterBy.Clicks]: 'count(',
-    [FilterBy.Sessions]: 'count(',
+    [FilterBy.Clicks]: "count(kql='event.action: click'",
+    [FilterBy.Sessions]: 'unique_count(labels.session_uuid',
   };
 
   return mapFilterByToFormula[filter] + (shift ? `, shift='${shift}'` : '') + ')';

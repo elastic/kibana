@@ -42,6 +42,7 @@ import { AnalyticsCollectionViewMetricWithLens } from './analytics_collection_me
 
 const DEFAULT_STROKE_WIDTH = 1;
 const HOVER_STROKE_WIDTH = 3;
+const CHART_HEIGHT = 490;
 
 interface AnalyticsCollectionChartProps extends WithLensDataInputProps {
   dataViewQuery: string;
@@ -62,6 +63,8 @@ const AnalyticsCollectionChart: React.FC<
   const { uiSettings, charts: chartSettings } = useValues(KibanaLogic);
   const fromDateParsed = DateMath.parse(timeRange.from);
   const toDataParsed = DateMath.parse(timeRange.to);
+  const chartTheme = chartSettings.theme.useChartsTheme();
+  const baseChartTheme = chartSettings.theme.useChartsBaseTheme();
 
   const charts = useMemo(
     () => [
@@ -134,84 +137,88 @@ const AnalyticsCollectionChart: React.FC<
         ))}
       </EuiFlexGroup>
 
-      <Chart size={['100%', 490]}>
-        <Settings
-          theme={chartSettings.theme.useChartsTheme()}
-          baseTheme={chartSettings.theme.useChartsBaseTheme()}
-          showLegend={false}
-          onElementClick={(elements) => {
-            const chartId = (elements as XYChartElementEvent[])[0][1]?.specId;
+      {isLoading ? (
+        <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: CHART_HEIGHT }}>
+          <EuiLoadingChart size="l" />
+        </EuiFlexGroup>
+      ) : (
+        <Chart size={['100%', CHART_HEIGHT]}>
+          <Settings
+            theme={chartTheme}
+            baseTheme={baseChartTheme}
+            showLegend={false}
+            onElementClick={(elements) => {
+              const chartId = (elements as XYChartElementEvent[])[0][1]?.specId;
 
-            if (chartId) {
-              setSelectedChart(chartId as ChartIds);
-            }
-          }}
-          onElementOver={(elements) => {
-            const chartId = (elements as XYChartElementEvent[])[0][1]?.specId;
-
-            if (chartId) {
-              setHoverChart(chartId as ChartIds);
-            }
-          }}
-          onElementOut={() => setHoverChart(null)}
-        />
-
-        {isLoading && (
-          <EuiFlexGroup alignItems="center" justifyContent="center">
-            <EuiLoadingChart size="l" />
-          </EuiFlexGroup>
-        )}
-
-        {charts.map(({ data: chartData, id, name, chartColor }) => (
-          <AreaSeries
-            id={id}
-            key={id}
-            name={name}
-            data={chartData}
-            color={chartColor}
-            xAccessor={0}
-            yAccessors={[1]}
-            areaSeriesStyle={{
-              area: {
-                opacity: 0.2,
-                visible: selectedChart === id,
-              },
-              line: {
-                opacity: selectedChart === id ? 1 : 0.5,
-
-                strokeWidth: [hoverChart, selectedChart].includes(id)
-                  ? HOVER_STROKE_WIDTH
-                  : DEFAULT_STROKE_WIDTH,
-              },
+              if (chartId) {
+                setSelectedChart(chartId as ChartIds);
+              }
             }}
-            yNice
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Sqrt}
-            curve={CurveType.CURVE_MONOTONE_X}
+            onElementOver={(elements) => {
+              const chartId = (elements as XYChartElementEvent[])[0][1]?.specId;
+
+              if (chartId) {
+                setHoverChart(chartId as ChartIds);
+              }
+            }}
+            onElementOut={() => setHoverChart(null)}
           />
-        ))}
 
-        <Axis
-          id="bottom-axis"
-          position={Position.Bottom}
-          tickFormat={
-            fromDateParsed && toDataParsed
-              ? niceTimeFormatter([fromDateParsed.valueOf(), toDataParsed.valueOf()])
-              : undefined
-          }
-          gridLine={{ visible: true }}
-        />
+          {charts.map(({ data: chartData, id, name, chartColor }) => (
+            <AreaSeries
+              id={id}
+              key={id}
+              name={name}
+              data={chartData}
+              color={chartColor}
+              xAccessor={0}
+              yAccessors={[1]}
+              areaSeriesStyle={{
+                area: {
+                  opacity: 0.2,
+                  visible: selectedChart === id,
+                },
+                line: {
+                  opacity: selectedChart === id ? 1 : 0.5,
+                  strokeWidth: [hoverChart, selectedChart].includes(id)
+                    ? HOVER_STROKE_WIDTH
+                    : DEFAULT_STROKE_WIDTH,
+                },
+              }}
+              yNice
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Sqrt}
+              curve={CurveType.CURVE_MONOTONE_X}
+            />
+          ))}
 
-        <Axis gridLine={{ dash: [], visible: true }} hide id="left-axis" position={Position.Left} />
+          <Axis
+            id="bottom-axis"
+            position={Position.Bottom}
+            tickFormat={
+              fromDateParsed && toDataParsed
+                ? niceTimeFormatter([fromDateParsed.valueOf(), toDataParsed.valueOf()])
+                : undefined
+            }
+            gridLine={{ visible: true }}
+          />
 
-        <Tooltip
-          headerFormatter={(tooltipData) =>
-            moment(tooltipData.value).format(uiSettings.get('dateFormat'))
-          }
-          maxTooltipItems={1}
-          type={TooltipType.VerticalCursor}
-        />
-      </Chart>
+          <Axis
+            gridLine={{ dash: [], visible: true }}
+            hide
+            id="left-axis"
+            position={Position.Left}
+          />
+
+          <Tooltip
+            headerFormatter={(tooltipData) =>
+              moment(tooltipData.value).format(uiSettings.get('dateFormat'))
+            }
+            maxTooltipItems={1}
+            type={TooltipType.VerticalCursor}
+          />
+        </Chart>
+      )}
     </EuiFlexGroup>
   );
 };
@@ -220,21 +227,9 @@ const initialValues: AnalyticsCollectionChartLensProps = {
   data: {},
   isLoading: true,
 };
-
-const LENS_LAYERS: Array<{ formula: string; id: ChartIds; x: string; y: string }> = [
-  {
-    formula: getFormulaByFilter(ChartIds.Searches),
-    id: ChartIds.Searches,
-    x: 'timeline',
-    y: 'values',
-  },
-  {
-    formula: getFormulaByFilter(ChartIds.NoResults),
-    id: ChartIds.NoResults,
-    x: 'timeline',
-    y: 'values',
-  },
-];
+const LENS_LAYERS: Array<{ formula: string; id: ChartIds; x: string; y: string }> = Object.values(
+  ChartIds
+).map((id) => ({ formula: getFormulaByFilter(id), id, x: 'timeline', y: 'values' }));
 
 export const AnalyticsCollectionChartWithLens = withLensData<
   AnalyticsCollectionChartProps,

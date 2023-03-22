@@ -95,6 +95,20 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
           defaultMessage: 'No results',
         }),
       },
+      {
+        css: [analyticsCollectionTableStyles.button],
+        id: FilterBy.Clicks,
+        label: i18n.translate('xpack.enterpriseSearch.analytics.filtering.clicks', {
+          defaultMessage: 'Clicks',
+        }),
+      },
+      {
+        css: [analyticsCollectionTableStyles.button],
+        id: FilterBy.NoResults,
+        label: i18n.translate('xpack.enterpriseSearch.analytics.filtering.sessions', {
+          defaultMessage: 'Sessions',
+        }),
+      },
     ],
     [analyticsCollectionTableStyles.button]
   );
