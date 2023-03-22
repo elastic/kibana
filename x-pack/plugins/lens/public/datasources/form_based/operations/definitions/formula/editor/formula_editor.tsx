@@ -883,7 +883,7 @@ export function FormulaEditor({
                         <EuiButtonEmpty
                           color={errorCount ? 'danger' : 'warning'}
                           className="lnsFormula__editorError"
-                          iconType="alert"
+                          iconType="warning"
                           size="xs"
                           flush="right"
                           onClick={() => {

@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { omit } from 'lodash';
 
 import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -29,7 +30,6 @@ import {
   getSimpleRuleOutput,
   ruleToUpdateSchema,
 } from '../../utils';
-import { ELASTIC_SECURITY_RULE_ID } from '../../utils/prebuilt_rules/create_prebuilt_rule_saved_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -75,6 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
             `${bodyToCompare.actions?.[0].id}`,
             `${bodyToCompare.actions?.[0].uuid}`
           ),
+          revision: 1, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
           version: 2, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
         };
         expect(bodyToCompare).to.eql(expected);
@@ -90,6 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
         const bodyToCompare = removeServerGeneratedProperties(ruleAfterActionRemoved);
         const expected = {
           ...getSimpleRuleOutput(),
+          revision: 2, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
           version: 3, // version bump is required since this is an updated rule and this is part of the testing that we do bump the version number on update
         };
         expect(bodyToCompare).to.eql(expected);
@@ -130,10 +132,10 @@ export default ({ getService }: FtrProviderContext) => {
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
         const expected = omit(removeServerGeneratedProperties(updatedRule), actionsProps);
 
-        const immutableRuleToAssert = omit(
-          removeServerGeneratedProperties(immutableRule),
-          actionsProps
-        );
+        const immutableRuleToAssert = {
+          ...omit(removeServerGeneratedProperties(immutableRule), actionsProps),
+          revision: 1, // Unlike `version` which is static for immutable rules, `revision` will increment when an action/exception is added
+        };
 
         expect(immutableRuleToAssert).to.eql(expected);
         expect(expected.immutable).to.be(true); // It should stay immutable true when returning

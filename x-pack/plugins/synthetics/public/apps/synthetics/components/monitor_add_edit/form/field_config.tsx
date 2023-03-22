@@ -556,7 +556,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           defaultMessage:
             "Change the default namespace. This setting changes the name of the monitor's data stream. ",
         })}
-        <EuiLink href="#" target="_blank">
+        <EuiLink data-test-subj="syntheticsFIELDLearnMoreLink" href="#" target="_blank">
           {i18n.translate('xpack.synthetics.monitorConfig.namespace.learnMore', {
             defaultMessage: 'Learn more',
           })}
@@ -1138,6 +1138,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           defaultMessage: 'Configure Playwright agent with custom options. ',
         })}
         <EuiLink
+          data-test-subj="syntheticsFIELDLearnMoreLink"
           href={getDocLinks()?.links?.observability?.syntheticsCommandReference}
           target="_blank"
         >

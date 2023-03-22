@@ -33,7 +33,7 @@ import {
   GetRuleExecutionKPIParams,
 } from './methods/get_execution_kpi';
 import { find, FindParams } from './methods/find';
-import { aggregate, AggregateOptions } from './methods/aggregate';
+import { aggregate, AggregateParams } from './methods/aggregate';
 import { deleteRule } from './methods/delete';
 import { update, UpdateOptions } from './methods/update';
 import { bulkDeleteRules } from './methods/bulk_delete';
@@ -66,6 +66,30 @@ const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
   'activeSnoozes',
 ];
 
+export const fieldsToExcludeFromRevisionUpdates: ReadonlySet<keyof RuleTypeParams> = new Set([
+  'activeSnoozes',
+  'alertTypeId',
+  'apiKey',
+  'apiKeyOwner',
+  'consumer',
+  'createdAt',
+  'createdBy',
+  'enabled',
+  'executionStatus',
+  'id',
+  'isSnoozedUntil',
+  'lastRun',
+  'monitoring',
+  'muteAll',
+  'mutedInstanceIds',
+  'nextRun',
+  'revision',
+  'running',
+  'snoozeSchedule',
+  'updatedBy',
+  'updatedAt',
+]);
+
 export class RulesClient {
   private readonly context: RulesClientContext;
 
@@ -77,7 +101,8 @@ export class RulesClient {
     };
   }
 
-  public aggregate = (params?: { options?: AggregateOptions }) => aggregate(this.context, params);
+  public aggregate = <T = Record<string, unknown>>(params: AggregateParams<T>): Promise<T> =>
+    aggregate<T>(this.context, params);
   public clone = <Params extends RuleTypeParams = never>(...args: CloneArguments) =>
     clone<Params>(this.context, ...args);
   public create = <Params extends RuleTypeParams = never>(params: CreateOptions<Params>) =>

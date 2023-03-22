@@ -25,6 +25,14 @@ import {
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import { maybe } from '../../../../common/utils/maybe';
+
+interface ServiceTransactionDetailedStat {
+  serviceName: string;
+  latency: Array<{ x: number; y: number | null }>;
+  transactionErrorRate?: Array<{ x: number; y: number }>;
+  throughput?: Array<{ x: number; y: number }>;
+}
 
 export async function getServiceTransactionDetailedStats({
   serviceNames,
@@ -133,26 +141,25 @@ export async function getServiceTransactionDetailedStats({
 
   return keyBy(
     response.aggregations?.sample.services.buckets.map((bucket) => {
-      const topTransactionTypeBucket =
+      const topTransactionTypeBucket = maybe(
         bucket.transactionType.buckets.find(({ key }) =>
           isDefaultTransactionType(key as string)
-        ) ?? bucket.transactionType.buckets[0];
+        ) ?? bucket.transactionType.buckets[0]
+      );
 
       return {
         serviceName: bucket.key as string,
-        latency: topTransactionTypeBucket.timeseries.buckets.map(
-          (dateBucket) => ({
+        latency:
+          topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
             x: dateBucket.key + offsetInMs,
             y: dateBucket.avg_duration.value,
-          })
-        ),
-        transactionErrorRate: topTransactionTypeBucket.timeseries.buckets.map(
-          (dateBucket) => ({
+          })) ?? [],
+        transactionErrorRate:
+          topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
             x: dateBucket.key + offsetInMs,
             y: calculateFailedTransactionRate(dateBucket),
-          })
-        ),
-        throughput: topTransactionTypeBucket.timeseries.buckets.map(
+          })) ?? undefined,
+        throughput: topTransactionTypeBucket?.timeseries.buckets.map(
           (dateBucket) => ({
             x: dateBucket.key + offsetInMs,
             y: calculateThroughputWithInterval({
@@ -167,7 +174,12 @@ export async function getServiceTransactionDetailedStats({
   );
 }
 
-export async function getServiceDetailedStatsPeriods({
+export interface ServiceTransactionDetailedStatPeriodsResponse {
+  currentPeriod: Record<string, ServiceTransactionDetailedStat>;
+  previousPeriod: Record<string, ServiceTransactionDetailedStat>;
+}
+
+export async function getServiceTransactionDetailedStatsPeriods({
   serviceNames,
   environment,
   kuery,
@@ -191,7 +203,7 @@ export async function getServiceDetailedStatsPeriods({
   start: number;
   end: number;
   randomSampler: RandomSampler;
-}) {
+}): Promise<ServiceTransactionDetailedStatPeriodsResponse> {
   return withApmSpan('get_service_detailed_statistics', async () => {
     const commonProps = {
       serviceNames,
