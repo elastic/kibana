@@ -61,8 +61,6 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     return Promise.all(requests)
       .then((results) => {
-        console.log(results);
-        
         return results.filter(isVisSeriesData).map((result) => {
           const metricIds = Object.keys(result).filter(
             (k) => !['type', 'uiRestrictions', 'trackedEsSearches'].includes(k)

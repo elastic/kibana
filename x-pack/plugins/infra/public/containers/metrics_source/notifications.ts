@@ -14,10 +14,10 @@ export const useSourceNotifier = () => {
   const updateFailure = (message?: string) => {
     notifications.toasts.danger({
       toastLifeTimeMs: 3000,
-      title: i18n.translate('xpack.infra.sourceConfiguration.updateSuccessTitle', {
+      title: i18n.translate('xpack.infra.sourceConfiguration.updateFailureTitle', {
         defaultMessage: 'Configuration update failed',
       }),
-      body: i18n.translate('xpack.infra.sourceConfiguration.updateSuccessTitle', {
+      body: i18n.translate('xpack.infra.sourceConfiguration.updateFailureTitle', {
         defaultMessage: `Changes for your Metrics configuration were not applied. ${message}`,
       }),
     });
