@@ -128,7 +128,7 @@
         "label": "Language",
         "description": [],
         "signature": [
-          "\"kuery\" | \"eql\" | \"lucene\""
+          "\"eql\" | \"kuery\" | \"lucene\""
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
@@ -143,7 +143,7 @@
         "label": "LanguageOrUndefined",
         "description": [],
         "signature": [
-          "\"kuery\" | \"eql\" | \"lucene\" | undefined"
+          "\"eql\" | \"kuery\" | \"lucene\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
@@ -741,7 +741,7 @@
         "label": "ThreatLanguage",
         "description": [],
         "signature": [
-          "\"kuery\" | \"eql\" | \"lucene\" | undefined"
+          "\"eql\" | \"kuery\" | \"lucene\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
@@ -756,7 +756,7 @@
         "label": "ThreatLanguageOrUndefined",
         "description": [],
         "signature": [
-          "\"kuery\" | \"eql\" | \"lucene\" | undefined"
+          "\"eql\" | \"kuery\" | \"lucene\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
@@ -936,7 +936,7 @@
         "label": "Type",
         "description": [],
         "signature": [
-          "\"query\" | \"eql\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\" | \"new_terms\""
+          "\"eql\" | \"query\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\" | \"new_terms\""
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
         "deprecated": false,
@@ -951,7 +951,7 @@
         "label": "TypeOrUndefined",
         "description": [],
         "signature": [
-          "\"query\" | \"eql\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\" | \"new_terms\" | undefined"
+          "\"eql\" | \"query\" | \"threshold\" | \"machine_learning\" | \"saved_query\" | \"threat_match\" | \"new_terms\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/type/index.ts",
         "deprecated": false,

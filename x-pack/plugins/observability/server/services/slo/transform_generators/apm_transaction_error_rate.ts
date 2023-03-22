@@ -21,7 +21,6 @@ import {
   getSLOTransformId,
 } from '../../../assets/constants';
 import { APMTransactionErrorRateIndicator, SLO } from '../../../domain/models';
-import { DEFAULT_APM_INDEX } from './constants';
 import { Query } from './types';
 import { parseIndex } from './common';
 
@@ -97,7 +96,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     }
 
     return {
-      index: parseIndex(indicator.params.index ?? DEFAULT_APM_INDEX),
+      index: parseIndex(indicator.params.index),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {
