@@ -19,7 +19,7 @@ import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../.
  * Function executed when switching data view in the UI
  */
 export async function changeDataView(
-  id: string,
+  id: string | DataView,
   {
     services,
     internalState,
@@ -37,7 +37,7 @@ export async function changeDataView(
   let nextDataView: DataView | null = null;
 
   try {
-    nextDataView = await dataViews.get(id, false);
+    nextDataView = typeof id === 'string' ? await dataViews.get(id, false) : id;
   } catch (e) {
     //
   }

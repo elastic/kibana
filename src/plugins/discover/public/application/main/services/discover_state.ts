@@ -124,7 +124,7 @@ export interface DiscoverStateContainer {
      * Create and select a ad-hoc data view by a given index pattern
      * @param pattern
      */
-    onCreateDefaultAdHocDataView: (pattern: string) => void;
+    onCreateDefaultAdHocDataView: (pattern: string) => Promise<void>;
     /**
      * Triggered when a new data view is created
      * @param dataView
@@ -396,7 +396,7 @@ export function getDiscoverStateContainer({
     }
     internalStateContainer.transitions.appendAdHocDataViews(newDataView);
 
-    await onChangeDataView(newDataView.id!);
+    await onChangeDataView(newDataView);
   };
 
   const onUpdateQuery = (
@@ -412,7 +412,7 @@ export function getDiscoverStateContainer({
   /**
    * Function triggered when user changes data view in the sidebar
    */
-  const onChangeDataView = async (id: string) => {
+  const onChangeDataView = async (id: string | DataView) => {
     await changeDataView(id, {
       services,
       internalState: internalStateContainer,

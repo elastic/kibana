@@ -389,7 +389,6 @@ describe('actions', () => {
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
     unsubscribe();
   });
-
   test('loadSavedSearch data view handling', async () => {
     const { state } = await getState('/', savedSearchMock);
     await state.actions.loadSavedSearch(savedSearchMock.id);
@@ -402,8 +401,7 @@ describe('actions', () => {
       'index-pattern-with-timefield-id'
     );
   });
-
-  it('loads a new saved search, updated by ad-hoc data view', async () => {
+  test('loadSavedSearch generating a new saved search, updated by ad-hoc data view', async () => {
     const { state } = await getState('/');
     const dataViewSpecMock = {
       id: 'mock-id',
@@ -448,6 +446,21 @@ describe('actions', () => {
     expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
       dataViewComplexMock.id
     );
+    unsubscribe();
+  });
+  test('onCreateDefaultAdHocDataView', async () => {
+    discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
+      ...dataViewMock,
+      isPersisted: () => false,
+      id: 'ad-hoc-id',
+      title: 'test',
+    });
+    const { state } = await getState('/', savedSearchMock);
+    await state.actions.loadSavedSearch(savedSearchMock.id);
+    const unsubscribe = state.actions.initializeAndSync();
+    await state.actions.onCreateDefaultAdHocDataView('ad-hoc-test');
+    expect(state.appState.getState().index).toBe('ad-hoc-id');
+    expect(state.internalState.getState().adHocDataViews[0].id).toBe('ad-hoc-id');
     unsubscribe();
   });
   test('undoChanges', async () => {
