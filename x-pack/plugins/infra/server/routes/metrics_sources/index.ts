@@ -52,15 +52,14 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       metricIndicesExistSettled
     );
 
-
     /**
      * Report gracefully handled rejections
      */
     if (!isFulfilled<InfraSourceIndexField[]>(indexFieldsSettled)) {
-      logger.error(indexFieldsSettled.reason)
+      logger.error(indexFieldsSettled.reason);
     }
     if (!isFulfilled<boolean>(metricIndicesExistSettled)) {
-      logger.error(metricIndicesExistSettled.reason)
+      logger.error(metricIndicesExistSettled.reason);
     }
 
     return {
