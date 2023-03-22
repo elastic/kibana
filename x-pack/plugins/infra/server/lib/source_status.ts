@@ -50,8 +50,6 @@ export class InfraSourceStatus {
       requestContext,
       sourceConfiguration.configuration.metricAlias
     );
-    console.log({indexStatus});
-    
     return indexStatus !== 'missing';
   }
 }
