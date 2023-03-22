@@ -259,27 +259,37 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
           );
         }
 
-        valuesBadges.push(
-          <>
+        if (groupItemsSortedByUniqueness.length > MAX_GROUP_BADGES) {
+          valuesBadges.push(
             <EuiText
-              key={`$more-id`}
-              data-test-subj="aiopsSpikeAnalysisGroupsTableColumnGroupBadge"
+              key={`group-info-id`}
+              data-test-subj="aiopsSpikeAnalysisGroupsTableColumnGroupInfo"
               color="subdued"
               size="xs"
             >
               <FormattedMessage
-                id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupInfo"
-                defaultMessage="Showing {valuesBadges} out of {count} group items. {unique} items unique to this group."
+                id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupItemsInfo"
+                defaultMessage="Showing {valuesBadges} out of {count} group items."
                 values={{
                   count: groupItemsSortedByUniqueness.length,
                   valuesBadges: valuesBadges.length,
-                  unique: uniqueItemsCount,
                 }}
               />
+              {uniqueItemsCount > MAX_GROUP_BADGES ? (
+                <>
+                  {' '}
+                  <FormattedMessage
+                    id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupUniqueItemsInfo"
+                    defaultMessage="{count, plural, one {# item} other {# items}} unique to this group."
+                    values={{
+                      count: uniqueItemsCount,
+                    }}
+                  />
+                </>
+              ) : null}
             </EuiText>
-            <EuiSpacer size="xs" />
-          </>
-        );
+          );
+        }
 
         return valuesBadges;
       },
