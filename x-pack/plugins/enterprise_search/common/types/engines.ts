@@ -23,7 +23,6 @@ export interface EnterpriseSearchEngineDetails {
   indices: EnterpriseSearchEngineIndex[];
   updated_at_millis: number;
   name: string;
-
 }
 
 export interface EnterpriseSearchEngineIndex {
@@ -56,5 +55,4 @@ export interface SchemaField {
   indices: SchemaFieldIndex[];
   name: string;
   type: string;
-
 }

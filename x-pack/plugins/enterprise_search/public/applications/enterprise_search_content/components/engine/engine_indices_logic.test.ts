@@ -33,7 +33,7 @@ const mockEngineData: EnterpriseSearchEngineDetails = {
     },
   ],
   name: DEFAULT_VALUES.engineName,
-  updated_at_millis: 1679501369566
+  updated_at_millis: 1679501369566,
 };
 
 describe('EngineViewLogic', () => {

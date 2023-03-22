@@ -80,7 +80,6 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
         }),
         params: schema.object({
           engine_name: schema.string(),
-
         }),
       },
     },
