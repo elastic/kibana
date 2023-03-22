@@ -90,7 +90,7 @@ describe('getSourceFieldsAgg', () => {
                 "service.language.name",
                 "labels",
                 "service.node.name",
-                "service.version"
+                "service.version",
               ],
             },
             "size": 1,
