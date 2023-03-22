@@ -76,7 +76,7 @@ export class PassiveMap extends Component<Props, State> {
   async _setupEmbeddable() {
     const basemapLayerDescriptor = createBasemapLayerDescriptor();
     const intialLayers = basemapLayerDescriptor ? [basemapLayerDescriptor] : [];
-    const mapEmbeddable = await this.props.factory.create({
+    const mapEmbeddable = (await this.props.factory.create({
       id: uuidv4(),
       attributes: {
         title: '',
@@ -95,19 +95,21 @@ export class PassiveMap extends Component<Props, State> {
         initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
         autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
       },
-    }) as MapEmbeddable | undefined;
+    })) as MapEmbeddable | undefined;
 
     if (!mapEmbeddable) {
       return;
     }
 
-    this._outputSubscription = mapEmbeddable.getOutput$()
+    this._outputSubscription = mapEmbeddable
+      .getOutput$()
       .pipe(
         // wrapping distinctUntilChanged with startWith and skip to prime distinctUntilChanged with an initial value.
         startWith(mapEmbeddable.getOutput()),
         distinctUntilChanged((a, b) => a.loading === b.loading),
         skip(1)
-      ).subscribe((output) => {
+      )
+      .subscribe((output) => {
         if (output.loading) {
           this._onRenderComplete.cancel();
         } else {
@@ -117,7 +119,7 @@ export class PassiveMap extends Component<Props, State> {
 
     if (this._isMounted) {
       mapEmbeddable.setIsSharable(false);
-      this.setState({ mapEmbeddable: mapEmbeddable }, () => {
+      this.setState({ mapEmbeddable }, () => {
         if (this.state.mapEmbeddable && this._embeddableRef.current) {
           this.state.mapEmbeddable.render(this._embeddableRef.current);
         }

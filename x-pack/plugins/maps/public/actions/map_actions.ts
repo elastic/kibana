@@ -181,7 +181,7 @@ export function mapReady() {
       });
     }
 
-    // clear waiting list after transfer to avoid state condition 
+    // clear waiting list after transfer to avoid state condition
     // where waiting list is empty and layers have not been added to layerList
     dispatch({
       type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
