@@ -15,6 +15,7 @@ import {
   EnterpriseSearchEngineUpsertResponse,
 } from '../../../common/types/engines';
 import { ErrorCode } from '../../../common/types/error_codes';
+import { createApiKey } from '../../lib/engines/create_api_key';
 
 import { fetchEngineFieldCapabilities } from '../../lib/engines/field_capabilities';
 import { RouteDependencies } from '../../plugin';
@@ -128,13 +129,37 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
       const { client } = (await context.core).elasticsearch;
       const engines = await client.asCurrentUser.transport.request<SearchResponse>({
         method: 'POST',
-        path: `/${request.params.engine_name}/_search/`,
+        path: `/${request.params.engine_name}/_search`,
         body: {},
       });
       return response.ok({ body: engines });
     })
   );
+  router.post(
+    {
+      path: '/internal/enterprise_search/engines/{engine_name}/api_key',
+      validate: {
+        body: schema.object({
+          keyName: schema.string(),
+        }),
+        params: schema.object({
+          engine_name: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const engineName = decodeURIComponent(request.params.engine_name);
+      const { keyName } = request.body;
+      const { client } = (await context.core).elasticsearch;
 
+      const apiKey = await createApiKey(client, engineName, keyName);
+
+      return response.ok({
+        body: { apiKey },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
   router.get(
     {
       path: '/internal/enterprise_search/engines/{engine_name}/field_capabilities',
