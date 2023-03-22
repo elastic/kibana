@@ -32,7 +32,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { StackFrameMetadata } from '../../common/profiling';
-import { getFieldNameForTopNType, TopNType } from '../../common/stack_traces';
 import { CountPerTime, OTHER_BUCKET_LABEL, TopNSample } from '../../common/topn';
 import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
@@ -41,6 +40,7 @@ import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { asNumber } from '../utils/formatters/as_number';
 import { asPercentage } from '../utils/formatters/as_percentage';
 import { StackFrameSummary } from './stack_frame_summary';
+import { getTracesViewRouteParams } from './stack_traces_view/utils';
 
 export interface SubChartProps {
   index: number;
@@ -62,7 +62,7 @@ export interface SubChartProps {
 
 const NUM_DISPLAYED_FRAMES = 5;
 
-export const SubChart: React.FC<SubChartProps> = ({
+export function SubChart({
   index,
   color,
   category,
@@ -78,24 +78,17 @@ export const SubChart: React.FC<SubChartProps> = ({
   showFrames,
   padTitle,
   sample,
-}) => {
+}: SubChartProps) {
   const theme = useEuiTheme();
 
   const profilingRouter = useProfilingRouter();
 
   const { path, query } = useProfilingParams('/stacktraces/{topNType}');
 
-  const href = profilingRouter.link('/stacktraces/{topNType}', {
-    path: {
-      topNType: TopNType.Traces,
-    },
-    query: {
-      ...query,
-      kuery: `${query.kuery ? `(${query.kuery}) AND ` : ''}${getFieldNameForTopNType(
-        path.topNType
-      )}:"${category}"`,
-    },
-  });
+  const href = profilingRouter.link(
+    '/stacktraces/{topNType}',
+    getTracesViewRouteParams({ query, topNType: path.topNType, category })
+  );
 
   const timeZone = useKibanaTimeZoneSetting();
 
@@ -304,4 +297,4 @@ export const SubChart: React.FC<SubChartProps> = ({
       {bottomElement}
     </EuiFlexGroup>
   );
-};
+}
