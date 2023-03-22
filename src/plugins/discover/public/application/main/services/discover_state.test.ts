@@ -24,7 +24,7 @@ import { dataViewMock } from '../../../__mocks__/data_view';
 import { DiscoverAppStateContainer } from './discover_app_state_container';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
-import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
+import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 import { copySavedSearch } from './discover_saved_search_container';
 
 const startSync = (appState: DiscoverAppStateContainer) => {
@@ -448,6 +448,72 @@ describe('actions', () => {
     );
     unsubscribe();
   });
+  test('onDataViewCreated - persisted data view', async () => {
+    const { state } = await getState('/', savedSearchMock);
+    await state.actions.loadSavedSearch(savedSearchMock.id);
+    const unsubscribe = state.actions.initializeAndSync();
+    await state.actions.onDataViewCreated(dataViewComplexMock);
+    await waitFor(() => {
+      expect(state.internalState.getState().dataView?.id).toBe(dataViewComplexMock.id);
+    });
+    expect(state.appState.get().index).toBe(dataViewComplexMock.id);
+    expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
+      dataViewComplexMock.id
+    );
+    unsubscribe();
+  });
+  test('onDataViewCreated - ad-hoc data view', async () => {
+    const { state } = await getState('/', savedSearchMock);
+    await state.actions.loadSavedSearch(savedSearchMock.id);
+    const unsubscribe = state.actions.initializeAndSync();
+    await state.actions.onDataViewCreated(dataViewAdHoc);
+    await waitFor(() => {
+      expect(state.internalState.getState().dataView?.id).toBe(dataViewAdHoc.id);
+    });
+    expect(state.appState.get().index).toBe(dataViewAdHoc.id);
+    expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
+      dataViewAdHoc.id
+    );
+    unsubscribe();
+  });
+  test('onDataViewEdited - persisted data view', async () => {
+    const { state } = await getState('/', savedSearchMock);
+    await state.actions.loadSavedSearch(savedSearchMock.id);
+    const selectedDataView = state.internalState.getState().dataView;
+    await waitFor(() => {
+      expect(selectedDataView).toBe(dataViewMock);
+    });
+    const unsubscribe = state.actions.initializeAndSync();
+    await state.actions.onDataViewEdited(dataViewMock);
+
+    await waitFor(() => {
+      expect(state.internalState.getState().dataView).not.toBe(selectedDataView);
+    });
+    unsubscribe();
+  });
+  test('onDataViewEdited - ad-hoc data view', async () => {
+    const { state } = await getState('/', savedSearchMock);
+    const unsubscribe = state.actions.initializeAndSync();
+    await state.actions.onDataViewCreated(dataViewAdHoc);
+    const previousId = dataViewAdHoc.id;
+    await state.actions.onDataViewEdited(dataViewAdHoc);
+    await waitFor(() => {
+      expect(state.internalState.getState().dataView?.id).not.toBe(previousId);
+    });
+    unsubscribe();
+  });
+
+  test('onOpenSavedSearch - same target id', async () => {
+    const { state } = await getState('/', savedSearchMock);
+    const unsubscribe = state.actions.initializeAndSync();
+    await state.actions.loadSavedSearch(savedSearchMock.id);
+    await state.savedSearchState.update({ nextState: { hideChart: true } });
+    expect(state.savedSearchState.getState().hideChart).toBe(true);
+    await state.actions.onOpenSavedSearch(savedSearchMock.id!);
+    expect(state.savedSearchState.getState().hideChart).toBe(undefined);
+    unsubscribe();
+  });
+
   test('onCreateDefaultAdHocDataView', async () => {
     discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
       ...dataViewMock,

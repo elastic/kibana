@@ -249,11 +249,15 @@ export function getDiscoverStateContainer({
    * This is usually the default data view
    */
   const loadAndResolveDataView = async (id?: string, dataViewSpec?: DataViewSpec) => {
+    const { adHocDataViews, savedDataViews } = internalStateContainer.getState();
+    const adHodDataView = adHocDataViews.find((dataView) => dataView.id === id);
+    if (adHodDataView) return { fallback: false, dataView: adHodDataView };
+
     const nextDataViewData = await loadDataView({
       services,
       id,
       dataViewSpec,
-      dataViewList: internalStateContainer.getState().savedDataViews,
+      dataViewList: savedDataViews,
     });
     const nextDataView = resolveDataView(nextDataViewData, services.toastNotifications);
     return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
@@ -297,7 +301,7 @@ export function getDiscoverStateContainer({
       await loadDataViewList();
     }
     if (nextDataView.id) {
-      await onChangeDataView(nextDataView.id);
+      await onChangeDataView(nextDataView);
     }
   };
 
