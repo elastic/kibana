@@ -7,12 +7,18 @@
 
 import Boom from '@hapi/boom';
 
+import pMap from 'p-map';
+import { partition } from 'lodash';
+import type { File, FileJSON } from '@kbn/files-plugin/common';
 import { Actions, ActionTypes } from '../../../common/api';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
+import type { OwnerEntity } from '../../authorization';
 import { Operations } from '../../authorization';
 import type { DeleteAllArgs, DeleteArgs, DeleteFileArgs } from './types';
+import type { CaseFileMetadata } from '../../../common/files';
+import { CaseFileMetadataRt } from '../../../common/files';
 
 /**
  * Delete all comments for a case.
@@ -68,8 +74,12 @@ export async function deleteAll(
   }
 }
 
+type FileWithRequiredCaseMetadata = Omit<File<CaseFileMetadata>, 'data'> & {
+  data: Omit<FileJSON<CaseFileMetadata>, 'meta'> & { meta: CaseFileMetadata };
+};
+
 export const deleteFileAttachments = async (
-  { caseId, fileId }: DeleteFileArgs,
+  { caseId, fileIds }: DeleteFileArgs,
   clientArgs: CasesClientArgs
 ) => {
   const {
@@ -77,21 +87,51 @@ export const deleteFileAttachments = async (
     services: { attachmentService, userActionService },
     logger,
     authorization,
+    fileService,
   } = clientArgs;
 
   try {
-    const fileAttachments = await attachmentService.getter.getFileAttachmentIds({ caseId, fileId });
+    // it's possible that we're trying to delete a file before an attachment was created
+    const files = await pMap(
+      fileIds,
+      async (fileId: string) => {
+        return fileService.getById({ id: fileId });
+      },
+      {
+        concurrency: MAX_CONCURRENT_SEARCHES,
+      }
+    );
 
-    if (fileAttachments.length <= 0) {
-      throw Boom.notFound(`No case attachments were found using file id: ${fileId}`);
+    const [validFiles, _] = partition(files, (file) => {
+      return CaseFileMetadataRt.is(file.data.meta) && file.data.meta.caseId === caseId;
+    }) as [FileWithRequiredCaseMetadata[], File[]];
+
+    const fileAttachments = await attachmentService.getter.getFileAttachments({ caseId, fileIds });
+
+    // if (fileAttachments.length <= 0) {
+    //   throw Boom.notFound(`No case attachments were found using file ids: ${fileIds}`);
+    // }
+
+    const fileEntities: OwnerEntity[] = [];
+    for (const fileInfo of validFiles) {
+      for (const owner of fileInfo.data.meta.owner) {
+        fileEntities.push({ id: fileInfo.id, owner });
+      }
     }
 
     await authorization.ensureAuthorized({
-      entities: fileAttachments.map((attachment) => ({
-        id: attachment.id,
-        owner: attachment.attributes.owner,
-      })),
+      entities: [
+        ...fileAttachments.map((attachment) => ({
+          id: attachment.id,
+          owner: attachment.attributes.owner,
+        })),
+        ...fileEntities,
+      ],
       operation: Operations.deleteComment,
+    });
+
+    await fileService.delete({
+      id: fileId,
     });
 
     await attachmentService.bulkDelete({
@@ -110,7 +150,7 @@ export const deleteFileAttachments = async (
     });
   } catch (error) {
     throw createCaseError({
-      message: `Failed to delete file attachments for case: ${caseId} file id: ${fileId}: ${error}`,
+      message: `Failed to delete file attachments for case: ${caseId} file ids: ${fileIds}: ${error}`,
       error,
       logger,
     });

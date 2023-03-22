@@ -32,6 +32,8 @@ import {
   injectAttachmentAttributesAndHandleErrors,
   injectAttachmentSOAttributesFromRefs,
 } from '../../so_references';
+import { getCaseReference, partitionByCaseAssociation } from '../../../common/utils';
+import type { AttachmentSavedObject } from '../../../common/types';
 
 type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
 
@@ -249,20 +251,24 @@ export class AttachmentGetter {
     };
   }
 
-  public async getFileAttachmentIds({
+  public async getFileAttachments({
     caseId,
-    fileId,
+    fileIds,
   }: {
     caseId: string;
-    fileId: string;
+    fileIds: string[];
   }): Promise<Array<SavedObject<CommentAttributes>>> {
     try {
       this.context.log.debug('Attempting to find file attachments');
 
-      const references = [
-        { id: caseId, type: CASE_SAVED_OBJECT },
-        { id: fileId, type: FILE_SO_TYPE },
-      ];
+      /**
+       * This is making a big assumption that a single file service saved object can only be associated within a single
+       * case. If a single file can be attached to multiple cases it will complicate deleting a file.
+       *
+       * The file's metadata would have to contain all case ids and deleting a file would need to removing a case id from
+       * array instead of deleting the entire saved object in the situation where the file is attached to multiple cases.
+       */
+      const references = fileIds.map((id) => ({ id, type: FILE_SO_TYPE }));
 
       /**
        * In the event that we add the ability to attach a file to a case that has already been uploaded we'll run into a
@@ -280,11 +286,11 @@ export class AttachmentGetter {
           }
         );
 
-      const results: Array<SavedObject<CommentAttributes>> = [];
+      const foundAttachments: Array<SavedObject<CommentAttributes>> = [];
 
-      for await (const attachmentSavedObject of finder.find()) {
-        results.push(
-          ...attachmentSavedObject.saved_objects.map((attachment) => {
+      for await (const attachmentSavedObjects of finder.find()) {
+        foundAttachments.push(
+          ...attachmentSavedObjects.saved_objects.map((attachment) => {
             const modifiedAttachment = injectAttachmentSOAttributesFromRefs(
               attachment,
               this.context.persistableStateAttachmentTypeRegistry
@@ -295,12 +301,37 @@ export class AttachmentGetter {
         );
       }
 
-      return results;
-    } catch (error) {
-      this.context.log.error(
-        `Error retrieving file attachments associated with case: [${caseId}] file id: [${fileId}]: ${error}`
+      const [validFileAttachments, invalidFileAttachments] = partitionByCaseAssociation(
+        caseId,
+        foundAttachments
       );
+
+      this.logInvalidFileAssociations(invalidFileAttachments, fileIds, caseId);
+
+      return validFileAttachments;
+    } catch (error) {
+      this.context.log.error(`Error retrieving file attachments file ids: ${fileIds}: ${error}`);
       throw error;
+    }
+  }
+
+  private logInvalidFileAssociations(
+    attachments: AttachmentSavedObject[],
+    fileIds: string[],
+    targetCaseId: string
+  ) {
+    const caseIds: string[] = [];
+    for (const attachment of attachments) {
+      const caseRef = getCaseReference(attachment.references);
+      if (caseRef != null) {
+        caseIds.push(caseRef.id);
+      }
+    }
+
+    if (caseIds.length > 0) {
+      this.context.log.warn(
+        `Found files associated to cases outside of request: ${caseIds} file ids: ${fileIds} target case id: ${targetCaseId}`
+      );
     }
   }
 }

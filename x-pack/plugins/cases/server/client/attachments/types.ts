@@ -50,9 +50,9 @@ export interface DeleteFileArgs {
    */
   caseId: string;
   /**
-   * The id of the file saved object
+   * The ids of the file saved objects
    */
-  fileId: string;
+  fileIds: string[];
 }
 
 /**

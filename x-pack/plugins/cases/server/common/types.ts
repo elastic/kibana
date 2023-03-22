@@ -9,6 +9,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { KueryNode } from '@kbn/es-query';
 import type {
   CaseAttributes,
+  CommentAttributes,
   CommentRequestExternalReferenceSOType,
   FileAttachmentMetadata,
   SavedObjectFindOptions,
@@ -34,3 +35,5 @@ export type FileAttachmentRequest = Omit<
 > & {
   externalReferenceMetadata: FileAttachmentMetadata;
 };
+
+export type AttachmentSavedObject = SavedObject<CommentAttributes>;
