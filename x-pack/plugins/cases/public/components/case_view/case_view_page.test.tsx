@@ -434,7 +434,17 @@ describe('CaseViewPage', () => {
     });
   });
 
-  describe('Tabs', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/149775
+  // FLAKY: https://github.com/elastic/kibana/issues/149776
+  // FLAKY: https://github.com/elastic/kibana/issues/149777
+  // FLAKY: https://github.com/elastic/kibana/issues/149778
+  // FLAKY: https://github.com/elastic/kibana/issues/149779
+  // FLAKY: https://github.com/elastic/kibana/issues/149780
+  // FLAKY: https://github.com/elastic/kibana/issues/149781
+  // FLAKY: https://github.com/elastic/kibana/issues/149782
+  // FLAKY: https://github.com/elastic/kibana/issues/153335
+  // FLAKY: https://github.com/elastic/kibana/issues/153336
+  describe.skip('Tabs', () => {
     jest.mock('@kbn/kibana-react-plugin/public', () => ({
       useKibana: () => ({
         services: {

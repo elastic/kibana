@@ -216,7 +216,7 @@ export const withLensData = <T extends WithLensDataInputProps>(Component: React.
         {dataView && attributes && (
           <div css={{ display: 'none' }}>
             <EmbeddableComponent
-              id={props.collection.id}
+              id={props.collection.name}
               timeRange={props.timeRange}
               attributes={attributes}
               onLoad={onDataLoad}
