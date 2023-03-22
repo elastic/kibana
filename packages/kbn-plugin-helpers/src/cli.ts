@@ -42,7 +42,7 @@ export function runCli() {
         },
         help: `
           --skip-archive        Don't create the zip file, just create the build/kibana directory
-          --kibana-version, -v  Kibana version that the
+          --kibana-version, -v  Kibana version this plugin will be built for
         `,
       },
       async run({ log, flags }) {
@@ -98,13 +98,8 @@ export function runCli() {
     .command({
       name: 'dev',
       description: `
-        Copies files from the source into a zip archive that can be distributed for
-        installation into production Kibana installs. The archive includes the non-
-        development npm dependencies and builds itself using raw files in the source
-        directory so make sure they are clean/up to date. The resulting archive can
-        be found at:
-
-          build/{plugin.id}-{kibanaVersion}.zip
+        Builds the current plugin ui browser side so it can be picked up by Kibana
+        during development
 
       `,
       flags: {
@@ -114,8 +109,8 @@ export function runCli() {
           w: 'watch'
         },
         help: `
-          --dist, -d  Kibana version that the
-          --watch, -w  Kibana version that the
+          --dist, -d  Outputs bundles in dist mode instead
+          --watch, -w  Starts the watch mode
         `,
       },
       async run({ log, flags }) {
@@ -143,7 +138,6 @@ export function runCli() {
         const plugin = loadKibanaPlatformPlugin(found.dir);
         const config = await loadConfig(log, plugin);
         const sourceDir = plugin.directory;
-        const buildDir = Path.resolve(plugin.directory, 'build/kibana', plugin.manifest.id);
 
         const context: TaskContext = {
           log,
@@ -153,7 +147,6 @@ export function runCli() {
           plugin,
           config,
           sourceDir,
-          buildDir,
           kibanaVersion: 'kibana'
         };
 
