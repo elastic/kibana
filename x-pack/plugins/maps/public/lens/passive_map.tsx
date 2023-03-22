@@ -17,6 +17,7 @@ import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_l
 interface Props {
   factory: EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput>;
   passiveLayer: LayerDescriptor;
+  onInitialRenderComplete: () => void;
 }
 
 interface State {
@@ -79,6 +80,8 @@ export class PassiveMap extends Component<Props, State> {
         autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
       },
     });
+    mapEmbeddable.setEventHandlers({ onInitialRenderComplete: this.props.onInitialRenderComplete });
+    mapEmbeddable.setIsSharable(false);
 
     if (!mapEmbeddable) {
       return;

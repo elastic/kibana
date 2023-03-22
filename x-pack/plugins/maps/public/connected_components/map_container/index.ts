@@ -22,6 +22,7 @@ import {
   getMapSettings,
   getQueryableUniqueIndexPatternIds,
 } from '../../selectors/map_selectors';
+import { getEventHandlers } from '../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
@@ -34,6 +35,7 @@ function mapStateToProps(state: MapStoreState) {
     indexPatternIds: getQueryableUniqueIndexPatternIds(state),
     settings: getMapSettings(state),
     layerList: getLayerList(state),
+    eventHandlers: getEventHandlers(state),
   };
 }
 

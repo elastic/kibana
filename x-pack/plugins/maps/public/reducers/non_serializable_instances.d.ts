@@ -25,13 +25,19 @@ export interface ResultMeta {
 
 interface EventHandlers {
   /**
+   * Take action on initial map render complete.
+   */
+  onInitialRenderComplete?: () => void;
+
+  /**
    * Take action on data load.
    */
-  onDataLoad: ({ layerId, dataId }: { layerId: string; dataId: string }) => void;
+  onDataLoad?: ({ layerId, dataId }: { layerId: string; dataId: string }) => void;
+
   /**
    * Take action on data load end.
    */
-  onDataLoadEnd: ({
+  onDataLoadEnd?: ({
     layerId,
     dataId,
     resultMeta,
@@ -40,10 +46,11 @@ interface EventHandlers {
     dataId: string;
     resultMeta: ResultMeta;
   }) => void;
+
   /**
    * Take action on data load error.
    */
-  onDataLoadError: ({
+  onDataLoadError?: ({
     layerId,
     dataId,
     errorMessage,
