@@ -1,0 +1,47 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import type { IRouter } from '@kbn/core-http-server';
+import type { VersionedRouter } from '@kbn/core-versioned-http-server';
+import type {
+  VersionedRoute,
+  VersionedRouteConfig,
+  VersionedRouterRoute,
+} from '@kbn/core-versioned-http-server';
+import { InternalVersionedRoute } from './internal_versioned_route';
+import { Method } from './types';
+
+export class InternalVersionedRouter implements VersionedRouter {
+  private readonly routes = new Set<InternalVersionedRoute>();
+  constructor(private readonly router: IRouter) {}
+
+  private registerVersionedRoute =
+    (routeMethod: Method) =>
+    (options: VersionedRouteConfig<Method>): VersionedRoute<Method, any> => {
+      const route = new InternalVersionedRoute(this.router, routeMethod, options.path, options);
+      this.routes.add(route);
+      return route as VersionedRoute;
+    };
+
+  public get = this.registerVersionedRoute('get');
+  public delete = this.registerVersionedRoute('delete');
+  public post = this.registerVersionedRoute('post');
+  public patch = this.registerVersionedRoute('patch');
+  public put = this.registerVersionedRoute('put');
+
+  public getRoutes(): VersionedRouterRoute[] {
+    return [...this.routes].map((route) => {
+      return {
+        path: route.path,
+        method: route.method,
+        options: route.options,
+        handlers: route.getHandlers(),
+      };
+    });
+  }
+}
