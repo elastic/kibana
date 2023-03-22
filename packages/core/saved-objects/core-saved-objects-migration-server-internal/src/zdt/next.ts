@@ -52,8 +52,6 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
-// const NOT_IMPLEMENTED_YET = () => Promise.resolve({} as any);
-
 export const nextActionMap = (context: MigratorContext) => {
   const client = context.elasticsearchClient;
   return {

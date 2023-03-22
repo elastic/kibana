@@ -15,12 +15,11 @@ import {
   getRequestDebugMeta,
 } from '@kbn/core-elasticsearch-client-server-internal';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { logActionResponse, logStateTransition } from './common/utils/logs';
 import { type Model, type Next, stateActionMachine } from './state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
 import type { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './state';
-import type { BulkOperation } from './model/create_batches';
+import { redactBulkOperationBatches } from './common/redact_state';
 
 /**
  * A specialized migrations-specific state-action machine that:
@@ -159,11 +158,3 @@ export async function migrationStateActionMachine({
     }
   }
 }
-
-const redactBulkOperationBatches = (
-  bulkOperationBatches: BulkOperation[][]
-): BulkOperationContainer[][] => {
-  return bulkOperationBatches.map((batch) =>
-    batch.map((operation) => (Array.isArray(operation) ? operation[0] : operation))
-  );
-};
