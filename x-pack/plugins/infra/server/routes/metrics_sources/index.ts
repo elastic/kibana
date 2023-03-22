@@ -11,7 +11,7 @@ import { createValidationFunction } from '../../../common/runtime_types';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';
-import { AnomalyThresholdRangeError } from '../../lib/sources/errors';
+import { AnomalyThresholdRangeError, NoSuchRemoteClusterError } from '../../lib/sources/errors';
 import {
   metricsSourceConfigurationResponseRT,
   MetricsSourceStatus,
@@ -44,7 +44,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     const metricIndicesExist = isFulfilled<boolean>(metricIndicesExistSettled)
       ? metricIndicesExistSettled.value
       : defaultStatus.metricIndicesExist;
-    const remoteClustersExist = isFulfilled<boolean>(metricIndicesExistSettled);
+    const remoteClustersExist = hasRemoteCluster<boolean | InfraSourceIndexField[]>(indexFieldsSettled, metricIndicesExistSettled);
 
     return {
       indexFields,
@@ -193,3 +193,9 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
 const isFulfilled = <Type>(
   promiseSettlement: PromiseSettledResult<Type>
 ): promiseSettlement is PromiseFulfilledResult<Type> => promiseSettlement.status === 'fulfilled';
+
+const hasRemoteCluster = <Type>(...promiseSettlements: PromiseSettledResult<Type>[]) => {
+  const isRemoteMissing = promiseSettlements.some(settlement => !isFulfilled<Type>(settlement) && settlement.reason instanceof NoSuchRemoteClusterError )
+  
+  return !isRemoteMissing;
+}
