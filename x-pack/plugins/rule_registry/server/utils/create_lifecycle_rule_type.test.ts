@@ -115,6 +115,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           name: 'name',
           notifyWhen: 'onActionGroupChange',
           producer: 'producer',
+          revision: 0,
           ruleTypeId: 'ruleTypeId',
           ruleTypeName: 'ruleTypeName',
           schedule: {
@@ -255,6 +256,7 @@ describe('createLifecycleRuleTypeFactory', () => {
                 "threshold": 1,
               },
               "kibana.alert.rule.producer": "producer",
+              "kibana.alert.rule.revision": 0,
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.tags": Array [
                 "tags",
@@ -291,6 +293,7 @@ describe('createLifecycleRuleTypeFactory', () => {
                 "threshold": 1,
               },
               "kibana.alert.rule.producer": "producer",
+              "kibana.alert.rule.revision": 0,
               "kibana.alert.rule.rule_type_id": "ruleTypeId",
               "kibana.alert.rule.tags": Array [
                 "tags",
