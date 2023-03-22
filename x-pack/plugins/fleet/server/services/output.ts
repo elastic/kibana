@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { v5 as uuidv5 } from 'uuid';
 import { omit } from 'lodash';
 import { safeLoad } from 'js-yaml';
@@ -117,19 +118,39 @@ class OutputService {
   }
 
   private async _getDefaultDataOutputsSO(soClient: SavedObjectsClientContract) {
-    return await this.encryptedSoClient.find<OutputSOAttributes>({
+    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
     });
+
+    for (const output of outputs.saved_objects) {
+      appContextService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    return outputs;
   }
 
   private async _getDefaultMonitoringOutputsSO(soClient: SavedObjectsClientContract) {
-    return await this.encryptedSoClient.find<OutputSOAttributes>({
+    const outputs = await this.encryptedSoClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default_monitoring'],
       search: 'true',
     });
+
+    for (const output of outputs.saved_objects) {
+      appContextService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    return outputs;
   }
 
   public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
@@ -254,9 +275,17 @@ class OutputService {
       }
     }
 
+    const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
+
+    appContextService.writeCustomSoAuditLog({
+      action: 'create',
+      id,
+      savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+    });
+
     const newSo = await this.encryptedSoClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
-      id: options?.id ? outputIdToUuid(options.id) : undefined,
+      id,
     });
 
     return outputSavedObjectToOutput(newSo);
@@ -294,6 +323,14 @@ class OutputService {
       sortOrder: 'desc',
     });
 
+    for (const output of outputs.saved_objects) {
+      appContextService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
     return {
       items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
       total: outputs.total,
@@ -311,6 +348,14 @@ class OutputService {
       search: escapeSearchQueryPhrase(proxyId),
     });
 
+    for (const output of outputs.saved_objects) {
+      appContextService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
     return {
       items: outputs.saved_objects.map<Output>(outputSavedObjectToOutput),
       total: outputs.total,
@@ -324,6 +369,12 @@ class OutputService {
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id)
     );
+
+    appContextService.writeCustomSoAuditLog({
+      action: 'get',
+      id: outputSO.id,
+      savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+    });
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
@@ -360,6 +411,12 @@ class OutputService {
       appContextService.getInternalUserESClient(),
       id
     );
+
+    appContextService.writeCustomSoAuditLog({
+      action: 'delete',
+      id: outputIdToUuid(id),
+      savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+    });
 
     return this.encryptedSoClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
   }
@@ -448,6 +505,12 @@ class OutputService {
         updateData.shipper = null;
       }
     }
+
+    appContextService.writeCustomSoAuditLog({
+      action: 'update',
+      id: outputIdToUuid(id),
+      savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+    });
 
     const outputSO = await this.encryptedSoClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
