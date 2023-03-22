@@ -550,6 +550,106 @@ describe('RRule', () => {
       `);
     });
 
+    it('works with daily frequency by behaving like weekly frequency', () => {
+      const rule = new RRule({
+        dtstart: new Date(DATE_2019_DECEMBER_19),
+        freq: Frequency.DAILY,
+        interval: 1,
+        tzid: 'UTC',
+        byweekday: [Weekday.TH],
+      });
+      expect(rule.all(14)).toMatchInlineSnapshot(`
+        Array [
+          2019-12-19T00:00:00.000Z,
+          2019-12-26T00:00:00.000Z,
+          2020-01-02T00:00:00.000Z,
+          2020-01-09T00:00:00.000Z,
+          2020-01-16T00:00:00.000Z,
+          2020-01-23T00:00:00.000Z,
+          2020-01-30T00:00:00.000Z,
+          2020-02-06T00:00:00.000Z,
+          2020-02-13T00:00:00.000Z,
+          2020-02-20T00:00:00.000Z,
+          2020-02-27T00:00:00.000Z,
+          2020-03-05T00:00:00.000Z,
+          2020-03-12T00:00:00.000Z,
+          2020-03-19T00:00:00.000Z,
+        ]
+      `);
+
+      const rule2 = new RRule({
+        dtstart: new Date(DATE_2019),
+        freq: Frequency.WEEKLY,
+        interval: 1,
+        tzid: 'UTC',
+        byweekday: [Weekday.SA, Weekday.SU, Weekday.MO],
+      });
+
+      expect(rule2.all(9)).toMatchInlineSnapshot(`
+        Array [
+          2019-01-05T00:00:00.000Z,
+          2019-01-06T00:00:00.000Z,
+          2019-01-07T00:00:00.000Z,
+          2019-01-12T00:00:00.000Z,
+          2019-01-13T00:00:00.000Z,
+          2019-01-14T00:00:00.000Z,
+          2019-01-19T00:00:00.000Z,
+          2019-01-20T00:00:00.000Z,
+          2019-01-21T00:00:00.000Z,
+        ]
+      `);
+    });
+
+    it('works with monthly frequency with non-setpos syntax by behaving like weekly frequency', () => {
+      const rule = new RRule({
+        dtstart: new Date(DATE_2019_DECEMBER_19),
+        freq: Frequency.DAILY,
+        interval: 1,
+        tzid: 'UTC',
+        byweekday: [Weekday.TH],
+      });
+      expect(rule.all(14)).toMatchInlineSnapshot(`
+        Array [
+          2019-12-19T00:00:00.000Z,
+          2019-12-26T00:00:00.000Z,
+          2020-01-02T00:00:00.000Z,
+          2020-01-09T00:00:00.000Z,
+          2020-01-16T00:00:00.000Z,
+          2020-01-23T00:00:00.000Z,
+          2020-01-30T00:00:00.000Z,
+          2020-02-06T00:00:00.000Z,
+          2020-02-13T00:00:00.000Z,
+          2020-02-20T00:00:00.000Z,
+          2020-02-27T00:00:00.000Z,
+          2020-03-05T00:00:00.000Z,
+          2020-03-12T00:00:00.000Z,
+          2020-03-19T00:00:00.000Z,
+        ]
+      `);
+
+      const rule2 = new RRule({
+        dtstart: new Date(DATE_2019),
+        freq: Frequency.WEEKLY,
+        interval: 1,
+        tzid: 'UTC',
+        byweekday: [Weekday.SA, Weekday.SU, Weekday.MO],
+      });
+
+      expect(rule2.all(9)).toMatchInlineSnapshot(`
+        Array [
+          2019-01-05T00:00:00.000Z,
+          2019-01-06T00:00:00.000Z,
+          2019-01-07T00:00:00.000Z,
+          2019-01-12T00:00:00.000Z,
+          2019-01-13T00:00:00.000Z,
+          2019-01-14T00:00:00.000Z,
+          2019-01-19T00:00:00.000Z,
+          2019-01-20T00:00:00.000Z,
+          2019-01-21T00:00:00.000Z,
+        ]
+      `);
+    });
+
     it('works with monthly frequency using setpos syntax', () => {
       const rule = new RRule({
         dtstart: new Date(DATE_2023),

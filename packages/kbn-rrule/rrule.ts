@@ -175,10 +175,11 @@ export class RRule {
 }
 
 const parseByWeekdayPos = function (byweekday: ConstructorOptions['byweekday']) {
-  if (byweekday?.some((d) => typeof d === 'string' && !Object.keys(Weekday).includes(d))) {
+  if (byweekday?.some((d) => typeof d === 'string')) {
     const pos: number[] = [];
     const newByweekday = byweekday.map((d) => {
       if (typeof d !== 'string') return d;
+      if (Object.keys(Weekday).includes(d)) return Weekday[d as WeekdayStr];
       const [sign, number, ...rest] = d.split('');
       if (sign === '-') pos.push(-Number(number));
       else pos.push(Number(number));
@@ -216,7 +217,15 @@ export const getNextRecurrences = function ({
     bysecond,
     bysetpos,
   };
-  switch (freq) {
+
+  // If the frequency is DAILY but there's a byweekday, or if the frequency is MONTHLY with a byweekday with no
+  // corresponding bysetpos, use the WEEKLY code path to determine recurrences
+  const derivedFreq =
+    byweekday && (freq === Frequency.DAILY || (freq === Frequency.MONTHLY && !bysetpos?.length))
+      ? Frequency.WEEKLY
+      : freq;
+
+  switch (derivedFreq) {
     case Frequency.YEARLY: {
       const nextRef = moment(refDT).add(interval, 'y');
       return getYearOfRecurrences({

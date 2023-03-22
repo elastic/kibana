@@ -12,7 +12,6 @@ Differences from library on Github:
 
 Known not to work are mostly edge cases:
 
-- Setting `Frequency.MONTHLY` with a `byweekday`; spec indicates this should basically behave like `Frequency.WEEKLY`, this lib doesn't
 - Manually configuring `setpos` with any frequency besides `MONTHLY`
 - `wkst` doesn't seem to have an effect on anything (I was also unable to get it to affect anything in the original library though)
 - Setting `byyearday` on anything besides `Frequency.YEARLY`, setting `bymonthday` on anything besides `MONTHLY`, and other similar odd situations
