@@ -73,6 +73,10 @@ export function isMobileAgentName(agentName?: string) {
   return isIosAgentName(agentName) || isAndroidAgentName(agentName);
 }
 
+export function isRumOrMobileAgent(agentName?: string) {
+  return isRumAgentName(agentName) || isMobileAgentName(agentName);
+}
+
 export function isIosAgentName(agentName?: string) {
   const lowercased = agentName && agentName.toLowerCase();
   return lowercased === 'ios/swift';
