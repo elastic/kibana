@@ -179,6 +179,9 @@ export const FILTER_NAMES = Object.freeze({
   users: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.users', {
     defaultMessage: 'Filter by username',
   }),
+  automated: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.automated', {
+    defaultMessage: 'Automated',
+  }),
 });
 
 export const ARIA_LABELS = Object.freeze({

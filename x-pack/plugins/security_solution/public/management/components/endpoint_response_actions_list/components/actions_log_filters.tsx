@@ -24,6 +24,7 @@ import {
 import { ActionsLogFilter } from './actions_log_filter';
 import { ActionsLogUsersFilter } from './actions_log_users_filter';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { FILTER_NAMES } from '../translations';
 
 export const ActionsLogFilters = memo(
   ({
@@ -90,12 +91,7 @@ export const ActionsLogFilters = memo(
             }}
             data-test-subj={getTestId('automated-responses-filter')}
           >
-            {'Automated'}
-            {/*  // TODO:*/}
-            {/* <FormattedMessage*/}
-            {/*  id=""*/}
-            {/*  defaultMessage="Automated"*/}
-            {/* />*/}
+            {FILTER_NAMES.automated}
           </EuiFilterButton>
         </>
       );
