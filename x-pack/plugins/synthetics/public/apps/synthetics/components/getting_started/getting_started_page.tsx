@@ -84,6 +84,7 @@ export const GettingStartedPage = () => {
               <SimpleMonitorForm />
             </>
           }
+          footer={<GettingStartedLink />}
         />
       )}
     </Wrapper>
@@ -140,6 +141,7 @@ export const GettingStartedOnPrem = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         }
+        footer={<GettingStartedLink />}
       />
 
       {isAddingNewLocation ? (
@@ -154,6 +156,22 @@ export const GettingStartedOnPrem = () => {
   );
 };
 
+export const GettingStartedLink = () => (
+  <>
+    <EuiText size="s" color="subdued" className="eui-displayInlineBlock">
+      {FOR_MORE_INFO_LABEL}
+    </EuiText>{' '}
+    <EuiLink
+      data-test-subj="syntheticsGettingStartedOnPremLink"
+      href="https://www.elastic.co/guide/en/observability/current/synthetics-get-started.html"
+      target="_blank"
+      className="eui-displayInline"
+    >
+      {GETTING_STARTED_LABEL}
+    </EuiLink>
+  </>
+);
+
 const Wrapper = styled.div`
   &&& {
     .euiEmptyPrompt__content {
@@ -162,6 +180,17 @@ const Wrapper = styled.div`
     }
   }
 `;
+
+const FOR_MORE_INFO_LABEL = i18n.translate('xpack.synthetics.gettingStarted.forMoreInfo', {
+  defaultMessage: 'For more information, read our',
+});
+
+const GETTING_STARTED_LABEL = i18n.translate(
+  'xpack.synthetics.gettingStarted.gettingStartedLabel',
+  {
+    defaultMessage: 'Getting Started Guide',
+  }
+);
 
 const CREATE_SINGLE_PAGE_LABEL = i18n.translate(
   'xpack.synthetics.gettingStarted.createSinglePageLabel',
@@ -204,6 +233,7 @@ const CREATE_LOCATION_DESCRIPTION = (
     }}
   />
 );
+
 const PUBLIC_LOCATION_DESCRIPTION = (
   <FormattedMessage
     id="xpack.synthetics.gettingStarted.publicLocationDescription"
