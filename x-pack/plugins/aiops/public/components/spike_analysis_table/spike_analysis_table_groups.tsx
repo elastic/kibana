@@ -222,7 +222,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupColumnTooltip',
             {
               defaultMessage:
-                'Displays field/value pairs unique to the group. Expand row to see all field/value pairs.',
+                'Displays up to {maxItemCount} group items sorted by uniqueness and document count. Expand row to see all field/value pairs.',
+              values: { maxItemCount: MAX_GROUP_BADGES },
             }
           )}
         >
