@@ -43,7 +43,7 @@ export const ReviewPipeline: React.FC = () => {
           <EuiText
             color="subdued"
             size="s"
-            >
+          >
             <p>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.review.description',

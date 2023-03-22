@@ -118,7 +118,7 @@ export const ConfigurePipeline: React.FC = () => {
           <EuiText
             color="subdued"
             size="s"
-            >
+          >
             <p>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.description',
@@ -143,7 +143,7 @@ export const ConfigurePipeline: React.FC = () => {
           <EuiPanel
             hasBorder={true}
             hasShadow={false}
-            >
+          >
             <EuiForm component="form">
               <EuiFormRow
                 fullWidth
@@ -272,7 +272,7 @@ export const ConfigurePipeline: React.FC = () => {
           <EuiText
             color="subdued"
             size="s"
-            >
+          >
             <p>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.descriptionDeployTrainedModel',
@@ -296,7 +296,7 @@ export const ConfigurePipeline: React.FC = () => {
          <EuiPanel
             hasBorder={true}
             hasShadow={false}
-            >
+          >
             <EuiForm component="form">
               <EuiFormRow
                 label={i18n.translate(

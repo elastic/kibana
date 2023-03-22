@@ -162,7 +162,7 @@ export const TestPipeline: React.FC = () => {
                   isCopyable
                   language="json"
                   paddingSize="m"
-                  >
+                >
                   { `[{"_index":"index","_id":"id","_source":{"${sourceField}":"bar"}}]` }
                 </EuiCodeBlock>
               </EuiFlexItem>

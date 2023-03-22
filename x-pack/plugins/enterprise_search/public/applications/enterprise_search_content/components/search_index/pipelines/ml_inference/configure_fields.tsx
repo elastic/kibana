@@ -83,7 +83,7 @@ export const ConfigureFields: React.FC = () => {
           <EuiText
             color="subdued"
             size="s"
-            >
+          >
             <p>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.description',
@@ -100,7 +100,7 @@ export const ConfigureFields: React.FC = () => {
       <EuiPanel
         hasBorder={true}
         hasShadow={false}
-        >
+      >
         <EuiForm component="form">
           <EuiFlexGroup>
             <EuiFlexItem>
