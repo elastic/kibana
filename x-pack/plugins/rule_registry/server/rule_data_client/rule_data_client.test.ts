@@ -104,6 +104,27 @@ describe('RuleDataClient', () => {
       });
     });
 
+    test('getReader searchs an index pattern without a wildcard', async () => {
+      const ruleDataClient = new RuleDataClient(
+        getRuleDataClientOptions({
+          waitUntilReadyForReading: new Promise((resolve) =>
+            setTimeout(resolve, 3000, right(scopedClusterClient))
+          ),
+        })
+      );
+
+      const query = { query: { bool: { filter: { range: { '@timestamp': { gte: 0 } } } } } };
+      const reader = ruleDataClient.getReader({ namespace: 'test', wildcard: false });
+      await reader.search({
+        body: query,
+      });
+
+      expect(scopedClusterClient.search).toHaveBeenCalledWith({
+        body: query,
+        index: `.alerts-observability.apm.alerts-test`,
+      });
+    });
+
     test('re-throws error when search throws error', async () => {
       scopedClusterClient.search.mockRejectedValueOnce(new Error('something went wrong!'));
       const ruleDataClient = new RuleDataClient(getRuleDataClientOptions({}));

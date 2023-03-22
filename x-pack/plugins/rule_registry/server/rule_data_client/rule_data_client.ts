@@ -92,9 +92,22 @@ export class RuleDataClient implements IRuleDataClient {
     this._isWriterCacheEnabled = isEnabled;
   }
 
-  public getReader(options: { namespace?: string } = {}): IRuleDataReader {
+  public getReader({
+    namespace,
+    wildcard = true,
+  }: { namespace?: string; wildcard?: boolean } = {}): IRuleDataReader {
     const { indexInfo } = this.options;
-    const indexPattern = indexInfo.getPatternForReading(options.namespace);
+    let indexPattern = indexInfo.getPatternForReading(namespace);
+
+    // https://github.com/elastic/security-team/issues/6231
+    if (!wildcard) {
+      if (!namespace) {
+        const error = `Error performing search in RuleDataClient - Space name is required`;
+        this.options.logger.error(error);
+        throw new Error(error);
+      }
+      indexPattern = indexInfo.getPrimaryAlias(namespace);
+    }
 
     const waitUntilReady = async () => {
       const result = await this.options.waitUntilReadyForReading;
