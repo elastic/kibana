@@ -100,6 +100,50 @@ describe('BurnRateRuleExecutor', () => {
     };
   });
 
+  it('throws when the slo is not found', async () => {
+    soClientMock.get.mockRejectedValue(new Error('NotFound'));
+    const executor = getRuleExecutor();
+
+    await expect(
+      executor({
+        params: someRuleParams({ sloId: 'inexistent', burnRateThreshold: BURN_RATE_THRESHOLD }),
+        startedAt: new Date(),
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: {} as SanitizedRuleConfig,
+        spaceId: 'irrelevant',
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      })
+    ).rejects.toThrowError();
+  });
+
+  it('returns early when the slo is disabled', async () => {
+    const slo = createSLO({ objective: { target: 0.9 }, enabled: false });
+    soClientMock.get.mockResolvedValue(aStoredSLO(slo));
+    const executor = getRuleExecutor();
+
+    const result = await executor({
+      params: someRuleParams({ sloId: slo.id, burnRateThreshold: BURN_RATE_THRESHOLD }),
+      startedAt: new Date(),
+      services: servicesMock,
+      executionId: 'irrelevant',
+      logger: loggerMock,
+      previousStartedAt: null,
+      rule: {} as SanitizedRuleConfig,
+      spaceId: 'irrelevant',
+      state: {},
+      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+    });
+
+    expect(esClientMock.search).not.toHaveBeenCalled();
+    expect(alertWithLifecycleMock).not.toHaveBeenCalled();
+    expect(alertFactoryMock.done).not.toHaveBeenCalled();
+    expect(result).toEqual({ state: {} });
+  });
+
   it('does not schedule an alert when both windows burn rates are below the threshold', async () => {
     const slo = createSLO({ objective: { target: 0.9 } });
     soClientMock.get.mockResolvedValue(aStoredSLO(slo));
