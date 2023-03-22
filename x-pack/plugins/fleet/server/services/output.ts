@@ -15,7 +15,7 @@ import { v5 as uuidv5 } from 'uuid';
 import { omit } from 'lodash';
 import { safeLoad } from 'js-yaml';
 
-import type { NewOutput, Output, OutputSOAttributes, AgentPolicy } from '../types';
+import type { NewOutput, Output, OutputSOAttributes } from '../types';
 import {
   DEFAULT_OUTPUT,
   DEFAULT_OUTPUT_ID,
@@ -108,7 +108,7 @@ async function getAgentPoliciesPerOutput(
     perPage: SO_SEARCH_LIMIT,
     withPackagePolicies: true,
   });
-  return agentPolicySO.items;
+  return agentPolicySO?.items;
 }
 
 async function validateLogstashOutputNotUsedInAPMPolicy(
@@ -156,6 +156,42 @@ function validateLogstashOutputNotUsedInFleetServerPolicy(agentPolicies: AgentPo
     );
   }
 }
+
+async function validateTypeChanges(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  id: string,
+  data: Partial<Output>,
+  originalOutput: Output,
+  defaultDataOutputId: string | null
+) {
+  const mergedIsDefault = data.is_default ?? originalOutput.is_default;
+  const fleetServerPolicies = await findPoliciesWithFleetServer(soClient, id, mergedIsDefault);
+
+  if (data.type === outputType.Logstash || originalOutput.type === outputType.Logstash) {
+    await validateLogstashOutputNotUsedInAPMPolicy(soClient, id, mergedIsDefault);
+  }
+  // prevent changing an ES output to logstash if it's used by fleet server policies
+  if (originalOutput.type === outputType.Elasticsearch && data?.type === outputType.Logstash) {
+    // Validate no policy with fleet server use that policy
+    validateLogstashOutputNotUsedInFleetServerPolicy(fleetServerPolicies);
+  }
+  // if a logstash output is updated to become default, update the fleet server policies to use the previous ES output or default output
+  if (data?.type === outputType.Logstash && mergedIsDefault) {
+    for (const policy of fleetServerPolicies) {
+      await agentPolicyService.update(
+        soClient,
+        esClient,
+        policy.id,
+        { data_output_id: defaultDataOutputId },
+        {
+          force: true,
+        }
+      );
+    }
+  }
+}
+
 class OutputService {
   private get encryptedSoClient() {
     return appContextService.getInternalUserSOClient(fakeRequest);
@@ -456,33 +492,9 @@ class OutputService {
 
     const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, 'ssl') };
     const mergedType = data.type ?? originalOutput.type;
-    const mergedIsDefault = data.is_default ?? originalOutput.is_default;
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
-    if (mergedType === outputType.Logstash) {
-      await validateLogstashOutputNotUsedInAPMPolicy(soClient, id, mergedIsDefault);
-    }
-
-    if (data.type === outputType.Logstash) {
-      const fleetServerPolicies = await findPoliciesWithFleetServer(soClient, id, mergedIsDefault);
-      // if a logstash output is updated to become default, update the fleet server policies to use the previous ES output or default output
-      if (data.is_default) {
-        for (const policy of fleetServerPolicies) {
-          await agentPolicyService.update(
-            soClient,
-            esClient,
-            policy.id,
-            { data_output_id: defaultDataOutputId },
-            {
-              force: true,
-            }
-          );
-        }
-      } else {
-        // prevent changing an ES output to logstash if it's used by fleet server policies
-        validateLogstashOutputNotUsedInFleetServerPolicy(fleetServerPolicies);
-      }
-    }
+    await validateTypeChanges(soClient, esClient, id, data, originalOutput, defaultDataOutputId);
 
     // If the output type changed
     if (data.type && data.type !== originalOutput.type) {
