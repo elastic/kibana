@@ -101,7 +101,9 @@ export class MapComponent extends Component<Props, State> {
         .getOnRenderComplete$()
         .pipe(first())
         .subscribe(() => {
-          this.props.onInitialRenderComplete();
+          if (this._isMounted) {
+            this.props.onInitialRenderComplete();
+          }
         });
     }
 
