@@ -73,6 +73,13 @@ spec:
               value: "/etc/elastic-agent"
           securityContext:
             runAsUser: 0
+            capabilities:
+              add:
+              # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
+              # If you are not using this integration, then these capabilites can be removed.
+                - BPF # (since Linux 5.8) allows loading of BPF programs, create most map types, load BTF, iterate programs and maps.
+                - PERFMON # (since Linux 5.8) allows attaching of BPF programs used for performance metrics and observability operations.
+                - SYS_RESOURCE # Allow use of special resources or raising of resource limits. Used by Defend for Containers to modify rlimit_memlock
           resources:
             limits:
               memory: 700Mi
@@ -105,6 +112,8 @@ spec:
             - name: var-lib
               mountPath: /hostfs/var/lib
               readOnly: true
+            - name: sys-kernel-debug
+              mountPath: /sys/kernel/debug
       volumes:
         - name: datastreams
           configMap:
@@ -134,6 +143,12 @@ spec:
         - name: var-lib
           hostPath:
             path: /var/lib
+        # Needed for 'Defend for containers' integration (cloud-defend)
+        # If you are not using this integration, then these volumes and the corresponding
+        # mounts can be removed.
+        - name: sys-kernel-debug
+          hostPath:
+            path: /sys/kernel/debug
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -353,12 +368,19 @@ spec:
                   fieldPath: metadata.name
           securityContext:
             runAsUser: 0
+            capabilities:
+              add:
+              # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
+              # If you are not using this integration, then these capabilites can be removed.
+                - BPF # (since Linux 5.8) allows loading of BPF programs, create most map types, load BTF, iterate programs and maps.
+                - PERFMON # (since Linux 5.8) allows attaching of BPF programs used for performance metrics and observability operations.
+                - SYS_RESOURCE # Allow use of special resources or raising of resource limits. Used by Defend for Containers to modify rlimit_memlock
           resources:
             limits:
-              memory: 500Mi
+              memory: 700Mi
             requests:
               cpu: 100m
-              memory: 200Mi
+              memory: 400Mi
           volumeMounts:
             - name: proc
               mountPath: /hostfs/proc
@@ -381,6 +403,8 @@ spec:
             - name: etc-mid
               mountPath: /etc/machine-id
               readOnly: true
+            - name: sys-kernel-debug
+              mountPath: /sys/kernel/debug
       volumes:
         - name: proc
           hostPath:
@@ -409,6 +433,12 @@ spec:
           hostPath:
             path: /etc/machine-id
             type: File
+        # Needed for 'Defend for containers' integration (cloud-defend)
+        # If you are not using this integration, then these volumes and the corresponding
+        # mounts can be removed.
+        - name: sys-kernel-debug
+          hostPath:
+            path: /sys/kernel/debug
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
