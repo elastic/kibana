@@ -59,11 +59,11 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engines = await client.asCurrentUser.transport.request<EnterpriseSearchEngineDetails>({
+      const engine = await client.asCurrentUser.transport.request<EnterpriseSearchEngineDetails>({
         method: 'GET',
         path: `/_application/search_application/${request.params.engine_name}`,
       });
-      return response.ok({ body: engines });
+      return response.ok({ body: engine });
     })
   );
 
@@ -75,20 +75,25 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
           indices: schema.arrayOf(schema.string()),
           name: schema.maybe(schema.string()),
         }),
+        query: schema.object({
+          create: schema.maybe(schema.boolean()),
+        }),
         params: schema.object({
           engine_name: schema.string(),
+
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engines =
+      const engine =
         await client.asCurrentUser.transport.request<EnterpriseSearchEngineUpsertResponse>({
           method: 'PUT',
           path: `/_application/search_application/${request.params.engine_name}`,
           body: { indices: request.body.indices },
+          querystring: request.query,
         });
-      return response.ok({ body: engines });
+      return response.ok({ body: engine });
     })
   );
 
@@ -103,11 +108,11 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engines = await client.asCurrentUser.transport.request<AcknowledgedResponseBase>({
+      const engine = await client.asCurrentUser.transport.request<AcknowledgedResponseBase>({
         method: 'DELETE',
         path: `_application/search_application/${request.params.engine_name}`,
       });
-      return response.ok({ body: engines });
+      return response.ok({ body: engine });
     })
   );
 
@@ -172,6 +177,7 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
         request,
         `/api/engines/${engineName}`
       );
+
       if (!engine || (isResponseError(engine) && engine.responseStatus === 404)) {
         return createError({
           errorCode: ErrorCode.ENGINE_NOT_FOUND,

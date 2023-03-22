@@ -26,6 +26,7 @@ export const createEngine = async ({
 
   return await HttpLogic.values.http.put<EnterpriseSearchEngineUpsertResponse>(route, {
     body: JSON.stringify({ indices, name: engineName }),
+    query: { create: true },
   });
 };
 

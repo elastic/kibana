@@ -174,11 +174,18 @@ describe('engines routes', () => {
         params: {
           engine_name: 'engine-name',
         },
+        query :{create: true},
+        body: {
+          indices: ['test-indices-1'],
+        }
       });
       expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
         method: 'PUT',
         path: '/_application/search_application/engine-name',
-        body: {},
+        body: {
+          indices: ['test-indices-1'],
+        },
+        querystring : {create: true}
       });
       const mock = jest.fn();
       const mockResponse = mock({ result: 'created' });
@@ -198,11 +205,17 @@ describe('engines routes', () => {
         params: {
           engine_name: 'engine-name',
         },
+        body: {
+          indices: ['test-indices-1'],
+        }
       });
       expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
         method: 'PUT',
         path: '/_application/search_application/engine-name',
-        body: {},
+        body: {
+          indices: ['test-indices-1'],
+        },
+        querystring : {}
       });
       const mock = jest.fn();
       const mockResponse = mock({ result: 'updated' });

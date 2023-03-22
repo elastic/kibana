@@ -26,6 +26,7 @@ describe('CreateEngineApiLogic', () => {
       await nextTick();
       expect(http.put).toHaveBeenCalledWith('/internal/enterprise_search/engines/my-engine', {
         body: '{"indices":["an-index"],"name":"my-engine"}',
+        query: { create: true },
       });
       await expect(result).resolves.toEqual(response);
     });
