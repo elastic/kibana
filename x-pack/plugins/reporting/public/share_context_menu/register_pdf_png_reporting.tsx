@@ -96,8 +96,9 @@ export const reportingScreenshotShareProvider = ({
     if (!licenseHasScreenshotReporting) {
       return [];
     }
+    const isSupportedType = ['dashboard', 'visualization', 'lens'].includes(objectType);
 
-    if (!['dashboard', 'visualization', 'lens'].includes(objectType)) {
+    if (!isSupportedType) {
       return [];
     }
 
@@ -105,10 +106,7 @@ export const reportingScreenshotShareProvider = ({
       return [];
     }
 
-    if (
-      ['visualize', 'visualization', 'lens'].includes(objectType) &&
-      !capabilityHasVisualizeScreenshotReporting
-    ) {
+    if (isSupportedType && !capabilityHasVisualizeScreenshotReporting) {
       return [];
     }
 
