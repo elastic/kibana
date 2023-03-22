@@ -35,7 +35,6 @@ interface Opts<T, H> {
   pollIntervalDelay$: Observable<number>;
   bufferCapacity: number;
   getCapacity: () => number;
-  pollRequests$: Observable<Option<T>>;
   work: WorkFn<T, H>;
   workTimeout: number;
 }
@@ -46,19 +45,17 @@ interface Opts<T, H> {
  * @param opts
  * @prop {number} pollInterval - How often, in milliseconds, we will an event be emnitted, assuming there's capacity to do so
  * @prop {() => number} getCapacity - A function specifying whether there is capacity to emit new events
- * @prop {Observable<Option<T>>} pollRequests$ - A stream of requests for polling which can provide an optional argument for the polling phase
  * @prop {number} bufferCapacity - How many requests are do we allow our buffer to accumulate before rejecting requests?
  * @prop {(...params: T[]) => Promise<H>} work - The work we wish to execute in order to `poll`, this is the operation we're actually executing on request
  *
  * @returns {Observable<Set<T>>} - An observable which emits an event whenever a polling event is due to take place, providing access to a singleton Set representing a queue
- *  of unique request argumets of type T. The queue holds all the buffered request arguments streamed in via pollRequests$
+ *  of unique request argumets of type T.
  */
 export function createTaskPoller<T, H>({
   logger,
   pollInterval$,
   pollIntervalDelay$,
   getCapacity,
-  pollRequests$,
   bufferCapacity,
   work,
   workTimeout,
@@ -67,65 +64,63 @@ export function createTaskPoller<T, H>({
 
   const errors$ = new Subject<Err<PollingError<T>>>();
 
-  const requestWorkProcessing$ = merge(
-    // emit a polling event on demand
-    pollRequests$,
+  const requestWorkProcessing$ = combineLatest([
     // emit a polling event on a fixed interval
-    combineLatest([
-      pollInterval$.pipe(
-        tap((period) => {
-          logger.debug(`Task poller now using interval of ${period}ms`);
-        })
-      ),
-      pollIntervalDelay$.pipe(
-        tap((pollDelay) => {
-          logger.debug(`Task poller now delaying emission by ${pollDelay}ms`);
-        })
-      ),
-    ]).pipe(
+    pollInterval$.pipe(
+      tap((period) => {
+        logger.debug(`Task poller now using interval of ${period}ms`);
+      })
+    ),
+    pollIntervalDelay$.pipe(
+      tap((pollDelay) => {
+        logger.debug(`Task poller now delaying emission by ${pollDelay}ms`);
+      })
+    ),
+  ])
+    .pipe(
       // We don't have control over `pollDelay` in the poller, and a change to `delayOnClaimConflicts` could accidentally cause us to pause Task Manager
       // polling for a far longer duration that we intended.
       // Since the goal is to shift it within the range of `period`, we use modulo as a safe guard to ensure this doesn't happen.
       switchMap(([period, pollDelay]) => timer(period + (pollDelay % period), period)),
       mapTo(none)
     )
-  ).pipe(
-    // buffer all requests in a single set (to remove duplicates) as we don't want
-    // work to take place in parallel (it could cause Task Manager to pull in the same
-    // task twice)
-    scan<Option<T>, Set<T>>((queue, request) => {
-      if (isErr(pushOptionalIntoSet(queue, bufferCapacity, request))) {
-        // value wasnt pushed into buffer, we must be at capacity
-        errors$.next(
-          asPollingError<T>(
-            `request capacity reached`,
-            PollingErrorType.RequestCapacityReached,
-            request
-          )
+    .pipe(
+      // buffer all requests in a single set (to remove duplicates) as we don't want
+      // work to take place in parallel (it could cause Task Manager to pull in the same
+      // task twice)
+      scan<Option<T>, Set<T>>((queue, request) => {
+        if (isErr(pushOptionalIntoSet(queue, bufferCapacity, request))) {
+          // value wasnt pushed into buffer, we must be at capacity
+          errors$.next(
+            asPollingError<T>(
+              `request capacity reached`,
+              PollingErrorType.RequestCapacityReached,
+              request
+            )
+          );
+        }
+        return queue;
+      }, new Set<T>()),
+      // only emit polling events when there's capacity to handle them
+      filter(hasCapacity),
+      // take as many argumented calls as we have capacity for and call `work` with
+      // those arguments. If the queue is empty this will still trigger work to be done
+      concatMap(async (set: Set<T>) => {
+        return mapResult<H, Error, Result<H, PollingError<T>>>(
+          await promiseResult<H, Error>(
+            timeoutPromiseAfter<H, Error>(
+              work(...pullFromSet(set, getCapacity())),
+              workTimeout,
+              () => new Error(`work has timed out`)
+            )
+          ),
+          (workResult) => asOk(workResult),
+          (err: Error) => asPollingError<T>(err, PollingErrorType.WorkError)
         );
-      }
-      return queue;
-    }, new Set<T>()),
-    // only emit polling events when there's capacity to handle them
-    filter(hasCapacity),
-    // take as many argumented calls as we have capacity for and call `work` with
-    // those arguments. If the queue is empty this will still trigger work to be done
-    concatMap(async (set: Set<T>) => {
-      return mapResult<H, Error, Result<H, PollingError<T>>>(
-        await promiseResult<H, Error>(
-          timeoutPromiseAfter<H, Error>(
-            work(...pullFromSet(set, getCapacity())),
-            workTimeout,
-            () => new Error(`work has timed out`)
-          )
-        ),
-        (workResult) => asOk(workResult),
-        (err: Error) => asPollingError<T>(err, PollingErrorType.WorkError)
-      );
-    }),
-    // catch errors during polling for work
-    catchError((err: Error) => of(asPollingError<T>(err, PollingErrorType.WorkError)))
-  );
+      }),
+      // catch errors during polling for work
+      catchError((err: Error) => of(asPollingError<T>(err, PollingErrorType.WorkError)))
+    );
 
   return merge(requestWorkProcessing$, errors$);
 }
