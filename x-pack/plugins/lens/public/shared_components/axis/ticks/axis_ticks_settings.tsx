@@ -18,7 +18,7 @@ export interface AxisTicksSettingsProps {
    */
   axis: AxesSettingsConfigKeys;
   /**
-   * Callback to axis title change for both title and visibility
+   * Callback to axis ticks status change
    */
   updateTicksVisibilityState: (visible: boolean, axis: AxesSettingsConfigKeys) => void;
   /**
