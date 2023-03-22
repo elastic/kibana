@@ -21,13 +21,12 @@ import { ToolbarOverlay } from '../toolbar_overlay';
 import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
 import { isScreenshotMode } from '../../kibana_services';
-import { RawValue } from '../../../common/constants';
+import { RawValue, RENDER_TIMEOUT } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettings } from '../../../common/descriptor_types';
 import { MapSettingsPanel } from '../map_settings_panel';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { ILayer } from '../../classes/layers/layer';
-import { EventHandlers } from '../../reducers/non_serializable_instances';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -56,7 +55,6 @@ export interface Props {
    * Visualize Embeddable handles sharing attributes so sharing attributes are not needed in the children.
    */
   isSharable: boolean;
-  eventHandlers: EventHandlers;
 }
 
 interface State {
@@ -87,6 +85,7 @@ export class MapContainer extends Component<Props, State> {
     this._loadShowFitToBoundsButton();
     this._loadShowTimesliderButton();
     if (
+      this.props.isSharable &&
       this.props.areLayersLoaded &&
       !this._isInitalLoadRenderTimerStarted
     ) {
@@ -108,10 +107,6 @@ export class MapContainer extends Component<Props, State> {
   // Failure to not have the dom attribute, or custom event, will timeout the job.
   // See x-pack/plugins/reporting/export_types/common/lib/screenshots/wait_for_render.ts for more.
   _onInitialLoadRenderComplete = () => {
-    if (this.props.eventHandlers.onInitialRenderComplete) {
-      this.props.eventHandlers.onInitialRenderComplete();
-    }
-
     const el = document.querySelector(`[data-dom-id="${this.state.domId}"]`);
 
     if (el) {
@@ -148,15 +143,13 @@ export class MapContainer extends Component<Props, State> {
     }
   }
 
-  // Mapbox does not provide any feedback when rendering is complete.
-  // Temporary solution is just to wait set period of time after data has loaded.
   _startInitialLoadRenderTimer = () => {
     window.setTimeout(() => {
       if (this._isMounted) {
         this.setState({ isInitialLoadRenderTimeoutComplete: true });
         this._onInitialLoadRenderComplete();
       }
-    }, 1000);
+    }, RENDER_TIMEOUT);
   };
 
   render() {

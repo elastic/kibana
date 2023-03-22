@@ -334,3 +334,7 @@ export enum WIZARD_ID {
   WMS_LAYER = 'wmsLayer',
   TMS_LAYER = 'tmsLayer',
 }
+
+// Maplibre does not provide any feedback when rendering is complete.
+// Temporary solution is just to wait set period of time after data has loaded.
+export const RENDER_TIMEOUT = 1000;

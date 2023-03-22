@@ -6,18 +6,20 @@
  */
 
 import React, { Component, RefObject } from 'react';
+import { debounce } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiLoadingChart } from '@elastic/eui';
 import { EmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common';
+import { RENDER_TIMEOUT } from '../../common/constants';
 import { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from '../embeddable';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
 
 interface Props {
   factory: EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput>;
   passiveLayer: LayerDescriptor;
-  onInitialRenderComplete: () => void;
+  onRenderComplete: () => void;
 }
 
 interface State {
@@ -35,6 +37,7 @@ export class PassiveMap extends Component<Props, State> {
   private _isMounted = false;
   private _prevPassiveLayer = this.props.passiveLayer;
   private readonly _embeddableRef: RefObject<HTMLDivElement> = React.createRef<HTMLDivElement>();
+  private readonly _loadingLayers = new Map<string, boolean>();
 
   state: State = { mapEmbeddable: null };
 
@@ -56,6 +59,14 @@ export class PassiveMap extends Component<Props, State> {
       this._prevPassiveLayer = this.props.passiveLayer;
     }
   }
+
+  _onRenderComplete = debounce(() => {
+    if (!this._isMounted) {
+      return;
+    }
+
+    this.props.onRenderComplete();
+  }, RENDER_TIMEOUT);
 
   async _setupEmbeddable() {
     const basemapLayerDescriptor = createBasemapLayerDescriptor();
@@ -86,7 +97,23 @@ export class PassiveMap extends Component<Props, State> {
     }
 
     if (this._isMounted) {
-      mapEmbeddable.setEventHandlers({ onInitialRenderComplete: this.props.onInitialRenderComplete });
+      mapEmbeddable.setEventHandlers({
+        onDataLoad: ({ layerId, }: { layerId: string; }) => {
+          this._loadingLayers.set(layerId, true);
+        },
+        onDataLoadEnd: ({ layerId }: { layerId: string }) => {
+          this._loadingLayers.delete(layerId);
+          if (this._loadingLayers.size === 0) {
+            this._onRenderComplete();
+          }
+        },
+        onDataLoadError: ({ layerId }: { layerId: string }) => {
+          this._loadingLayers.delete(layerId);
+          if (this._loadingLayers.size === 0) {
+            this._onRenderComplete();
+          }
+        }
+      });
       mapEmbeddable.setIsSharable(false);
       this.setState({ mapEmbeddable: mapEmbeddable }, () => {
         if (this.state.mapEmbeddable && this._embeddableRef.current) {

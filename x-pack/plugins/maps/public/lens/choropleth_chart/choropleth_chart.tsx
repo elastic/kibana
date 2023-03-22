@@ -31,7 +31,7 @@ interface Props extends ChoroplethChartProps {
   uiSettings: IUiSettingsClient;
   emsFileLayers: FileLayer[];
   mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableInput, MapEmbeddableOutput>;
-  onInitialRenderComplete: () => void;
+  onRenderComplete: () => void;
 }
 
 export function ChoroplethChart({
@@ -41,7 +41,7 @@ export function ChoroplethChart({
   uiSettings,
   emsFileLayers,
   mapEmbeddableFactory,
-  onInitialRenderComplete,
+  onRenderComplete,
 }: Props) {
   if (!args.regionAccessor || !args.valueAccessor) {
     return null;
@@ -134,7 +134,7 @@ export function ChoroplethChart({
     <PassiveMap
       passiveLayer={choroplethLayer}
       factory={mapEmbeddableFactory} 
-      onInitialRenderComplete={onInitialRenderComplete}
+      onRenderComplete={onRenderComplete}
     />
   );
 }

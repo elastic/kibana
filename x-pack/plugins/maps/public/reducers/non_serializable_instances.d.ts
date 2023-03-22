@@ -25,11 +25,6 @@ export interface ResultMeta {
 
 interface EventHandlers {
   /**
-   * Take action on initial map render complete.
-   */
-  onInitialRenderComplete?: () => void;
-
-  /**
    * Take action on data load.
    */
   onDataLoad?: ({ layerId, dataId }: { layerId: string; dataId: string }) => void;
