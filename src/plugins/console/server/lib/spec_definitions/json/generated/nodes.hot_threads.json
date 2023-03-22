@@ -8,7 +8,12 @@
       "type": [
         "cpu",
         "wait",
-        "block"
+        "block",
+        "mem"
+      ],
+      "sort": [
+        "cpu",
+        "total"
       ],
       "timeout": ""
     },

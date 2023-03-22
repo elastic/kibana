@@ -9,6 +9,7 @@ import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { buildMetricThresholdRule } from '../mocks/metric_threshold_rule';
 import AlertDetailsAppSection from './alert_details_app_section';
 
@@ -26,10 +27,13 @@ jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
 }));
 
 describe('AlertDetailsAppSection', () => {
+  const queryClient = new QueryClient();
   const renderComponent = () => {
     return render(
       <IntlProvider locale="en">
-        <AlertDetailsAppSection rule={buildMetricThresholdRule()} />
+        <QueryClientProvider client={queryClient}>
+          <AlertDetailsAppSection rule={buildMetricThresholdRule()} />
+        </QueryClientProvider>
       </IntlProvider>
     );
   };
