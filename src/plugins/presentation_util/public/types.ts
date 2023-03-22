@@ -7,6 +7,7 @@
  */
 
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { registerExpressionsLanguage } from '.';
 import { PresentationLabsService } from './services/labs/types';
 
@@ -23,4 +24,5 @@ export interface PresentationUtilPluginSetupDeps {}
 
 export interface PresentationUtilPluginStartDeps {
   dataViews: DataViewsPublicPluginStart;
+  uiActions: UiActionsStart;
 }

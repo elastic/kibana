@@ -64,7 +64,6 @@ export const queryExecutor = async ({
 
     const license = await firstValueFrom(licensing.license$);
     const hasPlatinumLicense = license.hasAtLeast('platinum');
-    const hasGoldLicense = license.hasAtLeast('gold');
 
     const result =
       ruleParams.alertSuppression?.groupBy != null && hasPlatinumLicense
@@ -98,7 +97,7 @@ export const queryExecutor = async ({
             state: {},
           };
 
-    if (hasGoldLicense) {
+    if (hasPlatinumLicense) {
       if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
         scheduleNotificationResponseActions(
           {
