@@ -13,8 +13,8 @@ export interface SourceDoc {
 }
 
 export function getServiceGroupFieldsAgg(
-  groupBy: string[] | string | undefined,
-  topHitsOpts: AggregationsTopHitsAggregation = {}
+  topHitsOpts: AggregationsTopHitsAggregation = {},
+  groupBy: string[] | string | undefined = []
 ) {
   return {
     source_fields: {
