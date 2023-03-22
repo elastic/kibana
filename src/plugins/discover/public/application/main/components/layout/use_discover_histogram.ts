@@ -15,19 +15,22 @@ import {
   UnifiedHistogramState,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
-import { AggregateQuery, Query, isOfAggregateQueryType } from '@kbn/es-query';
 import { useCallback, useEffect, useRef, useMemo, useState } from 'react';
-import { distinctUntilChanged, map, Observable } from 'rxjs';
+import { distinctUntilChanged, filter, map, Observable } from 'rxjs';
+import type { Suggestion } from '@kbn/lens-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
-import type { DataFetch$, SavedSearchData } from '../../services/discover_data_state_container';
+import type {
+  DataDocuments$,
+  DataFetch$,
+  SavedSearchData,
+} from '../../services/discover_data_state_container';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import type { DiscoverStateContainer } from '../../services/discover_state';
-import type { Suggestion } from '@kbn/lens-plugin/public';
 
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
@@ -36,7 +39,6 @@ export interface UseDiscoverHistogramProps {
   inspectorAdapters: InspectorAdapters;
   savedSearchFetch$: DataFetch$;
   searchSessionId: string | undefined;
-  isPlainRecord: boolean;
 }
 
 export const useDiscoverHistogram = ({
@@ -46,7 +48,6 @@ export const useDiscoverHistogram = ({
   inspectorAdapters,
   savedSearchFetch$,
   searchSessionId,
-  isPlainRecord,
 }: UseDiscoverHistogramProps) => {
   const services = useDiscoverServices();
   const timefilter = services.data.query.timefilter.timefilter;
@@ -56,12 +57,6 @@ export const useDiscoverHistogram = ({
    */
 
   const [unifiedHistogram, setUnifiedHistogram] = useState<UnifiedHistogramInitializedApi>();
-  const prev = useRef<{ query: AggregateQuery | Query | undefined; columns: string[] | undefined }>(
-    {
-      columns: [],
-      query: undefined,
-    }
-  );
 
   const setUnifiedHistogramApi = useCallback(
     (api: UnifiedHistogramApi | null) => {
@@ -83,8 +78,6 @@ export const useDiscoverHistogram = ({
           savedSearchData$.totalHits$.getValue();
 
         const { query, filters, time: timeRange } = services.data.query.getState();
-        prev.current.query = query;
-        prev.current.columns = columns;
 
         api.initialize({
           services: { ...services, uiActions: getUiActions() },
@@ -184,13 +177,13 @@ export const useDiscoverHistogram = ({
     // We only want to show the partial results on the first load,
     // or there will be a flickering effect as the loading spinner
     // is quickly shown and hidden again on fetches
-    if (!firstLoadComplete.current && !isPlainRecord) {
+    if (!firstLoadComplete.current) {
       unifiedHistogram?.setTotalHits({
         totalHitsStatus: totalHitsStatus.toString() as UnifiedHistogramFetchStatus,
         totalHitsResult,
       });
     }
-  }, [isPlainRecord, totalHitsResult, totalHitsStatus, unifiedHistogram]);
+  }, [totalHitsResult, totalHitsStatus, unifiedHistogram]);
 
   /**
    * Sync URL query params with Unified Histogram
@@ -218,25 +211,24 @@ export const useDiscoverHistogram = ({
     unifiedHistogram?.setBreakdownField(breakdownField);
   }, [breakdownField, unifiedHistogram]);
 
-  const columns = useAppStateSelector((state) => state.columns);
+  /**
+   * Columns
+   */
 
-
+  // Update the columns only when documents are fetched so the Lens suggestions
+  // don't constantly change when the user modifies the table columns
   useEffect(() => {
-    const currentQueryIsTextBased = query && isOfAggregateQueryType(query);
-    const initialQueryIsTextBased =
-      prev.current.query && isOfAggregateQueryType(prev.current.query);
-    // Update the columns only when the query changes
-    if (!isEqual(columns, prev.current.columns) && !isEqual(query, prev.current.query)) {
-      // transitioning from dataview mode to text based mode should set the columns to []
-      if (currentQueryIsTextBased && !initialQueryIsTextBased) {
-        unifiedHistogram?.setColumns([]);
-      } else {
-        unifiedHistogram?.setColumns(columns);
-      }
-      prev.current.query = query;
-      prev.current.columns = columns;
-    }
-  }, [columns, query, unifiedHistogram]);
+    const subscription = createDocumentsFetchedObservable(
+      stateContainer.dataState.data$.documents$
+    ).subscribe(({ textBasedQueryColumns }) => {
+      const columns = textBasedQueryColumns?.map(({ name }) => name) ?? [];
+      unifiedHistogram?.setColumns(columns);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [stateContainer.appState, stateContainer.dataState.data$.documents$, unifiedHistogram]);
 
   /**
    * Total hits
@@ -253,10 +245,6 @@ export const useDiscoverHistogram = ({
         if (result instanceof Error) {
           // Set totalHits$ to an error state
           setTotalHitsError(result);
-          return;
-        }
-
-        if (isPlainRecord) {
           return;
         }
 
@@ -288,10 +276,8 @@ export const useDiscoverHistogram = ({
   }, [
     savedSearchData$.main$,
     savedSearchData$.totalHits$,
-    services.data,
     setTotalHitsError,
-    unifiedHistogram,
-    isPlainRecord,
+    unifiedHistogram?.state$,
   ]);
 
   /**
@@ -361,6 +347,13 @@ const createStateSyncObservable = (state$?: Observable<UnifiedHistogramState>) =
 
       return prevLensRequestAdapter === currLensRequestAdapter && isEqual(prevRest, currRest);
     })
+  );
+};
+
+const createDocumentsFetchedObservable = (documents$: DataDocuments$) => {
+  return documents$.pipe(
+    distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
+    filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE)
   );
 };
 
