@@ -33,18 +33,27 @@ export const FunctionHelpPopover: FC = memo(() => {
   const columns = [
     {
       field: 'function',
-      name: 'Function',
+      name: i18n.translate(
+        'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.function',
+        {
+          defaultMessage: 'Function',
+        }
+      ),
       width: '150px',
     },
     {
       field: 'description',
-      name: 'Description',
+      name: i18n.translate(
+        'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.description',
+        {
+          defaultMessage: 'Description',
+        }
+      ),
     },
   ];
 
   const items = [
     {
-      id: 0,
       function: 'count, high_count, low_count',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.count',
@@ -54,7 +63,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       ),
     },
     {
-      id: 1,
       function: 'non_zero_count, high_non_zero_count, low_non_zero_count',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.nonZeroCount',
@@ -65,7 +73,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       ),
     },
     {
-      id: 2,
       function: 'distinct_count, high_distinct_count, low_distinct_count',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.distinctCount',
@@ -76,7 +83,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       ),
     },
     {
-      id: 3,
       function: 'lat_long',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.latLong',
@@ -86,7 +92,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       ),
     },
     {
-      id: 4,
       function: 'info_content, high_info_content, low_info_content',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.infoContent',
@@ -97,7 +102,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       ),
     },
     {
-      id: 5,
       function: 'min',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.min',
@@ -108,7 +112,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       ),
     },
     {
-      id: 6,
       function: 'max',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.max',
@@ -119,7 +122,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       ),
     },
     {
-      id: 7,
       function: 'median, high_median, low_median',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.median',
@@ -130,7 +132,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       ),
     },
     {
-      id: 8,
       function: 'mean, high_mean, low_mean',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.mean',
@@ -141,7 +142,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       ),
     },
     {
-      id: 9,
       function: 'metric',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.metric',
@@ -152,7 +152,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       ),
     },
     {
-      id: 10,
       function: 'varp, high_varp, low_varp',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.varp',
@@ -163,7 +162,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       ),
     },
     {
-      id: 11,
       function: 'rare',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.rare',
@@ -173,7 +171,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       ),
     },
     {
-      id: 12,
       function: 'freq_rare',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.freqRare',
@@ -184,7 +181,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       ),
     },
     {
-      id: 13,
       function: 'sum, high_sum, low_sum',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.sum',
@@ -194,7 +190,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       ),
     },
     {
-      id: 14,
       function: 'non_null_sum, high_non_null_sum, low_non_null_sum',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.nonNullSum',
@@ -205,7 +200,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       ),
     },
     {
-      id: 15,
       function: 'time_of_day, time_of_week',
       description: i18n.translate(
         'xpack.ml.newJob.wizard.pickFieldsStep.advancedDetectorModal.functionHelp.time',
@@ -224,8 +218,6 @@ export const FunctionHelpPopover: FC = memo(() => {
       isOpen={isHelpOpen}
       display="inlineBlock"
       panelPaddingSize="none"
-      className="anomalyDetectionFunctionsHelp_popover"
-      panelClassName="anomalyDetectionFunctionsHelp_panel"
       closePopover={closeHelp}
       initialFocus="#mlAdFunctionsHelpTableId"
     >
@@ -249,8 +241,7 @@ export const FunctionHelpPopover: FC = memo(() => {
           })}
           items={items}
           compressed={true}
-          rowHeader="firstName"
-          columns={columnsSidebar}
+          columns={columns}
           responsive={false}
         />
       </EuiPanel>
