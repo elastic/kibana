@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Block } from './types';
+import { Block } from '../types';
 
 const API_VERSION = '7.15.0';
 
