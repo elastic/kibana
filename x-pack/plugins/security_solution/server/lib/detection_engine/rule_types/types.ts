@@ -154,7 +154,7 @@ export interface CreateRuleOptions {
 }
 
 export interface CreateQueryRuleAdditionalOptions {
-  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
+  osqueryCreateActionService: SetupPlugins['osquery']['createActionService'];
   licensing: LicensingPluginSetup;
   endpointAppContext?: EndpointAppContext;
 }

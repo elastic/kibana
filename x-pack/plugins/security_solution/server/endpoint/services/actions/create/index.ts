@@ -53,7 +53,10 @@ const commandToFeatureKeyMap = new Map<ResponseActionsApiCommandNames, FeatureKe
 const returnActionIdCommands: ResponseActionsApiCommandNames[] = ['isolate', 'unisolate'];
 
 export class ActionCreateService {
-  constructor(private esClient: ElasticsearchClient, private endpointContext: EndpointAppContext) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private endpointContext: EndpointAppContext // private licenseService: LicenseService
+  ) {}
 
   async createAction(
     payload: TypeOf<typeof ResponseActionBodySchema> & {
@@ -68,6 +71,7 @@ export class ActionCreateService {
     if (featureKey) {
       this.endpointContext.service.getFeatureUsageService().notifyUsage(featureKey);
     }
+    // const hasLicense = this.licenseService.isAtLeast('enterprise');
 
     const logger = this.endpointContext.logFactory.get('hostIsolation');
 
@@ -102,7 +106,7 @@ export class ActionCreateService {
     const doc = {
       '@timestamp': moment().toISOString(),
       agent: {
-        id: agents,
+        id: payload.endpoint_ids,
       },
       EndpointActions: {
         action_id: actionID,
@@ -142,6 +146,9 @@ export class ActionCreateService {
           index: ENDPOINT_ACTIONS_INDEX,
           body: {
             ...doc,
+            agent: {
+              id: payload.endpoint_ids,
+            },
           },
           refresh: 'wait_for',
         },

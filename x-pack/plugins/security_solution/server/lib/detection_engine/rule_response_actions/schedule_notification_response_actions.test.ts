@@ -54,10 +54,13 @@ describe('ScheduleNotificationResponseActions', () => {
     ecs_mapping: { testField: { field: 'testField', value: 'testValue' } },
   };
 
+  const osqueryCreateActionServiceMock = {
+    create: jest.fn(),
+    stop: jest.fn(),
+  };
+
   const simpleQuery = 'select * from uptime';
   it('should handle osquery response actions with query', async () => {
-    const osqueryActionMock = jest.fn();
-
     const responseActions: RuleResponseAction[] = [
       {
         actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
@@ -67,17 +70,18 @@ describe('ScheduleNotificationResponseActions', () => {
         },
       },
     ];
-    scheduleNotificationResponseActions({ signals, responseActions }, osqueryActionMock);
+    scheduleNotificationResponseActions(
+      { signals, responseActions },
+      osqueryCreateActionServiceMock
+    );
 
-    expect(osqueryActionMock).toHaveBeenCalledWith({
+    expect(osqueryCreateActionServiceMock).toHaveBeenCalledWith({
       ...defaultQueryResultParams,
       query: simpleQuery,
     });
     //
   });
   it('should handle osquery response actions with packs', async () => {
-    const osqueryActionMock = jest.fn();
-
     const responseActions: RuleResponseAction[] = [
       {
         actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
@@ -94,9 +98,12 @@ describe('ScheduleNotificationResponseActions', () => {
         },
       },
     ];
-    scheduleNotificationResponseActions({ signals, responseActions }, osqueryActionMock);
+    scheduleNotificationResponseActions(
+      { signals, responseActions },
+      osqueryCreateActionServiceMock
+    );
 
-    expect(osqueryActionMock).toHaveBeenCalledWith({
+    expect(osqueryCreateActionServiceMock).toHaveBeenCalledWith({
       ...defaultPackResultParams,
       queries: [{ ...defaultQueries, id: 'query-1', query: simpleQuery }],
     });

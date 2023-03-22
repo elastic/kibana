@@ -7,25 +7,12 @@
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { HostMetadata } from '../../../../../common/endpoint/types';
-import type { HostListQueryResult, HostQueryResult } from '../../../types';
+import type { HostListQueryResult } from '../../../types';
 
 // remove the top-level 'HostDetails' property if found, from previous schemas
 function stripHostDetails(host: HostMetadata | { HostDetails: HostMetadata }): HostMetadata {
   return 'HostDetails' in host ? host.HostDetails : host;
 }
-
-export const queryResponseToHostResult = (
-  searchResponse: SearchResponse<HostMetadata | { HostDetails: HostMetadata }>
-): HostQueryResult => {
-  const response = searchResponse as SearchResponse<HostMetadata | { HostDetails: HostMetadata }>;
-  return {
-    resultLength: response.hits.hits.length,
-    result:
-      response.hits.hits.length > 0
-        ? stripHostDetails(response.hits.hits[0]._source as HostMetadata)
-        : undefined,
-  };
-};
 
 export const queryResponseToHostListResult = (
   searchResponse: SearchResponse<HostMetadata | { HostDetails: HostMetadata }>

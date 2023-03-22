@@ -55,30 +55,6 @@ export const MetadataSortMethod: estypes.SortCombinations[] = [
   },
 ];
 
-export function getESQueryHostMetadataByID(agentID: string): estypes.SearchRequest {
-  return {
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  { term: { 'agent.id': agentID } },
-                  { term: { 'HostDetails.agent.id': agentID } },
-                ],
-              },
-            },
-          ],
-        },
-      },
-      sort: MetadataSortMethod,
-      size: 1,
-    },
-    index: metadataCurrentIndexPattern,
-  };
-}
-
 export function getESQueryHostMetadataByFleetAgentIds(
   fleetAgentIds: string[]
 ): estypes.SearchRequest {
@@ -119,6 +95,7 @@ export function getESQueryHostMetadataByIDs(agentIDs: string[]) {
         },
       },
       sort: MetadataSortMethod,
+      size: agentIDs.length,
     },
     index: metadataCurrentIndexPattern,
   };

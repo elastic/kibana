@@ -30,7 +30,7 @@ interface AlertsWithAgentType {
 
 export const scheduleNotificationResponseActions = (
   { signals, responseActions }: ScheduleNotificationActions,
-  osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction'],
+  osqueryCreateActionService?: SetupPlugins['osquery']['createActionService'],
   endpointAppContext?: EndpointAppContext,
   hasEnterpriseLicense?: boolean
 ) => {
@@ -53,8 +53,11 @@ export const scheduleNotificationResponseActions = (
   );
 
   each(responseActions, (responseAction) => {
-    if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY && osqueryCreateAction) {
-      osqueryResponseAction(responseAction, osqueryCreateAction, {
+    if (
+      responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY &&
+      osqueryCreateActionService
+    ) {
+      osqueryResponseAction(responseAction, osqueryCreateActionService, {
         alerts,
         alertIds,
         agentIds,

@@ -33,14 +33,10 @@ import {
 } from './errors';
 import {
   getESQueryHostMetadataByFleetAgentIds,
-  getESQueryHostMetadataByID,
   buildUnitedIndexQuery,
   getESQueryHostMetadataByIDs,
 } from '../../routes/metadata/query_builders';
-import {
-  queryResponseToHostListResult,
-  queryResponseToHostResult,
-} from '../../routes/metadata/support/query_strategies';
+import { queryResponseToHostListResult } from '../../routes/metadata/support/query_strategies';
 import {
   catchAndWrapError,
   DEFAULT_ENDPOINT_HOST_STATUS,
@@ -108,12 +104,9 @@ export class EndpointMetadataService {
    * @throws
    */
   async getHostMetadata(esClient: ElasticsearchClient, endpointId: string): Promise<HostMetadata> {
-    const query = getESQueryHostMetadataByID(endpointId);
-    const queryResult = await esClient.search<HostMetadata>(query).catch(catchAndWrapError);
-    const endpointMetadata = queryResponseToHostResult(queryResult).result;
-
-    if (endpointMetadata) {
-      return endpointMetadata;
+    const endpointMetadataList = await this.getMetadataForEndpoints(esClient, [endpointId]);
+    if (endpointMetadataList.length) {
+      return endpointMetadataList[0];
     }
 
     throw new EndpointHostNotFoundError(`Endpoint with id ${endpointId} not found`);

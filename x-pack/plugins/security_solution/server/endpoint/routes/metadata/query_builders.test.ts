@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getESQueryHostMetadataByID, buildUnitedIndexQuery } from './query_builders';
+import { getESQueryHostMetadataByIDs, buildUnitedIndexQuery } from './query_builders';
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
 import { get } from 'lodash';
 import { expectedCompleteUnitedIndexQuery } from './query_builders.fixtures';
@@ -14,13 +14,13 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 describe('query builder', () => {
   describe('MetadataGetQuery', () => {
     it('searches the correct index', () => {
-      const query = getESQueryHostMetadataByID('nonsense-id');
+      const query = getESQueryHostMetadataByIDs(['nonsense-id']);
       expect(query.index).toEqual(metadataCurrentIndexPattern);
     });
 
     it('searches for the correct ID', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
-      const query = getESQueryHostMetadataByID(mockID);
+      const query = getESQueryHostMetadataByIDs([mockID]);
 
       expect(get(query, 'body.query.bool.filter.0.bool.should')).toContainEqual({
         term: { 'agent.id': mockID },
@@ -29,7 +29,7 @@ describe('query builder', () => {
 
     it('supports HostDetails in schema for backwards compat', () => {
       const mockID = 'AABBCCDD-0011-2233-AA44-DEADBEEF8899';
-      const query = getESQueryHostMetadataByID(mockID);
+      const query = getESQueryHostMetadataByIDs([mockID]);
 
       expect(get(query, 'body.query.bool.filter.0.bool.should')).toContainEqual({
         term: { 'HostDetails.agent.id': mockID },

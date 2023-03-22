@@ -129,6 +129,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private telemetryUsageCounter?: UsageCounter;
   private kibanaIndex?: string;
   private endpointContext: EndpointAppContext;
+  // private licenseSubscription: Subscription | null = null;
 
   constructor(context: PluginInitializerContext) {
     this.pluginContext = context;
@@ -166,9 +167,14 @@ export class Plugin implements ISecuritySolutionPlugin {
     const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
     ruleExecutionLogService.registerEventLogProvider();
 
+    // const licenses: OsqueryActiveLicenses = { isActivePlatinumLicense: false };
+    // this.licenseSubscription = plugins.licensing.license$.subscribe(async (license) => {
+    //   licenses.isActivePlatinumLicense = license.isActive && license.hasAtLeast('platinum');
+    // });
+
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
       licensing: plugins.licensing,
-      osqueryCreateAction: plugins.osquery.osqueryCreateAction,
+      osqueryCreateActionService: plugins.osquery.createActionService,
       endpointAppContext: this.endpointContext,
     };
 
@@ -541,5 +547,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.endpointAppContextService.stop();
     this.policyWatcher?.stop();
     licenseService.stop();
+    // this.licenseSubscription?.unsubscribe();
   }
 }

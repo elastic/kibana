@@ -35,7 +35,7 @@ export const queryExecutor = async ({
   version,
   spaceId,
   bucketHistory,
-  osqueryCreateAction,
+  osqueryCreateActionService,
   endpointAppContext,
   licensing,
 }: {
@@ -46,7 +46,7 @@ export const queryExecutor = async ({
   version: string;
   spaceId: string;
   bucketHistory?: BucketHistory[];
-  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
+  osqueryCreateActionService: SetupPlugins['osquery']['createActionService'];
   endpointAppContext?: EndpointAppContext;
   licensing: LicensingPluginSetup;
 }) => {
@@ -101,18 +101,16 @@ export const queryExecutor = async ({
             state: {},
           };
 
-    if (hasPlatinumLicense) {
-      if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
-        scheduleNotificationResponseActions(
-          {
-            signals: result.createdSignals,
-            responseActions: completeRule.ruleParams.responseActions,
-          },
-          osqueryCreateAction,
-          endpointAppContext,
-          hasEnterpriseLicense
-        );
-      }
+    if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
+      scheduleNotificationResponseActions(
+        {
+          signals: result.createdSignals,
+          responseActions: completeRule.ruleParams.responseActions,
+        },
+        osqueryCreateActionService,
+        endpointAppContext,
+        hasEnterpriseLicense
+      );
     }
 
     return result;
