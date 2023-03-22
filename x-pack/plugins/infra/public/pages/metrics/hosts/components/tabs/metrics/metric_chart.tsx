@@ -31,7 +31,7 @@ const MIN_HEIGHT = 300;
 
 export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) => {
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
-  const { metricsDataView } = useMetricsDataViewContext();
+  const { dataView } = useMetricsDataViewContext();
   const { baseRequest } = useHostsViewContext();
   const {
     services: { lens },
@@ -41,7 +41,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
 
   const { injectData, getExtraActions, error } = useLensAttributes({
     type,
-    dataView: metricsDataView,
+    dataView,
     options: {
       breakdownSize,
     },
