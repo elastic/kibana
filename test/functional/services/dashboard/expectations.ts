@@ -32,9 +32,30 @@ export class DashboardExpectService extends FtrService {
   }
 
   async visualizationsArePresent(vizList: string[]) {
-    this.log.debug('Checking all visualisations are present on dashsboard');
+    this.log.debug('Checking all visualisations are present on the dashboard');
     const notLoaded = await this.dashboard.getNotLoadedVisualizations(vizList);
     expect(notLoaded).to.be.empty();
+  }
+
+  /**
+   * Asserts that there is no error embeddables on the dashboard
+   * @throws An error if an error embeddable is present
+   */
+  async noErrorEmbeddablesPresent() {
+    this.log.debug('Ensure that there are no error embeddables on the dashboard');
+    const errorEmbeddables = await this.testSubjects.findAll('embeddableError');
+    if (errorEmbeddables.length > 0) {
+      const errorTitles = await Promise.all(
+        errorEmbeddables.map(async (embeddable) => {
+          return (
+            (await (await embeddable.findByTestSubject('dashboardPanelTitle')).getVisibleText()) ??
+            'Empty title'
+          );
+        })
+      );
+      await errorEmbeddables[0].scrollIntoViewIfNecessary();
+      throw new Error(`Found error embeddable(s): ${errorTitles}`);
+    }
   }
 
   async selectedLegendColorCount(color: string, expectedCount: number) {

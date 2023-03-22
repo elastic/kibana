@@ -6,11 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { fail } from 'assert';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const testSubjects = getService('testSubjects');
   const log = getService('log');
   const retry = getService('retry');
   const PageObjects = getPageObjects([
@@ -86,14 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   async function checkSampleDashboardLoaded(visualizationContainer?: string) {
     log.debug('Checking no error labels');
-    if (await testSubjects.exists('embeddableError')) {
-      const error = await testSubjects.find('embeddableError');
-      await error.scrollIntoViewIfNecessary();
-      const title =
-        (await (await error.findByTestSubject('dashboardPanelTitle')).getVisibleText()) ??
-        'Empty title';
-      fail(`Found an error embeddable: ${title}`);
-    }
+    await dashboardExpect.noErrorEmbeddablesPresent();
     log.debug('Checking charts rendered');
     await elasticChart.waitForRenderComplete(visualizationContainer ?? 'lnsVisualizationContainer');
     log.debug('Checking saved searches rendered');

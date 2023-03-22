@@ -16,6 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
+  const dashboardExpect = getService('dashboardExpect');
+
   const xyChartSelector = 'xyVisChart';
 
   const enableNewChartLibraryDebug = async () => {
@@ -36,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.missingOrFail('embeddableError');
+      await dashboardExpect.noErrorEmbeddablesPresent();
       await enableNewChartLibraryDebug();
       const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);
@@ -46,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Delayed 5s');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.missingOrFail('embeddableError');
+      await dashboardExpect.noErrorEmbeddablesPresent();
       await enableNewChartLibraryDebug();
       const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);
