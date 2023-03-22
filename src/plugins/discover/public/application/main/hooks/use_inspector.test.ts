@@ -6,39 +6,44 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { useInspector } from './use_inspector';
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
 import { OverlayRef } from '@kbn/core/public';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import { DataTableRecord } from '../../../types';
 
 describe('test useInspector', () => {
   test('inspector open function is executed, expanded doc is closed', async () => {
-    const setExpandedDoc = jest.fn();
     let adapters: Adapters | undefined;
     jest.spyOn(discoverServiceMock.inspector, 'open').mockImplementation((localAdapters) => {
       adapters = localAdapters;
-      return {} as OverlayRef;
+      return { close: jest.fn() } as unknown as OverlayRef;
     });
     const requests = new RequestAdapter();
     const lensRequests = new RequestAdapter();
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    stateContainer.internalState.transitions.setExpandedDoc({} as unknown as DataTableRecord);
     const { result } = renderHook(() => {
       return useInspector({
         inspectorAdapters: { requests, lensRequests },
         savedSearch: savedSearchMock,
         inspector: discoverServiceMock.inspector,
-        setExpandedDoc,
+        stateContainer,
       });
     });
-    result.current();
-    expect(setExpandedDoc).toHaveBeenCalledWith(undefined);
+    await act(async () => {
+      result.current();
+    });
     expect(discoverServiceMock.inspector.open).toHaveBeenCalled();
     expect(adapters?.requests).toBeInstanceOf(AggregateRequestAdapter);
     expect(adapters?.requests?.getRequests()).toEqual([
       ...requests.getRequests(),
       ...lensRequests.getRequests(),
     ]);
+    expect(stateContainer.internalState.getState().expandedDoc).toBe(undefined);
   });
 });
