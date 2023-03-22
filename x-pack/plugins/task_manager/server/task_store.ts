@@ -99,6 +99,7 @@ export class TaskStore {
   public readonly errors$ = new Subject<Error>();
 
   private esClient: ElasticsearchClient;
+  private esClientForUpdateByQuery: ElasticsearchClient;
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: ISavedObjectsSerializer;
@@ -121,6 +122,11 @@ export class TaskStore {
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
     this.adHocTaskCounter = opts.adHocTaskCounter;
+    this.esClientForUpdateByQuery = opts.esClient.child({
+      requestTimeout: 30 * 1000,
+      // Somehow timeouts are retried and make requests timeout after (requestTimeout * (1 + maxRetries))
+      maxRetries: 0,
+    });
   }
 
   /**
@@ -447,7 +453,7 @@ export class TaskStore {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     try {
       const // eslint-disable-next-line @typescript-eslint/naming-convention
-        { total, updated, version_conflicts } = await this.esClient.updateByQuery({
+        { total, updated, version_conflicts } = await this.esClientForUpdateByQuery.updateByQuery({
           index: this.index,
           ignore_unavailable: true,
           refresh: true,
