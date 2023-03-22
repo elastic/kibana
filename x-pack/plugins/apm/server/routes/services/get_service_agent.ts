@@ -15,7 +15,10 @@ import {
   CLOUD_SERVICE_NAME,
 } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getServerlessTypeFromCloudData } from '../../../common/serverless';
+import {
+  getServerlessTypeFromCloudData,
+  ServerlessType,
+} from '../../../common/serverless';
 
 interface ServiceAgent {
   agent?: {
@@ -34,6 +37,12 @@ interface ServiceAgent {
   };
 }
 
+export interface ServiceAgentResponse {
+  agentName?: string;
+  runtimeName?: string;
+  serverlessType?: ServerlessType;
+}
+
 export async function getServiceAgent({
   serviceName,
   apmEventClient,
@@ -44,7 +53,7 @@ export async function getServiceAgent({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}) {
+}): Promise<ServiceAgentResponse> {
   const params = {
     terminate_after: 1,
     apm: {

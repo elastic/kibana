@@ -469,5 +469,41 @@ export default ({ getService }: FtrProviderContext): void => {
         expectedHttpCode: 400,
       });
     });
+
+    it('400s when bulk creating a non registered external reference attachment type', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      await bulkCreateAttachments({
+        supertest,
+        caseId: postedCase.id,
+        params: [
+          postExternalReferenceSOReq,
+          { ...postExternalReferenceSOReq, externalReferenceAttachmentTypeId: 'not-exists' },
+        ],
+        expectedHttpCode: 400,
+      });
+    });
+
+    // This test is intended to fail when new external reference attachment types are registered.
+    // To resolve, add the new external reference attachment types ID to this list. This will trigger
+    // a CODEOWNERS review by Response Ops.
+    describe('check registered external reference attachment types', () => {
+      const getRegisteredTypes = () => {
+        return supertest
+          .get('/api/cases_fixture/registered_external_reference_attachments')
+          .expect(200)
+          .then((response) => response.body);
+      };
+
+      it('should check changes on all registered external reference attachment types', async () => {
+        const types = await getRegisteredTypes();
+
+        expect(types).to.eql({
+          '.files': '559a37324c84f1f2eadcc5bce43115d09501ffe4',
+          '.test': 'ab2204830c67f5cf992c9aa2f7e3ead752cc60a1',
+          indicator: 'e1ea6f0518f2e0e4b0b5c0739efe805598cf2516',
+          osquery: '99bee68fce8ee84e81d67c536e063d3e1a2cee96',
+        });
+      });
+    });
   });
 };

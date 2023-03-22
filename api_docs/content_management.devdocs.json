@@ -51,7 +51,7 @@
                 "section": "def-common.GetIn",
                 "text": "GetIn"
               },
-              "<string, object>, O = unknown>(input: I) => { queryKey: readonly [string, string]; queryFn: () => Promise<O>; }; search: <I extends ",
+              "<string, object>, O = unknown>(_input: I) => { queryKey: readonly [string, string]; queryFn: () => Promise<O>; }; search: <I extends ",
               {
                 "pluginId": "contentManagement",
                 "scope": "common",
@@ -67,7 +67,7 @@
                 "section": "def-common.SearchIn",
                 "text": "SearchIn"
               },
-              "<string, object, object>, O = unknown>(input: I) => { queryKey: readonly [string, \"search\", unknown]; queryFn: () => Promise<O>; }; }"
+              "<string, object, object>, O = unknown>(_input: I) => { queryKey: readonly [string, \"search\", unknown]; queryFn: () => Promise<O>; }; }"
             ],
             "path": "src/plugins/content_management/public/content_client/content_client.tsx",
             "deprecated": false,
@@ -103,6 +103,21 @@
                     "section": "def-public.CrudClient",
                     "text": "CrudClient"
                   }
+                ],
+                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.ContentClient.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "contentTypeRegistry",
+                "description": [],
+                "signature": [
+                  "ContentTypeRegistry"
                 ],
                 "path": "src/plugins/content_management/public/content_client/content_client.tsx",
                 "deprecated": false,
@@ -1666,6 +1681,58 @@
             "path": "src/plugins/content_management/server/core/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.StorageContext.version",
+            "type": "Object",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "{ request: number; latest: number; }"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.StorageContext.utils",
+            "type": "Object",
+            "tags": [],
+            "label": "utils",
+            "description": [],
+            "signature": [
+              "{ getTransforms: (definitions: ",
+              {
+                "pluginId": "@kbn/object-versioning",
+                "scope": "common",
+                "docId": "kibKbnObjectVersioningPluginApi",
+                "section": "def-common.ServiceDefinitionVersioned",
+                "text": "ServiceDefinitionVersioned"
+              },
+              ", requestVersion: number, _compiled?: { [path: string]: ",
+              {
+                "pluginId": "@kbn/object-versioning",
+                "scope": "common",
+                "docId": "kibKbnObjectVersioningPluginApi",
+                "section": "def-common.ObjectMigrationDefinition",
+                "text": "ObjectMigrationDefinition"
+              },
+              "; } | undefined) => ",
+              {
+                "pluginId": "@kbn/object-versioning",
+                "scope": "common",
+                "docId": "kibKbnObjectVersioningPluginApi",
+                "section": "def-common.ServiceTransforms",
+                "text": "ServiceTransforms"
+              },
+              "; }"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1769,6 +1836,20 @@
           },
           {
             "parentPluginId": "contentManagement",
+            "id": "def-common.BulkGetIn.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/bulk_get.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
             "id": "def-common.BulkGetIn.options",
             "type": "Uncategorized",
             "tags": [],
@@ -1828,6 +1909,20 @@
             "description": [],
             "signature": [
               "Data"
+            ],
+            "path": "src/plugins/content_management/common/rpc/create.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.CreateIn.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "src/plugins/content_management/common/rpc/create.ts",
             "deprecated": false,
@@ -1898,6 +1993,20 @@
           },
           {
             "parentPluginId": "contentManagement",
+            "id": "def-common.DeleteIn.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
             "id": "def-common.DeleteIn.options",
             "type": "Uncategorized",
             "tags": [],
@@ -1954,6 +2063,20 @@
             "description": [],
             "signature": [
               "T"
+            ],
+            "path": "src/plugins/content_management/common/rpc/get.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.GetIn.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "src/plugins/content_management/common/rpc/get.ts",
             "deprecated": false,
@@ -2025,7 +2148,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<any>"
+              "<any> | undefined"
             ],
             "path": "src/plugins/content_management/common/rpc/types.ts",
             "deprecated": false,
@@ -2078,6 +2201,20 @@
             "description": [],
             "signature": [
               "Query"
+            ],
+            "path": "src/plugins/content_management/common/rpc/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-common.SearchIn.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "src/plugins/content_management/common/rpc/search.ts",
             "deprecated": false,
@@ -2162,6 +2299,20 @@
           },
           {
             "parentPluginId": "contentManagement",
+            "id": "def-common.UpdateIn.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/content_management/common/rpc/update.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
             "id": "def-common.UpdateIn.options",
             "type": "Uncategorized",
             "tags": [],
@@ -2226,22 +2377,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "contentManagement",
-        "id": "def-common.procedureNames",
-        "type": "Object",
-        "tags": [],
-        "label": "procedureNames",
-        "description": [],
-        "signature": [
-          "readonly [\"get\", \"bulkGet\", \"create\", \"update\", \"delete\", \"search\"]"
-        ],
-        "path": "src/plugins/content_management/common/rpc/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }

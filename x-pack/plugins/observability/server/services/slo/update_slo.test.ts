@@ -40,16 +40,25 @@ describe('UpdateSLO', () => {
       mockRepository.findById.mockResolvedValueOnce(slo);
 
       const newName = 'new slo name';
-      const response = await updateSLO.execute(slo.id, { name: newName });
+      const newTags = ['other', 'tags'];
+      const response = await updateSLO.execute(slo.id, { name: newName, tags: newTags });
 
       expectTransformManagerNeverCalled();
       expect(mockEsClient.deleteByQuery).not.toBeCalled();
       expect(mockRepository.save).toBeCalledWith(
-        expect.objectContaining({ ...slo, name: newName, updatedAt: expect.anything() })
+        expect.objectContaining({
+          ...slo,
+          name: newName,
+          tags: newTags,
+          updatedAt: expect.anything(),
+        })
       );
-      expect(response.name).toBe(newName);
-      expect(response.updatedAt).not.toBe(slo.updatedAt);
-      expect(response.revision).toBe(slo.revision);
+      expect(slo.name).not.toEqual(newName);
+      expect(response.name).toEqual(newName);
+      expect(response.updatedAt).not.toEqual(slo.updatedAt);
+      expect(response.revision).toEqual(slo.revision);
+      expect(response.tags).toEqual(newTags);
+      expect(slo.tags).not.toEqual(newTags);
     });
   });
 

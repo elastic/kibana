@@ -771,7 +771,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should mark non-recurring task as failed if task is still running but maxAttempts has been reached', async () => {
       const task = await scheduleTask({
-        taskType: 'sampleOneTimeTaskTimingOut',
+        taskType: 'sampleOneTimeTaskThrowingError',
         params: {},
       });
 

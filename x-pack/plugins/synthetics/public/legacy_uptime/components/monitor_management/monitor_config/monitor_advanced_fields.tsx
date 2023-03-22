@@ -65,6 +65,7 @@ export const MonitorManagementAdvancedFields = memo<Props>(
               values={{
                 learnMore: (
                   <EuiLink
+                    data-test-subj="syntheticsMonitorManagementAdvancedFieldsLearnMoreLink"
                     target="_blank"
                     href={services.docLinks?.links?.fleet?.datastreamsNamingScheme}
                     external
@@ -80,6 +81,7 @@ export const MonitorManagementAdvancedFields = memo<Props>(
           }
         >
           <EuiFieldText
+            data-test-subj="syntheticsMonitorManagementAdvancedFieldsFieldText"
             defaultValue={namespace}
             onChange={(event) => setNamespace(event.target.value)}
             required={true}

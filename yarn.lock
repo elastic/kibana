@@ -1543,10 +1543,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@75.1.2":
-  version "75.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-75.1.2.tgz#c8ccb1728162b131e49a16833468ab2b0228f1bf"
-  integrity sha512-J6u16NR3BD5snje2CSWnk+JvEQ7y/8tzpmi2Ul+WWfzQwvf7DsKtouSIs91jdzC1QGSN26S1D3wKZvzaszXacg==
+"@elastic/eui@76.0.2":
+  version "76.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-76.0.2.tgz#5b99730de10785167b4ab98fcfdb8717018343ce"
+  integrity sha512-HB6HyjkWQ6akYBcIWl9vGenONpymP3q8cYUui/g4DS3/WPUp8R0jV/zEryjlJ5HyJ4Vp3THDoKtCmIEVy+wZvg==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -2893,6 +2893,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/assetManager-plugin@link:x-pack/plugins/asset_manager":
+  version "0.0.0"
+  uid ""
+
 "@kbn/audit-log-plugin@link:x-pack/test/security_api_integration/plugins/audit_log":
   version "0.0.0"
   uid ""
@@ -4061,6 +4065,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/eslint-plugin-telemetry@link:packages/kbn-eslint-plugin-telemetry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/eso-plugin@link:x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin":
   version "0.0.0"
   uid ""
@@ -4581,6 +4589,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/object-versioning@link:packages/kbn-object-versioning":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-fixtures-plugin@link:x-pack/test/cases_api_integration/common/plugins/observability":
   version "0.0.0"
   uid ""
@@ -4834,6 +4846,14 @@
   uid ""
 
 "@kbn/security-solution-plugin@link:x-pack/plugins/security_solution":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-solution-side-nav@link:packages/security-solution/side_nav":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-solution-storybook-config@link:packages/security-solution/storybook/config":
   version "0.0.0"
   uid ""
 
@@ -8960,10 +8980,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.1.12":
-  version "4.1.12"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.12.tgz#a2042f6bef044c48ca7a8b4caede4928242271a9"
-  integrity sha512-3DxuYHEbzIyUtuICRtxXtJomdOOkBeCbkXAlAPm/h8ArIn/ArWNnVSC6tIj/ECZ/sdxBoI0F/wuwcpxBew3hGw==
+"@types/selenium-webdriver@^4.1.13":
+  version "4.1.13"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.13.tgz#c31e833a3e67a2d2c9e46da3aac8b6acbffc838a"
+  integrity sha512-kGpIh7bvu4HGCJXl4PEJ53kzpG4iXlRDd66SNNCfJ58QhFuk9skOm57lVffZap5ChEOJwbge/LJ9IVGVC8EEOg==
   dependencies:
     "@types/ws" "*"
 
@@ -11603,9 +11623,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001335, caniuse-lite@^1.0.30001400:
-  version "1.0.30001409"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001409.tgz#6135da9dcab34cd9761d9cdb12a68e6740c5e96e"
-  integrity sha512-V0mnJ5dwarmhYv8/MzhJ//aW68UpvnQBXv8lJ2QUsvn2pHcmAuNtu8hQEDz37XnA1iE+lRR9CIfGWWpgJ5QedQ==
+  version "1.0.30001468"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001468.tgz#0101837c6a4e38e6331104c33dcfb3bdf367a4b7"
+  integrity sha512-zgAo8D5kbOyUcRAgSmgyuvBkjrGk5CGYG5TYgFdpQv+ywcyEpo1LOWoG8YmoflGnh+V+UsNuKYedsoYs0hzV5A==
 
 canvg@^3.0.9:
   version "3.0.9"
@@ -14224,10 +14244,50 @@ elastic-apm-http-client@11.2.0, elastic-apm-http-client@^11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.38.0, elastic-apm-node@^3.42.0:
+elastic-apm-node@^3.38.0:
   version "3.42.0"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.42.0.tgz#22c11e98708a0df7a7de8c8fb195929b4fc90c00"
   integrity sha512-Q9sugfpaw6jQ8xDeP09LlyF0MwE5k0hphQmUiap+qQKE2jrLvY00zk4WierDQ2GF/AguE6BtRZmXpUELDbHFyA==
+  dependencies:
+    "@elastic/ecs-pino-format" "^1.2.0"
+    "@opentelemetry/api" "^1.1.0"
+    after-all-results "^2.0.0"
+    async-cache "^1.1.0"
+    async-value-promise "^1.1.1"
+    basic-auth "^2.0.1"
+    cookie "^0.5.0"
+    core-util-is "^1.0.2"
+    debug "^4.1.1"
+    elastic-apm-http-client "11.2.0"
+    end-of-stream "^1.4.4"
+    error-callsites "^2.0.4"
+    error-stack-parser "^2.0.6"
+    escape-string-regexp "^4.0.0"
+    fast-safe-stringify "^2.0.7"
+    http-headers "^3.0.2"
+    is-native "^1.0.1"
+    lru-cache "^6.0.0"
+    measured-reporting "^1.51.1"
+    module-details-from-path "^1.0.3"
+    monitor-event-loop-delay "^1.0.0"
+    object-filter-sequence "^1.0.0"
+    object-identity-map "^1.0.2"
+    original-url "^1.2.3"
+    pino "^6.11.2"
+    relative-microtime "^2.0.0"
+    resolve "^1.22.1"
+    semver "^6.3.0"
+    set-cookie-serde "^1.0.0"
+    shallow-clone-shim "^2.0.0"
+    source-map "^0.8.0-beta.0"
+    sql-summary "^1.0.1"
+    traverse "^0.6.6"
+    unicode-byte-truncate "^1.0.0"
+
+elastic-apm-node@^3.43.0:
+  version "3.43.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.43.0.tgz#3d644cdb403c8230f5db7b6a3796d19e38faa2b7"
+  integrity sha512-iFuP8pXkfQst1LOFq6F86EjHhkvUL+pigpmbw2KL8rs+9i7Fn5pkxf8RP1G3oqwqydwUSdvw5+DPhO0lDO+LtA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     "@opentelemetry/api" "^1.1.0"
@@ -28386,10 +28446,10 @@ vega-expression@^5.0.1, vega-expression@~5.0.0, vega-expression@~5.0.1:
     "@types/estree" "^1.0.0"
     vega-util "^1.17.1"
 
-vega-force@~4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/vega-force/-/vega-force-4.1.1.tgz#27bffa96bda293f27d2a2492c2cbf99d49fec77e"
-  integrity sha512-T6fJAUz9zdXf2qj2Hz0VlmdtaY7eZfcKNazhUV8hza4R3F9ug6r/hSrdovfc9ExmbUjL5iyvDUsf63r8K3/wVQ==
+vega-force@~4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/vega-force/-/vega-force-4.2.0.tgz#5374d0dbac674c92620a9801e12b650b0966336a"
+  integrity sha512-aE2TlP264HXM1r3fl58AvZdKUWBNOGkIvn4EWyqeJdgO2vz46zSU7x7TzPG4ZLuo44cDRU5Ng3I1eQk23Asz6A==
   dependencies:
     d3-force "^3.0.0"
     vega-dataflow "^5.7.5"
@@ -28603,10 +28663,10 @@ vega-transforms@~4.10.1:
     vega-time "^2.1.1"
     vega-util "^1.17.1"
 
-vega-typings@~0.23.0:
-  version "0.23.0"
-  resolved "https://registry.yarnpkg.com/vega-typings/-/vega-typings-0.23.0.tgz#5b001f5b51a477e67d2446ef9b964e1dac48a20e"
-  integrity sha512-10ZRRGoUZoQLS5jMiIFhSZMDc3UkPhDP2VMUN/oHZXElvPCGjfjvgmiC6XzvvN4sRXdccMcZX1lZPoyYPERVkA==
+vega-typings@~0.24.0:
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/vega-typings/-/vega-typings-0.24.0.tgz#e659286c43c63b68cf29a3131360829d129eeb84"
+  integrity sha512-FFYf67Dn5VNPbYoYHgO2T9Z1I81qcwrXjwKEe0rlJk0MX7CNWPJr9Y3VZEWfxyEx7J9anAm69hGIv0Ehb2G85A==
   dependencies:
     "@types/geojson" "^7946.0.10"
     vega-event-selector "^3.0.1"
@@ -28661,17 +28721,17 @@ vega-wordcloud@~4.1.4:
     vega-statistics "^1.8.1"
     vega-util "^1.17.1"
 
-vega@^5.23.0:
-  version "5.23.0"
-  resolved "https://registry.yarnpkg.com/vega/-/vega-5.23.0.tgz#7e3899b65f1a84095545b74dcf71289890844c49"
-  integrity sha512-FjgDD/VmL9yl36ByLq66mEusDF/wZGRktK4JA5MkF68hQqj3F8BFMDDVNwCASuwY97H6wr7kw/RFqNI6XocjJQ==
+vega@^5.24.0:
+  version "5.24.0"
+  resolved "https://registry.yarnpkg.com/vega/-/vega-5.24.0.tgz#47ccf9288d06cf0be6f1e83bf38647de2bda3ca8"
+  integrity sha512-eahZ+4eryPywLuq9BpgcwWMyqiuVD3FAh7eMB3koOp7peQ4scPxAZxWdLwnh0t0kah+oE2QcXi2EHS4BabsMPg==
   dependencies:
     vega-crossfilter "~4.1.1"
     vega-dataflow "~5.7.5"
     vega-encode "~4.9.1"
     vega-event-selector "~3.0.1"
     vega-expression "~5.0.1"
-    vega-force "~4.1.1"
+    vega-force "~4.2.0"
     vega-format "~1.1.1"
     vega-functions "~5.13.1"
     vega-geo "~4.4.1"
@@ -28687,7 +28747,7 @@ vega@^5.23.0:
     vega-statistics "~1.8.1"
     vega-time "~2.1.1"
     vega-transforms "~4.10.1"
-    vega-typings "~0.23.0"
+    vega-typings "~0.24.0"
     vega-util "~1.17.1"
     vega-view "~5.11.1"
     vega-view-transforms "~4.5.9"
@@ -29104,9 +29164,9 @@ webpack@4, webpack@^4.41.5:
     webpack-sources "^1.4.1"
 
 "webpack@>=4.43.0 <6.0.0":
-  version "5.74.0"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.74.0.tgz#02a5dac19a17e0bb47093f2be67c695102a55980"
-  integrity sha512-A2InDwnhhGN4LYctJj6M1JEaGL7Luj6LOmyBHjcI8529cm5p6VXiTIW2sn6ffvEAKmveLzvu4jrihwXtPojlAA==
+  version "5.76.1"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.76.1.tgz#7773de017e988bccb0f13c7d75ec245f377d295c"
+  integrity sha512-4+YIK4Abzv8172/SGqObnUjaIHjLEuUasz9EwQj/9xmPPkYJy2Mh03Q/lJfSD3YLzbxy5FeTq5Uw0323Oh6SJQ==
   dependencies:
     "@types/eslint-scope" "^3.7.3"
     "@types/estree" "^0.0.51"
