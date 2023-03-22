@@ -235,7 +235,6 @@ export class MapEmbeddable
     const title = input.hidePanelTitles ? '' : input.title ?? savedMapTitle;
     const savedObjectId = 'savedObjectId' in input ? input.savedObjectId : undefined;
     this.updateOutput({
-      ...this.getOutput(),
       defaultTitle: savedMapTitle,
       defaultDescription: savedMapDescription,
       title,
@@ -528,7 +527,6 @@ export class MapEmbeddable
     this._savedMap.getStore().dispatch<any>(replaceLayerList(layerList));
     this._getIndexPatterns().then((indexPatterns) => {
       this.updateOutput({
-        ...this.getOutput(),
         indexPatterns,
       });
     });
@@ -749,38 +747,39 @@ export class MapEmbeddable
       });
     }
 
-    if (areLayersLoaded(this._savedMap.getStore().getState())) {
-      const layers = getLayerList(this._savedMap.getStore().getState());
-      const isLoading =
-        layers.length === 0 ||
-        layers.some((layer) => {
-          return layer.isLayerLoading();
-        });
-      const firstLayerWithError = layers.find((layer) => {
-        return layer.hasErrors();
+    if (!areLayersLoaded(this._savedMap.getStore().getState())) {
+
+    }
+
+    const layers = getLayerList(this._savedMap.getStore().getState());
+    const isLoading =
+      !areLayersLoaded(this._savedMap.getStore().getState()) ||
+      layers.some((layer) => {
+        return layer.isLayerLoading();
       });
-      const output = this.getOutput();
-      if (
-        output.loading !== isLoading ||
-        firstLayerWithError?.getErrors() !== output.error?.message
-      ) {
-        /**
-         * Maps emit rendered when the data is loaded, as we don't have feedback from the maps rendering library atm.
-         * This means that the DASHBOARD_LOADED_EVENT event might be fired while a map is still rendering in some cases.
-         * For more details please contact the maps team.
-         */
-        this.updateOutput({
-          ...output,
-          loading: isLoading,
-          rendered: !isLoading && firstLayerWithError === undefined,
-          error: firstLayerWithError
-            ? {
-                name: 'EmbeddableError',
-                message: firstLayerWithError.getErrors(),
-              }
-            : undefined,
-        });
-      }
+    const firstLayerWithError = layers.find((layer) => {
+      return layer.hasErrors();
+    });
+    const output = this.getOutput();
+    if (
+      output.loading !== isLoading ||
+      firstLayerWithError?.getErrors() !== output.error?.message
+    ) {
+      /**
+       * Maps emit rendered when the data is loaded, as we don't have feedback from the maps rendering library atm.
+       * This means that the DASHBOARD_LOADED_EVENT event might be fired while a map is still rendering in some cases.
+       * For more details please contact the maps team.
+       */
+      this.updateOutput({
+        loading: isLoading,
+        rendered: !isLoading && firstLayerWithError === undefined,
+        error: firstLayerWithError
+          ? {
+              name: 'EmbeddableError',
+              message: firstLayerWithError.getErrors(),
+            }
+          : undefined,
+      });
     }
   }
 }
