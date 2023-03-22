@@ -57,6 +57,7 @@
         "request_cache",
         "search",
         "segments",
+        "shard_stats",
         "store",
         "warmer"
       ]
