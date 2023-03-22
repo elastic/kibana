@@ -33,19 +33,42 @@ If you are running {kib} on-prem, you can define connectors by
 adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
 For example:
 
+Connector using Webhook
+
 [source,text]
 --
 xpack.actions.preconfigured:
   my-slack:
     name: preconfigured-slack-connector-type
     actionTypeId: .slack
+    config:
+      type: 'webhook'
     secrets:
-      webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
+      webhookUrl: 'https://hooks.slack.com/services/xxxx/xxxx/xxxx'
 --
+
+Connector using Web API
+
+[source,text]
+--
+xpack.actions.preconfigured:
+  my-slack:
+    name: preconfigured-slack-connector-type
+    actionTypeId: .slack
+    config:
+      type: 'web_api'
+    secrets:
+      token: 'xoxb-xxxx-xxxx-xxxx'
+--
+
+Config defines information for the connector type:
+
+`type`:: A string that takes values `'web_api'` or `'webhook'`, which depends on a chosen slack connector type.
 
 Secrets defines sensitive information for the connector type.
 
 `webhookUrl`:: A string that corresponds to *Webhook URL*.
+`token`:: A string that corresponds to *Bot token* for respective Slack App.
 
 [float]
 [[slack-action-configuration]]
