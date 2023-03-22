@@ -1,4 +1,4 @@
-# @kbn/core-version-http-server
+# @kbn/core-versioned-http-server
 
 This package contains types for sever-side HTTP versioning.
 
