@@ -26,7 +26,7 @@ import { fetchDocuments } from './fetch_documents';
 import { fetchSql } from './fetch_sql';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 import { dataViewMock } from '../../../__mocks__/data_view';
-import { AppState } from '../services/discover_app_state_container';
+import { DiscoverAppState } from '../services/discover_app_state_container';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -70,7 +70,7 @@ describe('test fetchAll', () => {
         getState: () => {
           return { interval: 'auto' };
         },
-      } as ReduxLikeStateContainer<AppState>,
+      } as ReduxLikeStateContainer<DiscoverAppState>,
       abortController: new AbortController(),
       data: discoverServiceMock.data,
       inspectorAdapters: { requests: new RequestAdapter() },
@@ -258,7 +258,7 @@ describe('test fetchAll', () => {
         getState: () => {
           return { interval: 'auto', query };
         },
-      } as unknown as ReduxLikeStateContainer<AppState>,
+      } as unknown as ReduxLikeStateContainer<DiscoverAppState>,
       abortController: new AbortController(),
       data: discoverServiceMock.data,
       inspectorAdapters: { requests: new RequestAdapter() },
