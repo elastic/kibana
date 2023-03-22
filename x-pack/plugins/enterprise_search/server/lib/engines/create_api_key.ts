@@ -20,7 +20,7 @@ export const createApiKey = async (
         indices: [
           {
             names: [`${engineName}`],
-            privileges: ['read']
+            privileges: ['read'],
           },
         ],
       },
