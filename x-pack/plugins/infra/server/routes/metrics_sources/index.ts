@@ -44,7 +44,10 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     const metricIndicesExist = isFulfilled<boolean>(metricIndicesExistSettled)
       ? metricIndicesExistSettled.value
       : defaultStatus.metricIndicesExist;
-    const remoteClustersExist = hasRemoteCluster<boolean | InfraSourceIndexField[]>(indexFieldsSettled, metricIndicesExistSettled);
+    const remoteClustersExist = hasRemoteCluster<boolean | InfraSourceIndexField[]>(
+      indexFieldsSettled,
+      metricIndicesExistSettled
+    );
 
     return {
       indexFields,
@@ -194,8 +197,11 @@ const isFulfilled = <Type>(
   promiseSettlement: PromiseSettledResult<Type>
 ): promiseSettlement is PromiseFulfilledResult<Type> => promiseSettlement.status === 'fulfilled';
 
-const hasRemoteCluster = <Type>(...promiseSettlements: PromiseSettledResult<Type>[]) => {
-  const isRemoteMissing = promiseSettlements.some(settlement => !isFulfilled<Type>(settlement) && settlement.reason instanceof NoSuchRemoteClusterError )
-  
+const hasRemoteCluster = <Type>(...promiseSettlements: Array<PromiseSettledResult<Type>>) => {
+  const isRemoteMissing = promiseSettlements.some(
+    (settlement) =>
+      !isFulfilled<Type>(settlement) && settlement.reason instanceof NoSuchRemoteClusterError
+  );
+
   return !isRemoteMissing;
-}
+};
