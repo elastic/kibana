@@ -14,7 +14,7 @@ import { AlertsTabContent } from './alerts';
 
 import { AlertsTabBadge } from './alerts_tab_badge';
 import { TabIds, useTabId } from '../../hooks/use_tab_id';
-import { LogsTabContent } from './logs/logs_tab_content';
+import { LogsTabContent } from './logs';
 
 const tabs = [
   {

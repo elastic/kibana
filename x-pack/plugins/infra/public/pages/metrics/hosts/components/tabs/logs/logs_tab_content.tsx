@@ -19,7 +19,7 @@ import { LogsSearchBar } from './logs_search_bar';
 export const LogsTabContent = () => {
   const [filterQuery] = useLogsSearchUrlState();
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
-  const { from, to } = useMemo(() => getDateRangeAsTimestamp(), [getDateRangeAsTimestamp]);
+  const { from, to } = getDateRangeAsTimestamp();
   const { hostNodes } = useHostsViewContext();
 
   const hostsFilterQuery = useMemo(() => createHostsFilter(hostNodes), [hostNodes]);

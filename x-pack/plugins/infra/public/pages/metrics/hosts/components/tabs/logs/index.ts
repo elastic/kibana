@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './logs_search_bar';
 export * from './logs_tab_content';
-export * from './logs_link_to_stream';

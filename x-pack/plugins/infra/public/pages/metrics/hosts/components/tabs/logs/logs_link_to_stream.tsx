@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import url from 'url';
+import React from 'react';
 import { stringify } from 'querystring';
-
-import React, { useMemo } from 'react';
 import { encode } from '@kbn/rison';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiButtonEmpty } from '@elastic/eui';
@@ -28,26 +26,21 @@ export const LogsLinkToStream = ({
   const { services } = useKibanaContextForPlugin();
   const { http } = services;
 
-  const viewInLogsUrl = useMemo(
-    () =>
-      http.basePath.prepend(
-        url.format({
-          pathname: '/app/logs/stream',
-          search: stringify({
-            logPosition: encode({
-              start: new Date(startTimestamp),
-              end: new Date(endTimestamp),
-              streamLive: false,
-            }),
-            logFilter: encode({
-              kind: 'kuery',
-              expression: query,
-            }),
-          }),
-        })
-      ),
-    [http.basePath, startTimestamp, endTimestamp, query]
+  const queryString = new URLSearchParams(
+    stringify({
+      logPosition: encode({
+        start: new Date(startTimestamp),
+        end: new Date(endTimestamp),
+        streamLive: false,
+      }),
+      logFilter: encode({
+        kind: 'kuery',
+        expression: query,
+      }),
+    })
   );
+
+  const viewInLogsUrl = http.basePath.prepend(`/app/logs/stream?${queryString}`);
 
   return (
     <RedirectAppLinks coreStart={services}>
