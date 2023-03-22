@@ -19,7 +19,7 @@ import { EmptySections } from './components/empty_sections';
 import { HeaderMenu } from './components/header_menu';
 import { Resources } from './components/resources';
 import { NewsFeed } from './components/news_feed';
-import { ObservabilityStatusProgress } from '../../../components/app/observability_status/observability_status_progress';
+import { ObservabilityStatusProgress } from './components/observability_status/observability_status_progress';
 import { observabilityAlertFeatureIds } from '../../../plugin/rule_registry/alert_feature_ids';
 import { paths } from '../../routes';
 import { useKibana } from '../../../utils/kibana_react';
@@ -38,7 +38,7 @@ import { getAlertSummaryTimeRange } from '../../../utils/alert_summary_widget';
 import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../../../constants';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
 import { useOverviewMetrics } from './helpers/use_overview_metrics';
-import { SectionContainer } from '../../../components/app/section';
+import { SectionContainer } from './components/section';
 import { DataSections } from './components/data_sections';
 
 const ALERTS_PER_PAGE = 10;

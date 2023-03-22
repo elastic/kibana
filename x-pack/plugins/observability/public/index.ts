@@ -55,9 +55,11 @@ export {
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';
 
-export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout'));
+export const LazyAlertsFlyout = lazy(
+  () => import('./components/alerts/alerts_flyout/alerts_flyout')
+);
 
-import { TopAlert } from './typings/alerts';
+import type { TopAlert } from './typings/alerts';
 import type { AlertSummaryField } from './routes/pages/alert_details/components/alert_summary';
 import {
   ApmFetchDataResponse,

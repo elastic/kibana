@@ -10,7 +10,7 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import { SLO_BURN_RATE_RULE_ID } from '../../../common/constants';
-import { validateBurnRateRule } from '../../components/app/burn_rate_rule_editor/validation';
+import { validateBurnRateRule } from '../../components/slo/slo_status_badge/burn_rate_rule_editor/validation';
 import type { ConfigSchema } from '../plugin';
 
 export const registerObservabilityRuleTypes = (
@@ -32,7 +32,9 @@ export const registerObservabilityRuleTypes = (
     documentationUrl(docLinks) {
       return '/unknown/docs';
     },
-    ruleParamsExpression: lazy(() => import('../../components/app/burn_rate_rule_editor')),
+    ruleParamsExpression: lazy(
+      () => import('../../components/slo/slo_status_badge/burn_rate_rule_editor')
+    ),
     validate: validateBurnRateRule,
     requiresAppContext: false,
     defaultActionMessage: i18n.translate(
