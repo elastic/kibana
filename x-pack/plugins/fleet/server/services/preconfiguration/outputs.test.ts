@@ -213,7 +213,7 @@ describe('output preconfiguration', () => {
       expect.objectContaining({
         is_preconfigured: true,
       }),
-      {fromPreconfiguration: true,}
+      { fromPreconfiguration: true }
     );
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
   });
