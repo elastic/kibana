@@ -169,6 +169,17 @@ export function registerTransactionDurationRuleType({
                     missing: ENVIRONMENT_NOT_DEFINED.value,
                   },
                   { field: TRANSACTION_TYPE },
+                  ...(ruleParams.groupBy ? [ruleParams.groupBy] : [])
+                    .flat()
+                    .map((group) => {
+                      return {
+                        field: group,
+                        missing: group
+                          .replaceAll('.', '_')
+                          .toUpperCase()
+                          .concat('_NOT_DEFINED'),
+                      };
+                    }),
                 ],
                 size: 1000,
                 ...getMultiTermsSortOrder(ruleParams.aggregationType),
@@ -178,7 +189,7 @@ export function registerTransactionDurationRuleType({
                   aggregationType: ruleParams.aggregationType,
                   transactionDurationField: field,
                 }),
-                ...getServiceGroupFieldsAgg(),
+                ...getServiceGroupFieldsAgg(ruleParams.groupBy),
               },
             },
           },

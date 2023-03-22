@@ -13,6 +13,7 @@ export interface SourceDoc {
 }
 
 export function getServiceGroupFieldsAgg(
+  groupBy: string[] | string | undefined,
   topHitsOpts: AggregationsTopHitsAggregation = {}
 ) {
   return {
@@ -20,7 +21,10 @@ export function getServiceGroupFieldsAgg(
       top_hits: {
         size: 1,
         _source: {
-          includes: SERVICE_GROUP_SUPPORTED_FIELDS,
+          includes: [
+            ...SERVICE_GROUP_SUPPORTED_FIELDS,
+            ...(groupBy ? [groupBy] : []).flat(),
+          ],
         },
         ...topHitsOpts,
       },

@@ -29,6 +29,9 @@ export const transactionDurationParamsSchema = schema.object({
     schema.literal(AggregationType.P99),
   ]),
   environment: schema.string(),
+  groupBy: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+  ),
 });
 
 export const anomalyParamsSchema = schema.object({
