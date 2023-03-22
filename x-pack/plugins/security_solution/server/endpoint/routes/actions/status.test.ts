@@ -37,6 +37,7 @@ import type {
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 describe('Endpoint Pending Action Summary API', () => {
   let endpointAppContextService: EndpointAppContextService;
@@ -70,6 +71,7 @@ describe('Endpoint Pending Action Summary API', () => {
       logFactory: loggingSystemMock.create(),
       service: endpointAppContextService,
       config: () => Promise.resolve(createMockConfig()),
+      licensing: licensingMock.createSetup(),
       experimentalFeatures: {
         ...parseExperimentalConfigValue(createMockConfig().enableExperimental),
         pendingActionResponsesWithAck,

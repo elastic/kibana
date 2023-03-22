@@ -129,7 +129,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private telemetryUsageCounter?: UsageCounter;
   private kibanaIndex?: string;
   private endpointContext: EndpointAppContext;
-  // private licenseSubscription: Subscription | null = null;
+  private endpointActionCreateService: ReturnType<typeof ActionCreateService> | undefined;
 
   constructor(context: PluginInitializerContext) {
     this.pluginContext = context;
@@ -141,14 +141,15 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.artifactsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
-
-    this.logger.debug('plugin initialized');
     this.endpointContext = {
       logFactory: this.pluginContext.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(this.config),
       experimentalFeatures: this.config.experimentalFeatures,
+      licensing: undefined,
     };
+
+    this.logger.debug('plugin initialized');
   }
 
   public setup(
@@ -166,11 +167,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
     ruleExecutionLogService.registerEventLogProvider();
-
-    // const licenses: OsqueryActiveLicenses = { isActivePlatinumLicense: false };
-    // this.licenseSubscription = plugins.licensing.license$.subscribe(async (license) => {
-    //   licenses.isActivePlatinumLicense = license.isActive && license.hasAtLeast('platinum');
-    // });
 
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
       licensing: plugins.licensing,
@@ -198,6 +194,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.endpointAppContextService.setup({
       securitySolutionRequestContextFactory: requestContextFactory,
     });
+
+    // Don't have access to plugins in the constructor, so we have to initialize the
+    if (this.endpointContext) {
+      this.endpointContext.licensing = plugins.licensing;
+    }
 
     initUsageCollectors({
       core,
@@ -476,6 +477,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.policyWatcher.start(licenseService);
     }
 
+    this.endpointActionCreateService = ActionCreateService(
+      core.elasticsearch.client.asInternalUser,
+      this.endpointContext
+    );
+
     this.endpointAppContextService.start({
       fleetAuthzService: authz,
       endpointMetadataService: new EndpointMetadataService(
@@ -506,10 +512,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
       messageSigningService: plugins.fleet?.messageSigningService,
-      actionCreateService: new ActionCreateService(
-        core.elasticsearch.client.asInternalUser,
-        this.endpointContext
-      ),
+      actionCreateService: this.endpointActionCreateService,
     });
 
     this.telemetryReceiver.start(
@@ -546,7 +549,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
     this.policyWatcher?.stop();
+    this.endpointActionCreateService?.stop();
     licenseService.stop();
-    // this.licenseSubscription?.unsubscribe();
   }
 }

@@ -31,6 +31,7 @@ import type { Agent } from '@kbn/fleet-plugin/common/types/models';
 import type { AgentClient } from '@kbn/fleet-plugin/server/services';
 import { get } from 'lodash';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
@@ -179,6 +180,7 @@ describe('test policy response handler', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        licensing: licensingMock.createSetup(),
         experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 
@@ -212,6 +214,7 @@ describe('test policy response handler', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        licensing: licensingMock.createSetup(),
         experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 

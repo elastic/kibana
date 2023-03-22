@@ -22,6 +22,7 @@ import * as buildQuery from './query.risk_score.dsl';
 import { get } from 'lodash/fp';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
   rawResponse: {
@@ -83,6 +84,7 @@ const mockDeps = {
     experimentalFeatures: {
       ...allowedExperimentalValues,
     },
+    licensing: licensingMock.createSetup(),
     service: {} as EndpointAppContextService,
   } as EndpointAppContext,
   request: {} as KibanaRequest,

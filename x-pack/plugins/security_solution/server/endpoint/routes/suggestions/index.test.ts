@@ -41,6 +41,7 @@ import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/se
 import { eventsIndexPattern, SUGGESTIONS_ROUTE } from '../../../../common/endpoint/constants';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 jest.mock('@kbn/unified-search-plugin/server/autocomplete/terms_enum', () => {
   return {
@@ -158,6 +159,7 @@ describe('when calling the Suggestions route handler', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        licensing: licensingMock.createSetup(),
         experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 

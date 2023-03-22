@@ -39,6 +39,7 @@ import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../common/endpoint/service/authz/mocks';
 import { xpackMocks } from '../fixtures';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
@@ -72,6 +73,7 @@ export const createMockEndpointAppContext = (
     logFactory: loggingSystemMock.create(),
     config: () => Promise.resolve(createMockConfig()),
     service: createMockEndpointAppContextService(mockManifestManager),
+    licensing: licensingMock.createSetup(),
     experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
   };
 };

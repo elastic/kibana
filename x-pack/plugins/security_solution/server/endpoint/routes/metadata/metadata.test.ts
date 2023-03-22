@@ -58,6 +58,7 @@ import { EndpointHostNotFoundError } from '../../services/metadata';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
 import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 describe('test endpoint routes', () => {
   let routerMock: jest.Mocked<SecuritySolutionPluginRouter>;
@@ -114,6 +115,7 @@ describe('test endpoint routes', () => {
       logFactory: loggingSystemMock.create(),
       service: endpointAppContextService,
       config: () => Promise.resolve(createMockConfig()),
+      licensing: licensingMock.createSetup(),
       experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
     });
   });

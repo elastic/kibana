@@ -16,6 +16,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { EndpointAppContextService } from '../../../../../../endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from '../../../../../../endpoint/types';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 export const mockOptions: UsersRequestOptions = {
   defaultIndex: ['test_indices*'],
@@ -144,6 +145,7 @@ export const mockDeps = () => ({
     experimentalFeatures: {
       ...allowedExperimentalValues,
     },
+    licensing: licensingMock.createSetup(),
     service: {} as EndpointAppContextService,
   } as EndpointAppContext,
   request: {} as KibanaRequest,

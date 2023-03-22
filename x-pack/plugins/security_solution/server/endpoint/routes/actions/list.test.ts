@@ -33,6 +33,7 @@ import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { registerActionListRoutes } from './list';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 interface CallApiRouteInterface {
   query?: EndpointActionListRequestQuery;
@@ -87,6 +88,7 @@ describe('Action List Route', () => {
       logFactory: loggingSystemMock.create(),
       service: endpointAppContextService,
       config: () => Promise.resolve(createMockConfig()),
+      licensing: licensingMock.createSetup(),
       experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
     });
 

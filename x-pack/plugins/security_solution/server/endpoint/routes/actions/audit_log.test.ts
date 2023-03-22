@@ -42,6 +42,7 @@ import type {
 } from '../../../../common/endpoint/types';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 describe('Action Log API', () => {
   describe('schema', () => {
@@ -140,6 +141,7 @@ describe('Action Log API', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        licensing: licensingMock.createSetup(),
         experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 

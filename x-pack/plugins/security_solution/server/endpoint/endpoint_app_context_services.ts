@@ -60,7 +60,7 @@ export interface EndpointAppContextServiceStartContract {
   featureUsageService: FeatureUsageService;
   experimentalFeatures: ExperimentalFeatures;
   messageSigningService: MessageSigningServiceInterface | undefined;
-  actionCreateService: ActionCreateService | undefined;
+  actionCreateService: ReturnType<typeof ActionCreateService> | undefined;
 }
 
 /**
@@ -232,7 +232,7 @@ export class EndpointAppContextService {
     return this.startDependencies.messageSigningService;
   }
 
-  public getActionCreateService(): ActionCreateService {
+  public getActionCreateService(): ReturnType<typeof ActionCreateService> {
     if (!this.startDependencies?.actionCreateService) {
       throw new EndpointAppContentServicesNotStartedError();
     }

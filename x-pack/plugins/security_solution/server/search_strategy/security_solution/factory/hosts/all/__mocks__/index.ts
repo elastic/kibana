@@ -17,6 +17,7 @@ import type {
 import { Direction, HostsFields, HostsQueries } from '../../../../../../../common/search_strategy';
 import type { EndpointAppContextService } from '../../../../../../endpoint/endpoint_app_context_services';
 import type { EndpointAppContext } from '../../../../../../endpoint/types';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 export const mockOptions: HostsRequestOptions = {
   defaultIndex: [
@@ -721,6 +722,7 @@ export const mockDeps = {
     experimentalFeatures: {
       ...allowedExperimentalValues,
     },
+    licensing: licensingMock.createSetup(),
     service: {} as EndpointAppContextService,
   } as EndpointAppContext,
   request: {} as KibanaRequest,
