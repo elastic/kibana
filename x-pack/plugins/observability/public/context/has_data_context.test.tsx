@@ -37,7 +37,7 @@ function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
   unregisterDataHandler({ appName: 'infra_logs' });
   unregisterDataHandler({ appName: 'infra_metrics' });
-  unregisterDataHandler({ appName: 'synthetics' });
+  unregisterDataHandler({ appName: 'uptime' });
   unregisterDataHandler({ appName: 'ux' });
 }
 
@@ -98,7 +98,7 @@ describe('HasDataContextProvider', () => {
           },
           { appName: 'infra_metrics', hasData: async () => ({ hasData: false }) },
           {
-            appName: 'synthetics',
+            appName: 'uptime',
             hasData: async () => ({ hasData: false }),
           },
           {
@@ -161,7 +161,7 @@ describe('HasDataContextProvider', () => {
             hasData: async () => ({ hasData: false, indices: 'metric-*' }),
           },
           {
-            appName: 'synthetics',
+            appName: 'uptime',
             hasData: async () => ({ hasData: false, indices: 'heartbeat-*, synthetics-*' }),
           },
           {
@@ -225,7 +225,7 @@ describe('HasDataContextProvider', () => {
             hasData: async () => ({ hasData: true, indices: 'metric-*' }),
           },
           {
-            appName: 'synthetics',
+            appName: 'uptime',
             hasData: async () => ({ hasData: true, indices: 'heartbeat-*, synthetics-*' }),
           },
           {
@@ -391,7 +391,7 @@ describe('HasDataContextProvider', () => {
             hasData: async () => ({ hasData: true, indices: 'metric-*' }),
           },
           {
-            appName: 'synthetics',
+            appName: 'uptime',
             hasData: async () => ({ hasData: true, indices: 'heartbeat-*, synthetics-*' }),
           },
           {
@@ -465,7 +465,7 @@ describe('HasDataContextProvider', () => {
             },
           },
           {
-            appName: 'synthetics',
+            appName: 'uptime',
             hasData: async () => {
               throw new Error('BOOMMMMM');
             },
