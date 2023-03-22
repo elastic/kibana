@@ -40,9 +40,9 @@ export const updateAppLinks = (
   appLinksToUpdate: AppLinkItems,
   linksPermissions: LinksPermissions
 ) => {
-  const filteredAppLinks = getFilteredAppLinks(appLinksToUpdate, linksPermissions);
-  appLinksUpdater$.next(Object.freeze(filteredAppLinks));
-  normalizedAppLinksUpdater$.next(Object.freeze(getNormalizedLinks(filteredAppLinks)));
+  const appLinks = processAppLinks(appLinksToUpdate, linksPermissions);
+  appLinksUpdater$.next(Object.freeze(appLinks));
+  normalizedAppLinksUpdater$.next(Object.freeze(getNormalizedLinks(appLinks)));
 };
 
 /**
@@ -132,7 +132,7 @@ const getNormalizedLinks = (
 const getNormalizedLink = (id: SecurityPageName): Readonly<NormalizedLink> | undefined =>
   normalizedAppLinksUpdater$.getValue()[id];
 
-const getFilteredAppLinks = (
+const processAppLinks = (
   appLinkToFilter: AppLinkItems,
   linksPermissions: LinksPermissions
 ): LinkItem[] =>
@@ -140,18 +140,33 @@ const getFilteredAppLinks = (
     if (!isLinkAllowed(appLink, linksPermissions)) {
       return acc;
     }
-    if (links) {
-      const childrenLinks = getFilteredAppLinks(links, linksPermissions);
-      if (childrenLinks.length > 0) {
-        acc.push({ ...appLink, links: childrenLinks });
-      } else {
-        acc.push(appLink);
-      }
-    } else {
-      acc.push(appLink);
+    const accessibleAppLink = processAppLinkCapabilities(appLink, linksPermissions);
+    if (!accessibleAppLink) {
+      return acc;
     }
+    if (links && !accessibleAppLink.isUpsell) {
+      const childrenLinks = processAppLinks(links, linksPermissions);
+      if (childrenLinks.length > 0) {
+        accessibleAppLink.links = childrenLinks;
+      }
+    }
+    acc.push(accessibleAppLink);
     return acc;
   }, []);
+
+export const processAppLinkCapabilities = (
+  appLink: LinkItem,
+  { capabilities, upselling }: LinksPermissions
+): LinkItem | null => {
+  if (appLink.capabilities && !hasCapabilities(appLink.capabilities, capabilities)) {
+    if (upselling.isLinkUpgradable(appLink.id)) {
+      return { ...appLink, isUpsell: true };
+    } else {
+      return null;
+    }
+  }
+  return appLink;
+};
 
 /**
  * The format of defining features supports OR and AND mechanism. To specify features in an OR fashion
@@ -185,7 +200,7 @@ export const hasCapabilities = <T>(
 
 const isLinkAllowed = (
   link: LinkItem,
-  { license, experimentalFeatures, capabilities }: LinksPermissions
+  { license, experimentalFeatures, capabilities, upselling }: LinksPermissions
 ) => {
   const linkLicenseType = link.licenseType ?? 'basic';
   if (license) {
@@ -201,8 +216,8 @@ const isLinkAllowed = (
   if (link.experimentalKey && !experimentalFeatures[link.experimentalKey]) {
     return false;
   }
-  if (link.capabilities && !hasCapabilities(link.capabilities, capabilities)) {
-    return false;
-  }
+  // if (link.capabilities && !hasCapabilities(link.capabilities, capabilities)) {
+  //   return false;
+  // }
   return true;
 };

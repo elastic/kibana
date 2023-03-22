@@ -67,6 +67,8 @@ import type { Explore } from './explore';
 import type { NavigationLink } from './common/links';
 
 import type { TelemetryClientStart } from './common/lib/telemetry';
+import type { UpsellingService } from './upselling';
+
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
@@ -128,6 +130,7 @@ export type StartServices = CoreStart &
     };
     savedObjectsManagement: SavedObjectsManagementPluginStart;
     isSidebarEnabled$: BehaviorSubject<boolean>;
+    upselling: UpsellingService;
     telemetry: TelemetryClientStart;
   };
 

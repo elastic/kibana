@@ -10,6 +10,7 @@ import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { IconType } from '@elastic/eui';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { SecurityPageName } from '../../../common/constants';
+import type { UpsellingService } from '../../upselling';
 
 /**
  * Permissions related parameters needed for the links to be filtered
@@ -17,6 +18,7 @@ import type { SecurityPageName } from '../../../common/constants';
 export interface LinksPermissions {
   capabilities: Capabilities;
   experimentalFeatures: Readonly<ExperimentalFeatures>;
+  upselling: UpsellingService;
   license?: ILicense;
 }
 
@@ -81,6 +83,12 @@ export interface LinkItem {
    */
   id: SecurityPageName;
   /**
+   * This prop is set automatically using the upsell service.
+   * The link will be rendered but shadowed in the navigation,
+   * it will be accessible but the page will display an upsell placeholder.
+   */
+  isUpsell?: boolean;
+  /**
    * Displays the "Beta" badge. Defaults to false.
    */
   isBeta?: boolean;
@@ -142,6 +150,7 @@ export interface NavigationLink {
   image?: string;
   title: string;
   skipUrlState?: boolean;
+  isUpsell?: boolean;
   isBeta?: boolean;
   betaOptions?: {
     text: string;

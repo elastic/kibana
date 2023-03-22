@@ -61,6 +61,7 @@ import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 
 import type { SecurityAppStore } from './common/store/types';
+import { UpsellingService } from './upselling';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -87,6 +88,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private telemetry: TelemetryService;
 
   readonly experimentalFeatures: ExperimentalFeatures;
+  private upsellingService: UpsellingService;
   private isSidebarEnabled$: BehaviorSubject<boolean>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -96,6 +98,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+    this.upsellingService = new UpsellingService();
     this.telemetry = new TelemetryService();
   }
   private appUpdater$ = new Subject<AppUpdater>();
@@ -176,6 +179,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         },
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
         isSidebarEnabled$: this.isSidebarEnabled$,
+        upselling: this.upsellingService,
         telemetry: this.telemetry.start(),
       };
       return services;
@@ -499,6 +503,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     license$.pipe(combineLatestWith(newNavEnabled$)).subscribe(async ([license, newNavEnabled]) => {
       const linksPermissions: LinksPermissions = {
         experimentalFeatures: this.experimentalFeatures,
+        upselling: this.upsellingService,
         capabilities: core.application.capabilities,
       };
 

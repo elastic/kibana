@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin } from '@kbn/core/server';
+import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
+import { capabilitiesSwitcher } from './lib/capabilities';
 
 import {
   ServerlessSecurityPluginSetup,
@@ -25,7 +26,8 @@ export class ServerlessSecurityPlugin
 {
   constructor(_initializerContext: PluginInitializerContext) {}
 
-  public setup() {
+  public setup(coreSetup: CoreSetup) {
+    coreSetup.capabilities.registerSwitcher(capabilitiesSwitcher);
     return {};
   }
 

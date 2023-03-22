@@ -18,6 +18,7 @@ export const formatNavigationLinks = (appLinks: AppLinkItems): NavigationLink[] 
     ...(link.categories != null ? { categories: link.categories } : {}),
     ...(link.description != null ? { description: link.description } : {}),
     ...(link.sideNavDisabled === true ? { disabled: true } : {}),
+    ...(link.isUpsell === true ? { isUpsell: true } : {}),
     ...(link.landingIcon != null ? { icon: link.landingIcon } : {}),
     ...(link.landingImage != null ? { image: link.landingImage } : {}),
     ...(link.skipUrlState != null ? { skipUrlState: link.skipUrlState } : {}),
