@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  comment-if-apm-ui:
+  comment-if-oblt-member:
     runs-on: ubuntu-latest
     steps:
       - uses: elastic/apm-pipeline-library/.github/actions/github-token@current
@@ -26,10 +26,10 @@ jobs:
           secretId: ${{ secrets.OBLT_VAULT_SECRET_ID }}
 
       - id: is_team_member
-        name: Check if user is member of the Elastic org and apm-ui team
+        name: Check if user is member of the Elastic org and Observability team
         run: |
           if gh api -H "Accept: application/vnd.github+json" \
-            /orgs/elastic/teams/apm-ui/memberships/${{ github.actor }} ; then
+            /orgs/elastic/teams/observability/memberships/${{ github.actor }} ; then
             echo "result=true" >> $GITHUB_OUTPUT
           else
             echo "result=false" >> $GITHUB_OUTPUT
