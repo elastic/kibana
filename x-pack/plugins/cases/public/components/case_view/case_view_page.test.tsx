@@ -273,12 +273,14 @@ for (let index = 0; index < 50; index++) {
     it('should update title', async () => {
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
       const newTitle = 'The new title';
-      userEvent.click(screen.getByTestId('editable-title-edit-icon'), undefined, {
+
+      userEvent.click(await screen.findByTestId('editable-title-edit-icon'), undefined, {
         skipPointerEventsCheck: true,
       });
-      userEvent.clear(screen.getByTestId('editable-title-input-field'));
-      userEvent.paste(screen.getByTestId('editable-title-input-field'), newTitle);
-      userEvent.click(screen.getByTestId('editable-title-submit-btn'), undefined, {
+
+      userEvent.clear(await screen.findByTestId('editable-title-input-field'));
+      userEvent.paste(await screen.findByTestId('editable-title-input-field'), newTitle);
+      userEvent.click(await screen.findByTestId('editable-title-submit-btn'), undefined, {
         skipPointerEventsCheck: true,
       });
 
@@ -342,20 +344,28 @@ for (let index = 0; index < 50; index++) {
           }}
         />
       );
-      userEvent.click(screen.getByTestId('connector-edit').querySelector('button')!, undefined, {
+
+      userEvent.click(
+        (await screen.findByTestId('connector-edit')).querySelector('button')!,
+        undefined,
+        {
+          skipPointerEventsCheck: true,
+        }
+      );
+
+      userEvent.click(await screen.findByTestId('dropdown-connectors'), undefined, {
         skipPointerEventsCheck: true,
       });
-      userEvent.click(screen.getByTestId('dropdown-connectors'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+
       await waitForEuiPopoverOpen();
-      userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'), undefined, {
+
+      userEvent.click(await screen.findByTestId('dropdown-connector-resilient-2'), undefined, {
         skipPointerEventsCheck: true,
       });
 
       expect(await screen.findByTestId('connector-fields-resilient')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('edit-connectors-submit'), undefined, {
+      userEvent.click(await screen.findByTestId('edit-connectors-submit'), undefined, {
         skipPointerEventsCheck: true,
       });
 
@@ -406,9 +416,13 @@ for (let index = 0; index < 50; index++) {
       const showAlertDetails = jest.fn();
       appMockRenderer.render(<CaseViewPage {...caseProps} showAlertDetails={showAlertDetails} />);
 
-      userEvent.click(screen.getByTestId('comment-action-show-alert-alert-action-id'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      userEvent.click(
+        await screen.findByTestId('comment-action-show-alert-alert-action-id'),
+        undefined,
+        {
+          skipPointerEventsCheck: true,
+        }
+      );
 
       await waitFor(() => {
         expect(showAlertDetails).toHaveBeenCalledWith('alert-id-1', 'alert-index-1');
@@ -427,9 +441,11 @@ for (let index = 0; index < 50; index++) {
 
     it('should update settings', async () => {
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
-      userEvent.click(screen.getByTestId('sync-alerts-switch'), undefined, {
+
+      userEvent.click(await screen.findByTestId('sync-alerts-switch'), undefined, {
         skipPointerEventsCheck: true,
       });
+
       const updateObject = updateCaseProperty.mock.calls[0][0];
 
       await waitFor(() => {
@@ -453,16 +469,24 @@ for (let index = 0; index < 50; index++) {
     describe('Callouts', () => {
       it('it shows the danger callout when a connector has been deleted', async () => {
         useGetConnectorsMock.mockImplementation(() => ({ data: [], isLoading: false }));
-        const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+        appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-        expect(result.container.querySelector('.euiCallOut--danger')).toBeInTheDocument();
+        expect(
+          await screen.findByText(
+            /The connector used to send updates to the external service has been deleted/
+          )
+        ).toBeInTheDocument();
       });
 
       it('it does NOT shows the danger callout when connectors are loading', async () => {
         useGetConnectorsMock.mockImplementation(() => ({ data: [], isLoading: true }));
-        const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+        appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-        expect(result.container.querySelector('.euiCallOut--danger')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(
+            /The connector used to send updates to the external service has been deleted/
+          )
+        ).not.toBeInTheDocument();
       });
     });
 
