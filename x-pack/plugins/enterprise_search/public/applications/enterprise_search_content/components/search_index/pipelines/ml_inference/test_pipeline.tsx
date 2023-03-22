@@ -65,9 +65,7 @@ export const TestPipeline: React.FC = () => {
           <EuiSpacer size="m" />
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
-          <EuiText
-            color="subdued"
-            size="s">
+          <EuiText color="subdued" size="s">
             <p>
               <strong>
                 {i18n.translate(
@@ -88,10 +86,7 @@ export const TestPipeline: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiPanel
-        hasBorder={true}
-        hasShadow={false}
-        >
+      <EuiPanel hasBorder hasShadow={false}>
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
             <EuiFlexGroup>
@@ -105,7 +100,8 @@ export const TestPipeline: React.FC = () => {
                   helpText={i18n.translate(
                     'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument.helptext',
                     {
-                      defaultMessage: 'Use a document to test your new pipeline. Search using document IDs',
+                      defaultMessage:
+                        'Use a document to test your new pipeline. Search using document IDs',
                     }
                   )}
                   isInvalid={showGetDocumentErrors}
@@ -150,20 +146,14 @@ export const TestPipeline: React.FC = () => {
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.example.code',
                         {
-                          defaultMessage:
-                            "Use this JSON format to add your own array of documents",
+                          defaultMessage: 'Use this JSON format to add your own array of documents',
                         }
                       )}
                     </strong>
                   </p>
                 </EuiText>
-                <EuiCodeBlock
-                  fontSize="m"
-                  isCopyable
-                  language="json"
-                  paddingSize="m"
-                >
-                  { `[{"_index":"index","_id":"id","_source":{"${sourceField}":"bar"}}]` }
+                <EuiCodeBlock fontSize="m" isCopyable language="json" paddingSize="m">
+                  {`[{"_index":"index","_id":"id","_source":{"${sourceField}":"bar"}}]`}
                 </EuiCodeBlock>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -221,7 +211,9 @@ export const TestPipeline: React.FC = () => {
                     <EuiCodeBlock language="json" isCopyable className="reviewCodeBlock">
                       {simulatePipelineErrors.length > 0
                         ? JSON.stringify(simulatePipelineErrors, null, 2)
-                        : (simulatePipelineResult ? JSON.stringify(simulatePipelineResult, null, 2) : "{}")}
+                        : simulatePipelineResult
+                        ? JSON.stringify(simulatePipelineResult, null, 2)
+                        : '{}'}
                     </EuiCodeBlock>
                   </EuiResizablePanel>
                 </>
@@ -241,7 +233,6 @@ export const TestPipeline: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-
     </>
   );
 };

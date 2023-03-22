@@ -115,16 +115,13 @@ export const ConfigurePipeline: React.FC = () => {
             </h4>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <EuiText
-            color="subdued"
-            size="s"
-          >
+          <EuiText color="subdued" size="s">
             <p>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.description',
                 {
                   defaultMessage:
-                    "Build or reuse a child pipeline that will be used as a processor in your main pipeline.",
+                    'Build or reuse a child pipeline that will be used as a processor in your main pipeline.',
                 }
               )}
             </p>
@@ -133,17 +130,14 @@ export const ConfigurePipeline: React.FC = () => {
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.descriptionUsePipelines',
                 {
                   defaultMessage:
-                    "Pipelines you create will be saved to be used elsewhere in your Elastic deployment.",
+                    'Pipelines you create will be saved to be used elsewhere in your Elastic deployment.',
                 }
               )}
             </p>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
-          <EuiPanel
-            hasBorder={true}
-            hasShadow={false}
-          >
+          <EuiPanel hasBorder hasShadow={false}>
             <EuiForm component="form">
               <EuiFormRow
                 fullWidth
@@ -259,7 +253,7 @@ export const ConfigurePipeline: React.FC = () => {
       </EuiFlexGroup>
       <EuiHorizontalRule />
       <EuiFlexGroup>
-      <EuiFlexItem grow={3}>
+        <EuiFlexItem grow={3}>
           <EuiTitle size="s">
             <h4>
               {i18n.translate(
@@ -269,16 +263,13 @@ export const ConfigurePipeline: React.FC = () => {
             </h4>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <EuiText
-            color="subdued"
-            size="s"
-          >
+          <EuiText color="subdued" size="s">
             <p>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.descriptionDeployTrainedModel',
                 {
                   defaultMessage:
-                    "To perform natural language processing tasks in your cluster, you must deploy an appropriate trained model.",
+                    'To perform natural language processing tasks in your cluster, you must deploy an appropriate trained model.',
                 }
               )}
             </p>
@@ -286,17 +277,15 @@ export const ConfigurePipeline: React.FC = () => {
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.docsLink',
                 {
-                  defaultMessage: 'Learn more about importing and using ML models in Enterprise Search',
+                  defaultMessage:
+                    'Learn more about importing and using ML models in Enterprise Search',
                 }
               )}
             </EuiLink>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
-         <EuiPanel
-            hasBorder={true}
-            hasShadow={false}
-          >
+          <EuiPanel hasBorder hasShadow={false}>
             <EuiForm component="form">
               <EuiFormRow
                 label={i18n.translate(

@@ -80,16 +80,13 @@ export const ConfigureFields: React.FC = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
-          <EuiText
-            color="subdued"
-            size="s"
-          >
+          <EuiText color="subdued" size="s">
             <p>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.description',
                 {
                   defaultMessage:
-                    "Choose fields to be enhanced from your existing documents or manually enter in fields you anticipate using.",
+                    'Choose fields to be enhanced from your existing documents or manually enter in fields you anticipate using.',
                 }
               )}
             </p>
@@ -97,10 +94,7 @@ export const ConfigureFields: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiPanel
-        hasBorder={true}
-        hasShadow={false}
-      >
+      <EuiPanel hasBorder hasShadow={false}>
         <EuiForm component="form">
           <EuiFlexGroup>
             <EuiFlexItem>

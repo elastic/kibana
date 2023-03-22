@@ -40,10 +40,7 @@ export const ReviewPipeline: React.FC = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
-          <EuiText
-            color="subdued"
-            size="s"
-          >
+          <EuiText color="subdued" size="s">
             <p>
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.review.description',
