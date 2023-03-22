@@ -79,16 +79,16 @@ export class PassiveMap extends Component<Props, State> {
         initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
         autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
       },
-    });
-    mapEmbeddable.setEventHandlers({ onInitialRenderComplete: this.props.onInitialRenderComplete });
-    mapEmbeddable.setIsSharable(false);
+    }) as MapEmbeddable | undefined;
 
     if (!mapEmbeddable) {
       return;
     }
 
     if (this._isMounted) {
-      this.setState({ mapEmbeddable: mapEmbeddable as MapEmbeddable }, () => {
+      mapEmbeddable.setEventHandlers({ onInitialRenderComplete: this.props.onInitialRenderComplete });
+      mapEmbeddable.setIsSharable(false);
+      this.setState({ mapEmbeddable: mapEmbeddable }, () => {
         if (this.state.mapEmbeddable && this._embeddableRef.current) {
           this.state.mapEmbeddable.render(this._embeddableRef.current);
         }

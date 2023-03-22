@@ -156,7 +156,7 @@ export class MapContainer extends Component<Props, State> {
         this.setState({ isInitialLoadRenderTimeoutComplete: true });
         this._onInitialLoadRenderComplete();
       }
-    }, 5000);
+    }, 1000);
   };
 
   render() {
