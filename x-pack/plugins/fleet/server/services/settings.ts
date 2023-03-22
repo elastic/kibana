@@ -19,6 +19,11 @@ export async function getSettings(soClient: SavedObjectsClientContract): Promise
   const res = await soClient.find<SettingsSOAttributes>({
     type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   });
+  appContextService.writeCustomSoAuditLog({
+    action: 'get',
+    id: GLOBAL_SETTINGS_ID,
+    savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+  });
 
   if (res.total === 0) {
     throw Boom.notFound('Global settings not found');
@@ -59,6 +64,12 @@ export async function saveSettings(
   try {
     const settings = await getSettings(soClient);
 
+    appContextService.writeCustomSoAuditLog({
+      action: 'update',
+      id: settings.id,
+      savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+    });
+
     const res = await soClient.update<SettingsSOAttributes>(
       GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
       settings.id,
@@ -72,6 +83,13 @@ export async function saveSettings(
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
       const defaultSettings = createDefaultSettings();
+
+      appContextService.writeCustomSoAuditLog({
+        action: 'update',
+        id: GLOBAL_SETTINGS_ID,
+        savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      });
+
       const res = await soClient.create<SettingsSOAttributes>(
         GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
         {
