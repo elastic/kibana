@@ -54,6 +54,20 @@ export function groupDuplicates(
   return groups;
 }
 
+export function getShouldClauses(significantTerms: SignificantTerm[]) {
+  return Array.from(
+    group(significantTerms, ({ fieldName }) => fieldName),
+    ([field, values]) => ({ terms: { [field]: values.map((d) => d.fieldValue) } })
+  );
+}
+
+export function getFrequentItemSetsAggFields(significantTerms: SignificantTerm[]) {
+  return Array.from(
+    group(significantTerms, ({ fieldName }) => fieldName),
+    ([field, values]) => ({ field, include: values.map((d) => d.fieldValue) })
+  );
+}
+
 export async function fetchFrequentItemSets(
   client: ElasticsearchClient,
   index: string,
@@ -87,17 +101,9 @@ export async function fetchFrequentItemSets(
           },
         },
       ],
-      should: Array.from(
-        group(sortedSignificantTerms, ({ fieldName }) => fieldName),
-        ([field, values]) => ({ terms: { [field]: values.map((d) => d.fieldValue) } })
-      ),
+      should: getShouldClauses(sortedSignificantTerms),
     },
   };
-
-  const aggFields = Array.from(
-    group(sortedSignificantTerms, ({ fieldName }) => fieldName),
-    ([field, values]) => ({ field, include: values.map((d) => d.fieldValue) })
-  );
 
   const frequentItemSetsAgg: Record<string, estypes.AggregationsAggregationContainer> = {
     fi: {
@@ -106,7 +112,7 @@ export async function fetchFrequentItemSets(
         minimum_set_size: 2,
         size: 200,
         minimum_support: 0.001,
-        fields: aggFields,
+        fields: getFrequentItemSetsAggFields(sortedSignificantTerms),
       },
     },
   };
