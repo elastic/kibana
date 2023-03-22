@@ -72,7 +72,7 @@ async function getServiceNodes({
     start,
     end,
   });
-};
+}
 
 async function getElasticServiceNodes({
   kuery,
@@ -89,7 +89,6 @@ async function getElasticServiceNodes({
   start: number;
   end: number;
 }): Promise<ServiceNodesResponse> {
-
   const params = {
     apm: {
       events: [ProcessorEvent.metric],
@@ -292,6 +291,6 @@ async function getOTelServiceNodes({
         item.nonHeapMemory !== null ||
         item.threadCount != null
     );
-};
+}
 
 export { getServiceNodes };
