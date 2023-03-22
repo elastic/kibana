@@ -16,6 +16,7 @@ export enum LICENSING_FEATURE {
   NATIVE_CONNECTOR = 'nativeConnector',
   CRAWLER = 'crawler',
   INFERENCE = 'inference',
+  SEARCH_APPLICATIONS = 'searchApplications',
 }
 
 type ContentBlock = Record<LICENSING_FEATURE, string>;
@@ -43,6 +44,13 @@ export const LicensingCallout: React.FC<{ feature: LICENSING_FEATURE }> = ({ fea
           'Inference processors require a Platinum license or higher and are not available to Standard license self-managed deployments. You need to upgrade to use this feature.',
       }
     ),
+   [LICENSING_FEATURE.SEARCH_APPLICATIONS]: i18n.translate(
+      'xpack.enterpriseSearch.content.licensingCallout.inference.contentOne',
+    {
+      defaultMessage:
+        'Search Applications require a Platinum license or higher and are not available to Standard license self-managed deployments. You need to upgrade to use this feature.',
+      }
+    ),
   };
 
   const secondContentBlock: ContentBlock = {
@@ -65,6 +73,13 @@ export const LicensingCallout: React.FC<{ feature: LICENSING_FEATURE }> = ({ fea
       {
         defaultMessage:
           "Did you know that inference processors are available with a Standard Elastic Cloud license? Elastic Cloud gives you the flexibility to run where you want. Deploy our managed service on Google Cloud, Microsoft Azure, or Amazon Web Services, and we'll handle the maintenance and upkeep for you.",
+      }
+    ),
+    [LICENSING_FEATURE.SEARCH_APPLICATIONS]: i18n.translate(
+      'xpack.enterpriseSearch.content.licensingCallout.inference.contentTwo',
+      {
+        defaultMessage:
+          "Did you know that Search Applications are available with a Standard Elastic Cloud license? Elastic Cloud gives you the flexibility to run where you want. Deploy our managed service on Google Cloud, Microsoft Azure, or Amazon Web Services and we\'ll handle the maintenance and upkeep for you.",
       }
     ),
   };
