@@ -18,7 +18,7 @@ import { getTotalCount, getInUseTotalCount, getExecutionsPerDayCount } from './a
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
 
 export const TASK_ID = `Actions-${TELEMETRY_TASK_TYPE}`;
-export const SCHEDULE: IntervalSchedule = { interval: '1d' };
+export const SCHEDULE: IntervalSchedule = { interval: '15s' };
 
 export function initializeActionsTelemetry(
   logger: Logger,
@@ -135,8 +135,8 @@ export function telemetryTaskRunner(
               count_connector_types_by_action_run_outcome_per_day:
                 totalExecutionsPerDay.countRunOutcomeByConnectorType,
             },
-            // Migrates old tasks that don't have a schedule to have a schedule
-            // while also updating the schedule value if we decide to change it
+            // Useful for setting a schedule for the old tasks that don't have one
+            // or to update the schedule if ever the frequency changes in code
             schedule: SCHEDULE,
           };
         });

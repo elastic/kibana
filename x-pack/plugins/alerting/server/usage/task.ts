@@ -191,8 +191,8 @@ export function telemetryTaskRunner(
                   percentile_num_alerts_by_type_per_day:
                     dailyExecutionCounts.alertsPercentilesByType,
                 },
-                // Migrates old tasks that don't have a schedule to have a schedule
-                // while also updating the schedule value if we decide to change it
+                // Useful for setting a schedule for the old tasks that don't have one
+                // or to update the schedule if ever the frequency changes in code
                 schedule: SCHEDULE,
               };
             }
@@ -201,8 +201,8 @@ export function telemetryTaskRunner(
             logger.warn(`Error executing alerting telemetry task: ${errMsg}`);
             return {
               state: {},
-              // Migrates old tasks that don't have a schedule to have a schedule
-              // while also updating the schedule value if we decide to change it
+              // Useful for setting a schedule for the old tasks that don't have one
+              // or to update the schedule if ever the frequency changes in code
               schedule: SCHEDULE,
             };
           });
