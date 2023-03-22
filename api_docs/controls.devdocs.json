@@ -4580,6 +4580,36 @@
     "misc": [
       {
         "parentPluginId": "controls",
+        "id": "def-public.ACTION_DELETE_CONTROL",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_DELETE_CONTROL",
+        "description": [],
+        "signature": [
+          "\"deleteControl\""
+        ],
+        "path": "src/plugins/controls/public/control_group/actions/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.ACTION_EDIT_CONTROL",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_EDIT_CONTROL",
+        "description": [],
+        "signature": [
+          "\"editControl\""
+        ],
+        "path": "src/plugins/controls/public/control_group/actions/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
         "id": "def-public.AddOptionsListControlProps",
         "type": "Type",
         "tags": [],
