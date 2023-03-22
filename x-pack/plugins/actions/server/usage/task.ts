@@ -18,7 +18,7 @@ import { getTotalCount, getInUseTotalCount, getExecutionsPerDayCount } from './a
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
 
 export const TASK_ID = `Actions-${TELEMETRY_TASK_TYPE}`;
-export const SCHEDULE: IntervalSchedule = { interval: '15s' };
+export const SCHEDULE: IntervalSchedule = { interval: '1d' };
 
 export function initializeActionsTelemetry(
   logger: Logger,
