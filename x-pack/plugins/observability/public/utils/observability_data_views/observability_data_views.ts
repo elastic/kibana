@@ -138,6 +138,10 @@ export class ObservabilityDataViews {
         false
       );
 
+      if (dataView.matchedIndices.length === 0) {
+        return;
+      }
+
       if (runtimeFields !== null) {
         runtimeFields.forEach(({ name, field }) => {
           dataView.addRuntimeField(name, field);
