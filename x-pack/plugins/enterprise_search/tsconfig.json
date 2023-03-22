@@ -51,7 +51,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
     "@kbn/core-http-browser",
-    "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/es-query",
   ]
 }

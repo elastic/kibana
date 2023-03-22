@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SearchResponse, AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
-
-import { AcknowledgeResponse } from '@kbn/core-saved-objects-migration-server-internal/src/actions';
 
 import {
   EnterpriseSearchEngineDetails,
@@ -105,7 +103,7 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engines = await client.asCurrentUser.transport.request<AcknowledgeResponse>({
+      const engines = await client.asCurrentUser.transport.request<AcknowledgedResponseBase>({
         method: 'DELETE',
         path: `_application/search_application/${request.params.engine_name}`,
       });
