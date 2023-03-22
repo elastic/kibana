@@ -108,9 +108,7 @@ export class MapContainer extends Component<Props, State> {
   // Failure to not have the dom attribute, or custom event, will timeout the job.
   // See x-pack/plugins/reporting/export_types/common/lib/screenshots/wait_for_render.ts for more.
   _onInitialLoadRenderComplete = () => {
-    console.log('_onInitialLoadRenderComplete');
     if (this.props.eventHandlers.onInitialRenderComplete) {
-      console.log('calling eventHandlers.onInitialRenderComplete');
       this.props.eventHandlers.onInitialRenderComplete();
     }
 
