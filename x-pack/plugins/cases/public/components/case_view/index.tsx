@@ -86,7 +86,6 @@ export const CaseView = React.memo(
         {getLegacyUrlConflictCallout()}
         <CaseViewPage
           caseData={data.case}
-          caseId={caseId}
           fetchCase={refetch}
           onComponentInitialized={onComponentInitialized}
           actionsNavigation={actionsNavigation}

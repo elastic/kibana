@@ -26,7 +26,6 @@ import { useOnUpdateField } from './use_on_update_field';
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
     caseData,
-    caseId,
     onComponentInitialized,
     refreshRef,
     ruleDetailsNavigation,
@@ -83,15 +82,12 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       [onUpdateField]
     );
 
-    // useEffect used for component's initialization
-    useEffect(() => {
-      if (init.current) {
-        init.current = false;
-        if (onComponentInitialized) {
-          onComponentInitialized();
-        }
+    if (init.current) {
+      init.current = false;
+      if (onComponentInitialized) {
+        onComponentInitialized();
       }
-    }, [onComponentInitialized]);
+    }
 
     return (
       <>
