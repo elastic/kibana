@@ -17,9 +17,14 @@ export const useSourceNotifier = () => {
       title: i18n.translate('xpack.infra.sourceConfiguration.updateFailureTitle', {
         defaultMessage: 'Configuration update failed',
       }),
-      body: i18n.translate('xpack.infra.sourceConfiguration.updateFailureBody', {
-        defaultMessage: `Changes for your Metrics configuration were not applied. ${message}`,
-      }),
+      body: [
+        i18n.translate('xpack.infra.sourceConfiguration.updateFailureBody', {
+          defaultMessage: 'Changes for your Metrics configuration were not applied.',
+        }),
+        message,
+      ]
+        .filter(Boolean)
+        .join(' '),
     });
   };
 
