@@ -65,6 +65,8 @@ describe('AnnotationsPanel', () => {
           indexPatternId: 'indexPattern1',
           annotations: [customLineStaticAnnotation],
           ignoreGlobalFilters: true,
+          hide: false,
+          simpleView: false,
         },
       ],
     };
@@ -143,6 +145,8 @@ describe('AnnotationsPanel', () => {
         layerType: 'annotations',
         indexPatternId: 'indexPattern1',
         ignoreGlobalFilters: true,
+        hide: false,
+        simpleView: false,
       };
       const component = mount(
         <AnnotationsPanel
@@ -283,6 +287,8 @@ describe('AnnotationsPanel', () => {
         layerType: 'annotations',
         indexPatternId: indexPattern.id,
         ignoreGlobalFilters: true,
+        hide: false,
+        simpleView: false,
       };
       const frameMock = createMockFramePublicAPI({
         datasourceLayers: {},
@@ -341,6 +347,8 @@ describe('AnnotationsPanel', () => {
         layerType: 'annotations',
         ignoreGlobalFilters: true,
         indexPatternId: indexPattern.id,
+        hide: false,
+        simpleView: false,
       };
       const frameMock = createMockFramePublicAPI({
         datasourceLayers: {},
@@ -397,6 +405,8 @@ describe('AnnotationsPanel', () => {
         layerType: 'annotations',
         ignoreGlobalFilters: true,
         indexPatternId: indexPattern.id,
+        hide: false,
+        simpleView: false,
       };
       const frameMock = createMockFramePublicAPI({
         datasourceLayers: {},
@@ -473,6 +483,8 @@ describe('AnnotationsPanel', () => {
         layerType: 'annotations',
         ignoreGlobalFilters: true,
         indexPatternId: indexPattern.id,
+        hide: false,
+        simpleView: false,
       };
       const frameMock = createMockFramePublicAPI({
         datasourceLayers: {},
@@ -547,6 +559,8 @@ describe('AnnotationsPanel', () => {
         layerType: 'annotations',
         indexPatternId: indexPattern.id,
         ignoreGlobalFilters: true,
+        hide: false,
+        simpleView: false,
       };
       const frameMock = createMockFramePublicAPI({
         datasourceLayers: {},
@@ -618,6 +632,8 @@ describe('AnnotationsPanel', () => {
         layerType: 'annotations',
         ignoreGlobalFilters: true,
         indexPatternId: indexPattern.id,
+        hide: false,
+        simpleView: false,
       };
       const frameMock = createMockFramePublicAPI({
         datasourceLayers: {},

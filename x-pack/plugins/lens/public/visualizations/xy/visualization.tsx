@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import { CoreStart, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -23,6 +23,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -43,6 +44,8 @@ import type {
   FramePublicAPI,
   Suggestion,
   UserMessage,
+  VisualizeEditorContext,
+  AnnotationGroups,
 } from '../../types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import {
@@ -229,10 +232,17 @@ export const getXyVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
 
-  initialize(addNewLayer, annotationGroups, state, _, references, initialContext) {
+  initialize(
+    addNewLayer,
+    state,
+    _mainPalette?,
+    annotationGroups?: AnnotationGroups,
+    references?: SavedObjectReference[],
+    initialContext?: VisualizeFieldContext | VisualizeEditorContext
+  ) {
     const finalState =
       state && isPersistedState(state)
-        ? injectReferences(state, annotationGroups, references, initialContext)
+        ? injectReferences(state, annotationGroups!, references, initialContext)
         : state;
     return (
       finalState || {

@@ -8,6 +8,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { EventAnnotationConfig } from '../../common';
 import { getEventAnnotationService } from './service';
 import { EventAnnotationServiceType } from './types';
@@ -132,7 +133,10 @@ describe('Event Annotation Service', () => {
       const typedId = id as 'multiAnnotations' | 'noAnnotations' | 'nonExistingGroup';
       return annotationResolveMocks[typedId];
     });
-    eventAnnotationService = getEventAnnotationService(core);
+    eventAnnotationService = getEventAnnotationService(
+      core,
+      {} as SavedObjectsManagementPluginStart
+    );
   });
   afterEach(() => {
     jest.clearAllMocks();
@@ -468,16 +472,16 @@ describe('Event Annotation Service', () => {
       });
     });
   });
-  describe.skip('deleteAnnotationGroup', () => {
-    it('deletes annotation group along with annotations that reference them', async () => {
-      await eventAnnotationService.deleteAnnotationGroup('multiAnnotations');
-      expect(core.savedObjects.client.bulkDelete).toHaveBeenCalledWith([
-        { id: 'multiAnnotations', type: 'event-annotation-group' },
-        { id: 'annotation1', type: 'event-annotation' },
-        { id: 'annotation2', type: 'event-annotation' },
-      ]);
-    });
-  });
+  // describe.skip('deleteAnnotationGroup', () => {
+  //   it('deletes annotation group along with annotations that reference them', async () => {
+  //     await eventAnnotationService.deleteAnnotationGroup('multiAnnotations');
+  //     expect(core.savedObjects.client.bulkDelete).toHaveBeenCalledWith([
+  //       { id: 'multiAnnotations', type: 'event-annotation-group' },
+  //       { id: 'annotation1', type: 'event-annotation' },
+  //       { id: 'annotation2', type: 'event-annotation' },
+  //     ]);
+  //   });
+  // });
   describe('createAnnotationGroup', () => {
     it('creates annotation group along with annotations', async () => {
       const annotations = [
@@ -541,72 +545,72 @@ describe('Event Annotation Service', () => {
       );
     });
   });
-  describe.skip('updateAnnotations', () => {
-    const upsert = [
-      {
-        id: 'annotation2',
-        label: 'Query based event',
-        icon: 'triangle',
-        color: 'red',
-        type: 'query',
-        timeField: 'timestamp',
-        key: {
-          type: 'point_in_time',
-        },
-        lineStyle: 'dashed',
-        lineWidth: 3,
-        filter: { type: 'kibana_query', query: '', language: 'kuery' },
-      },
-      {
-        id: 'annotation4',
-        label: 'Query based event',
-        type: 'query',
-        timeField: 'timestamp',
-        key: {
-          type: 'point_in_time',
-        },
-        filter: { type: 'kibana_query', query: '', language: 'kuery' },
-      },
-    ] as EventAnnotationConfig[];
-    it('updates annotations - deletes annotations', async () => {
-      await eventAnnotationService.updateAnnotations('multiAnnotations', {
-        delete: ['annotation1', 'annotation2'],
-      });
-      expect(core.savedObjects.client.bulkDelete).toHaveBeenCalledWith([
-        { id: 'annotation1', type: 'event-annotation' },
-        { id: 'annotation2', type: 'event-annotation' },
-      ]);
-    });
-    it('updates annotations - inserts new annotations', async () => {
-      await eventAnnotationService.updateAnnotations('multiAnnotations', { upsert });
-      expect(core.savedObjects.client.bulkCreate).toHaveBeenCalledWith([
-        {
-          id: 'annotation2',
-          type: 'event-annotation',
-          attributes: upsert[0],
-          overwrite: true,
-          references: [
-            {
-              id: 'multiAnnotations',
-              name: 'event-annotation-group-ref-annotation2',
-              type: 'event-annotation-group',
-            },
-          ],
-        },
-        {
-          id: 'annotation4',
-          type: 'event-annotation',
-          attributes: upsert[1],
-          overwrite: true,
-          references: [
-            {
-              id: 'multiAnnotations',
-              name: 'event-annotation-group-ref-annotation4',
-              type: 'event-annotation-group',
-            },
-          ],
-        },
-      ]);
-    });
-  });
+  // describe.skip('updateAnnotations', () => {
+  //   const upsert = [
+  //     {
+  //       id: 'annotation2',
+  //       label: 'Query based event',
+  //       icon: 'triangle',
+  //       color: 'red',
+  //       type: 'query',
+  //       timeField: 'timestamp',
+  //       key: {
+  //         type: 'point_in_time',
+  //       },
+  //       lineStyle: 'dashed',
+  //       lineWidth: 3,
+  //       filter: { type: 'kibana_query', query: '', language: 'kuery' },
+  //     },
+  //     {
+  //       id: 'annotation4',
+  //       label: 'Query based event',
+  //       type: 'query',
+  //       timeField: 'timestamp',
+  //       key: {
+  //         type: 'point_in_time',
+  //       },
+  //       filter: { type: 'kibana_query', query: '', language: 'kuery' },
+  //     },
+  //   ] as EventAnnotationConfig[];
+  //   it('updates annotations - deletes annotations', async () => {
+  //     await eventAnnotationService.updateAnnotations('multiAnnotations', {
+  //       delete: ['annotation1', 'annotation2'],
+  //     });
+  //     expect(core.savedObjects.client.bulkDelete).toHaveBeenCalledWith([
+  //       { id: 'annotation1', type: 'event-annotation' },
+  //       { id: 'annotation2', type: 'event-annotation' },
+  //     ]);
+  //   });
+  //   it('updates annotations - inserts new annotations', async () => {
+  //     await eventAnnotationService.updateAnnotations('multiAnnotations', { upsert });
+  //     expect(core.savedObjects.client.bulkCreate).toHaveBeenCalledWith([
+  //       {
+  //         id: 'annotation2',
+  //         type: 'event-annotation',
+  //         attributes: upsert[0],
+  //         overwrite: true,
+  //         references: [
+  //           {
+  //             id: 'multiAnnotations',
+  //             name: 'event-annotation-group-ref-annotation2',
+  //             type: 'event-annotation-group',
+  //           },
+  //         ],
+  //       },
+  //       {
+  //         id: 'annotation4',
+  //         type: 'event-annotation',
+  //         attributes: upsert[1],
+  //         overwrite: true,
+  //         references: [
+  //           {
+  //             id: 'multiAnnotations',
+  //             name: 'event-annotation-group-ref-annotation4',
+  //             type: 'event-annotation-group',
+  //           },
+  //         ],
+  //       },
+  //     ]);
+  //   });
+  // });
 });

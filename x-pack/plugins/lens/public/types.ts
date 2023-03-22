@@ -128,8 +128,10 @@ export interface EditorFrameSetup {
   registerDatasource: <T, P>(
     datasource: Datasource<T, P> | (() => Promise<Datasource<T, P>>)
   ) => void;
-  registerVisualization: <T, P>(
-    visualization: Visualization<T, P> | (() => Promise<Visualization<T, P>>)
+  registerVisualization: <T, P, ExtraAppendLayerArg>(
+    visualization:
+      | Visualization<T, P, ExtraAppendLayerArg>
+      | (() => Promise<Visualization<T, P, ExtraAppendLayerArg>>)
   ) => void;
 }
 
@@ -1016,8 +1018,9 @@ interface VisualizationStateFromContextChangeProps {
   context: VisualizeEditorContext;
 }
 
-export type AddLayerFunction<T> = (layerType: LayerType, extraArg?: T) => void;
+export type AddLayerFunction<T = unknown> = (layerType: LayerType, extraArg?: T) => void;
 
+export type AnnotationGroups = Record<string, EventAnnotationGroupConfig>;
 export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown> {
   /** Plugin ID, such as "lnsXY" */
   id: string;
@@ -1028,14 +1031,17 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * - Loading from a saved visualization
    * - When using suggestions, the suggested state is passed in
    */
-  initialize: (
-    addNewLayer: () => string,
-    annotationGroups: Record<string, EventAnnotationGroupConfig>,
-    state?: T | P,
-    mainPalette?: PaletteOutput,
-    references?: SavedObjectReference[],
-    initialContext?: VisualizeFieldContext | VisualizeEditorContext
-  ) => T;
+  initialize: {
+    (addNewLayer: () => string, nonPersistedState?: T, mainPalette?: PaletteOutput): T;
+    (
+      addNewLayer: () => string,
+      persistedState: P,
+      mainPalette?: PaletteOutput,
+      annotationGroups?: AnnotationGroups,
+      references?: SavedObjectReference[],
+      initialContext?: VisualizeFieldContext | VisualizeEditorContext
+    ): T;
+  };
 
   getUsedDataView?: (state: T, layerId: string) => string | undefined;
   /**
@@ -1244,7 +1250,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   getAddLayerButtonComponent?: (props: {
     visualization: Visualization;
     visualizationState: T;
-    addLayer: (layerType: LayerType) => void;
+    addLayer: AddLayerFunction;
     layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
   }) => JSX.Element | null;
   /**

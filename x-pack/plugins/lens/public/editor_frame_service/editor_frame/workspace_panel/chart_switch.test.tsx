@@ -47,7 +47,7 @@ describe('chart_switch', () => {
           groupLabel: `${id}Group`,
         },
       ],
-      initialize: jest.fn((_frame, state?: unknown) => {
+      initialize: jest.fn((_addNewLayer, state) => {
         return state || `${id} initial state`;
       }),
       getSuggestions: jest.fn((options) => {

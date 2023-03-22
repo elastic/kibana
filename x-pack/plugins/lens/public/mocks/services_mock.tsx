@@ -29,6 +29,7 @@ import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 
 import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { LensAttributeService } from '../lens_attribute_service';
 import type {
   LensByValueInput,
@@ -177,5 +178,6 @@ export function makeDefaultServices(
     dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     docLinks: startMock.docLinks,
+    eventAnnotationService: {} as EventAnnotationServiceType,
   };
 }

@@ -13,6 +13,7 @@ import {
   DatasourcePublicAPI,
   FramePublicAPI,
   UserMessage,
+  AnnotationGroups,
 } from '../../types';
 import {
   State,
@@ -202,7 +203,7 @@ describe('xy_visualization', () => {
 
   describe('#initialize', () => {
     it('loads default state', () => {
-      const initialState = xyVisualization.initialize(() => 'l1', {});
+      const initialState = xyVisualization.initialize(() => 'l1');
 
       expect(initialState.layers).toHaveLength(1);
       expect((initialState.layers[0] as XYDataLayerConfig).xAccessor).not.toBeDefined();
@@ -232,7 +233,7 @@ describe('xy_visualization', () => {
     });
 
     it('loads from persisted state', () => {
-      expect(xyVisualization.initialize(() => 'first', {}, exampleState())).toEqual(exampleState());
+      expect(xyVisualization.initialize(() => 'first', exampleState())).toEqual(exampleState());
     });
 
     it('should inject data view references on by-value annotation layers', () => {
@@ -240,7 +241,6 @@ describe('xy_visualization', () => {
       expect(
         xyVisualization.initialize!(
           () => 'first',
-          {},
           {
             ...baseState,
             layers: [
@@ -254,6 +254,7 @@ describe('xy_visualization', () => {
             ],
           } as XYPersistedState,
           undefined,
+          {},
           [
             {
               type: 'index-pattern',
@@ -284,7 +285,6 @@ describe('xy_visualization', () => {
       expect(
         xyVisualization.initialize!(
           () => 'first',
-          {},
           {
             ...baseState,
             layers: [
@@ -300,6 +300,7 @@ describe('xy_visualization', () => {
             ],
           },
           undefined,
+          {},
           [
             {
               type: 'index-pattern',
@@ -356,24 +357,6 @@ describe('xy_visualization', () => {
           xyVisualization.initialize!(
             () => 'first',
             {
-              [annotationGroupId1]: {
-                annotations: [exampleAnnotation],
-                indexPatternId: 'data-view-123',
-                ignoreGlobalFilters: true,
-                title: 'my title!',
-                description: '',
-                tags: [],
-              },
-              [annotationGroupId2]: {
-                annotations: [exampleAnnotation2],
-                indexPatternId: 'data-view-773203',
-                ignoreGlobalFilters: true,
-                title: 'my other title!',
-                description: '',
-                tags: [],
-              },
-            },
-            {
               ...baseState,
               layers: [
                 ...baseState.layers,
@@ -392,6 +375,24 @@ describe('xy_visualization', () => {
               ],
             } as XYPersistedState,
             undefined,
+            {
+              [annotationGroupId1]: {
+                annotations: [exampleAnnotation],
+                indexPatternId: 'data-view-123',
+                ignoreGlobalFilters: true,
+                title: 'my title!',
+                description: '',
+                tags: [],
+              },
+              [annotationGroupId2]: {
+                annotations: [exampleAnnotation2],
+                indexPatternId: 'data-view-773203',
+                ignoreGlobalFilters: true,
+                title: 'my other title!',
+                description: '',
+                tags: [],
+              },
+            },
             references
           ).layers
         )
@@ -448,7 +449,7 @@ describe('xy_visualization', () => {
         },
       ];
 
-      const libraryAnnotationGroups = {
+      const libraryAnnotationGroups: AnnotationGroups = {
         [annotationGroupId1]: {
           annotations: [exampleAnnotation],
           indexPatternId: 'data-view-123',
@@ -497,12 +498,12 @@ describe('xy_visualization', () => {
         getAnnotationsLayers(
           xyVisualization.initialize!(
             () => 'first',
-            libraryAnnotationGroups,
             {
               ...baseState,
               layers: [...baseState.layers, ...persistedAnnotationLayers],
             } as XYPersistedState,
             undefined,
+            libraryAnnotationGroups,
             references
           ).layers
         )

@@ -7,7 +7,11 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { getEventAnnotationService } from './event_annotation_service/service';
 
 // not really mocking but avoiding async loading
-export const eventAnnotationServiceMock = getEventAnnotationService(coreMock.createStart());
+export const eventAnnotationServiceMock = getEventAnnotationService(
+  coreMock.createStart(),
+  {} as SavedObjectsManagementPluginStart
+);

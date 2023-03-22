@@ -564,6 +564,8 @@ describe('#toExpression', () => {
             annotations: [],
             indexPatternId: 'my-indexPattern',
             ignoreGlobalFilters: true,
+            hide: false,
+            simpleView: false,
           },
         ],
       },

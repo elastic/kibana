@@ -282,9 +282,9 @@ export function initializeVisualization({
     return (
       visualizationMap[visualizationState.activeId]?.initialize(
         () => '',
-        annotationGroups,
         visualizationState.state,
         undefined,
+        annotationGroups,
         references,
         initialContext
       ) ?? visualizationState.state

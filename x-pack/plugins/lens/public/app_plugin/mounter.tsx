@@ -107,7 +107,7 @@ export async function getLensServices(
   const storage = new Storage(localStorage);
   const stateTransfer = embeddable?.getStateTransfer();
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
-  const eventAnnotationService = await eventAnnotation.getService(coreStart);
+  const eventAnnotationService = await eventAnnotation.getService();
 
   return {
     data,
