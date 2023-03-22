@@ -63,9 +63,6 @@ import { registerObservabilityRuleTypes } from './rules/register_observability_r
 export interface ConfigSchema {
   unsafe: {
     alertDetails: {
-      apm: {
-        enabled: boolean;
-      };
       metrics: {
         enabled: boolean;
       };

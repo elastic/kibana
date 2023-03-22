@@ -11,12 +11,12 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../../../../utils/kibana_react';
-import { paths } from '../../../../config';
-import { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
-import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloIndicatorTypeBadge } from './slo_indicator_type_badge';
+import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloTimeWindowBadge } from './slo_time_window_badge';
 import { toAlertsPageQueryFilter } from '../../helpers/alerts_page_query_filter';
+import { paths } from '../../../../config/paths';
+import type { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
 
 export interface Props {
   slo: SLOWithSummaryResponse;

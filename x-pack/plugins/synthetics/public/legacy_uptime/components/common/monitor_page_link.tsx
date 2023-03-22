@@ -32,7 +32,7 @@ export const MonitorPageLink: FC<DetailPageLinkProps> = ({
       : `/monitor/${btoa(monitorId)}`;
   };
   return (
-    <EuiLink>
+    <EuiLink data-test-subj="syntheticsMonitorPageLinkLink">
       <Link data-test-subj={`monitor-page-link-${monitorId}`} to={getLocationTo()}>
         {children}
       </Link>

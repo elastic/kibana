@@ -67,6 +67,12 @@ const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['messag
       defaultMessage: 'Your session has timed out. Please log in again.',
     }),
   },
+  CONCURRENCY_LIMIT: {
+    type: LoginFormMessageType.Info,
+    content: i18n.translate('xpack.security.login.concurrencyLimitDescription', {
+      defaultMessage: 'You have logged in on another device. Please log in again.',
+    }),
+  },
   AUTHENTICATION_ERROR: {
     type: LoginFormMessageType.Info,
     content: i18n.translate('xpack.security.login.authenticationErrorDescription', {
