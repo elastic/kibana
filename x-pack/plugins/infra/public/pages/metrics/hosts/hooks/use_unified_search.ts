@@ -36,7 +36,7 @@ const buildQuerySubmittedPayload = (
 
 export const useUnifiedSearch = () => {
   const { state, dispatch, getTime, getDateRangeAsTimestamp } = useHostsUrlState();
-  const { metricsDataView } = useMetricsDataViewContext();
+  const { dataView } = useMetricsDataViewContext();
   const { services } = useKibana<InfraClientStartDeps>();
   const {
     data: {
@@ -146,12 +146,12 @@ export const useUnifiedSearch = () => {
   }, [getDateRangeAsTimestamp, state, telemetry]);
 
   const getAllFilters = useCallback(
-    () => [...filterManagerService.getFilters(), ...state.panelFilters],
-    [filterManagerService, state.panelFilters]
+    () => [...state.filters, ...state.panelFilters],
+    [state.filters, state.panelFilters]
   );
   const buildQuery = useCallback(() => {
-    return buildEsQuery(metricsDataView, queryStringService.getQuery(), getAllFilters());
-  }, [metricsDataView, queryStringService, getAllFilters]);
+    return buildEsQuery(dataView, state.query, getAllFilters());
+  }, [dataView, state.query, getAllFilters]);
 
   return {
     buildQuery,

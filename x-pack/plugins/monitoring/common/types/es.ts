@@ -413,6 +413,18 @@ export interface ElasticsearchIndexRecoveryShard {
   };
 }
 
+export interface ElasticsearchMetricbeatIndexRecoveryShard {
+  start_time?: {
+    ms: number;
+  };
+  stop_time?: {
+    ms: number;
+  };
+  total_time?: {
+    ms: number;
+  };
+}
+
 export interface ElasticsearchMetricbeatNode {
   name?: string;
   stats?: ElasticsearchNodeStats;
@@ -430,7 +442,7 @@ export interface ElasticsearchMetricbeatSource {
   elasticsearch?: {
     node?: ElasticsearchLegacySource['source_node'] & ElasticsearchMetricbeatNode;
     index?: ElasticsearchIndexStats & {
-      recovery?: ElasticsearchIndexRecoveryShard;
+      recovery?: ElasticsearchMetricbeatIndexRecoveryShard;
     };
     version?: string;
     shard?: ElasticsearchLegacySource['shard'] & {

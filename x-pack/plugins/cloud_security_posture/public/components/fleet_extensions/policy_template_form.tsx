@@ -4,8 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useCallback, useEffect } from 'react';
-import { EuiFieldText, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import {
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
@@ -25,7 +33,7 @@ import {
   getPosturePolicy,
   getPostureInputHiddenVars,
   POSTURE_NAMESPACE,
-  NewPackagePolicyPostureInput,
+  type NewPackagePolicyPostureInput,
   isPostureInput,
 } from './utils';
 import {
@@ -93,11 +101,56 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
      * - Updates policy inputs by user selection
      * - Updates hidden policy vars
      */
-    const setEnabledPolicyInput = (inputType: PostureInput) => {
-      const inputVars = getPostureInputHiddenVars(inputType);
-      const policy = getPosturePolicy(newPolicy, inputType, inputVars);
-      updatePolicy(policy);
-    };
+    const setEnabledPolicyInput = useCallback(
+      (inputType: PostureInput) => {
+        const inputVars = getPostureInputHiddenVars(inputType);
+        const policy = getPosturePolicy(newPolicy, inputType, inputVars);
+        updatePolicy(policy);
+      },
+      [newPolicy, updatePolicy]
+    );
+
+    // search for non null fields of the validation?.vars object
+    const validationResultsNonNullFields = Object.keys(validationResults?.vars || {}).filter(
+      (key) => (validationResults?.vars || {})[key] !== null
+    );
+
+    const [loading, setLoading] = useState(validationResultsNonNullFields.length > 0);
+
+    // delaying component rendering due to a race condition issue from Fleet
+    // TODO: remove this workaround when the following issue is resolved:
+    // https://github.com/elastic/kibana/issues/153246
+    useEffect(() => {
+      // using validation?.vars to know if the newPolicy state was reset due to race condition
+      if (validationResultsNonNullFields.length > 0) {
+        // Forcing rerender to recover from the validation errors state
+        setLoading(true);
+      }
+      setTimeout(() => setLoading(false), 200);
+    }, [validationResultsNonNullFields]);
+
+    useEffect(() => {
+      if (isEditPage) return;
+      if (loading) return;
+      // Pick default input type for policy template.
+      // Only 1 enabled input is supported when all inputs are initially enabled.
+      // Required for mount only to ensure a single input type is selected
+      // This will remove errors in validationResults.vars
+      setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [loading, input.policy_template, isEditPage]);
+
+    useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
+
+    if (loading) {
+      return (
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
 
     const integrationFields = [
       {
@@ -123,19 +176,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         ),
       },
     ];
-
-    useEffect(() => {
-      if (isEditPage) return;
-
-      // Pick default input type for policy template.
-      // Only 1 enabled input is supported when all inputs are initially enabled.
-      setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
-
-      // Required for mount only to ensure a single input type is selected
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isEditPage]);
-
-    useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
 
     return (
       <div>
