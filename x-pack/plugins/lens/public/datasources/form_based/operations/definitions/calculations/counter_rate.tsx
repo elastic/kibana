@@ -80,7 +80,16 @@ export const counterRateOperation: OperationDefinition<
       column.timeShift
     );
   },
-  toExpression: (layer, columnId) => {
+  toExpression: (layer, columnId, indexPattern) => {
+    const metric =
+      layer.columns[(layer.columns[columnId] as ReferenceBasedIndexPatternColumn).references[0]];
+    if (
+      metric &&
+      'sourceField' in metric &&
+      indexPattern.getFieldByName(metric.sourceField)?.timeSeriesMetric === 'counter'
+    ) {
+      return dateBasedOperationToExpression(layer, columnId, 'lens_identity');
+    }
     return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate');
   },
   buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {

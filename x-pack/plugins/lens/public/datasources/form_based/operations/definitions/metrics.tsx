@@ -9,7 +9,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { AggFunctionsMapping } from '@kbn/data-plugin/common';
 import { LayerSettingsFeatures, OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -23,6 +24,7 @@ import {
   FieldBasedIndexPatternColumn,
   BaseIndexPatternColumn,
   ValueFormatConfig,
+  ReferenceBasedIndexPatternColumn,
 } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
@@ -50,6 +52,23 @@ const supportedTypes = ['number', 'histogram'];
 
 function isTimeSeriesCompatible(type: string, timeSeriesMetric?: string) {
   return timeSeriesMetric !== 'counter' || ['min', 'max'].includes(type);
+}
+
+function timeScaleToUnit(t?: string) {
+  if (!t || t === 's') return 'second';
+  else if (t === 'h') return 'hour';
+  else if (t === 'm') return 'minute';
+  else return 'day';
+}
+
+function operationToAggFn(t?: string) {
+  if (t === 'max') {
+    return 'aggBucketMax';
+  } else if (t === 'min') {
+    return 'aggBucketMin';
+  } else {
+    return 'aggBucketSum';
+  }
 }
 
 function buildMetricOperation<T extends MetricColumn<string>>({
@@ -202,7 +221,53 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         },
       ];
     },
-    toEsAggsFn: (column, columnId, _indexPattern) => {
+    toEsAggsFn: (
+      column,
+      columnId,
+      _indexPattern,
+      layer,
+      uiSettings,
+      orderedColumnIds,
+      operationDefinitionMap,
+      colId
+    ) => {
+      const counterRateColumn = layer.columnOrder.find(
+        (c) =>
+          layer.columns[c].operationType === 'counter_rate' &&
+          (layer.columns[c] as ReferenceBasedIndexPatternColumn).references[0] === colId
+      );
+      const counterField =
+        _indexPattern.getFieldByName(column.sourceField)?.timeSeriesMetric === 'counter';
+      if (counterRateColumn && counterField) {
+        const fnName = operationToAggFn(column.operationType);
+        return buildExpressionFunction<
+          | AggFunctionsMapping['aggBucketMin']
+          | AggFunctionsMapping['aggBucketMax']
+          | AggFunctionsMapping['aggBucketSum']
+        >(fnName, {
+          id: columnId,
+          enabled: true,
+          schema: 'metric',
+          customBucket: buildExpression([
+            buildExpressionFunction<AggFunctionsMapping['aggTimeSeries']>('aggTimeSeries', {
+              id: `-timeseries`,
+              enabled: true,
+              schema: 'bucket',
+            }),
+          ]),
+          customMetric: buildExpression([
+            buildExpressionFunction<AggFunctionsMapping['aggRate']>('aggRate', {
+              id: '-metric',
+              enabled: true,
+              schema: 'metric',
+              field: column.sourceField,
+              // time shift is added to wrapping aggFilteredMetric if filter is set
+              timeShift: column.filter ? undefined : column.timeShift,
+              unit: timeScaleToUnit(layer.columns[counterRateColumn].timeScale || column.timeScale),
+            }),
+          ]),
+        }).toAst();
+      }
       return buildExpressionFunction(typeToFn[type], {
         id: columnId,
         enabled: true,

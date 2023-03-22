@@ -574,7 +574,8 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
     layer: FormBasedLayer,
     uiSettings: IUiSettingsClient,
     orderedColumnIds: string[],
-    operationDefinitionMap?: Record<string, GenericOperationDefinition>
+    operationDefinitionMap?: Record<string, GenericOperationDefinition>,
+    colId?: string
   ) => ExpressionAstFunction;
   /**
    * Validate that the operation has the right preconditions in the state. For example:

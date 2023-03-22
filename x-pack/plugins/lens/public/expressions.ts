@@ -14,6 +14,7 @@ import { formatColumn } from '../common/expressions/format_column';
 import { counterRate } from '../common/expressions/counter_rate';
 import { getTimeScale } from '../common/expressions/time_scale/time_scale';
 import { collapse } from '../common/expressions/collapse';
+import { identity } from '../common/expressions/identity';
 
 type TimeScaleArguments = Parameters<typeof getTimeScale>;
 
@@ -27,6 +28,7 @@ export const setupExpressions = (
   [
     collapse,
     counterRate,
+    identity,
     formatColumn,
     mapToColumns,
     datatableColumn,

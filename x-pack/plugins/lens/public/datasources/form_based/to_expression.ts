@@ -24,10 +24,13 @@ import {
 } from '@kbn/expressions-plugin/public';
 import type { DateRange } from '../../../common/types';
 import { GenericIndexPatternColumn } from './form_based';
-import { operationDefinitionMap } from './operations';
+import { FormulaIndexPatternColumn, operationDefinitionMap } from './operations';
 import { FormBasedPrivateState, FormBasedLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
-import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
+import {
+  FormattedIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+} from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import type { IndexPattern, IndexPatternMap } from '../../types';
 import { dedupeAggs } from './dedupe_aggs';
@@ -179,7 +182,8 @@ function getExpressionForLayer(
           layer,
           uiSettings,
           orderedColumnIds,
-          operationDefinitionMap
+          operationDefinitionMap,
+          colId
         );
         if (wrapInFilter || wrapInTimeFilter) {
           aggAst = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(
@@ -398,6 +402,32 @@ function getExpressionForLayer(
             parentFormat: [JSON.stringify({ id: 'suffix', params: { unit: col.timeScale } })],
           },
         };
+
+        if (col.operationType === 'formula') {
+          // we need to check if formula is doing counter_rate(max(counter field))
+          const formula = (col as FormulaIndexPatternColumn).params.formula || '';
+          if (formula.startsWith('counter_rate(max(') || formula.startsWith('counter_rate(min(')) {
+            const regexp = /counter_rate\(([a-z]+)\((.*?)\)\)/;
+            const match = formula.match(regexp);
+            if (match && match.length === 3) {
+              const fieldName = match[2].replace("'", '');
+              if (indexPattern.getFieldByName(fieldName)?.timeSeriesMetric === 'counter') {
+                return [formatCall];
+              }
+            }
+          }
+        }
+        if (col.operationType === 'counter_rate') {
+          const metric =
+            layer.columns[(layer.columns[id] as ReferenceBasedIndexPatternColumn).references[0]];
+          if (
+            metric &&
+            'sourceField' in metric &&
+            indexPattern.getFieldByName(metric.sourceField)?.timeSeriesMetric === 'counter'
+          ) {
+            return [formatCall];
+          }
+        }
 
         return [scalingCall, formatCall];
       }
