@@ -15,18 +15,6 @@ image::user/monitoring/images/metricbeat.png[Example monitoring architecture]
 To learn about monitoring in general, see
 {ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].
 
-****
-**Question for reviewers:**
-
-Is it still necessary to disable default collection? I didn't test this with
-Metricbeat, but when I tested Elastic Agent + the Kibana integration, I did not
-need to change any default settings. I did not need to set
-monitoring.kibana.collection.enabled: false, and I didn't see
-a monitoring.enabled setting.
-
-Question for Lisa C: Are these tagged regions used anywhere?
-****
-
 . Disable the default collection of {kib} monitoring metrics. +
 +
 --
