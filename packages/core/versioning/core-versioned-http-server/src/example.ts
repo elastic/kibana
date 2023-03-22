@@ -8,15 +8,15 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
-import type { VersionHTTPToolkit } from './types';
+import type { CreateVersionedRouter } from './types';
 
 interface MyCustomContext extends RequestHandlerContextBase {
   fooService: { create: (value: string, id: undefined | string, name?: string) => Promise<void> };
 }
-const vtk = {} as unknown as VersionHTTPToolkit;
+const createVersionedRouter = (() => {}) as unknown as CreateVersionedRouter;
 const router = {} as unknown as IRouter<MyCustomContext>;
 
-const versionedRouter = vtk.createVersionedRouter({ router });
+const versionedRouter = createVersionedRouter({ router });
 
 // @ts-ignore unused variable
 const versionedRoute = versionedRouter

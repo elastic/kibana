@@ -46,18 +46,14 @@ export interface CreateVersionedRouterArgs<Ctx extends RqCtx = RqCtx> {
  * @example see ./example.ts
  *
  * @experimental
+ * Create a versioned router
+ * @param args - The arguments to create a versioned router
+ * @returns A versioned router
+ * @experimental
  */
-export interface VersionHTTPToolkit {
-  /**
-   * Create a versioned router
-   * @param args - The arguments to create a versioned router
-   * @returns A versioned router
-   * @experimental
-   */
-  createVersionedRouter<Ctx extends RqCtx = RqCtx>(
-    args: CreateVersionedRouterArgs<Ctx>
-  ): VersionedRouter<Ctx>;
-}
+export type CreateVersionedRouter = <Ctx extends RqCtx = RqCtx>(
+  args: CreateVersionedRouterArgs<Ctx>
+) => VersionedRouter<Ctx>;
 
 /**
  * Versioned route access flag, required

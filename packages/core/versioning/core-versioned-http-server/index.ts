@@ -12,7 +12,7 @@ export type {
   CreateVersionedRouterArgs,
   RequestValidation,
   ResponseValidation,
-  VersionHTTPToolkit,
+  CreateVersionedRouter,
   VersionedRoute,
   VersionedRouteConfig,
   VersionedRouteRegistrar,
