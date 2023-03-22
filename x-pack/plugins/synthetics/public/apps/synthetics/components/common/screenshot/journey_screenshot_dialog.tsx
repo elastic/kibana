@@ -35,12 +35,14 @@ import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_i
 import { ScreenshotImage } from './screenshot_image';
 
 export const JourneyScreenshotDialog = ({
+  timestamp,
   checkGroup,
   initialImgSrc,
   initialStepNumber,
   isOpen,
   onClose,
 }: {
+  timestamp?: string;
   checkGroup: string | undefined;
   initialImgSrc: string | undefined;
   initialStepNumber: number;
@@ -61,6 +63,7 @@ export const JourneyScreenshotDialog = ({
     imgPath,
     retryFetchOnRevisit: false,
     checkGroup,
+    timestamp,
   });
   const { url, loading, stepName, maxSteps } = imageResult?.[imgPath] ?? {};
   const imgSrc = stepNumber === initialStepNumber ? initialImgSrc ?? url : url;

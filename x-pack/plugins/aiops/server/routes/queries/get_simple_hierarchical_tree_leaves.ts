@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChangePointGroup } from '@kbn/ml-agg-utils';
+import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
 import { stringHash } from '@kbn/ml-string-hash';
 
 import type { SimpleHierarchicalTreeNode } from '../../../common/types';
@@ -15,7 +15,7 @@ import type { SimpleHierarchicalTreeNode } from '../../../common/types';
  */
 export function getSimpleHierarchicalTreeLeaves(
   tree: SimpleHierarchicalTreeNode,
-  leaves: ChangePointGroup[],
+  leaves: SignificantTermGroup[],
   level = 1
 ) {
   if (tree.children.length === 0) {

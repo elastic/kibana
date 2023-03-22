@@ -8,7 +8,7 @@
 import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiDescribedFormGroup } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 export const Description: FC = memo(({ children }) => {
   const title = i18n.translate(
@@ -27,7 +27,9 @@ export const Description: FC = memo(({ children }) => {
         />
       }
     >
-      <>{children}</>
+      <EuiFormRow>
+        <>{children}</>
+      </EuiFormRow>
     </EuiDescribedFormGroup>
   );
 });

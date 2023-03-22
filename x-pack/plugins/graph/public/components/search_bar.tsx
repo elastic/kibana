@@ -107,9 +107,9 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
     notifications,
     http,
     docLinks,
+    savedObjectsManagement,
   } = services;
   if (!overlays) return null;
-
   return (
     <form
       onSubmit={(e) => {
@@ -131,7 +131,11 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
               data-test-subj="graphDatasourceButton"
               onClick={() => {
                 confirmWipeWorkspace(
-                  () => openSourceModal({ overlays, http, uiSettings }, onIndexPatternSelected),
+                  () =>
+                    openSourceModal(
+                      { overlays, http, uiSettings, savedObjectsManagement },
+                      onIndexPatternSelected
+                    ),
                   i18n.translate('xpack.graph.clearWorkspace.confirmText', {
                     defaultMessage:
                       'If you change data sources, your current fields and vertices will be reset.',

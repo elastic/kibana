@@ -18,7 +18,7 @@ const i18nTexts = {
 
 export const ErrorUnsavedWorkPanel: FunctionComponent = () => {
   return (
-    <EuiCallOut size="s" title={i18nTexts.title} iconType="alert" color="danger">
+    <EuiCallOut size="s" title={i18nTexts.title} iconType="warning" color="danger">
       <EuiText size="s">
         <p>
           <FormattedMessage

@@ -22,7 +22,11 @@ export const LogEntryExampleMessagesFailureIndicator: React.FunctionComponent<{
       </EuiTextColor>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiButton onClick={onRetry} size="s">
+      <EuiButton
+        data-test-subj="infraLogEntryExampleMessagesFailureIndicatorRetryButton"
+        onClick={onRetry}
+        size="s"
+      >
         <FormattedMessage
           id="xpack.infra.logs.logEntryExamples.exampleLoadingFailureRetryButtonLabel"
           defaultMessage="Retry"
