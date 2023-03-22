@@ -57,6 +57,10 @@ export async function createAgentAction(
     refresh: 'wait_for',
   });
 
+  appContextService.writeCustomAuditLog({
+    message: `User created Fleet action [id=${actionId}]`,
+  });
+
   return {
     id: actionId,
     ...newAgentAction,
@@ -104,6 +108,12 @@ export async function bulkCreateAgentActions(
       ];
     }),
   });
+
+  for (const action of actions) {
+    appContextService.writeCustomAuditLog({
+      message: `User created Fleet action [id=${action.id}]`,
+    });
+  }
 
   return actions;
 }
@@ -164,6 +174,12 @@ export async function bulkCreateAgentActionResults(
     ];
   });
 
+  for (const result of results) {
+    appContextService.writeCustomAuditLog({
+      message: `User created Fleet action result [id=${result.actionId}]`,
+    });
+  }
+
   await esClient.bulk({
     index: AGENT_ACTIONS_RESULTS_INDEX,
     body: bulkBody,
@@ -192,10 +208,20 @@ export async function getAgentActions(esClient: ElasticsearchClient, actionId: s
     throw new AgentActionNotFoundError('Action not found');
   }
 
-  return res.hits.hits.map((hit) => ({
-    ...hit._source,
-    id: hit._id,
-  })) as FleetServerAgentAction[];
+  const result: FleetServerAgentAction[] = [];
+
+  for (const hit of res.hits.hits) {
+    appContextService.writeCustomAuditLog({
+      message: `User retrieved Fleet action [id=${hit._id}]}]`,
+    });
+
+    result.push({
+      ...hit._source,
+      id: hit._id,
+    });
+  }
+
+  return result;
 }
 
 export async function getUnenrollAgentActions(
@@ -227,10 +253,20 @@ export async function getUnenrollAgentActions(
     size: SO_SEARCH_LIMIT,
   });
 
-  return res.hits.hits.map((hit) => ({
-    ...hit._source,
-    id: hit._id,
-  }));
+  const result: FleetServerAgentAction[] = [];
+
+  for (const hit of res.hits.hits) {
+    appContextService.writeCustomAuditLog({
+      message: `User retrieved Fleet action [id=${hit._id}]}]`,
+    });
+
+    result.push({
+      ...hit._source,
+      id: hit._id,
+    });
+  }
+
+  return result;
 }
 
 export async function cancelAgentAction(esClient: ElasticsearchClient, actionId: string) {
@@ -253,6 +289,12 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
 
     if (res.hits.hits.length === 0) {
       throw new AgentActionNotFoundError('Action not found');
+    }
+
+    for (const hit of res.hits.hits) {
+      appContextService.writeCustomAuditLog({
+        message: `User retrieved Fleet action [id=${hit._id}]}]`,
+      });
     }
 
     const upgradeActions: FleetServerAgentAction[] = res.hits.hits
@@ -368,10 +410,20 @@ async function getAgentActionsByIds(esClient: ElasticsearchClient, actionIds: st
     throw new AgentActionNotFoundError('Action not found');
   }
 
-  return res.hits.hits.map((hit) => ({
-    ...hit._source,
-    id: hit._id,
-  })) as FleetServerAgentAction[];
+  const result: FleetServerAgentAction[] = [];
+
+  for (const hit of res.hits.hits) {
+    appContextService.writeCustomAuditLog({
+      message: `User retrieved Fleet action [id=${hit._id}]}]`,
+    });
+
+    result.push({
+      ...hit._source,
+      id: hit._id,
+    });
+  }
+
+  return result;
 }
 
 export const getAgentsByActionsIds = async (
