@@ -24,6 +24,7 @@ import {
   indexEventLogExecutionEvents,
   waitForEventLogExecuteComplete,
   waitForRulePartialFailure,
+  waitForRuleSuccess,
 } from '../../utils';
 import {
   failedGapExecution,
