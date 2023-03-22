@@ -16,5 +16,6 @@ export type {
   VersionedRoute,
   VersionedRouteConfig,
   VersionedRouteRegistrar,
+  VersionedRouterRoute,
   VersionedRouter,
 } from './src';

@@ -7,7 +7,6 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import type { WithRequiredProperty } from '@kbn/utility-types';
 import type {
   IRouter,
   RouteConfig,
@@ -63,9 +62,9 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   RouteConfig<unknown, unknown, unknown, Method>,
   'validate' | 'options'
 > & {
-  options?: Omit<RouteConfigOptions<RouteMethod>, 'access'>;
+  options?: Omit<RouteConfigOptions<Method>, 'access'>;
   // Make "access" required and move to top level
-  access: RouteConfigOptions<RouteMethod>['access'];
+  access: RouteConfigOptions<Method>['access'];
 };
 
 /**
@@ -96,9 +95,7 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
   /** @experimental */
   delete: VersionedRouteRegistrar<'delete', Ctx>;
   /** @experimental */
-  options: VersionedRouteRegistrar<'options', Ctx>;
-  /** @experimental */
-  getRoutes: () => VersionedRoute[];
+  getRoutes: () => VersionedRouterRoute[];
 }
 
 /** @experimental */
@@ -161,10 +158,25 @@ export interface VersionedRoute<
    * @returns A versioned route, allows for fluent chaining of version declarations
    * @experimental
    */
-  addVersion<P, Q, B, R>(
+  addVersion<P = unknown, Q = unknown, B = unknown, R = any>(
     options: AddVersionOpts<P, Q, B, R>,
     handler: (
       ...params: Parameters<RequestHandler<P, Q, B, Ctx>>
     ) => Promise<IKibanaResponse<R>> | IKibanaResponse<R>
   ): VersionedRoute<Method, Ctx>;
+}
+
+/** @experimental */
+export interface VersionedRouterRoute {
+  /** @experimental */
+  method: string;
+  /** @experimental */
+  path: string;
+  /** @experimental */
+  options: VersionedRouteConfig<RouteMethod>;
+  /** @experimental */
+  handlers: Array<{
+    handler: RequestHandler;
+    options: AddVersionOpts<unknown, unknown, unknown, unknown>;
+  }>;
 }
