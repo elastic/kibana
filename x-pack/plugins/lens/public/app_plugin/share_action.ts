@@ -45,8 +45,7 @@ function getShareURLForSavedObject(
   );
 }
 
-function getShortShareableURL(
-  shortUrlService: (params: LensAppLocatorParams) => Promise<string>,
+export function getLocatorParams(
   data: LensAppServices['data'],
   {
     filters,
@@ -80,7 +79,7 @@ function getShortShareableURL(
   const serializableDatasourceStates = datasourceStates as LensAppState['datasourceStates'] &
     SerializableRecord;
 
-  return shortUrlService({
+  return {
     filters,
     query,
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
@@ -90,7 +89,7 @@ function getShortShareableURL(
     searchSessionId: data.search.session.getSessionId(),
     references,
     dataViewSpecs: adHocDataViews,
-  });
+  };
 }
 
 export async function getShareURL(
@@ -98,8 +97,10 @@ export async function getShareURL(
   services: Pick<LensAppServices, 'application' | 'data'>,
   configuration: ShareableConfiguration
 ) {
+  const locatorParams = getLocatorParams(services.data, configuration);
   return {
-    shareableUrl: await getShortShareableURL(shortUrlService, services.data, configuration),
+    shareableUrl: await shortUrlService(locatorParams),
     savedObjectURL: getShareURLForSavedObject(services, configuration.currentDoc),
+    locatorParams,
   };
 }

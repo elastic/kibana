@@ -91,7 +91,11 @@ export function WorkspacePanelWrapper({
       mainProps={{ component: 'div' } as unknown as {}}
     >
       {!(isFullscreen && (autoApplyEnabled || userMessages?.length)) && (
-        <EuiPageTemplate.Section paddingSize="none" color="transparent">
+        <EuiPageTemplate.Section
+          paddingSize="none"
+          color="transparent"
+          className="hide-for-sharing"
+        >
           <EuiFlexGroup
             alignItems="flexEnd"
             gutterSize="s"
@@ -170,7 +174,7 @@ export function WorkspacePanelWrapper({
         contentProps={{
           className: 'lnsWorkspacePanelWrapper__content',
         }}
-        className={classNames('lnsWorkspacePanelWrapper', {
+        className={classNames('lnsWorkspacePanelWrapper stretch-for-sharing', {
           'lnsWorkspacePanelWrapper--fullscreen': isFullscreen,
         })}
         color="transparent"

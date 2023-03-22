@@ -15,6 +15,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { LENS_APP_LOCATOR } from '../../common/locator/locator';
 import { ENABLE_SQL } from '../../common';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
@@ -574,13 +575,8 @@ export const LensTopNavMenu = ({
             if (!share) {
               return;
             }
-            const sharingData = {
-              activeData,
-              csvEnabled,
-              title: title || unsavedTitle,
-            };
 
-            const { shareableUrl, savedObjectURL } = await getShareURL(
+            const { shareableUrl, savedObjectURL, locatorParams } = await getShareURL(
               shortUrlService,
               { application, data },
               {
@@ -595,6 +591,16 @@ export const LensTopNavMenu = ({
                 adHocDataViews: adHocDataViews.map((dataView) => dataView.toSpec()),
               }
             );
+            const sharingData = {
+              activeData,
+              csvEnabled,
+              reportingDisabled: !csvEnabled,
+              title: title || unsavedTitle,
+              locatorParams: {
+                id: LENS_APP_LOCATOR,
+                params: locatorParams,
+              },
+            };
 
             share.toggleShareContextMenu({
               anchorElement,
@@ -1072,6 +1078,7 @@ export const LensTopNavMenu = ({
       screenTitle={'lens'}
       appName={'lens'}
       displayStyle="detached"
+      className="hide-for-sharing"
     />
   );
 };

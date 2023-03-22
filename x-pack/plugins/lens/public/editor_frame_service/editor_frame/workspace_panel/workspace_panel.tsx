@@ -624,6 +624,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   );
 });
 
+function dispatchRenderComplete(node: HTMLDivElement | null) {
+  if (node) {
+    node.dispatchEvent(new CustomEvent('renderComplete', { bubbles: true }));
+  }
+}
+
 export const VisualizationWrapper = ({
   expression,
   framePublicAPI,
@@ -654,6 +660,9 @@ export const VisualizationWrapper = ({
   onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
 }) => {
   const context = useLensSelector(selectExecutionContext);
+  // Used for reporting
+  const [isLoading, setIsLoading] = useState(true);
+  const nodeRef = useRef<HTMLDivElement>(null);
   const searchContext: ExecutionContextSearch = useMemo(
     () => ({
       query: context.query,
@@ -719,7 +728,13 @@ export const VisualizationWrapper = ({
   }
 
   return (
-    <div className="lnsExpressionRenderer">
+    <div
+      className="lnsExpressionRenderer"
+      data-shared-items-container
+      data-render-complete={!isLoading}
+      data-shared-item=""
+      ref={nodeRef}
+    >
       <ExpressionRendererComponent
         className="lnsExpressionRenderer__component"
         padding="m"
@@ -729,7 +744,11 @@ export const VisualizationWrapper = ({
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
         onData$={onData$}
-        onRender$={onRender$}
+        onRender$={() => {
+          setIsLoading(false);
+          onRender$();
+          dispatchRenderComplete(nodeRef.current);
+        }}
         inspectorAdapters={lensInspector.adapters}
         executionContext={executionContext}
         renderMode="edit"
