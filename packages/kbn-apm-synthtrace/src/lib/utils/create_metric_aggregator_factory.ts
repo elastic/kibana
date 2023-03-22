@@ -208,7 +208,7 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
           const key = appendHash(getAggregateKey(event), truncatedTimestamp.toString());
 
-          let set = getOrCreateMetricSet(key, event, truncatedTimestamp);
+          const set = getOrCreateMetricSet(key, event, truncatedTimestamp);
 
           reduce(set, event);
 
