@@ -11,8 +11,13 @@ import { EuiEmptyPromptProps } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { PageTemplate } from '../page_template';
 
+interface NoIndicesProps extends Omit<EuiEmptyPromptProps, 'body' | 'title'> {
+  body: string;
+  title: string;
+}
+
 // Represents a fully constructed page, including page template.
-export const NoIndices: React.FC<EuiEmptyPromptProps> = ({ body, title, ...rest }) => {
+export const NoIndices: React.FC<NoIndicesProps> = ({ body, title, ...rest }) => {
   return (
     <PageTemplate isEmptyState={true}>
       <KibanaPageTemplate.EmptyPrompt
