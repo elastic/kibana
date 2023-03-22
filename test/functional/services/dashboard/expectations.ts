@@ -16,6 +16,7 @@ export class DashboardExpectService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly filterBar = this.ctx.getService('filterBar');
+  private readonly screenshotService = this.ctx.getService('screenshots');
 
   private readonly dashboard = this.ctx.getPageObject('dashboard');
   private readonly visChart = this.ctx.getPageObject('visChart');
@@ -43,18 +44,28 @@ export class DashboardExpectService extends FtrService {
    */
   async noErrorEmbeddablesPresent() {
     this.log.debug('Ensure that there are no error embeddables on the dashboard');
+
     const errorEmbeddables = await this.testSubjects.findAll('embeddableError');
     if (errorEmbeddables.length > 0) {
-      const errorTitles = await Promise.all(
+      const errorMessages = await Promise.all(
         errorEmbeddables.map(async (embeddable) => {
-          return (
-            (await (await embeddable.findByTestSubject('dashboardPanelTitle')).getVisibleText()) ??
-            'Empty title'
-          );
+          const panel = await embeddable.findByXpath('./..');
+          let panelTitle = 'Empty title';
+          if (await this.testSubjects.descendantExists('dashboardPanelTitle', panel)) {
+            panelTitle = await (
+              await this.testSubjects.findDescendant('dashboardPanelTitle', panel)
+            ).getVisibleText();
+          }
+          const panelError = await embeddable.getVisibleText();
+          return `${panelTitle}: "${panelError}"`;
         })
       );
-      await errorEmbeddables[0].scrollIntoViewIfNecessary();
-      throw new Error(`Found error embeddable(s): ${errorTitles}`);
+
+      throw new Error(
+        `Found error embeddable(s): ${errorMessages.reduce((errorString, error, id) => {
+          return errorString + '\n' + `\t- ${error}`;
+        }, '')}`
+      );
     }
   }
 
