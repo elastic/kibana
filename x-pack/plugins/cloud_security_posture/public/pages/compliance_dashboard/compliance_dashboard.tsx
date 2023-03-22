@@ -187,10 +187,10 @@ export const ComplianceDashboard = () => {
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
 
   const getCspmDashboardData = useCspmStatsApi({
-    enabled: hasFindingsCspm || hasFindingsKspm,
+    enabled: hasFindingsCspm,
   });
   const getKspmDashboardData = useKspmStatsApi({
-    enabled: hasFindingsKspm || hasFindingsCspm,
+    enabled: hasFindingsKspm,
   });
 
   useEffect(() => {
