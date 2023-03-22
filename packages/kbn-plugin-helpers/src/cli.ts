@@ -14,7 +14,7 @@ import { createFlagError, createFailError } from '@kbn/dev-cli-errors';
 import { findPluginDir } from './find_plugin_dir';
 import { loadKibanaPlatformPlugin } from './load_kibana_platform_plugin';
 import * as Tasks from './tasks';
-import { BuildContext } from './build_context';
+import { TaskContext } from './task_context';
 import { resolveKibanaVersion } from './resolve_kibana_version';
 import { loadConfig } from './config';
 
@@ -56,7 +56,7 @@ export function runCli() {
           throw createFlagError('expected a single --skip-archive flag');
         }
 
-        const found = await findPluginDir();
+        const found = findPluginDir();
         if (!found) {
           throw createFailError(
             `Unable to find Kibana Platform plugin in [${process.cwd()}] or any of its parent directories. Has it been migrated properly? Does it have a kibana.json file?`
@@ -73,8 +73,10 @@ export function runCli() {
         const sourceDir = plugin.directory;
         const buildDir = Path.resolve(plugin.directory, 'build/kibana', plugin.manifest.id);
 
-        const context: BuildContext = {
+        const context: TaskContext = {
           log,
+          dev: false,
+          dist: true,
           plugin,
           config,
           sourceDir,
@@ -91,6 +93,72 @@ export function runCli() {
         if (skipArchive !== true) {
           await Tasks.createArchive(context);
         }
+      },
+    })
+    .command({
+      name: 'dev',
+      description: `
+        Copies files from the source into a zip archive that can be distributed for
+        installation into production Kibana installs. The archive includes the non-
+        development npm dependencies and builds itself using raw files in the source
+        directory so make sure they are clean/up to date. The resulting archive can
+        be found at:
+
+          build/{plugin.id}-{kibanaVersion}.zip
+
+      `,
+      flags: {
+        boolean: ['dist', 'watch'],
+        alias: {
+          d: 'dist',
+          w: 'watch'
+        },
+        help: `
+          --dist, -d  Kibana version that the
+          --watch, -w  Kibana version that the
+        `,
+      },
+      async run({ log, flags }) {
+        const dist = flags['dist'];
+        if (dist !== undefined && typeof dist !== 'boolean') {
+          throw createFlagError('expected a single --dist flag');
+        }
+
+        const watch = flags['watch'];
+        if (watch !== undefined && typeof watch !== 'boolean') {
+          throw createFlagError('expected a single --watch flag');
+        }
+
+        const found = findPluginDir();
+        if (!found) {
+          throw createFailError(
+            `Unable to find Kibana Platform plugin in [${process.cwd()}] or any of its parent directories. Has it been migrated properly? Does it have a kibana.json file?`
+          );
+        }
+
+        if (found.type === 'package') {
+          throw createFailError(`the plugin helpers do not currently support "package plugins"`);
+        }
+
+        const plugin = loadKibanaPlatformPlugin(found.dir);
+        const config = await loadConfig(log, plugin);
+        const sourceDir = plugin.directory;
+        const buildDir = Path.resolve(plugin.directory, 'build/kibana', plugin.manifest.id);
+
+        const context: TaskContext = {
+          log,
+          dev: true,
+          dist,
+          watch,
+          plugin,
+          config,
+          sourceDir,
+          buildDir,
+          kibanaVersion: 'kibana'
+        };
+
+        await Tasks.initDev(context);
+        await Tasks.optimize(context);
       },
     })
     .execute();

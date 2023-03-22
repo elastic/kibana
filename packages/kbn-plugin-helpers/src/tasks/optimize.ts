@@ -17,11 +17,11 @@ import { OptimizerConfig } from '@kbn/optimizer';
 import { Bundle, BundleRemotes } from '@kbn/optimizer/src/common';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 
-import { BuildContext } from '../build_context';
+import { TaskContext } from '../task_context';
 
 type WorkerMsg = { success: true; warnings: string } | { success: false; error: string };
 
-export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContext) {
+export async function optimize({ log, dev, dist, watch, plugin, sourceDir, buildDir }: TaskContext) {
   if (!plugin.manifest.ui) {
     return;
   }
@@ -33,14 +33,15 @@ export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContex
       examples: false,
       testPlugins: false,
       includeCoreBundle: true,
-      dist: true,
+      dist: !!dist,
+      watch: !!watch
     });
 
     const bundle = new Bundle({
       id: plugin.manifest.id,
       contextDir: sourceDir,
       ignoreMetrics: true,
-      outputDir: Path.resolve(buildDir, 'target/public'),
+      outputDir: Path.resolve(dev ? sourceDir : buildDir, 'target/public'),
       sourceRoot: sourceDir,
       type: 'plugin',
       remoteInfo: {
