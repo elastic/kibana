@@ -20,3 +20,7 @@ export function hashKeysOf<T extends Fields>(source: T, keys: Array<keyof T>) {
 export function appendHash(hash: string, value: string) {
   return fast1a32(hash + ',' + value).toString();
 }
+
+export function hashObject(object: Record<string, any>) {
+  return hashKeysOf(object, Object.keys(object));
+}
