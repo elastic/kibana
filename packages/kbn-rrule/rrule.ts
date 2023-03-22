@@ -299,7 +299,7 @@ const getYearOfRecurrences = function ({
 
   if (bymonth) {
     return bymonth.flatMap((month) => {
-      const currentMonth = moment(refDT).month(month);
+      const currentMonth = moment(refDT).month(month - 1);
       return getMonthOfRecurrences({
         refDT: currentMonth,
         wkst,
