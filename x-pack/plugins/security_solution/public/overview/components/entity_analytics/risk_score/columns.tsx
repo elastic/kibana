@@ -9,7 +9,6 @@ import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
-import { get } from 'lodash/fp';
 import { UsersTableType } from '../../../../explore/users/store/model';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink, UserDetailsLink } from '../../../../common/components/links';
@@ -29,7 +28,6 @@ import {
   SecurityCellActionsTrigger,
   SecurityCellActionType,
 } from '../../../../common/components/cell_actions';
-import { useKibana } from '../../../../common/lib/kibana';
 
 type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
 
@@ -141,7 +139,11 @@ export const getRiskScoreColumns = (
       <EuiLink
         data-test-subj="risk-score-alerts"
         disabled={alertCount === 0}
-        onClick={() => openEntityOnAlertsPage(get('host.name', risk) ?? get('user.name', risk))}
+        onClick={() =>
+          openEntityOnAlertsPage(
+            riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name
+          )
+        }
       >
         <FormattedCount count={alertCount} />
       </EuiLink>
