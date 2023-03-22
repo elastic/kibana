@@ -53,7 +53,7 @@ image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt5fbd962a3
 ==== Interactive chart filters
 
 Filtering your data just got easier with interactive chart filters. When you right-click your chart data,
-you can now select one or more filter values from the menu that appears, and link the filters with the OR operator.
+you can select one or more filter values from the menu that appears, and link the filters with the OR operator.
 
 [role="screenshot"]
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt1a969a88d51822a9/640139393acc576c5603410c/highlights-chart-filters.gif[Interactive chart filters]
@@ -73,7 +73,7 @@ image::images/highlights-labels-maps.png[Label positioning in maps]
 ==== Hexagon clustering
 
 Hexagon clustering was added to {kib} 8.2, but only for geo_point fields.
-In 8.7, you can also use hexagon clustering for geo_shape fields.
+This release extends support for hexagon clustering to include geo_shape fields.
 
 [discrete]
 ==== Controls time slider
@@ -89,7 +89,7 @@ to {kibana-ref}/add-controls.html[Controls] for details.
 ==== Natural language processing (NLP)
 
 In 8.7, the NLP capabilities of the Elastic product became generally available.
-You can deploy and manage your trained NLP models to perform tasks,
+Deploy and manage your trained NLP models to perform tasks,
 such as text classification (including zero-shot), question answering, named entity recognition, and more.
 Refer to https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-overview.html[Natural language processing]
 for details.
@@ -105,8 +105,8 @@ to create jobs to detect anomalies in the geographic location of your input data
 image::images/highlights-jobs-geo-data.png[Anomaly detection jobs on geo data]
 
 A new action enables you to quickly create anomaly detection jobs from map visualizations.
-You can now create the jobs directly from a flyout in *Dashboard*.
-For a more advanced configuration, you can follow the link that takes you to the ML job wizard.
+You can create the jobs directly from a flyout in *Dashboard*.
+For a more advanced configuration, follow the link that takes you to the ML job wizard.
 
 [role="screenshot"]
 image::images/highlights-anomaly-maps.png[Create anomaly detection jobs from map visualizations]
@@ -136,7 +136,7 @@ image::images/highlights-change-point-detection.png[New change point detection U
 [discrete]
 ==== Field statistics in machine learning job and transform wizards
 
-Now you are able to view the statistics of the selectable fields in the anomaly detection,
+You are now able to view the statistics of the selectable fields in the anomaly detection,
 the data frame analytics, and the transforms wizards. The field statistics
 provide more meaningful context to help you select relevant fields.
 
@@ -167,7 +167,7 @@ image::images/highlights-alerts.png[Alerts UI]
 Currently, alert actions are triggered when the rule runs or when the alert status changes.
 This behavior might lead to a notification storm when an alerting rule detects a high cardinality of alerts.
 These situations increase the time to respond to each event and affect the overall MTTR.
-With the new alert actions summarization feature, users will be able to define how
+With the new alert actions summarization feature, you can define how
 to aggregate several actions into a single one with these options:
 
 * *Alert summarization per each rule run.* For example, all the alerts that are
@@ -175,7 +175,7 @@ detected by the same rule run will be sent in a single notification.
 * *Alert summarization per custom time interval.*
 For example, all the alerts that are detected in the last 10 hours will be sent in a single email.
 
-This feature aims to improve the way users consume notifications from third parties
+This feature aims to improve the way you consume notifications from third parties
 and improve the MTTR by reducing unnecessary noise.
 For more information, check {kibana-ref}/alerting-getting-started.html[Alerting].
 
@@ -188,7 +188,7 @@ image::images/highlights-alert-summary-actions.png[Alert action summary example]
 [discrete]
 ==== New actions in Case management
 
-New actions are now supported in the *Case* table view to streamline case management:
+The *Case* table view streamlines case management with these new actions:
 
 * More sorting and filtering options (by severity, status, last updates, and more)
 * Bulk action for maintaining case assignees
@@ -196,7 +196,7 @@ New actions are now supported in the *Case* table view to streamline case manage
 [discrete]
 ==== New connector log
 
-A new connector log is now available for users to troubleshoot their connectors’
+A new connector log is available for you to troubleshoot connector
 behaviors and react when something goes wrong.
 
 [role="screenshot"]
@@ -224,4 +224,4 @@ image::images/highlights-concurrent-users.png[Setting for controlling the number
 ==== {kib} audit logging enhanced
 
 Since its introduction, the {kibana-ref}/xpack-security-audit-logging.html[{kib} audit logging] has been enhanced with
-additional data of security audit interest to our users. This release adds the client IP address field.
+additional data of security audit interest. This release adds the client IP address field.
