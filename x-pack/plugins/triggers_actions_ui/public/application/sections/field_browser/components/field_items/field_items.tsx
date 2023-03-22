@@ -55,7 +55,7 @@ export const getFieldItemsData = ({
             return {
               name,
               type: field.type,
-              description: field.description ?? '',
+              description: `https://www.elastic.co/guide/en/ecs/current/ecs-${categoryId}.html`, // field.description ?? '',
               example: field.example?.toString(),
               category: categoryId,
               selected: selectedFieldIds.has(name),

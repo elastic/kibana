@@ -11,12 +11,12 @@ import {
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiScreenReaderOnly,
   EuiHealth,
   EuiBadge,
   EuiIcon,
   EuiText,
   EuiHighlight,
+  EuiLink,
 } from '@elastic/eui';
 import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import type {
@@ -24,12 +24,7 @@ import type {
   GetFieldTableColumns,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import * as i18n from './translations';
-import {
-  getExampleText,
-  getIconFromType,
-} from '../../../../common/components/event_details/helpers';
-import { getEmptyValue } from '../../../../common/components/empty_value';
-import { EllipsisText } from '../../../../common/components/truncatable_text';
+import { getIconFromType } from '../../../../common/components/event_details/helpers';
 import type { OpenFieldEditor, OpenDeleteFieldModal } from '..';
 
 export interface UseFieldTableColumnsProps {
@@ -133,21 +128,7 @@ export const useFieldTableColumns: UseFieldTableColumns = ({
           field: 'description',
           name: i18n.DESCRIPTION,
           render: (description, { name, example }) => (
-            <EuiToolTip content={description}>
-              <>
-                <EuiScreenReaderOnly data-test-subj="descriptionForScreenReaderOnly">
-                  <p>{i18n.DESCRIPTION_FOR_FIELD(name)}</p>
-                </EuiScreenReaderOnly>
-                <EllipsisText>
-                  <Description
-                    width={actions.length > 0 ? '335px' : '400px'}
-                    data-test-subj={`field-${name}-description`}
-                  >
-                    {`${description ?? getEmptyValue()} ${getExampleText(example)}`}
-                  </Description>
-                </EllipsisText>
-              </>
-            </EuiToolTip>
+            <EuiLink href={description}>{description}</EuiLink>
           ),
           sortable: true,
           width: actions.length > 0 ? '335px' : '400px',
