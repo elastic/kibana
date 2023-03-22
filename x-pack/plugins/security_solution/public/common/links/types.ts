@@ -101,6 +101,10 @@ export interface LinkItem {
    */
   landingImage?: string;
   /**
+   * Disables link in the landing page. Defaults to false.
+   */
+  landingPageDisabled?: boolean;
+  /**
    * Minimum license required to enable the link
    */
   licenseType?: LicenseType;

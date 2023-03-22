@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { DASHBOARDS_PATH, SecurityPageName, SERVER_APP_ID } from '../../common/constants';
-import { DASHBOARDS } from '../app/translations';
+import { DASHBOARD, DASHBOARDS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import { links as kubernetesLinks } from '../kubernetes/links';
 import { dashboardLinks as cloudSecurityPostureLinks } from '../cloud_security_posture/links';
@@ -16,6 +16,20 @@ import {
   entityAnalyticsLinks,
   overviewLinks,
 } from '../overview/links';
+
+export const dashboardViewLinks: LinkItem = {
+  id: SecurityPageName.dashboardView,
+  title: DASHBOARD,
+  path: DASHBOARDS_PATH,
+  capabilities: [`${SERVER_APP_ID}.show`],
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.dashboard', {
+      defaultMessage: 'Dashboard',
+    }),
+  ],
+  sideNavDisabled: true,
+  landingPageDisabled: true,
+};
 
 export const dashboardsLandingLinks: LinkItem = {
   id: SecurityPageName.dashboardsLanding,
@@ -29,6 +43,7 @@ export const dashboardsLandingLinks: LinkItem = {
     }),
   ],
   links: [
+    dashboardViewLinks,
     overviewLinks,
     detectionResponseLinks,
     kubernetesLinks,

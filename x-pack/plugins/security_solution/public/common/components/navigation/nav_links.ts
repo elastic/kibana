@@ -27,7 +27,9 @@ const formatNavLinkItems = (appLinks: AppLinkItems): NavLinkItem[] =>
     title: link.title,
     ...(link.categories != null ? { categories: link.categories } : {}),
     ...(link.description != null ? { description: link.description } : {}),
-    ...(link.sideNavDisabled === true ? { disabled: true } : {}),
+    ...(link.sideNavDisabled === true || link.landingPageDisabled === true
+      ? { disabled: true }
+      : {}),
     ...(link.landingIcon != null ? { icon: link.landingIcon } : {}),
     ...(link.landingImage != null ? { image: link.landingImage } : {}),
     ...(link.skipUrlState != null ? { skipUrlState: link.skipUrlState } : {}),

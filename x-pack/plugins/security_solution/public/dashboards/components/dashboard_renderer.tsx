@@ -38,6 +38,7 @@ const DashboardRendererComponent = ({
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
+
   const getCreationOptions = useCallback(
     () =>
       Promise.resolve({
