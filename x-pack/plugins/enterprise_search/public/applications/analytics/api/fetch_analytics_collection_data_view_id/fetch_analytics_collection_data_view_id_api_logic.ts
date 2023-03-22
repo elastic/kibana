@@ -10,16 +10,16 @@ import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface FetchAnalyticsCollectionDataViewIdAPILogicArgs {
-  id: string;
+  name: string;
 }
 
 export type FetchAnalyticsCollectionDataViewIdApiLogicResponse = AnalyticsCollectionDataViewId;
 
 export const fetchAnalyticsCollectionDataViewId = async ({
-  id,
+  name,
 }: FetchAnalyticsCollectionDataViewIdAPILogicArgs): Promise<FetchAnalyticsCollectionDataViewIdApiLogicResponse> => {
   const { http } = HttpLogic.values;
-  const route = `/internal/enterprise_search/analytics/collections/${id}/data_view_id`;
+  const route = `/internal/enterprise_search/analytics/collections/${name}/data_view_id`;
   const response = await http.get<AnalyticsCollectionDataViewId>(route);
 
   return response;

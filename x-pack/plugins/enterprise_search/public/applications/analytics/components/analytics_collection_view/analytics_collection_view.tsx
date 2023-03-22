@@ -50,7 +50,7 @@ export const AnalyticsCollectionView: React.FC = () => {
   const { fetchAnalyticsCollectionDataViewId } = useActions(AnalyticsCollectionDataViewIdLogic);
   const { analyticsCollection, isLoading } = useValues(FetchAnalyticsCollectionLogic);
   const { dataViewId } = useValues(AnalyticsCollectionDataViewIdLogic);
-  const { id, section } = useParams<{ id: string; section: string }>();
+  const { name, section } = useParams<{ name: string; section: string }>();
   const { navigateToUrl, application } = useValues(KibanaLogic);
   const collectionViewTabs = [
     {
@@ -61,7 +61,7 @@ export const AnalyticsCollectionView: React.FC = () => {
       onClick: () =>
         navigateToUrl(
           generateEncodedPath(COLLECTION_VIEW_PATH, {
-            id: analyticsCollection?.id,
+            name: analyticsCollection.name,
             section: 'events',
           })
         ),
@@ -75,7 +75,7 @@ export const AnalyticsCollectionView: React.FC = () => {
       onClick: () =>
         navigateToUrl(
           generateEncodedPath(COLLECTION_VIEW_PATH, {
-            id: analyticsCollection?.id,
+            name: analyticsCollection?.name,
             section: 'integrate',
           })
         ),
@@ -89,7 +89,7 @@ export const AnalyticsCollectionView: React.FC = () => {
       onClick: () =>
         navigateToUrl(
           generateEncodedPath(COLLECTION_VIEW_PATH, {
-            id: analyticsCollection?.id,
+            name: analyticsCollection?.name,
             section: 'settings',
           })
         ),
@@ -98,8 +98,8 @@ export const AnalyticsCollectionView: React.FC = () => {
   ];
 
   useEffect(() => {
-    fetchAnalyticsCollection(id);
-    fetchAnalyticsCollectionDataViewId(id);
+    fetchAnalyticsCollection(name);
+    fetchAnalyticsCollectionDataViewId(name);
   }, []);
 
   return (
