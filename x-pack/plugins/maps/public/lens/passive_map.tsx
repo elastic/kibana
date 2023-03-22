@@ -99,6 +99,7 @@ export class PassiveMap extends Component<Props, State> {
     if (this._isMounted) {
       mapEmbeddable.setEventHandlers({
         onDataLoad: ({ layerId, }: { layerId: string; }) => {
+          this._onRenderComplete.cancel();
           this._loadingLayers.set(layerId, true);
         },
         onDataLoadEnd: ({ layerId }: { layerId: string }) => {
