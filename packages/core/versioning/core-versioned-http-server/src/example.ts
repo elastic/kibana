@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
-import type { VersionHTTPToolkit } from './version_http_toolkit';
+import type { VersionHTTPToolkit } from './types';
 
 interface MyCustomContext extends RequestHandlerContextBase {
   fooService: { create: (value: string, id: undefined | string, name?: string) => Promise<void> };

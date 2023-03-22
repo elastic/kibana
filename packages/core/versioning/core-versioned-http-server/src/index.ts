@@ -17,4 +17,4 @@ export type {
   VersionedRouteConfig,
   VersionedRouteRegistrar,
   VersionedRouter,
-} from './version_http_toolkit';
+} from './types';
