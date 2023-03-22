@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { EuiDraggable, EuiDragDropContext } from '@elastic/eui';
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { EuiDraggable, EuiDragDropContext } from '@elastic/eui';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
