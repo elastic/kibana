@@ -14,16 +14,13 @@ import { getUnlinkLayerAction } from './unlink_action';
 import { getIgnoreFilterAction } from './ignore_filters_action';
 import { getSaveLayerAction } from './save_action';
 import { isByReferenceAnnotationsLayer } from '../../visualization_helpers';
-export {
-  IGNORE_GLOBAL_FILTERS_ACTION_ID,
-  KEEP_GLOBAL_FILTERS_ACTION_ID,
-} from './ignore_filters_action';
+import { annotationLayerHasUnsavedChanges } from '../../state_helpers';
+import { getRevertChangesAction } from './revert_changes_action';
 
 // TODO add unit test to verify that the correct actions are shown
 export const createAnnotationActions = ({
   state,
   layer,
-  layerIndex,
   setState,
   core,
   isSaveable,
@@ -32,7 +29,6 @@ export const createAnnotationActions = ({
 }: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
-  layerIndex: number;
   setState: StateSetter<XYState, unknown>;
   core: CoreStart;
   isSaveable?: boolean;
@@ -69,7 +65,11 @@ export const createAnnotationActions = ({
     );
   }
 
-  actions.push(getIgnoreFilterAction({ state, layer, layerIndex, setState }));
+  if (isByReferenceAnnotationsLayer(layer) && annotationLayerHasUnsavedChanges(layer)) {
+    actions.push(getRevertChangesAction({ state, layer, setState, core }));
+  }
+
+  actions.push(getIgnoreFilterAction({ state, layer, setState }));
 
   return actions;
 };

@@ -135,7 +135,7 @@ function getLayerReferenceName(layerId: string) {
   return `xy-visualization-layer-${layerId}`;
 }
 
-const annotationLayerHasUnsavedChanges = (layer: XYAnnotationLayerConfig) => {
+export const annotationLayerHasUnsavedChanges = (layer: XYAnnotationLayerConfig) => {
   if (!isByReferenceAnnotationsLayer(layer)) {
     return false;
   }

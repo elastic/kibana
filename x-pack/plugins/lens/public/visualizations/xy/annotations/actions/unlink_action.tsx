@@ -46,7 +46,7 @@ export const getUnlinkLayerAction = ({
 
       toasts.addSuccess(
         i18n.translate('xpack.lens.xyChart.annotations.notificationUnlinked', {
-          defaultMessage: `Unlinked "{title}" from library`,
+          defaultMessage: `Unlinked "{title}"`,
           values: { title: layer.__lastSaved.title },
         })
       );

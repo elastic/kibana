@@ -9,18 +9,13 @@ import { i18n } from '@kbn/i18n';
 import type { LayerAction, StateSetter } from '../../../../types';
 import type { XYState, XYAnnotationLayerConfig } from '../../types';
 
-export const IGNORE_GLOBAL_FILTERS_ACTION_ID = 'ignoreGlobalFilters';
-export const KEEP_GLOBAL_FILTERS_ACTION_ID = 'keepGlobalFilters';
-
 export const getIgnoreFilterAction = ({
   state,
   layer,
-  layerIndex,
   setState,
 }: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
-  layerIndex: number;
   setState: StateSetter<XYState, unknown>;
 }): LayerAction => {
   return {
@@ -41,8 +36,10 @@ export const getIgnoreFilterAction = ({
             'All the dimensions configured in this layer respect filters defined at kibana level.',
         }),
     execute: () => {
-      const newLayers = [...state.layers];
-      newLayers[layerIndex] = { ...layer, ignoreGlobalFilters: !layer.ignoreGlobalFilters };
+      const newLayer = { ...layer, ignoreGlobalFilters: !layer.ignoreGlobalFilters };
+      const newLayers = state.layers.map((layerToCheck) =>
+        layerToCheck.layerId === layer.layerId ? newLayer : layerToCheck
+      );
       return setState({ ...state, layers: newLayers });
     },
     icon: !layer.ignoreGlobalFilters ? 'filterIgnore' : 'filter',
