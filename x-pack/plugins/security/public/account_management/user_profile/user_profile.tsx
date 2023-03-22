@@ -161,7 +161,7 @@ function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfi
       }
       description={
         <FormattedMessage
-          id="xpack.security.accountManagement.userProfile.avatarGroupDescription"
+          id="xpack.security.accountManagement.userProfile.themeFormGroupDescription"
           defaultMessage="Choose your desired theme for Kibana"
         />
       }
@@ -765,19 +765,25 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <p>
-                  {i18n.translate('advancedSettings.form.requiresPageReloadToastDescription', {
-                    defaultMessage:
-                      'One or more settings require you to reload the page to take effect.',
-                  })}
+                  {i18n.translate(
+                    'xpack.security.accountManagement.userProfile.requiresPageReloadToastDescription',
+                    {
+                      defaultMessage:
+                        'One or more settings require you to reload the page to take effect.',
+                    }
+                  )}
                 </p>
                 <EuiButton
                   size="s"
                   onClick={() => window.location.reload()}
                   data-test-subj="windowReloadButton"
                 >
-                  {i18n.translate('advancedSettings.form.requiresPageReloadToastButtonLabel', {
-                    defaultMessage: 'Reload page',
-                  })}
+                  {i18n.translate(
+                    'xpack.security.accountManagement.userProfile.requiresPageReloadToastButtonLabel',
+                    {
+                      defaultMessage: 'Reload page',
+                    }
+                  )}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
