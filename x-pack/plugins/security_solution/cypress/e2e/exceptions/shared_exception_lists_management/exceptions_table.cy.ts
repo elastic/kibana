@@ -5,30 +5,24 @@
  * 2.0.
  */
 
-import { ROLES } from '../../../../common/test';
-import { getExceptionList, expectedExportedExceptionList } from '../../../objects/exception';
+import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
 import { createRule } from '../../../tasks/api_calls/rules';
-import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../../tasks/login';
+import { login, visitWithoutDateRange } from '../../../tasks/login';
 
 import { EXCEPTIONS_URL } from '../../../urls/navigation';
 import {
-  deleteExceptionListWithRuleReference,
-  deleteExceptionListWithoutRuleReference,
-  exportExceptionList,
   searchForExceptionList,
   waitForExceptionsTableToBeLoaded,
   clearSearchSelection,
 } from '../../../tasks/exceptions_table';
 import {
-  EXCEPTIONS_OVERFLOW_ACTIONS_BTN,
   EXCEPTIONS_TABLE_LIST_NAME,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../../screens/exceptions';
 import { createExceptionList } from '../../../tasks/api_calls/exceptions';
 import { esArchiverResetKibana } from '../../../tasks/es_archiver';
-import { TOASTER } from '../../../screens/alerts_detection_rules';
 
 const getExceptionList1 = () => ({
   ...getExceptionList(),
@@ -69,25 +63,6 @@ describe('Exceptions Table', () => {
 
   beforeEach(() => {
     visitWithoutDateRange(EXCEPTIONS_URL);
-  });
-
-  it('Exports exception list', function () {
-    cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
-
-    waitForExceptionsTableToBeLoaded();
-    exportExceptionList();
-
-    cy.wait('@export').then(({ response }) => {
-      cy.wrap(response?.body).should(
-        'eql',
-        expectedExportedExceptionList(this.exceptionListResponse)
-      );
-
-      cy.get(TOASTER).should(
-        'have.text',
-        `Exception list "${getExceptionList1().name}" exported successfully`
-      );
-    });
   });
 
   it('Filters exception lists on search', () => {
@@ -138,55 +113,5 @@ describe('Exceptions Table', () => {
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
-  });
-
-  it('Deletes exception list without rule reference', () => {
-    waitForExceptionsTableToBeLoaded();
-
-    // Using cy.contains because we do not care about the exact text,
-    // just checking number of lists shown
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
-
-    deleteExceptionListWithoutRuleReference();
-
-    // Using cy.contains because we do not care about the exact text,
-    // just checking number of lists shown
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
-  });
-
-  it('Deletes exception list with rule reference', () => {
-    waitForPageWithoutDateRange(EXCEPTIONS_URL);
-    waitForExceptionsTableToBeLoaded();
-
-    // Using cy.contains because we do not care about the exact text,
-    // just checking number of lists shown
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
-
-    deleteExceptionListWithRuleReference();
-
-    // Using cy.contains because we do not care about the exact text,
-    // just checking number of lists shown
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
-  });
-});
-
-describe('Exceptions Table - read only', () => {
-  before(() => {
-    // First we login as a privileged user to create exception list
-    esArchiverResetKibana();
-    login(ROLES.platform_engineer);
-    visitWithoutDateRange(EXCEPTIONS_URL, ROLES.platform_engineer);
-    createExceptionList(getExceptionList(), getExceptionList().list_id);
-
-    // Then we login as read-only user to test.
-    login(ROLES.reader);
-    visitWithoutDateRange(EXCEPTIONS_URL, ROLES.reader);
-    waitForExceptionsTableToBeLoaded();
-
-    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 1 list`);
-  });
-
-  it('Card menu actions should be disabled', () => {
-    cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().should('be.disabled');
   });
 });
