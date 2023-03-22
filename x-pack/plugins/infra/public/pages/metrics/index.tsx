@@ -41,7 +41,7 @@ import { AlertPrefillProvider } from '../../alerting/use_alert_prefill';
 import { InfraMLCapabilitiesProvider } from '../../containers/ml/infra_ml_capabilities';
 import { AnomalyDetectionFlyout } from './inventory_view/components/ml/anomaly_detection/anomaly_detection_flyout';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
-import { CreateDerivedIndexPattern, useSourceContext } from '../../containers/metrics_source';
+import { CreateDerivedIndexPattern, SourceProvider, useSourceContext } from '../../containers/metrics_source';
 import { NotFoundPage } from '../404';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
