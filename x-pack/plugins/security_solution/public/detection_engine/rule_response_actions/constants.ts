@@ -11,6 +11,8 @@ export const getActionDetails = (actionTypeId: string) => {
   switch (actionTypeId) {
     case RESPONSE_ACTION_TYPES.OSQUERY:
       return { logo: 'logoOsquery', name: 'Osquery' };
+    case RESPONSE_ACTION_TYPES.ENDPOINT:
+      return { logo: 'logoSecurity', name: 'Endpoint' };
     // update when new responseActions are provided
     default:
       return { logo: 'logoOsquery', name: 'Osquery' };
