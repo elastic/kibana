@@ -88,7 +88,8 @@ export const updateContextInUrl =
         filters: context.filters,
         timeRange: context.timeRange,
         refreshInterval: context.refreshInterval,
-      })
+      }),
+      { replace: true }
     );
   };
 

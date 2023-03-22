@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { SnapshotNode } from '../../../../../../../common/http_api';
 import { LogStream } from '../../../../../../components/log_stream';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
@@ -20,7 +20,7 @@ export const LogsTabContent = () => {
   const [filterQuery] = useLogsSearchUrlState();
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
   const { from, to } = getDateRangeAsTimestamp();
-  const { hostNodes } = useHostsViewContext();
+  const { hostNodes, loading } = useHostsViewContext();
 
   const hostsFilterQuery = useMemo(() => createHostsFilter(hostNodes), [hostNodes]);
 
@@ -28,6 +28,15 @@ export const LogsTabContent = () => {
     const hostsFilterQueryParam = createHostsFilterQueryParam(hostNodes);
     return `${filterQuery.query ? filterQuery.query + ' and ' : ''}${hostsFilterQueryParam}`;
   }, [filterQuery.query, hostNodes]);
+
+  if (loading)
+    return (
+      <EuiFlexGroup style={{ height: 300 }} alignItems="center" justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-logs">
@@ -39,18 +48,17 @@ export const LogsTabContent = () => {
           <LogsLinkToStream startTimestamp={from} endTimestamp={to} query={logsLinkToStreamQuery} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {hostNodes.length ? (
-        <EuiFlexItem>
-          <LogStream
-            height={500}
-            logView={{ type: 'log-view-reference', logViewId: 'default' }}
-            startTimestamp={from}
-            endTimestamp={to}
-            filters={[hostsFilterQuery]}
-            query={filterQuery}
-          />
-        </EuiFlexItem>
-      ) : null}
+
+      <EuiFlexItem>
+        <LogStream
+          height={500}
+          logView={{ type: 'log-view-reference', logViewId: 'default' }}
+          startTimestamp={from}
+          endTimestamp={to}
+          filters={[hostsFilterQuery]}
+          query={filterQuery}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

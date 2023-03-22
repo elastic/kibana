@@ -37,7 +37,8 @@ export const updateContextInUrl =
       positionStateKey,
       positionStateInUrlRT.encode({
         position: context.latestPosition ? pickTimeKey(context.latestPosition) : null,
-      })
+      }),
+      { replace: true }
     );
   };
 
