@@ -28,7 +28,7 @@ export const FunctionHelpPopover: FC = memo(() => {
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
   const closeHelp = () => setIsHelpOpen(false);
 
-  const helpButton = <EuiButtonIcon onClick={onHelpClick} iconType="documentation" />;
+  const helpButton = <EuiButtonIcon onClick={onHelpClick} iconType="help" />;
 
   const columns = [
     {
