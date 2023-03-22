@@ -37,7 +37,7 @@ export function DocViewTableRowBtnFilterExists({
   ) : (
     <FormattedMessage
       id="discover.docViews.table.filterForFieldPresentButtonTooltip"
-      defaultMessage="Filter for field present"
+      defaultMessage="Filter for field present1"
     />
   );
 
@@ -45,7 +45,7 @@ export function DocViewTableRowBtnFilterExists({
     <EuiToolTip content={tooltipContent}>
       <EuiButtonIcon
         aria-label={i18n.translate('discover.docViews.table.filterForFieldPresentButtonAriaLabel', {
-          defaultMessage: 'Filter for field present',
+          defaultMessage: 'Filter for field present2',
         })}
         onClick={onClick}
         className="kbnDocViewer__actionButton"

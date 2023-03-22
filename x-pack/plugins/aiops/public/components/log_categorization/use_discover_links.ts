@@ -29,8 +29,6 @@ export function useDiscoverLinks() {
     mode: QueryMode,
     category?: Category
   ) => {
-    const selectedRows = category === undefined ? selection : [category];
-
     const _g = rison.encode({
       time: {
         from: moment(timefilterActiveBounds.min?.valueOf()).toISOString(),
@@ -39,35 +37,7 @@ export function useDiscoverLinks() {
     });
 
     const _a = rison.encode({
-      filters: [
-        ...aiopsListState.filters,
-        {
-          query: {
-            bool: {
-              [mode]: selectedRows.map(({ key: query }) => ({
-                match: {
-                  [field]: {
-                    auto_generate_synonyms_phrase_query: false,
-                    fuzziness: 0,
-                    operator: 'and',
-                    query,
-                  },
-                },
-              })),
-            },
-          },
-          meta: {
-            alias: i18n.translate('xpack.aiops.logCategorization.filterAliasLabel', {
-              defaultMessage: 'Categorization - {field}',
-              values: {
-                field,
-              },
-            }),
-            index,
-            disabled: false,
-          },
-        },
-      ],
+      filters: [...aiopsListState.filters, createFilter(index, field, selection, mode, category)],
       index,
       interval: 'auto',
       query: {
@@ -84,4 +54,40 @@ export function useDiscoverLinks() {
   };
 
   return { openInDiscoverWithFilter };
+}
+
+export function createFilter(
+  index: string,
+  field: string,
+  selection: Category[],
+  mode: QueryMode,
+  category?: Category
+) {
+  const selectedRows = category === undefined ? selection : [category];
+  return {
+    query: {
+      bool: {
+        [mode]: selectedRows.map(({ key: query }) => ({
+          match: {
+            [field]: {
+              auto_generate_synonyms_phrase_query: false,
+              fuzziness: 0,
+              operator: 'and',
+              query,
+            },
+          },
+        })),
+      },
+    },
+    meta: {
+      alias: i18n.translate('xpack.aiops.logCategorization.filterAliasLabel', {
+        defaultMessage: 'Categorization - {field}',
+        values: {
+          field,
+        },
+      }),
+      index,
+      disabled: false,
+    },
+  };
 }

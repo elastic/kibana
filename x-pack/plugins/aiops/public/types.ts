@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { DiscoverSetup } from '@kbn/discover-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedFieldListPluginSetup } from '@kbn/unified-field-list-plugin/public';
 
 export interface AiopsPluginSetupDeps {
-  data: PluginSetup;
-  licensing: LicensingPluginStart;
-  discover: DiscoverSetup;
+  unifiedFieldList: UnifiedFieldListPluginSetup;
 }
 
 export interface AiopsPluginStartDeps {
-  data: PluginStart;
+  data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
 }
 
 /**
@@ -24,13 +23,5 @@ export interface AiopsPluginStartDeps {
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiopsPluginSetup {}
-
-/**
- * aiops plugin server start contract
- */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiopsPluginStart {}
-
-export interface AiopsLicense {
-  isActivePlatinumLicense: boolean;
-}

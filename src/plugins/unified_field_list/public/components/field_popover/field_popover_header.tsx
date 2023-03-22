@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiButtonIconProps,
@@ -17,11 +17,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { AddFieldFilterHandler } from '../../types';
+import { getExtraFieldActionsRegistry } from '../../kibana_services';
 
 export interface FieldPopoverHeaderProps {
   field: DataViewField;
+  dataView?: DataView;
   closePopover: EuiPopoverProps['closePopover'];
   buttonAddFieldToWorkspaceProps?: Partial<EuiButtonIconProps>;
   buttonAddFilterProps?: Partial<EuiButtonIconProps>;
@@ -29,12 +31,15 @@ export interface FieldPopoverHeaderProps {
   buttonDeleteFieldProps?: Partial<EuiButtonIconProps>;
   onAddFieldToWorkspace?: (field: DataViewField) => unknown;
   onAddFilter?: AddFieldFilterHandler;
+  onAddDSLFilter?: AddFieldFilterHandler;
   onEditField?: (fieldName: string) => unknown;
   onDeleteField?: (fieldName: string) => unknown;
+  onCategorizeField?: (fieldName: string) => unknown;
 }
 
 export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   field,
+  dataView,
   closePopover,
   buttonAddFieldToWorkspaceProps,
   buttonAddFilterProps,
@@ -42,9 +47,12 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   buttonDeleteFieldProps,
   onAddFieldToWorkspace,
   onAddFilter,
+  onAddDSLFilter,
   onEditField,
   onDeleteField,
 }) => {
+  const extraActions = useMemo(() => getExtraFieldActionsRegistry(), []);
+
   if (!field) {
     return null;
   }
@@ -115,6 +123,32 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
           </EuiToolTip>
         </EuiFlexItem>
       )}
+
+      {dataView !== undefined
+        ? extraActions
+            .getActionsGetters()
+            .map((actionGetter) => actionGetter(field, dataView, onAddDSLFilter))
+            .filter((action) => action.canShow())
+            .map((action) => {
+              return (
+                <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_addExistsFilter">
+                  <EuiToolTip content={action.title}>
+                    <EuiButtonIcon
+                      data-test-subj={`fieldPopoverHeader_addExistsFilter-${field.name}`}
+                      aria-label={field.name}
+                      {...(buttonAddFilterProps || {})}
+                      iconType="editorOrderedList"
+                      onClick={() => {
+                        closePopover();
+                        action.onClick();
+                      }}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              );
+            })
+        : null}
+
       {onEditField &&
         (field.isRuntimeField || !['unknown', 'unknown_selected'].includes(field.type)) && (
           <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_editField">

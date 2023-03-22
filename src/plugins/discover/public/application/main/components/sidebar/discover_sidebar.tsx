@@ -108,6 +108,7 @@ export function DiscoverSidebarComponent({
   allFields,
   onAddField,
   onAddFilter,
+  onAddDSLFilter,
   onRemoveField,
   selectedDataView,
   trackUiMetric,
@@ -248,6 +249,7 @@ export function DiscoverSidebarComponent({
           onAddField={onAddField}
           onRemoveField={onRemoveField}
           onAddFilter={onAddFilter}
+          onAddDSLFilter={onAddDSLFilter}
           documents$={documents$}
           trackUiMetric={trackUiMetric}
           multiFields={multiFieldsMap?.get(field.name)} // ideally we better calculate multifields when they are requested first from the popover
@@ -268,6 +270,7 @@ export function DiscoverSidebarComponent({
       onAddField,
       onRemoveField,
       onAddFilter,
+      onAddDSLFilter,
       documents$,
       trackUiMetric,
       multiFieldsMap,

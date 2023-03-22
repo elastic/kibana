@@ -22,7 +22,9 @@ import {
   EuiTableSelectionType,
 } from '@elastic/eui';
 
-import { useDiscoverLinks } from '../use_discover_links';
+import { AddFieldFilterHandler } from '@kbn/unified-field-list-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { useDiscoverLinks, createFilter } from '../use_discover_links';
 import { MiniHistogram } from '../../mini_histogram';
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
 import type { AiOpsIndexBasedAppState } from '../../explain_log_rate_spikes/explain_log_rate_spikes_app_state';
@@ -40,13 +42,16 @@ interface Props {
   sparkLines: SparkLinesPerCategory;
   eventRate: EventRate;
   dataViewId: string;
-  selectedField: string | undefined;
+  selectedField: DataViewField | string | undefined;
   timefilter: TimefilterContract;
   aiopsListState: Required<AiOpsIndexBasedAppState>;
   pinnedCategory: Category | null;
   setPinnedCategory: (category: Category | null) => void;
   selectedCategory: Category | null;
   setSelectedCategory: (category: Category | null) => void;
+  onAddFilter?: AddFieldFilterHandler;
+  onClose: () => void;
+  enableRowActions?: boolean;
 }
 
 export const CategoryTable: FC<Props> = ({
@@ -61,14 +66,33 @@ export const CategoryTable: FC<Props> = ({
   setPinnedCategory,
   selectedCategory,
   setSelectedCategory,
+  onAddFilter,
+  onClose,
+  enableRowActions = true,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
   const { openInDiscoverWithFilter } = useDiscoverLinks();
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const { onTableChange, pagination, sorting } = useTableState<Category>(categories ?? [], 'key');
+  // console.log(sparkLines);
 
   const openInDiscover = (mode: QueryMode, category?: Category) => {
+    if (
+      onAddFilter !== undefined &&
+      selectedField !== undefined &&
+      typeof selectedField !== 'string'
+    ) {
+      onAddFilter(
+        selectedField,
+        createFilter('', selectedField.name, selectedCategories, mode, category),
+        '+',
+        `Categories - ${selectedField.name}`
+      );
+      onClose();
+      return;
+    }
+
     const timefilterActiveBounds = timefilter.getActiveBounds();
     if (timefilterActiveBounds === undefined || selectedField === undefined) {
       return;
@@ -76,7 +100,7 @@ export const CategoryTable: FC<Props> = ({
 
     openInDiscoverWithFilter(
       dataViewId,
-      selectedField,
+      typeof selectedField === 'string' ? selectedField : selectedField.name,
       selectedCategories,
       aiopsListState,
       timefilterActiveBounds,
@@ -245,22 +269,24 @@ export const CategoryTable: FC<Props> = ({
         pagination={pagination}
         sorting={sorting}
         rowProps={(category) => {
-          return {
-            onClick: () => {
-              if (category.key === pinnedCategory?.key) {
-                setPinnedCategory(null);
-              } else {
-                setPinnedCategory(category);
+          return enableRowActions
+            ? {
+                onClick: () => {
+                  if (category.key === pinnedCategory?.key) {
+                    setPinnedCategory(null);
+                  } else {
+                    setPinnedCategory(category);
+                  }
+                },
+                onMouseEnter: () => {
+                  setSelectedCategory(category);
+                },
+                onMouseLeave: () => {
+                  setSelectedCategory(null);
+                },
+                style: getRowStyle(category),
               }
-            },
-            onMouseEnter: () => {
-              setSelectedCategory(category);
-            },
-            onMouseLeave: () => {
-              setSelectedCategory(null);
-            },
-            style: getRowStyle(category),
-          };
+            : undefined;
         }}
       />
     </>

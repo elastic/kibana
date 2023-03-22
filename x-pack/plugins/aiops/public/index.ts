@@ -18,3 +18,4 @@ export {
   LogCategorization,
   ChangePointDetection,
 } from './shared_lazy_components';
+export { showCategorizeFlyout } from './shared_flyout';

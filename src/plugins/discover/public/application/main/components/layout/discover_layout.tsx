@@ -17,8 +17,10 @@ import {
   EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
 } from '@elastic/eui';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { buildEmptyFilter } from '@kbn/es-query';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
@@ -152,6 +154,20 @@ export function DiscoverLayout({
       return filterManager.addFilters(newFilters);
     },
     [filterManager, dataView, dataViews, trackUiMetric, capabilities]
+  );
+
+  const onAddDSLFilter = useCallback(
+    (field: DataViewField | string, values: unknown, operation: '+' | '-', alias?: string) => {
+      const fieldName = typeof field === 'string' ? field : field.name;
+      popularizeField(dataView, fieldName, dataViews, capabilities);
+      const filter = buildEmptyFilter(false, dataView.id);
+      if (alias) {
+        filter.meta.alias = alias;
+      }
+      filter.query = (values as estypes.QueryDslNestedQuery).query;
+      return filterManager.addFilters([filter]);
+    },
+    [filterManager, dataView, dataViews, capabilities]
   );
 
   const onFieldEdited = useCallback(
@@ -318,6 +334,7 @@ export function DiscoverLayout({
               onAddField={onAddColumn}
               columns={currentColumns}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+              onAddDSLFilter={onAddDSLFilter}
               onRemoveField={onRemoveColumn}
               onChangeDataView={onChangeDataView}
               selectedDataView={dataView}
