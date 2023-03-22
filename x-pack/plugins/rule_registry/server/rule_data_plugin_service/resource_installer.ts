@@ -209,12 +209,14 @@ export class ResourceInstaller {
 
     logger.info(`Installing namespace-level resources and creating concrete index for ${alias}`);
 
+    const secondaryNamespacedAlias = indexInfo.getSecondaryAlias(namespace);
     const indexPatterns = {
       basePattern: indexInfo.basePattern,
       pattern: indexInfo.getPatternForBackingIndices(namespace),
       alias: indexInfo.getPrimaryAlias(namespace),
       name: indexInfo.getConcreteIndexInitialName(namespace),
       template: indexInfo.getIndexTemplateName(namespace),
+      ...(secondaryNamespacedAlias ? { secondaryAlias: secondaryNamespacedAlias } : {}),
     };
 
     const technicalComponentNames = [TECHNICAL_COMPONENT_TEMPLATE_NAME];
