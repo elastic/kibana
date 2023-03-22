@@ -29,7 +29,7 @@ export const initGetLogAlertsChartPreviewDataRoute = ({
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const {
-        data: { logView, buckets, alertParams, executionTimestamp },
+        data: { logView, buckets, alertParams, executionTimeRange },
       } = request.body;
 
       const [, , { logViews }] = await getStartServices();
@@ -42,7 +42,7 @@ export const initGetLogAlertsChartPreviewDataRoute = ({
           framework.callWithRequest,
           alertParams,
           buckets,
-          executionTimestamp
+          executionTimeRange
         );
 
         return response.ok({

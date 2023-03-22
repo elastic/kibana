@@ -8,6 +8,7 @@
 import { useState, useMemo } from 'react';
 import { HttpHandler } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ExecutionTimeRange } from '../../../../../types';
 import { useTrackedPromise } from '../../../../../utils/use_tracked_promise';
 import {
   GetLogAlertsChartPreviewDataSuccessResponsePayload,
@@ -22,14 +23,14 @@ interface Options {
   sourceId: string;
   ruleParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   buckets: number;
-  executionTimestamp?: number;
+  executionTimeRange?: ExecutionTimeRange;
 }
 
 export const useChartPreviewData = ({
   sourceId,
   ruleParams,
   buckets,
-  executionTimestamp,
+  executionTimeRange,
 }: Options) => {
   const { http } = useKibana().services;
   const [chartPreviewData, setChartPreviewData] = useState<
@@ -46,7 +47,7 @@ export const useChartPreviewData = ({
           http!.fetch,
           ruleParams,
           buckets,
-          executionTimestamp
+          executionTimeRange
         );
       },
       onResolve: ({ data: { series } }) => {
@@ -78,7 +79,7 @@ export const callGetChartPreviewDataAPI = async (
   fetch: HttpHandler,
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
   buckets: number,
-  executionTimestamp?: number
+  executionTimeRange?: ExecutionTimeRange
 ) => {
   const response = await fetch(LOG_ALERTS_CHART_PREVIEW_DATA_PATH, {
     method: 'POST',
@@ -88,7 +89,7 @@ export const callGetChartPreviewDataAPI = async (
           logView: { type: 'log-view-reference', logViewId: sourceId },
           alertParams,
           buckets,
-          executionTimestamp,
+          executionTimeRange,
         },
       })
     ),

@@ -110,3 +110,7 @@ export type LensAttributes = TypedLensByValueInput['attributes'];
 export interface LensOptions {
   breakdownSize: number;
 }
+export interface ExecutionTimeRange {
+  gte: number;
+  lte: number;
+}

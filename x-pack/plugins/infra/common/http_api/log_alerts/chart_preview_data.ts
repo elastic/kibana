@@ -85,7 +85,13 @@ export const getLogAlertsChartPreviewDataRequestPayloadRT = rt.type({
     logView: persistedLogViewReferenceRT,
     alertParams: getLogAlertsChartPreviewDataAlertParamsSubsetRT,
     buckets: rt.number,
-    executionTimestamp: rt.union([rt.number, rt.undefined]),
+    executionTimeRange: rt.union([
+      rt.undefined,
+      rt.type({
+        gte: rt.number,
+        lte: rt.number,
+      }),
+    ]),
   }),
 });
 
