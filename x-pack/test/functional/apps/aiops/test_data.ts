@@ -20,12 +20,11 @@ export const farequoteDataViewTestData: TestData = {
     analysisGroupsTable: [
       {
         docCount: '297',
-        group: '* airline: AALShowing 1 out of 1 group items. 1 items unique to this group.',
+        group: '* airline: AAL',
       },
       {
         docCount: '100',
-        group:
-          '* custom_field.keyword: deviation* airline: UALShowing 2 out of 2 group items. 2 items unique to this group.',
+        group: '* custom_field.keyword: deviation* airline: UAL',
       },
     ],
     analysisTable: [
@@ -59,24 +58,20 @@ export const artificialLogDataViewTestData: TestData = {
     totalDocCountFormatted: '8,400',
     analysisGroupsTable: [
       {
-        group:
-          'response_code: 500url: home.phpShowing 2 out of 2 group items. 0 items unique to this group.',
+        group: 'response_code: 500url: home.php',
         docCount: '792',
       },
       {
-        group:
-          'response_code: 500url: login.phpShowing 2 out of 2 group items. 0 items unique to this group.',
+        group: 'response_code: 500url: login.php',
         docCount: '792',
       },
       {
         docCount: '634',
-        group:
-          'user: Peterurl: home.phpShowing 2 out of 2 group items. 0 items unique to this group.',
+        group: 'user: Peterurl: home.php',
       },
       {
         docCount: '634',
-        group:
-          'user: Peterurl: login.phpShowing 2 out of 2 group items. 0 items unique to this group.',
+        group: 'user: Peterurl: login.php',
       },
     ],
     analysisTable: [
@@ -89,7 +84,7 @@ export const artificialLogDataViewTestData: TestData = {
       },
       {
         fieldName: 'url',
-        fieldValue: 'home.php',
+        fieldValue: 'login.php',
         impact: 'Low',
         logRate: 'Chart type:bar chart',
         pValue: '0.0108',
