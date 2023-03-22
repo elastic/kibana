@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_PROCESS_CPU_PERCENT,
+  METRIC_OTEL_SYSTEM_CPU_UTILIZATION,
 } from '../../../../../../common/es_fields/apm';
 import { ChartBase } from '../../../types';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
@@ -62,6 +63,7 @@ export function getCPUChartData({
   serviceNodeName,
   start,
   end,
+  isOpenTelemetry,
 }: {
   environment: string;
   kuery: string;
@@ -71,7 +73,12 @@ export function getCPUChartData({
   serviceNodeName?: string;
   start: number;
   end: number;
+  isOpenTelemetry?: boolean;
 }) {
+  const systemCpuMetric = isOpenTelemetry
+    ? METRIC_OTEL_SYSTEM_CPU_UTILIZATION
+    : METRIC_SYSTEM_CPU_PERCENT;
+
   return fetchAndTransformMetrics({
     environment,
     kuery,
@@ -83,8 +90,8 @@ export function getCPUChartData({
     end,
     chartBase,
     aggs: {
-      systemCPUAverage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
-      systemCPUMax: { max: { field: METRIC_SYSTEM_CPU_PERCENT } },
+      systemCPUAverage: { avg: { field: systemCpuMetric } },
+      systemCPUMax: { max: { field: systemCpuMetric } },
       processCPUAverage: { avg: { field: METRIC_PROCESS_CPU_PERCENT } },
       processCPUMax: { max: { field: METRIC_PROCESS_CPU_PERCENT } },
     },
