@@ -8,27 +8,22 @@
 import { HealthStatus, FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export interface EnterpriseSearchEnginesResponse {
-  meta: {
-    from: number;
-    size: number;
-    total: number;
-  };
-  params: { from: number; q?: string; size: number };
+  count: number;
+  params: { q?: string; from: number; size: number };
   results: EnterpriseSearchEngine[];
 }
 
 export interface EnterpriseSearchEngine {
-  created: string;
   indices: string[];
   name: string;
-  updated: string;
+  updated_at_millis: number;
 }
 
 export interface EnterpriseSearchEngineDetails {
-  created: string;
   indices: EnterpriseSearchEngineIndex[];
+  updated_at_millis: number;
   name: string;
-  updated: string;
+
 }
 
 export interface EnterpriseSearchEngineIndex {
@@ -38,11 +33,10 @@ export interface EnterpriseSearchEngineIndex {
 }
 
 export interface EnterpriseSearchEngineFieldCapabilities {
-  created: string;
   field_capabilities: FieldCapsResponse;
   fields?: SchemaField[];
   name: string;
-  updated: string;
+  updated_at_millis: number;
 }
 export interface EnterpriseSearchSchemaField {
   field_name: string;

@@ -342,7 +342,7 @@ describe('engines routes', () => {
       });
       expect(mockClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
         method: 'POST',
-        path: '/engine-name/_search/',
+        path: '/engine-name/_search',
         body: {},
       });
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
