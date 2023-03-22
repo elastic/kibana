@@ -72,7 +72,7 @@ describe('ZDT upgrades - basic document migration', () => {
     await savedObjectsRepository.bulkCreate(sampleBObjs);
   };
 
-  it('updates the mappings and the meta', async () => {
+  it('follows the expected stages and transitions', async () => {
     await createBaseline();
 
     const typeA = getSampleAType();

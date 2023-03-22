@@ -36,7 +36,11 @@ export const generateAdditiveMappingDiff = ({
   deletedTypes,
 }: GenerateAdditiveMappingsDiffOpts): SavedObjectsMappingProperties => {
   const typeVersions = getModelVersionMapForTypes(types);
-  const mappingVersion = getModelVersionsFromMappingMeta({ meta, source: 'mappingVersions' });
+  const mappingVersion = getModelVersionsFromMappingMeta({
+    meta,
+    source: 'mappingVersions',
+    knownTypes: types.map((type) => type.name),
+  });
   if (!mappingVersion) {
     // should never occur given we checked previously in the flow but better safe than sorry.
     throw new Error(

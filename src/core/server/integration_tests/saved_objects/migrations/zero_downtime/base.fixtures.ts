@@ -91,3 +91,42 @@ export const getSampleBType = () => {
     },
   });
 };
+
+export const getDeletedType = () => {
+  return createType({
+    // we cant' easily introduce a deleted type, so we're using an existing one
+    name: 'server',
+    mappings: {
+      properties: {
+        text: { type: 'text' },
+      },
+    },
+    switchToModelVersionAt: '8.7.0',
+    modelVersions: {
+      '1': dummyModelVersion,
+    },
+  });
+};
+
+export const getExcludedType = () => {
+  return createType({
+    // we cant' easily introduce a deleted type, so we're using an existing one
+    name: 'excluded',
+    mappings: {
+      properties: {
+        value: { type: 'integer' },
+      },
+    },
+    switchToModelVersionAt: '8.7.0',
+    modelVersions: {
+      '1': dummyModelVersion,
+    },
+    excludeOnUpgrade: () => {
+      return {
+        bool: {
+          must: [{ term: { type: 'excluded' } }, { range: { 'excluded.value': { lte: 1 } } }],
+        },
+      };
+    },
+  });
+};
