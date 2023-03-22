@@ -32,7 +32,7 @@ describe('Guided onboarding tour', () => {
   before(() => {
     cleanKibana();
     login();
-    createRule({ ...getNewRule(), query: 'user.name:*' });
+    createRule(getNewRule({ query: 'user.name:*' }));
   });
   beforeEach(() => {
     startAlertsCasesTour();

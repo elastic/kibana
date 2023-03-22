@@ -78,19 +78,20 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
     esArchiverLoad('conflicts_2');
     login();
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
-      createRule({
-        ...getNewRule(),
-        index: ['auditbeat-*', 'exceptions-*', 'conflicts-*'],
-        enabled: false,
-        exceptions_list: [
-          {
-            id: response.body.id,
-            list_id: getExceptionList().list_id,
-            type: getExceptionList().type,
-            namespace_type: getExceptionList().namespace_type,
-          },
-        ],
-      })
+      createRule(
+        getNewRule({
+          index: ['auditbeat-*', 'exceptions-*', 'conflicts-*'],
+          enabled: false,
+          exceptions_list: [
+            {
+              id: response.body.id,
+              list_id: getExceptionList().list_id,
+              type: getExceptionList().type,
+              namespace_type: getExceptionList().namespace_type,
+            },
+          ],
+        })
+      )
     );
   });
 

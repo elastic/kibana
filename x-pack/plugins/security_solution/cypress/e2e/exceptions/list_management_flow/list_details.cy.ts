@@ -41,17 +41,18 @@ describe('Exception list management page', () => {
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList1(), getExceptionList1().list_id).then((response) =>
-      createRule({
-        ...getNewRule(),
-        exceptions_list: [
-          {
-            id: response.body.id,
-            list_id: getExceptionList1().list_id,
-            type: getExceptionList1().type,
-            namespace_type: getExceptionList1().namespace_type,
-          },
-        ],
-      })
+      createRule(
+        getNewRule({
+          exceptions_list: [
+            {
+              id: response.body.id,
+              list_id: getExceptionList1().list_id,
+              type: getExceptionList1().type,
+              namespace_type: getExceptionList1().namespace_type,
+            },
+          ],
+        })
+      )
     );
   });
 

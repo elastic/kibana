@@ -154,7 +154,7 @@ const refreshUntilAlertsIndexExists = async () => {
 };
 
 export const waitForAlertsIndexToExist = () => {
-  createRule({ ...getNewRule(), rule_id: '1', max_signals: 100 });
+  createRule(getNewRule({ rule_id: '1', max_signals: 100 }));
   refreshUntilAlertsIndexExists();
 };
 

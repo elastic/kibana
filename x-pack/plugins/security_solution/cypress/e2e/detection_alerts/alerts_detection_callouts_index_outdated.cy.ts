@@ -73,7 +73,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
       context('On Rule Details page', () => {
         beforeEach(() => {
-          createRule({ ...getNewRule(), rule_id: 'rule_testing' });
+          createRule(getNewRule({ rule_id: 'rule_testing' }));
           loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
           waitForPageTitleToBeShown();
           goToRuleDetails();
@@ -123,7 +123,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
       context('On Rule Details page', () => {
         beforeEach(() => {
-          createRule({ ...getNewRule(), rule_id: 'rule_testing' });
+          createRule(getNewRule({ rule_id: 'rule_testing' }));
           loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
           waitForPageTitleToBeShown();
           goToRuleDetails();
@@ -173,7 +173,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
       context('On Rule Details page', () => {
         beforeEach(() => {
-          createRule({ ...getNewRule(), rule_id: 'rule_testing' });
+          createRule(getNewRule({ rule_id: 'rule_testing' }));
           loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
           waitForPageTitleToBeShown();
           goToRuleDetails();

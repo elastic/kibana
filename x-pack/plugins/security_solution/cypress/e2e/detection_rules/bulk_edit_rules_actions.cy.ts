@@ -85,21 +85,15 @@ describe('Detection rules, bulk edit of rule actions', () => {
         },
       ];
 
-      createRule({
-        ...getNewRule(),
-        name: ruleNameToAssert,
-        rule_id: '1',
-        max_signals: 500,
-        actions,
-      });
+      createRule(getNewRule({ name: ruleNameToAssert, rule_id: '1', max_signals: 500, actions }));
     });
 
-    createRule({ ...getEqlRule(), rule_id: '2' });
-    createRule({ ...getMachineLearningRule(), rule_id: '3' });
-    createRule({ ...getNewThreatIndicatorRule(), rule_id: '4' });
-    createRule({ ...getNewThresholdRule(), rule_id: '5' });
-    createRule({ ...getNewTermsRule(), rule_id: '6' });
-    createRule({ ...getNewRule(), saved_id: 'mocked', rule_id: '7' });
+    createRule(getEqlRule({ rule_id: '2' }));
+    createRule(getMachineLearningRule({ rule_id: '3' }));
+    createRule(getNewThreatIndicatorRule({ rule_id: '4' }));
+    createRule(getNewThresholdRule({ rule_id: '5' }));
+    createRule(getNewTermsRule({ rule_id: '6' }));
+    createRule(getNewRule({ saved_id: 'mocked', rule_id: '7' }));
 
     createSlackConnector();
   });

@@ -62,33 +62,16 @@ describe('Bulk editing index patterns of rules with a data view only', () => {
 
     postDataView(DATA_VIEW_ID);
 
-    createRule({ ...getNewRule(), index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '1' });
-    createRule({ ...getEqlRule(), index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '2' });
-    createRule({
-      ...getNewThreatIndicatorRule(),
-      index: undefined,
-      data_view_id: DATA_VIEW_ID,
-      rule_id: '3',
-    });
-    createRule({
-      ...getNewThresholdRule(),
-      index: undefined,
-      data_view_id: DATA_VIEW_ID,
-      rule_id: '4',
-    });
-    createRule({
-      ...getNewTermsRule(),
-      index: undefined,
-      data_view_id: DATA_VIEW_ID,
-      rule_id: '5',
-    });
-    createRule({
-      ...getNewRule(),
-      index: undefined,
-      data_view_id: DATA_VIEW_ID,
-      saved_id: 'mocked',
-      rule_id: '6',
-    });
+    createRule(getNewRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '1' }));
+    createRule(getEqlRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '2' }));
+    createRule(
+      getNewThreatIndicatorRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '3' })
+    );
+    createRule(getNewThresholdRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '4' }));
+    createRule(getNewTermsRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '5' }));
+    createRule(
+      getNewRule({ index: undefined, data_view_id: DATA_VIEW_ID, saved_id: 'mocked', rule_id: '6' })
+    );
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 
@@ -205,12 +188,8 @@ describe('Bulk editing index patterns of rules with index patterns and rules wit
 
     postDataView(DATA_VIEW_ID);
 
-    createRule({ ...getNewRule(), index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '1' });
-    createRule({
-      ...getNewRule(),
-      index: ['test-index-1-*'],
-      rule_id: '2',
-    });
+    createRule(getNewRule({ index: undefined, data_view_id: DATA_VIEW_ID, rule_id: '1' }));
+    createRule(getNewRule({ index: ['test-index-1-*'], rule_id: '2' }));
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 

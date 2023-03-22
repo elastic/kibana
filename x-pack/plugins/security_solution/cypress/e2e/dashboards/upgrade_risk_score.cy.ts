@@ -39,7 +39,7 @@ describe('Upgrade risk scores', () => {
   before(() => {
     cleanKibana();
     login();
-    createRule({ ...getNewRule(), rule_id: 'rule1' });
+    createRule(getNewRule({ rule_id: 'rule1' }));
   });
 
   beforeEach(() => {
@@ -88,7 +88,7 @@ versions.forEach((version) =>
     before(() => {
       cleanKibana();
       login();
-      createRule({ ...getNewRule(), rule_id: 'rule1' });
+      createRule(getNewRule({ rule_id: 'rule1' }));
     });
 
     beforeEach(() => {
