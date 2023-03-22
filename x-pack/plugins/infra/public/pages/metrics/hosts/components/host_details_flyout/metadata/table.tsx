@@ -46,14 +46,7 @@ export const Table = (props: Props) => {
         name: VALUE_LABEL,
         width: '65%',
         sortable: false,
-        render: (_name: string, item: Row) => {
-          return (
-            <>
-              {!Array.isArray(item.value) && item.value}
-              {Array.isArray(item.value) && <ExpandableContent values={item.value} />}
-            </>
-          );
-        },
+        render: (_name: string, item: Row) => <ExpandableContent values={item.value} />,
       },
     ],
     []
@@ -63,7 +56,7 @@ export const Table = (props: Props) => {
 };
 
 interface ExpandableContentProps {
-  values: string[];
+  values: string | string[] | undefined;
 }
 const ExpandableContent = (props: ExpandableContentProps) => {
   const { values } = props;

@@ -124,7 +124,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
   } = useKibanaContextForPlugin();
 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const [clickedItemUuid, setClickedItemUuid] = useState(uuidv4());
+  const [clickedItemUuid, setClickedItemUuid] = useState(() => uuidv4());
 
   const closeFlyout = () => setIsFlyoutOpen(false);
 

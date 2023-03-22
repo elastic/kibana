@@ -22,18 +22,12 @@ const flyoutTabs = [MetadataTab];
 export const Flyout = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
 
-  const { to, from } = getDateRangeAsTimestamp();
-
-  const currentTimeRange = useMemo(
-    () => ({
-      from,
-      interval: '1m',
-      to,
-    }),
-    [from, to]
-  );
-
   const tabs = useMemo(() => {
+    const currentTimeRange = {
+      ...getDateRangeAsTimestamp(),
+      interval: '1m',
+    };
+
     return flyoutTabs.map((m) => {
       const TabContent = m.content;
       return {
@@ -41,7 +35,7 @@ export const Flyout = ({ node, closeFlyout }: Props) => {
         content: <TabContent node={node} currentTimeRange={currentTimeRange} />,
       };
     });
-  }, [currentTimeRange, node]);
+  }, [getDateRangeAsTimestamp, node]);
 
   const [selectedTab, setSelectedTab] = useState(0);
 
