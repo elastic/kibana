@@ -71,7 +71,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
           tour-step="create-case-flyout"
           data-test-subj="create-case-flyout"
           // maskProps is needed in order to apply the z-index to the parent overlay element, not to the flyout only
-          maskProps={{ headerZindexLocation: 'above' }}
+          maskProps={{ headerZindexLocation: 'below' }}
         >
           <EuiFlyoutHeader data-test-subj="create-case-flyout-header" hasBorder>
             <EuiTitle size="m">
