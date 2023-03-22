@@ -10,11 +10,11 @@ import fs from 'fs';
 import { createEsClientForTesting } from '@kbn/test';
 
 const fileNamesOrdered = [
-  'profiling-events-all.json',
-  'profiling-events-5*.json',
-  'profiling-stacktraces.json',
-  'profiling-stackframes.json',
-  'profiling-executables.json',
+  'profiling_events_all.json',
+  'profiling_events_5*.json',
+  'profiling_stacktraces.json',
+  'profiling_stackframes.json',
+  'profiling_executables.json',
 ];
 
 const esArchiversPath = path.posix.join(__dirname, 'es_archivers');
