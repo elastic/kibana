@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { validateDurationSchema } from '../../lib';
+import { validateHours } from './validate_hours';
 
 export const actionsSchema = schema.arrayOf(
   schema.object({
@@ -47,8 +48,12 @@ export const actionsSchema = schema.arrayOf(
               ])
             ),
             hours: schema.object({
-              start: schema.string(),
-              end: schema.string(),
+              start: schema.string({
+                validate: validateHours,
+              }),
+              end: schema.string({
+                validate: validateHours,
+              }),
             }),
           })
         ),

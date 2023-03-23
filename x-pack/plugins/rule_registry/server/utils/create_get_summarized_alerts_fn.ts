@@ -152,13 +152,12 @@ const getPersistentAlertsByExecutionUuid = async <TSearchRequest extends ESSearc
 }: GetAlertsByExecutionUuidHelperOpts) => {
   // persistent alerts only create new alerts so query by execution UUID to
   // get all alerts created during an execution
-  const request = getQueryByExecutionUuid(
+  const request = getQueryByExecutionUuid({
     executionUuid,
     ruleId,
     excludedAlertInstanceIds,
-    undefined,
-    alertsFilter
-  );
+    alertsFilter,
+  });
   const response = await doSearch(ruleDataClientReader, request, formatAlert);
 
   return {
@@ -187,15 +186,27 @@ const getLifecycleAlertsByExecutionUuid = async ({
   // to get the count of each action type as well as up to the maximum number
   // of each type of alert.
   const requests = [
-    getQueryByExecutionUuid(executionUuid, ruleId, excludedAlertInstanceIds, 'open', alertsFilter),
-    getQueryByExecutionUuid(
+    getQueryByExecutionUuid({
       executionUuid,
       ruleId,
       excludedAlertInstanceIds,
-      'active',
-      alertsFilter
-    ),
-    getQueryByExecutionUuid(executionUuid, ruleId, excludedAlertInstanceIds, 'close', alertsFilter),
+      action: 'open',
+      alertsFilter,
+    }),
+    getQueryByExecutionUuid({
+      executionUuid,
+      ruleId,
+      excludedAlertInstanceIds,
+      action: 'active',
+      alertsFilter,
+    }),
+    getQueryByExecutionUuid({
+      executionUuid,
+      ruleId,
+      excludedAlertInstanceIds,
+      action: 'close',
+      alertsFilter,
+    }),
   ];
 
   const responses = await Promise.all(
@@ -255,13 +266,21 @@ const doSearch = async (
   return getHitsWithCount(response, formatAlert);
 };
 
-const getQueryByExecutionUuid = (
-  executionUuid: string,
-  ruleId: string,
-  excludedAlertInstanceIds: string[],
-  action?: string,
-  alertsFilter?: AlertsFilter | null
-) => {
+interface GetQueryByExecutionUuidParams {
+  executionUuid: string;
+  ruleId: string;
+  excludedAlertInstanceIds: string[];
+  action?: string;
+  alertsFilter?: AlertsFilter | null;
+}
+
+const getQueryByExecutionUuid = ({
+  executionUuid,
+  ruleId,
+  excludedAlertInstanceIds,
+  action,
+  alertsFilter,
+}: GetQueryByExecutionUuidParams) => {
   const filter: QueryDslQueryContainer[] = [
     {
       term: {

@@ -14,12 +14,14 @@ import { NormalizedAlertAction } from '../types';
 import { RulesClientContext } from '../types';
 import { parseDuration } from '../../lib';
 
+export type ValidateActionsData = Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {
+  actions: NormalizedAlertAction[];
+};
+
 export async function validateActions(
   context: RulesClientContext,
   ruleType: UntypedNormalizedRuleType,
-  data: Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {
-    actions: NormalizedAlertAction[];
-  },
+  data: ValidateActionsData,
   allowMissingConnectorSecrets?: boolean
 ): Promise<void> {
   const { actions, notifyWhen, throttle } = data;
@@ -167,11 +169,9 @@ export async function validateActions(
   if (actionWithoutQueryAndTimeframe.length > 0) {
     errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidAlertsFilter', {
-        defaultMessage: `Action's alertsFilter  must have either "query" or "timeframe" : {groups}`,
+        defaultMessage: `Action's alertsFilter  must have either "query" or "timeframe" : {uuids}`,
         values: {
-          groups: actionWithoutQueryAndTimeframe
-            .map((a) => `${a.group} (${a.frequency?.throttle})`)
-            .join(', '),
+          uuids: actionWithoutQueryAndTimeframe.map((a) => `${a.uuid}`).join(', '),
         },
       })
     );

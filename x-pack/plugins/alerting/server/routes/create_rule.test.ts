@@ -90,7 +90,10 @@ describe('createRuleRoute', () => {
         group: mockedAlert.actions[0].group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
-        alerts_filter: mockedAlert.actions[0].alertsFilter,
+        alerts_filter: {
+          query: { kql: mockedAlert.actions[0].alertsFilter!.query!.kql },
+          timeframe: mockedAlert.actions[0].alertsFilter?.timeframe!,
+        },
       },
     ],
   };
@@ -113,6 +116,10 @@ describe('createRuleRoute', () => {
     actions: [
       {
         ...ruleToCreate.actions[0],
+        alerts_filter: {
+          query: mockedAlert.actions[0].alertsFilter?.query!,
+          timeframe: mockedAlert.actions[0].alertsFilter!.timeframe!,
+        },
         connector_type_id: 'test',
         uuid: '123-456',
       },
@@ -159,7 +166,6 @@ describe('createRuleRoute', () => {
               Object {
                 "alertsFilter": Object {
                   "query": Object {
-                    "dsl": "{\\"must\\": {\\"term\\": { \\"name\\": \\"test\\" }}}",
                     "kql": "name:test",
                   },
                   "timeframe": Object {
@@ -255,7 +261,6 @@ describe('createRuleRoute', () => {
               Object {
                 "alertsFilter": Object {
                   "query": Object {
-                    "dsl": "{\\"must\\": {\\"term\\": { \\"name\\": \\"test\\" }}}",
                     "kql": "name:test",
                   },
                   "timeframe": Object {
@@ -352,7 +357,6 @@ describe('createRuleRoute', () => {
               Object {
                 "alertsFilter": Object {
                   "query": Object {
-                    "dsl": "{\\"must\\": {\\"term\\": { \\"name\\": \\"test\\" }}}",
                     "kql": "name:test",
                   },
                   "timeframe": Object {
@@ -449,7 +453,6 @@ describe('createRuleRoute', () => {
               Object {
                 "alertsFilter": Object {
                   "query": Object {
-                    "dsl": "{\\"must\\": {\\"term\\": { \\"name\\": \\"test\\" }}}",
                     "kql": "name:test",
                   },
                   "timeframe": Object {
