@@ -96,6 +96,7 @@ const StickyContainer = (props: { children: React.ReactNode }) => {
         z-index: ${euiTheme.levels.header};
         background: ${euiTheme.colors.emptyShade};
         padding-top: ${euiTheme.size.m};
+        margin-top: -${euiTheme.size.l};
       `}
       {...props}
     />

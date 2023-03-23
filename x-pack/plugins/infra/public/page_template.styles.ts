@@ -15,5 +15,4 @@ export const fullHeightContentStyles = css`
   flex: 1 0 auto;
   width: 100%;
   height: 100%;
-  padding-block: 0;
 `;
