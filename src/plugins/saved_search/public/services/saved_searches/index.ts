@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { getSavedSearch } from './get_saved_searches';
+export { getSavedSearch, getEmptySavedSearch } from './get_saved_searches';
 export {
   getSavedSearchUrl,
   getSavedSearchFullPathUrl,

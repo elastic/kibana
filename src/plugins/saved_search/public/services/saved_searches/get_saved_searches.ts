@@ -24,7 +24,7 @@ interface GetSavedSearchDependencies {
   savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 
-const getEmptySavedSearch = ({
+export const getEmptySavedSearch = ({
   search,
 }: {
   search: DataPublicPluginStart['search'];
