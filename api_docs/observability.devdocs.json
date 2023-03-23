@@ -6209,37 +6209,6 @@
       },
       {
         "parentPluginId": "observability",
-        "id": "def-public.DragHandleProps",
-        "type": "Type",
-        "tags": [],
-        "label": "DragHandleProps",
-        "description": [],
-        "signature": [
-          "DraggableProvidedDragHandleProps",
-          " | undefined"
-        ],
-        "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.DropResult",
-        "type": "Type",
-        "tags": [],
-        "label": "DropResult",
-        "description": [],
-        "signature": [
-          "DropResult"
-        ],
-        "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
         "id": "def-public.DurationUnit",
         "type": "Type",
         "tags": [],
