@@ -51,6 +51,7 @@ import {
   RuleLastRun,
   SanitizedRule,
   AlertsFilter,
+  AlertsFilterTimeframe,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -270,12 +271,13 @@ export type UntypedRuleType = RuleType<
   AlertInstanceContext
 >;
 
-export type RawAlertsFilter = Omit<AlertsFilter, 'query'> & {
+export interface RawAlertsFilter extends AlertsFilter {
   query: null | {
     kql: string;
     dsl: string;
   };
-};
+  timeframe: null | AlertsFilterTimeframe;
+}
 
 export interface RawRuleAction extends SavedObjectAttributes {
   uuid: string;
