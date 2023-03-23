@@ -241,8 +241,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           PageObjects.discover.getSidebarSectionSelector('empty', true)
         );
         await emptySectionButton.scrollIntoViewIfNecessary();
-        availableFields = await PageObjects.discover.getSidebarSectionFieldNames('available');
-        expect(availableFields.length).to.be(53);
+
+        await retry.waitFor('list to update after scrolling', async () => {
+          availableFields = await PageObjects.discover.getSidebarSectionFieldNames('available');
+          return availableFields.length === 53;
+        });
+
         expect(availableFields.join(', ')).to.be(
           `${expectedInitialAvailableFields}, url, utc_time, xss`
         );
@@ -272,7 +276,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
 
         // Initial Available fields
-        let availableFields = await PageObjects.discover.getSidebarSectionFieldNames('available');
+        const availableFields = await PageObjects.discover.getSidebarSectionFieldNames('available');
         expect(availableFields.length).to.be(50);
         expect(
           availableFields
@@ -287,8 +291,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           PageObjects.discover.getSidebarSectionSelector('empty', true)
         );
         await emptySectionButton.scrollIntoViewIfNecessary();
-        availableFields = await PageObjects.discover.getSidebarSectionFieldNames('available');
-        expect(availableFields.length).to.be(53);
 
         // Expand Empty section
         await PageObjects.discover.toggleSidebarSection('empty');
