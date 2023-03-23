@@ -73,7 +73,7 @@ describe('HasDataContextProvider', () => {
       expect(result.current).toEqual({
         hasDataMap: {
           apm: { hasData: undefined, status: 'success' },
-          synthetics: { hasData: undefined, status: 'success' },
+          uptime: { hasData: undefined, status: 'success' },
           infra_logs: { hasData: undefined, status: 'success' },
           infra_metrics: { hasData: undefined, status: 'success' },
           ux: { hasData: undefined, status: 'success' },
@@ -128,7 +128,7 @@ describe('HasDataContextProvider', () => {
         expect(result.current).toEqual({
           hasDataMap: {
             apm: { hasData: false, status: 'success' },
-            synthetics: {
+            uptime: {
               hasData: false,
               status: 'success',
             },
@@ -190,7 +190,7 @@ describe('HasDataContextProvider', () => {
         expect(result.current).toEqual({
           hasDataMap: {
             apm: { hasData: true, status: 'success' },
-            synthetics: {
+            uptime: {
               hasData: false,
               indices: 'heartbeat-*, synthetics-*',
               status: 'success',
@@ -257,7 +257,7 @@ describe('HasDataContextProvider', () => {
               hasData: true,
               status: 'success',
             },
-            synthetics: {
+            uptime: {
               hasData: true,
               indices: 'heartbeat-*, synthetics-*',
               status: 'success',
@@ -309,7 +309,7 @@ describe('HasDataContextProvider', () => {
           expect(result.current).toEqual({
             hasDataMap: {
               apm: { hasData: true, indices: sampleAPMIndices, status: 'success' },
-              synthetics: { hasData: undefined, status: 'success' },
+              uptime: { hasData: undefined, status: 'success' },
               infra_logs: { hasData: undefined, status: 'success' },
               infra_metrics: { hasData: undefined, status: 'success' },
               ux: { hasData: undefined, status: 'success' },
@@ -358,7 +358,7 @@ describe('HasDataContextProvider', () => {
                 indices: sampleAPMIndices,
                 status: 'success',
               },
-              synthetics: { hasData: undefined, status: 'success' },
+              uptime: { hasData: undefined, status: 'success' },
               infra_logs: { hasData: undefined, status: 'success' },
               infra_metrics: { hasData: undefined, status: 'success' },
               ux: { hasData: undefined, status: 'success' },
@@ -420,7 +420,7 @@ describe('HasDataContextProvider', () => {
         expect(result.current).toEqual({
           hasDataMap: {
             apm: { hasData: undefined, status: 'failure' },
-            synthetics: {
+            uptime: {
               hasData: true,
               indices: 'heartbeat-*, synthetics-*',
               status: 'success',
@@ -498,7 +498,7 @@ describe('HasDataContextProvider', () => {
         expect(result.current).toEqual({
           hasDataMap: {
             apm: { hasData: undefined, status: 'failure' },
-            synthetics: { hasData: undefined, status: 'failure' },
+            uptime: { hasData: undefined, status: 'failure' },
             infra_logs: { hasData: undefined, status: 'failure' },
             infra_metrics: { hasData: undefined, status: 'failure' },
             ux: { hasData: undefined, status: 'failure' },
@@ -544,7 +544,7 @@ describe('HasDataContextProvider', () => {
       expect(result.current).toEqual({
         hasDataMap: {
           apm: { hasData: undefined, status: 'success' },
-          synthetics: { hasData: undefined, status: 'success' },
+          uptime: { hasData: undefined, status: 'success' },
           infra_logs: { hasData: undefined, status: 'success' },
           infra_metrics: { hasData: undefined, status: 'success' },
           ux: { hasData: undefined, status: 'success' },
