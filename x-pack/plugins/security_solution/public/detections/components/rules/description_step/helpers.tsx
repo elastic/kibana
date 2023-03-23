@@ -100,7 +100,7 @@ export const buildQueryBarDescription = ({
         description: (
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
             {filterManager.getFilters().map((filter, index) => (
-              <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
+              <EuiFlexItem grow={false} key={`${field}-filter-${index}`} css={{ width: '100%' }}>
                 <EuiBadgeWrap color="hollow">
                   {indexPatterns != null ? (
                     <FilterBadgeGroup filters={[filter]} dataViews={[indexPatterns]} />
