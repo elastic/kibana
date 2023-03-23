@@ -61,7 +61,7 @@
         "label": "AlertSummary",
         "description": [],
         "signature": [
-          "({ alert, alertSummaryFields }: ",
+          "({ alertSummaryFields }: ",
           "AlertSummaryProps",
           ") => JSX.Element"
         ],
@@ -74,7 +74,7 @@
             "id": "def-public.AlertSummary.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ alert, alertSummaryFields }",
+            "label": "{ alertSummaryFields }",
             "description": [],
             "signature": [
               "AlertSummaryProps"
@@ -2171,7 +2171,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "string | number"
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "x-pack/plugins/observability/public/pages/alert_details/components/alert_summary.tsx",
             "deprecated": false,
@@ -6203,37 +6203,6 @@
           "\"observability:apmServiceGroupMaxNumberOfServices\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.DragHandleProps",
-        "type": "Type",
-        "tags": [],
-        "label": "DragHandleProps",
-        "description": [],
-        "signature": [
-          "DraggableProvidedDragHandleProps",
-          " | undefined"
-        ],
-        "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.DropResult",
-        "type": "Type",
-        "tags": [],
-        "label": "DropResult",
-        "description": [],
-        "signature": [
-          "DropResult"
-        ],
-        "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

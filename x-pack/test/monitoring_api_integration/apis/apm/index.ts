@@ -8,10 +8,8 @@
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  // Failing ES Promotion: https://github.com/elastic/kibana/issues/153123
-  describe.skip('APM', () => {
+  describe('APM', () => {
     loadTestFile(require.resolve('./overview'));
     loadTestFile(require.resolve('./instances'));
-    loadTestFile(require.resolve('./instance'));
   });
 }

@@ -83,8 +83,8 @@ export const explainLogRateSpikesTestData: TestData[] = [
       grouping: true,
     },
     expected: {
-      chunksLength: 25,
-      actionsLength: 24,
+      chunksLength: 27,
+      actionsLength: 26,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
       significantTermFilter: 'add_significant_terms',

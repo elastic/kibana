@@ -11,7 +11,9 @@
         "none",
         "all"
       ],
-      "include_unmapped": "__flag__"
+      "include_unmapped": "__flag__",
+      "filters": [],
+      "types": []
     },
     "methods": [
       "GET",
