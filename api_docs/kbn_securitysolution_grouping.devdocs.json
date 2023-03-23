@@ -27,7 +27,7 @@
         "label": "getGroupingQuery",
         "description": [],
         "signature": [
-          "({ additionalFilters, from, groupByFields, metricsAggregations, pageNumber, rootAggregations, runtimeMappings, size, sort, to, }: ",
+          "({ additionalFilters, from, groupByFields, statsAggregations, pageNumber, rootAggregations, runtimeMappings, size, sort, to, }: ",
           "GroupingQueryArgs",
           ") => ",
           "GroupingQuery"
@@ -41,7 +41,7 @@
             "id": "def-common.getGroupingQuery.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  additionalFilters = [],\n  from,\n  groupByFields,\n  metricsAggregations,\n  pageNumber,\n  rootAggregations,\n  runtimeMappings,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  sort,\n  to,\n}",
+            "label": "{\n  additionalFilters = [],\n  from,\n  groupByFields,\n  statsAggregations,\n  pageNumber,\n  rootAggregations,\n  runtimeMappings,\n  size = DEFAULT_GROUP_BY_FIELD_SIZE,\n  sort,\n  to,\n}",
             "description": [],
             "signature": [
               "GroupingQueryArgs"
@@ -133,7 +133,7 @@
         "label": "useGrouping",
         "description": [],
         "signature": [
-          "<T>({ defaultGroupingOptions, fields, groupingId, onGroupChangeCallback, tracker, }: GroupingArgs) => Grouping<T>"
+          "<T>({ defaultGroupingOptions, fields, groupingId, onGroupChange, tracker, }: GroupingArgs) => Grouping<T>"
         ],
         "path": "packages/kbn-securitysolution-grouping/src/hooks/use_grouping.tsx",
         "deprecated": false,
@@ -144,7 +144,7 @@
             "id": "def-common.useGrouping.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  defaultGroupingOptions,\n  fields,\n  groupingId,\n  onGroupChangeCallback,\n  tracker,\n}",
+            "label": "{\n  defaultGroupingOptions,\n  fields,\n  groupingId,\n  onGroupChange,\n  tracker,\n}",
             "description": [],
             "signature": [
               "GroupingArgs"

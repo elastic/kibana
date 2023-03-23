@@ -29,34 +29,34 @@ const DEFAULT_VALUES = {
   isFirstRequest: true,
   isLoading: true,
   meta: DEFAULT_META,
-  parameters: { meta: DEFAULT_META },
+  parameters: { meta: DEFAULT_META, count: 0 },
   results: [],
   searchQuery: '',
   status: Status.IDLE,
 };
-
 // may need to call mock engines response when ready
-
 const results: EnterpriseSearchEngine[] = [
   {
-    created: '1999-12-31T23:59:59Z',
     indices: ['index-18', 'index-23'],
     name: 'engine-name-1',
-    updated: '1999-12-31T23:59:59Z',
+    updated_at_millis: 1679337823167,
   },
   {
-    created: '1999-12-31T23:59:59Z',
     indices: ['index-180', 'index-230', 'index-8', 'index-2'],
     name: 'engine-name-2',
-    updated: '1999-12-31T23:59:59Z',
+    updated_at_millis: 1679337823167,
   },
   {
-    created: '1999-12-31T23:59:59Z',
     indices: ['index-2', 'index-3'],
     name: 'engine-name-3',
-    updated: '1999-12-31T23:59:59Z',
+    updated_at_millis: 1679337823167,
   },
 ];
+const mockData = {
+  count: 3,
+  params: { from: DEFAULT_META.from, size: DEFAULT_META.size },
+  results,
+};
 
 describe('EnginesListLogic', () => {
   const { mount: apiLogicMount } = new LogicMounter(FetchEnginesAPILogic);
@@ -72,44 +72,72 @@ describe('EnginesListLogic', () => {
     expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
   });
   describe('actions', () => {
-    describe('onPaginate', () => {
-      it('updates meta with newPageIndex', () => {
-        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+    describe('onPaginate - change page', () => {
+      beforeEach(() => {
+        EnginesListLogic.actions.apiSuccess({
+          ...mockData,
+          count: 11, // update count to simulate next page
+        });
+      });
 
-        EnginesListLogic.actions.onPaginate({ page: { index: 1 } });
+      it('has engine data', () => {
+        expect(EnginesListLogic.values.data).toEqual({ ...mockData, count: 11 });
+      });
+      it('updates meta with newPageIndex', () => {
+        jest.spyOn(EnginesListLogic.actions, 'fetchEngines');
+        jest.spyOn(EnginesListLogic.actions, 'onPaginate');
+
         expect(EnginesListLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          meta: {
-            ...DEFAULT_META,
-            from: 10,
-          },
-          parameters: {
-            meta: {
-              ...DEFAULT_META,
-              from: 10,
-            },
-          },
+          data: { ...mockData, count: 11 },
+          results: mockData.results,
+          isFirstRequest: false,
+          isLoading: false,
+          meta: { ...DEFAULT_META, total: 11 },
+          status: Status.SUCCESS,
+          parameters: { count: 11, meta: { ...DEFAULT_META, total: 11 } },
         });
 
+        // move to next page
+        EnginesListLogic.actions.onPaginate({ page: { index: 1 } });
+
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          data: { ...mockData, count: 11 },
+          results: mockData.results,
+          isFirstRequest: false,
+          isLoading: false,
+          meta: { ...DEFAULT_META, from: 10, total: 11 },
+          status: Status.SUCCESS,
+          parameters: { count: 11, meta: { ...DEFAULT_META, from: 10, total: 11 } },
+        });
+        // move back to previous page
         EnginesListLogic.actions.onPaginate({ page: { index: 0 } });
-        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
+        expect(EnginesListLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          data: { ...mockData, count: 11 },
+          results: mockData.results,
+          isFirstRequest: false,
+          isLoading: false,
+          meta: { ...DEFAULT_META, total: 11 },
+          status: Status.SUCCESS,
+          parameters: { count: 11, meta: { ...DEFAULT_META, total: 11 } },
+        });
 
         EnginesListLogic.actions.onPaginate({ page: { index: 3 } });
         expect(EnginesListLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          meta: {
-            ...DEFAULT_META,
-            from: 30,
-          },
-          parameters: {
-            meta: {
-              ...DEFAULT_META,
-              from: 30,
-            },
-          },
+          data: { ...mockData, count: 11 },
+          results: mockData.results,
+          isFirstRequest: false,
+          isLoading: false,
+          meta: { ...DEFAULT_META, total: 11, from: 30 },
+          status: Status.SUCCESS,
+          parameters: { count: 11, meta: { ...DEFAULT_META, total: 11, from: 30 } },
         });
       });
     });
+
     describe('closeDeleteEngineModal', () => {
       it('set isDeleteModalVisible to false and engineName to empty string', () => {
         EnginesListLogic.actions.openDeleteEngineModal(results[0]);
@@ -152,6 +180,7 @@ describe('EnginesListLogic', () => {
         expect(EnginesListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           parameters: {
+            count: 0,
             meta: {
               ...DEFAULT_META,
             },
@@ -165,31 +194,49 @@ describe('EnginesListLogic', () => {
 
   describe('reducers', () => {
     describe('meta', () => {
-      it('updates when apiSuccess', () => {
+      beforeEach(() => {
+        FetchEnginesAPILogic.actions.apiSuccess({ ...mockData, params: { from: 10, size: 20 } });
+      });
+      it('has engine data', () => {
+        expect(EnginesListLogic.values.data).toEqual({
+          ...mockData,
+          params: { from: 10, size: 20 },
+        });
+      });
+      it('updates meta with new state when apiSuccess', () => {
+        jest.spyOn(EnginesListLogic.actions, 'fetchEngines');
+        const newCount = 20;
         const newPageMeta = {
           from: 10,
           size: 20,
-          total: 20,
+          total: newCount,
         };
-        expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
-        EnginesListLogic.actions.apiSuccess({
-          meta: newPageMeta,
-          results,
+        FetchEnginesAPILogic.actions.apiSuccess({
+          ...mockData,
+          count: newCount,
           params: { from: newPageMeta.from, size: newPageMeta.size },
         });
+
         expect(EnginesListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: {
-            meta: newPageMeta,
-            results,
+            ...mockData,
+            count: newCount,
             params: { from: newPageMeta.from, size: newPageMeta.size },
           },
           hasNoEngines: false,
           isFirstRequest: false,
           isLoading: false,
-          meta: newPageMeta,
+          meta: {
+            ...DEFAULT_META,
+            total: newCount,
+          },
           parameters: {
-            meta: newPageMeta,
+            meta: {
+              ...DEFAULT_META,
+              total: newCount,
+            },
+            count: newPageMeta.total,
           },
           results,
           status: Status.SUCCESS,
@@ -247,7 +294,7 @@ describe('EnginesListLogic', () => {
     it('should update to false on apiSuccess', () => {
       EnginesListLogic.actions.setIsFirstRequest();
       EnginesListLogic.actions.apiSuccess({
-        meta: DEFAULT_VALUES.meta,
+        count: 0,
         results: [],
         params: {
           q: undefined,
@@ -261,8 +308,9 @@ describe('EnginesListLogic', () => {
 
         meta: DEFAULT_VALUES.meta,
         data: {
+          ...mockData,
+          count: 0,
           results: [],
-          meta: DEFAULT_VALUES.meta,
           params: {
             q: undefined,
             from: DEFAULT_VALUES.meta.from,
@@ -293,6 +341,7 @@ describe('EnginesListLogic', () => {
       await nextTick();
       expect(EnginesListLogic.actions.makeRequest).toHaveBeenCalledWith({
         meta: DEFAULT_META,
+        count: 0,
       });
     });
   });
@@ -302,8 +351,8 @@ describe('EnginesListLogic', () => {
       it('updates when apiSuccess with no search query', () => {
         expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
         EnginesListLogic.actions.apiSuccess({
+          count: 0,
           results,
-          meta: DEFAULT_META,
           params: {
             q: undefined,
             from: DEFAULT_META.from,
@@ -313,8 +362,8 @@ describe('EnginesListLogic', () => {
         expect(EnginesListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: {
+            count: 0,
             results,
-            meta: DEFAULT_META,
             params: {
               q: undefined,
               from: DEFAULT_META.from,
@@ -326,6 +375,7 @@ describe('EnginesListLogic', () => {
           meta: DEFAULT_META,
           parameters: {
             meta: DEFAULT_META,
+            count: 0,
           },
           results,
           status: Status.SUCCESS,
@@ -336,18 +386,18 @@ describe('EnginesListLogic', () => {
         expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
         EnginesListLogic.actions.apiSuccess({
           results,
-          meta: DEFAULT_META,
           params: {
             q: 'engine',
             from: DEFAULT_META.from,
             size: DEFAULT_META.size,
           },
+          count: 0,
         });
         expect(EnginesListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: {
+            count: 0,
             results,
-            meta: DEFAULT_META,
             params: {
               q: 'engine',
               from: DEFAULT_META.from,
@@ -358,6 +408,7 @@ describe('EnginesListLogic', () => {
           isLoading: false,
           meta: DEFAULT_META,
           parameters: {
+            count: 0,
             meta: DEFAULT_META,
           },
           results,
@@ -369,18 +420,18 @@ describe('EnginesListLogic', () => {
         expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
         EnginesListLogic.actions.apiSuccess({
           results: [],
-          meta: DEFAULT_META,
           params: {
             q: 'zzz',
             from: DEFAULT_META.from,
             size: DEFAULT_META.size,
           },
+          count: 0,
         });
         expect(EnginesListLogic.values).toEqual({
           ...DEFAULT_VALUES,
           data: {
+            count: 0,
             results: [],
-            meta: DEFAULT_META,
             params: {
               q: 'zzz',
               from: DEFAULT_META.from,
@@ -391,6 +442,7 @@ describe('EnginesListLogic', () => {
           isLoading: false,
           meta: DEFAULT_META,
           parameters: {
+            count: 0,
             meta: DEFAULT_META,
           },
           results: [],
@@ -405,26 +457,24 @@ describe('EnginesListLogic', () => {
           expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
           EnginesListLogic.actions.apiSuccess({
             results: [],
-            meta: DEFAULT_META,
             params: {
               from: DEFAULT_META.from,
               size: DEFAULT_META.size,
             },
+            count: 0,
           });
           expect(EnginesListLogic.values).toEqual({
             ...DEFAULT_VALUES,
             data: {
+              ...mockData,
+              count: 0,
               results: [],
-              meta: DEFAULT_META,
-              params: {
-                from: DEFAULT_META.from,
-                size: DEFAULT_META.size,
-              },
             },
             isFirstRequest: false,
             isLoading: false,
             meta: DEFAULT_META,
             parameters: {
+              count: 0,
               meta: DEFAULT_META,
             },
             hasNoEngines: true,
@@ -436,27 +486,25 @@ describe('EnginesListLogic', () => {
         it('updates to true when isFirstRequest is true  ', () => {
           EnginesListLogic.actions.apiSuccess({
             results: [],
-            meta: DEFAULT_META,
             params: {
               from: DEFAULT_META.from,
               size: DEFAULT_META.size,
             },
+            count: 0,
           });
           EnginesListLogic.actions.setIsFirstRequest();
           expect(EnginesListLogic.values).toEqual({
             ...DEFAULT_VALUES,
             data: {
+              ...mockData,
+              count: 0,
               results: [],
-              meta: DEFAULT_META,
-              params: {
-                from: DEFAULT_META.from,
-                size: DEFAULT_META.size,
-              },
             },
             isFirstRequest: true,
             isLoading: false,
             meta: DEFAULT_META,
             parameters: {
+              count: 0,
               meta: DEFAULT_META,
             },
             hasNoEngines: true,
@@ -470,7 +518,7 @@ describe('EnginesListLogic', () => {
           expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
           EnginesListLogic.actions.apiSuccess({
             results: [],
-            meta: DEFAULT_META,
+            count: 0,
             params: {
               q: 'zzz',
               from: DEFAULT_META.from,
@@ -480,8 +528,8 @@ describe('EnginesListLogic', () => {
           expect(EnginesListLogic.values).toEqual({
             ...DEFAULT_VALUES,
             data: {
+              count: 0,
               results: [],
-              meta: DEFAULT_META,
               params: {
                 q: 'zzz',
                 from: DEFAULT_META.from,
@@ -492,6 +540,7 @@ describe('EnginesListLogic', () => {
             isLoading: false,
             meta: DEFAULT_META,
             parameters: {
+              count: 0,
               meta: DEFAULT_META,
             },
             results: [],
@@ -505,28 +554,24 @@ describe('EnginesListLogic', () => {
           expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
           EnginesListLogic.actions.apiSuccess({
             results,
-            meta: DEFAULT_META,
             params: {
               q: undefined,
               from: DEFAULT_META.from,
               size: DEFAULT_META.size,
             },
+            count: 0,
           });
           expect(EnginesListLogic.values).toEqual({
             ...DEFAULT_VALUES,
             data: {
-              results,
-              meta: DEFAULT_META,
-              params: {
-                q: undefined,
-                from: DEFAULT_META.from,
-                size: DEFAULT_META.size,
-              },
+              ...mockData,
+              count: 0,
             },
             isFirstRequest: false,
             isLoading: false,
             meta: DEFAULT_META,
             parameters: {
+              count: 0,
               meta: DEFAULT_META,
             },
             hasNoEngines: false,
@@ -539,18 +584,18 @@ describe('EnginesListLogic', () => {
           expect(EnginesListLogic.values).toEqual(DEFAULT_VALUES);
           EnginesListLogic.actions.apiSuccess({
             results,
-            meta: DEFAULT_META,
             params: {
               q: 'en',
               from: DEFAULT_META.from,
               size: DEFAULT_META.size,
             },
+            count: 0,
           });
           expect(EnginesListLogic.values).toEqual({
             ...DEFAULT_VALUES,
             data: {
               results,
-              meta: DEFAULT_META,
+              count: 0,
               params: {
                 q: 'en',
                 from: DEFAULT_META.from,
@@ -561,6 +606,7 @@ describe('EnginesListLogic', () => {
             isLoading: false,
             meta: DEFAULT_META,
             parameters: {
+              count: 0,
               meta: DEFAULT_META,
             },
             hasNoEngines: false,

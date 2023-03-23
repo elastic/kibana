@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
@@ -33,9 +34,8 @@ export interface HostNodeRow extends HostMetrics {
   servicesOnHost?: number | null;
   title: { name: string; cloudProvider?: CloudProvider | null };
   name: string;
+  uuid: string;
 }
-
-// type MappedMetrics = Record<keyof HostNodeRow, SnapshotNodeMetric>;
 
 interface HostTableParams {
   time: TimeRange;
@@ -50,6 +50,7 @@ const formatMetric = (type: SnapshotMetricInput['type'], value: number | undefin
 
 const buildItemsList = (nodes: SnapshotNode[]) => {
   return nodes.map(({ metrics, path, name }) => ({
+    uuid: uuidv4(),
     name,
     os: path.at(-1)?.os ?? '-',
     title: {
@@ -107,6 +108,13 @@ const averageMemoryUsageLabel = i18n.translate(
   }
 );
 
+const toggleDialogActionLabel = i18n.translate(
+  'xpack.infra.hostsViewPage.table.toggleDialogWithDetails',
+  {
+    defaultMessage: 'Toggle dialog with details',
+  }
+);
+
 /**
  * Build a table columns and items starting from the snapshot nodes.
  */
@@ -114,6 +122,11 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
+
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [clickedItemUuid, setClickedItemUuid] = useState(() => uuidv4());
+
+  const closeFlyout = () => setIsFlyoutOpen(false);
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
@@ -129,6 +142,27 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [
+      {
+        name: '',
+        width: '40px',
+        field: 'uuid',
+        actions: [
+          {
+            name: toggleDialogActionLabel,
+            description: toggleDialogActionLabel,
+            icon: ({ uuid }) => (isFlyoutOpen && uuid === clickedItemUuid ? 'minimize' : 'expand'),
+            type: 'icon',
+            onClick: ({ uuid }) => {
+              setClickedItemUuid(uuid);
+              if (isFlyoutOpen && uuid === clickedItemUuid) {
+                setIsFlyoutOpen(false);
+              } else {
+                setIsFlyoutOpen(true);
+              }
+            },
+          },
+        ],
+      },
       {
         name: titleLabel,
         field: 'title',
@@ -191,8 +225,8 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         align: 'right',
       },
     ],
-    [reportHostEntryClick, time]
+    [clickedItemUuid, isFlyoutOpen, reportHostEntryClick, time]
   );
 
-  return { columns, items };
+  return { columns, items, isFlyoutOpen, closeFlyout, clickedItemUuid };
 };
