@@ -15,15 +15,15 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
   return {
     options: {
       overflowSettings: {
-        maxGroups: 800,
+        maxGroups: 10000,
         transactions: {
           maxServices: 3,
-          maxTransactionGroupsPerService: 3,
+          maxTransactionGroupsPerService: 4,
         },
       },
     },
     generate: ({ range }) => {
-      const TRANSACTION_TYPES = ['request', 'test'];
+      const TRANSACTION_TYPES = ['request'];
       const ENVIRONMENTS = ['production'];
 
       const MIN_DURATION = 10;
