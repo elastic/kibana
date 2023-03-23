@@ -85,7 +85,7 @@ export const APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES = [
 
 export const APP_INDEX_PRIVILEGES = ['monitor'];
 
-// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L214
 export const TRANSFORM_STATE = {
   ABORTING: 'aborting',
   FAILED: 'failed',
