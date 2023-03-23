@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -17,7 +18,7 @@ import {
   DropIdentifier,
 } from './providers';
 import { act } from 'react-dom/test-utils';
-import { DropType } from '../types';
+import { DropType } from './types';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 
@@ -28,6 +29,7 @@ const dataTransfer = {
 
 describe('DragDrop', () => {
   const defaultContext = {
+    dataTestSubjPrefix: 'testDragDrop',
     dragging: undefined,
     setDragging: jest.fn(),
     setActiveDropTarget: jest.fn(),
@@ -69,7 +71,7 @@ describe('DragDrop', () => {
       </DragDrop>
     );
 
-    component.find('[data-test-subj="lnsDragDrop"]').at(0).simulate('dragover', { preventDefault });
+    component.find('[data-test-subj="domDragDrop"]').at(0).simulate('dragover', { preventDefault });
 
     expect(preventDefault).toBeCalled();
   });
@@ -82,7 +84,7 @@ describe('DragDrop', () => {
       </DragDrop>
     );
 
-    component.find('[data-test-subj="lnsDragDrop"]').at(0).simulate('dragover', { preventDefault });
+    component.find('[data-test-subj="domDragDrop"]').at(0).simulate('dragover', { preventDefault });
 
     expect(preventDefault).not.toBeCalled();
   });
@@ -96,7 +98,7 @@ describe('DragDrop', () => {
       </DragDrop>
     );
 
-    component.find('[data-test-subj="lnsDragDrop"]').at(0).simulate('mousedown');
+    component.find('[data-test-subj="domDragDrop"]').at(0).simulate('mousedown');
     expect(global.getSelection).toBeCalled();
     expect(removeAllRanges).toBeCalled();
   });
@@ -118,7 +120,7 @@ describe('DragDrop', () => {
       </ChildDragDropProvider>
     );
 
-    component.find('[data-test-subj="lnsDragDrop"]').at(0).simulate('dragstart', { dataTransfer });
+    component.find('[data-test-subj="testDragDrop"]').at(0).simulate('dragstart', { dataTransfer });
 
     act(() => {
       jest.runAllTimers();
@@ -147,7 +149,7 @@ describe('DragDrop', () => {
       </ChildDragDropProvider>
     );
 
-    const dragDrop = component.find('[data-test-subj="lnsDragDrop"]').at(0);
+    const dragDrop = component.find('[data-test-subj="testDragDrop"]').at(0);
     dragDrop.simulate('dragOver');
     dragDrop.simulate('drop', { preventDefault, stopPropagation });
 
@@ -175,7 +177,7 @@ describe('DragDrop', () => {
       </ChildDragDropProvider>
     );
 
-    const dragDrop = component.find('[data-test-subj="lnsDragDrop"]').at(0);
+    const dragDrop = component.find('[data-test-subj="testDragDrop"]').at(0);
     dragDrop.simulate('dragover');
     dragDrop.simulate('drop', { preventDefault, stopPropagation });
 
@@ -219,7 +221,7 @@ describe('DragDrop', () => {
       </ChildDragDropProvider>
     );
 
-    expect(component.find('[data-test-subj="lnsDragDrop"]').at(1)).toMatchSnapshot();
+    expect(component.find('[data-test-subj="testDragDrop"]').at(1)).toMatchSnapshot();
   });
 
   test('additional styles are reflected in the className until drop', () => {
@@ -258,7 +260,7 @@ describe('DragDrop', () => {
     );
 
     component
-      .find('[data-test-subj="lnsDragDrop"]')
+      .find('[data-test-subj="testDragDrop"]')
       .first()
       .simulate('dragstart', { dataTransfer });
     act(() => {
@@ -266,7 +268,7 @@ describe('DragDrop', () => {
     });
     expect(setA11yMessage).toBeCalledWith('Lifted ignored');
 
-    const dragDrop = component.find('[data-test-subj="lnsDragDrop"]').at(1);
+    const dragDrop = component.find('[data-test-subj="testDragDrop"]').at(1);
     dragDrop.simulate('dragOver');
     dragDrop.simulate('drop');
     expect(component.find('.additional')).toHaveLength(0);
@@ -280,6 +282,7 @@ describe('DragDrop', () => {
 
     const component = mount(
       <ChildDragDropProvider
+        dataTestSubjPrefix={defaultContext.dataTestSubjPrefix}
         setA11yMessage={jest.fn()}
         dragging={dragging}
         setDragging={() => {
@@ -313,16 +316,16 @@ describe('DragDrop', () => {
     );
 
     component
-      .find('[data-test-subj="lnsDragDrop"]')
+      .find('[data-test-subj="testDragDrop"]')
       .first()
       .simulate('dragstart', { dataTransfer });
     act(() => {
       jest.runAllTimers();
     });
 
-    component.find('[data-test-subj="lnsDragDrop"]').at(1).simulate('dragover');
+    component.find('[data-test-subj="testDragDrop"]').at(1).simulate('dragover');
     expect(component.find('.additional')).toHaveLength(2);
-    component.find('[data-test-subj="lnsDragDrop"]').at(1).simulate('dragleave');
+    component.find('[data-test-subj="testDragDrop"]').at(1).simulate('dragleave');
     expect(setActiveDropTarget).toBeCalledWith(undefined);
   });
 
@@ -411,7 +414,7 @@ describe('DragDrop', () => {
         </ChildDragDropProvider>
       );
       const keyboardHandler = component
-        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .find('[data-test-subj="testDragDrop-keyboardHandler"]')
         .at(1)
         .simulate('focus');
 
@@ -451,7 +454,7 @@ describe('DragDrop', () => {
       );
 
       const keyboardHandler = component
-        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .find('[data-test-subj="testDragDrop-keyboardHandler"]')
         .at(1)
         .simulate('focus');
 
@@ -523,7 +526,7 @@ describe('DragDrop', () => {
         </ChildDragDropProvider>
       );
 
-      expect(component.find(DragDrop).at(1).find('.lnsDragDrop_ghost').text()).toEqual('Hello');
+      expect(component.find(DragDrop).at(1).find('.domDragDrop_ghost').text()).toEqual('Hello');
     });
   });
 
@@ -540,6 +543,7 @@ describe('DragDrop', () => {
       });
       component = mount(
         <ChildDragDropProvider
+          dataTestSubjPrefix={defaultContext.dataTestSubjPrefix}
           setA11yMessage={jest.fn()}
           dragging={{ id: '1', humanData: { label: 'Label1', layerNumber: 0 } }}
           setDragging={jest.fn()}
@@ -574,18 +578,18 @@ describe('DragDrop', () => {
     });
 
     test('extra drop targets appear when dragging over and disappear when activeDropTarget changes', () => {
-      component.find('[data-test-subj="lnsDragDropContainer"]').first().simulate('dragenter');
+      component.find('[data-test-subj="testDragDropContainer"]').first().simulate('dragenter');
 
       // customDropTargets are visible
-      expect(component.find('[data-test-subj="lnsDragDropContainer"]').prop('className')).toEqual(
-        'lnsDragDrop__container lnsDragDrop__container-active'
+      expect(component.find('[data-test-subj="testDragDropContainer"]').prop('className')).toEqual(
+        'domDragDrop__container domDragDrop__container-active'
       );
       expect(
-        component.find('[data-test-subj="lnsDragDropExtraDrops"]').first().prop('className')
-      ).toEqual('lnsDragDrop__extraDrops lnsDragDrop__extraDrops-visible');
+        component.find('[data-test-subj="testDragDropExtraDrops"]').first().prop('className')
+      ).toEqual('domDragDrop__extraDrops domDragDrop__extraDrops-visible');
 
       // set activeDropTarget as undefined
-      component.find('[data-test-subj="lnsDragDrop"]').at(1).simulate('dragleave');
+      component.find('[data-test-subj="testDragDrop"]').at(1).simulate('dragleave');
       act(() => {
         jest.runAllTimers();
       });
@@ -593,13 +597,13 @@ describe('DragDrop', () => {
 
       // customDropTargets are invisible
       expect(
-        component.find('[data-test-subj="lnsDragDropExtraDrops"]').first().prop('className')
-      ).toEqual('lnsDragDrop__extraDrops');
+        component.find('[data-test-subj="testDragDropExtraDrops"]').first().prop('className')
+      ).toEqual('domDragDrop__extraDrops');
     });
 
     test('dragging over different drop types of the same value assigns correct activeDropTarget', () => {
       component
-        .find('[data-test-subj="lnsDragDrop"]')
+        .find('[data-test-subj="testDragDrop"]')
         .first()
         .simulate('dragstart', { dataTransfer });
 
@@ -631,7 +635,7 @@ describe('DragDrop', () => {
 
     test('drop on extra drop target passes correct dropType to onDrop', () => {
       component
-        .find('[data-test-subj="lnsDragDrop"]')
+        .find('[data-test-subj="testDragDrop"]')
         .first()
         .simulate('dragstart', { dataTransfer });
 
@@ -659,7 +663,7 @@ describe('DragDrop', () => {
 
     test('pressing Alt or Shift when dragging over the main drop target sets extra drop target as active', () => {
       component
-        .find('[data-test-subj="lnsDragDrop"]')
+        .find('[data-test-subj="testDragDrop"]')
         .first()
         .simulate('dragstart', { dataTransfer });
 
@@ -689,7 +693,7 @@ describe('DragDrop', () => {
 
     test('pressing Alt or Shift when dragging over the extra drop target does nothing', () => {
       component
-        .find('[data-test-subj="lnsDragDrop"]')
+        .find('[data-test-subj="testDragDrop"]')
         .first()
         .simulate('dragstart', { dataTransfer });
 
@@ -805,7 +809,7 @@ describe('DragDrop', () => {
             ))}
           </ChildDragDropProvider>
         );
-        component.find('[data-test-subj="lnsDragDrop-keyboardHandler"]').at(1).simulate('focus');
+        component.find('[data-test-subj="testDragDrop-keyboardHandler"]').at(1).simulate('focus');
         act(() => {
           jest.runAllTimers();
         });
@@ -837,7 +841,7 @@ describe('DragDrop', () => {
         );
         act(() => {
           component
-            .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+            .find('[data-test-subj="testDragDrop-keyboardHandler"]')
             .at(1)
             .simulate('keydown', { key: 'ArrowRight', altKey: true });
         });
@@ -848,7 +852,7 @@ describe('DragDrop', () => {
         });
         act(() => {
           component
-            .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+            .find('[data-test-subj="testDragDrop-keyboardHandler"]')
             .at(1)
             .simulate('keydown', { key: 'ArrowRight', shiftKey: true });
         });
@@ -883,7 +887,7 @@ describe('DragDrop', () => {
         );
         act(() => {
           component
-            .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+            .find('[data-test-subj="testDragDrop-keyboardHandler"]')
             .at(1)
             .simulate('keydown', { key: 'Alt' });
         });
@@ -894,7 +898,7 @@ describe('DragDrop', () => {
         });
         act(() => {
           component
-            .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+            .find('[data-test-subj="testDragDrop-keyboardHandler"]')
             .at(1)
             .simulate('keyup', { key: 'Alt' });
         });
@@ -929,7 +933,7 @@ describe('DragDrop', () => {
         );
         act(() => {
           component
-            .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+            .find('[data-test-subj="testDragDrop-keyboardHandler"]')
             .at(1)
             .simulate('keydown', { key: 'Shift' });
         });
@@ -941,7 +945,7 @@ describe('DragDrop', () => {
         });
         act(() => {
           component
-            .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+            .find('[data-test-subj="testDragDrop-keyboardHandler"]')
             .at(1)
             .simulate('keyup', { key: 'Shift' });
         });
@@ -985,6 +989,7 @@ describe('DragDrop', () => {
       const setA11yMessage = jest.fn();
       const registerDropTarget = jest.fn();
       const baseContext = {
+        dataTestSubjPrefix: defaultContext.dataTestSubjPrefix,
         dragging,
         setDragging: (val?: DraggingIdentifier) => {
           dragging = val;
@@ -1011,7 +1016,7 @@ describe('DragDrop', () => {
 
       return mount(
         <ChildDragDropProvider {...baseContext} {...dragContext}>
-          <ReorderProvider id="groupId">
+          <ReorderProvider id="groupId" dataTestSubj="testDragDrop">
             <DragDrop
               {...dragDropSharedProps}
               value={items[0]}
@@ -1045,7 +1050,7 @@ describe('DragDrop', () => {
       act(() => {
         jest.runAllTimers();
       });
-      expect(component.find('[data-test-subj="lnsDragDrop"]')).toHaveLength(5);
+      expect(component.find('[data-test-subj="testDragDrop"]')).toHaveLength(5);
     });
 
     test(`Reorderable group with lifted element renders properly`, () => {
@@ -1061,7 +1066,7 @@ describe('DragDrop', () => {
         jest.runAllTimers();
       });
       component
-        .find('[data-test-subj="lnsDragDrop"]')
+        .find('[data-test-subj="testDragDrop"]')
         .first()
         .simulate('dragstart', { dataTransfer });
 
@@ -1077,7 +1082,7 @@ describe('DragDrop', () => {
       const component = mountComponent({ dragging: { ...items[0] } });
 
       component
-        .find('[data-test-subj="lnsDragDrop"]')
+        .find('[data-test-subj="testDragDrop"]')
         .first()
         .simulate('dragstart', { dataTransfer });
 
@@ -1086,32 +1091,32 @@ describe('DragDrop', () => {
       });
 
       component
-        .find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]')
+        .find('[data-test-subj="testDragDrop-reorderableDropLayer"]')
         .at(1)
         .simulate('dragover');
       expect(
-        component.find('[data-test-subj="lnsDragDrop-reorderableDrag"]').at(0).prop('style')
+        component.find('[data-test-subj="testDragDrop-reorderableDrag"]').at(0).prop('style')
       ).toEqual(undefined);
       expect(
-        component.find('[data-test-subj="lnsDragDrop-translatableDrop"]').at(0).prop('style')
+        component.find('[data-test-subj="testDragDrop-translatableDrop"]').at(0).prop('style')
       ).toEqual({
         transform: 'translateY(-8px)',
       });
       expect(
-        component.find('[data-test-subj="lnsDragDrop-translatableDrop"]').at(1).prop('style')
+        component.find('[data-test-subj="testDragDrop-translatableDrop"]').at(1).prop('style')
       ).toEqual({
         transform: 'translateY(-8px)',
       });
 
       component
-        .find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]')
+        .find('[data-test-subj="testDragDrop-reorderableDropLayer"]')
         .at(1)
         .simulate('dragleave');
       expect(
-        component.find('[data-test-subj="lnsDragDrop-reorderableDrag"]').at(0).prop('style')
+        component.find('[data-test-subj="testDragDrop-reorderableDrag"]').at(0).prop('style')
       ).toEqual(undefined);
       expect(
-        component.find('[data-test-subj="lnsDragDrop-translatableDrop"]').at(1).prop('style')
+        component.find('[data-test-subj="testDragDrop-translatableDrop"]').at(1).prop('style')
       ).toEqual(undefined);
     });
 
@@ -1128,7 +1133,7 @@ describe('DragDrop', () => {
         setA11yMessage,
       });
 
-      const dragDrop = component.find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]').at(1);
+      const dragDrop = component.find('[data-test-subj="testDragDrop-reorderableDropLayer"]').at(1);
       dragDrop.simulate('dragOver');
       dragDrop.simulate('drop', { preventDefault, stopPropagation });
 
@@ -1160,7 +1165,7 @@ describe('DragDrop', () => {
         setA11yMessage,
       });
       const keyboardHandler = component
-        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .find('[data-test-subj="testDragDrop-keyboardHandler"]')
         .at(1);
 
       keyboardHandler.simulate('keydown', { key: 'Space' });
@@ -1188,7 +1193,7 @@ describe('DragDrop', () => {
         keyboardMode: true,
       });
       const keyboardHandler = component
-        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .find('[data-test-subj="testDragDrop-keyboardHandler"]')
         .at(1)
         .simulate('focus');
 
@@ -1208,7 +1213,7 @@ describe('DragDrop', () => {
         onDropHandler
       );
       const keyboardHandler = component
-        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .find('[data-test-subj="testDragDrop-keyboardHandler"]')
         .at(1);
       keyboardHandler.simulate('keydown', { key: 'Space' });
       keyboardHandler.simulate('keydown', { key: 'Escape' });
@@ -1245,37 +1250,37 @@ describe('DragDrop', () => {
       });
 
       const keyboardHandler = component
-        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .find('[data-test-subj="testDragDrop-keyboardHandler"]')
         .at(1);
       keyboardHandler.simulate('keydown', { key: 'Space' });
       keyboardHandler.simulate('keydown', { key: 'ArrowDown' });
 
       expect(
-        component.find('[data-test-subj="lnsDragDrop-reorderableDrag"]').at(0).prop('style')
+        component.find('[data-test-subj="testDragDrop-reorderableDrag"]').at(0).prop('style')
       ).toEqual({
         transform: 'translateY(+8px)',
       });
       expect(
-        component.find('[data-test-subj="lnsDragDrop-translatableDrop"]').at(0).prop('style')
+        component.find('[data-test-subj="testDragDrop-translatableDrop"]').at(0).prop('style')
       ).toEqual({
         transform: 'translateY(-40px)',
       });
       expect(
-        component.find('[data-test-subj="lnsDragDrop-translatableDrop"]').at(1).prop('style')
+        component.find('[data-test-subj="testDragDrop-translatableDrop"]').at(1).prop('style')
       ).toEqual(undefined);
       expect(setA11yMessage).toBeCalledWith(
         'Reorder Label1 in X group from position 1 to position 2. Press space or enter to reorder'
       );
 
       component
-        .find('[data-test-subj="lnsDragDrop-reorderableDropLayer"]')
+        .find('[data-test-subj="testDragDrop-reorderableDropLayer"]')
         .at(1)
         .simulate('dragleave');
       expect(
-        component.find('[data-test-subj="lnsDragDrop-reorderableDrag"]').at(0).prop('style')
+        component.find('[data-test-subj="testDragDrop-reorderableDrag"]').at(0).prop('style')
       ).toEqual(undefined);
       expect(
-        component.find('[data-test-subj="lnsDragDrop-translatableDrop"]').at(1).prop('style')
+        component.find('[data-test-subj="testDragDrop-translatableDrop"]').at(1).prop('style')
       ).toEqual(undefined);
     });
 
@@ -1299,7 +1304,7 @@ describe('DragDrop', () => {
           setActiveDropTarget={setActiveDropTarget}
           setA11yMessage={setA11yMessage}
         >
-          <ReorderProvider id="groupId">
+          <ReorderProvider id="groupId" dataTestSubj="testDragDrop">
             <DragDrop
               draggable
               dragType="move"
@@ -1323,7 +1328,7 @@ describe('DragDrop', () => {
         </ChildDragDropProvider>
       );
       const keyboardHandler = component
-        .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
+        .find('[data-test-subj="testDragDrop-keyboardHandler"]')
         .at(1);
 
       keyboardHandler.simulate('keydown', { key: 'Space' });

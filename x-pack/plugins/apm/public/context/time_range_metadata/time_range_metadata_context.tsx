@@ -9,6 +9,7 @@ import {
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
 } from '@kbn/observability-plugin/common';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { useApmParams } from '../../hooks/use_apm_params';
 import { useApmRoutePath } from '../../hooks/use_apm_route_path';
@@ -20,10 +21,10 @@ export const TimeRangeMetadataContext = createContext<
   FetcherResult<TimeRangeMetadata> | undefined
 >(undefined);
 
-export function TimeRangeMetadataContextProvider({
+export function ApmTimeRangeMetadataContextProvider({
   children,
 }: {
-  children: React.ReactElement;
+  children?: React.ReactNode;
 }) {
   const {
     core: { uiSettings },
@@ -46,6 +47,38 @@ export function TimeRangeMetadataContextProvider({
 
   const routePath = useApmRoutePath();
 
+  const isOperationView =
+    routePath.startsWith('/dependencies/operation') ||
+    routePath.startsWith('/dependencies/operations');
+
+  return (
+    <TimeRangeMetadataContextProvider
+      uiSettings={uiSettings}
+      useSpanName={isOperationView}
+      start={start}
+      end={end}
+      kuery={kuery}
+    >
+      {children}
+    </TimeRangeMetadataContextProvider>
+  );
+}
+
+export function TimeRangeMetadataContextProvider({
+  children,
+  uiSettings,
+  useSpanName,
+  start,
+  end,
+  kuery,
+}: {
+  children?: React.ReactNode;
+  uiSettings: IUiSettingsClient;
+  useSpanName: boolean;
+  start: string;
+  end: string;
+  kuery: string;
+}) {
   const enableServiceTransactionMetrics = uiSettings.get<boolean>(
     apmEnableServiceMetrics,
     true
@@ -56,10 +89,6 @@ export function TimeRangeMetadataContextProvider({
     true
   );
 
-  const isOperationView =
-    routePath.startsWith('/dependencies/operation') ||
-    routePath.startsWith('/dependencies/operations');
-
   const fetcherResult = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/time_range_metadata', {
@@ -68,7 +97,7 @@ export function TimeRangeMetadataContextProvider({
             start,
             end,
             kuery,
-            useSpanName: isOperationView,
+            useSpanName,
             enableServiceTransactionMetrics,
             enableContinuousRollups,
           },
@@ -79,7 +108,7 @@ export function TimeRangeMetadataContextProvider({
       start,
       end,
       kuery,
-      isOperationView,
+      useSpanName,
       enableServiceTransactionMetrics,
       enableContinuousRollups,
     ]

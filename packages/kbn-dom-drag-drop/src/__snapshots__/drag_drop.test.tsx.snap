@@ -2,12 +2,12 @@
 
 exports[`DragDrop defined dropTypes is reflected in the className 1`] = `
 <div
-  class="lnsDragDrop__container"
-  data-test-subj="lnsDragDropContainer"
+  class="domDragDrop__container"
+  data-test-subj="domDragDropContainer"
 >
   <button
-    class="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isDropTarget"
-    data-test-subj="lnsDragDrop"
+    class="domDragDrop domDragDrop-isDroppable domDragDrop-isDropTarget"
+    data-test-subj="domDragDrop"
   >
     Hello!
   </button>
@@ -16,16 +16,16 @@ exports[`DragDrop defined dropTypes is reflected in the className 1`] = `
 
 exports[`DragDrop items that has dropTypes=undefined get special styling when another item is dragged 1`] = `
 <SingleDropInner
-  className="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isNotDroppable"
-  data-test-subj="lnsDragDrop"
+  className="domDragDrop domDragDrop-isDroppable domDragDrop-isNotDroppable"
+  data-test-subj="testDragDrop"
   onDragEnter={[Function]}
   onDragLeave={[Function]}
   onDragOver={[Function]}
   onDrop={[Function]}
 >
   <button
-    className="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isNotDroppable"
-    data-test-subj="lnsDragDrop"
+    className="domDragDrop domDragDrop-isDroppable domDragDrop-isNotDroppable"
+    data-test-subj="testDragDrop"
     onDragEnter={[Function]}
     onDragLeave={[Function]}
     onDragOver={[Function]}
@@ -39,17 +39,17 @@ exports[`DragDrop items that has dropTypes=undefined get special styling when an
 exports[`DragDrop renders if nothing is being dragged 1`] = `
 <div
   class=""
-  data-test-subj="lnsDragDrop_draggable-hello"
+  data-test-subj="domDragDrop_draggable-hello"
 >
   <button
-    aria-describedby="lnsDragDrop-keyboardInstructions"
+    aria-describedby="domDragDrop-keyboardInstructions"
     aria-label="hello"
-    class="lnsDragDrop__keyboardHandler emotion-euiScreenReaderOnly"
-    data-test-subj="lnsDragDrop-keyboardHandler"
+    class="domDragDrop__keyboardHandler emotion-euiScreenReaderOnly"
+    data-test-subj="domDragDrop-keyboardHandler"
   />
   <button
-    class="lnsDragDrop lnsDragDrop-isDraggable"
-    data-test-subj="lnsDragDrop"
+    class="domDragDrop domDragDrop-isDraggable"
+    data-test-subj="domDragDrop"
     draggable="true"
   >
     Hello!

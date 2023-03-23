@@ -1,13 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState, useMemo } from 'react';
 import classNames from 'classnames';
+import { DEFAULT_DATA_TEST_SUBJ } from '../constants';
 
+/**
+ * Reorder state
+ */
 export interface ReorderState {
   /**
    * Ids of the elements that are translated up or down
@@ -34,11 +39,17 @@ export interface ReorderState {
 
 type SetReorderStateDispatch = (prevState: ReorderState) => ReorderState;
 
+/**
+ * Reorder context state
+ */
 export interface ReorderContextState {
   reorderState: ReorderState;
   setReorderState: (dispatch: SetReorderStateDispatch) => void;
 }
 
+/**
+ * Reorder context
+ */
 export const ReorderContext = React.createContext<ReorderContextState>({
   reorderState: {
     reorderedItems: [],
@@ -50,14 +61,24 @@ export const ReorderContext = React.createContext<ReorderContextState>({
   setReorderState: () => () => {},
 });
 
+/**
+ * To create a reordering group, surround the elements from the same group with a `ReorderProvider`
+ * @param id
+ * @param children
+ * @param className
+ * @param dataTestSubj
+ * @constructor
+ */
 export function ReorderProvider({
   id,
   children,
   className,
+  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
 }: {
   id: string;
   children: React.ReactNode;
   className?: string;
+  dataTestSubj?: string;
 }) {
   const [state, setState] = useState<ReorderContextState['reorderState']>({
     reorderedItems: [],
@@ -71,11 +92,12 @@ export function ReorderProvider({
     () => (dispatch: SetReorderStateDispatch) => setState(dispatch),
     [setState]
   );
+
   return (
     <div
-      data-test-subj="lnsDragDrop-reorderableGroup"
+      data-test-subj={`${dataTestSubj}-reorderableGroup`}
       className={classNames(className, {
-        'lnsDragDrop-isActiveGroup': state.isReorderOn && React.Children.count(children) > 1,
+        'domDragDrop-isActiveGroup': state.isReorderOn && React.Children.count(children) > 1,
       })}
     >
       <ReorderContext.Provider value={{ reorderState: state, setReorderState }}>

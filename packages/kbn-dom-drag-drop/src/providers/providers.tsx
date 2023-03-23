@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState, useMemo } from 'react';
@@ -15,6 +16,7 @@ import {
   RegisteredDropTargets,
   DragContextState,
 } from './types';
+import { DEFAULT_DATA_TEST_SUBJ } from '../constants';
 
 /**
  * The drag / drop context singleton, used like so:
@@ -31,6 +33,8 @@ export const DragContext = React.createContext<DragContextState>({
   setA11yMessage: () => {},
   dropTargetsByOrder: undefined,
   registerDropTarget: () => {},
+  dataTestSubjPrefix: DEFAULT_DATA_TEST_SUBJ,
+  onTrackUICounterEvent: undefined,
 });
 
 /**
@@ -50,7 +54,15 @@ export interface ProviderProps extends DragContextState {
  *
  * @param props
  */
-export function RootDragDropProvider({ children }: { children: React.ReactNode }) {
+export function RootDragDropProvider({
+  children,
+  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
+  onTrackUICounterEvent,
+}: {
+  children: React.ReactNode;
+  dataTestSubj?: string;
+  onTrackUICounterEvent?: DragContextState['onTrackUICounterEvent'];
+}) {
   const [draggingState, setDraggingState] = useState<{ dragging?: DraggingIdentifier }>({
     dragging: undefined,
   });
@@ -101,6 +113,8 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
         setActiveDropTarget={setActiveDropTarget}
         registerDropTarget={registerDropTarget}
         dropTargetsByOrder={dropTargetsByOrderState}
+        dataTestSubjPrefix={dataTestSubj}
+        onTrackUICounterEvent={onTrackUICounterEvent}
       >
         {children}
       </ChildDragDropProvider>
@@ -109,13 +123,13 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
           <p aria-live="assertive" aria-atomic={true}>
             {a11yMessageState}
           </p>
-          <p id={`lnsDragDrop-keyboardInstructionsWithReorder`}>
-            {i18n.translate('xpack.lens.dragDrop.keyboardInstructionsReorder', {
+          <p id={`${dataTestSubj}-keyboardInstructionsWithReorder`}>
+            {i18n.translate('domDragDrop.keyboardInstructionsReorder', {
               defaultMessage: `Press space or enter to start dragging. When dragging, use the up/down arrow keys to reorder items in the group and left/right arrow keys to choose drop targets outside of the group. Press space or enter again to finish.`,
             })}
           </p>
-          <p id={`lnsDragDrop-keyboardInstructions`}>
-            {i18n.translate('xpack.lens.dragDrop.keyboardInstructions', {
+          <p id={`${dataTestSubj}-keyboardInstructions`}>
+            {i18n.translate('domDragDrop.keyboardInstructions', {
               defaultMessage: `Press space or enter to start dragging. When dragging, use the left/right arrow keys to move between drop targets. Press space or enter again to finish.`,
             })}
           </p>
@@ -202,6 +216,8 @@ export function ChildDragDropProvider({
   setA11yMessage,
   registerDropTarget,
   dropTargetsByOrder,
+  dataTestSubjPrefix,
+  onTrackUICounterEvent,
   children,
 }: ProviderProps) {
   const value = useMemo(
@@ -215,6 +231,8 @@ export function ChildDragDropProvider({
       setA11yMessage,
       dropTargetsByOrder,
       registerDropTarget,
+      dataTestSubjPrefix,
+      onTrackUICounterEvent,
     }),
     [
       setDragging,
@@ -226,6 +244,8 @@ export function ChildDragDropProvider({
       setA11yMessage,
       dropTargetsByOrder,
       registerDropTarget,
+      dataTestSubjPrefix,
+      onTrackUICounterEvent,
     ]
   );
   return <DragContext.Provider value={value}>{children}</DragContext.Provider>;
