@@ -144,7 +144,7 @@ export const TestPipeline: React.FC = () => {
                   <p>
                     <strong>
                       {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.example.code',
+                        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.useJsonFormat',
                         {
                           defaultMessage: 'Use this JSON format to add your own array of documents',
                         }
