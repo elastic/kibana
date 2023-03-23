@@ -14,7 +14,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DataTableRecord } from '../../../../types';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverStateContainer } from '../../services/discover_state';
@@ -30,8 +29,6 @@ export interface DiscoverMainContentProps {
   isPlainRecord: boolean;
   navigateTo: (url: string) => void;
   stateContainer: DiscoverStateContainer;
-  expandedDoc?: DataTableRecord;
-  setExpandedDoc: (doc?: DataTableRecord) => void;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;
   onFieldEdited: () => Promise<void>;
@@ -42,8 +39,6 @@ export const DiscoverMainContent = ({
   dataView,
   isPlainRecord,
   navigateTo,
-  expandedDoc,
-  setExpandedDoc,
   viewMode,
   onAddFilter,
   onFieldEdited,
@@ -95,12 +90,10 @@ export const DiscoverMainContent = ({
       )}
       {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
         <DiscoverDocuments
-          expandedDoc={expandedDoc}
           dataView={dataView}
           navigateTo={navigateTo}
           onAddFilter={!isPlainRecord ? onAddFilter : undefined}
           savedSearch={savedSearch}
-          setExpandedDoc={setExpandedDoc}
           stateContainer={stateContainer}
           onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
         />
