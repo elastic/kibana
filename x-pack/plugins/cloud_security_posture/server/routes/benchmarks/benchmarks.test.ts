@@ -14,6 +14,7 @@ import {
   getCspPackagePolicies,
   getCspAgentPolicies,
 } from '../../lib/fleet_util';
+import { POSTURE_TYPE_ALL } from '../../../common/constants';
 import { defineGetBenchmarksRoute, getRulesCountForPolicy } from './benchmarks';
 
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
@@ -157,11 +158,17 @@ describe('benchmarks API', () => {
       it('should format request by package name', async () => {
         const mockPackagePolicyService = createPackagePolicyServiceMock();
 
-        await getCspPackagePolicies(mockSoClient, mockPackagePolicyService, 'myPackage', {
-          page: 1,
-          per_page: 100,
-          sort_order: 'desc',
-        });
+        await getCspPackagePolicies(
+          mockSoClient,
+          mockPackagePolicyService,
+          'myPackage',
+          {
+            page: 1,
+            per_page: 100,
+            sort_order: 'desc',
+          },
+          POSTURE_TYPE_ALL
+        );
 
         expect(mockPackagePolicyService.list.mock.calls[0][1]).toMatchObject(
           expect.objectContaining({
@@ -175,12 +182,18 @@ describe('benchmarks API', () => {
       it('should build sort request by `sort_field` and default `sort_order`', async () => {
         const mockAgentPolicyService = createPackagePolicyServiceMock();
 
-        await getCspPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
-          page: 1,
-          per_page: 100,
-          sort_field: 'package_policy.name',
-          sort_order: 'desc',
-        });
+        await getCspPackagePolicies(
+          mockSoClient,
+          mockAgentPolicyService,
+          'myPackage',
+          {
+            page: 1,
+            per_page: 100,
+            sort_field: 'package_policy.name',
+            sort_order: 'desc',
+          },
+          POSTURE_TYPE_ALL
+        );
 
         expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
           expect.objectContaining({
@@ -196,12 +209,18 @@ describe('benchmarks API', () => {
       it('should build sort request by `sort_field` and asc `sort_order`', async () => {
         const mockAgentPolicyService = createPackagePolicyServiceMock();
 
-        await getCspPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
-          page: 1,
-          per_page: 100,
-          sort_field: 'package_policy.name',
-          sort_order: 'asc',
-        });
+        await getCspPackagePolicies(
+          mockSoClient,
+          mockAgentPolicyService,
+          'myPackage',
+          {
+            page: 1,
+            per_page: 100,
+            sort_field: 'package_policy.name',
+            sort_order: 'asc',
+          },
+          POSTURE_TYPE_ALL
+        );
 
         expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
           expect.objectContaining({
@@ -218,12 +237,18 @@ describe('benchmarks API', () => {
     it('should format request by benchmark_name', async () => {
       const mockAgentPolicyService = createPackagePolicyServiceMock();
 
-      await getCspPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
-        page: 1,
-        per_page: 100,
-        sort_order: 'desc',
-        benchmark_name: 'my_cis_benchmark',
-      });
+      await getCspPackagePolicies(
+        mockSoClient,
+        mockAgentPolicyService,
+        'myPackage',
+        {
+          page: 1,
+          per_page: 100,
+          sort_order: 'desc',
+          benchmark_name: 'my_cis_benchmark',
+        },
+        POSTURE_TYPE_ALL
+      );
 
       expect(mockAgentPolicyService.list.mock.calls[0][1]).toMatchObject(
         expect.objectContaining({

@@ -10,23 +10,13 @@ import { finalSignificantTermGroups } from '../../../common/__mocks__/artificial
 import { getGroupFilter } from './get_group_filter';
 
 describe('getGroupFilter', () => {
-  it('gets a query filter for the significant terms of a group with multiple values per field', () => {
+  it('gets a query filter for the significant terms of a group', () => {
     expect(getGroupFilter(finalSignificantTermGroups[0])).toStrictEqual([
       {
         term: {
-          response_code: '500',
+          url: 'login.php',
         },
       },
-      {
-        terms: {
-          url: ['home.php', 'login.php'],
-        },
-      },
-    ]);
-  });
-
-  it('gets a query filter for the significant terms of a group with just a single field/value', () => {
-    expect(getGroupFilter(finalSignificantTermGroups[1])).toStrictEqual([
       {
         term: {
           user: 'Peter',

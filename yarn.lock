@@ -3973,6 +3973,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dom-drag-drop@link:packages/kbn-dom-drag-drop":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ebt-tools@link:packages/kbn-ebt-tools":
   version "0.0.0"
   uid ""
