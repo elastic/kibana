@@ -15,7 +15,7 @@
   ],
   "exclude": [
     "target/**/*",
-    "scripts/apidoc_scripts/**"
+    "scripts/apidoc_scripts/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
