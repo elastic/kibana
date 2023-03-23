@@ -25,7 +25,7 @@ export default {
 };
 
 const Template: ComponentStory<typeof Component> = (props: Props) => (
-  <EuiFlexGroup>
+  <EuiFlexGroup gutterSize="s">
     <Component {...props} />
   </EuiFlexGroup>
 );
