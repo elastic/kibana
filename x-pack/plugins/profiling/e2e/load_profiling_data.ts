@@ -9,14 +9,6 @@ import path from 'path';
 import fs from 'fs';
 import { createEsClientForTesting } from '@kbn/test';
 
-const fileNamesOrdered = [
-  'profiling_events_all.json',
-  'profiling_events_5*.json',
-  'profiling_stacktraces.json',
-  'profiling_stackframes.json',
-  'profiling_executables.json',
-];
-
 const esArchiversPath = path.posix.join(__dirname, 'es_archivers');
 
 export async function loadProfilingData({
@@ -34,14 +26,10 @@ export async function loadProfilingData({
     isCloud: true,
   });
 
-  const dataAsArray = fileNamesOrdered
-    .flatMap((fileName) => {
-      return globby.sync(fileName, { cwd: esArchiversPath });
-    })
-    .flatMap((fileName) => {
-      const content = fs.readFileSync(`${esArchiversPath}/${fileName}`, 'utf8');
-      return content.split('\n');
-    });
+  const dataAsArray = globby.sync('*', { cwd: esArchiversPath }).flatMap((fileName) => {
+    const content = fs.readFileSync(`${esArchiversPath}/${fileName}`, 'utf8');
+    return content.split('\n');
+  });
 
   await client.bulk({ operations: dataAsArray, refresh: 'wait_for' });
   // eslint-disable-next-line no-console
