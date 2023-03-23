@@ -51,7 +51,7 @@ export function createExploratoryViewUrl(
 
   return (
     baseHref +
-    `/app/${appId}/exploratory-view/#?reportType=${reportType}&sr=${encodeUriIfNeeded(
+    `/app/exploratory-view/#?reportType=${reportType}&sr=${encodeUriIfNeeded(
       rison.encode(allShortSeries)
     )}`
   );
