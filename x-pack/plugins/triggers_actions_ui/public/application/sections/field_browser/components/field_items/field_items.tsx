@@ -55,7 +55,7 @@ export const getFieldItemsData = ({
               type: field.type,
               description: (EcsFlat as Record<string, EcsMetadata>)[name]?.description ?? '',
               example: field.example?.toString(),
-              category: name.split('.')?.[0],
+              category: name?.split('.')?.[0] ?? '(unknown)',
               selected: selectedFieldIds.has(name),
               isRuntime: !!field.runtimeField,
             };
