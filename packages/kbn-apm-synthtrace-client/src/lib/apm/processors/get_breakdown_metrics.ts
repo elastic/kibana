@@ -41,6 +41,7 @@ const KEY_FIELDS: Array<keyof ApmFields> = [
   'transaction.name',
   'span.type',
   'span.subtype',
+  'labels.telemetry_auto_version',
 ];
 
 export function getBreakdownMetrics(events: ApmFields[]): ApmFields[] {

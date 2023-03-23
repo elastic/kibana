@@ -8,7 +8,7 @@
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { isEqual } from 'lodash';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { AppState, isEqualState } from '../../services/discover_app_state_container';
+import { DiscoverAppState, isEqualState } from '../../services/discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
 
@@ -27,9 +27,9 @@ export const buildStateSubscribe =
   }: {
     stateContainer: DiscoverStateContainer;
     savedSearch: SavedSearch;
-    setState: (state: AppState) => void;
+    setState: (state: DiscoverAppState) => void;
   }) =>
-  async (nextState: AppState) => {
+  async (nextState: DiscoverAppState) => {
     const prevState = stateContainer.appState.getPrevious();
     if (isEqualState(prevState, nextState)) {
       addLog('[appstate] subscribe update ignored due to no changes');

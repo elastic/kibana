@@ -42,7 +42,6 @@
     "@kbn/utility-types-jest",
     "@kbn/securitysolution-es-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
-    "@kbn/es-types",
     "@kbn/core-elasticsearch-server",
     "@kbn/ecs",
     "@kbn/core-saved-objects-api-server",

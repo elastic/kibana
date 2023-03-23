@@ -16,6 +16,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import { DataTableRecord } from '../../../../types';
+import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
@@ -36,9 +38,9 @@ import { DocTableInfinite } from '../../../../components/doc_table/doc_table_inf
 import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
-import { DataTableRecord } from '../../../../types';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid/discover_grid_flyout';
+import { DocViewer } from '../../../../services/doc_views/components/doc_viewer';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -59,20 +61,16 @@ export const onResize = (
 };
 
 function DiscoverDocumentsComponent({
-  expandedDoc,
   dataView,
   onAddFilter,
   savedSearch,
-  setExpandedDoc,
   stateContainer,
   onFieldEdited,
 }: {
-  expandedDoc?: DataTableRecord;
   dataView: DataView;
   navigateTo: (url: string) => void;
   onAddFilter?: DocViewFilterFn;
   savedSearch: SavedSearch;
-  setExpandedDoc: (doc?: DataTableRecord) => void;
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
 }) {
@@ -92,6 +90,14 @@ function DiscoverDocumentsComponent({
       ];
     }
   );
+  const setExpandedDoc = useCallback(
+    (doc: DataTableRecord | undefined) => {
+      stateContainer.internalState.transitions.setExpandedDoc(doc);
+    },
+    [stateContainer]
+  );
+
+  const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
 
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
@@ -200,6 +206,7 @@ function DiscoverDocumentsComponent({
             onSort={!isPlainRecord ? onSort : undefined}
             useNewFieldsApi={useNewFieldsApi}
             dataTestSubj="discoverDocTable"
+            DocViewer={DocViewer}
           />
         </>
       )}
