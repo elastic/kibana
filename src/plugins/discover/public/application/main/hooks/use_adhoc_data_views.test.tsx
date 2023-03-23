@@ -7,10 +7,8 @@
  */
 
 import React from 'react';
-import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { act, renderHook } from '@testing-library/react-hooks';
-import { discoverServiceMock as mockDiscoverServices } from '../../../__mocks__/services';
+import { renderHook } from '@testing-library/react-hooks';
 import { useAdHocDataViews } from './use_adhoc_data_views';
 import * as persistencePromptModule from '../../../hooks/use_confirm_persistence_prompt';
 import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
@@ -65,27 +63,20 @@ const mockDataView = {
   isPersisted: () => false,
   getName: () => 'mock-data-view',
   toSpec: () => ({}),
+  isTimeBased: () => true,
 } as DataView;
-
-const savedSearchMock = {
-  id: 'some-id',
-  searchSource: createSearchSourceMock({ index: mockDataView }),
-};
 
 describe('useAdHocDataViews', () => {
   it('should save data view with new id and update saved search', async () => {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const stateContainer = getDiscoverStateMock({
+      isTimeBased: true,
+    });
+    stateContainer.actions.setDataView(mockDataView);
 
     const hook = renderHook(
       () =>
         useAdHocDataViews({
-          dataView: mockDataView,
-          savedSearch: savedSearchMock,
           stateContainer,
-          setUrlTracking: jest.fn(),
-          dataViews: mockDiscoverServices.dataViews,
-          filterManager: mockDiscoverServices.filterManager,
-          toastNotifications: mockDiscoverServices.toastNotifications,
         }),
       {
         wrapper: ({ children }: { children: React.ReactElement }) => (
@@ -100,39 +91,5 @@ describe('useAdHocDataViews', () => {
     const updateSavedSearchCall = persistencePromptMocks.updateSavedSearch.mock.calls[0];
     expect(updateSavedSearchCall[0].dataView.id).toEqual('updated-mock-id');
     expect(savedDataView!.id).toEqual('updated-mock-id');
-  });
-
-  it('should update id of adhoc data view correctly', async () => {
-    const dataViewsCreateMock = mockDiscoverServices.dataViews.create as jest.Mock;
-    dataViewsCreateMock.mockImplementation(() => ({
-      ...mockDataView,
-      id: 'updated-mock-id',
-    }));
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    const hook = renderHook(
-      () =>
-        useAdHocDataViews({
-          dataView: mockDataView,
-          savedSearch: savedSearchMock,
-          stateContainer: getDiscoverStateMock({ isTimeBased: true }),
-          setUrlTracking: jest.fn(),
-          dataViews: mockDiscoverServices.dataViews,
-          filterManager: mockDiscoverServices.filterManager,
-          toastNotifications: mockDiscoverServices.toastNotifications,
-        }),
-      {
-        wrapper: ({ children }: { children: React.ReactElement }) => (
-          <DiscoverMainProvider value={stateContainer}>{children}</DiscoverMainProvider>
-        ),
-      }
-    );
-
-    let updatedDataView: DataView;
-    await act(async () => {
-      updatedDataView = await hook.result.current.updateAdHocDataViewId(mockDataView);
-    });
-
-    expect(mockDiscoverServices.dataViews.clearInstanceCache).toHaveBeenCalledWith(mockDataView.id);
-    expect(updatedDataView!.id).toEqual('updated-mock-id');
   });
 });

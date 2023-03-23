@@ -8,7 +8,6 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { useInspector } from './use_inspector';
 import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
 import { OverlayRef } from '@kbn/core/public';
@@ -29,15 +28,14 @@ describe('test useInspector', () => {
     stateContainer.internalState.transitions.setExpandedDoc({} as unknown as DataTableRecord);
     const { result } = renderHook(() => {
       return useInspector({
-        inspectorAdapters: { requests, lensRequests },
-        savedSearch: savedSearchMock,
-        inspector: discoverServiceMock.inspector,
         stateContainer,
+        inspector: discoverServiceMock.inspector,
       });
     });
     await act(async () => {
       result.current();
     });
+
     expect(discoverServiceMock.inspector.open).toHaveBeenCalled();
     expect(adapters?.requests).toBeInstanceOf(AggregateRequestAdapter);
     expect(adapters?.requests?.getRequests()).toEqual([

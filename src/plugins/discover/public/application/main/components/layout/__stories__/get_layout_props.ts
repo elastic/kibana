@@ -23,7 +23,7 @@ import {
 import { buildDataTableRecordList } from '../../../../../utils/build_data_record';
 import { esHits } from '../../../../../__mocks__/es_hits';
 import { SavedSearch } from '../../../../..';
-import { DiscoverLayoutProps } from '../types';
+import { DiscoverLayoutProps } from '../discover_layout';
 import {
   DiscoverStateContainer,
   getDiscoverStateContainer,

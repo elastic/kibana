@@ -7,12 +7,13 @@
  */
 import { useEffect } from 'react';
 import { History } from 'history';
+import { DiscoverStateContainer } from '../services/discover_state';
 export function useUrl({
   history,
-  resetSavedSearch,
+  stateContainer,
 }: {
   history: History;
-  resetSavedSearch: (val?: string) => void;
+  stateContainer: DiscoverStateContainer;
 }) {
   /**
    * Url / Routing logic
@@ -21,11 +22,12 @@ export function useUrl({
     // this listener is waiting for such a path http://localhost:5601/app/discover#/
     // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
     // to reload the page in a right way
-    const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
-      if (!search && !hash && pathname === '/') {
-        resetSavedSearch();
+    const unlistenHistoryBasePath = history.listen(async ({ pathname, search, hash }) => {
+      if (!search && !hash && pathname === '/' && !stateContainer.savedSearchState.getState().id) {
+        await stateContainer.actions.loadSavedSearch();
+        stateContainer.actions.fetchData(true);
       }
     });
     return () => unlistenHistoryBasePath();
-  }, [history, resetSavedSearch]);
+  }, [history, stateContainer]);
 }

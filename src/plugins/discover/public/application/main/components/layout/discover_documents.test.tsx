@@ -11,7 +11,6 @@ import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DataDocuments$ } from '../../services/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
@@ -41,15 +40,9 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {
-    expandedDoc: undefined,
     dataView: dataViewMock,
     onAddFilter: jest.fn(),
-    savedSearch: savedSearchMock,
-    searchSource: savedSearchMock.searchSource,
-    setExpandedDoc: jest.fn(),
-    state: { columns: [] },
     stateContainer,
-    navigateTo: jest.fn(),
     onFieldEdited: jest.fn(),
   };
 

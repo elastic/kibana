@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { useQuerySubscriber } from '@kbn/unified-field-list-plugin/public';
+import { useSavedSearch } from '../../services/discover_state_provider';
 import { FieldStatisticsTable, type FieldStatisticsTableProps } from './field_stats_table';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
@@ -17,10 +18,12 @@ export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query
     const querySubscriberResult = useQuerySubscriber({
       data: services.data,
     });
+    const savedSearch = useSavedSearch();
 
     return (
       <FieldStatisticsTable
         {...props}
+        savedSearch={savedSearch}
         query={querySubscriberResult.query}
         filters={querySubscriberResult.filters}
       />

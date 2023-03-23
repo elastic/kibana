@@ -67,7 +67,6 @@ export class DiscoverSearchSessionManager {
         this.deps.session.restore(searchSessionIdFromURL);
       }
     }
-
     return searchSessionIdFromURL ?? this.deps.session.start();
   }
 

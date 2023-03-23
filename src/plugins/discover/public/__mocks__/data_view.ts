@@ -112,6 +112,7 @@ export const buildDataViewMock = ({
     getTimeField: () => {
       return dataViewFields.find((field) => field.name === timeFieldName);
     },
+    toSpec: () => ({}),
   } as unknown as DataView;
 
   dataView.isTimeBased = () => !!timeFieldName;

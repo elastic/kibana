@@ -7,7 +7,6 @@
  */
 import { useEffect } from 'react';
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
   createSearchSessionRestorationDataProvider,
   DiscoverStateContainer,
@@ -17,11 +16,9 @@ import { DiscoverServices } from '../../../build_services';
 export function useSearchSession({
   services,
   stateContainer,
-  savedSearch,
 }: {
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
-  savedSearch: SavedSearch;
 }) {
   const { data, capabilities } = services;
 
@@ -30,7 +27,7 @@ export function useSearchSession({
       createSearchSessionRestorationDataProvider({
         appStateContainer: stateContainer.appState,
         data,
-        getSavedSearch: () => savedSearch,
+        getSavedSearch: () => stateContainer.savedSearchState.getState(),
       }),
       {
         isDisabled: () =>
@@ -42,5 +39,5 @@ export function useSearchSession({
               },
       }
     );
-  }, [capabilities.discover.storeSearchSession, data, savedSearch, stateContainer.appState]);
+  }, [capabilities.discover.storeSearchSession, data, stateContainer]);
 }

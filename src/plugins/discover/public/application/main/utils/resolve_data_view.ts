@@ -7,14 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  DataView,
-  DataViewListItem,
-  DataViewsContract,
-  DataViewSpec,
-} from '@kbn/data-views-plugin/public';
-import type { ISearchSource } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
+import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { ToastsStart } from '@kbn/core/public';
+import { DiscoverServices } from '../../../build_services';
 interface DataViewData {
   /**
    * List of existing data views
@@ -37,13 +32,19 @@ interface DataViewData {
 /**
  * Function to load the given data view by id, providing a fallback if it doesn't exist
  */
-export async function loadDataView(
-  dataViews: DataViewsContract,
-  config: IUiSettingsClient,
-  id?: string,
-  dataViewSpec?: DataViewSpec
-): Promise<DataViewData> {
-  const dataViewList = await dataViews.getIdsWithTitle();
+export async function loadDataView({
+  id,
+  dataViewSpec,
+  services,
+  dataViewList,
+}: {
+  id?: string;
+  dataViewSpec?: DataViewSpec;
+  services: DiscoverServices;
+  dataViewList: DataViewListItem[];
+}): Promise<DataViewData> {
+  const { dataViews } = services;
+
   let fetchId: string | undefined = id;
 
   /**
@@ -97,7 +98,7 @@ export async function loadDataView(
     // we can be certain that the data view exists due to an earlier hasData check
     loaded: fetchedDataView || defaultDataView!,
     stateVal: fetchId,
-    stateValFound: !!fetchId && !!fetchedDataView,
+    stateValFound: Boolean(fetchId) && Boolean(fetchedDataView),
   };
 }
 
@@ -107,17 +108,10 @@ export async function loadDataView(
  */
 export function resolveDataView(
   ip: DataViewData,
-  searchSource: ISearchSource,
   toastNotifications: ToastsStart,
   isTextBasedQuery?: boolean
 ) {
   const { loaded: loadedDataView, stateVal, stateValFound } = ip;
-
-  const ownDataView = searchSource.getOwnField('index');
-
-  if (ownDataView && !stateVal) {
-    return ownDataView;
-  }
 
   if (stateVal && !stateValFound) {
     const warningTitle = i18n.translate('discover.valueIsNotConfiguredDataViewIDWarningTitle', {
@@ -127,20 +121,6 @@ export function resolveDataView(
       },
     });
 
-    if (ownDataView) {
-      toastNotifications.addWarning({
-        title: warningTitle,
-        text: i18n.translate('discover.showingSavedDataViewWarningDescription', {
-          defaultMessage: 'Showing the saved data view: "{ownDataViewTitle}" ({ownDataViewId})',
-          values: {
-            ownDataViewTitle: ownDataView.getIndexPattern(),
-            ownDataViewId: ownDataView.id,
-          },
-        }),
-        'data-test-subj': 'dscDataViewNotFoundShowSavedWarning',
-      });
-      return ownDataView;
-    }
     if (!Boolean(isTextBasedQuery)) {
       toastNotifications.addWarning({
         title: warningTitle,

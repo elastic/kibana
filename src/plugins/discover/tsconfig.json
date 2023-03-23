@@ -48,7 +48,6 @@
     "@kbn/ui-theme",
     "@kbn/react-field",
     "@kbn/monaco",
-    "@kbn/core-notifications-browser",
     "@kbn/config-schema",
     "@kbn/storybook",
     "@kbn/shared-ux-router",
