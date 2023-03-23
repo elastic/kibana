@@ -7,6 +7,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+// @ts-ignore can only be default-imported using the 'esModuleInterop' flag
 import moment from 'moment';
 
 const getHeaderString = () => `---
@@ -18,4 +19,6 @@ date: ${moment().format('YYYY-MM-DD')}
 tags: ['machine learning','internal docs', 'UI']
 ---`;
 
-fs.writeFileSync(path.resolve(__dirname, '..', 'header.md'), getHeaderString());
+export function run() {
+  fs.writeFileSync(path.resolve(__dirname, '..', 'header.md'), getHeaderString());
+}

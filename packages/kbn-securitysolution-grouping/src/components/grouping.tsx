@@ -18,30 +18,30 @@ import React, { useMemo, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { defaultUnit, firstNonNullValue } from '../helpers';
 import { createGroupFilter } from './accordion_panel/helpers';
-import type { BadgeMetric, CustomMetric } from './accordion_panel';
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
 import { groupingContainerCss, countCss } from './styles';
 import { GROUPS_UNIT } from './translations';
-import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } from './types';
+import type {
+  GroupingAggregation,
+  GroupingFieldTotalAggregation,
+  GroupPanelRenderer,
+  RawBucket,
+} from './types';
 import { getTelemetryEvent } from '../telemetry/const';
+import { GroupStatsRenderer, OnGroupToggle } from './types';
 
 export interface GroupingProps<T> {
-  badgeMetricStats?: (fieldBucket: RawBucket<T>) => BadgeMetric[];
-  customMetricStats?: (fieldBucket: RawBucket<T>) => CustomMetric[];
-  data?: GroupingAggregation<T> & GroupingFieldTotalAggregation;
+  data?: GroupingAggregation<T> & GroupingFieldTotalAggregation<T>;
   groupingId: string;
-  groupPanelRenderer?: (fieldBucket: RawBucket<T>) => JSX.Element | undefined;
+  groupPanelRenderer?: GroupPanelRenderer<T>;
   groupSelector?: JSX.Element;
+  // list of custom UI components which correspond to your custom rendered metrics aggregations
+  groupStatsRenderer?: GroupStatsRenderer<T>;
   inspectButton?: JSX.Element;
   isLoading: boolean;
-  onToggleCallback?: (params: {
-    isOpen: boolean;
-    groupName?: string | undefined;
-    groupNumber: number;
-    groupingId: string;
-  }) => void;
+  onGroupToggle?: OnGroupToggle;
   pagination: {
     pageIndex: number;
     pageSize: number;
@@ -49,7 +49,7 @@ export interface GroupingProps<T> {
     onChangePage: (pageNumber: number) => void;
     itemsPerPageOptions: number[];
   };
-  renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
+  renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
   selectedGroup: string;
   takeActionItems: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
   tracker?: (
@@ -61,15 +61,14 @@ export interface GroupingProps<T> {
 }
 
 const GroupingComponent = <T,>({
-  badgeMetricStats,
-  customMetricStats,
   data,
   groupingId,
   groupPanelRenderer,
   groupSelector,
+  groupStatsRenderer,
   inspectButton,
   isLoading,
-  onToggleCallback,
+  onGroupToggle,
   pagination,
   renderChildComponent,
   selectedGroup,
@@ -103,18 +102,21 @@ const GroupingComponent = <T,>({
             <GroupPanel
               extraAction={
                 <GroupStats
-                  bucket={groupBucket}
+                  bucketKey={groupKey}
                   takeActionItems={takeActionItems(
                     createGroupFilter(selectedGroup, group),
                     groupNumber
                   )}
-                  badgeMetricStats={badgeMetricStats && badgeMetricStats(groupBucket)}
-                  customMetricStats={customMetricStats && customMetricStats(groupBucket)}
+                  statRenderers={
+                    groupStatsRenderer && groupStatsRenderer(selectedGroup, groupBucket)
+                  }
                 />
               }
               forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
               groupBucket={groupBucket}
-              groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(groupBucket)}
+              groupPanelRenderer={
+                groupPanelRenderer && groupPanelRenderer(selectedGroup, groupBucket)
+              }
               isLoading={isLoading}
               onToggleGroup={(isOpen) => {
                 // built-in telemetry: UI-counter
@@ -129,12 +131,12 @@ const GroupingComponent = <T,>({
                     selectedBucket: groupBucket,
                   },
                 });
-                onToggleCallback?.({ isOpen, groupName: group, groupNumber, groupingId });
+                onGroupToggle?.({ isOpen, groupName: group, groupNumber, groupingId });
               }}
               renderChildComponent={
                 trigger[groupKey] && trigger[groupKey].state === 'open'
                   ? renderChildComponent
-                  : () => null
+                  : () => <span />
               }
               selectedGroup={selectedGroup}
             />
@@ -143,13 +145,12 @@ const GroupingComponent = <T,>({
         );
       }),
     [
-      badgeMetricStats,
-      customMetricStats,
       data?.groupByFields?.buckets,
       groupPanelRenderer,
+      groupStatsRenderer,
       groupingId,
       isLoading,
-      onToggleCallback,
+      onGroupToggle,
       renderChildComponent,
       selectedGroup,
       takeActionItems,
@@ -193,6 +194,9 @@ const GroupingComponent = <T,>({
         </EuiFlexItem>
       </EuiFlexGroup>
       <div css={groupingContainerCss} className="eui-xScroll">
+        {isLoading && (
+          <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
+        )}
         {groupCount > 0 ? (
           <>
             {groupPanels}
@@ -209,12 +213,7 @@ const GroupingComponent = <T,>({
             />
           </>
         ) : (
-          <>
-            {isLoading && (
-              <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
-            )}
-            <EmptyGroupingComponent />
-          </>
+          <EmptyGroupingComponent />
         )}
       </div>
     </>
