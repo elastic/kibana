@@ -19,7 +19,7 @@ export const DeactivatedUserCallout: React.FC<Props> = ({ isNew }) => (
   <>
     {!isNew && <EuiSpacer />}
     <EuiText size="s">
-      <EuiIcon type="alert" color="warning" /> <strong>{DEACTIVATED_USER_CALLOUT_LABEL}</strong>
+      <EuiIcon type="warning" color="warning" /> <strong>{DEACTIVATED_USER_CALLOUT_LABEL}</strong>
     </EuiText>
     <EuiSpacer size="xs" />
     <EuiText size="s">{DEACTIVATED_USER_CALLOUT_DESCRIPTION}</EuiText>

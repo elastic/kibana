@@ -91,7 +91,7 @@ export const DeleteIndexModal: React.FC = () => {
         <>
           <EuiCallOut
             color="warning"
-            iconType="alert"
+            iconType="warning"
             title={i18n.translate(
               'xpack.enterpriseSearch.content.searchIndices.deleteModal.syncsWarning.title',
               {

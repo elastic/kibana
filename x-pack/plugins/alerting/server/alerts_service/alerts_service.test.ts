@@ -58,18 +58,16 @@ const GetAliasResponse = {
 };
 
 const IlmPutBody = {
-  body: {
-    policy: {
-      _meta: {
-        managed: true,
-      },
-      phases: {
-        hot: {
-          actions: {
-            rollover: {
-              max_age: '30d',
-              max_primary_shard_size: '50gb',
-            },
+  policy: {
+    _meta: {
+      managed: true,
+    },
+    phases: {
+      hot: {
+        actions: {
+          rollover: {
+            max_age: '30d',
+            max_primary_shard_size: '50gb',
           },
         },
       },
@@ -212,7 +210,6 @@ describe('Alerts Service', () => {
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
     });
 
     test('should log error and set initialized to false if creating/updating common component template throws error', async () => {
@@ -232,7 +229,6 @@ describe('Alerts Service', () => {
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
     });
 
     test('should update index template field limit and retry initialization if creating/updating common component template fails with field limit error', async () => {

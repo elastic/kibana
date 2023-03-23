@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import fetch from 'node-fetch';
+import { Logger } from '@kbn/core/server';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import { fetchWithTimeout } from '../../lib/helpers/fetch_with_timeout';
 
 const bucketUrl =
   'https://8f83orp5pc.execute-api.eu-west-1.amazonaws.com/test/0_0_1';
@@ -19,13 +20,25 @@ export interface OtelAgentLatestVersion {
   auto_latest_version?: string;
 }
 
-export const fetchAgentsLatestVersion = async (): Promise<
-  Record<AgentName, ElasticAgentLatestVersion | OtelAgentLatestVersion>
-> => {
-  const response = await fetch(bucketUrl);
+type AgentLatestVersions = Record<
+  AgentName,
+  ElasticAgentLatestVersion | OtelAgentLatestVersion
+>;
 
-  const releases = await response.json();
-  console.log(JSON.stringify(releases));
+export const fetchAgentsLatestVersion = async (
+  logger: Logger
+): Promise<AgentLatestVersions> => {
+  try {
+    const response = await fetchWithTimeout(bucketUrl);
 
-  return releases;
+    return await response.json();
+  } catch (error) {
+    const message =
+      error.name === 'AbortError'
+        ? 'Failed to retrieve Agents latest versions due to timeout'
+        : `Failed to retrieve Agents latest versions, received error: ${error}`;
+    logger.warn(message);
+
+    return {} as AgentLatestVersions;
+  }
 };

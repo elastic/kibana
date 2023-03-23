@@ -5,7 +5,8 @@
       "name": "",
       "username": "",
       "realm_name": "",
-      "owner": "__flag__"
+      "owner": "__flag__",
+      "with_limited_by": "__flag__"
     },
     "methods": [
       "GET"

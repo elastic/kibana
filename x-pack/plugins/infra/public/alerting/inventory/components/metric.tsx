@@ -226,6 +226,7 @@ export const MetricExpression = ({
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiSelect
+                    data-test-subj="infraMetricExpressionSelect"
                     onChange={onAggregationChange}
                     value={customMetric?.aggregation || 'avg'}
                     options={aggregationOptions}
@@ -272,6 +273,7 @@ export const MetricExpression = ({
               })}
             >
               <EuiFieldText
+                data-test-subj="infraMetricExpressionFieldText"
                 name="label"
                 placeholder={i18n.translate('xpack.infra.waffle.customMetrics.labelPlaceholder', {
                   defaultMessage: 'Choose a name to appear in the "Metric" dropdown',

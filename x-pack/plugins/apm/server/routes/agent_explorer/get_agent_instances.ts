@@ -45,7 +45,7 @@ export async function getAgentInstances({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}) {
+}): Promise<AgentExplorerAgentInstancesResponse> {
   const response = await apmEventClient.search('get_agent_instances', {
     apm: {
       events: [ProcessorEvent.metric],
