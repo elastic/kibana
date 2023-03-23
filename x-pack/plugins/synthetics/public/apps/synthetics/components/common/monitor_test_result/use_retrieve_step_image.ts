@@ -6,7 +6,6 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { useFetcher } from '@kbn/observability-plugin/public';
 import {
   ScreenshotImageBlob,
   ScreenshotRefImageData,
@@ -59,34 +58,50 @@ export const useRetrieveStepImage = ({
   const imageResult = useGetStepScreenshotUrls(checkGroup, imgPath, imgState);
   const isImageUrlAvailable = imageResult?.[imgPath]?.url ?? false;
 
-  useFetcher(async () => {
-    const retrieveAttemptedBefore = (imgState[imgPath]?.attempts ?? 0) > 0;
-    const shouldRetry = retryFetchOnRevisit || !retrieveAttemptedBefore;
+  const shouldRetry = useMemo(
+    () => retryFetchOnRevisit || !((imgState[imgPath]?.attempts ?? 0) > 0),
+    [imgPath, imgState, retryFetchOnRevisit]
+  );
 
-    if (!skippedStep && hasIntersected && !isImageUrlAvailable && shouldRetry && checkGroup) {
-      setImgState((prevState) => {
-        return getUpdatedState({ prevState, imgPath, increment: true, loading: true });
-      });
-      if (stepStatus !== 'failed') setIsLoading(true);
-      const backoffOptions: Partial<BackoffOptions> | undefined = !testNowMode
-        ? { shouldBackoff: false }
-        : undefined;
-      try {
-        const data = await getJourneyScreenshot(imgPath, backoffOptions);
+  useEffect(() => {
+    async function run() {
+      if (!skippedStep && hasIntersected && !isImageUrlAvailable && shouldRetry && checkGroup) {
         setImgState((prevState) => {
-          return getUpdatedState({ prevState, imgPath, increment: false, data, loading: false });
+          return getUpdatedState({ prevState, imgPath, increment: true, loading: true });
         });
-        return data;
-      } catch (e: unknown) {
-        setImgState((prevState) => {
-          return getUpdatedState({ prevState, imgPath, increment: false, loading: false });
-        });
+        if (stepStatus !== 'failed') setIsLoading(true);
+        const backoffOptions: Partial<BackoffOptions> | undefined = !testNowMode
+          ? { shouldBackoff: false }
+          : undefined;
+        try {
+          const data = await getJourneyScreenshot(imgPath, backoffOptions);
+          setImgState((prevState) => {
+            return getUpdatedState({ prevState, imgPath, increment: false, data, loading: false });
+          });
+          return data;
+        } catch (e: unknown) {
+          setImgState((prevState) => {
+            return getUpdatedState({ prevState, imgPath, increment: false, loading: false });
+          });
+        }
+      } else {
+        return null;
       }
-    } else {
-      return null;
+      setIsLoading(false);
     }
-    setIsLoading(false);
-  }, [skippedStep, hasIntersected, imgPath, retryFetchOnRevisit, timestamp]);
+    run();
+  }, [
+    skippedStep,
+    hasIntersected,
+    imgPath,
+    retryFetchOnRevisit,
+    timestamp,
+    isImageUrlAvailable,
+    checkGroup,
+    stepStatus,
+    testNowMode,
+    shouldRetry,
+  ]);
 
   return { imageResult, isLoading };
 };
