@@ -9,6 +9,10 @@ import { useHostsTable } from './use_hosts_table';
 import { renderHook } from '@testing-library/react-hooks';
 import { SnapshotNode } from '../../../../../common/http_api';
 
+jest.mock('uuid', () => ({
+  v4: () => 'uuidv4',
+}));
+
 describe('useHostTable hook', () => {
   it('it should map the nodes returned from the snapshot api to a format matching eui table items', () => {
     const nodes: SnapshotNode[] = [
@@ -73,6 +77,7 @@ describe('useHostTable hook', () => {
       {
         name: 'host-0',
         os: '-',
+        uuid: 'uuidv4',
         title: {
           cloudProvider: 'aws',
           name: 'host-0',
@@ -102,6 +107,7 @@ describe('useHostTable hook', () => {
       {
         name: 'host-1',
         os: 'macOS',
+        uuid: 'uuidv4',
         title: {
           cloudProvider: null,
           name: 'host-1',
