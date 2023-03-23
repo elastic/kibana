@@ -16,7 +16,6 @@ export class DashboardExpectService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
   private readonly filterBar = this.ctx.getService('filterBar');
-  private readonly screenshotService = this.ctx.getService('screenshots');
 
   private readonly dashboard = this.ctx.getPageObject('dashboard');
   private readonly visChart = this.ctx.getPageObject('visChart');
@@ -49,7 +48,7 @@ export class DashboardExpectService extends FtrService {
     if (errorEmbeddables.length > 0) {
       const errorMessages = await Promise.all(
         errorEmbeddables.map(async (embeddable) => {
-          const panel = await embeddable.findByXpath('./..');
+          const panel = await embeddable.findByXpath('./..'); // get the parent of 'embeddableError'
           let panelTitle = 'Empty title';
           if (await this.testSubjects.descendantExists('dashboardPanelTitle', panel)) {
             panelTitle = await (
@@ -62,7 +61,7 @@ export class DashboardExpectService extends FtrService {
       );
 
       throw new Error(
-        `Found error embeddable(s): ${errorMessages.reduce((errorString, error, id) => {
+        `Found error embeddable(s): ${errorMessages.reduce((errorString, error) => {
           return errorString + '\n' + `\t- ${error}`;
         }, '')}`
       );
