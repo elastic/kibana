@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
 import type { Logger } from '@kbn/logging';
+import { isCustom } from './metric_expression_params';
 import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
@@ -104,7 +105,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
             metric:
               criterion.aggType === 'count'
                 ? DOCUMENT_COUNT_I18N
-                : criterion.aggType === 'custom' && criterion.label
+                : isCustom(criterion) && criterion.label
                 ? criterion.label
                 : criterion.aggType === 'custom'
                 ? CUSTOM_EQUATION_I18N

@@ -6,6 +6,7 @@
  */
 
 import { scheduleNotificationResponseActions } from './schedule_notification_response_actions';
+import type { RuleResponseAction } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 
 describe('ScheduleNotificationResponseActions', () => {
@@ -57,7 +58,7 @@ describe('ScheduleNotificationResponseActions', () => {
   it('should handle osquery response actions with query', async () => {
     const osqueryActionMock = jest.fn();
 
-    const responseActions = [
+    const responseActions: RuleResponseAction[] = [
       {
         actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
         params: {
@@ -77,7 +78,7 @@ describe('ScheduleNotificationResponseActions', () => {
   it('should handle osquery response actions with packs', async () => {
     const osqueryActionMock = jest.fn();
 
-    const responseActions = [
+    const responseActions: RuleResponseAction[] = [
       {
         actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
         params: {

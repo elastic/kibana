@@ -23,6 +23,7 @@ import {
   useDebouncedValue,
   AxisTitleSettings,
   AxisBoundsControl,
+  AxisTicksSettings,
 } from '../../../shared_components';
 import { XYLayerConfig, AxesSettingsConfig } from '../types';
 import { validateExtent } from '../axes_configuration';
@@ -292,24 +293,13 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        display="columnCompressedSwitch"
-        label={i18n.translate('xpack.lens.xyChart.tickLabels', {
-          defaultMessage: 'Tick labels',
-        })}
-        fullWidth
-      >
-        <EuiSwitch
-          compressed
-          data-test-subj={`lnsshow${axis}AxisTickLabels`}
-          label={i18n.translate('xpack.lens.xyChart.tickLabels', {
-            defaultMessage: 'Tick labels',
-          })}
-          onChange={() => toggleTickLabelsVisibility(axis)}
-          checked={areTickLabelsVisible}
-          showLabel={false}
-        />
-      </EuiFormRow>
+      <AxisTicksSettings
+        axis={axis}
+        updateTicksVisibilityState={(visible) => {
+          toggleTickLabelsVisibility(axis);
+        }}
+        isAxisLabelVisible={areTickLabelsVisible}
+      />
       {!useMultilayerTimeAxis && areTickLabelsVisible && (
         <EuiFormRow
           display="columnCompressed"

@@ -92,7 +92,7 @@ export const AnalyticsCollectionSettings: React.FC<AnalyticsCollectionSettingsPr
           isLoading={!isLoading}
           disabled={!isLoading}
           onClick={() => {
-            deleteAnalyticsCollection(collection.id);
+            deleteAnalyticsCollection(collection.name);
           }}
         >
           {i18n.translate(
