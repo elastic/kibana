@@ -168,13 +168,15 @@ export class Bundle {
     // This is only used to build legacy third party plugins in the @kbn/plugin-helpers
 
     if (!isObj(parsed)) {
-      throw new Error(
-        `Expected [${this.manifestPath}] to be a jsonc parseable file`
-      );
+      throw new Error(`Expected [${this.manifestPath}] to be a jsonc parseable file`);
     }
 
-    const requiredBundles = isObj(parsed.plugin) ? parsed.plugin.requiredBundles : parsed.requiredBundles;
-    const requiredPlugins = isObj(parsed.plugin) ? parsed.plugin.requiredPlugins : parsed.requiredPlugins;
+    const requiredBundles = isObj(parsed.plugin)
+      ? parsed.plugin.requiredBundles
+      : parsed.requiredBundles;
+    const requiredPlugins = isObj(parsed.plugin)
+      ? parsed.plugin.requiredPlugins
+      : parsed.requiredPlugins;
     const requiredBundlesStringArray = toStringArray(requiredBundles);
     const requiredPluginsStringArray = toStringArray(requiredPlugins);
     // END-OF-TD: we just need to check for parse.plugin and not for legacy plugins manifest types
@@ -193,10 +195,7 @@ export class Bundle {
 
     return {
       explicit: [...(requiredBundlesStringArray || [])],
-      implicit: [
-        ...DEFAULT_IMPLICIT_BUNDLE_DEPS,
-        ...(requiredPluginsStringArray || [])
-      ],
+      implicit: [...DEFAULT_IMPLICIT_BUNDLE_DEPS, ...(requiredPluginsStringArray || [])],
     };
   }
 }

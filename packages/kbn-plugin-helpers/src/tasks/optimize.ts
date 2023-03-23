@@ -20,7 +20,15 @@ import { TaskContext } from '../task_context';
 
 type WorkerMsg = { success: true; warnings: string } | { success: false; error: string };
 
-export async function optimize({ log, dev, dist, watch, plugin, sourceDir, buildDir }: TaskContext) {
+export async function optimize({
+  log,
+  dev,
+  dist,
+  watch,
+  plugin,
+  sourceDir,
+  buildDir,
+}: TaskContext) {
   if (!plugin.manifest.ui) {
     return;
   }
@@ -33,7 +41,7 @@ export async function optimize({ log, dev, dist, watch, plugin, sourceDir, build
       testPlugins: false,
       includeCoreBundle: true,
       dist: !!dist,
-      watch: !!watch
+      watch: !!watch,
     });
 
     const bundle = new Bundle({
@@ -63,21 +71,24 @@ export async function optimize({ log, dev, dist, watch, plugin, sourceDir, build
 
     // Observe all events from child process
     const eventObservable = Rx.merge(
-      observeLines(proc.stdout!).pipe(
-        Rx.map((line) => ({ type: 'stdout', data: line }))
-      ),
-      observeLines(proc.stderr!).pipe(
-        Rx.map((line) => ({ type: 'stderr', data: line }))
-      ),
+      observeLines(proc.stdout!).pipe(Rx.map((line) => ({ type: 'stdout', data: line }))),
+      observeLines(proc.stderr!).pipe(Rx.map((line) => ({ type: 'stderr', data: line }))),
       Rx.fromEvent<[WorkerMsg]>(proc, 'message').pipe(
         Rx.map((msg) => ({ type: 'message', data: msg[0] }))
       ),
-      Rx.fromEvent<Error>(proc, 'error').pipe(
-        Rx.map((error) => ({ type: 'error', data: error }))
-      )
+      Rx.fromEvent<Error>(proc, 'error').pipe(Rx.map((error) => ({ type: 'error', data: error })))
     );
 
-    const simpleOrWatchObservable = watch ? eventObservable : eventObservable.pipe(Rx.take(1), Rx.tap({ complete() { proc.kill('SIGKILL'); }}));
+    const simpleOrWatchObservable = watch
+      ? eventObservable
+      : eventObservable.pipe(
+          Rx.take(1),
+          Rx.tap({
+            complete() {
+              proc.kill('SIGKILL');
+            },
+          })
+        );
 
     // Subscribe to eventObservable to log events
     const eventSubscription = simpleOrWatchObservable.subscribe((event) => {
@@ -96,7 +107,7 @@ export async function optimize({ log, dev, dist, watch, plugin, sourceDir, build
           log.success(`browser bundle created at ${rel}`);
         }
       } else if (event.type === 'error') {
-        log.error(event.data as Error)
+        log.error(event.data as Error);
       }
     });
 
