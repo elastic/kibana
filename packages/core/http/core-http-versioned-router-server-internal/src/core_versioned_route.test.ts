@@ -43,7 +43,9 @@ describe('Versioned route', () => {
         .addVersion({ version: '1', validate: false }, handlerFn)
         .addVersion({ version: '1', validate: false }, handlerFn)
         .addVersion({ version: '3', validate: false }, handlerFn)
-    ).toThrowError(`Version 1 handler has already been registered for the route "get /test/{id}"`);
+    ).toThrowError(
+      `Version "1" handler has already been registered for the route [get] [/test/{id}]`
+    );
   });
 
   it('runs request and response validations', async () => {

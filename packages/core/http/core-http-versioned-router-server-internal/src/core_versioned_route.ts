@@ -148,11 +148,11 @@ export class CoreVersionedRoute implements VersionedRoute {
   public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
     if (this.handlers.has(options.version)) {
       throw new Error(
-        `Version ${
+        `Version "${
           options.version
-        } handler has already been registered for the route "${this.method.toLowerCase()} ${
+        }" handler has already been registered for the route [${this.method.toLowerCase()}] [${
           this.path
-        }"`
+        }]"`
       );
     }
 
