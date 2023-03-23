@@ -9,7 +9,6 @@ import type { Action } from 'redux';
 import type { DataViewBase } from '@kbn/es-query';
 import type {
   HostInfo,
-  GetHostPolicyResponse,
   HostIsolationRequestBody,
   ISOLATION_ACTIONS,
   MetadataListResponse,
@@ -37,11 +36,6 @@ export interface ServerFailedToReturnEndpointDetails {
   type: 'serverFailedToReturnEndpointDetails';
   payload: ServerApiError;
 }
-export interface ServerReturnedEndpointPolicyResponse {
-  type: 'serverReturnedEndpointPolicyResponse';
-  payload: GetHostPolicyResponse;
-}
-
 export interface ServerFailedToReturnEndpointPolicyResponse {
   type: 'serverFailedToReturnEndpointPolicyResponse';
   payload: ServerApiError;
@@ -169,7 +163,6 @@ export type EndpointAction =
   | ServerReturnedEndpointDetails
   | ServerFailedToReturnEndpointDetails
   | EndpointDetailsLoad
-  | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding
   | ServerFailedToReturnPoliciesForOnboarding

@@ -102,13 +102,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       error: action.payload,
       policyItemsLoading: false,
     };
-  } else if (action.type === 'serverReturnedEndpointPolicyResponse') {
-    return {
-      ...state,
-      policyResponse: action.payload.policy_response,
-      policyResponseLoading: false,
-      policyResponseError: undefined,
-    };
   } else if (action.type === 'serverFailedToReturnEndpointPolicyResponse') {
     return {
       ...state,

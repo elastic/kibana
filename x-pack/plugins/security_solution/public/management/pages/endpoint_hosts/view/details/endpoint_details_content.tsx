@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isPolicyOutOfDate } from '../../utils';
 import type { HostInfo, HostMetadata, HostStatus } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from '../hooks';
-import { nonExistingPolicies, policyResponseStatus, uiQueryParams } from '../../store/selectors';
+import { nonExistingPolicies, uiQueryParams } from '../../store/selectors';
 import { POLICY_STATUS_TO_BADGE_COLOR } from '../host_constants';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
@@ -60,10 +60,6 @@ export const EndpointDetailsContent = memo(
     hostStatus: HostStatus;
   }) => {
     const queryParams = useEndpointSelector(uiQueryParams);
-    const policyStatus = useEndpointSelector(
-      policyResponseStatus
-    ) as keyof typeof POLICY_STATUS_TO_BADGE_COLOR;
-
     const missingPolicies = useEndpointSelector(nonExistingPolicies);
 
     const policyResponseRoutePath = useMemo(() => {
@@ -168,15 +164,17 @@ export const EndpointDetailsContent = memo(
           ),
           description: (
             <EuiHealth
-              data-test-subj={`policyStatusValue-${policyStatus}`}
-              color={POLICY_STATUS_TO_BADGE_COLOR[policyStatus] || 'default'}
+              data-test-subj={`policyStatusValue-${details.Endpoint.policy.applied.status}`}
+              color={
+                POLICY_STATUS_TO_BADGE_COLOR[details.Endpoint.policy.applied.status] || 'default'
+              }
             >
               <EuiLink onClick={policyStatusClickHandler} data-test-subj="policyStatusValue">
                 <EuiText size="xs">
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.details.policyStatusValue"
                     defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
-                    values={{ policyStatus }}
+                    values={{ policyStatus: details.Endpoint.policy.applied.status }}
                   />
                 </EuiText>
               </EuiLink>
@@ -214,7 +212,7 @@ export const EndpointDetailsContent = memo(
           ),
         },
       ];
-    }, [details, hostStatus, policyStatus, policyStatusClickHandler, policyInfo, missingPolicies]);
+    }, [details, hostStatus, policyStatusClickHandler, policyInfo, missingPolicies]);
 
     return (
       <EndpointDetailsContentStyled>
