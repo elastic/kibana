@@ -224,6 +224,7 @@ export class AlertingPlugin {
         management: {
           insightsAndAlerting: {
             triggersActions: true,
+            maintenanceWindows: true,
           },
         },
       };

@@ -82,7 +82,7 @@ export const recurringSummary = (
 
     const every = i18n
       .CREATE_FORM_RECURRING_SUMMARY(
-        !dailyWithWeekdays ? frequencySummary : null,
+        !dailyWithWeekdays ? frequencySummary : '',
         onSummary,
         untilSummary
       )
