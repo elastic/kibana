@@ -387,6 +387,13 @@
         },
         "sessionLeaderInteractive": {
           "type": "boolean"
+        },
+        "sessionLeaderName": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
         }
       },
       "dependencies": {

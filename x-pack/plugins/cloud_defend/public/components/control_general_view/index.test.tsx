@@ -106,7 +106,7 @@ describe('<ControlGeneralView />', () => {
             actions: [alert, block]
     `;
 
-    const { getByTestId, rerender } = render(
+    const { getByTestId } = render(
       <WrappedComponent policy={getCloudDefendNewPolicyMock(testPolicy)} />
     );
 
