@@ -71,3 +71,4 @@ export const registerCaseFileKinds = (filesSetupPlugin: FilesSetup) => {
 };
 
 export const MAX_FILES_PER_CASE = 100;
+export const MAX_DELETE_FILES = MAX_FILES_PER_CASE * 5;

@@ -16,6 +16,7 @@ import {
   CommentRequest,
   CommentResponse,
   CommentType,
+  getCasesDeleteFileAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
@@ -257,4 +258,25 @@ export const updateComment = async ({
     .expect(expectedHttpCode);
 
   return res;
+};
+
+export const deleteFileAttachments = async ({
+  supertest,
+  caseId,
+  fileIds,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  fileIds: string[];
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<void> => {
+  await supertest
+    .delete(`${getSpaceUrlPrefix(auth.space)}${getCasesDeleteFileAttachmentsUrl(caseId)}`)
+    .set('kbn-xsrf', 'true')
+    .query({ ids: JSON.stringify(fileIds) })
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
 };

@@ -91,26 +91,29 @@ export const deleteFileAttachments = async (
   } = clientArgs;
 
   try {
-    // it's possible that we're trying to delete a file before an attachment was created
+    // it's possible that we're trying to delete a file when an attachment wasn't created (for example if the create
+    // attachment request failed)
     const files = await pMap(
       fileIds,
-      async (fileId: string) => {
-        return fileService.getById({ id: fileId });
-      },
+      async (fileId: string) => fileService.getById({ id: fileId }),
       {
         concurrency: MAX_CONCURRENT_SEARCHES,
       }
     );
 
-    const [validFiles, _] = partition(files, (file) => {
+    const [validFiles, invalidFiles] = partition(files, (file) => {
       return CaseFileMetadataRt.is(file.data.meta) && file.data.meta.caseId === caseId;
     }) as [FileWithRequiredCaseMetadata[], File[]];
 
-    const fileAttachments = await attachmentService.getter.getFileAttachments({ caseId, fileIds });
+    if (invalidFiles.length > 0) {
+      const invalidIds = invalidFiles.map((fileInfo) => fileInfo.id);
 
-    // if (fileAttachments.length <= 0) {
-    //   throw Boom.notFound(`No case attachments were found using file ids: ${fileIds}`);
-    // }
+      // I'm intentionally being vague here because it's possible an unauthorized user could attempt to delete files
+      throw Boom.badRequest(`Failed to delete files because filed ids were invalid: ${invalidIds}`);
+    }
+
+    // It's possible for this to return an empty array if there was an error creating file attachments
+    const fileAttachments = await attachmentService.getter.getFileAttachments({ caseId, fileIds });
 
     const fileEntities: OwnerEntity[] = [];
     for (const fileInfo of validFiles) {
@@ -130,14 +133,15 @@ export const deleteFileAttachments = async (
       operation: Operations.deleteComment,
     });
 
-    await fileService.delete({
-      id: fileId,
-    });
-
-    await attachmentService.bulkDelete({
-      attachmentIds: fileAttachments.map((so) => so.id),
-      refresh: false,
-    });
+    await Promise.all([
+      pMap(fileIds, async (fileId: string) => fileService.delete({ id: fileId }), {
+        concurrency: MAX_CONCURRENT_SEARCHES,
+      }),
+      attachmentService.bulkDelete({
+        attachmentIds: fileAttachments.map((so) => so.id),
+        refresh: false,
+      }),
+    ]);
 
     await userActionService.creator.bulkCreateAttachmentDeletion({
       caseId,

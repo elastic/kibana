@@ -173,6 +173,10 @@ export class AttachmentService {
 
   public async bulkDelete({ attachmentIds, refresh }: DeleteAttachmentArgs) {
     try {
+      if (attachmentIds.length <= 0) {
+        return;
+      }
+
       this.context.log.debug(`Attempting to DELETE attachments ${attachmentIds}`);
       return await this.context.unsecuredSavedObjectsClient.bulkDelete(
         attachmentIds.map((id) => ({ id, type: CASE_COMMENT_SAVED_OBJECT })),
