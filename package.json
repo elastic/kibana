@@ -501,6 +501,7 @@
     "@kbn/rendering-plugin": "link:test/plugin_functional/plugins/rendering_plugin",
     "@kbn/repo-info": "link:packages/kbn-repo-info",
     "@kbn/repo-packages": "link:packages/kbn-repo-packages",
+    "@kbn/reporting-common": "link:packages/kbn-reporting-common",
     "@kbn/reporting-example-plugin": "link:x-pack/examples/reporting_example",
     "@kbn/reporting-plugin": "link:x-pack/plugins/reporting",
     "@kbn/resolver-test-plugin": "link:x-pack/test/plugin_functional/plugins/resolver_test",

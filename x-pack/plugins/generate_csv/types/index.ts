@@ -7,7 +7,7 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import { TaskRunMetrics } from '@kbn/reporting-plugin/common/types';
+import { TaskRunMetrics } from '@kbn/reporting-common';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import { Ensure, SerializableRecord } from '@kbn/utility-types';
 

@@ -11,7 +11,7 @@ import { createEscapeValue } from '@kbn/data-plugin/common';
 import {
   UI_SETTINGS_DATEFORMAT_TZ,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
-} from '@kbn/reporting-plugin/common/constants';
+} from '@kbn/reporting-common';
 import {
   CsvConfig,
   CSV_BOM_CHARS,

@@ -10,7 +10,6 @@ import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/
 import type { ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { cellHasFormulas, ES_SEARCH_STRATEGY, tabifyDocs } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import type { ReportingConfigType } from '@kbn/reporting-plugin/server/config';
 import type { Datatable } from '@kbn/expressions-plugin/server';
 import type {
   FieldFormat,
@@ -19,15 +18,17 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
-import type { CancellationToken } from '@kbn/reporting-plugin/common/cancellation_token';
-import { CONTENT_TYPE_CSV } from '@kbn/reporting-plugin/common/constants';
-import { AuthenticationExpiredError, ReportingError } from '@kbn/reporting-plugin/common/errors';
-import { byteSizeValueToNumber } from '@kbn/reporting-plugin/common/schema_utils';
-import { TaskRunResult } from '@kbn/reporting-plugin/common/types';
+import {
+  AuthenticationExpiredError,
+  ReportingError,
+  byteSizeValueToNumber,
+  TaskRunResult,
+  CancellationToken,
+} from '@kbn/reporting-common';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { i18nTexts } from './i18n_texts';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
-import { JobParams } from '../types';
+import { CONTENT_TYPE_CSV, CsvConfig, JobParams } from '../types';
 
 interface Clients {
   es: IScopedClusterClient;
@@ -47,7 +48,7 @@ export class CsvGenerator {
 
   constructor(
     private job: Omit<JobParams, 'version'>,
-    private config: ReportingConfigType['csv'],
+    private config: CsvConfig,
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,

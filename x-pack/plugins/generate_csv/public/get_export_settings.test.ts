@@ -8,7 +8,7 @@
 import {
   UI_SETTINGS_DATEFORMAT_TZ,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
-} from '@kbn/reporting-plugin/common/constants';
+} from '@kbn/reporting-common';
 import { UI_SETTINGS_CSV_QUOTE_VALUES, UI_SETTINGS_CSV_SEPARATOR, CsvConfig } from '../types';
 import { IUiSettingsClient } from '@kbn/core/server';
 import {

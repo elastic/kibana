@@ -17,7 +17,7 @@
     "@kbn/i18n",
     "@kbn/utility-types",
     "@kbn/expressions-plugin",
-    "@kbn/reporting-plugin",
+    "@kbn/reporting-common",
   ], 
   "exclude": [
     "target/**/*",
