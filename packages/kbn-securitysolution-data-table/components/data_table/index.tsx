@@ -38,6 +38,7 @@ import {
   RowRenderer,
   TimelineItem,
 } from '@kbn/timelines-plugin/common';
+import { DataTableModel, DataTableState } from '../../store/data_table/types';
 import {
   useDataGridColumnsSecurityCellActions,
   SecurityCellActionsTrigger,
@@ -138,7 +139,9 @@ export const DataTableComponent = React.memo<DataTableProps>(
     getFieldBrowser,
   }) => {
     const getDataTable = dataTableSelectors.getTableByIdSelector();
-    const dataTable = useShallowEqualSelector((state) => getDataTable(state, id) ?? tableDefaults);
+    const dataTable = useShallowEqualSelector<DataTableModel, DataTableState>(
+      (state) => getDataTable(state, id) ?? tableDefaults
+    );
     const { columns, selectedEventIds, showCheckboxes, sort, isLoading, defaultColumns } =
       dataTable;
 

@@ -7,16 +7,11 @@
  */
 
 import { shallowEqual, useSelector } from 'react-redux';
-import deepEqual from 'fast-deep-equal';
 
-// TODO strong typing
-export type TypedUseSelectorHook = <TSelected, TState = any>(
+export type TypedUseSelectorHook = <TSelected, TState>(
   selector: (state: TState) => TSelected,
   equalityFn?: (left: TSelected, right: TSelected) => boolean
 ) => TSelected;
 
 export const useShallowEqualSelector: TypedUseSelectorHook = (selector) =>
   useSelector(selector, shallowEqual);
-
-export const useDeepEqualSelector: TypedUseSelectorHook = (selector) =>
-  useSelector(selector, deepEqual);
