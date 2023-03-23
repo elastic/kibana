@@ -37,8 +37,6 @@ describe('SelectSeverity', () => {
     );
 
     // assert initial state
-    // EuiSuperSelect was refactored to update SR-only
-    // text, reducing the text count to 1.
     expect(getAllByText('warning')).toHaveLength(1);
     expect(queryByText('minor')).not.toBeInTheDocument();
     expect(queryByText('major')).not.toBeInTheDocument();
