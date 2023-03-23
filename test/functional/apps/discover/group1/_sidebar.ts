@@ -224,8 +224,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/146996
-    describe.skip('renders field groups', function () {
+    describe('renders field groups', function () {
       it('should show field list groups excluding subfields', async function () {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
         expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
