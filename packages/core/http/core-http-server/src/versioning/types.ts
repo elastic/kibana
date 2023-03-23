@@ -36,7 +36,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   'validate' | 'options'
 > & {
   options?: Omit<RouteConfigOptions<Method>, 'access'>;
-  // Make "access" required and move to top level
+  /** See {@link RouteConfigOptions<RouteMethod>['access']} */
   access: RouteConfigOptions<Method>['access'];
 };
 
