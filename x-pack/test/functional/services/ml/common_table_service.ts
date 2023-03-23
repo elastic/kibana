@@ -14,6 +14,7 @@ export type MlTableService = ReturnType<typeof MlTableServiceProvider>;
 export function MlTableServiceProvider({ getPageObject, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const commonPage = getPageObject('common');
+  const retry = getService('retry');
 
   const TableService = class {
     constructor(
@@ -128,19 +129,13 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
     }
 
     public async sortByField(columnName: string, columnIndex: number, direction: 'desc' | 'asc') {
-      const currentSorting = await this.getCurrentSorting();
-
       const testSubjString = `tableHeaderCell_${columnName}_${columnIndex}`;
 
-      if (currentSorting && currentSorting.direction !== direction) {
-        // if current sorting order is different, need to click twice
+      await retry.tryForTime(5000, async () => {
         await testSubjects.click(testSubjString);
         await this.waitForTableToLoad();
-      }
-
-      await testSubjects.click(testSubjString);
-      await this.waitForTableToLoad();
-      await this.assertTableSorting(columnName, columnIndex, direction);
+        await this.assertTableSorting(columnName, columnIndex, direction);
+      });
     }
   };
 
