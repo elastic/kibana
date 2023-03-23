@@ -19,6 +19,6 @@ export interface TaskContext {
   plugin: Plugin;
   config: Config;
   sourceDir: string;
-  buildDir?: string;
+  buildDir: string;
   kibanaVersion: string;
 }

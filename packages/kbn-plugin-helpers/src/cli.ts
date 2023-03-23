@@ -147,6 +147,7 @@ export function runCli() {
           plugin,
           config,
           sourceDir,
+          buildDir: '',
           kibanaVersion: 'kibana'
         };
 

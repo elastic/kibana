@@ -44,6 +44,7 @@ export async function optimize({ log, dev, dist, watch, plugin, sourceDir, build
       outputDir: Path.resolve(dev ? sourceDir : buildDir, 'target/public'),
       sourceRoot: sourceDir,
       type: 'plugin',
+      manifestPath: Path.resolve(sourceDir, 'kibana.json'),
       remoteInfo: {
         pkgId: 'not-importable',
         targets: ['public', 'common'],
@@ -56,7 +57,7 @@ export async function optimize({ log, dev, dist, watch, plugin, sourceDir, build
     const proc = fork(require.resolve('./optimize_worker'), {
       cwd: REPO_ROOT,
       execArgv: ['--require=@kbn/babel-register/install'],
-      stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+      stdio: 'pipe'
     });
 
     const result = await Rx.lastValueFrom(
@@ -100,7 +101,9 @@ export async function optimize({ log, dev, dist, watch, plugin, sourceDir, build
     );
 
     // cleanup unnecessary files
-    Fs.unlinkSync(Path.resolve(bundle.outputDir, '.kbn-optimizer-cache'));
+    try {
+      Fs.unlinkSync(Path.resolve(bundle.outputDir, '.kbn-optimizer-cache'));
+    } catch {}
 
     const rel = Path.relative(REPO_ROOT, bundle.outputDir);
     if (!result.success) {
