@@ -6,6 +6,26 @@
  * Side Public License, v 1.
  */
 
-import type { RouteMethod } from '@kbn/core-http-server';
+import type {
+  AddVersionOpts,
+  RequestHandler,
+  RouteMethod,
+  VersionedRouteConfig,
+} from '@kbn/core-http-server';
 
 export type Method = Exclude<RouteMethod, 'options'>;
+
+/** @experimental */
+export interface VersionedRouterRoute {
+  /** @experimental */
+  method: string;
+  /** @experimental */
+  path: string;
+  /** @experimental */
+  options: VersionedRouteConfig<RouteMethod>;
+  /** @experimental */
+  handlers: Array<{
+    fn: RequestHandler;
+    options: AddVersionOpts<unknown, unknown, unknown, unknown>;
+  }>;
+}

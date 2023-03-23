@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Type } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
+import type { MaybePromise } from '@kbn/utility-types';
 import type {
   RouteConfig,
   RouteMethod,
@@ -66,8 +67,6 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
   patch: VersionedRouteRegistrar<'patch', Ctx>;
   /** @experimental */
   delete: VersionedRouteRegistrar<'delete', Ctx>;
-  /** @experimental */
-  getRoutes: () => VersionedRouterRoute[];
 }
 
 /** @experimental */
@@ -135,21 +134,6 @@ export interface VersionedRoute<
     options: AddVersionOpts<P, Q, B, R>,
     handler: (
       ...params: Parameters<RequestHandler<P, Q, B, Ctx>>
-    ) => Promise<IKibanaResponse<R>> | IKibanaResponse<R>
+    ) => MaybePromise<IKibanaResponse<R>>
   ): VersionedRoute<Method, Ctx>;
-}
-
-/** @experimental */
-export interface VersionedRouterRoute {
-  /** @experimental */
-  method: string;
-  /** @experimental */
-  path: string;
-  /** @experimental */
-  options: VersionedRouteConfig<RouteMethod>;
-  /** @experimental */
-  handlers: Array<{
-    fn: RequestHandler;
-    options: AddVersionOpts<unknown, unknown, unknown, unknown>;
-  }>;
 }

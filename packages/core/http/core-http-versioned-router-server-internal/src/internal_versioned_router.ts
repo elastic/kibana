@@ -7,14 +7,9 @@
  */
 
 import type { IRouter } from '@kbn/core-http-server';
-import type {
-  VersionedRouter,
-  VersionedRoute,
-  VersionedRouteConfig,
-  VersionedRouterRoute,
-} from '@kbn/core-http-server';
+import type { VersionedRouter, VersionedRoute, VersionedRouteConfig } from '@kbn/core-http-server';
 import { InternalVersionedRoute } from './internal_versioned_route';
-import { Method } from './types';
+import { Method, VersionedRouterRoute } from './types';
 
 export class InternalVersionedRouter implements VersionedRouter {
   private readonly routes = new Set<InternalVersionedRoute>();
