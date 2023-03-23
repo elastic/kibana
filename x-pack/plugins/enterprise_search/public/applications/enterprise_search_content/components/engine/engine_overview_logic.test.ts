@@ -84,10 +84,9 @@ describe('EngineOverviewLogic', () => {
           },
         ];
         const engineData = {
-          created: '2023-02-07T19:16:43Z',
           indices,
           name: 'foo-engine',
-          updated: '2023-02-07T19:16:43Z',
+          updated_at_millis: 2202018295,
         } as EngineOverviewValues['engineData'];
         expect(selectIndices(engineData)).toBe(indices);
       });
@@ -313,7 +312,7 @@ describe('EngineOverviewLogic', () => {
             indices: ['index-001', 'index-002'],
           },
           name: 'engine-001',
-          updated: '2023-02-07T19:16:43Z',
+          updated_at_millis: 2202018295,
         };
         expect(selectFieldsCount(fieldCapabilities)).toBe(3);
       });
@@ -391,7 +390,7 @@ describe('EngineOverviewLogic', () => {
             indices: ['index-001', 'index-002'],
           },
           name: 'foo-engine',
-          updated: '2023-02-07T19:16:43Z',
+          updated_at_millis: 2202018295,
         };
         expect(selectFieldsCount(fieldCapabilities)).toBe(3);
       });

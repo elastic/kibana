@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
 import { Meta, Story } from '@storybook/react';
 import cytoscape from 'cytoscape';
 import React from 'react';
 import { Popover } from '.';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_spy';
 import { CytoscapeContext } from '../cytoscape';
 import exampleGroupedConnectionsData from '../__stories__/example_grouped_connections.json';
 
@@ -21,42 +19,32 @@ interface Args {
   nodeData: cytoscape.NodeDataDefinition;
 }
 
-type DependencyAPIReturnype =
-  APIReturnType<'GET /internal/apm/service-map/dependency'>;
-
 const stories: Meta<Args> = {
   title: 'app/ServiceMap/popover',
   component: Popover,
   decorators: [
     (StoryComponent) => {
-      const coreMock = {
-        http: {
-          get: async (): Promise<DependencyAPIReturnype> => {
-            return {
-              currentPeriod: {
-                cpuUsage: { value: 0.32809666568309237 },
-                failedTransactionsRate: { value: 0.556068173242986 },
-                memoryUsage: { value: 0.5504868173242986 },
-                transactionStats: {
-                  latency: {
-                    value: 61634.38905590272,
-                  },
-                  throughput: {
-                    value: 164.47222031860858,
-                  },
-                },
+      mockApmApiCallResponse('GET /internal/apm/service-map/dependency', () => {
+        return {
+          currentPeriod: {
+            cpuUsage: { value: 0.32809666568309237 },
+            failedTransactionsRate: { value: 0.556068173242986 },
+            memoryUsage: { value: 0.5504868173242986 },
+            transactionStats: {
+              latency: {
+                value: 61634.38905590272,
               },
-              previousPeriod: {},
-            };
+              throughput: {
+                value: 164.47222031860858,
+              },
+            },
           },
-        },
-      } as unknown as CoreStart;
+          previousPeriod: {},
+        };
+      });
 
       return (
-        <MockApmPluginStorybook
-          routePath="/service-map?rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&offset=1d"
-          apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
-        >
+        <MockApmPluginStorybook routePath="/service-map?rangeFrom=now-15m&rangeTo=now&comparisonEnabled=true&offset=1d">
           <div style={{ height: 325 }}>
             <StoryComponent />
           </div>

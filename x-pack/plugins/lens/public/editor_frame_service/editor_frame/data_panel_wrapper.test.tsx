@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { Datasource, DatasourceDataPanelProps, VisualizationMap } from '../../types';
-import { DragDropIdentifier } from '../../drag_drop';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { createMockFramePublicAPI, mockStoreDeps, mountWithProvider } from '../../mocks';
 import { disableAutoApply } from '../../state_management/lens_slice';
