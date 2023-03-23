@@ -13,7 +13,7 @@ import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import type { Case } from '../../../../common/ui/types';
-import type { GetCaseFilesParams } from '../../../containers/use_get_case_files';
+import type { CaseFilesFilteringOptions } from '../../../containers/use_get_case_files';
 
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { useGetCaseFiles } from '../../../containers/use_get_case_files';
@@ -26,12 +26,14 @@ interface CaseViewFilesProps {
 }
 
 export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
-  const [filteringOptions, setFilteringOptions] = useState<GetCaseFilesParams>({
+  const [filteringOptions, setFilteringOptions] = useState<CaseFilesFilteringOptions>({
     page: 0,
     perPage: 10,
+  });
+  const { data: caseFiles, isLoading } = useGetCaseFiles({
+    ...filteringOptions,
     caseId: caseData.id,
   });
-  const { data: attachmentsData, isLoading } = useGetCaseFiles(filteringOptions);
 
   const onTableChange = useCallback(
     ({ page }: Criteria<FileJSON>) => {
@@ -63,11 +65,11 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
     () => ({
       pageIndex: filteringOptions.page,
       pageSize: filteringOptions.perPage,
-      totalItemCount: attachmentsData?.total ?? 0,
+      totalItemCount: caseFiles?.total ?? 0,
       pageSizeOptions: [10, 25, 50],
       showPerPageOptions: true,
     }),
-    [filteringOptions.page, filteringOptions.perPage, attachmentsData]
+    [filteringOptions.page, filteringOptions.perPage, caseFiles?.total]
   );
 
   return (
@@ -75,11 +77,11 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
       <EuiFlexItem>
         <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.FILES} />
         <EuiFlexGroup>
-          <EuiFlexItem style={{ maxHeight: 300 }}>
+          <EuiFlexItem>
             <FilesUtilityBar caseId={caseData.id} onSearch={onSearchChange} />
             <FilesTable
               isLoading={isLoading}
-              items={attachmentsData?.files ?? []}
+              items={caseFiles?.files ?? []}
               onChange={onTableChange}
               pagination={pagination}
             />

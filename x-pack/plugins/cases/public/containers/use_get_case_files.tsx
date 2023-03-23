@@ -20,11 +20,14 @@ import { CASES_FILE_KINDS } from '../files';
 import { casesQueriesKeys } from './constants';
 import * as i18n from './translations';
 
-export interface GetCaseFilesParams {
-  caseId: string;
+export interface CaseFilesFilteringOptions {
   page: number;
   perPage: number;
   searchTerm?: string;
+}
+
+export interface GetCaseFilesParams extends CaseFilesFilteringOptions {
+  caseId: string;
 }
 
 export const useGetCaseFiles = ({

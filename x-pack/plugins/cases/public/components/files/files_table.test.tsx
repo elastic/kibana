@@ -8,13 +8,13 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 
-import { basicAttachment } from '../../containers/mock';
+import { basicFileMock } from '../../containers/mock';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { FilesTable } from './files_table';
 
 const defaultProps = {
-  items: [basicAttachment],
+  items: [basicFileMock],
   pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 1 },
   onChange: jest.fn(),
   isLoading: false,

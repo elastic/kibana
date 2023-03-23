@@ -241,7 +241,7 @@ export const basicCase: Case = {
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
 };
 
-export const basicAttachment: FileJSON = {
+export const basicFileMock: FileJSON = {
   id: '7d47d130-bcec-11ed-afa1-0242ac120002',
   name: 'my-super-cool-screenshot',
   mimeType: 'image/png',

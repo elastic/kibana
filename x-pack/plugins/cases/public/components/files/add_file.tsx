@@ -19,16 +19,15 @@ import type { UploadedFile } from '@kbn/shared-ux-file-upload/src/file_upload';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { FileUpload } from '@kbn/shared-ux-file-upload';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
-import { useQueryClient } from '@tanstack/react-query';
 
 import { APP_ID, CommentType, ExternalReferenceStorageType } from '../../../common';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
-import { useKibana } from '../../common/lib/kibana';
-import { casesQueriesKeys } from '../../containers/constants';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { CASES_FILE_KINDS } from '../../files';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import * as i18n from './translations';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import { useCasesToast } from '../../common/use_cases_toast';
 
 interface AddFileProps {
   caseId: string;
@@ -37,81 +36,81 @@ interface AddFileProps {
 const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
   const { owner } = useCasesContext();
   const { client: filesClient } = useFilesContext();
-  const { notifications } = useKibana().services;
-  const queryClient = useQueryClient();
+  const { showDangerToast, showErrorToast, showSuccessToast } = useCasesToast();
 
   const { isLoading, createAttachments } = useCreateAttachments();
+  const refreshAttachmentsTable = useRefreshCaseViewPage();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);
 
-  const refreshAttachmentsTable = useCallback(() => {
-    queryClient.invalidateQueries(casesQueriesKeys.caseView());
-  }, [queryClient]);
-
   const onError = useCallback(
     (error) => {
-      notifications.toasts.addError(error, {
+      showErrorToast(error, {
         title: i18n.FAILED_UPLOAD,
       });
     },
-    [notifications.toasts]
+    [showErrorToast]
   );
 
   const onUploadDone = useCallback(
     async (chosenFiles: UploadedFile[]) => {
       if (chosenFiles.length === 0) {
-        notifications.toasts.addDanger({
-          title: i18n.FAILED_UPLOAD,
-        });
-      } else {
-        const file = chosenFiles[0];
+        showDangerToast(i18n.FAILED_UPLOAD);
+        return;
+      }
 
-        try {
-          await createAttachments({
-            caseId,
-            caseOwner: owner[0],
-            data: [
-              {
-                type: CommentType.externalReference,
-                externalReferenceId: file.id,
-                externalReferenceStorage: {
-                  type: ExternalReferenceStorageType.savedObject,
-                  soType: FILE_SO_TYPE,
-                },
-                externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
-                externalReferenceMetadata: {
-                  files: [
-                    {
-                      name: file.fileJSON.name,
-                      extension: file.fileJSON.extension ?? '',
-                      mimeType: file.fileJSON.mimeType ?? '',
-                      createdAt: file.fileJSON.created,
-                    },
-                  ],
-                },
+      const file = chosenFiles[0];
+
+      try {
+        await createAttachments({
+          caseId,
+          caseOwner: owner[0],
+          data: [
+            {
+              type: CommentType.externalReference,
+              externalReferenceId: file.id,
+              externalReferenceStorage: {
+                type: ExternalReferenceStorageType.savedObject,
+                soType: FILE_SO_TYPE,
               },
-            ],
-            updateCase: refreshAttachmentsTable,
-            throwOnError: true,
-          });
+              externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+              externalReferenceMetadata: {
+                files: [
+                  {
+                    name: file.fileJSON.name,
+                    extension: file.fileJSON.extension ?? '',
+                    mimeType: file.fileJSON.mimeType ?? '',
+                    createdAt: file.fileJSON.created,
+                  },
+                ],
+              },
+            },
+          ],
+          updateCase: refreshAttachmentsTable,
+          throwOnError: true,
+        });
 
-          notifications.toasts.addSuccess({
-            title: i18n.SUCCESSFUL_UPLOAD,
-            text: i18n.SUCCESSFUL_UPLOAD_FILE_NAME(file.fileJSON.name),
-          });
-        } catch (error) {
-          // error toast is handled inside  createAttachments
+        showSuccessToast(i18n.SUCCESSFUL_UPLOAD_FILE_NAME(file.fileJSON.name));
+      } catch (error) {
+        // error toast is handled inside  createAttachments
 
-          // we need to delete the file if attachment creation failed
-          await filesClient.delete({ kind: CASES_FILE_KINDS[APP_ID].id, id: file.id });
-        }
+        // we need to delete the file if attachment creation failed
+        await filesClient.delete({ kind: CASES_FILE_KINDS[APP_ID].id, id: file.id });
       }
 
       closeModal();
     },
-    [caseId, createAttachments, filesClient, notifications.toasts, refreshAttachmentsTable, owner]
+    [
+      caseId,
+      createAttachments,
+      filesClient,
+      owner,
+      refreshAttachmentsTable,
+      showDangerToast,
+      showSuccessToast,
+    ]
   );
 
   return (

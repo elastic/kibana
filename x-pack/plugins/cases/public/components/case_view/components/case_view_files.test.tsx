@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { alertCommentWithIndices, basicAttachment, basicCase } from '../../../containers/mock';
+import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
 import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer, TestProviders } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 import type { Case } from '../../../../common';
 import { CaseViewFiles } from './case_view_files';
 import { useGetCaseFiles } from '../../../containers/use_get_case_files';
@@ -25,11 +25,7 @@ const caseData: Case = {
 describe('Case View Page files tab', () => {
   let appMockRender: AppMockRenderer;
   useGetCaseFilesMock.mockReturnValue({
-    data: {
-      pageOfItems: [basicAttachment],
-      availableTypes: [basicAttachment.mimeType],
-      totalItemCount: 1,
-    },
+    data: {},
     isLoading: false,
   });
 
@@ -42,22 +38,14 @@ describe('Case View Page files tab', () => {
   });
 
   it('should render the utility bar for the files table', async () => {
-    const result = appMockRender.render(
-      <TestProviders>
-        <CaseViewFiles caseData={caseData} />
-      </TestProviders>
-    );
+    const result = appMockRender.render(<CaseViewFiles caseData={caseData} />);
 
     expect(await result.findByTestId('cases-add-file')).toBeInTheDocument();
     expect(await result.findByTestId('case-detail-search-file')).toBeInTheDocument();
   });
 
   it('should render the files table', async () => {
-    const result = appMockRender.render(
-      <TestProviders>
-        <CaseViewFiles caseData={caseData} />
-      </TestProviders>
-    );
+    const result = appMockRender.render(<CaseViewFiles caseData={caseData} />);
 
     expect(await result.findByTestId('cases-files-table')).toBeInTheDocument();
   });

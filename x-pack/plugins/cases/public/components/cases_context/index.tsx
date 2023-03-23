@@ -131,9 +131,12 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
         return contextChildren;
       }
 
-      if (owner[0] in CASES_FILE_KINDS) {
+      const isValidOwner = (ownerToCheck: string): ownerToCheck is Owner =>
+        ownerToCheck in CASES_FILE_KINDS;
+
+      if (isValidOwner(owner[0])) {
         return (
-          <FilesContext client={getFilesClient(CASES_FILE_KINDS[owner[0] as Owner].id)}>
+          <FilesContext client={getFilesClient(CASES_FILE_KINDS[owner[0]].id)}>
             {contextChildren}
           </FilesContext>
         );
