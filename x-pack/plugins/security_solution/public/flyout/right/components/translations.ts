@@ -16,3 +16,8 @@ export const COLLAPSE_DETAILS_BUTTON = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.collapseDetailButton',
   { defaultMessage: 'Collapse alert details' }
 );
+
+export const HIGHLIGHTED_FIELDS_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.highlightedFieldsTitle',
+  { defaultMessage: 'Highlighted fields' }
+);

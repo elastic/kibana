@@ -28,7 +28,7 @@ import {
   FetchEnginesAPILogic,
 } from '../../api/engines/fetch_engines_api_logic';
 
-import { DEFAULT_META, updateMetaPageIndex } from './types';
+import { DEFAULT_META, updateMetaPageIndex, updateMetaTotalState } from './types';
 
 interface EuiBasicTableOnChange {
   page: { index: number };
@@ -67,7 +67,7 @@ interface EngineListValues {
   isFirstRequest: boolean;
   isLoading: boolean;
   meta: Page;
-  parameters: { meta: Page; searchQuery?: string }; // Added this variable to store to the search Query value as well
+  parameters: { count: number; meta: Page; searchQuery?: string }; // Added this variable to store to the search Query value as well
   results: EnterpriseSearchEngine[]; // stores engine list value from data
   searchQuery: string;
   status: typeof FetchEnginesAPILogic.values.status;
@@ -132,10 +132,12 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     ],
 
     parameters: [
-      { meta: DEFAULT_META },
+      { count: 0, meta: DEFAULT_META },
       {
-        apiSuccess: (_, { meta }) => ({
-          meta,
+        apiSuccess: (state, { count }) => ({
+          ...state,
+          count,
+          meta: updateMetaTotalState(state.meta, count), // update total count from response
         }),
         onPaginate: (state, { pageNumber }) => ({
           ...state,
@@ -171,7 +173,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     hasNoEngines: [
       () => [selectors.data, selectors.results],
       (data: EngineListValues['data'], results: EngineListValues['results']) =>
-        (data?.meta?.from === 0 && results.length === 0 && !data?.params?.q) ?? false,
+        (data?.params?.from === 0 && results.length === 0 && !data?.params?.q) ?? false,
     ],
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
   }),

@@ -14,6 +14,7 @@ import {
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
+  METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION,
 } from '../../../../../../common/es_fields/apm';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { ChartBase } from '../../../types';
@@ -91,6 +92,7 @@ export async function getMemoryChartData({
   serverlessId,
   start,
   end,
+  isOpenTelemetry,
 }: {
   environment: string;
   kuery: string;
@@ -101,9 +103,10 @@ export async function getMemoryChartData({
   serverlessId?: string;
   start: number;
   end: number;
+  isOpenTelemetry?: boolean;
 }) {
-  return withApmSpan('get_memory_metrics_charts', async () => {
-    const cgroupResponse = await fetchAndTransformMetrics({
+  if (isOpenTelemetry) {
+    return await fetchAndTransformMetrics({
       environment,
       kuery,
       config,
@@ -114,18 +117,22 @@ export async function getMemoryChartData({
       end,
       chartBase,
       aggs: {
-        memoryUsedAvg: { avg: { script: percentCgroupMemoryUsedScript } },
-        memoryUsedMax: { max: { script: percentCgroupMemoryUsedScript } },
+        memoryUsedAvg: {
+          avg: { field: METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION },
+        },
+        memoryUsedMax: {
+          max: { field: METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION },
+        },
       },
       additionalFilters: [
-        { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+        { exists: { field: METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION } },
         ...termQuery(FAAS_ID, serverlessId),
       ],
-      operationName: 'get_cgroup_memory_metrics_charts',
+      operationName: 'get_otel_system_memory_metrics_charts',
     });
-
-    if (cgroupResponse.series.length === 0) {
-      return await fetchAndTransformMetrics({
+  } else {
+    return withApmSpan('get_memory_metrics_charts', async () => {
+      const cgroupResponse = await fetchAndTransformMetrics({
         environment,
         kuery,
         config,
@@ -136,18 +143,41 @@ export async function getMemoryChartData({
         end,
         chartBase,
         aggs: {
-          memoryUsedAvg: { avg: { script: percentSystemMemoryUsedScript } },
-          memoryUsedMax: { max: { script: percentSystemMemoryUsedScript } },
+          memoryUsedAvg: { avg: { script: percentCgroupMemoryUsedScript } },
+          memoryUsedMax: { max: { script: percentCgroupMemoryUsedScript } },
         },
         additionalFilters: [
-          { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-          { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+          { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
           ...termQuery(FAAS_ID, serverlessId),
         ],
-        operationName: 'get_system_memory_metrics_charts',
+        operationName: 'get_cgroup_memory_metrics_charts',
       });
-    }
 
-    return cgroupResponse;
-  });
+      if (cgroupResponse.series.length === 0) {
+        return await fetchAndTransformMetrics({
+          environment,
+          kuery,
+          config,
+          apmEventClient,
+          serviceName,
+          serviceNodeName,
+          start,
+          end,
+          chartBase,
+          aggs: {
+            memoryUsedAvg: { avg: { script: percentSystemMemoryUsedScript } },
+            memoryUsedMax: { max: { script: percentSystemMemoryUsedScript } },
+          },
+          additionalFilters: [
+            { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+            { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+            ...termQuery(FAAS_ID, serverlessId),
+          ],
+          operationName: 'get_system_memory_metrics_charts',
+        });
+      }
+
+      return cgroupResponse;
+    });
+  }
 }

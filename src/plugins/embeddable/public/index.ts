@@ -89,6 +89,8 @@ export {
   isFilterableEmbeddable,
   shouldFetch$,
   shouldRefreshFilterCompareOptions,
+  PANEL_HOVER_TRIGGER,
+  panelHoverTrigger,
 } from './lib';
 
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
