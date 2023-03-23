@@ -515,7 +515,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
     });
 
-    for (const packagePolicy of packagePolicies.saved_objects ?? []) {
+    for (const packagePolicy of packagePolicies?.saved_objects ?? []) {
       appContextService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
