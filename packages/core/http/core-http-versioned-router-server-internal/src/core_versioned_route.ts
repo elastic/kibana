@@ -62,7 +62,16 @@ export class CoreVersionedRoute implements VersionedRoute {
     public readonly options: VersionedRouteConfig<Method>,
     // TODO: Make "true" dev-only
     private readonly validateResponses: boolean = true
-  ) {}
+  ) {
+    this.router[this.method](
+      {
+        path: this.path,
+        validate: passThroughValidation,
+        options: this.options,
+      },
+      this.requestHandler
+    );
+  }
 
   /** This is where we must implement the versioned spec once it is available */
   private requestHandler = async (
@@ -145,16 +154,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     }
 
     this.handlers.set(options.version, { fn: handler, options });
-    if (this.handlers.size === 1) {
-      this.router[this.method](
-        {
-          path: this.path,
-          validate: passThroughValidation,
-          options: this.options,
-        },
-        this.requestHandler
-      );
-    }
+
     return this;
   }
 
