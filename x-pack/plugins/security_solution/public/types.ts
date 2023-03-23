@@ -44,6 +44,7 @@ import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plu
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -101,6 +102,7 @@ export interface StartPlugins {
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
 }
 
@@ -119,6 +121,7 @@ export type StartServices = CoreStart &
     securityLayout: {
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
+    savedObjectsManagement: SavedObjectsManagementPluginStart;
     telemetry: TelemetryClientStart;
   };
 

@@ -19,14 +19,16 @@ describe('CreateEngineApiLogic', () => {
   describe('createEngine', () => {
     it('calls correct api', async () => {
       const engine = { engineName: 'my-engine', indices: ['an-index'] };
-      const promise = Promise.resolve(engine);
-      http.post.mockReturnValue(promise);
+      const response = { result: 'created' };
+      const promise = Promise.resolve(response);
+      http.put.mockReturnValue(promise);
       const result = createEngine(engine);
       await nextTick();
-      expect(http.post).toHaveBeenCalledWith('/internal/enterprise_search/engines', {
+      expect(http.put).toHaveBeenCalledWith('/internal/enterprise_search/engines/my-engine', {
         body: '{"indices":["an-index"],"name":"my-engine"}',
+        query: { create: true },
       });
-      await expect(result).resolves.toEqual(engine);
+      await expect(result).resolves.toEqual(response);
     });
   });
 });

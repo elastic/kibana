@@ -59,9 +59,13 @@ export async function getSloDiagnosis(
   let dataSample;
   if (sloSavedObject?.attributes.indicator.params.index) {
     const slo = sloSavedObject.attributes;
+    const sortField =
+      'timestampField' in slo.indicator.params
+        ? slo.indicator.params.timestampField ?? '@timestamp'
+        : '@timestamp';
     dataSample = await esClient.search({
       index: slo.indicator.params.index,
-      sort: { [slo.settings.timestampField]: 'desc' },
+      sort: { [sortField]: 'desc' },
       size: 5,
     });
   }
