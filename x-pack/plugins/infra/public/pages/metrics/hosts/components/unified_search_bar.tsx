@@ -21,6 +21,7 @@ import type { InfraClientStartDeps } from '../../../../types';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
 import { useMetricsDataViewContext } from '../hooks/use_data_view';
+import { EuiHorizontalRule } from '@elastic/eui';
 
 export const UnifiedSearchBar = () => {
   const {
@@ -78,6 +79,7 @@ export const UnifiedSearchBar = () => {
         filters={searchCriteria.filters}
         onFiltersChange={onPanelFiltersChange}
       />
+      <EuiHorizontalRule margin="none" />
     </StickyContainer>
   );
 };
@@ -93,7 +95,7 @@ const StickyContainer = (props: { children: React.ReactNode }) => {
         top: calc(${euiTheme.size.xxxl} * 2);
         z-index: ${euiTheme.levels.header};
         background: ${euiTheme.colors.emptyShade};
-        padding-top: ${euiTheme.size.l};
+        padding-top: ${euiTheme.size.m};
       `}
       {...props}
     />
