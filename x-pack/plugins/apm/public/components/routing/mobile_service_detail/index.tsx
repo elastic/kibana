@@ -14,7 +14,6 @@ import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { AlertsOverview } from '../../app/alerts_overview';
 import { ServiceMapServiceDetail } from '../../app/service_map';
 import { MobileServiceTemplate } from '../templates/mobile_service_template';
@@ -22,6 +21,7 @@ import { MobileServiceOverview } from '../../app/mobile/service_overview';
 import { MobileTransactionOverview } from '../../app/mobile/transaction_overview';
 import { TransactionDetails } from '../../app/transaction_details';
 import { RedirectToDefaultServiceRouteView } from '../service_detail/redirect_to_default_service_route_view';
+import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 
 export function page({
   title,
@@ -58,9 +58,9 @@ export function page({
 export const mobileServiceDetail = {
   '/mobile-services/{serviceName}': {
     element: (
-      <TimeRangeMetadataContextProvider>
+      <ApmTimeRangeMetadataContextProvider>
         <Outlet />
-      </TimeRangeMetadataContextProvider>
+      </ApmTimeRangeMetadataContextProvider>
     ),
     params: t.intersection([
       t.type({

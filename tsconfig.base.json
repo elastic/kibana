@@ -618,6 +618,8 @@
       "@kbn/doc-links/*": ["packages/kbn-doc-links/*"],
       "@kbn/docs-utils": ["packages/kbn-docs-utils"],
       "@kbn/docs-utils/*": ["packages/kbn-docs-utils/*"],
+      "@kbn/dom-drag-drop": ["packages/kbn-dom-drag-drop"],
+      "@kbn/dom-drag-drop/*": ["packages/kbn-dom-drag-drop/*"],
       "@kbn/ebt-tools": ["packages/kbn-ebt-tools"],
       "@kbn/ebt-tools/*": ["packages/kbn-ebt-tools/*"],
       "@kbn/ecs": ["packages/kbn-ecs"],
