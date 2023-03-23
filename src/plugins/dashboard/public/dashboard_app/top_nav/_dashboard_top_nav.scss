@@ -5,7 +5,7 @@
   background: $euiPageBackgroundColor;
 
   top: $kbnHeaderOffset;
-  &.dashboardTopNav__fullscreen {
-    top: 0px;
+  &.dashboardTopNav-fullscreenMode {
+    top: 0;
   }
 }
