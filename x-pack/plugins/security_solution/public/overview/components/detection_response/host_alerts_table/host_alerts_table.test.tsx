@@ -13,25 +13,11 @@ import { TestProviders } from '../../../../common/mock';
 import { parsedVulnerableHostsAlertsResult } from './mock_data';
 import type { UseHostAlertsItems } from './use_host_alerts_items';
 import { HostAlertsTable } from './host_alerts_table';
-import { openAlertsFilter } from '../utils';
 
-const mockGetAppUrl = jest.fn();
-jest.mock('../../../../common/lib/kibana/hooks', () => {
-  const original = jest.requireActual('../../../../common/lib/kibana/hooks');
+const mockNavigateToAlertsPageWithFilters = jest.fn();
+jest.mock('../../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
   return {
-    ...original,
-    useNavigation: () => ({
-      getAppUrl: mockGetAppUrl,
-    }),
-  };
-});
-
-const mockOpenTimelineWithFilters = jest.fn();
-jest.mock('../hooks/use_navigate_to_timeline', () => {
-  return {
-    useNavigateToTimeline: () => ({
-      openTimelineWithFilters: mockOpenTimelineWithFilters,
-    }),
+    useNavigateToAlertsPageWithFilters: () => mockNavigateToAlertsPageWithFilters,
   };
 });
 
@@ -141,14 +127,8 @@ describe('HostAlertsTable', () => {
 
     fireEvent.click(getByTestId('hostSeverityAlertsTable-totalAlertsLink'));
 
-    expect(mockOpenTimelineWithFilters).toHaveBeenCalledWith([
-      [
-        {
-          field: 'host.name',
-          value: 'Host-342m5gl1g2',
-        },
-        openAlertsFilter,
-      ],
+    expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
+      { fieldName: 'host.name', selectedOptions: ['Host-342m5gl1g2'], title: 'Host name' },
     ]);
   });
 
@@ -158,18 +138,17 @@ describe('HostAlertsTable', () => {
 
     fireEvent.click(getByTestId('hostSeverityAlertsTable-criticalLink'));
 
-    expect(mockOpenTimelineWithFilters).toHaveBeenCalledWith([
-      [
-        {
-          field: 'host.name',
-          value: 'Host-342m5gl1g2',
-        },
-        openAlertsFilter,
-        {
-          field: 'kibana.alert.severity',
-          value: 'critical',
-        },
-      ],
+    expect(mockNavigateToAlertsPageWithFilters).toHaveBeenCalledWith([
+      {
+        fieldName: 'host.name',
+        selectedOptions: ['Host-342m5gl1g2'],
+        title: 'Host name',
+      },
+      {
+        fieldName: 'kibana.alert.severity',
+        selectedOptions: ['critical'],
+        title: 'Severity',
+      },
     ]);
   });
 });

@@ -39,12 +39,13 @@ import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/con
 import {
   getAlertsGroupingQuery,
   getDefaultGroupingOptions,
-  getSelectedGroupBadgeMetrics,
-  getSelectedGroupButtonContent,
-  getSelectedGroupCustomMetrics,
+  getBadgeMetrics,
+  renderGroupPanel,
+  getCustomMetrics,
   useGroupTakeActionsItems,
 } from './grouping_settings';
 import { updateGroupSelector, updateSelectedGroup } from '../../../common/store/grouping/actions';
+import { track } from '../../../common/lib/telemetry';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 
@@ -82,16 +83,19 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   renderChildComponent,
 }) => {
   const dispatch = useDispatch();
+
   const { browserFields, indexPattern, selectedPatterns } = useSourcererDataView(
     SourcererScopeName.detections
   );
-  const kibana = useKibana();
+  const {
+    services: { uiSettings, telemetry },
+  } = useKibana();
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
       if (browserFields != null && indexPattern != null) {
         return combineQueries({
-          config: getEsQueryConfig(kibana.services.uiSettings),
+          config: getEsQueryConfig(uiSettings),
           dataProviders: [],
           indexPattern,
           browserFields,
@@ -107,13 +111,22 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
       }
       return null;
     },
-    [browserFields, defaultFilters, globalFilters, globalQuery, indexPattern, kibana, to, from]
+    [browserFields, indexPattern, uiSettings, defaultFilters, globalFilters, from, to, globalQuery]
+  );
+
+  const onGroupChangeCallback = useCallback(
+    (param) => {
+      telemetry.reportAlertsGroupingChanged(param);
+    },
+    [telemetry]
   );
 
   const { groupSelector, getGrouping, selectedGroup, pagination } = useGrouping({
     defaultGroupingOptions: getDefaultGroupingOptions(tableId),
     groupingId: tableId,
     fields: indexPattern.fields,
+    onGroupChangeCallback,
+    tracker: track,
   });
   const resetPagination = pagination.reset;
 
@@ -221,9 +234,14 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   });
 
   const getTakeActionItems = useCallback(
-    (groupFilters: Filter[]) =>
-      takeActionItems(getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery),
-    [defaultFilters, getGlobalQuery, takeActionItems]
+    (groupFilters: Filter[], groupNumber: number) =>
+      takeActionItems({
+        query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
+        tableId,
+        groupNumber,
+        selectedGroup,
+      }),
+    [defaultFilters, getGlobalQuery, selectedGroup, tableId, takeActionItems]
   );
 
   const groupedAlerts = useMemo(
@@ -232,16 +250,21 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
         ? renderChildComponent([])
         : getGrouping({
             badgeMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
-              getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket),
+              getBadgeMetrics(selectedGroup, fieldBucket),
             customMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
-              getSelectedGroupCustomMetrics(selectedGroup, fieldBucket),
+              getCustomMetrics(selectedGroup, fieldBucket),
             data: alertsGroupsData?.aggregations,
+            groupingId: tableId,
             groupPanelRenderer: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
-              getSelectedGroupButtonContent(selectedGroup, fieldBucket),
+              renderGroupPanel(selectedGroup, fieldBucket),
             inspectButton: inspect,
             isLoading: loading || isLoadingGroups,
+            onToggleCallback: (param) => {
+              telemetry.reportAlertsGroupingToggled({ ...param, tableId: param.groupingId });
+            },
             renderChildComponent,
             takeActionItems: getTakeActionItems,
+            tracker: track,
             unit: defaultUnit,
           }),
     [
@@ -253,6 +276,8 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
       loading,
       renderChildComponent,
       selectedGroup,
+      tableId,
+      telemetry,
     ]
   );
 

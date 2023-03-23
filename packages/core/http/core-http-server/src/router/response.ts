@@ -13,9 +13,9 @@ import type { ResponseHeaders } from './headers';
  * HTTP response parameters
  * @public
  */
-export interface HttpResponseOptions {
+export interface HttpResponseOptions<T extends HttpResponsePayload | ResponseError = any> {
   /** HTTP message to send to the client */
-  body?: HttpResponsePayload;
+  body?: T;
   /** HTTP Headers with additional information about response */
   headers?: ResponseHeaders;
   /** Bypass the default error formatting */

@@ -91,6 +91,7 @@ export function TestResultHeader({
       {checkGroupId && configId && isCompleted && (
         <EuiFlexItem grow={false}>
           <EuiLink
+            data-test-subj="syntheticsTestResultHeaderLink"
             href={getTestRunDetailLink({
               basePath,
               monitorId: configId,
