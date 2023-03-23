@@ -100,7 +100,7 @@ export const useRetrieveStepImage = ({
     shouldRetry,
   ]);
 
-  return { imageResult };
+  return imageResult;
 };
 
 /**

@@ -52,7 +52,7 @@ export const JourneyStepScreenshotContainer = ({
     threshold: 0.1,
   });
 
-  const { imageResult } = useRetrieveStepImage({
+  const imageResult = useRetrieveStepImage({
     hasIntersected: Boolean(intersection && intersection.intersectionRatio > 0),
     stepStatus,
     imgPath,
