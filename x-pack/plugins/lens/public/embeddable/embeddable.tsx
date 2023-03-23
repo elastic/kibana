@@ -487,16 +487,13 @@ export class Embeddable
       merge(searchContext$, attributesOrSavedObjectId$)
         .pipe(debounceTime(0))
         .subscribe(async ({ trigger, input }) => {
-          switch (trigger) {
-            case 'attributesOrSavedObjectId':
-              await this.initializeSavedVis(input);
-              break;
-            case 'searchContext':
-              // reset removable messages
-              // Dashboard search/context changes are detected here
-              this.additionalUserMessages = {};
-              break;
+          if (trigger === 'attributesOrSavedObjectId') {
+            await this.initializeSavedVis(input);
           }
+
+          // reset removable messages
+          // Dashboard search/context changes are detected here
+          this.additionalUserMessages = {};
 
           this.reload();
         })
