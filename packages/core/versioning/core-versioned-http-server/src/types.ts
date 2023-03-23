@@ -8,7 +8,6 @@
 
 import { Type } from '@kbn/config-schema';
 import type {
-  IRouter,
   RouteConfig,
   RouteMethod,
   RequestHandler,
@@ -17,7 +16,6 @@ import type {
   RouteValidatorFullConfig,
   RequestHandlerContextBase,
   RouteValidationFunction,
-  RouteValidatorOptions,
 } from '@kbn/core-http-server';
 
 type RqCtx = RequestHandlerContextBase;
@@ -27,33 +25,6 @@ type RqCtx = RequestHandlerContextBase;
  * @experimental
  */
 export type Version = `${number}`;
-
-/**
- * Arguments to create a {@link VersionedRouter | versioned router}.
- * @experimental
- */
-export interface CreateVersionedRouterArgs<Ctx extends RqCtx = RqCtx> {
-  /**
-   * A router instance
-   * @experimental
-   */
-  router: IRouter<Ctx>;
-}
-
-/**
- * This interface is the starting point for creating versioned routers and routes
- *
- * @example see ./example.ts
- *
- * @experimental
- * Create a versioned router
- * @param args - The arguments to create a versioned router
- * @returns A versioned router
- * @experimental
- */
-export type CreateVersionedRouter = <Ctx extends RqCtx = RqCtx>(
-  args: CreateVersionedRouterArgs<Ctx>
-) => VersionedRouter<Ctx>;
 
 /**
  * Configuration for a versioned route

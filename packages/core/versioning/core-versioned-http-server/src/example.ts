@@ -7,16 +7,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
-import type { CreateVersionedRouter } from './types';
+import type { RequestHandlerContextBase } from '@kbn/core-http-server';
+import { VersionedRouter } from './types';
 
 interface MyCustomContext extends RequestHandlerContextBase {
   fooService: { create: (value: string, id: undefined | string, name?: string) => Promise<void> };
 }
-const createVersionedRouter = (() => {}) as unknown as CreateVersionedRouter;
-const router = {} as unknown as IRouter<MyCustomContext>;
-
-const versionedRouter = createVersionedRouter({ router });
+const versionedRouter = {} as unknown as VersionedRouter<MyCustomContext>;
 
 // @ts-ignore unused variable
 const versionedRoute = versionedRouter

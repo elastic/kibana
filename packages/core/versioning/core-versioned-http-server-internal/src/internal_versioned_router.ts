@@ -13,13 +13,12 @@ import type {
   VersionedRouteConfig,
   VersionedRouterRoute,
 } from '@kbn/core-versioned-http-server';
-import { CreateVersionedRouterArgs } from '@kbn/core-versioned-http-server/src';
 import { InternalVersionedRoute } from './internal_versioned_route';
 import { Method } from './types';
 
 export class InternalVersionedRouter implements VersionedRouter {
   private readonly routes = new Set<InternalVersionedRoute>();
-  public static from({ router }: CreateVersionedRouterArgs) {
+  public static from({ router }: { router: IRouter }) {
     return new InternalVersionedRouter(router);
   }
   private constructor(private readonly router: IRouter) {}
