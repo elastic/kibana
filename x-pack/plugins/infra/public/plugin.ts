@@ -83,6 +83,18 @@ export class Plugin implements InfraClientPluginClass {
       fetchData: createMetricsFetchData(core.getStartServices),
     });
 
+    pluginsSetup.observability.dashboard.register({
+      appName: 'infra_logs',
+      hasData: getLogsHasDataFetcher(core.getStartServices),
+      fetchData: getLogsOverviewDataFetcher(core.getStartServices),
+    });
+
+    pluginsSetup.observability.dashboard.register({
+      appName: 'infra_metrics',
+      hasData: createMetricsHasData(core.getStartServices),
+      fetchData: createMetricsFetchData(core.getStartServices),
+    });
+
     const startDep$AndHostViewFlag$ = combineLatest([
       from(core.getStartServices()),
       core.uiSettings.get$<boolean>(enableInfrastructureHostsView),

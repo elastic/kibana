@@ -11,6 +11,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -61,6 +62,7 @@ export interface InfraClientStartExports {
 export interface InfraClientSetupDeps {
   home?: HomePublicPluginSetup;
   observability: ObservabilityPublicSetup;
+  exploratoryView: ExploratoryViewPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   ml: MlPluginSetup;
