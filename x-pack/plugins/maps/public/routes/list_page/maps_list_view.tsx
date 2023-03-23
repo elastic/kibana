@@ -105,7 +105,8 @@ interface Props {
 
 export function MapsListView(props: Props) {
   getExecutionContextService().set({
-    type: APP_ID,
+    type: 'application',
+    name: APP_ID,
     page: 'list',
   });
 

@@ -171,7 +171,7 @@ export class MapEmbeddable
       return;
     }
 
-    this.getStore().dispatch(
+    this._savedMap.getStore().dispatch(
       setExecutionContext(this.getExecutionContext())
     );
 
@@ -188,7 +188,7 @@ export class MapEmbeddable
     const parentContext = getExecutionContextService().get();
     const mapContext: KibanaExecutionContext = {
       type: APP_ID,
-      name: this.output.defaultTitle,
+      name: APP_ID,
       id: this.id,
       url: this.output.editPath,
     };
@@ -196,7 +196,7 @@ export class MapEmbeddable
     return parentContext
       ? {
           ...parentContext,
-          mapContext,
+          child: mapContext,
         }
       : mapContext;
   }

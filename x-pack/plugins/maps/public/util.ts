@@ -11,7 +11,7 @@ import {
   getTilemap,
   getEMSSettings,
   getMapsEmsStart,
-  getExecutionContext,
+  getExecutionContextService,
 } from './kibana_services';
 import { getLicenseId } from './licensed_features';
 import { makeExecutionContext } from '../common/execution_context';
@@ -63,7 +63,7 @@ export function isRetina(): boolean {
 }
 
 export function makePublicExecutionContext(description: string): KibanaExecutionContext {
-  const topLevelContext = getExecutionContext().get();
+  const topLevelContext = getExecutionContextService().get();
   const context = makeExecutionContext({
     url: window.location.pathname,
     description,

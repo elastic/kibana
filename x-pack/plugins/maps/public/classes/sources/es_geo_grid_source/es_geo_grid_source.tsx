@@ -50,7 +50,7 @@ import {
 } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty, OnSourceChangeArgs, SourceEditorArgs } from '../source';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { makePublicExecutionContext } from '../../../util';
+import { mergeExecutionContext } from '../execution_context_utils';
 import { isMvt } from './is_mvt';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { getIconSize } from './get_icon_size';
@@ -256,6 +256,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     isRequestStillActive,
     bufferedExtent,
     inspectorAdapters,
+    executionContext,
   }: {
     searchSource: ISearchSource;
     searchSessionId?: string;
@@ -267,6 +268,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     isRequestStillActive: () => boolean;
     bufferedExtent: MapExtent;
     inspectorAdapters: Adapters;
+    executionContext: KibanaExecutionContext;
   }) {
     const gridsPerRequest: number = Math.floor(DEFAULT_MAX_BUCKETS_LIMIT / bucketsPerGrid);
     const aggs: any = {
@@ -337,7 +339,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
           }
         ),
         searchSessionId,
-        executionContext: makePublicExecutionContext('es_geo_grid_source:cluster_composite'),
+        executionContext: mergeExecutionContext({ description: 'es_geo_grid_source:cluster_composite' }, executionContext),
         requestsAdapter: inspectorAdapters.requests,
       });
 
@@ -365,6 +367,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     bufferedExtent,
     tooManyBuckets,
     inspectorAdapters,
+    executionContext,
   }: {
     searchSource: ISearchSource;
     searchSessionId?: string;
@@ -375,6 +378,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     bufferedExtent: MapExtent;
     tooManyBuckets: boolean;
     inspectorAdapters: Adapters;
+    executionContext: KibanaExecutionContext;
   }): Promise<Feature[]> {
     const valueAggsDsl = tooManyBuckets
       ? this.getValueAggsDsl(indexPattern, (metric) => {
@@ -411,7 +415,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         defaultMessage: 'Elasticsearch geo grid aggregation request',
       }),
       searchSessionId,
-      executionContext: makePublicExecutionContext('es_geo_grid_source:cluster'),
+      executionContext: mergeExecutionContext({ description: 'es_geo_grid_source:cluster' }, executionContext),
       requestsAdapter: inspectorAdapters.requests,
     });
 
@@ -471,6 +475,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
             isRequestStillActive,
             bufferedExtent: searchFilters.buffer,
             inspectorAdapters,
+            executionContext: searchFilters.executionContext,
           })
         : await this._nonCompositeAggRequest({
             searchSource,
@@ -482,6 +487,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
             bufferedExtent: searchFilters.buffer,
             tooManyBuckets,
             inspectorAdapters,
+            executionContext: searchFilters.executionContext,
           });
 
     return {
