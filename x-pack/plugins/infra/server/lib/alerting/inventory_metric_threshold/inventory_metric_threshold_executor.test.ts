@@ -24,7 +24,6 @@ import {
 } from '../../../../common/alerting/metrics';
 
 import type { LogMeta, Logger } from '@kbn/logging';
-import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { createInventoryMetricThresholdExecutor } from './inventory_metric_threshold_executor';
 import { ConditionResult } from './evaluate_condition';
 import { InfraBackendLibs } from '../../infra_types';
@@ -80,7 +79,6 @@ const mockOptions = {
     muteAll: false,
   },
   logger,
-  flappingSettings: DEFAULT_FLAPPING_SETTINGS,
 };
 
 const setEvaluationResults = (response: Record<string, ConditionResult>) => {
