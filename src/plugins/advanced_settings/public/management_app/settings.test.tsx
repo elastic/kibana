@@ -252,8 +252,8 @@ describe('Settings', () => {
     const component = mountWithI18nProvider(
       <Settings
         history={mockHistory}
-        enableSaving={{ global: true, namespace: true }}
-        enableShowing={{ global: true, namespace: true }}
+        enableSaving={{ global: true, namespace: true, user: false }}
+        enableShowing={{ global: true, namespace: true, user: false }}
         toasts={notificationServiceMock.createStartContract().toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
         settingsService={mockConfig().core.settings}
@@ -281,8 +281,8 @@ describe('Settings', () => {
     const component = mountWithI18nProvider(
       <Settings
         history={mockHistory}
-        enableSaving={{ global: true, namespace: true }}
-        enableShowing={{ global: true, namespace: true }}
+        enableSaving={{ global: true, namespace: true, user: false }}
+        enableShowing={{ global: true, namespace: true, user: false }}
         toasts={notificationServiceMock.createStartContract().toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
         settingsService={mockConfig().core.settings}
@@ -307,8 +307,8 @@ describe('Settings', () => {
     const component = mountWithI18nProvider(
       <Settings
         history={mockHistory}
-        enableSaving={{ global: true, namespace: false }}
-        enableShowing={{ global: true, namespace: true }}
+        enableSaving={{ global: true, namespace: false, user: false }}
+        enableShowing={{ global: true, namespace: true, user: false }}
         toasts={notificationServiceMock.createStartContract().toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
         settingsService={mockConfig().core.settings}
@@ -336,8 +336,8 @@ describe('Settings', () => {
     const component = mountWithI18nProvider(
       <Settings
         history={mockHistory}
-        enableSaving={{ global: false, namespace: false }}
-        enableShowing={{ global: true, namespace: true }}
+        enableSaving={{ global: false, namespace: false, user: false }}
+        enableShowing={{ global: true, namespace: true, user: false }}
         toasts={toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
         settingsService={mockConfig().core.settings}
@@ -358,8 +358,8 @@ describe('Settings', () => {
     const component = mountWithI18nProvider(
       <Settings
         history={mockHistory}
-        enableSaving={{ global: false, namespace: false }}
-        enableShowing={{ global: false, namespace: true }}
+        enableSaving={{ global: false, namespace: false, user: false }}
+        enableShowing={{ global: false, namespace: true, user: false }}
         toasts={toasts}
         docLinks={docLinksServiceMock.createStartContract().links}
         settingsService={mockConfig().core.settings}
