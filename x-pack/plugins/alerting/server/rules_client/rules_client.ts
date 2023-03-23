@@ -2505,9 +2505,7 @@ export class RulesClient {
               attributes.params,
               rule.references || []
             );
-            const ruleParams = paramsModifier
-              ? await paramsModifier(params)
-              : attributes.params;
+            const ruleParams = paramsModifier ? await paramsModifier(params) : attributes.params;
 
             // validate rule params
             const validatedAlertTypeParams = validateRuleTypeParams(
