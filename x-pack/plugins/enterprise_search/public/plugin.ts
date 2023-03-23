@@ -53,6 +53,7 @@ export interface PluginsStart {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
+  lens: LensPublicStart;
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
   lens: LensPublicStart;

@@ -12,6 +12,9 @@ import { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { mockHistory } from '../react_router/state.mock';
@@ -40,9 +43,16 @@ export const mockKibanaValues = {
     isCloudEnabled: false,
     deployment_url: 'https://cloud.elastic.co/deployments/some-id',
   },
+  data: dataPluginMock.createStartContract(),
   guidedOnboarding: {},
   history: mockHistory,
   isCloud: false,
+  lens: {
+    EmbeddableComponent: jest.fn(),
+    stateHelperApi: jest.fn().mockResolvedValue({
+      formula: jest.fn(),
+    }),
+  } as unknown as LensPublicStart,
   navigateToUrl: jest.fn(),
   productAccess: {
     hasAppSearchAccess: true,

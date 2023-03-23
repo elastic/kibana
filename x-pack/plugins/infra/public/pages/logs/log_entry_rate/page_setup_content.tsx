@@ -43,7 +43,11 @@ export const LogEntryRateSetupContent: React.FunctionComponent<LogEntryRateSetup
         </EuiText>
       }
       actions={
-        <EuiButton fill onClick={onOpenSetup}>
+        <EuiButton
+          data-test-subj="infraLogEntryRateSetupContentMlSetupButton"
+          fill
+          onClick={onOpenSetup}
+        >
           <FormattedMessage
             id="xpack.infra.logs.logEntryRate.showAnalysisSetupButtonLabel"
             defaultMessage="ML Setup"

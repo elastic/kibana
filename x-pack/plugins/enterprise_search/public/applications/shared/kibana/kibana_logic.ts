@@ -38,7 +38,9 @@ interface KibanaLogicProps {
   productFeatures: ProductFeatures;
   // Kibana core
   capabilities: Capabilities;
+  data: DataPublicPluginStart;
   history: ScopedHistory;
+  lens: LensPublicStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -56,9 +58,9 @@ interface KibanaLogicProps {
 }
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
   cloud: Partial<CloudSetup>;
+  data: DataPublicPluginStart;
   isCloud: boolean;
   lens: LensPublicStart;
-  data: DataPublicPluginStart;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
 }
 
@@ -72,8 +74,10 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     lens: [props.lens, {}],
     data: [props.data, {}],
     cloud: [props.cloud || {}, {}],
+    data: [props.data, {}],
     guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],
+    lens: [props.lens, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {
         const deps = { history: props.history, http: HttpLogic.values.http };

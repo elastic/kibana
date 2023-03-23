@@ -22,8 +22,8 @@
       "cloud",
       "esUiShared",
       "guidedOnboarding",
-      "embeddable",
       "lens",
+      "embeddable",
     ],
     "optionalPlugins": [
       "usageCollection",

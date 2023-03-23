@@ -106,24 +106,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const statistics = servicesDetailedStatistics.currentPeriod[serviceNames[0]];
 
         expect(statistics.latency.length).to.be.greaterThan(0);
-        expect(statistics.throughput.length).to.be.greaterThan(0);
-        expect(statistics.transactionErrorRate.length).to.be.greaterThan(0);
+        expect(statistics.throughput?.length).to.be.greaterThan(0);
+        expect(statistics.transactionErrorRate?.length).to.be.greaterThan(0);
 
         // latency
         const nonNullLantencyDataPoints = statistics.latency.filter(({ y }) => isFiniteNumber(y));
         expect(nonNullLantencyDataPoints.length).to.be.greaterThan(0);
 
         // throughput
-        const nonNullThroughputDataPoints = statistics.throughput.filter(({ y }) =>
+        const nonNullThroughputDataPoints = statistics.throughput?.filter(({ y }) =>
           isFiniteNumber(y)
         );
-        expect(nonNullThroughputDataPoints.length).to.be.greaterThan(0);
+        expect(nonNullThroughputDataPoints?.length).to.be.greaterThan(0);
 
-        // transaction erro rate
-        const nonNullTransactionErrorRateDataPoints = statistics.transactionErrorRate.filter(
+        // transaction error rate
+        const nonNullTransactionErrorRateDataPoints = statistics.transactionErrorRate?.filter(
           ({ y }) => isFiniteNumber(y)
         );
-        expect(nonNullTransactionErrorRateDataPoints.length).to.be.greaterThan(0);
+        expect(nonNullTransactionErrorRateDataPoints?.length).to.be.greaterThan(0);
       });
 
       it('returns empty when empty service names is passed', async () => {
@@ -253,8 +253,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const previousPeriodStatistics = servicesDetailedStatistics.previousPeriod[serviceNames[0]];
 
         expect(currentPeriodStatistics.latency.length).to.be.greaterThan(0);
-        expect(currentPeriodStatistics.throughput.length).to.be.greaterThan(0);
-        expect(currentPeriodStatistics.transactionErrorRate.length).to.be.greaterThan(0);
+        expect(currentPeriodStatistics.throughput?.length).to.be.greaterThan(0);
+        expect(currentPeriodStatistics.transactionErrorRate?.length).to.be.greaterThan(0);
 
         // latency
         const nonNullCurrentPeriodLantencyDataPoints = currentPeriodStatistics.latency.filter(
@@ -263,19 +263,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(nonNullCurrentPeriodLantencyDataPoints.length).to.be.greaterThan(0);
 
         // throughput
-        const nonNullCurrentPeriodThroughputDataPoints = currentPeriodStatistics.throughput.filter(
+        const nonNullCurrentPeriodThroughputDataPoints = currentPeriodStatistics.throughput?.filter(
           ({ y }) => isFiniteNumber(y)
         );
-        expect(nonNullCurrentPeriodThroughputDataPoints.length).to.be.greaterThan(0);
+        expect(nonNullCurrentPeriodThroughputDataPoints?.length).to.be.greaterThan(0);
 
-        // transaction erro rate
+        // transaction error rate
         const nonNullCurrentPeriodTransactionErrorRateDataPoints =
-          currentPeriodStatistics.transactionErrorRate.filter(({ y }) => isFiniteNumber(y));
-        expect(nonNullCurrentPeriodTransactionErrorRateDataPoints.length).to.be.greaterThan(0);
+          currentPeriodStatistics.transactionErrorRate?.filter(({ y }) => isFiniteNumber(y));
+        expect(nonNullCurrentPeriodTransactionErrorRateDataPoints?.length).to.be.greaterThan(0);
 
         expect(previousPeriodStatistics.latency.length).to.be.greaterThan(0);
-        expect(previousPeriodStatistics.throughput.length).to.be.greaterThan(0);
-        expect(previousPeriodStatistics.transactionErrorRate.length).to.be.greaterThan(0);
+        expect(previousPeriodStatistics.throughput?.length).to.be.greaterThan(0);
+        expect(previousPeriodStatistics.transactionErrorRate?.length).to.be.greaterThan(0);
 
         // latency
         const nonNullPreviousPeriodLantencyDataPoints = previousPeriodStatistics.latency.filter(
@@ -285,13 +285,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         // throughput
         const nonNullPreviousPeriodThroughputDataPoints =
-          previousPeriodStatistics.throughput.filter(({ y }) => isFiniteNumber(y));
-        expect(nonNullPreviousPeriodThroughputDataPoints.length).to.be.greaterThan(0);
+          previousPeriodStatistics.throughput?.filter(({ y }) => isFiniteNumber(y));
+        expect(nonNullPreviousPeriodThroughputDataPoints?.length).to.be.greaterThan(0);
 
-        // transaction erro rate
+        // transaction error rate
         const nonNullPreviousPeriodTransactionErrorRateDataPoints =
-          previousPeriodStatistics.transactionErrorRate.filter(({ y }) => isFiniteNumber(y));
-        expect(nonNullPreviousPeriodTransactionErrorRateDataPoints.length).to.be.greaterThan(0);
+          previousPeriodStatistics.transactionErrorRate?.filter(({ y }) => isFiniteNumber(y));
+        expect(nonNullPreviousPeriodTransactionErrorRateDataPoints?.length).to.be.greaterThan(0);
       });
     }
   );

@@ -62,6 +62,8 @@ export const renderApp = (
     application: core.application,
     capabilities: core.application.capabilities,
     config,
+    data: plugins.data,
+    lens: plugins.lens,
     productAccess,
     productFeatures,
     charts: plugins.charts,
@@ -113,6 +115,7 @@ export const renderApp = (
     unmountLicensingLogic();
     unmountHttpLogic();
     unmountFlashMessagesLogic();
+    plugins.data.search.session.clear();
   };
 };
 
