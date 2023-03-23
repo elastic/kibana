@@ -8,7 +8,7 @@
 
 import type { IRouter, RequestHandler } from '@kbn/core-http-server';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import { createVersionedRouter } from '.';
+import { InternalVersionedRouter } from '.';
 
 describe('Versioned router', () => {
   let router: IRouter;
@@ -18,7 +18,7 @@ describe('Versioned router', () => {
   });
 
   it('can register multiple routes', () => {
-    const versionedRouter = createVersionedRouter({ router });
+    const versionedRouter = InternalVersionedRouter.from({ router });
     versionedRouter.get({ path: '/test/{id}', access: 'internal' });
     versionedRouter.post({ path: '/test', access: 'internal' });
     versionedRouter.delete({ path: '/test', access: 'internal' });
@@ -27,7 +27,7 @@ describe('Versioned router', () => {
 
   describe('Versioned route', () => {
     it('can register multiple handlers', () => {
-      const versionedRouter = createVersionedRouter({ router });
+      const versionedRouter = InternalVersionedRouter.from({ router });
       versionedRouter
         .get({ path: '/test/{id}', access: 'internal' })
         .addVersion({ version: '1', validate: false }, handlerFn)
@@ -41,7 +41,7 @@ describe('Versioned router', () => {
       expect(router.get).toHaveBeenCalledTimes(1);
     });
     it('does not allow specifying a handler for the same version more than once', () => {
-      const versionedRouter = createVersionedRouter({ router });
+      const versionedRouter = InternalVersionedRouter.from({ router });
       expect(() =>
         versionedRouter
           .get({ path: '/test/{id}', access: 'internal' })
