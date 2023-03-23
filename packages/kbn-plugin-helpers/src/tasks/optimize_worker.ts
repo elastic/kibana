@@ -26,7 +26,11 @@ process.on('message', (msg: any) => {
   const webpackConfig = getWebpackConfig(bundle, remotes, workerConfig);
   const compiler = webpack(webpackConfig);
 
-  compiler.run((error, stats) => {
+  compiler.watch({
+    // Example
+    aggregateTimeout: 300,
+    poll: undefined,
+  }, (error, stats) => {
     if (error) {
       send.call(process, {
         success: false,
