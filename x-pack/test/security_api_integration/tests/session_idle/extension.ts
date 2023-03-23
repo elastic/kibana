@@ -41,7 +41,6 @@ export default function ({ getService }: FtrProviderContext) {
       return response;
     };
     const getSessionInfo = async () => {
-      await es.indices.refresh({ index: '.kibana_security_session*' });
       return supertestWithoutAuth
         .get('/internal/security/session')
         .set('kbn-xsrf', 'xxx')
@@ -51,7 +50,6 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     };
     const extendSession = async () => {
-      await es.indices.refresh({ index: '.kibana_security_session*' });
       return supertestWithoutAuth
         .post('/internal/security/session')
         .set('kbn-xsrf', 'xxx')
@@ -99,15 +97,19 @@ export default function ({ getService }: FtrProviderContext) {
       it('should extend the session', async () => {
         // browsers will follow the redirect and return the new session info, but this testing framework does not
         // we simulate that behavior in this test by sending another GET request
-        await setTimeoutAsync(200); // wait a bit
-        const { body } = await getSessionInfo();
 
         // Make sure that all sessions have populated `createdAt` field.
         const sessionsCreatedAtBeforeExtension = await getSessionsCreatedAt();
         expect(sessionsCreatedAtBeforeExtension.every((createdAt) => createdAt > 0)).to.be(true);
 
+        // Make sure that the session time has somewhat elapsed to ensure
+        // there is a noticable difference after extending the session
+        await setTimeoutAsync(200);
+        const { body } = await getSessionInfo();
         await extendSession();
         const { body: body2 } = await getSessionInfo();
+
+        // Check that the extended session has more time left than before
         expect(body2.expiresInMs).not.to.be.lessThan(body.expiresInMs);
 
         // Check that session extension didn't alter `createdAt`.

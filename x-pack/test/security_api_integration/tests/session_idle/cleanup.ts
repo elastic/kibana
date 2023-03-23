@@ -33,7 +33,6 @@ export default function ({ getService }: FtrProviderContext) {
     provider: AuthenticationProvider
   ) {
     log.debug(`Verifying session cookie for ${username}.`);
-    await es.indices.refresh({ index: '.kibana_security_session*' });
     const apiResponse = await supertest
       .get('/internal/security/me')
       .set('kbn-xsrf', 'xxx')
