@@ -28,7 +28,7 @@ export class InternalVersionedRouter implements VersionedRouter {
         options,
       });
       this.routes.add(route);
-      return route as VersionedRoute;
+      return route;
     };
 
   public get = this.registerVersionedRoute('get');
