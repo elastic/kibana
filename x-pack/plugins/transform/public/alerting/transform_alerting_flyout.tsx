@@ -44,7 +44,7 @@ export const TransformAlertFlyout: FC<TransformAlertFlyoutProps> = ({
     };
 
     if (initialAlert) {
-      return triggersActionsUi.getEditAlertFlyout({
+      return triggersActionsUi.getEditRuleFlyout({
         ...commonProps,
         initialRule: {
           ...initialAlert,

@@ -48,7 +48,7 @@ export function mockTelemetryService({
   const telemetryService = new TelemetryService({
     config,
     http: httpServiceMock.createStartContract(),
-    notifications: notificationServiceMock.createStartContract(),
+    notifications: notificationServiceMock.createSetupContract(),
     isScreenshotMode,
     currentKibanaVersion,
     reportOptInStatusChange,

@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
 import { LayerType } from '../../../../common';
 import { LayerActions } from './layer_actions';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
@@ -28,13 +29,11 @@ import {
   StateSetter,
   Visualization,
   DragDropOperation,
-  DropType,
   isOperation,
   LayerAction,
   VisualizationDimensionGroupConfig,
   UserMessagesGetter,
 } from '../../../types';
-import { DragDropIdentifier, ReorderProvider } from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
 import { LayerPanelProps, ActiveDimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
@@ -508,7 +507,11 @@ export function LayerPanel(
               >
                 <>
                   {group.accessors.length ? (
-                    <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
+                    <ReorderProvider
+                      id={group.groupId}
+                      className={'lnsLayerPanel__group'}
+                      dataTestSubj="lnsDragDrop"
+                    >
                       {group.accessors.map((accessorConfig, accessorIndex) => {
                         const { columnId } = accessorConfig;
 
@@ -599,7 +602,7 @@ export function LayerPanel(
 
                   {group.fakeFinalAccessor && (
                     <div
-                      className="lnsLayerPanel__dimension lnsDragDrop-isDraggable"
+                      className="lnsLayerPanel__dimension domDragDrop-isDraggable"
                       css={css`
                         cursor: default !important;
                         border-color: transparent !important;

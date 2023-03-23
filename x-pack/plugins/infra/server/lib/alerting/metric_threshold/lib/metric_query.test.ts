@@ -6,18 +6,22 @@
  */
 
 import moment from 'moment';
-import { Comparator, MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import {
+  Aggregators,
+  Comparator,
+  MetricExpressionParams,
+} from '../../../../../common/alerting/metrics';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
-  const expressionParams = {
+  const expressionParams: MetricExpressionParams = {
     metric: 'system.is.a.good.puppy.dog',
-    aggType: 'avg',
+    aggType: Aggregators.AVERAGE,
     timeUnit: 'm',
     timeSize: 1,
     threshold: [1],
     comparator: Comparator.GT,
-  } as MetricExpressionParams;
+  };
 
   const groupBy = 'host.doggoname';
   const timeframe = {

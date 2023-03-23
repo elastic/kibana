@@ -41,6 +41,7 @@ import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { act } from 'react-dom/test-utils';
+import { ErrorCallout } from '../../../../components/common/error_callout';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -49,7 +50,12 @@ async function mountComponent(
   prevSidebarClosed?: boolean,
   mountOptions: { attachTo?: HTMLElement } = {},
   query?: Query | AggregateQuery,
-  isPlainRecord?: boolean
+  isPlainRecord?: boolean,
+  main$: DataMain$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
+    foundDocuments: true,
+  }) as DataMain$
 ) {
   const searchSourceMock = createSearchSourceMock({});
   const services = {
@@ -74,12 +80,6 @@ async function mountComponent(
   );
 
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-
-  const main$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
-    foundDocuments: true,
-  }) as DataMain$;
 
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -204,4 +204,21 @@ describe('Discover component', () => {
       expect(component.find(DiscoverSidebar).length).toBe(0);
     }, 10000);
   });
+
+  it('shows the no results error display', async () => {
+    const component = await mountComponent(
+      dataViewWithTimefieldMock,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      new BehaviorSubject({
+        fetchStatus: FetchStatus.ERROR,
+        recordRawType: RecordRawType.DOCUMENT,
+        foundDocuments: false,
+        error: new Error('No results'),
+      }) as DataMain$
+    );
+    expect(component.find(ErrorCallout)).toHaveLength(1);
+  }, 10000);
 });

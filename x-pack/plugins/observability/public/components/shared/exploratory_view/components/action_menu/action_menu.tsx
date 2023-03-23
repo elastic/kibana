@@ -49,6 +49,7 @@ export function ExpViewActionMenuContent({
         )}
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="o11yExpViewActionMenuContentOpenInLensButton"
             iconType="lensApp"
             fullWidth={false}
             isDisabled={!lens.canUseEditor() || lensAttributes === null}
@@ -75,6 +76,7 @@ export function ExpViewActionMenuContent({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="o11yExpViewActionMenuContentSaveButton"
             fill={true}
             iconType="save"
             fullWidth={false}

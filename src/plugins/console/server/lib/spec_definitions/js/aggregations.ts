@@ -173,7 +173,7 @@ const rules = {
         __template: {
           _key: 'asc',
         },
-        _term: { __one_of: ['asc', 'desc'] },
+        _key: { __one_of: ['asc', 'desc'] },
         _count: { __one_of: ['asc', 'desc'] },
         '*': { __one_of: ['asc', 'desc'] },
       },
