@@ -31,6 +31,24 @@ import { LicensingLogic } from '../../../shared/licensing';
 import { KibanaLogic } from "../../../shared/kibana";
 import { LicensingCallout, LICENSING_FEATURE } from '../new_index/licensing_callout';
 
+export const CreateEngineButton: React.FC<{ disabled: boolean }> = ({ disabled }) => {
+  const { openEngineCreate } = useActions(EnginesListLogic);
+  return (
+    <EuiButton
+      fill
+      iconType="plusInCircle"
+      data-test-subj="enterprise-search-content-engines-creation-button"
+      data-telemetry-id="entSearchContent-engines-list-createEngine"
+      disabled={disabled}
+      onClick={openEngineCreate}
+    >
+      {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
+        defaultMessage: 'Create Search Application',
+      })}
+    </EuiButton>
+  );
+};
+
 export const EnginesList: React.FC = () => {
   const {
     closeDeleteEngineModal,
@@ -49,24 +67,7 @@ export const EnginesList: React.FC = () => {
 
   const isGated = !isCloud && !hasPlatinumLicense;
 
-  const CreateButton: React.FC = () => {
-    const { openEngineCreate } = useActions(EnginesListLogic);
-    const { hasPlatinumLicense } = useValues(LicensingLogic);
-    return (
-      <EuiButton
-        fill
-        iconType="plusInCircle"
-        data-test-subj="enterprise-search-content-engines-creation-button"
-        data-telemetry-id="entSearchContent-engines-list-createEngine"
-        disabled={!hasPlatinumLicense}
-        onClick={openEngineCreate}
-      >
-        {i18n.translate('xpack.enterpriseSearch.content.engines.createEngineButtonLabel', {
-          defaultMessage: 'Create Search Application',
-        })}
-      </EuiButton>
-    );
-  };
+
 
   const {
     createEngineFlyoutOpen,
@@ -128,7 +129,7 @@ export const EnginesList: React.FC = () => {
           pageTitle: i18n.translate('xpack.enterpriseSearch.content.engines.title', {
             defaultMessage: 'Search Applications',
           }),
-          rightSideItems: isLoading ? [] : !hasNoEngines ? [<CreateButton />] : [],
+          rightSideItems: isLoading ? [] : !hasNoEngines ? [<CreateEngineButton disabled={isGated}/>] : [],
         }}
         pageViewTelemetry="Engines"
         isLoading={isLoading}
@@ -205,7 +206,7 @@ export const EnginesList: React.FC = () => {
           </>
         ) : (
           <EmptyEnginesPrompt>
-            <CreateButton />
+            <CreateEngineButton disabled={isGated}/>
           </EmptyEnginesPrompt>
         )}
 
