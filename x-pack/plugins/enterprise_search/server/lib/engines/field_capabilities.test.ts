@@ -20,10 +20,9 @@ describe('engines field_capabilities', () => {
     asInternalUser: {},
   };
   const mockEngine: EnterpriseSearchEngineDetails = {
-    created: '1999-12-31T23:59:59.999Z',
     indices: [],
     name: 'unit-test-engine',
-    updated: '1999-12-31T23:59:59.999Z',
+    updated_at_millis: 2202018295,
   };
   beforeEach(() => {
     jest.clearAllMocks();
@@ -49,7 +48,6 @@ describe('engines field_capabilities', () => {
       await expect(
         fetchEngineFieldCapabilities(mockClient as unknown as IScopedClusterClient, mockEngine)
       ).resolves.toEqual({
-        created: mockEngine.created,
         field_capabilities: fieldCapsResponse,
         fields: [
           {
@@ -65,7 +63,7 @@ describe('engines field_capabilities', () => {
           },
         ],
         name: mockEngine.name,
-        updated: mockEngine.updated,
+        updated_at_millis: mockEngine.updated_at_millis,
       });
 
       expect(mockClient.asCurrentUser.fieldCaps).toHaveBeenCalledTimes(1);
