@@ -73,6 +73,10 @@ export class CoreVersionedRoute implements VersionedRoute {
     );
   }
 
+  private getAvailableVersionsMessage(): string {
+    return `Available versions are: "${[...this.handlers.keys()].join(',') || 'none'}"`;
+  }
+
   /** This is where we must implement the versioned spec once it is available */
   private requestHandler = async (
     ctx: RequestHandlerContextBase,
@@ -83,7 +87,9 @@ export class CoreVersionedRoute implements VersionedRoute {
     if (!version) {
       return res.custom({
         statusCode: 406,
-        body: `Version expected at [${this.method}] [${this.path}]. Please specify a version in the ${VERSION_HEADER} header.`,
+        body: `Version expected at [${this.method}] [${
+          this.path
+        }]. Please specify a version using the "${VERSION_HEADER}" header. ${this.getAvailableVersionsMessage()}`,
       });
     }
 
@@ -91,9 +97,9 @@ export class CoreVersionedRoute implements VersionedRoute {
     if (!handler) {
       return res.custom({
         statusCode: 406,
-        body: `No ${version} available for ${this.method} ${this.path}. Available versions are: ${[
-          this.handlers.keys(),
-        ].join(',')}`,
+        body: `No version "${version}" available for [${this.method}] [${
+          this.path
+        }]. ${this.getAvailableVersionsMessage()}`,
       });
     }
 

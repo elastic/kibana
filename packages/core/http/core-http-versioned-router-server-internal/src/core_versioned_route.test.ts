@@ -46,7 +46,7 @@ describe('Versioned route', () => {
     ).toThrowError(`Version 1 handler has already been registered for the route "get /test/{id}"`);
   });
 
-  it('runs input validations', async () => {
+  it('runs request and response validations', async () => {
     let handler: RequestHandler;
 
     let validatedBody = false;
@@ -113,5 +113,78 @@ describe('Versioned route', () => {
     expect(validatedParams).toBe(true);
     expect(validatedQuery).toBe(true);
     expect(validatedOutputBody).toBe(true);
+  });
+
+  it('returns the expected output for non-existent versions', async () => {
+    let handler: RequestHandler;
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
+    versionedRouter.post({ access: 'internal', path: '/test/{id}' });
+
+    await expect(
+      handler!(
+        {} as any,
+        {
+          headers: { [VERSION_HEADER]: '999' },
+        } as any,
+        kibanaResponseFactory
+      )
+    ).resolves.toEqual({
+      options: {},
+      payload: 'No version "999" available for [post] [/test/{id}]. Available versions are: "none"',
+      status: 406,
+    });
+  });
+
+  it('returns the expected output if no version was provided to versioned route', async () => {
+    let handler: RequestHandler;
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
+
+    versionedRouter
+      .post({ access: 'internal', path: '/test/{id}' })
+      .addVersion({ validate: false, version: '1' }, handlerFn);
+
+    await expect(
+      handler!(
+        {} as any,
+        {
+          headers: {},
+        } as any,
+        kibanaResponseFactory
+      )
+    ).resolves.toEqual({
+      options: {},
+      payload:
+        'Version expected at [post] [/test/{id}]. Please specify a version using the "TBD" header. Available versions are: "1"',
+      status: 406,
+    });
+  });
+  it('returns the expected output for failed validation', async () => {
+    let handler: RequestHandler;
+    const versionedRouter = CoreVersionedRouter.from({ router });
+    (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
+
+    versionedRouter
+      .post({ access: 'internal', path: '/test/{id}' })
+      .addVersion(
+        { validate: { request: { body: schema.object({ foo: schema.number() }) } }, version: '1' },
+        handlerFn
+      );
+
+    await expect(
+      handler!(
+        {} as any,
+        {
+          headers: { [VERSION_HEADER]: '1' },
+          body: {},
+        } as any,
+        kibanaResponseFactory
+      )
+    ).resolves.toEqual({
+      options: {},
+      payload: expect.any(String),
+      status: 400,
+    });
   });
 });
