@@ -627,9 +627,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return await testSubjects.isEuiSwitchChecked('indexPattern-nesting-switch');
     },
     /**
+     * Cen remove the dimension matching a specific test subject?
+     */
+    async canRemoveDimension(dimensionTestSubj: string) {
+      await testSubjects.moveMouseTo(`${dimensionTestSubj} > indexPattern-dimension-remove`);
+      return await testSubjects.isDisplayed(`${dimensionTestSubj} > indexPattern-dimension-remove`);
+    },
+    /**
      * Removes the dimension matching a specific test subject
      */
     async removeDimension(dimensionTestSubj: string) {
+      await testSubjects.moveMouseTo(`${dimensionTestSubj} > indexPattern-dimension-remove`);
       await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimension-remove`);
     },
     /**
