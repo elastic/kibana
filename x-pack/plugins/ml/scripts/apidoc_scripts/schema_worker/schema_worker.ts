@@ -7,11 +7,12 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { DocEntry, extractDocumentation } from './schema_extractor';
-import type { ApiParameter, Block } from './types';
+import { DocEntry, extractDocumentation } from '../schema_extractor';
+import type { ApiParameter, Block } from '../types';
 
 export function postProcess(parsedFiles: any[]): void {
-  const schemasDirPath = path.resolve(__dirname, '..', '..', 'schemas');
+  const schemasDirPath = path.resolve(__dirname, '..', '..', '..', 'server', 'routes', 'schemas');
+
   const schemaFiles = fs
     .readdirSync(schemasDirPath)
     .map((filename) => path.resolve(schemasDirPath, filename));
