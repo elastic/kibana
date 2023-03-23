@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
+import { TransformFn } from '../types';
 
-export function transformMigrationVersion({ migrationVersion, ...doc }: SavedObjectUnsanitizedDoc) {
+export const transformMigrationVersion: TransformFn = ({ migrationVersion, ...doc }) => {
   return {
-    ...doc,
-    ...(migrationVersion ? { typeMigrationVersion: migrationVersion[doc.type] ?? '' } : {}),
+    transformedDoc: {
+      ...doc,
+      ...(migrationVersion ? { typeMigrationVersion: migrationVersion[doc.type] ?? '' } : {}),
+    },
+    additionalDocs: [],
   };
-}
+};

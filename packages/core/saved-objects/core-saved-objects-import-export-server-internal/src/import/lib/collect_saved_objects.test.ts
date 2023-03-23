@@ -178,6 +178,19 @@ describe('collectSavedObjects()', () => {
       expect(result).toEqual({ collectedObjects, errors, importStateMap });
     });
 
+    test('keeps the original migration versions', async () => {
+      const collectedObjects = [
+        { ...obj1, migrationVersion: { a: '1.0.0' } },
+        { ...obj2, typeMigrationVersion: '2.0.0' },
+      ];
+
+      const readStream = createReadStream(...collectedObjects);
+      const supportedTypes = [obj1.type, obj2.type];
+      const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
+
+      expect(result).toEqual(expect.objectContaining({ collectedObjects }));
+    });
+
     describe('with optional filter', () => {
       test('filters out objects when result === false', async () => {
         const readStream = createReadStream(obj1, obj2);

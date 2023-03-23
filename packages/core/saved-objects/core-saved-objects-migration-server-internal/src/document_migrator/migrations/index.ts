@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectMigrationMap } from '@kbn/core-saved-objects-server';
+import { TransformFn } from '../types';
 import { transformMigrationVersion } from './transform_migration_version';
 
 export const migrations = {
   '8.8.0': transformMigrationVersion,
-} as SavedObjectMigrationMap;
+} as Record<string, TransformFn>;

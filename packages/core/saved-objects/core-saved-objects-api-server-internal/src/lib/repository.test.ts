@@ -8,7 +8,6 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
-import { omit } from 'lodash';
 import {
   pointInTimeFinderMock,
   mockCollectMultiNamespaceReferences,
@@ -933,7 +932,7 @@ describe('SavedObjectsRepository', () => {
         expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(1, {
           ...response.items[0].create,
           _source: {
-            ...omit(response.items[0].create._source, 'migrationVersion'),
+            ...response.items[0].create._source,
             namespaces: response.items[0].create._source.namespaces,
             coreMigrationVersion: expect.any(String),
             typeMigrationVersion: '1.1.1',
@@ -943,7 +942,7 @@ describe('SavedObjectsRepository', () => {
         expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(2, {
           ...response.items[1].create,
           _source: {
-            ...omit(response.items[1].create._source, 'migrationVersion'),
+            ...response.items[1].create._source,
             namespaces: response.items[1].create._source.namespaces,
             coreMigrationVersion: expect.any(String),
             typeMigrationVersion: '1.1.1',

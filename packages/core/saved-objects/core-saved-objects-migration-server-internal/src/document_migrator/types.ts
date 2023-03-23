@@ -37,23 +37,29 @@ export interface Transform {
   transformType: TransformType;
 }
 
-/**
- * There are two "typeMigrationVersion" transform types:
- *   * `migrate` - These transforms are defined and added by consumers using the type registry; each is applied to a single object type
- *     based on an object's `typeMigrationVersion` field. These are applied during index migrations and document migrations.
- *   * `convert` - These transforms are defined by core and added by consumers using the type registry; each is applied to a single object
- *     type based on an object's `typeMigrationVersion` field. These are applied during index migrations, NOT document migrations.
- *
- * There is one "coreMigrationVersion" transform type:
- *   * `reference` - These transforms are defined by core and added by consumers using the type registry; they are applied to all object
- *     types based on their `coreMigrationVersion` field. These are applied during index migrations, NOT document migrations.
- *   * `core` - These transforms are defined by core internally; they are applied to all object types based on their `coreMigrationVersion` field.
- *     These are applied during index migrations and before any document migrations to guarantee that all documents have the most recent schema.
- */
 export enum TransformType {
+  /**
+   * These transforms are defined by core and added by consumers using the type registry; each is applied to a single object
+   * type based on an object's `typeMigrationVersion` field. These are applied during index migrations, NOT document migrations.
+   */
   Convert = 'convert',
+
+  /**
+   * These transforms are defined by core internally; they are applied to all object types based on their `coreMigrationVersion` field.
+   * These are applied during index migrations and before any document migrations to guarantee that all documents have the most recent schema.
+   */
   Core = 'core',
+
+  /**
+   * These transforms are defined and added by consumers using the type registry; each is applied to a single object type
+   * based on an object's `typeMigrationVersion` field. These are applied during index migrations and document migrations.
+   */
   Migrate = 'migrate',
+
+  /**
+   * These transforms are defined by core and added by consumers using the type registry; they are applied to all object
+   * types based on their `coreMigrationVersion` field. These are applied during index migrations, NOT document migrations.
+   */
   Reference = 'reference',
 }
 

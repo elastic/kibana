@@ -589,23 +589,25 @@ export const getMockBulkCreateResponse = (
   return {
     errors: false,
     took: 1,
-    items: objects.map(({ type, id, originId, attributes, references, migrationVersion }) => ({
-      create: {
-        // status: 1,
-        // _index: '.kibana',
-        _id: `${namespace ? `${namespace}:` : ''}${type}:${id}`,
-        _source: {
-          [type]: attributes,
-          type,
-          namespace,
-          ...(originId && { originId }),
-          references,
-          ...mockTimestampFieldsWithCreated,
-          migrationVersion: migrationVersion || { [type]: '1.1.1' },
+    items: objects.map(
+      ({ type, id, originId, attributes, references, migrationVersion, typeMigrationVersion }) => ({
+        create: {
+          // status: 1,
+          // _index: '.kibana',
+          _id: `${namespace ? `${namespace}:` : ''}${type}:${id}`,
+          _source: {
+            [type]: attributes,
+            type,
+            namespace,
+            ...(originId && { originId }),
+            references,
+            ...mockTimestampFieldsWithCreated,
+            typeMigrationVersion: typeMigrationVersion || migrationVersion?.[type] || '1.1.1',
+          },
+          ...mockVersionProps,
         },
-        ...mockVersionProps,
-      },
-    })),
+      })
+    ),
   } as unknown as estypes.BulkResponse;
 };
 

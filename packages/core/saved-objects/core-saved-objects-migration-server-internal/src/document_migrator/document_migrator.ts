@@ -157,7 +157,9 @@ export class DocumentMigrator implements VersionedTransformer {
     );
     pipeline.run();
 
-    return [pipeline.document, ...pipeline.additionalDocs];
+    const { document, additionalDocs } = pipeline;
+
+    return { document, additionalDocs };
   }
 
   /**
@@ -168,9 +170,9 @@ export class DocumentMigrator implements VersionedTransformer {
    * @memberof DocumentMigrator
    */
   public migrate = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc => {
-    const [transformedDoc] = this.transform(doc);
+    const { document } = this.transform(doc);
 
-    return transformedDoc;
+    return document;
   };
 
   /**
@@ -182,6 +184,8 @@ export class DocumentMigrator implements VersionedTransformer {
    * @memberof DocumentMigrator
    */
   public migrateAndConvert = (doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc[] => {
-    return this.transform(doc, { convertNamespaceTypes: true });
+    const { document, additionalDocs } = this.transform(doc, { convertNamespaceTypes: true });
+
+    return [document, ...additionalDocs];
   };
 }

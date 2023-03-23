@@ -10,8 +10,11 @@ import _ from 'lodash';
 import type { Logger } from '@kbn/logging';
 import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { type ActiveMigrations, type Transform, type TypeTransforms, TransformType } from './types';
-import { getReferenceTransforms, getConversionTransforms } from './internal_transforms';
-import { migrations as coreMigrationsMap } from './migrations';
+import {
+  getCoreTransforms,
+  getReferenceTransforms,
+  getConversionTransforms,
+} from './internal_transforms';
 import { validateTypeMigrations } from './validate_migrations';
 import { transformComparator, convertMigrationFunction } from './utils';
 import { getModelVersionTransforms } from './model_version';
@@ -33,6 +36,7 @@ export function buildActiveMigrations({
   convertVersion?: string;
   log: Logger;
 }): ActiveMigrations {
+  const coreTransforms = getCoreTransforms();
   const referenceTransforms = getReferenceTransforms(typeRegistry);
 
   return typeRegistry.getAllTypes().reduce((migrations, type) => {
@@ -42,6 +46,7 @@ export function buildActiveMigrations({
       type,
       log,
       kibanaVersion,
+      coreTransforms,
       referenceTransforms,
     });
 
@@ -59,23 +64,18 @@ export function buildActiveMigrations({
 const buildTypeTransforms = ({
   type,
   log,
+  coreTransforms,
   referenceTransforms,
 }: {
   type: SavedObjectsType;
   kibanaVersion: string;
   log: Logger;
+  coreTransforms: Transform[];
   referenceTransforms: Transform[];
 }): TypeTransforms => {
   const migrationsMap =
     typeof type.migrations === 'function' ? type.migrations() : type.migrations ?? {};
 
-  const coreTransforms = Object.entries(coreMigrationsMap).map<Transform>(
-    ([version, transform]) => ({
-      version,
-      transform: convertMigrationFunction(version, type, transform, log),
-      transformType: TransformType.Core,
-    })
-  );
   const migrationTransforms = Object.entries(migrationsMap ?? {}).map<Transform>(
     ([version, transform]) => ({
       version,
