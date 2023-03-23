@@ -183,7 +183,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   viewInAppRelativeUrl?: string;
 }
 
-interface SanitizedAlertsFilter extends SavedObjectAttributes {
+export interface SanitizedAlertsFilter extends AlertsFilter {
   query: null | {
     kql: string;
   };
