@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { createVersionedRouter } from './src';
+export { InternalVersionedRouter } from './src';
