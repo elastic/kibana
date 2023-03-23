@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { isObject } from 'lodash';
 import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
 import type { DateRange } from '../../../../../../common/types';
-import type { IndexPattern } from '../../../../../types';
+import { IndexPattern, nonNullable } from '../../../../../types';
 import {
   OperationDefinition,
   GenericOperationDefinition,
@@ -26,7 +26,6 @@ import {
   getOperationParams,
   groupArgsByType,
   mergeWithGlobalFilters,
-  nonNullable,
 } from './util';
 import { FormulaIndexPatternColumn, isFormulaIndexPatternColumn } from './formula';
 import { getColumnOrder } from '../../layer_helpers';

@@ -19,7 +19,13 @@ import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import { validateQuery } from '../../shared_components';
 import { DataViewsState } from '../../state_management';
-import type { FramePublicAPI, DatasourcePublicAPI, VisualizeEditorContext } from '../../types';
+import {
+  FramePublicAPI,
+  DatasourcePublicAPI,
+  VisualizeEditorContext,
+  nonNullable,
+  AnnotationGroups,
+} from '../../types';
 import {
   visualizationTypes,
   XYLayerConfig,
@@ -220,7 +226,7 @@ export function isPersistedState(state: XYPersistedState | XYState): state is XY
 
 export function injectReferences(
   state: XYPersistedState,
-  annotationGroups: Record<string, EventAnnotationGroupConfig>,
+  annotationGroups?: AnnotationGroups,
   references?: SavedObjectReference[],
   initialContext?: VisualizeFieldContext | VisualizeEditorContext
 ): XYState {
@@ -228,75 +234,85 @@ export function injectReferences(
     return state as XYState;
   }
 
+  if (!annotationGroups) {
+    throw new Error(
+      'xy visualization: injecting references relies on annotation groups but they were not provided'
+    );
+  }
+
   const fallbackIndexPatternId = references.find(({ type }) => type === 'index-pattern')!.id;
   return {
     ...state,
-    layers: state.layers.map((persistedLayer) => {
-      if (!isPersistedAnnotationsLayer(persistedLayer)) {
-        return persistedLayer as XYLayerConfig;
-      }
-
-      const indexPatternIdFromReferences =
-        references.find(({ name }) => name === getLayerReferenceName(persistedLayer.layerId))?.id ||
-        fallbackIndexPatternId;
-
-      let injectedLayer: XYAnnotationLayerConfig;
-
-      if (isPersistedByValueAnnotationsLayer(persistedLayer)) {
-        injectedLayer = {
-          ...persistedLayer,
-          hide: Boolean(persistedLayer.hide),
-          simpleView: Boolean(persistedLayer.simpleView),
-          indexPatternId:
-            // getIndexPatternIdFromInitialContext(persistedLayer, initialContext) || TODO - was this doing anything?
-            indexPatternIdFromReferences,
-        };
-      } else {
-        const annotationGroupId = references?.find(
-          ({ name }) => name === persistedLayer.annotationGroupRef
-        )?.id;
-
-        const annotationGroup = annotationGroupId ? annotationGroups[annotationGroupId] : undefined;
-
-        if (!annotationGroupId || !annotationGroup) {
-          throw new Error("can't find annotation group!"); // TODO - better handling
+    layers: state.layers
+      .map((persistedLayer) => {
+        if (!isPersistedAnnotationsLayer(persistedLayer)) {
+          return persistedLayer as XYLayerConfig;
         }
 
-        // declared as a separate variable for type checking
-        const commonProps: Pick<
-          XYByReferenceAnnotationLayerConfig,
-          'layerId' | 'layerType' | 'annotationGroupId' | 'hide' | 'simpleView' | '__lastSaved'
-        > = {
-          layerId: persistedLayer.layerId,
-          layerType: persistedLayer.layerType,
-          annotationGroupId,
-          hide: persistedLayer.hide,
-          simpleView: persistedLayer.simpleView,
-          __lastSaved: annotationGroup,
-        };
+        const indexPatternIdFromReferences =
+          references.find(({ name }) => name === getLayerReferenceName(persistedLayer.layerId))
+            ?.id || fallbackIndexPatternId;
 
-        if (isPersistedByReferenceAnnotationsLayer(persistedLayer)) {
-          // a clean by-reference layer inherits everything from the library annotation group
+        let injectedLayer: XYAnnotationLayerConfig;
+
+        if (isPersistedByValueAnnotationsLayer(persistedLayer)) {
           injectedLayer = {
-            ...commonProps,
-            ignoreGlobalFilters: annotationGroup.ignoreGlobalFilters,
-            indexPatternId: annotationGroup.indexPatternId,
-            annotations: cloneDeep(annotationGroup.annotations),
+            ...persistedLayer,
+            hide: Boolean(persistedLayer.hide),
+            simpleView: Boolean(persistedLayer.simpleView),
+            indexPatternId:
+              // getIndexPatternIdFromInitialContext(persistedLayer, initialContext) || TODO - was this doing anything?
+              indexPatternIdFromReferences,
           };
         } else {
-          // a linked by-value layer gets settings from visualization state while
-          // still maintaining the reference to the library annotation group
-          injectedLayer = {
-            ...commonProps,
-            ignoreGlobalFilters: persistedLayer.ignoreGlobalFilters,
-            indexPatternId: indexPatternIdFromReferences,
-            annotations: cloneDeep(persistedLayer.annotations),
-          };
-        }
-      }
+          const annotationGroupId = references?.find(
+            ({ name }) => name === persistedLayer.annotationGroupRef
+          )?.id;
 
-      return injectedLayer;
-    }),
+          const annotationGroup = annotationGroupId
+            ? annotationGroups[annotationGroupId]
+            : undefined;
+
+          if (!annotationGroupId || !annotationGroup) {
+            return undefined; // the annotation group this layer was referencing is gone, so remove the layer
+          }
+
+          // declared as a separate variable for type checking
+          const commonProps: Pick<
+            XYByReferenceAnnotationLayerConfig,
+            'layerId' | 'layerType' | 'annotationGroupId' | 'hide' | 'simpleView' | '__lastSaved'
+          > = {
+            layerId: persistedLayer.layerId,
+            layerType: persistedLayer.layerType,
+            annotationGroupId,
+            hide: persistedLayer.hide,
+            simpleView: persistedLayer.simpleView,
+            __lastSaved: annotationGroup,
+          };
+
+          if (isPersistedByReferenceAnnotationsLayer(persistedLayer)) {
+            // a clean by-reference layer inherits everything from the library annotation group
+            injectedLayer = {
+              ...commonProps,
+              ignoreGlobalFilters: annotationGroup.ignoreGlobalFilters,
+              indexPatternId: annotationGroup.indexPatternId,
+              annotations: cloneDeep(annotationGroup.annotations),
+            };
+          } else {
+            // a linked by-value layer gets settings from visualization state while
+            // still maintaining the reference to the library annotation group
+            injectedLayer = {
+              ...commonProps,
+              ignoreGlobalFilters: persistedLayer.ignoreGlobalFilters,
+              indexPatternId: indexPatternIdFromReferences,
+              annotations: cloneDeep(persistedLayer.annotations),
+            };
+          }
+        }
+
+        return injectedLayer;
+      })
+      .filter(nonNullable),
   };
 }
 

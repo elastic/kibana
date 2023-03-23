@@ -509,6 +509,84 @@ describe('xy_visualization', () => {
         )
       ).toEqual<XYAnnotationLayerConfig[]>(expectedAnnotationLayers);
     });
+
+    it('should remove annotation layers linked to deleted library annotation groups', () => {
+      const annotationGroupId1 = 'my-annotation-group-id1';
+      const annotationGroupId2 = 'my-annotation-group-id2';
+
+      const refName1 = 'my-reference';
+      const refName2 = 'my-other-reference';
+
+      const dataViewId = 'some-index-pattern-*';
+
+      const references: SavedObjectReference[] = [
+        {
+          name: refName1,
+          id: annotationGroupId1,
+          type: 'event-annotation-group',
+        },
+        {
+          name: refName2,
+          id: annotationGroupId2,
+          type: 'event-annotation-group',
+        },
+        {
+          name: 'some-name',
+          id: dataViewId,
+          type: 'index-pattern',
+        },
+      ];
+
+      const persistedAnnotationLayers: XYPersistedLinkedByValueAnnotationLayerConfig[] = [
+        {
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          persistanceType: 'linked',
+          annotationGroupRef: refName1,
+          ignoreGlobalFilters: false, // different from the persisted group
+          annotations: [], // different from the persisted group
+          hide: false,
+          simpleView: false,
+        },
+        {
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          persistanceType: 'linked',
+          annotationGroupRef: refName2,
+          ignoreGlobalFilters: false, // different from the persisted group
+          annotations: [], // different from the persisted group
+          hide: false,
+          simpleView: false,
+        },
+      ];
+
+      const libraryAnnotationGroups: AnnotationGroups = {
+        [annotationGroupId1]: {
+          annotations: [exampleAnnotation],
+          indexPatternId: 'data-view-123',
+          ignoreGlobalFilters: true,
+          title: 'my title!',
+          description: '',
+          tags: [],
+        },
+      };
+
+      const baseState = exampleState();
+      expect(
+        getAnnotationsLayers(
+          xyVisualization.initialize!(
+            () => 'first',
+            {
+              ...baseState,
+              layers: [...baseState.layers, ...persistedAnnotationLayers],
+            } as XYPersistedState,
+            undefined,
+            libraryAnnotationGroups,
+            references
+          ).layers
+        )
+      ).toHaveLength(1);
+    });
   });
 
   describe('#removeLayer', () => {

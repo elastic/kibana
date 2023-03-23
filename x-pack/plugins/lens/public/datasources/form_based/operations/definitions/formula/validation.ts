@@ -27,7 +27,6 @@ import {
   getValueOrName,
   groupArgsByType,
   isMathNode,
-  nonNullable,
   tinymathFunctions,
 } from './util';
 
@@ -37,7 +36,7 @@ import type {
   GenericOperationDefinition,
 } from '..';
 import type { FormBasedLayer } from '../../../types';
-import type { IndexPattern } from '../../../../../types';
+import { IndexPattern, nonNullable } from '../../../../../types';
 import type { TinymathNodeTypes } from './types';
 
 interface ValidationErrors {

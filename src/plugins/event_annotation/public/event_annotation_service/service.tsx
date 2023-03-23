@@ -47,6 +47,10 @@ export function getEventAnnotationService(
       savedObjectId
     );
 
+    if (savedObject.error) {
+      throw savedObject.error;
+    }
+
     // const annotations = (
     //   await client.find<EventAnnotationConfig>({
     //     type: EVENT_ANNOTATION_TYPE,

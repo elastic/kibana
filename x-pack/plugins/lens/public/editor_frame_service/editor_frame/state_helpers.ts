@@ -9,7 +9,7 @@ import { IUiSettingsClient, SavedObjectReference } from '@kbn/core/public';
 import { Ast } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { difference } from 'lodash';
+import { difference, noop } from 'lodash';
 import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
@@ -180,14 +180,13 @@ const initializeEventAnnotationGroups = async (
   const annotationGroups: Record<string, EventAnnotationGroupConfig> = {};
 
   await Promise.all(
-    // TODO error handling
-    references
-      ?.filter((ref) => ref.type === EVENT_ANNOTATION_GROUP_TYPE)
+    (references || [])
+      .filter((ref) => ref.type === EVENT_ANNOTATION_GROUP_TYPE)
       .map(({ id }) =>
         eventAnnotationService
           .loadAnnotationGroup(id)
-          .then((group) => (annotationGroups[id] = group))
-      ) || []
+          .then((group) => (annotationGroups[id] = group), noop)
+      )
   );
 
   return annotationGroups;

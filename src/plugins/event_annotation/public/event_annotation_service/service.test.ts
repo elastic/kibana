@@ -6,55 +6,57 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import { CoreStart, SimpleSavedObject } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { EventAnnotationConfig } from '../../common';
+import { EventAnnotationConfig, EventAnnotationGroupAttributes } from '../../common';
 import { getEventAnnotationService } from './service';
 import { EventAnnotationServiceType } from './types';
 
-const annotationGroupResolveMocks = {
+type AnnotationGroupSavedObject = SimpleSavedObject<EventAnnotationGroupAttributes>;
+
+const annotationGroupResolveMocks: Record<string, AnnotationGroupSavedObject> = {
   nonExistingGroup: {
-    saved_object: {
-      attributes: {},
-      references: [],
-      id: 'nonExistingGroup',
+    attributes: {} as EventAnnotationGroupAttributes,
+    references: [],
+    id: 'nonExistingGroup',
+    error: {
+      error: 'Saved object not found',
+      statusCode: 404,
+      message: 'Not found',
     },
-    outcome: 'exactMatch',
-  },
+  } as Partial<AnnotationGroupSavedObject> as AnnotationGroupSavedObject,
   noAnnotations: {
-    saved_object: {
-      attributes: {
-        title: 'groupTitle',
-      },
-      type: 'event-annotation-group',
-      references: [
-        {
-          id: 'ipid',
-          name: 'ipid',
-          type: 'index-pattern',
-        },
-      ],
+    attributes: {
+      title: 'groupTitle',
+      description: '',
+      tags: [],
+      ignoreGlobalFilters: false,
+      annotations: [],
     },
-    outcome: 'exactMatch',
-  },
+    type: 'event-annotation-group',
+    references: [
+      {
+        id: 'ipid',
+        name: 'ipid',
+        type: 'index-pattern',
+      },
+    ],
+  } as Partial<AnnotationGroupSavedObject> as AnnotationGroupSavedObject,
   multiAnnotations: {
-    saved_object: {
-      attributes: {
-        title: 'groupTitle',
-      },
-      id: 'multiAnnotations',
-      type: 'event-annotation-group',
-      references: [
-        {
-          id: 'ipid',
-          name: 'ipid',
-          type: 'index-pattern',
-        },
-      ],
+    attributes: {
+      title: 'groupTitle',
     },
-    outcome: 'exactMatch',
-  },
+    id: 'multiAnnotations',
+    type: 'event-annotation-group',
+    references: [
+      {
+        id: 'ipid',
+        name: 'ipid',
+        type: 'index-pattern',
+      },
+    ],
+  } as Partial<AnnotationGroupSavedObject> as AnnotationGroupSavedObject,
 };
 
 const annotationResolveMocks = {
@@ -118,20 +120,15 @@ describe('Event Annotation Service', () => {
   let eventAnnotationService: EventAnnotationServiceType;
   beforeEach(() => {
     core = coreMock.createStart();
-    (core.savedObjects.client.resolve as jest.Mock).mockImplementation(
-      (_type, id: 'multiAnnotations' | 'noAnnotations' | 'nonExistingGroup') => {
-        return annotationGroupResolveMocks[id];
-      }
-    );
     (core.savedObjects.client.create as jest.Mock).mockImplementation(() => {
-      return annotationGroupResolveMocks.multiAnnotations.saved_object;
+      return annotationGroupResolveMocks.multiAnnotations;
+    });
+    (core.savedObjects.client.get as jest.Mock).mockImplementation((_type, id) => {
+      const typedId = id as 'multiAnnotations' | 'noAnnotations' | 'nonExistingGroup';
+      return annotationGroupResolveMocks[typedId];
     });
     (core.savedObjects.client.bulkCreate as jest.Mock).mockImplementation(() => {
       return annotationResolveMocks.multiAnnotations;
-    });
-    (core.savedObjects.client.find as jest.Mock).mockImplementation(({ hasReference: { id } }) => {
-      const typedId = id as 'multiAnnotations' | 'noAnnotations' | 'nonExistingGroup';
-      return annotationResolveMocks[typedId];
     });
     eventAnnotationService = getEventAnnotationService(
       core,
@@ -446,30 +443,34 @@ describe('Event Annotation Service', () => {
       }
     );
   });
-  describe.skip('loadAnnotationGroup', () => {
-    it('should not error when loading group doesnt exit', async () => {
-      expect(await eventAnnotationService.loadAnnotationGroup('nonExistingGroup')).toEqual({
-        annotations: [],
-        indexPatternId: undefined,
-        title: undefined,
-      });
+  describe('loadAnnotationGroup', () => {
+    it('should throw error when loading group doesnt exist', async () => {
+      expect(() => eventAnnotationService.loadAnnotationGroup('nonExistingGroup')).rejects
+        .toMatchInlineSnapshot(`
+        Object {
+          "error": "Saved object not found",
+          "message": "Not found",
+          "statusCode": 404,
+        }
+      `);
     });
     it('should properly load an annotation group with no annotation', async () => {
-      expect(await eventAnnotationService.loadAnnotationGroup('noAnnotations')).toEqual({
-        annotations: [],
-        indexPatternId: 'ipid',
-        title: 'groupTitle',
-      });
+      expect(await eventAnnotationService.loadAnnotationGroup('noAnnotations'))
+        .toMatchInlineSnapshot(`
+        Object {
+          "annotations": Array [],
+          "description": "",
+          "ignoreGlobalFilters": false,
+          "indexPatternId": "ipid",
+          "tags": Array [],
+          "title": "groupTitle",
+        }
+      `);
     });
     it('should properly load an annotation group with a multiple annotation', async () => {
-      expect(await eventAnnotationService.loadAnnotationGroup('multiAnnotations')).toEqual({
-        annotations: [
-          annotationResolveMocks.multiAnnotations.savedObjects[0].attributes,
-          annotationResolveMocks.multiAnnotations.savedObjects[1].attributes,
-        ],
-        indexPatternId: 'ipid',
-        title: 'groupTitle',
-      });
+      expect(
+        await eventAnnotationService.loadAnnotationGroup('multiAnnotations')
+      ).toMatchSnapshot();
     });
   });
   // describe.skip('deleteAnnotationGroup', () => {
