@@ -10,12 +10,12 @@ import { ComponentStory } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { SloEditFormObjectivesTimeslices as Component } from './slo_edit_form_objectives_timeslices';
+import { SloEditFormObjectiveSectionTimeslices as Component } from './slo_edit_form_objective_section_timeslices';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 
 export default {
   component: Component,
-  title: 'app/SLO/EditPage/SloEditFormObjectivesTimeslices',
+  title: 'app/SLO/EditPage/SloEditFormObjectiveSectionTimeslices',
   decorators: [KibanaReactStorybookDecorator],
 };
 
