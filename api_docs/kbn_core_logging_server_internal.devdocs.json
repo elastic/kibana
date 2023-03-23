@@ -135,15 +135,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{} & { type: \"console\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"file\"; fileName: string; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"rewrite\"; policy: Readonly<{} & { type: \"meta\"; mode: \"update\" | \"remove\"; properties: Readonly<{ value?: string | number | boolean | null | undefined; } & { path: string; }>[]; }>; appenders: string[]; }> | Readonly<{} & { type: \"rolling-file\"; strategy: ",
-          {
-            "pluginId": "@kbn/core-logging-server",
-            "scope": "common",
-            "docId": "kibKbnCoreLoggingServerPluginApi",
-            "section": "def-common.NumericRollingStrategyConfig",
-            "text": "NumericRollingStrategyConfig"
-          },
-          "; fileName: string; policy: Readonly<{} & { type: \"size-limit\"; size: ",
+          "<Readonly<{} & { type: \"console\"; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"file\"; fileName: string; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; }> | Readonly<{} & { type: \"rewrite\"; policy: Readonly<{} & { type: \"meta\"; mode: \"update\" | \"remove\"; properties: Readonly<{ value?: string | number | boolean | null | undefined; } & { path: string; }>[]; }>; appenders: string[]; }> | Readonly<{} & { type: \"rolling-file\"; policy: Readonly<{} & { type: \"size-limit\"; size: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -151,7 +143,15 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; }>>"
+          "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; strategy: ",
+          {
+            "pluginId": "@kbn/core-logging-server",
+            "scope": "common",
+            "docId": "kibKbnCoreLoggingServerPluginApi",
+            "section": "def-common.NumericRollingStrategyConfig",
+            "text": "NumericRollingStrategyConfig"
+          },
+          "; fileName: string; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; }>>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/appenders/appenders.ts",
         "deprecated": false,
@@ -199,7 +199,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{} & { name: string; level: \"error\" | \"all\" | \"off\" | \"debug\" | \"info\" | \"warn\" | \"trace\" | \"fatal\"; appenders: string[]; }>[]>; }>"
+          "<Readonly<{} & { name: string; level: \"error\" | \"info\" | \"all\" | \"off\" | \"debug\" | \"warn\" | \"trace\" | \"fatal\"; appenders: string[]; }>[]>; }>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",
         "deprecated": false,
@@ -247,7 +247,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"error\" | \"all\" | \"off\" | \"debug\" | \"info\" | \"warn\" | \"trace\" | \"fatal\">; }>"
+          "<\"error\" | \"info\" | \"all\" | \"off\" | \"debug\" | \"warn\" | \"trace\" | \"fatal\">; }>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",
         "deprecated": false,
