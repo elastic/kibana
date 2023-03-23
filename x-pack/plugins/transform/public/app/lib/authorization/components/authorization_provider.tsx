@@ -25,6 +25,7 @@ const initialCapabilities: Capabilities = {
   canDeleteTransform: false,
   canPreviewTransform: false,
   canCreateTransform: false,
+  canScheduleNowTransform: false,
   canStartStopTransform: false,
   canCreateTransformAlerts: false,
   canUseTransformAlerts: false,
@@ -93,6 +94,11 @@ export const AuthorizationProvider = ({ privilegesEndpoint, children }: Props) =
   value.capabilities.canCreateTransformAlerts = value.capabilities.canCreateTransform;
 
   value.capabilities.canUseTransformAlerts = value.capabilities.canGetTransform;
+
+  value.capabilities.canScheduleNowTransform = hasPrivilege([
+    'cluster',
+    'cluster:admin/transform/schedule_now',
+  ]);
 
   return (
     <AuthorizationContext.Provider value={{ ...value }}>{children}</AuthorizationContext.Provider>

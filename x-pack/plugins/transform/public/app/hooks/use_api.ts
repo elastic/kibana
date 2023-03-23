@@ -35,6 +35,10 @@ import type {
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';
 import type {
+  ScheduleNowTransformsRequestSchema,
+  ScheduleNowTransformsResponseSchema,
+} from '../../../common/api_schemas/schedule_now_transforms';
+import type {
   GetTransformNodesResponseSchema,
   GetTransformsResponseSchema,
   PostTransformsPreviewRequestSchema,
@@ -189,6 +193,17 @@ export const useApi = () => {
       ): Promise<StopTransformsResponseSchema | IHttpFetchError> {
         try {
           return await http.post(`${API_BASE_PATH}stop_transforms`, {
+            body: JSON.stringify(transformsInfo),
+          });
+        } catch (e) {
+          return e;
+        }
+      },
+      async scheduleNowTransforms(
+        transformsInfo: ScheduleNowTransformsRequestSchema
+      ): Promise<ScheduleNowTransformsResponseSchema | IHttpFetchError> {
+        try {
+          return await http.post(`${API_BASE_PATH}schedule_now_transforms`, {
             body: JSON.stringify(transformsInfo),
           });
         } catch (e) {

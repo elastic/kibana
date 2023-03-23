@@ -48,6 +48,11 @@ import {
   ResetActionModal,
 } from '../action_reset';
 import { useStartAction, StartActionName, StartActionModal } from '../action_start';
+import {
+  useScheduleNowAction,
+  ScheduleNowActionName,
+  ScheduleNowActionModal,
+} from '../action_schedule_now';
 import { StopActionName, useStopAction } from '../action_stop';
 
 import { useColumns } from './use_columns';
@@ -100,6 +105,7 @@ export const TransformList: FC<TransformListProps> = ({
   const bulkDeleteAction = useDeleteAction(false);
   const bulkResetAction = useResetAction(false);
   const bulkStopAction = useStopAction(false);
+  const bulkScheduleNowAction = useScheduleNowAction(false, transformNodes);
 
   const { capabilities } = useContext(AuthorizationContext);
   const disabled =
@@ -173,6 +179,11 @@ export const TransformList: FC<TransformListProps> = ({
     <div key="startAction" className="transform__BulkActionItem">
       <EuiButtonEmpty onClick={() => bulkStartAction.openModal(transformSelection)}>
         <StartActionName items={transformSelection} transformNodes={transformNodes} />
+      </EuiButtonEmpty>
+    </div>,
+    <div key="scheduleNowAction" className="transform__BulkActionItem">
+      <EuiButtonEmpty onClick={() => bulkScheduleNowAction.openModal(transformSelection)}>
+        <ScheduleNowActionName items={transformSelection} transformNodes={transformNodes} />
       </EuiButtonEmpty>
     </div>,
     <div key="stopAction" className="transform__BulkActionItem">
@@ -286,6 +297,9 @@ export const TransformList: FC<TransformListProps> = ({
       {bulkDeleteAction.isModalVisible && <DeleteActionModal {...bulkDeleteAction} />}
       {bulkResetAction.isModalVisible && <ResetActionModal {...bulkResetAction} />}
       {bulkStopAction.isModalVisible && <StopActionModal {...bulkStopAction} />}
+      {bulkScheduleNowAction.isModalVisible && (
+        <ScheduleNowActionModal {...bulkScheduleNowAction} />
+      )}
 
       {/* Single Action Modals */}
       {singleActionModals}
