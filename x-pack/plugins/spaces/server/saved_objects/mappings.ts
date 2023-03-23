@@ -8,6 +8,7 @@
 import { deepFreeze } from '@kbn/std';
 
 export const SpacesSavedObjectMappings = deepFreeze({
+  dynamic: false as false,
   properties: {
     name: {
       type: 'text',
@@ -30,10 +31,9 @@ export const SpacesSavedObjectMappings = deepFreeze({
     disabledFeatures: {
       type: 'keyword',
     },
-    imageUrl: {
-      type: 'text',
-      index: false,
-    },
+    // This field isn't included in the mappings since it doesn't need to be indexed or searched, but it will still
+    // appear in the `_source` field of the `space` document.
+    // imageUrl: { type: 'text' },
     _reserved: {
       type: 'boolean',
     },

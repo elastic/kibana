@@ -8,7 +8,7 @@
 
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
+import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
 import {
   readLog,
   clearLog,
@@ -25,7 +25,7 @@ import { delay } from '../test_utils';
 describe('when migrating to a new version', () => {
   let esServer: TestElasticsearchUtils['es'];
   let esClient: ElasticsearchClient;
-  let migrator: IKibanaMigrator;
+  let runMigrations: (rerun?: boolean | undefined) => Promise<MigrationResult[]>;
 
   beforeAll(async () => {
     esServer = await startElasticsearch();
@@ -39,9 +39,8 @@ describe('when migrating to a new version', () => {
   describe('and the mappings remain the same', () => {
     it('the migrator skips reindexing', async () => {
       // we run the migrator with the same identic baseline types
-      migrator = (await getIdenticalMappingsMigrator()).migrator;
-      migrator.prepareMigrations();
-      await migrator.runMigrations();
+      runMigrations = (await getIdenticalMappingsMigrator()).runMigrations;
+      await runMigrations();
 
       const logs = await readLog();
       expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
@@ -68,9 +67,8 @@ describe('when migrating to a new version', () => {
   describe("and the mappings' changes are still compatible", () => {
     it('the migrator skips reindexing', async () => {
       // we run the migrator with altered, compatible mappings
-      migrator = (await getCompatibleMappingsMigrator()).migrator;
-      migrator.prepareMigrations();
-      await migrator.runMigrations();
+      runMigrations = (await getCompatibleMappingsMigrator()).runMigrations;
+      await runMigrations();
 
       const logs = await readLog();
       expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
@@ -97,9 +95,8 @@ describe('when migrating to a new version', () => {
   describe("and the mappings' changes are NOT compatible", () => {
     it('the migrator reindexes documents to a new index', async () => {
       // we run the migrator with altered, compatible mappings
-      migrator = (await getIncompatibleMappingsMigrator()).migrator;
-      migrator.prepareMigrations();
-      await migrator.runMigrations();
+      runMigrations = (await getIncompatibleMappingsMigrator()).runMigrations;
+      await runMigrations();
 
       const logs = await readLog();
       expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
@@ -119,7 +116,7 @@ describe('when migrating to a new version', () => {
   afterEach(async () => {
     // we run the migrator again to ensure that the next time state is loaded everything still works as expected
     await clearLog();
-    await migrator.runMigrations({ rerun: true });
+    await runMigrations(true);
 
     const logs = await readLog();
     expect(logs).toMatch('INIT -> WAIT_FOR_YELLOW_SOURCE.');
