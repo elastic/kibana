@@ -23,6 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/grok_debugger'),
       require.resolve('./apps/search_profiler'),
       require.resolve('./apps/painless_lab'),
+      // https://github.com/elastic/kibana/issues/153601
       // require.resolve('./apps/uptime'),
       require.resolve('./apps/spaces'),
       require.resolve('./apps/advanced_settings'),
@@ -32,6 +33,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/roles'),
       require.resolve('./apps/ingest_node_pipelines'),
       require.resolve('./apps/index_lifecycle_management'),
+      // https://github.com/elastic/kibana/issues/153596
+      // https://github.com/elastic/kibana/issues/153592
       // require.resolve('./apps/ml'),
       // require.resolve('./apps/transform'),
       require.resolve('./apps/lens'),
@@ -46,7 +49,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       // CCR tests stay in that order. Their execution fails if rearranged.
       require.resolve('./apps/remote_clusters'),
       require.resolve('./apps/snapshot_and_restore'),
-      require.resolve('./apps/cross_cluster_replication'),
+      // https://github.com/elastic/kibana/issues/153599
+      // require.resolve('./apps/cross_cluster_replication'),
       require.resolve('./apps/reporting'),
       require.resolve('./apps/enterprise_search'),
       require.resolve('./apps/license_management'),
