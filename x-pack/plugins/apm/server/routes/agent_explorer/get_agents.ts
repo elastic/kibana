@@ -11,6 +11,27 @@ import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getAgentsItems } from './get_agents_items';
 import { getAgentDocsPageUrl } from './get_agent_url_repository';
 
+const getOtelAgentVersion = (item: {
+  agentTelemetryAutoVersion: string[];
+  agentVersion: string[];
+}) => {
+  // Auto version should take precedence over sdk version
+  return item.agentTelemetryAutoVersion.length > 0
+    ? item.agentTelemetryAutoVersion
+    : item.agentVersion;
+};
+
+export interface AgentExplorerAgentsResponse {
+  items: Array<{
+    agentDocsPageUrl: string | undefined;
+    serviceName: string;
+    environments: string[];
+    agentName: AgentName;
+    agentVersion: string[];
+    instances: number;
+  }>;
+}
+
 export async function getAgents({
   environment,
   serviceName,

@@ -24,6 +24,13 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 
 const MAX_NUMBER_OF_SERVICE_NODES = 500;
 
+export type AgentExplorerAgentInstancesResponse = Array<{
+  serviceNode: string;
+  environments: string[];
+  agentVersion: string;
+  lastReport: string;
+}>;
+
 export async function getAgentInstances({
   environment,
   serviceName,
