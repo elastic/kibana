@@ -53,11 +53,11 @@ describe('getExportSettings', () => {
     expect(await getExportSettings(uiSettingsClient, config, '', logger)).toMatchInlineSnapshot(`
       Object {
         "bom": "",
-        "checkForFormulas": undefined,
-        "escapeFormulaValues": undefined,
+        "checkForFormulas": true,
+        "escapeFormulaValues": true,
         "escapeValue": [Function],
         "includeFrozen": false,
-        "maxSizeBytes": undefined,
+        "maxSizeBytes": 180000,
         "scroll": Object {
           "duration": "30s",
           "size": 500,

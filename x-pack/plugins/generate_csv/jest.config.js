@@ -8,11 +8,13 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/fleet'],
+  roots: ['<rootDir>/x-pack/plugins/generate_csv'],
   transform: {
     '^.+\\.stories\\.tsx?$': '@storybook/addon-storyshots/injectFileName',
   },
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/fleet',
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/generate_csv',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/fleet/{common,public,server}/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/plugins/generate_csv/{common,public,server}/**/*.{ts,tsx}',
+  ],
 };
