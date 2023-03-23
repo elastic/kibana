@@ -351,6 +351,7 @@
     "@kbn/discover-enhanced-plugin": "link:x-pack/plugins/discover_enhanced",
     "@kbn/discover-plugin": "link:src/plugins/discover",
     "@kbn/doc-links": "link:packages/kbn-doc-links",
+    "@kbn/dom-drag-drop": "link:packages/kbn-dom-drag-drop",
     "@kbn/ebt-tools": "link:packages/kbn-ebt-tools",
     "@kbn/ecs": "link:packages/kbn-ecs",
     "@kbn/ecs-data-quality-dashboard": "link:x-pack/packages/kbn-ecs-data-quality-dashboard",
