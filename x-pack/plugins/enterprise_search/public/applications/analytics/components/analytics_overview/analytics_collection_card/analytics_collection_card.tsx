@@ -94,7 +94,7 @@ const getChartStatus = (metric: number | null): ChartStatus => {
   return ChartStatus.CONSTANT;
 };
 
-const AnalyticsCollectionCard: React.FC<
+export const AnalyticsCollectionCard: React.FC<
   AnalyticsCollectionCardProps & AnalyticsCollectionCardLensProps
 > = ({ collection, isLoading, isCreatedByEngine, subtitle, data, metric, secondaryMetric }) => {
   const { euiTheme } = useEuiTheme();
