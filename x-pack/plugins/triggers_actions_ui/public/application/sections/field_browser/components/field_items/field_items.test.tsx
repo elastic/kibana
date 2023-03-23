@@ -28,7 +28,7 @@ describe('field_items', () => {
       expect(fieldItems[0]).toEqual({
         name: timestampFieldId,
         description: timestampField.description,
-        category: 'base',
+        category: '@timestamp',
         selected: false,
         type: timestampField.type,
         example: timestampField.example,
@@ -102,7 +102,7 @@ describe('field_items', () => {
     });
 
     it('should show description field', () => {
-      const { fieldItems, showDescriptionColumn } = getFieldItemsData({
+      const { fieldItems } = getFieldItemsData({
         selectedCategoryIds: ['base'],
         browserFields: { base: { fields: { [timestampFieldId]: timestampField } } },
         columnIds: [],
@@ -111,35 +111,12 @@ describe('field_items', () => {
       expect(fieldItems[0]).toEqual({
         name: timestampFieldId,
         description: timestampField.description,
-        category: 'base',
+        category: '@timestamp',
         selected: false,
         type: timestampField.type,
         example: timestampField.example,
         isRuntime: false,
       });
-      expect(showDescriptionColumn).toEqual(true);
-    });
-
-    it('should not show description field', () => {
-      const { description, ...timestampFieldWithoutDescription } = timestampField;
-      const { fieldItems, showDescriptionColumn } = getFieldItemsData({
-        selectedCategoryIds: ['base'],
-        browserFields: {
-          base: { fields: { [timestampFieldId]: timestampFieldWithoutDescription } },
-        },
-        columnIds: [],
-      });
-
-      expect(fieldItems[0]).toEqual({
-        name: timestampFieldId,
-        description: '',
-        category: 'base',
-        selected: false,
-        type: timestampField.type,
-        example: timestampField.example,
-        isRuntime: false,
-      });
-      expect(showDescriptionColumn).toEqual(false);
     });
   });
 
@@ -157,9 +134,7 @@ describe('field_items', () => {
 
     it('should return default field columns', () => {
       expect(
-        getFieldColumns({ ...getFieldColumnsParams, showDescriptionColumn: false }).map((column) =>
-          omit('render', column)
-        )
+        getFieldColumns({ ...getFieldColumnsParams }).map((column) => omit('render', column))
       ).toEqual([
         {
           field: 'selected',
@@ -172,6 +147,12 @@ describe('field_items', () => {
           name: 'Name',
           sortable: true,
           width: '225px',
+        },
+        {
+          field: 'description',
+          name: 'Description',
+          sortable: true,
+          width: '400px',
         },
         {
           field: 'category',
@@ -241,7 +222,6 @@ describe('field_items', () => {
 
       const columns = getFieldColumns({
         ...getFieldColumnsParams,
-        showDescriptionColumn: true,
       });
 
       const { getByTestId, getAllByText } = render(
@@ -268,19 +248,18 @@ describe('field_items', () => {
 
       const columns = getFieldColumns({
         ...getFieldColumnsParams,
-        showDescriptionColumn: false,
       });
       const { getByTestId, getAllByText, queryAllByText, queryByTestId } = render(
         <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
       );
 
       expect(getAllByText('Name').at(0)).toBeInTheDocument();
-      expect(queryAllByText('Description').at(0)).toBeFalsy();
+      expect(queryAllByText('Description').at(0)).toBeInTheDocument();
       expect(getAllByText('Category').at(0)).toBeInTheDocument();
 
       expect(getByTestId(`field-${timestampFieldId}-checkbox`)).toBeInTheDocument();
       expect(getByTestId(`field-${timestampFieldId}-name`)).toBeInTheDocument();
-      expect(queryByTestId(`field-${timestampFieldId}-description`)).not.toBeInTheDocument();
+      expect(queryByTestId(`field-${timestampFieldId}-description`)).toBeInTheDocument();
       expect(getByTestId(`field-${timestampFieldId}-category`)).toBeInTheDocument();
     });
   });
