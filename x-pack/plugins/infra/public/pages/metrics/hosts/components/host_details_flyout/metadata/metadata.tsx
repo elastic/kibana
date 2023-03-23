@@ -77,7 +77,7 @@ const Metadata = ({ node, currentTimeRange }: TabProps) => {
       title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
         defaultMessage: 'Sorry, there is no metadata related to this host.',
       })}
-      size="s"
+      size="m"
       iconType="iInCircle"
     />
   );
