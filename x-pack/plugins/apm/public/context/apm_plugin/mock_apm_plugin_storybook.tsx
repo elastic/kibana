@@ -5,24 +5,26 @@
  * 2.0.
  */
 import { CoreStart } from '@kbn/core/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { UI_SETTINGS } from '@kbn/observability-plugin/public/hooks/use_kibana_ui_settings';
+import { UrlService } from '@kbn/share-plugin/common/url_service';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { createMemoryHistory } from 'history';
 import { merge } from 'lodash';
 import React, { ReactNode } from 'react';
 import { Observable, of } from 'rxjs';
-import { UrlService } from '@kbn/share-plugin/common/url_service';
-import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
-import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import {
   APMServiceContext,
   APMServiceContextValue,
 } from '../apm_service/apm_service_context';
+import { MockTimeRangeContextProvider } from '../time_range_metadata/mock_time_range_metadata_context_provider';
+import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time_range_metadata_context';
+import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
@@ -147,7 +149,11 @@ export function MockApmPluginStorybook({
         <ApmPluginContext.Provider value={contextMock}>
           <APMServiceContext.Provider value={serviceContextValue}>
             <RouterProvider router={apmRouter as any} history={history2}>
-              {children}
+              <MockTimeRangeContextProvider>
+                <ApmTimeRangeMetadataContextProvider>
+                  {children}
+                </ApmTimeRangeMetadataContextProvider>
+              </MockTimeRangeContextProvider>
             </RouterProvider>
           </APMServiceContext.Provider>
         </ApmPluginContext.Provider>

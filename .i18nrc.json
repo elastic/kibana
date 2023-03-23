@@ -14,6 +14,7 @@
     "core": ["src/core", "packages/core"],
     "customIntegrations": "src/plugins/custom_integrations",
     "dashboard": "src/plugins/dashboard",
+    "domDragDrop": "packages/kbn-dom-drag-drop",
     "controls": "src/plugins/controls",
     "data": "src/plugins/data",
     "ecsDataQualityDashboard": "x-pack/packages/kbn-ecs-data-quality-dashboard",

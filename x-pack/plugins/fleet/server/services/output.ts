@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import type { KibanaRequest, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  SavedObject,
+  SavedObjectsClientContract,
+  ElasticsearchClient,
+} from '@kbn/core/server';
 import { v5 as uuidv5 } from 'uuid';
 import { omit } from 'lodash';
 import { safeLoad } from 'js-yaml';
 
-import type { NewOutput, Output, OutputSOAttributes } from '../types';
+import type { NewOutput, Output, OutputSOAttributes, AgentPolicy } from '../types';
 import {
   DEFAULT_OUTPUT,
   DEFAULT_OUTPUT_ID,
@@ -78,12 +83,11 @@ function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output 
   };
 }
 
-async function validateLogstashOutputNotUsedInAPMPolicy(
+async function getAgentPoliciesPerOutput(
   soClient: SavedObjectsClientContract,
   outputId?: string,
   isDefault?: boolean
 ) {
-  // Validate no policy with APM use that policy
   let kuery: string;
   if (outputId) {
     if (isDefault) {
@@ -104,9 +108,86 @@ async function validateLogstashOutputNotUsedInAPMPolicy(
     perPage: SO_SEARCH_LIMIT,
     withPackagePolicies: true,
   });
-  for (const agentPolicy of agentPolicySO.items) {
-    if (agentPolicyService.hasAPMIntegration(agentPolicy)) {
-      throw new OutputInvalidError('Logstash output cannot be used with APM integration.');
+  return agentPolicySO?.items;
+}
+
+async function validateLogstashOutputNotUsedInAPMPolicy(
+  soClient: SavedObjectsClientContract,
+  outputId?: string,
+  isDefault?: boolean
+) {
+  const agentPolicies = await getAgentPoliciesPerOutput(soClient, outputId, isDefault);
+
+  // Validate no policy with APM use that policy
+  if (agentPolicies) {
+    for (const agentPolicy of agentPolicies) {
+      if (agentPolicyService.hasAPMIntegration(agentPolicy)) {
+        throw new OutputInvalidError('Logstash output cannot be used with APM integration.');
+      }
+    }
+  }
+}
+
+async function findPoliciesWithFleetServer(
+  soClient: SavedObjectsClientContract,
+  outputId?: string,
+  isDefault?: boolean
+) {
+  // find agent policies by outputId
+  // otherwise query all the policies
+  const agentPolicies = outputId
+    ? await getAgentPoliciesPerOutput(soClient, outputId, isDefault)
+    : (await agentPolicyService.list(soClient, { withPackagePolicies: true }))?.items;
+
+  if (agentPolicies) {
+    const policiesWithFleetServer = agentPolicies.filter((policy) =>
+      agentPolicyService.hasFleetServerIntegration(policy)
+    );
+    return policiesWithFleetServer;
+  }
+  return [];
+}
+
+function validateLogstashOutputNotUsedInFleetServerPolicy(agentPolicies: AgentPolicy[]) {
+  // Validate no policy with fleet server use that policy
+  for (const agentPolicy of agentPolicies) {
+    throw new OutputInvalidError(
+      `Logstash output cannot be used with Fleet Server integration in ${agentPolicy.name}. Please create a new ElasticSearch output.`
+    );
+  }
+}
+
+async function validateTypeChanges(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  id: string,
+  data: Partial<Output>,
+  originalOutput: Output,
+  defaultDataOutputId: string | null
+) {
+  const mergedIsDefault = data.is_default ?? originalOutput.is_default;
+  const fleetServerPolicies = await findPoliciesWithFleetServer(soClient, id, mergedIsDefault);
+
+  if (data.type === outputType.Logstash || originalOutput.type === outputType.Logstash) {
+    await validateLogstashOutputNotUsedInAPMPolicy(soClient, id, mergedIsDefault);
+  }
+  // prevent changing an ES output to logstash if it's used by fleet server policies
+  if (originalOutput.type === outputType.Elasticsearch && data?.type === outputType.Logstash) {
+    // Validate no policy with fleet server use that policy
+    validateLogstashOutputNotUsedInFleetServerPolicy(fleetServerPolicies);
+  }
+  // if a logstash output is updated to become default, update the fleet server policies to use the previous ES output or default output
+  if (data?.type === outputType.Logstash && mergedIsDefault) {
+    for (const policy of fleetServerPolicies) {
+      await agentPolicyService.update(
+        soClient,
+        esClient,
+        policy.id,
+        { data_output_id: defaultDataOutputId },
+        {
+          force: true,
+        }
+      );
     }
   }
 }
@@ -132,7 +213,10 @@ class OutputService {
     });
   }
 
-  public async ensureDefaultOutput(soClient: SavedObjectsClientContract) {
+  public async ensureDefaultOutput(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient
+  ) {
     const outputs = await this.list(soClient);
 
     const defaultOutput = outputs.items.find((o) => o.is_default);
@@ -146,7 +230,7 @@ class OutputService {
         is_default_monitoring: !defaultMonitoringOutput,
       } as NewOutput;
 
-      return await this.create(soClient, newDefaultOutput, {
+      return await this.create(soClient, esClient, newDefaultOutput, {
         id: DEFAULT_OUTPUT_ID,
         overwrite: true,
       });
@@ -191,6 +275,7 @@ class OutputService {
 
   public async create(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     output: NewOutput,
     options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
   ): Promise<Output> {
@@ -205,12 +290,35 @@ class OutputService {
       }
     }
 
+    if (data.type === outputType.Logstash) {
+      const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
+      const fleetServerPolicies = await findPoliciesWithFleetServer(soClient);
+      // if a logstash output is updated to become default, update the fleet server policies to use the previous ES output or default output
+      if (data.is_default) {
+        for (const policy of fleetServerPolicies) {
+          await agentPolicyService.update(
+            soClient,
+            esClient,
+            policy.id,
+            { data_output_id: defaultDataOutputId },
+            {
+              force: true,
+            }
+          );
+        }
+      } else {
+        // prevent changing an ES output to logstash if it's used by fleet server policies
+        validateLogstashOutputNotUsedInFleetServerPolicy(fleetServerPolicies);
+      }
+    }
+
     // ensure only default output exists
     if (data.is_default) {
       const defaultDataOuputId = await this.getDefaultDataOutputId(soClient);
       if (defaultDataOuputId) {
         await this.update(
           soClient,
+          esClient,
           defaultDataOuputId,
           { is_default: false },
           { fromPreconfiguration: options?.fromPreconfiguration ?? false }
@@ -222,6 +330,7 @@ class OutputService {
       if (defaultMonitoringOutputId) {
         await this.update(
           soClient,
+          esClient,
           defaultMonitoringOutputId,
           { is_default_monitoring: false },
           { fromPreconfiguration: options?.fromPreconfiguration ?? false }
@@ -366,6 +475,7 @@ class OutputService {
 
   public async update(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     id: string,
     data: Partial<Output>,
     { fromPreconfiguration = false }: { fromPreconfiguration: boolean } = {
@@ -382,11 +492,9 @@ class OutputService {
 
     const updateData: Nullable<Partial<OutputSOAttributes>> = { ...omit(data, 'ssl') };
     const mergedType = data.type ?? originalOutput.type;
-    const mergedIsDefault = data.is_default ?? originalOutput.is_default;
+    const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
-    if (mergedType === outputType.Logstash) {
-      await validateLogstashOutputNotUsedInAPMPolicy(soClient, id, mergedIsDefault);
-    }
+    await validateTypeChanges(soClient, esClient, id, data, originalOutput, defaultDataOutputId);
 
     // If the output type changed
     if (data.type && data.type !== originalOutput.type) {
@@ -409,11 +517,11 @@ class OutputService {
 
     // ensure only default output exists
     if (data.is_default) {
-      const defaultDataOuputId = await this.getDefaultDataOutputId(soClient);
-      if (defaultDataOuputId && defaultDataOuputId !== id) {
+      if (defaultDataOutputId && defaultDataOutputId !== id) {
         await this.update(
           soClient,
-          defaultDataOuputId,
+          esClient,
+          defaultDataOutputId,
           { is_default: false },
           { fromPreconfiguration }
         );
@@ -425,6 +533,7 @@ class OutputService {
       if (defaultMonitoringOutputId && defaultMonitoringOutputId !== id) {
         await this.update(
           soClient,
+          esClient,
           defaultMonitoringOutputId,
           { is_default_monitoring: false },
           { fromPreconfiguration }
