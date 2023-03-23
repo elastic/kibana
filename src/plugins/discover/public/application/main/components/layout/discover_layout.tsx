@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import {DataView, DataViewField, DataViewType} from '@kbn/data-views-plugin/public';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
@@ -30,7 +30,6 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { DiscoverSidebarResponsive } from '../sidebar';
-import { DiscoverLayoutProps } from './types';
 import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
 import { popularizeField } from '../../../../utils/popularize_field';
 import { DiscoverTopNav } from '../top_nav/discover_topnav';
@@ -45,6 +44,7 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
+import {DiscoverStateContainer} from "@kbn/discover-plugin/public/application/main/services/discover_state";
 
 /**
  * Local storage key for sidebar persistence state
@@ -53,6 +53,13 @@ export const SIDEBAR_CLOSED_KEY = 'discover:sidebarClosed';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
+
+export interface DiscoverLayoutProps {
+  navigateTo: (url: string) => void;
+  stateContainer: DiscoverStateContainer;
+  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
+}
+
 
 export function DiscoverLayout({
   navigateTo,
@@ -208,7 +215,6 @@ export function DiscoverLayout({
         <DiscoverHistogramLayout
           isPlainRecord={isPlainRecord}
           dataView={dataView}
-          navigateTo={navigateTo}
           stateContainer={stateContainer}
           columns={currentColumns}
           viewMode={viewMode}

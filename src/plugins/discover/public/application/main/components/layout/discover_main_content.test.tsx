@@ -97,7 +97,6 @@ const mountComponent = ({
   const props: DiscoverMainContentProps = {
     isPlainRecord,
     dataView: dataViewMock,
-    navigateTo: jest.fn(),
     stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],

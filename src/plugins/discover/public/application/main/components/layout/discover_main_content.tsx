@@ -25,7 +25,6 @@ import { useDataState } from '../../hooks/use_data_state';
 export interface DiscoverMainContentProps {
   dataView: DataView;
   isPlainRecord: boolean;
-  navigateTo: (url: string) => void;
   stateContainer: DiscoverStateContainer;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;

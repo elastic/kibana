@@ -116,7 +116,6 @@ const mountComponent = async ({
   const props: DiscoverHistogramLayoutProps = {
     isPlainRecord,
     dataView: dataViewMock,
-    navigateTo: jest.fn(),
     stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],
