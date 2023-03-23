@@ -94,9 +94,11 @@ describe('AlertsTable.BulkActions', () => {
     sort: [],
   };
 
+  const casesConfig = { featureId: 'test-feature-id', owner: ['test-owner'] };
+
   const alertsTableConfiguration = {
     id: '',
-    casesFeatureId: 'test',
+    casesConfig,
     columns,
     sort: [],
     useInternalFlyout: jest.fn().mockImplementation(() => ({
@@ -114,7 +116,7 @@ describe('AlertsTable.BulkActions', () => {
 
   const tableProps: AlertsTableProps = {
     alertsTableConfiguration,
-    cases: { data: casesMap, isLoading: false, showBulkActions: true },
+    cases: { data: casesMap, isLoading: false },
     columns,
     deletedEventIds: [],
     disabledCellActions: [],
@@ -215,6 +217,21 @@ describe('AlertsTable.BulkActions', () => {
     it('should not show the bulk actions column', () => {
       const { queryByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
       expect(queryByTestId('bulk-actions-header')).toBeNull();
+    });
+  });
+
+  describe('Cases', () => {
+    beforeAll(() => {
+      mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
+      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(() => 'Cases context');
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    afterAll(() => {
+      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(() => null);
     });
 
     it('should show the bulk actions column when the cases service is defined', () => {

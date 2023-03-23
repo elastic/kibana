@@ -26,7 +26,7 @@ import { ADD_TO_CASE_DISABLED, ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './t
 interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   alerts: Alerts;
-  casesConfig: AlertsTableConfigurationRegistry['cases'];
+  casesConfig?: AlertsTableConfigurationRegistry['cases'];
   useBulkActionsConfig?: UseBulkActionsRegistry;
   refresh: () => void;
 }
@@ -52,7 +52,7 @@ export const useBulkAddToCaseActions = ({
 
   const userCasesPermissions = casesService?.helpers.canUseCases(casesConfig?.owner ?? []);
   const CasesContext = casesService?.ui.getCasesContext();
-  const isCasesContextAvailable = casesService && CasesContext;
+  const isCasesContextAvailable = Boolean(casesService && CasesContext);
 
   const onSuccess = useCallback(() => {
     refresh();
@@ -76,7 +76,10 @@ export const useBulkAddToCaseActions = ({
             disableOnQuery: true,
             disabledLabel: ADD_TO_CASE_DISABLED,
             onClick: (items?: any[]) => {
-              const caseAttachments = items ? casesService.helpers.groupAlertsByRule(items) : [];
+              const caseAttachments = items
+                ? casesService?.helpers.groupAlertsByRule(items) ?? []
+                : [];
+
               createCaseFlyout.open({
                 attachments: caseAttachments,
               });
@@ -89,7 +92,10 @@ export const useBulkAddToCaseActions = ({
             disabledLabel: ADD_TO_CASE_DISABLED,
             'data-test-subj': 'attach-existing-case',
             onClick: (items?: any[]) => {
-              const caseAttachments = items ? casesService.helpers.groupAlertsByRule(items) : [];
+              const caseAttachments = items
+                ? casesService?.helpers.groupAlertsByRule(items) ?? []
+                : [];
+
               selectCaseModal.open({
                 attachments: caseAttachments,
               });

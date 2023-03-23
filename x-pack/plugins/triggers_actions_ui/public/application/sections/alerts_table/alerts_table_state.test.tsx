@@ -259,6 +259,10 @@ describe('AlertsTableState', () => {
   });
 
   describe('cases column', () => {
+    beforeAll(() => {
+      mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
+    });
+
     it('should show the cases column', async () => {
       render(<AlertsTableWithLocale {...tableProps} />);
       expect(await screen.findByText('Cases')).toBeInTheDocument();
@@ -281,7 +285,7 @@ describe('AlertsTableState', () => {
       render(<AlertsTableWithLocale {...tableProps} />);
 
       await waitFor(() => {
-        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id', 'test-id-2']);
+        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id', 'test-id-2'], true);
       });
     });
 
@@ -297,7 +301,7 @@ describe('AlertsTableState', () => {
       render(<AlertsTableWithLocale {...tableProps} />);
 
       await waitFor(() => {
-        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id', 'test-id-2']);
+        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id', 'test-id-2'], true);
       });
     });
 
@@ -316,7 +320,7 @@ describe('AlertsTableState', () => {
       render(<AlertsTableWithLocale {...tableProps} />);
 
       await waitFor(() => {
-        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id-2']);
+        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id-2'], true);
       });
     });
   });
