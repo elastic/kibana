@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-const LOADED_RULE_ID = '74f3e6d7-b7bb-477d-ac28-92ee22728e6e';
+const LOADED_RULE_ID = 'c6b2c560-0685-42f6-b488-472594cfe915';
 
 // eslint-disable-next-line import/no-default-export
 export default function createRunSoonTests({ getService }: FtrProviderContext) {
@@ -22,8 +22,7 @@ export default function createRunSoonTests({ getService }: FtrProviderContext) {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/rules_scheduled_task_id/rules');
-      await esArchiver.load('x-pack/test/functional/es_archives/rules_scheduled_task_id/tasks');
+      await esArchiver.load('x-pack/test/functional/es_archives/rules_run_soon');
     });
 
     afterEach(async () => {
@@ -31,8 +30,7 @@ export default function createRunSoonTests({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rules_scheduled_task_id/tasks');
-      await esArchiver.unload('x-pack/test/functional/es_archives/rules_scheduled_task_id/rules');
+      await esArchiver.unload('x-pack/test/functional/es_archives/rules_run_soon');
     });
 
     it('should successfully run rule where scheduled task id is different than rule id', async () => {
