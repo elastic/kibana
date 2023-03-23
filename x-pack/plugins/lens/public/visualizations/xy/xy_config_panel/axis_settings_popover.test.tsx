@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { AxisSettingsPopover, AxisSettingsPopoverProps } from './axis_settings_popover';
-import { ToolbarPopover } from '../../../shared_components';
+import { ToolbarPopover, AxisTicksSettings } from '../../../shared_components';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { ShallowWrapper } from 'enzyme';
 
@@ -67,13 +67,23 @@ describe('Axes Settings', () => {
   });
 
   it('has the tickLabels switch on by default', () => {
-    const component = shallow(<AxisSettingsPopover {...props} />);
+    const component = shallow(
+      <AxisTicksSettings
+        axis={props.axis}
+        isAxisLabelVisible={props.areTickLabelsVisible}
+        updateTicksVisibilityState={jest.fn()}
+      />
+    );
     expect(component.find('[data-test-subj="lnsshowxAxisTickLabels"]').prop('checked')).toBe(true);
   });
 
   it('has the tickLabels switch off when tickLabelsVisibilitySettings for this axes are false', () => {
     const component = shallow(
-      <AxisSettingsPopover {...props} axis="yLeft" areTickLabelsVisible={false} />
+      <AxisTicksSettings
+        axis="yLeft"
+        isAxisLabelVisible={false}
+        updateTicksVisibilityState={jest.fn()}
+      />
     );
     expect(component.find('[data-test-subj="lnsshowyLeftAxisTickLabels"]').prop('checked')).toBe(
       false
