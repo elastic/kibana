@@ -15,11 +15,12 @@ import { Status } from '../../../../../common/types/api';
 
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
+import { LicensingCallout } from '../new_index/licensing_callout';
+
 import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
 import { EnginesListTable } from './components/tables/engines_table';
 import { EnginesList, CreateEngineButton } from './engines_list';
 import { DEFAULT_META } from './types';
-import { LicensingCallout } from '../new_index/licensing_callout';
 
 const DEFAULT_VALUES = {
   data: undefined,

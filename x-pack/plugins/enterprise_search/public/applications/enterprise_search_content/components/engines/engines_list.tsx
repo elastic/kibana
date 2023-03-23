@@ -18,7 +18,11 @@ import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { INPUT_THROTTLE_DELAY_MS } from '../../../shared/constants/timers';
 import { docLinks } from '../../../shared/doc_links';
 
+import { KibanaLogic } from '../../../shared/kibana';
+import { LicensingLogic } from '../../../shared/licensing';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
+
+import { LicensingCallout, LICENSING_FEATURE } from '../new_index/licensing_callout';
 
 import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
 import { EnginesListTable } from './components/tables/engines_table';
@@ -27,9 +31,6 @@ import { DeleteEngineModal } from './delete_engine_modal';
 import { EngineListIndicesFlyout } from './engines_list_flyout';
 import { EnginesListFlyoutLogic } from './engines_list_flyout_logic';
 import { EnginesListLogic } from './engines_list_logic';
-import { LicensingLogic } from '../../../shared/licensing';
-import { KibanaLogic } from "../../../shared/kibana";
-import { LicensingCallout, LICENSING_FEATURE } from '../new_index/licensing_callout';
 
 export const CreateEngineButton: React.FC<{ disabled: boolean }> = ({ disabled }) => {
   const { openEngineCreate } = useActions(EnginesListLogic);
@@ -66,8 +67,6 @@ export const EnginesList: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const isGated = !isCloud && !hasPlatinumLicense;
-
-
 
   const {
     createEngineFlyoutOpen,
@@ -129,12 +128,15 @@ export const EnginesList: React.FC = () => {
           pageTitle: i18n.translate('xpack.enterpriseSearch.content.engines.title', {
             defaultMessage: 'Search Applications',
           }),
-          rightSideItems: isLoading ? [] : !hasNoEngines ? [<CreateEngineButton disabled={isGated}/>] : [],
+          rightSideItems: isLoading
+            ? []
+            : !hasNoEngines
+            ? [<CreateEngineButton disabled={isGated} />]
+            : [],
         }}
         pageViewTelemetry="Engines"
         isLoading={isLoading}
       >
-
         {isGated && (
           <EuiFlexItem>
             <LicensingCallout feature={LICENSING_FEATURE.SEARCH_APPLICATIONS} />
@@ -206,7 +208,7 @@ export const EnginesList: React.FC = () => {
           </>
         ) : (
           <EmptyEnginesPrompt>
-            <CreateEngineButton disabled={isGated}/>
+            <CreateEngineButton disabled={isGated} />
           </EmptyEnginesPrompt>
         )}
 
