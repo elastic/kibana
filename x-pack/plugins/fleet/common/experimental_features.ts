@@ -18,7 +18,7 @@ export const allowedExperimentalValues = Object.freeze({
   diagnosticFileUploadEnabled: true,
   experimentalDataStreamSettings: false,
   displayAgentMetrics: true,
-  showIntegrationsSubcategories: false,
+  showIntegrationsSubcategories: true,
   agentFqdnMode: false,
   showExperimentalShipperOptions: false,
   fleetServerStandalone: false,
