@@ -9,7 +9,15 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'tagManagement']);
+  const PageObjects = getPageObjects([
+    'visualize',
+    'lens',
+    'common',
+    'header',
+    'tagManagement',
+    'settings',
+    'savedObjects',
+  ]);
   const find = getService('find');
   const retry = getService('retry');
   const toastsService = getService('toasts');
@@ -106,6 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('library annotation groups', () => {
       const ANNOTATION_GROUP_TITLE = 'library annotation group';
       const FIRST_VIS_TITLE = 'first visualization';
+      const SECOND_VIS_TITLE = 'second visualization';
 
       it('should save annotation group to library', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
@@ -166,6 +175,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         retry.try(async () => {
           expect(await PageObjects.lens.getLayerCount()).to.be(2);
+        });
+
+        await PageObjects.lens.save(SECOND_VIS_TITLE);
+      });
+
+      it('should remove layer for deleted annotation group', async () => {
+        // TODO - delete from listing page instead
+
+        await PageObjects.settings.navigateTo();
+        await PageObjects.settings.clickKibanaSavedObjects();
+        await PageObjects.savedObjects.searchForObject(ANNOTATION_GROUP_TITLE);
+        await PageObjects.savedObjects.clickCheckboxByTitle(ANNOTATION_GROUP_TITLE);
+        await PageObjects.savedObjects.clickDelete({ confirmDelete: true });
+
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await PageObjects.visualize.loadSavedVisualization(FIRST_VIS_TITLE, {
+          navigateToVisualize: false,
+        });
+
+        retry.try(async () => {
+          expect(await PageObjects.lens.getLayerCount()).to.be(1);
         });
       });
 
