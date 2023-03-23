@@ -77,7 +77,6 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     componentProps: {
       groupPanelRenderer: renderGroupPanel,
       groupStatsRenderer: getStats,
-      // inspectButton: inspect,
       onGroupToggle,
       renderChildComponent,
       unit: defaultUnit,

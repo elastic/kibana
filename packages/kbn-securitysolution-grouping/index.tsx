@@ -7,22 +7,22 @@
  */
 
 import { getGroupingQuery, isNoneGroup, useGrouping } from './src';
-import type {   GroupingAggregation,
-  GroupingFieldTotalAggregation,
+import type {
+  GroupingAggregation,
   NamedAggregation,
   RawBucket,
   StatRenderer,
-  GroupingProps,
-  GroupsPagingSettingsById, } from './src';
+  DynamicGroupingProps,
+  GroupsPagingSettingsById,
+} from './src';
 
 export { getGroupingQuery, isNoneGroup, useGrouping };
 
 export type {
   GroupingAggregation,
-  GroupingFieldTotalAggregation,
   NamedAggregation,
   RawBucket,
   StatRenderer,
-  GroupingProps,
+  DynamicGroupingProps,
   GroupsPagingSettingsById,
 };

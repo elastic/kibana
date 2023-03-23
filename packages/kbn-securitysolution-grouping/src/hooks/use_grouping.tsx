@@ -30,25 +30,23 @@ interface Grouping<T> {
   selectedGroups: string[];
 }
 
-/** Type for static grouping component props where T is the `GroupingAggregation`
+/** Type for static grouping component props where T is the consumer `GroupingAggregation`
  *  @interface StaticGroupingProps<T>
  */
 type StaticGroupingProps<T> = Pick<
   GroupingProps<T>,
-  | 'groupPanelRenderer'
-  | 'groupStatsRenderer'
-  | 'inspectButton'
-  | 'onGroupToggle'
-  | 'renderChildComponent'
-  | 'unit'
+  'groupPanelRenderer' | 'groupStatsRenderer' | 'onGroupToggle' | 'renderChildComponent' | 'unit'
 >;
 
-/** Type for dynamic grouping component props where T is the `GroupingAggregation`
+/** Type for dynamic grouping component props where T is the consumer `GroupingAggregation`
  *  @interface DynamicGroupingProps<T>
  */
-type DynamicGroupingProps<T> = Pick<GroupingProps<T>, 'data' | 'isLoading' | 'takeActionItems'>;
+export type DynamicGroupingProps<T> = Pick<
+  GroupingProps<T>,
+  'data' | 'groupingLevel' | 'inspectButton' | 'isLoading' | 'selectedGroup' | 'takeActionItems'
+>;
 
-/** Interface for configuring grouping package where T is the `GroupingAggregation`
+/** Interface for configuring grouping package where T is the consumer `GroupingAggregation`
  *  @interface GroupingArgs<T>
  */
 interface GroupingArgs<T> {
@@ -123,7 +121,6 @@ export const useGrouping = <T,>({
           groupingId={groupingId}
           groupSelector={groupSelector}
           pagination={pagination}
-          selectedGroups={selectedGroups}
           tracker={tracker}
         />
       ),
@@ -131,9 +128,9 @@ export const useGrouping = <T,>({
   );
 
   const resetPagination = useCallback(() => {
-    selectedGroups.forEach((selectedGroups, i, arr) => {
+    selectedGroups.forEach((selectedGroup, i, arr) => {
       dispatch(
-        groupActions.updateGroupActivePage({ id: groupingId, activePage: 0, selectedGroups })
+        groupActions.updateGroupActivePage({ id: groupingId, activePage: 0, selectedGroup })
       );
     });
   }, [groupingId, selectedGroups]);

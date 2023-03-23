@@ -23,20 +23,16 @@ import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
 import { countCss, groupingContainerCss, groupingContainerCssLevel } from './styles';
 import { GROUPS_UNIT } from './translations';
-import type {
-  GroupingAggregation,
-  GroupingFieldTotalAggregation,
-  GroupPanelRenderer,
-  RawBucket,
-} from './types';
+import type { GroupingAggregation, GroupPanelRenderer, RawBucket } from './types';
 import { GroupStatsRenderer, OnGroupToggle } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
 import { GroupsPagingSettingsById } from '../hooks/types';
 
 export interface GroupingProps<T> {
-  data?: GroupingAggregation<T> & GroupingFieldTotalAggregation<T>;
+  data?: GroupingAggregation<T>;
   groupingId: string;
   groupPanelRenderer?: GroupPanelRenderer<T>;
+  groupingLevel?: number;
   groupSelector?: JSX.Element;
   // list of custom UI components which correspond to your custom rendered metrics aggregations
   groupStatsRenderer?: GroupStatsRenderer<T>;
@@ -44,11 +40,10 @@ export interface GroupingProps<T> {
   isLoading: boolean;
   onGroupToggle?: OnGroupToggle;
   pagination: {
-    pageIndex: number;
-    pageSize: number;
-    onChangeItemsPerPage: (itemsPerPageNumber: number) => void;
-    onChangePage: (pageNumber: number) => void;
     itemsPerPageOptions: number[];
+    onChangeItemsPerPage: (newItemsPerPage: number, selectedGroup: string) => void;
+    onChangePage: (newActivePage: number, selectedGroup: string) => void;
+    pagingSettings: GroupsPagingSettingsById;
   };
   renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
   selectedGroup: string;
@@ -59,7 +54,6 @@ export interface GroupingProps<T> {
     count?: number | undefined
   ) => void;
   unit?: (n: number) => string;
-  groupingLevel?: number;
 }
 
 const GroupingComponent = <T,>({
