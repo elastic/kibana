@@ -34,7 +34,7 @@ const mockResponse = {
 };
 
 jest.mock('../hooks/use_metrics_explorer_chart_data', () => ({
-  useMetricsExplorerChartData: () => ({ loading: false, data: mockResponse }),
+  useMetricsExplorerChartData: () => ({ loading: false, data: { pages: [mockResponse] } }),
 }));
 
 describe('ExpressionChart', () => {
