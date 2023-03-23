@@ -17,6 +17,7 @@ import type {
   RouteValidatorFullConfig,
   RequestHandlerContextBase,
   RouteValidationFunction,
+  RouteValidatorOptions,
 } from '@kbn/core-http-server';
 
 type RqCtx = RequestHandlerContextBase;
@@ -104,6 +105,7 @@ export type RequestValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
 /** @experimental */
 export interface ResponseValidation<R> {
   body: RouteValidationFunction<R> | Type<R>;
+  unsafe?: boolean;
 }
 
 /**
@@ -176,7 +178,7 @@ export interface VersionedRouterRoute {
   options: VersionedRouteConfig<RouteMethod>;
   /** @experimental */
   handlers: Array<{
-    handler: RequestHandler;
+    fn: RequestHandler;
     options: AddVersionOpts<unknown, unknown, unknown, unknown>;
   }>;
 }
