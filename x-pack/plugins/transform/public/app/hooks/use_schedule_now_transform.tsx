@@ -57,7 +57,7 @@ export const useScheduleNowTransforms = () => {
         if (result.success === true) {
           toastNotifications.addSuccess(
             i18n.translate('xpack.transform.transformList.scheduleNowTransformSuccessMessage', {
-              defaultMessage: 'Request to schedule now transform {transformId} acknowledged.',
+              defaultMessage: 'Request to schedule transform {transformId} now acknowledged.',
               values: { transformId },
             })
           );
@@ -66,7 +66,7 @@ export const useScheduleNowTransforms = () => {
             title: i18n.translate(
               'xpack.transform.transformList.scheduleNowTransformErrorMessage',
               {
-                defaultMessage: 'An error occurred to schedule the transform {transformId} now',
+                defaultMessage: 'An error occurred scheduling the transform {transformId} now.',
                 values: { transformId },
               }
             ),
