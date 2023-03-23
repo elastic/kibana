@@ -10,7 +10,7 @@ import { convertSliApmParamsToApmAppDeeplinkUrl } from './convert_sli_apm_params
 const SLI_APM_PARAMS = {
   duration: '30-d',
   environment: 'fooEnvironment',
-  filter: 'agent.name : "beats" ',
+  filter: 'agent.name : "beats" and agent.version : 3.4.12 ',
   service: 'barService',
   transactionName: 'bazName',
   transactionType: 'blarfType',
@@ -20,8 +20,8 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
   it('should return a correct APM deeplink when all params have a value', () => {
     const url = convertSliApmParamsToApmAppDeeplinkUrl(SLI_APM_PARAMS);
 
-    expect(url).toBe(
-      '/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&kuery=transaction.name%20%3A%20%22bazName%22%20and%20agent.name%20%3A%20%22beats%22%20&rangeFrom=now-30-d&rangeTo=now'
+    expect(url).toMatchInlineSnapshot(
+      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30-d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12+"`
     );
   });
 
@@ -31,8 +31,8 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
       duration: '',
     });
 
-    expect(url).toBe(
-      '/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&kuery=transaction.name%20%3A%20%22bazName%22%20and%20agent.name%20%3A%20%22beats%22%20'
+    expect(url).toMatchInlineSnapshot(
+      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12+"`
     );
   });
 
@@ -42,8 +42,8 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
       environment: '',
     });
 
-    expect(url).toBe(
-      '/app/apm/services/barService/overview?comparisonEnabled=true&transactionType=blarfType&kuery=transaction.name%20%3A%20%22bazName%22%20and%20agent.name%20%3A%20%22beats%22%20&rangeFrom=now-30-d&rangeTo=now'
+    expect(url).toMatchInlineSnapshot(
+      `"/app/apm/services/barService/overview?comparisonEnabled=true&transactionType=blarfType&rangeFrom=now-30-d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12+"`
     );
   });
 
@@ -53,8 +53,8 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
       filter: '',
     });
 
-    expect(url).toBe(
-      '/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&kuery=transaction.name%20%3A%20%22bazName%22%20&rangeFrom=now-30-d&rangeTo=now'
+    expect(url).toMatchInlineSnapshot(
+      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30-d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22"`
     );
   });
 
@@ -64,7 +64,7 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
       service: '',
     });
 
-    expect(url).toBe('');
+    expect(url).toMatchInlineSnapshot(`""`);
   });
 
   it('should return a correct APM deeplink when empty transactionName is passed', () => {
@@ -73,8 +73,8 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
       transactionName: '',
     });
 
-    expect(url).toBe(
-      '/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&kuery=%20and%20agent.name%20%3A%20%22beats%22%20&rangeFrom=now-30-d&rangeTo=now'
+    expect(url).toMatchInlineSnapshot(
+      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&transactionType=blarfType&rangeFrom=now-30-d&rangeTo=now&kuery=agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12+"`
     );
   });
 
@@ -84,8 +84,8 @@ describe('convertSliApmParamsToApmAppDeeplinkUrl', () => {
       transactionType: '',
     });
 
-    expect(url).toBe(
-      '/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&kuery=transaction.name%20%3A%20%22bazName%22%20and%20agent.name%20%3A%20%22beats%22%20&rangeFrom=now-30-d&rangeTo=now'
+    expect(url).toMatchInlineSnapshot(
+      `"/app/apm/services/barService/overview?comparisonEnabled=true&environment=fooEnvironment&rangeFrom=now-30-d&rangeTo=now&kuery=transaction.name+%3A+%22bazName%22+and+agent.name+%3A+%22beats%22+and+agent.version+%3A+3.4.12+"`
     );
   });
 });
