@@ -35,13 +35,7 @@
       "spaces",
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "cloudChat",
-      "esUiShared",
-      "infra",
-      "kibanaUtils",
       "usageCollection",
-      "unifiedSearch"
     ],
     "extraPublicDirs": [
       "common"
