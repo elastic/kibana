@@ -7,7 +7,7 @@
 
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { useKibana } from '../hooks/use_kibana';
-import { CspSetupStatus } from '../../../common/types';
+import { type CspSetupStatus } from '../../../common/types';
 import { STATUS_ROUTE_PATH } from '../../../common/constants';
 
 const getCspSetupStatusQueryKey = 'csp_status_key';
