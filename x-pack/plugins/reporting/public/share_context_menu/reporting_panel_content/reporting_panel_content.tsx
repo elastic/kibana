@@ -135,7 +135,13 @@ class ReportingPanelContentUi extends Component<Props, State> {
     return (
       <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
         {(copy) => (
-          <EuiButton color={isUnsaved ? 'warning' : 'primary'} fullWidth onClick={copy} size="s">
+          <EuiButton
+            color={isUnsaved ? 'warning' : 'primary'}
+            fullWidth
+            onClick={copy}
+            size="s"
+            data-test-subj="shareReportingCopyURL"
+          >
             <FormattedMessage
               id="xpack.reporting.panelContent.copyUrlButtonLabel"
               defaultMessage="Copy POST URL"
@@ -200,6 +206,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             defaultMessage: 'Advanced options',
           })}
           paddingSize="none"
+          data-test-subj="shareReportingAdvancedOptionsButton"
         >
           <EuiSpacer size="s" />
           <EuiText size="s">

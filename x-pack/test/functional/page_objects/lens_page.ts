@@ -1677,16 +1677,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return await testSubjects.isEnabled('lnsApp_shareButton');
     },
 
-    async isShareActionEnabled(action: 'csvDownload' | 'permalinks') {
+    async isShareActionEnabled(action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports') {
       switch (action) {
         case 'csvDownload':
           return await testSubjects.isEnabled('sharePanel-CSVDownload');
         case 'permalinks':
           return await testSubjects.isEnabled('sharePanel-Permalinks');
+        default:
+          return await testSubjects.isEnabled(`sharePanel-${action}`);
       }
     },
 
-    async ensureShareMenuIsOpen(action: 'csvDownload' | 'permalinks') {
+    async ensureShareMenuIsOpen(
+      action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports'
+    ) {
       await this.clickShareMenu();
 
       if (!(await testSubjects.exists('shareContextMenu'))) {
@@ -1737,6 +1741,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await browser.execute<[boolean], void>((v) => {
         window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG = v;
       }, value);
+    },
+
+    async openReportingShare(type: 'PNG' | 'PDF') {
+      await this.ensureShareMenuIsOpen(`${type}Reports`);
+      await testSubjects.click(`sharePanel-${type}Reports`);
     },
 
     async getCSVContent() {

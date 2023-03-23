@@ -9,8 +9,16 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'dashboard', 'reporting', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'lens',
+    'reporting',
+    'timePicker',
+    'visualize',
+  ]);
   const es = getService('es');
+  const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const listingTable = getService('listingTable');
   const security = getService('security');
@@ -25,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         [
           'test_logstash_reader',
           'global_dashboard_read',
+          'global_visualize_all',
           'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
         ],
         { skipBrowserRefresh: true }
@@ -50,5 +59,64 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const url = await PageObjects.reporting.getReportURL(60000);
       expect(url).to.be.ok();
     });
+
+    for (const type of ['PNG', 'PDF'] as const) {
+      it('should not allow to download PNG reports for incomplete visualization', async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVisType('lens');
+        await PageObjects.lens.goToTimeRange();
+
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'date_histogram',
+          field: '@timestamp',
+        });
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'average',
+          field: 'bytes',
+        });
+
+        // now remove a dimension to make it incomplete
+        await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
+        // open the share menu and check that reporting is disabled
+        await PageObjects.lens.clickShareMenu();
+
+        expect(await PageObjects.lens.isShareActionEnabled(`${type}Reports`));
+      });
+
+      it('should be able to download PNG report of the current visualization', async () => {
+        // make the configuration complete
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'average',
+          field: 'bytes',
+        });
+
+        await PageObjects.lens.openReportingShare(type);
+        await PageObjects.reporting.clickGenerateReportButton();
+        const url = await PageObjects.reporting.getReportURL(60000);
+        expect(url).to.be.ok();
+      });
+
+      it('should show a warning message for curl reporting of unsaved visualizations', async () => {
+        await PageObjects.lens.openReportingShare(type);
+        await testSubjects.click('shareReportingAdvancedOptionsButton');
+        await testSubjects.existOrFail('shareReportingUnsavedState');
+        expect(await testSubjects.getVisibleText('shareReportingUnsavedState')).to.eql(
+          'Unsaved work\nSave your work before copying this URL.'
+        );
+      });
+
+      it('should enable curl reporting if the visualization is saved', async () => {
+        await PageObjects.lens.save(`ASavedVisualizationToShareIn${type}`);
+
+        await PageObjects.lens.openReportingShare(type);
+        await testSubjects.click('shareReportingAdvancedOptionsButton');
+        await testSubjects.existOrFail('shareReportingCopyURL');
+        expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql('Copy POST URL');
+      });
+    }
   });
 }
