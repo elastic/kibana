@@ -252,6 +252,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 latencyAggregationType: 'avg' as LatencyAggregationType,
                 environment: 'ENVIRONMENT_ALL',
                 kuery: '',
+                documentType: ApmDocumentType.TransactionMetric,
+                rollupInterval: RollupInterval.OneMinute,
               },
             },
           });
@@ -267,7 +269,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('should have the correct value for transactionOverflowCount', function () {
-          expect(response.body.transactionOverflowCount).to.be(290);
+          expect(response.body.transactionOverflowCount).to.be(232);
         });
       });
     }
