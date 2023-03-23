@@ -12,6 +12,10 @@
   ],
   "kbn_references": [
     "@kbn/core-versioned-http-server",
+    "@kbn/config-schema",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-http-router-server-internal",
   ],
   "exclude": [
     "target/**/*",
