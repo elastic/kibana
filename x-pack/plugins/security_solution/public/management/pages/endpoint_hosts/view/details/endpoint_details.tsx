@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlyoutBody, EuiFlyoutFooter, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutFooter, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { useGetEndpointDetails } from '../../../../hooks';
@@ -43,9 +43,9 @@ export const EndpointDetails = memo(() => {
   const ContentLoadingMarkup = useMemo(
     () => (
       <>
-        <EuiLoadingContent lines={3} />
+        <EuiSkeletonText lines={3} />
         <EuiSpacer size="l" />
-        <EuiLoadingContent lines={3} />
+        <EuiSkeletonText lines={3} />
       </>
     ),
     []
@@ -67,7 +67,7 @@ export const EndpointDetails = memo(() => {
               ContentLoadingMarkup
             ) : (
               <EndpointDetailsContent
-                details={hostDetails && hostDetails.metadata}
+                details={hostDetails.metadata}
                 policyInfo={hostDetails.policy_info}
                 hostStatus={hostDetails.host_status}
               />
@@ -122,7 +122,7 @@ export const EndpointDetails = memo(() => {
       )}
       {hostDetails === undefined ? (
         <EuiFlyoutBody>
-          <EuiLoadingContent lines={3} /> <EuiSpacer size="l" /> <EuiLoadingContent lines={3} />
+          <EuiSkeletonText lines={3} /> <EuiSpacer size="l" /> <EuiSkeletonText lines={3} />
         </EuiFlyoutBody>
       ) : (
         <>
@@ -132,7 +132,7 @@ export const EndpointDetails = memo(() => {
               isHostDetailsLoading={isHostDetailsLoading}
               // show overview tab if forcing response actions history
               // tab via URL without permission
-              show={show}
+              show={!canAccessEndpointActionsLogManagement ? 'details' : show}
               tabs={getTabs(hostDetails?.metadata.agent.id)}
             />
           )}
