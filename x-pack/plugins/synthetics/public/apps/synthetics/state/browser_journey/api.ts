@@ -71,7 +71,7 @@ export async function fetchLastSuccessfulCheck({
   );
 }
 
-interface BackoffOptions {
+export interface BackoffOptions {
   shouldBackoff?: boolean;
   maxRetry?: number;
   initialBackoff?: number;
@@ -83,7 +83,7 @@ const DEFAULT_INITIAL_BACKOFF = 100;
 
 export async function getJourneyScreenshot(
   imgSrc: string,
-  options?: BackoffOptions
+  options?: Partial<BackoffOptions>
 ): Promise<ScreenshotImageBlob | ScreenshotRefImageData | null> {
   const shouldBackoff = options?.shouldBackoff ?? DEFAULT_SHOULD_BACKOFF;
   const maxRetry = options?.maxRetry ?? DEFAULT_MAX_RETRY;

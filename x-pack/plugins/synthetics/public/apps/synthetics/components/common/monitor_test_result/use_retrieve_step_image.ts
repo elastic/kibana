@@ -13,7 +13,7 @@ import {
   isScreenshotRef,
 } from '../../../../../../common/runtime_types';
 import { useComposeImageFromRef } from '../../../hooks/use_composite_image';
-import { getJourneyScreenshot } from '../../../state';
+import { BackoffOptions, getJourneyScreenshot } from '../../../state';
 
 type ImageResponse = ScreenshotImageBlob | ScreenshotRefImageData | null;
 interface ImageDataResult {
@@ -68,11 +68,8 @@ export const useRetrieveStepImage = ({
         return getUpdatedState({ prevState, imgPath, increment: true, loading: true });
       });
       if (stepStatus !== 'failed') setIsLoading(true);
-      const backoffOptions = !testNowMode
-        ? {
-            maxRetry: 2,
-            initialBackoff: 100,
-          }
+      const backoffOptions: Partial<BackoffOptions> | undefined = !testNowMode
+        ? { shouldBackoff: false }
         : undefined;
       try {
         const data = await getJourneyScreenshot(imgPath, backoffOptions);
