@@ -20,7 +20,7 @@ export const useSourceNotifier = () => {
       body: [
         i18n.translate('xpack.infra.sourceConfiguration.updateFailureBody', {
           defaultMessage:
-            'We couldn’t apply the changes to the Metrics configuration. Try again later.',
+            "We couldn't apply the changes to the Metrics configuration. Try again later.",
         }),
         message,
       ]

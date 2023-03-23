@@ -28,7 +28,7 @@ export const NoRemoteCluster = () => {
       iconType="error"
       titleSize="m"
       title={i18n.translate('xpack.infra.sourceConfiguration.noRemoteClusterTitle', {
-        defaultMessage: 'Couldn't connect to the remote cluster',
+        defaultMessage: "Couldn't connect to the remote cluster",
       })}
       body={i18n.translate('xpack.infra.sourceConfiguration.noRemoteClusterMessage', {
         defaultMessage:
