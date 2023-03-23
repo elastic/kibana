@@ -22,7 +22,7 @@ export default {
 const todosClient = new TodosClient();
 
 const contentTypeRegistry = new ContentTypeRegistry();
-contentTypeRegistry.register({ id: 'todos', version: { latest: 'v1' } });
+contentTypeRegistry.register({ id: 'todos', version: { latest: 1 } });
 
 const contentClient = new ContentClient((contentType: string) => {
   switch (contentType) {

@@ -40,8 +40,11 @@ const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) 
   const ctx: StorageContext = {
     requestHandlerContext: {} as any,
     version: {
-      latest: 'v1',
-      request: 'v1',
+      latest: 1,
+      request: 1,
+    },
+    utils: {
+      getTransforms: jest.fn(),
     },
   };
 
@@ -51,7 +54,7 @@ const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) 
     id: FOO_CONTENT_ID,
     storage: createMemoryStorage(),
     version: {
-      latest: 'v2',
+      latest: 2,
     },
   };
   const cleanUp = () => {
@@ -104,7 +107,24 @@ describe('Content Core', () => {
           // Make sure the "register" exposed by the api is indeed registring
           // the content into our "contentRegistry" instance
           expect(contentRegistry.isContentRegistered(FOO_CONTENT_ID)).toBe(true);
-          expect(contentRegistry.getDefinition(FOO_CONTENT_ID)).toBe(contentDefinition);
+          expect(contentRegistry.getDefinition(FOO_CONTENT_ID)).toEqual(contentDefinition);
+
+          cleanUp();
+        });
+
+        test('should convert the latest version to number if string is passed', () => {
+          const { coreSetup, cleanUp, contentDefinition } = setup();
+
+          const {
+            contentRegistry,
+            api: { register },
+          } = coreSetup;
+
+          register({ ...contentDefinition, version: { latest: '123' } } as any);
+
+          expect(contentRegistry.getContentType(contentDefinition.id).version).toEqual({
+            latest: 123,
+          });
 
           cleanUp();
         });
@@ -121,10 +141,10 @@ describe('Content Core', () => {
 
           expect(() => {
             register({ ...contentDefinition, version: undefined } as any);
-          }).toThrowError('Invalid version [undefined]. Must follow the pattern [v${number}]');
+          }).toThrowError('Invalid version [undefined]. Must be an integer.');
 
           expect(() => {
-            register({ ...contentDefinition, version: { latest: 'v0' } });
+            register({ ...contentDefinition, version: { latest: 0 } });
           }).toThrowError('Version must be >= 1');
 
           cleanUp();

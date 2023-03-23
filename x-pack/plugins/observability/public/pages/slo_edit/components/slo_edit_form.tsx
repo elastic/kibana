@@ -35,7 +35,7 @@ import {
   transformSloResponseToCreateSloInput,
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
-import { paths } from '../../../config';
+import { paths } from '../../../config/paths';
 import { SLI_OPTIONS, SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import { ApmLatencyIndicatorTypeForm } from './apm_latency/apm_latency_indicator_type_form';
 import { ApmAvailabilityIndicatorTypeForm } from './apm_availability/apm_availability_indicator_type_form';

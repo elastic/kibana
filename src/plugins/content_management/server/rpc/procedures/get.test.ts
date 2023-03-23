@@ -8,10 +8,13 @@
 
 import { omit } from 'lodash';
 
+import { schema } from '@kbn/config-schema';
+import { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
+import { getServiceObjectTransformFactory } from '../services_transforms_factory';
 import { get } from './get';
 
 const { fn, schemas } = get;
@@ -31,7 +34,7 @@ const FOO_CONTENT_ID = 'foo';
 
 describe('RPC -> get()', () => {
   describe('Input/Output validation', () => {
-    const validInput = { contentTypeId: 'foo', id: '123', version: 'v1' };
+    const validInput = { contentTypeId: 'foo', id: '123', version: 1 };
 
     test('should validate that a contentTypeId and an id is passed', () => {
       [
@@ -50,11 +53,10 @@ describe('RPC -> get()', () => {
         },
         {
           input: omit(validInput, 'version'),
-          expectedError: '[version]: expected value of type [string] but got [undefined]',
+          expectedError: '[version]: expected value of type [number] but got [undefined]',
         },
         {
-          input: { ...validInput, version: '1' }, // invalid version format
-          expectedError: '[version]: must follow the pattern [v${number}]',
+          input: { ...validInput, version: '1' }, // string number is OK
         },
       ].forEach(({ input, expectedError }) => {
         const error = validate(input, inputSchema);
@@ -76,7 +78,7 @@ describe('RPC -> get()', () => {
         {
           contentTypeId: 'foo',
           id: '123',
-          version: 'v1',
+          version: 1,
           options: { any: 'object' },
         },
         inputSchema
@@ -88,7 +90,7 @@ describe('RPC -> get()', () => {
         {
           contentTypeId: 'foo',
           id: '123',
-          version: 'v1',
+          version: 1,
           options: 123, // Not an object
         },
         inputSchema
@@ -123,12 +125,16 @@ describe('RPC -> get()', () => {
         id: FOO_CONTENT_ID,
         storage,
         version: {
-          latest: 'v2',
+          latest: 2,
         },
       });
 
       const requestHandlerContext = 'mockedRequestHandlerContext';
-      const ctx: any = { contentRegistry, requestHandlerContext };
+      const ctx: any = {
+        contentRegistry,
+        requestHandlerContext,
+        getTransformsFactory: getServiceObjectTransformFactory,
+      };
 
       return { ctx, storage };
     };
@@ -139,7 +145,7 @@ describe('RPC -> get()', () => {
       const expected = 'GetResult';
       storage.get.mockResolvedValueOnce(expected);
 
-      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', version: 'v1' });
+      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', version: 1 });
 
       expect(result).toEqual({
         contentTypeId: FOO_CONTENT_ID,
@@ -150,8 +156,11 @@ describe('RPC -> get()', () => {
         {
           requestHandlerContext: ctx.requestHandlerContext,
           version: {
-            request: 'v1',
-            latest: 'v2', // from the registry
+            request: 1,
+            latest: 2, // from the registry
+          },
+          utils: {
+            getTransforms: expect.any(Function),
           },
         },
         '1234',
@@ -173,9 +182,57 @@ describe('RPC -> get()', () => {
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
             id: '1234',
-            version: 'v7',
+            version: 7,
           })
-        ).rejects.toEqual(new Error('Invalid version. Latest version is [v2].'));
+        ).rejects.toEqual(new Error('Invalid version. Latest version is [2].'));
+      });
+    });
+
+    describe('object versioning', () => {
+      test('should expose a  utility to transform and validate services objects', () => {
+        const { ctx, storage } = setup();
+        fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', version: 1 });
+        const [[storageContext]] = storage.get.mock.calls;
+
+        // getTransforms() utils should be available from context
+        const { getTransforms } = storageContext.utils ?? {};
+        expect(getTransforms).not.toBeUndefined();
+
+        const definitions: ContentManagementServiceDefinitionVersioned = {
+          1: {
+            get: {
+              in: {
+                options: {
+                  schema: schema.object({
+                    version1: schema.string(),
+                  }),
+                  up: (pre: object) => ({ ...pre, version2: 'added' }),
+                },
+              },
+            },
+          },
+          2: {},
+        };
+
+        const transforms = getTransforms(definitions, 1);
+
+        // Some smoke tests for the getTransforms() utils. Complete test suite is inside
+        // the package @kbn/object-versioning
+        expect(transforms.get.in.options.up({ version1: 'foo' }).value).toEqual({
+          version1: 'foo',
+          version2: 'added',
+        });
+
+        const optionsUpTransform = transforms.get.in.options.up({ version1: 123 });
+
+        expect(optionsUpTransform.value).toBe(null);
+        expect(optionsUpTransform.error?.message).toBe(
+          '[version1]: expected value of type [string] but got [number]'
+        );
+
+        expect(transforms.get.in.options.validate({ version1: 123 })?.message).toBe(
+          '[version1]: expected value of type [string] but got [number]'
+        );
       });
     });
   });
