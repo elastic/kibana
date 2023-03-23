@@ -14,7 +14,6 @@ import { buildEsQuery } from '@kbn/es-query';
 import type {
   GroupingFieldTotalAggregation,
   GroupingAggregation,
-  RawBucket,
   GroupingProps,
   GroupsPagingSettingsById,
 } from '@kbn/securitysolution-grouping';
@@ -28,7 +27,6 @@ import type { Status } from '../../../../common/detection_engine/schemas/common'
 import { InspectButton } from '../../../common/components/inspect';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useKibana } from '../../../common/lib/kibana';
-import { defaultUnit } from '../../../common/components/toolbar/unit';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { useInspectButton } from '../alerts_kpis/common/hooks';
@@ -37,13 +35,7 @@ import { buildTimeRangeFilter } from './helpers';
 import * as i18n from './translations';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
-import {
-  getAlertsGroupingQuery,
-  getSelectedGroupBadgeMetrics,
-  getSelectedGroupButtonContent,
-  getSelectedGroupCustomMetrics,
-  useGroupTakeActionsItems,
-} from './grouping_settings';
+import { getAlertsGroupingQuery, useGroupTakeActionsItems } from './grouping_settings';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 
@@ -238,26 +230,15 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       isNoneGroup([selectedGroup])
         ? renderChildComponent([])
         : getGrouping({
-            badgeMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
-              getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket),
-            customMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
-              getSelectedGroupCustomMetrics(selectedGroup, fieldBucket),
             data: alertsGroupsData?.aggregations,
-            groupPanelRenderer: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
-              getSelectedGroupButtonContent(selectedGroup, fieldBucket),
-            inspectButton: inspect,
             isLoading: loading || isLoadingGroups,
-            renderChildComponent,
             takeActionItems: getTakeActionItems,
-            unit: defaultUnit,
-            selectedGroup,
             groupingLevel,
           }),
     [
       alertsGroupsData?.aggregations,
       getGrouping,
       getTakeActionItems,
-      inspect,
       isLoadingGroups,
       loading,
       renderChildComponent,

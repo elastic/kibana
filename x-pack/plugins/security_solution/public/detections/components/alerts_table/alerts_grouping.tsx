@@ -15,17 +15,11 @@ import type { Status } from '../../../../common/detection_engine/schemas/common'
 import { defaultUnit } from '../../../common/components/toolbar/unit';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import {
-  getAlertsGroupingQuery,
-  getDefaultGroupingOptions,
-  renderGroupPanel,
-  getStats,
-  useGroupTakeActionsItems } from './grouping_settings';
+import { getDefaultGroupingOptions, renderGroupPanel, getStats } from './grouping_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { updateGroupSelector, updateSelectedGroup } from '../../../common/store/grouping/actions';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { track } from '../../../common/lib/telemetry';
-
 
 export interface AlertsTableComponentProps {
   currentAlertStatusFilterValue?: Status;
@@ -114,10 +108,18 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     (level: number, selectedGroup: string, parentGroupingFilter?: Filter[]) => {
       return (
         <GroupedSubLevel
+          currentAlertStatusFilterValue={currentAlertStatusFilterValue}
+          defaultFilters={defaultFilters}
           from={from}
+          getGrouping={getGrouping}
+          globalFilters={globalFilters}
+          globalQuery={globalQuery}
+          groupingLevel={level}
           hasIndexMaintenance={hasIndexMaintenance}
           hasIndexWrite={hasIndexWrite}
           loading={loading}
+          pagination={pagination}
+          parentGroupingFilter={parentGroupingFilter}
           renderChildComponent={
             level < selectedGroups.length - 1
               ? (groupingFilters: Filter[]) =>
@@ -129,18 +131,10 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
                   renderChildComponent([...groupingFilters, ...(parentGroupingFilter ?? [])])
           }
           runtimeMappings={runtimeMappings}
+          selectedGroup={selectedGroup}
           signalIndexName={signalIndexName}
           tableId={tableId}
           to={to}
-          selectedGroup={selectedGroup}
-          getGrouping={getGrouping}
-          globalFilters={globalFilters}
-          globalQuery={globalQuery}
-          currentAlertStatusFilterValue={currentAlertStatusFilterValue}
-          defaultFilters={defaultFilters}
-          parentGroupingFilter={parentGroupingFilter}
-          pagination={pagination}
-          groupingLevel={level}
         />
       );
     },
@@ -154,13 +148,13 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
       hasIndexMaintenance,
       hasIndexWrite,
       loading,
+      pagination,
       renderChildComponent,
       runtimeMappings,
       selectedGroups,
       signalIndexName,
       tableId,
       to,
-      pagination,
     ]
   );
 

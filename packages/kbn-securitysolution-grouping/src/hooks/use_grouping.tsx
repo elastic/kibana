@@ -75,9 +75,10 @@ interface GroupingArgs<T> {
  * @param defaultGroupingOptions defines the grouping options as an array of {@link GroupOption}
  * @param fields FieldSpec array serialized version of DataViewField fields. Available in the custom grouping options
  * @param groupingId Unique identifier of the grouping component. Used in local storage
+ * @param maxGroupingLevels maximum group nesting levels (optional)
  * @param onGroupChange callback executed when selected group is changed, used for tracking
  * @param tracker telemetry handler
- * @returns {@link Grouping} the grouping constructor { getGrouping, groupSelector, pagination, selectedGroup }
+ * @returns {@link Grouping} the grouping constructor { getGrouping, groupSelector, pagination, selectedGroups }
  */
 export const useGrouping = <T,>({
   componentProps,
@@ -113,7 +114,7 @@ export const useGrouping = <T,>({
      * @param props {@link DynamicGroupingProps}
      */
     (props: DynamicGroupingProps<T>): React.ReactElement =>
-      isNoneGroup(selectedGroup) ? (
+      isNoneGroup(selectedGroups) ? (
         componentProps.renderChildComponent([])
       ) : (
         <GroupingComponent
@@ -122,17 +123,17 @@ export const useGrouping = <T,>({
           groupingId={groupingId}
           groupSelector={groupSelector}
           pagination={pagination}
-          selectedGroup={selectedGroup}
+          selectedGroups={selectedGroups}
           tracker={tracker}
         />
       ),
-    [componentProps, groupSelector, groupingId, pagination, selectedGroup, tracker]
+    [componentProps, groupSelector, groupingId, pagination, selectedGroups, tracker]
   );
 
   const resetPagination = useCallback(() => {
-    selectedGroups.forEach((selectedGroup, i, arr) => {
+    selectedGroups.forEach((selectedGroups, i, arr) => {
       dispatch(
-        groupActions.updateGroupActivePage({ id: groupingId, activePage: 0, selectedGroup })
+        groupActions.updateGroupActivePage({ id: groupingId, activePage: 0, selectedGroups })
       );
     });
   }, [groupingId, selectedGroups]);
