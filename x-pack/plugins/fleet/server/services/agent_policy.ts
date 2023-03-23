@@ -39,12 +39,16 @@ import type {
   ListWithKuery,
   NewPackagePolicy,
 } from '../types';
-import { getAllowedOutputTypeForPolicy, packageToPackagePolicy } from '../../common/services';
+import {
+  getAllowedOutputTypeForPolicy,
+  packageToPackagePolicy,
+  policyHasFleetServer,
+  policyHasAPMIntegration,
+} from '../../common/services';
 import {
   agentPolicyStatuses,
   AGENT_POLICY_INDEX,
   UUID_V5_NAMESPACE,
-  FLEET_APM_PACKAGE,
   FLEET_ELASTIC_AGENT_PACKAGE,
 } from '../../common/constants';
 import type {
@@ -193,10 +197,11 @@ class AgentPolicyService {
   }
 
   public hasAPMIntegration(agentPolicy: AgentPolicy) {
-    return (
-      agentPolicy.package_policies &&
-      agentPolicy.package_policies.some((p) => p.package?.name === FLEET_APM_PACKAGE)
-    );
+    return policyHasAPMIntegration(agentPolicy);
+  }
+
+  public hasFleetServerIntegration(agentPolicy: AgentPolicy) {
+    return policyHasFleetServer(agentPolicy);
   }
 
   public async create(
@@ -1114,6 +1119,7 @@ class AgentPolicyService {
 
 export const agentPolicyService = new AgentPolicyService();
 
+// TODO: remove unused parameters
 export async function addPackageToAgentPolicy(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,

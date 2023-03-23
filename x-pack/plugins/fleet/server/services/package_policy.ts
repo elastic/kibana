@@ -72,6 +72,7 @@ import {
   PackagePolicyNotFoundError,
   HostedAgentPolicyRestrictionRelatedError,
   FleetUnauthorizedError,
+  PackagePolicyNameExistsError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -178,17 +179,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // trailing whitespace causes issues creating API keys
     enrichedPackagePolicy.name = enrichedPackagePolicy.name.trim();
     if (!options?.skipUniqueNameVerification) {
-      const existingPoliciesWithName = await this.list(soClient, {
-        perPage: 1,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${enrichedPackagePolicy.name}"`,
-      });
-
-      // Check that the name does not exist already
-      if (existingPoliciesWithName.items.length > 0) {
-        throw new FleetError(
-          `An integration policy with the name ${enrichedPackagePolicy.name} already exists. Please rename it or choose a different name.`
-        );
-      }
+      await requireUniqueName(soClient, enrichedPackagePolicy);
     }
 
     let elasticsearchPrivileges: NonNullable<PackagePolicy['elasticsearch']>['privileges'];
@@ -621,17 +612,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy.name !== oldPackagePolicy.name &&
       !options?.skipUniqueNameVerification
     ) {
-      // Check that the name does not exist already but exclude the current package policy
-      const existingPoliciesWithName = await this.list(soClient, {
-        perPage: SO_SEARCH_LIMIT,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${packagePolicy.name}"`,
-      });
-      const filtered = (existingPoliciesWithName?.items || []).filter((p) => p.id !== id);
-      if (filtered.length > 0) {
-        throw new FleetError(
-          `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
-        );
-      }
+      await requireUniqueName(soClient, enrichedPackagePolicy, id);
     }
 
     let inputs = restOfPackagePolicy.inputs.map((input) =>
@@ -2338,4 +2319,26 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
   }
 
   return result;
+}
+
+async function requireUniqueName(
+  soClient: SavedObjectsClientContract,
+  packagePolicy: UpdatePackagePolicy | NewPackagePolicy,
+  id?: string
+) {
+  const existingPoliciesWithName = await packagePolicyService.list(soClient, {
+    perPage: SO_SEARCH_LIMIT,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${packagePolicy.name}"`,
+  });
+
+  const policiesToCheck = id
+    ? // Check that the name does not exist already but exclude the current package policy
+      (existingPoliciesWithName?.items || []).filter((p) => p.id !== id)
+    : existingPoliciesWithName?.items;
+
+  if (policiesToCheck.length > 0) {
+    throw new PackagePolicyNameExistsError(
+      `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
+    );
+  }
 }
