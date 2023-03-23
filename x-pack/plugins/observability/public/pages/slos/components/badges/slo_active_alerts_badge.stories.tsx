@@ -9,13 +9,12 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { buildForecastedSlo } from '../../../../data/slo/slo';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
-import { SloBadges as Component, Props } from './slo_badges';
+import { SloActiveAlertsBadge as Component, Props } from './slo_active_alerts_badge';
 
 export default {
   component: Component,
-  title: 'app/SLO/ListPage/Badges/SloBadges',
+  title: 'app/SLO/ListPage/Badges/SloActiveAlertsBadge',
   decorators: [KibanaReactStorybookDecorator],
 };
 
@@ -25,9 +24,5 @@ const Template: ComponentStory<typeof Component> = (props: Props) => (
   </EuiFlexGroup>
 );
 
-const defaultProps = {
-  slo: buildForecastedSlo(),
-};
-
-export const SloBadges = Template.bind({});
-SloBadges.args = defaultProps;
+export const Default = Template.bind({});
+Default.args = { activeAlerts: { count: 2, ruleIds: ['rule-1', 'rule-2'] } };

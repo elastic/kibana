@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlexItem } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
 
@@ -17,10 +17,10 @@ export interface Props {
 
 export function SloIndicatorTypeBadge({ slo }: Props) {
   return (
-    <div>
+    <EuiFlexItem grow={false}>
       <EuiBadge color={euiLightVars.euiColorDisabled}>
         {toIndicatorTypeLabel(slo.indicator.type)}
       </EuiBadge>
-    </div>
+    </EuiFlexItem>
   );
 }

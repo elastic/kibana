@@ -22,14 +22,14 @@ export function HeaderTitle(props: Props) {
     return <EuiLoadingSpinner data-test-subj="loadingTitle" />;
   }
 
+  if (!slo) {
+    return null;
+  }
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiFlexItem>{slo && slo.name}</EuiFlexItem>
-      {!!slo && (
-        <EuiFlexItem>
-          <SloStatusBadge slo={slo} />
-        </EuiFlexItem>
-      )}
+    <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+      <EuiFlexItem grow={false}>{slo.name}</EuiFlexItem>
+      <SloStatusBadge slo={slo} />
     </EuiFlexGroup>
   );
 }
