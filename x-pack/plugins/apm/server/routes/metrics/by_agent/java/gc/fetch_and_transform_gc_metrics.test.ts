@@ -6,14 +6,14 @@
  */
 
 import { APMConfig } from '../../../../..';
-import {
-  METRIC_JAVA_GC_COUNT,
-  METRIC_JAVA_GC_TIME,
-} from '../../../../../../common/es_fields/apm';
 import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ChartBase } from '../../../types';
 
-import { fetchAndTransformGcMetrics } from './fetch_and_transform_gc_metrics';
+import {
+  fetchAndTransformGcMetrics,
+  TIME,
+  RATE,
+} from './fetch_and_transform_gc_metrics';
 
 describe('fetchAndTransformGcMetrics', () => {
   describe('given "jvm.gc.time"', () => {
@@ -54,12 +54,11 @@ describe('fetchAndTransformGcMetrics', () => {
       const apmEventClient = {
         search: () => Promise.resolve(response),
       } as unknown as APMEventClient;
-      const fieldName = METRIC_JAVA_GC_TIME;
 
       const { series } = await fetchAndTransformGcMetrics({
         chartBase,
         environment: 'test environment',
-        fieldName,
+        rateOrTime: TIME,
         kuery: '',
         operationName: 'test operation name',
         config,
@@ -115,12 +114,11 @@ describe('fetchAndTransformGcMetrics', () => {
       const apmEventClient = {
         search: () => Promise.resolve(response),
       } as unknown as APMEventClient;
-      const fieldName = METRIC_JAVA_GC_COUNT;
 
       const { series } = await fetchAndTransformGcMetrics({
         chartBase,
         environment: 'test environment',
-        fieldName,
+        rateOrTime: RATE,
         kuery: '',
         operationName: 'test operation name',
         config,
