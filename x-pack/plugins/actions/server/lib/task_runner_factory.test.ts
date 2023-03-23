@@ -863,6 +863,9 @@ test(`will throw an error with retry: false if the task is not retryable`, async
   }
   expect(err).toBeDefined();
   expect(isRetryableError(err)).toEqual(false);
+  expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
+    `Action '2' failed: Error message`
+  );
 });
 
 test('will rethrow the error if the error is thrown instead of returned', async () => {
@@ -900,6 +903,9 @@ test('will rethrow the error if the error is thrown instead of returned', async 
     err = e;
   }
   expect(err).toBeDefined();
+  expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
+    `Action '2' failed: Fail`
+  );
   expect(thrownError).toEqual(err);
 });
 
