@@ -26,7 +26,7 @@
       "screenshotMode",
       "share",
       "features",
-      "generateCsv"
+      "generateCsv",
     ],
     "optionalPlugins": [
       "security",

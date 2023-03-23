@@ -29,7 +29,7 @@ import {
   JobParams,
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
-} from '@kbn/generate-csv/types';
+} from '../types';
 
 const createMockJob = (baseObj: any = {}): JobParams => ({
   ...baseObj,

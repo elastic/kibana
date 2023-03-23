@@ -265,3 +265,7 @@ export interface JobParams {
   columns?: string[];
   browserTimezone?: string;
 }
+
+interface CsvFromSavedObjectBase {
+  objectType: 'search';
+}
