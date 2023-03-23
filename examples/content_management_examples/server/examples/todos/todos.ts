@@ -34,7 +34,7 @@ export const registerTodoContentType = ({
     id: TODO_CONTENT_ID,
     storage: new TodosStorage(),
     version: {
-      latest: 'v1',
+      latest: 1,
     },
   });
 };

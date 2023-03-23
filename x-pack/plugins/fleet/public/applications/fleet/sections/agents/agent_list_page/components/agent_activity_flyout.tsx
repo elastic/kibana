@@ -82,6 +82,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   const currentActionsEnriched: ActionStatus[] = currentActions.map((a) => ({
     ...a,
     newPolicyId: getAgentPolicyName(a.newPolicyId ?? ''),
+    policyId: getAgentPolicyName(a.policyId ?? ''),
   }));
 
   const inProgressActions = currentActionsEnriched.filter((a) => a.status === 'IN_PROGRESS');
@@ -309,9 +310,9 @@ const actionNames: {
     cancelledText: 'update settings',
   },
   POLICY_CHANGE: {
-    inProgressText: 'Changing policy of',
-    completedText: 'changed policy',
-    cancelledText: 'change policy',
+    inProgressText: 'Applying policy change on',
+    completedText: 'applied policy change',
+    cancelledText: 'policy change',
   },
   INPUT_ACTION: {
     inProgressText: 'Input action in progress of',
@@ -370,28 +371,36 @@ const ActivityItem: React.FunctionComponent<{
   action: ActionStatus;
   onClickViewAgents: (action: ActionStatus) => void;
 }> = ({ action, onClickViewAgents }) => {
-  const completeTitle = (
-    <EuiText>
-      <FormattedMessage
-        id="xpack.fleet.agentActivity.completedTitle"
-        defaultMessage="{nbAgents} {agents} {completedText}{offlineText}"
-        values={{
-          nbAgents:
-            action.nbAgentsAck === action.nbAgentsActioned
-              ? action.nbAgentsAck
-              : action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
-          agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
-          completedText: getAction(action.type).completedText,
-          offlineText:
-            action.status === 'ROLLOUT_PASSED' && action.nbAgentsActioned - action.nbAgentsAck > 0
-              ? `, ${
-                  action.nbAgentsActioned - action.nbAgentsAck
-                } agent(s) offline during the rollout period`
-              : '',
-        }}
-      />
-    </EuiText>
-  );
+  const completeTitle =
+    action.type === 'POLICY_CHANGE' && action.nbAgentsActioned === 0 ? (
+      <EuiText>
+        <FormattedMessage
+          id="xpack.fleet.agentActivity.policyChangeCompletedTitle"
+          defaultMessage="Policy changed"
+        />
+      </EuiText>
+    ) : (
+      <EuiText>
+        <FormattedMessage
+          id="xpack.fleet.agentActivity.completedTitle"
+          defaultMessage="{nbAgents} {agents} {completedText}{offlineText}"
+          values={{
+            nbAgents:
+              action.nbAgentsAck === action.nbAgentsActioned
+                ? action.nbAgentsAck
+                : action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
+            agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
+            completedText: getAction(action.type).completedText,
+            offlineText:
+              action.status === 'ROLLOUT_PASSED' && action.nbAgentsActioned - action.nbAgentsAck > 0
+                ? `, ${
+                    action.nbAgentsActioned - action.nbAgentsAck
+                  } agent(s) offline during the rollout period`
+                : '',
+          }}
+        />
+      </EuiText>
+    );
 
   const completedDescription = (
     <FormattedMessage
@@ -433,7 +442,7 @@ const ActivityItem: React.FunctionComponent<{
     ROLLOUT_PASSED: {
       icon:
         action.nbAgentsFailed > 0 ? (
-          <EuiIcon size="m" type="alert" color="red" />
+          <EuiIcon size="m" type="warning" color="red" />
         ) : (
           <EuiIcon size="m" type="checkInCircleFilled" color="green" />
         ),
@@ -464,18 +473,32 @@ const ActivityItem: React.FunctionComponent<{
               {completedDescription}
             </p>
           </EuiText>
+        ) : action.type === 'POLICY_CHANGE' ? (
+          <EuiText color="subdued">
+            <p>
+              <b>{action.policyId}</b>{' '}
+              <FormattedMessage
+                id="xpack.fleet.agentActivityFlyout.policyChangedDescription"
+                defaultMessage="changed to revision {rev} at {date}."
+                values={{
+                  rev: action.revision,
+                  date: formattedTime(action.creationTime),
+                }}
+              />
+            </p>
+          </EuiText>
         ) : (
           <EuiText color="subdued">{completedDescription}</EuiText>
         ),
     },
     FAILED: {
-      icon: <EuiIcon size="m" type="alert" color="red" />,
+      icon: <EuiIcon size="m" type="warning" color="red" />,
       title: completeTitle,
       titleColor: 'red',
       description: failedDescription,
     },
     CANCELLED: {
-      icon: <EuiIcon size="m" type="alert" color="grey" />,
+      icon: <EuiIcon size="m" type="warning" color="grey" />,
       titleColor: 'grey',
       title: (
         <EuiText>
@@ -501,7 +524,7 @@ const ActivityItem: React.FunctionComponent<{
       ),
     },
     EXPIRED: {
-      icon: <EuiIcon size="m" type="alert" color="grey" />,
+      icon: <EuiIcon size="m" type="warning" color="grey" />,
       titleColor: 'grey',
       title: (
         <EuiText>

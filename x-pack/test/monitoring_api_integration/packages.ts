@@ -8,10 +8,11 @@
 import path from 'path';
 
 const PACKAGES = [
-  { name: 'beat', version: '0.0.1' },
+  { name: 'beat', version: '0.1.3' },
   { name: 'elasticsearch', version: '1.4.1' },
   { name: 'enterprisesearch', version: '1.0.0' },
   { name: 'logstash', version: '2.2.2-preview1' },
+  { name: 'kibana', version: '2.3.0-preview1' },
 ];
 
 export const getPackagesArgs = (): string[] => {

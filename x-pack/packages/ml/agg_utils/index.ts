@@ -22,6 +22,7 @@ export type {
   AggCardinality,
   SignificantTerm,
   SignificantTermGroup,
+  SignificantTermGroupItem,
   SignificantTermGroupHistogram,
   SignificantTermHistogram,
   SignificantTermHistogramItem,

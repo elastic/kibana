@@ -576,35 +576,27 @@
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.ControlGroupContainer.getEditControlGroupButton",
+            "id": "def-public.ControlGroupContainer.openEditControlGroupFlyout",
             "type": "Function",
             "tags": [],
-            "label": "getEditControlGroupButton",
+            "label": "openEditControlGroupFlyout",
             "description": [],
             "signature": [
-              "(closePopover: () => void) => JSX.Element"
+              "(this: ",
+              {
+                "pluginId": "controls",
+                "scope": "public",
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.ControlGroupContainer",
+                "text": "ControlGroupContainer"
+              },
+              ") => void"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "controls",
-                "id": "def-public.ControlGroupContainer.getEditControlGroupButton.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "closePopover",
-                "description": [],
-                "signature": [
-                  "() => void"
-                ],
-                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
+            "returnComment": [],
+            "children": []
           },
           {
             "parentPluginId": "controls",
@@ -3735,7 +3727,7 @@
             "label": "chainingSystem",
             "description": [],
             "signature": [
-              "\"NONE\" | \"HIERARCHICAL\""
+              "\"HIERARCHICAL\" | \"NONE\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,
@@ -4578,6 +4570,36 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.ACTION_DELETE_CONTROL",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_DELETE_CONTROL",
+        "description": [],
+        "signature": [
+          "\"deleteControl\""
+        ],
+        "path": "src/plugins/controls/public/control_group/actions/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-public.ACTION_EDIT_CONTROL",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_EDIT_CONTROL",
+        "description": [],
+        "signature": [
+          "\"editControl\""
+        ],
+        "path": "src/plugins/controls/public/control_group/actions/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "controls",
         "id": "def-public.AddOptionsListControlProps",
@@ -5631,7 +5653,7 @@
             "label": "chainingSystem",
             "description": [],
             "signature": [
-              "\"NONE\" | \"HIERARCHICAL\""
+              "\"HIERARCHICAL\" | \"NONE\""
             ],
             "path": "src/plugins/controls/common/control_group/types.ts",
             "deprecated": false,

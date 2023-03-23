@@ -24,17 +24,7 @@ import {
 } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
-export async function getThroughputChartsForDependency({
-  dependencyName,
-  spanName,
-  apmEventClient,
-  start,
-  end,
-  environment,
-  kuery,
-  searchServiceDestinationMetrics,
-  offset,
-}: {
+interface Options {
   dependencyName: string;
   spanName: string;
   apmEventClient: APMEventClient;
@@ -44,7 +34,24 @@ export async function getThroughputChartsForDependency({
   kuery: string;
   searchServiceDestinationMetrics: boolean;
   offset?: string;
-}) {
+}
+
+export interface ThroughputChartsForDependencyResponse {
+  currentTimeseries: Array<{ x: number; y: number | null }>;
+  comparisonTimeseries: Array<{ x: number; y: number | null }> | null;
+}
+
+async function getThroughputChartsForDependencyForTimeRange({
+  dependencyName,
+  spanName,
+  apmEventClient,
+  start,
+  end,
+  environment,
+  kuery,
+  searchServiceDestinationMetrics,
+  offset,
+}: Options) {
   const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
@@ -120,4 +127,44 @@ export async function getThroughputChartsForDependency({
       };
     }) ?? []
   );
+}
+
+export async function getThroughputChartsForDependency({
+  dependencyName,
+  spanName,
+  apmEventClient,
+  start,
+  end,
+  environment,
+  kuery,
+  searchServiceDestinationMetrics,
+  offset,
+}: Options): Promise<ThroughputChartsForDependencyResponse> {
+  const [currentTimeseries, comparisonTimeseries] = await Promise.all([
+    getThroughputChartsForDependencyForTimeRange({
+      dependencyName,
+      spanName,
+      apmEventClient,
+      start,
+      end,
+      kuery,
+      environment,
+      searchServiceDestinationMetrics,
+    }),
+    offset
+      ? getThroughputChartsForDependencyForTimeRange({
+          dependencyName,
+          spanName,
+          apmEventClient,
+          start,
+          end,
+          kuery,
+          environment,
+          offset,
+          searchServiceDestinationMetrics,
+        })
+      : null,
+  ]);
+
+  return { currentTimeseries, comparisonTimeseries };
 }

@@ -29,7 +29,6 @@ import {
   FieldPopoverHeaderProps,
   FieldPopoverVisualize,
   getFieldIconProps,
-  wrapFieldNameOnDot,
 } from '@kbn/unified-field-list-plugin/public';
 import { DiscoverFieldStats } from './discover_field_stats';
 import { DiscoverFieldDetails } from './deprecated_stats/discover_field_details';
@@ -49,7 +48,7 @@ const FieldInfoIcon: React.FC = memo(() => (
   >
     <EuiIcon
       tabIndex={0}
-      type="alert"
+      type="warning"
       title={i18n.translate('discover.field.mappingConflict.title', {
         defaultMessage: 'Mapping Conflict',
       })}
@@ -77,12 +76,12 @@ const FieldName: React.FC<{ field: DataViewField; highlight?: string }> = memo(
 
     return (
       <EuiHighlight
-        search={wrapFieldNameOnDot(highlight)}
+        search={highlight || ''}
         data-test-subj={`field-${field.name}`}
         title={title}
         className="dscSidebarField__name"
       >
-        {wrapFieldNameOnDot(field.displayName)}
+        {field.displayName}
       </EuiHighlight>
     );
   }
