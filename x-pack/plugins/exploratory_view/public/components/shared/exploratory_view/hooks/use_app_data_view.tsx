@@ -55,8 +55,6 @@ export function DataViewContextProvider({ children }: ProviderProps) {
 
           setHasAppData((prevState) => ({ ...prevState, [dataType]: hasData }));
 
-          console.log('loading', hasData, indices);
-
           if (hasData && indices) {
             const obsvDataV = new ObservabilityDataViews(dataViewsService, true);
             const dataV = await obsvDataV.getDataView(dataType, indices);
