@@ -48,8 +48,10 @@ appropriate feature privileges. For example, to create rules in
 *{stack-manage-app} > {rules-ui}*, you must have `all` privileges for the
 *Management > {stack-rules-feature}* feature. To add rule actions and test
 connectors, you must also have `read` privileges for the *{connectors-feature}*
-feature. For more information on configuring roles that provide access to
-features, go to <<kibana-feature-privileges>>.
+feature. To change rule settings, you must have `all` privileges for the
+*Rules Settings* privilege or `all` privileges for the appropriate sub-feature
+such as flapping detection. For more information on configuring roles that
+provide access to features, go to <<kibana-feature-privileges>>.
 
 For details about the prerequisites for each API, refer to <<alerting-apis>>.
 
