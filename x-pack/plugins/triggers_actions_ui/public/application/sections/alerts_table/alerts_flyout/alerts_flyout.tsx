@@ -27,8 +27,8 @@ const PAGINATION_LABEL = i18n.translate(
   }
 );
 
-function usePrevious(alert: Alert) {
-  const ref = useRef<Alert | null>(null);
+function usePrevious(alert: EcsFieldsResponse) {
+  const ref = useRef<EcsFieldsResponse | null>(null);
   useEffect(() => {
     if (alert) {
       ref.current = alert;
