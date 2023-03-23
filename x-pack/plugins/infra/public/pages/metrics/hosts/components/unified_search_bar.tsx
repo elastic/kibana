@@ -17,11 +17,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EuiHorizontalRule } from '@elastic/eui';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
 import { useMetricsDataViewContext } from '../hooks/use_data_view';
-import { EuiHorizontalRule } from '@elastic/eui';
 
 export const UnifiedSearchBar = () => {
   const {
