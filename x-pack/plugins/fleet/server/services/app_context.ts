@@ -281,7 +281,6 @@ class AppContextService {
     // This should ideally be an infrequent occurence only called during preconfiguration
     // contexts or other "Fleet system" operations.
     if (!auditLogger) {
-      this.getLogger().debug('No request-scoped audit logger available, using unscoped logger');
       auditLogger = this.getSecuritySetup().audit.withoutRequest;
     }
 
