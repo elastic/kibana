@@ -21,7 +21,7 @@ export const outdatedDocumentsSearchTransform: ModelStage<
   // Increment the processed documents, no matter what the results are.
   // Otherwise the progress might look off when there are errors.
   const progress = incrementProcessedProgress(state.progress, state.outdatedDocuments.length);
-  const discardCorruptObjects = true; // TODO: assume it would be always true for ZDT, need to confirm
+  const discardCorruptObjects = context.discardCorruptObjects;
   if (
     Either.isRight(res) ||
     (isTypeof(res.left, 'documents_transform_failed') && discardCorruptObjects)

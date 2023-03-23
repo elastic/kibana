@@ -10,11 +10,14 @@ import * as Either from 'fp-ts/lib/Either';
 import { throwBadResponse } from '../../../model/helpers';
 import type { ModelStage } from '../types';
 import { logProgress, setProgressTotal } from '../../../model/progress';
-import { extractDiscardedCorruptDocs } from '../../../model/extract_errors';
+import {
+  extractDiscardedCorruptDocs,
+  extractTransformFailuresReason,
+} from '../../../model/extract_errors';
 
 export const outdatedDocumentsSearchRead: ModelStage<
   'OUTDATED_DOCUMENTS_SEARCH_READ',
-  'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM' | 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT'
+  'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM' | 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT' | 'FATAL'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     throwBadResponse(state, res as never);
@@ -36,19 +39,18 @@ export const outdatedDocumentsSearchRead: ModelStage<
   } else {
     // no more outdated documents , we need to move on
     if (state.corruptDocumentIds.length > 0 || state.transformErrors.length > 0) {
-      // TODO: do we want this for ZDT? (if so we need to change `next.ts` too as the flag is hardcoded somewhere)
-      // if (!state.discardCorruptObjects) {
-      //   const transformFailureReason = extractTransformFailuresReason(
-      //     context.migrationDocLinks.resolveMigrationFailures,
-      //     state.corruptDocumentIds,
-      //     state.transformErrors
-      //   );
-      //   return {
-      //     ...state,
-      //     controlState: 'FATAL',
-      //     reason: transformFailureReason,
-      //   };
-      // }
+      if (!context.discardCorruptObjects) {
+        const transformFailureReason = extractTransformFailuresReason(
+          context.migrationDocLinks.resolveMigrationFailures,
+          state.corruptDocumentIds,
+          state.transformErrors
+        );
+        return {
+          ...state,
+          controlState: 'FATAL',
+          reason: transformFailureReason,
+        };
+      }
 
       // at this point, users have configured kibana to discard corrupt objects
       // thus, we can ignore corrupt documents and transform errors and proceed with the migration

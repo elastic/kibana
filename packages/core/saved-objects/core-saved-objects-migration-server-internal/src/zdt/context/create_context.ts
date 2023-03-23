@@ -40,5 +40,6 @@ export const createContext = ({
     maxRetryAttempts: migrationConfig.retryAttempts,
     migrationDocLinks: docLinks.links.kibanaUpgradeSavedObjects,
     deletedTypes: REMOVED_TYPES,
+    discardCorruptObjects: Boolean(migrationConfig.discardCorruptObjects),
   };
 };

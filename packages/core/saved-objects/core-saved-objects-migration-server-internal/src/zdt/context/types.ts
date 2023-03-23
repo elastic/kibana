@@ -46,4 +46,6 @@ export interface MigratorContext {
   readonly typeRegistry: ISavedObjectTypeRegistry;
   /** List of types that are no longer registered */
   readonly deletedTypes: string[];
+  /** If true, corrupted objects will be discarded instead of failing the migration */
+  readonly discardCorruptObjects: boolean;
 }

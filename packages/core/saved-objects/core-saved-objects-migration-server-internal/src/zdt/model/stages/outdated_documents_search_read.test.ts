@@ -85,4 +85,94 @@ describe('Stage: outdatedDocumentsSearchRead', () => {
       logs: expect.any(Array),
     });
   });
+
+  it('OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL when corrupt ids are found and discardCorruptObjects is false', () => {
+    context = createContextMock({
+      discardCorruptObjects: false,
+    });
+    const state = createState({
+      corruptDocumentIds: ['foo_1', 'bar_2'],
+    });
+    const res = Either.right({
+      outdatedDocuments: [],
+      lastHitSortValue: [12, 24],
+      totalHits: 9000,
+    }) as StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_READ'>;
+
+    const newState = outdatedDocumentsSearchRead(state, res, context);
+
+    expect(newState).toEqual({
+      ...state,
+      controlState: 'FATAL',
+      reason: expect.any(String),
+    });
+  });
+
+  it('OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL when transform errors are found and discardCorruptObjects is false', () => {
+    context = createContextMock({
+      discardCorruptObjects: false,
+    });
+    const state = createState({
+      transformErrors: [{ rawId: 'foo_1', err: new Error('woups') }],
+    });
+    const res = Either.right({
+      outdatedDocuments: [],
+      lastHitSortValue: [12, 24],
+      totalHits: 9000,
+    }) as StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_READ'>;
+
+    const newState = outdatedDocumentsSearchRead(state, res, context);
+
+    expect(newState).toEqual({
+      ...state,
+      controlState: 'FATAL',
+      reason: expect.any(String),
+    });
+  });
+
+  ////
+
+  it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT when corrupt ids are are found and discardCorruptObjects is false', () => {
+    context = createContextMock({
+      discardCorruptObjects: true,
+    });
+    const state = createState({
+      corruptDocumentIds: ['foo_1', 'bar_2'],
+    });
+    const res = Either.right({
+      outdatedDocuments: [],
+      lastHitSortValue: [12, 24],
+      totalHits: 9000,
+    }) as StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_READ'>;
+
+    const newState = outdatedDocumentsSearchRead(state, res, context);
+
+    expect(newState).toEqual({
+      ...state,
+      controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
+      logs: expect.any(Array),
+    });
+  });
+
+  it('OUTDATED_DOCUMENTS_SEARCH_READ -> OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT when transform errors are found and discardCorruptObjects is false', () => {
+    context = createContextMock({
+      discardCorruptObjects: true,
+    });
+    const state = createState({
+      transformErrors: [{ rawId: 'foo_1', err: new Error('woups') }],
+    });
+    const res = Either.right({
+      outdatedDocuments: [],
+      lastHitSortValue: [12, 24],
+      totalHits: 9000,
+    }) as StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_READ'>;
+
+    const newState = outdatedDocumentsSearchRead(state, res, context);
+
+    expect(newState).toEqual({
+      ...state,
+      controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
+      logs: expect.any(Array),
+    });
+  });
 });

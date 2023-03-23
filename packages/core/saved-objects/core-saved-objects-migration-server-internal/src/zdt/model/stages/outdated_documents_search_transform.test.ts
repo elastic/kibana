@@ -66,4 +66,45 @@ describe('Stage: outdatedDocumentsSearchTransform', () => {
       },
     });
   });
+
+  it('OUTDATED_DOCUMENTS_SEARCH_TRANSFORM -> OUTDATED_DOCUMENTS_SEARCH_READ in case of documents_transform_failed when discardCorruptObjects is false', () => {
+    context = createContextMock({
+      discardCorruptObjects: false,
+    });
+    const state = createState({
+      progress: {
+        processed: 0,
+        total: 100,
+      },
+      outdatedDocuments: [
+        createSavedObjectRawDoc({ _id: '1' }),
+        createSavedObjectRawDoc({ _id: '2' }),
+      ],
+      corruptDocumentIds: ['init_1'],
+    });
+    const processedDocs = [
+      createSavedObjectRawDoc({ _id: '3' }),
+      createSavedObjectRawDoc({ _id: '4' }),
+    ];
+    const res: StateActionResponse<'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM'> = Either.left({
+      type: 'documents_transform_failed',
+      processedDocs,
+      corruptDocumentIds: ['foo_1', 'bar_2'],
+      transformErrors: [],
+    });
+
+    const newState = outdatedDocumentsSearchTransform(state, res, context);
+
+    expect(newState).toEqual({
+      ...state,
+      controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ',
+      corruptDocumentIds: ['init_1', 'foo_1', 'bar_2'],
+      transformErrors: [],
+      hasTransformedDocs: false,
+      progress: {
+        processed: 2,
+        total: 100,
+      },
+    });
+  });
 });
