@@ -84,5 +84,6 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/monaco",
+    "@kbn/repo-info",
   ],
 }
