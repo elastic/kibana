@@ -18,6 +18,7 @@ import {
 } from '@kbn/mapbox-gl';
 import { v4 as uuidv4 } from 'uuid';
 import { Geometry } from 'geojson';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { LON_INDEX, RawValue, SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
@@ -65,6 +66,7 @@ export interface Props {
   openTooltips: TooltipState[];
   renderTooltipContent?: RenderToolTipContent;
   updateOpenTooltips: (openTooltips: TooltipState[]) => void;
+  executionContext: KibanaExecutionContext;
 }
 
 export class TooltipControl extends Component<Props, {}> {
@@ -376,6 +378,7 @@ export class TooltipControl extends Component<Props, {}> {
           isLocked={isLocked}
           index={index}
           loadFeatureGeometry={this._getFeatureGeometry}
+          executionContext={this.props.executionContext}
         />
       );
     });

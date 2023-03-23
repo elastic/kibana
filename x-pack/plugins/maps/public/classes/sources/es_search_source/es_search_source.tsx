@@ -74,7 +74,7 @@ import {
   getIsDrawLayer,
   getMatchingIndexes,
 } from './util/feature_edit';
-import { makePublicExecutionContext } from '../../../util';
+import { mergeExecutionContext } from '../execution_context_utils';
 import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/tooltip_control/features_tooltip';
 
 type ESSearchSourceSyncMeta = Pick<
@@ -354,7 +354,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       registerCancelCallback,
       requestDescription: 'Elasticsearch document top hits request',
       searchSessionId: searchFilters.searchSessionId,
-      executionContext: makePublicExecutionContext('es_search_source:top_hits'),
+      executionContext: mergeExecutionContext({ description: 'es_search_source:top_hits' }, searchFilters.executionContext),
       requestsAdapter: inspectorAdapters.requests,
     });
 
@@ -438,7 +438,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       registerCancelCallback,
       requestDescription: 'Elasticsearch document request',
       searchSessionId: searchFilters.searchSessionId,
-      executionContext: makePublicExecutionContext('es_search_source:doc_search'),
+      executionContext: mergeExecutionContext({ description: 'es_search_source:doc_search' }, searchFilters.executionContext),
       requestsAdapter: inspectorAdapters.requests,
     });
 
@@ -574,7 +574,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return this._tooltipFields.length > 0;
   }
 
-  async _loadTooltipProperties(docId: string | number, index: string, indexPattern: DataView) {
+  async _loadTooltipProperties(docId: string | number, index: string, indexPattern: DataView, executionContext: KibanaExecutionContext) {
     if (this._tooltipFields.length === 0) {
       return {};
     }
@@ -616,7 +616,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const { rawResponse: resp } = await lastValueFrom(
       searchSource.fetch$({
         legacyHitsTotal: false,
-        executionContext: makePublicExecutionContext('es_search_source:load_tooltip_properties'),
+        executionContext: mergeExecutionContext({ description: 'es_search_source:load_tooltip_properties' }, executionContext),
       })
     );
 
@@ -643,7 +643,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return this._tooltipFields.map((field: IField) => field.getName());
   }
 
-  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
+  async getTooltipProperties(properties: GeoJsonProperties, executionContext: KibanaExecutionContext): Promise<ITooltipProperty[]> {
     if (properties === null) {
       throw new Error('properties cannot be null');
     }
@@ -651,7 +651,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const propertyValues = await this._loadTooltipProperties(
       properties._id,
       properties._index,
-      indexPattern
+      indexPattern,
+      executionContext
     );
     const tooltipProperties = this._tooltipFields.map((field) => {
       const value = propertyValues[field.getName()];
@@ -935,7 +936,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         abortSignal: abortController.signal,
         sessionId: searchFilters.searchSessionId,
         legacyHitsTotal: false,
-        executionContext: makePublicExecutionContext('es_search_source:all_doc_counts'),
+        executionContext: mergeExecutionContext({ description: 'es_search_source:all_doc_counts' }, searchFilters.executionContext),
       })
     );
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
