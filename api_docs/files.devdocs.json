@@ -1944,6 +1944,22 @@
           },
           {
             "parentPluginId": "files",
+            "id": "def-server.CreateEsFileClientArgs.indexIsAlias",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "indexIsAlias",
+            "description": [
+              "\nTreat the indices provided as Aliases. If set to true, ES `search()` will be used to\nretrieve the file info and content instead of `get()`. This is needed to ensure the\ncontent can be retrieved in cases where an index may have rolled over (ES `get()`\nneeds a \"real\" index)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
             "id": "def-server.CreateEsFileClientArgs.maxSizeBytes",
             "type": "number",
             "tags": [],
