@@ -58,6 +58,7 @@ const TabComponent = (props: TabProps) => {
       <EuiFlexGroup gutterSize={'m'} alignItems={'center'} responsive={false}>
         <EuiFlexItem>
           <EuiFieldSearch
+            data-test-subj="infraTabComponentFieldSearch"
             fullWidth
             placeholder={i18n.translate('xpack.infra.nodeDetails.logs.textFieldPlaceholder', {
               defaultMessage: 'Search for log entries...',
@@ -69,6 +70,7 @@ const TabComponent = (props: TabProps) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            data-test-subj="infraTabComponentOpenInLogsButton"
             size={'xs'}
             flush={'both'}
             iconType={'popout'}

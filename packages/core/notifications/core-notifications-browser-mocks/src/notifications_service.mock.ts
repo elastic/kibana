@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types-jest';
+import type { DeeplyMockedKeys, MockedKeys } from '@kbn/utility-types-jest';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import type { NotificationsServiceContract } from '@kbn/core-notifications-browser-internal';
 import { toastsServiceMock } from './toasts_service.mock';
@@ -20,9 +20,10 @@ const createSetupContractMock = () => {
 };
 
 const createStartContractMock = () => {
-  const startContract: MockedKeys<NotificationsStart> = {
+  const startContract: DeeplyMockedKeys<NotificationsStart> = {
     // we have to suppress type errors until decide how to mock es6 class
     toasts: toastsServiceMock.createStartContract(),
+    showErrorDialog: jest.fn(),
   };
   return startContract;
 };
