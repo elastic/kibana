@@ -11,24 +11,36 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiFormLabel,
+  EuiPanel,
   EuiSelect,
   EuiSpacer,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
-import { SloEditFormObjectivesTimeslices } from './slo_edit_form_objectives_timeslices';
+import { SloEditFormObjectiveSectionTimeslices } from './slo_edit_form_objective_section_timeslices';
 import { BUDGETING_METHOD_OPTIONS, TIMEWINDOW_OPTIONS } from '../constants';
+import { maxWidth } from './slo_edit_form';
 
-export function SloEditFormObjectives() {
+export function SloEditFormObjectiveSection() {
   const { control, watch } = useFormContext<CreateSLOInput>();
   const budgetingSelect = useGeneratedHtmlId({ prefix: 'budgetingSelect' });
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
 
   return (
-    <>
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
+      <EuiTitle>
+        <h2>
+          {i18n.translate('xpack.observability.slo.sloEdit.objectives.title', {
+            defaultMessage: 'Set objectives',
+          })}
+        </h2>
+      </EuiTitle>
+
+      <EuiSpacer size="xl" />
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
           <EuiFormLabel>
@@ -43,10 +55,11 @@ export function SloEditFormObjectives() {
             rules={{ required: true }}
             render={({ field: { ref, ...field } }) => (
               <EuiSelect
+                {...field}
+                required
                 id={budgetingSelect}
                 data-test-subj="sloFormBudgetingMethodSelect"
                 options={BUDGETING_METHOD_OPTIONS}
-                {...field}
               />
             )}
           />
@@ -65,10 +78,11 @@ export function SloEditFormObjectives() {
             rules={{ required: true }}
             render={({ field: { ref, ...field } }) => (
               <EuiSelect
+                {...field}
+                required
                 id={timeWindowSelect}
                 data-test-subj="sloFormTimeWindowDurationSelect"
                 options={TIMEWINDOW_OPTIONS}
-                {...field}
                 value={String(field.value)}
               />
             )}
@@ -90,10 +104,12 @@ export function SloEditFormObjectives() {
               min: 0.001,
               max: 99.999,
             }}
-            render={({ field: { ref, ...field } }) => (
+            render={({ field: { ref, ...field }, fieldState }) => (
               <EuiFieldNumber
-                data-test-subj="sloFormObjectiveTargetInput"
                 {...field}
+                required
+                isInvalid={fieldState.invalid}
+                data-test-subj="sloFormObjectiveTargetInput"
                 value={String(field.value)}
                 min={0.001}
                 max={99.999}
@@ -108,9 +124,10 @@ export function SloEditFormObjectives() {
       {watch('budgetingMethod') === 'timeslices' ? (
         <>
           <EuiSpacer size="xl" />
-          <SloEditFormObjectivesTimeslices />
+          <SloEditFormObjectiveSectionTimeslices />
         </>
       ) : null}
-    </>
+      <EuiSpacer size="xl" />
+    </EuiPanel>
   );
 }
