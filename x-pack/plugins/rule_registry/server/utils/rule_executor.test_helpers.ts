@@ -66,6 +66,7 @@ export const createDefaultAlertExecutorOptions = <
     createdAt,
     updatedAt,
     notifyWhen: null,
+    revision: 0,
     ruleTypeId: 'RULE_TYPE_ID',
     ruleTypeName: 'RULE_TYPE_NAME',
     muteAll: false,
