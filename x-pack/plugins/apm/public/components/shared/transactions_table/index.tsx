@@ -141,13 +141,7 @@ export function TransactionsTable({
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
-      if (
-        !start ||
-        !end ||
-        !latencyAggregationType ||
-        !transactionType ||
-        !dataSource?.source
-      ) {
+      if (!latencyAggregationType || !transactionType || !preferred) {
         return Promise.resolve(undefined);
       }
       return callApmApi(
@@ -163,8 +157,8 @@ export function TransactionsTable({
               transactionType,
               latencyAggregationType:
                 latencyAggregationType as LatencyAggregationType,
-              documentType: dataSource.source.documentType,
-              rollupInterval: dataSource.source.rollupInterval,
+              documentType: preferred.source.documentType,
+              rollupInterval: preferred.source.rollupInterval,
             },
           },
         }
@@ -207,8 +201,7 @@ export function TransactionsTable({
       offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
-      dataSource?.source.documentType,
-      dataSource?.source.rollupInterval,
+      preferred,
     ]
   );
 
