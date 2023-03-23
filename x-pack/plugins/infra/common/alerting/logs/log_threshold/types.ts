@@ -401,3 +401,8 @@ export const isOptimizableGroupedThreshold = (
     return false;
   }
 };
+
+export interface ExecutionTimeRange {
+  gte?: number;
+  lte: number;
+}

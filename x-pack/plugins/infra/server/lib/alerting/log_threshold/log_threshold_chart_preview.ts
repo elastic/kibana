@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  ExecutionTimeRange,
   GroupedSearchQueryResponse,
   GroupedSearchQueryResponseRT,
   isOptimizedGroupedSearchQueryResponse,
@@ -36,10 +37,7 @@ export async function getChartPreviewData(
   callWithRequest: KibanaFramework['callWithRequest'],
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
   buckets: number,
-  executionTimeRange?: {
-    gte: number;
-    lte: number;
-  }
+  executionTimeRange?: ExecutionTimeRange
 ) {
   const { indices, timestampField, runtimeMappings } = resolvedLogView;
   const { groupBy, timeSize, timeUnit } = alertParams;

@@ -46,6 +46,7 @@ import {
   RatioRuleParams,
   UngroupedSearchQueryResponse,
   UngroupedSearchQueryResponseRT,
+  ExecutionTimeRange,
 } from '../../../../common/alerting/logs/log_threshold';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getLogsAppAlertUrl } from '../../../../common/formatters/alert_link';
@@ -644,10 +645,7 @@ export const processGroupByRatioResults = (
 export const buildFiltersFromCriteria = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
-  executionTimeRange?: {
-    gte?: number;
-    lte: number;
-  }
+  executionTimeRange?: ExecutionTimeRange
 ) => {
   const { timeSize, timeUnit, criteria } = params;
   const interval = `${timeSize}${timeUnit}`;
@@ -705,10 +703,7 @@ export const getGroupedESQuery = (
   timestampField: string,
   index: string,
   runtimeMappings: estypes.MappingRuntimeFields,
-  executionTimeRange?: {
-    gte?: number;
-    lte: number;
-  }
+  executionTimeRange?: ExecutionTimeRange
 ): estypes.SearchRequest | undefined => {
   // IMPORTANT:
   // For the group by scenario we need to account for users utilizing "less than" configurations
@@ -821,10 +816,7 @@ export const getUngroupedESQuery = (
   timestampField: string,
   index: string,
   runtimeMappings: estypes.MappingRuntimeFields,
-  executionTimeRange?: {
-    gte?: number;
-    lte: number;
-  }
+  executionTimeRange?: ExecutionTimeRange
 ): object => {
   const { rangeFilter, mustFilters, mustNotFilters } = buildFiltersFromCriteria(
     params,
