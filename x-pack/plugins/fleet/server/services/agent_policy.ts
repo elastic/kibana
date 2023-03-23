@@ -781,6 +781,12 @@ class AgentPolicyService {
       return;
     }
 
+    for (const policyId of agentPolicyIds) {
+      appContextService.writeCustomAuditLog({
+        message: `User deploying policy [id=${policyId}]`,
+      });
+    }
+
     const policies = await agentPolicyService.getByIDs(soClient, agentPolicyIds);
     const policiesMap = keyBy(policies, 'id');
     const fullPolicies = await Promise.all(
@@ -880,6 +886,10 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     agentPolicyId: string
   ) {
+    appContextService.writeCustomAuditLog({
+      message: `User deleting policy [id=${agentPolicyId}]`,
+    });
+
     await esClient.deleteByQuery({
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,

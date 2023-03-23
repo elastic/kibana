@@ -105,10 +105,19 @@ export async function openPointInTime(
     index,
     keep_alive: pitKeepAlive,
   });
+
+  appContextService.writeCustomAuditLog({
+    message: `User opened point in time query [index=${index}] [pitId=${pitRes.id}]`,
+  });
+
   return pitRes.id;
 }
 
 export async function closePointInTime(esClient: ElasticsearchClient, pitId: string) {
+  appContextService.writeCustomAuditLog({
+    message: `User closing point in time query [pitId=${pitId}]`,
+  });
+
   try {
     await esClient.closePointInTime({ id: pitId });
   } catch (error) {
@@ -465,6 +474,10 @@ export async function updateAgent(
   agentId: string,
   data: Partial<AgentSOAttributes>
 ) {
+  appContextService.writeCustomAuditLog({
+    message: `User updated agent [id=${agentId}]`,
+  });
+
   await esClient.update({
     id: agentId,
     index: AGENTS_INDEX,
