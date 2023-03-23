@@ -62,7 +62,7 @@ export const getExportSettings = async (
     client.get(UI_SETTINGS_CSV_QUOTE_VALUES),
   ]);
 
-  const escapeFormulaValues = config.escapeFormulaValues;
+  const { escapeFormulaValues } = config;
   const escapeValue = createEscapeValue(quoteValues, escapeFormulaValues);
   const bom = config.useByteOrderMarkEncoding ? CSV_BOM_CHARS : '';
 

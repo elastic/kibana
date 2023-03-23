@@ -22,7 +22,8 @@ describe('getExportSettings', () => {
   let uiSettingsClient: IUiSettingsClient;
   const config: CsvConfig = {
     checkForFormulas: true,
-    escapeFormulaValues: true,
+    // x-pack/plugins/reporting/server/config/schema.ts set escapeFormulaValues: schema.boolean({defaultValue: false})
+    escapeFormulaValues: false,
     maxSizeBytes: 180000,
     scroll: { size: 500, duration: '30s' },
     useByteOrderMarkEncoding: false,
@@ -54,7 +55,7 @@ describe('getExportSettings', () => {
       Object {
         "bom": "",
         "checkForFormulas": true,
-        "escapeFormulaValues": true,
+        "escapeFormulaValues": false,
         "escapeValue": [Function],
         "includeFrozen": false,
         "maxSizeBytes": 180000,
