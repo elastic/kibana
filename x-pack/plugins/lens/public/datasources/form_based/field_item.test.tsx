@@ -37,7 +37,7 @@ const chartsThemeService = chartPluginMock.createSetupContract().theme;
 const clickField = async (wrapper: ReactWrapper, field: string) => {
   await act(async () => {
     await wrapper
-      .find(`[data-test-subj="lnsFieldListPanelField-${field}"] button`)
+      .find(`[data-test-subj="lnsFieldListPanelField-${field}"] .kbnFieldButton__button`)
       .simulate('click');
   });
 };
