@@ -21,14 +21,13 @@ export function useSearchSession({
   stateContainer: DiscoverStateContainer;
 }) {
   const { data, capabilities } = services;
-  const savedSearch = stateContainer.savedSearchState.getState();
 
   useEffect(() => {
     data.search.session.enableStorage(
       createSearchSessionRestorationDataProvider({
         appStateContainer: stateContainer.appState,
         data,
-        getSavedSearch: () => savedSearch,
+        getSavedSearch: () => stateContainer.savedSearchState.getState(),
       }),
       {
         isDisabled: () =>
@@ -40,5 +39,5 @@ export function useSearchSession({
               },
       }
     );
-  }, [capabilities.discover.storeSearchSession, data, savedSearch, stateContainer.appState]);
+  }, [capabilities.discover.storeSearchSession, data, stateContainer]);
 }
