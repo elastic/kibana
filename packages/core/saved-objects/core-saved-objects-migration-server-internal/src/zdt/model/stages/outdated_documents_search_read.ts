@@ -23,6 +23,7 @@ export const outdatedDocumentsSearchRead: ModelStage<
   let logs = state.logs;
 
   if (res.right.outdatedDocuments.length > 0) {
+    // search returned outdated documents, so we process them
     const progress = setProgressTotal(state.progress, res.right.totalHits);
     return {
       ...state,
@@ -33,9 +34,9 @@ export const outdatedDocumentsSearchRead: ModelStage<
       progress,
     };
   } else {
-    // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
+    // no more outdated documents , we need to move on
     if (state.corruptDocumentIds.length > 0 || state.transformErrors.length > 0) {
-      // TODO: do we want this for ZDT? if so, we need to change the action call in next.ts too
+      // TODO: do we want this for ZDT? (if so we need to change `next.ts` too as the flag is hardcoded somewhere)
       // if (!state.discardCorruptObjects) {
       //   const transformFailureReason = extractTransformFailuresReason(
       //     context.migrationDocLinks.resolveMigrationFailures,
