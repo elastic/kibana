@@ -41,7 +41,7 @@ export const getIndexPatternSelectComponent = () =>
   pluginsStart.unifiedSearch.ui.IndexPatternSelect;
 export const getSearchBar = () => pluginsStart.unifiedSearch.ui.SearchBar;
 export const getHttp = () => coreStart.http;
-export const getExecutionContext = () => coreStart.executionContext;
+export const getExecutionContextService = () => coreStart.executionContext;
 export const getTimeFilter = () => pluginsStart.data.query.timefilter.timefilter;
 export const getToasts = () => coreStart.notifications.toasts;
 export const getSavedObjectsClient = () => coreStart.savedObjects.client;
