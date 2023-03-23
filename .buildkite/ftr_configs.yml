@@ -94,6 +94,7 @@ enabled:
   - test/functional/apps/discover/embeddable/config.ts
   - test/functional/apps/discover/group1/config.ts
   - test/functional/apps/discover/group2/config.ts
+  - test/functional/apps/discover/group3/config.ts
   - test/functional/apps/getting_started/config.ts
   - test/functional/apps/home/config.ts
   - test/functional/apps/kibana_overview/config.ts
