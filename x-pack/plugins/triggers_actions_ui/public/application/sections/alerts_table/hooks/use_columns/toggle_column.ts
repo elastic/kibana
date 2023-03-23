@@ -42,7 +42,7 @@ const insert = ({
 const formatSystemColumn = (column: EuiDataGridColumn): EuiDataGridColumn => {
   const newColumn = { ...column };
 
-  if (column.id === ALERT_CASE_IDS) {
+  if (newColumn.id === ALERT_CASE_IDS) {
     newColumn.isSortable = false;
 
     /**
@@ -50,7 +50,7 @@ const formatSystemColumn = (column: EuiDataGridColumn): EuiDataGridColumn => {
      * display text we should not modified it. For that reason,
      * we check if the displayAsText is set.
      */
-    if (!column.displayAsText) {
+    if (!newColumn.displayAsText) {
       newColumn.displayAsText = i18n.CASES;
     }
   }

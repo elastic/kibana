@@ -10,6 +10,7 @@ import { render } from '@testing-library/react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { mockBrowserFields } from '../../mock';
 import { getFieldColumns, getFieldItemsData } from './field_items';
+import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 
 const timestampFieldId = '@timestamp';
 const columnIds = [timestampFieldId];
@@ -282,6 +283,27 @@ describe('field_items', () => {
       expect(getByTestId(`field-${timestampFieldId}-name`)).toBeInTheDocument();
       expect(queryByTestId(`field-${timestampFieldId}-description`)).not.toBeInTheDocument();
       expect(getByTestId(`field-${timestampFieldId}-category`)).toBeInTheDocument();
+    });
+
+    it('should format the cases column correctly', () => {
+      const caseIdsField = mockBrowserFields.kibana.fields![ALERT_CASE_IDS];
+
+      const { fieldItems } = getFieldItemsData({
+        selectedCategoryIds: ['kibana'],
+        browserFields: { kibana: { fields: { [ALERT_CASE_IDS]: caseIdsField } } },
+        columnIds: [],
+      });
+
+      const columns = getFieldColumns({
+        ...getFieldColumnsParams,
+        showDescriptionColumn: false,
+      });
+
+      const { getByText } = render(
+        <EuiInMemoryTable items={fieldItems} itemId="name" columns={columns} />
+      );
+
+      expect(getByText('Cases')).toBeInTheDocument();
     });
   });
 });

@@ -260,6 +260,13 @@ describe('AlertsTable.BulkActions', () => {
 
       expect(queryByTestId('bulk-actions-header')).toBeNull();
     });
+
+    it('should not show the bulk actions when the cases context is missing', () => {
+      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(() => null);
+
+      const { queryByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
+      expect(queryByTestId('bulk-actions-header')).toBeNull();
+    });
   });
 
   describe('when the bulk action hook is set', () => {

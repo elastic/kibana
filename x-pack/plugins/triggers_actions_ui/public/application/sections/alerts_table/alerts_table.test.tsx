@@ -306,7 +306,7 @@ describe('AlertsTable', () => {
 
   const tableProps: AlertsTableProps = {
     alertsTableConfiguration,
-    cases: { data: casesMap, isLoading: false, showBulkActions: true },
+    cases: { data: casesMap, isLoading: false },
     columns,
     deletedEventIds: [],
     disabledCellActions: [],
