@@ -9,287 +9,265 @@ import moment from 'moment';
 import type { ResolverNode } from '../../../../common/endpoint/types';
 
 export const stubEndpointAlertResponse = () => {
-  return {
-    took: 0,
-    timed_out: false,
-    _shards: {
-      total: 1,
-      successful: 1,
-      skipped: 0,
-      failed: 0,
-    },
-    hits: {
-      total: {
-        value: 1,
-        relation: 'eq',
-      },
-      max_score: 0,
-      hits: [
-        {
-          _index: '.internal.alerts-security.alerts-default-000001',
-          _id: '2f4c790211998ec3369f581b778e9761ae5647d041edd7b1245f7311fba06f37',
-          _score: 0,
-          _source: {
-            'kibana.alert.rule.category': 'Custom Query Rule',
-            'kibana.alert.rule.consumer': 'siem',
-            'kibana.alert.rule.execution.uuid': 'c92c1a91-9981-4948-8dee-39b263d81f05',
-            'kibana.alert.rule.name': 'Endpoint Security',
-            'kibana.alert.rule.producer': 'siem',
-            'kibana.alert.rule.rule_type_id': 'siem.queryRule',
-            'kibana.alert.rule.uuid': 'b35e3af8-da87-11ec-ad90-353e53c6bd3e',
-            'kibana.space_ids': ['default'],
-            'kibana.alert.rule.tags': ['Elastic', 'Endpoint Security'],
-            '@timestamp': moment.now(),
-            registry: {
-              path: 'HKEY_USERS\\S-1-5-21-2460036010-3910878774-3458087990-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\chrome',
-              data: {
-                strings: 'C:/fake_behavior/explorer.exe',
-              },
-              value: 'explorer.exe',
-            },
-            agent: {
-              id: 'd2529c31-5415-492a-9c9b-87a77e8874d5',
-              type: 'endpoint',
-              version: '7.0.1',
-            },
-            process: {
-              Ext: {
-                ancestry: ['j0mdzksneq', 'up4f1f87wr'],
-                code_signature: [
-                  {
-                    trusted: false,
-                    subject_name: 'bad signer',
-                  },
-                ],
-                user: 'SYSTEM',
-                token: {
-                  integrity_level_name: 'high',
-                  elevation_level: 'full',
-                },
-              },
-              parent: {
-                pid: 1,
-                entity_id: 'j0mdzksneq',
-              },
-              group_leader: {
-                name: 'fake leader',
-                pid: 112,
-                entity_id: '3po060bfqd',
-              },
-              session_leader: {
-                name: 'fake session',
-                pid: 7,
-                entity_id: '3po060bfqd',
-              },
-              code_signature: {
-                subject_name: 'Microsoft Windows',
-                status: 'trusted',
-              },
-              entry_leader: {
-                name: 'fake entry',
-                pid: 139,
-                entity_id: '3po060bfqd',
-              },
-              name: 'explorer.exe',
-              pid: 2,
-              entity_id: 'p1dbx787xe',
-              executable: 'C:/fake_behavior/explorer.exe',
-            },
-            dll: [
+  return [
+    {
+      _index: '.internal.alerts-security.alerts-default-000001',
+      _id: '2f4c790211998ec3369f581b778e9761ae5647d041edd7b1245f7311fba06f37',
+      _score: 0,
+      _source: {
+        'kibana.alert.rule.category': 'Custom Query Rule',
+        'kibana.alert.rule.consumer': 'siem',
+        'kibana.alert.rule.execution.uuid': 'c92c1a91-9981-4948-8dee-39b263d81f05',
+        'kibana.alert.rule.name': 'Endpoint Security',
+        'kibana.alert.rule.producer': 'siem',
+        'kibana.alert.rule.rule_type_id': 'siem.queryRule',
+        'kibana.alert.rule.uuid': 'b35e3af8-da87-11ec-ad90-353e53c6bd3e',
+        'kibana.space_ids': ['default'],
+        'kibana.alert.rule.tags': ['Elastic', 'Endpoint Security'],
+        '@timestamp': moment.now(),
+        registry: {
+          path: 'HKEY_USERS\\S-1-5-21-2460036010-3910878774-3458087990-1001\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\chrome',
+          data: {
+            strings: 'C:/fake_behavior/explorer.exe',
+          },
+          value: 'explorer.exe',
+        },
+        agent: {
+          id: 'd2529c31-5415-492a-9c9b-87a77e8874d5',
+          type: 'endpoint',
+          version: '7.0.1',
+        },
+        process: {
+          Ext: {
+            ancestry: ['j0mdzksneq', 'up4f1f87wr'],
+            code_signature: [
               {
-                Ext: {
-                  compile_time: 1534424710,
-                  malware_classification: {
-                    identifier: 'Whitelisted',
-                    score: 0,
-                    threshold: 0,
-                    version: '3.0.0',
-                  },
-                  mapped_address: 5362483200,
-                  mapped_size: 0,
-                },
-                path: 'C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe',
-                code_signature: {
-                  trusted: true,
-                  subject_name: 'Cybereason Inc',
-                },
-                pe: {
-                  architecture: 'x64',
-                },
-                hash: {
-                  sha1: 'ca85243c0af6a6471bdaa560685c51eefd6dbc0d',
-                  sha256: '8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2',
-                  md5: '1f2d082566b0fc5f2c238a5180db7451',
-                },
+                trusted: false,
+                subject_name: 'bad signer',
               },
             ],
-            destination: {
-              port: 443,
-              ip: '10.39.10.58',
+            user: 'SYSTEM',
+            token: {
+              integrity_level_name: 'high',
+              elevation_level: 'full',
             },
-            rule: {
-              description: 'Behavior rule description',
-              id: 'e2d719cc-7044-4a46-b2ee-0a2993202096',
+          },
+          parent: {
+            pid: 1,
+            entity_id: 'j0mdzksneq',
+          },
+          group_leader: {
+            name: 'fake leader',
+            pid: 112,
+            entity_id: '3po060bfqd',
+          },
+          session_leader: {
+            name: 'fake session',
+            pid: 7,
+            entity_id: '3po060bfqd',
+          },
+          code_signature: {
+            subject_name: 'Microsoft Windows',
+            status: 'trusted',
+          },
+          entry_leader: {
+            name: 'fake entry',
+            pid: 139,
+            entity_id: '3po060bfqd',
+          },
+          name: 'explorer.exe',
+          pid: 2,
+          entity_id: 'p1dbx787xe',
+          executable: 'C:/fake_behavior/explorer.exe',
+        },
+        dll: [
+          {
+            Ext: {
+              compile_time: 1534424710,
+              malware_classification: {
+                identifier: 'Whitelisted',
+                score: 0,
+                threshold: 0,
+                version: '3.0.0',
+              },
+              mapped_address: 5362483200,
+              mapped_size: 0,
             },
-            source: {
-              port: 59406,
-              ip: '10.199.40.10',
+            path: 'C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe',
+            code_signature: {
+              trusted: true,
+              subject_name: 'Cybereason Inc',
             },
-            network: {
-              transport: 'tcp',
-              type: 'ipv4',
-              direction: 'outgoing',
+            pe: {
+              architecture: 'x64',
             },
-            file: {
-              path: 'C:/fake_behavior.exe',
-              name: 'fake_behavior.exe',
+            hash: {
+              sha1: 'ca85243c0af6a6471bdaa560685c51eefd6dbc0d',
+              sha256: '8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2',
+              md5: '1f2d082566b0fc5f2c238a5180db7451',
             },
-            ecs: {
-              version: '1.6.0',
-            },
-            data_stream: {
-              namespace: 'default',
-              type: 'logs',
-              dataset: 'endpoint.alerts',
-            },
-            elastic: {
-              agent: {
-                id: 'd2529c31-5415-492a-9c9b-87a77e8874d5',
-              },
-            },
-            host: {
-              hostname: 'Host-uu8vmc2z8a',
-              os: {
-                Ext: {
-                  variant: 'Windows Server',
-                },
-                name: 'Windows',
-                family: 'windows',
-                version: '10.0',
-                platform: 'Windows',
-                full: 'Windows Server 2016',
-              },
-              ip: ['10.23.178.108'],
-              name: 'Host-uu8vmc2z8a',
-              id: 'c1e90e16-0130-46d4-88de-ee338f13fed7',
-              mac: ['ee-83-79-cf-1a-13', 'a7-79-da-62-9e-78'],
-              architecture: 'a4rwx2t7yu',
-            },
-            'event.agent_id_status': 'auth_metadata_missing',
-            'event.sequence': 15,
-            'event.ingested': '2022-05-23T11:02:53Z',
-            'event.code': 'behavior',
-            'event.kind': 'signal',
-            'event.module': 'endpoint',
-            'event.action': 'rule_detection',
-            'event.id': '962dba31-1306-4bb1-82c2-2a6d9ef8962d',
-            'event.category': 'behavior',
-            'event.type': 'info',
-            'event.dataset': 'endpoint.diagnostic.collection',
-            'kibana.alert.original_time': '2022-05-23T11:02:59.511Z',
-            'kibana.alert.ancestors': [
-              {
-                id: 'juKV8IABsphBWHn-nT4H',
-                type: 'event',
-                index: '.ds-logs-endpoint.alerts-default-2022.05.23-000001',
-                depth: 0,
-              },
-            ],
-            'kibana.alert.status': 'active',
-            'kibana.alert.workflow_status': 'open',
-            'kibana.alert.depth': 1,
-            'kibana.alert.reason':
-              'behavior event with process explorer.exe, file fake_behavior.exe,:59406,:443, on Host-uu8vmc2z8a created medium alert Endpoint Security.',
-            'kibana.alert.severity': 'medium',
-            'kibana.alert.risk_score': 47,
-            'kibana.alert.rule.actions': [],
-            'kibana.alert.rule.author': ['Elastic'],
-            'kibana.alert.rule.created_at': '2022-05-23T11:01:34.044Z',
-            'kibana.alert.rule.created_by': 'elastic',
-            'kibana.alert.rule.description':
-              'Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.',
-            'kibana.alert.rule.enabled': true,
-            'kibana.alert.rule.exceptions_list': [
-              {
-                id: 'endpoint_list',
-                list_id: 'endpoint_list',
-                namespace_type: 'agnostic',
-                type: 'endpoint',
-              },
-            ],
-            'kibana.alert.rule.false_positives': [],
-            'kibana.alert.rule.from': 'now-10m',
-            'kibana.alert.rule.immutable': true,
-            'kibana.alert.rule.interval': '5m',
-            'kibana.alert.rule.license': 'Elastic License v2',
-            'kibana.alert.rule.max_signals': 10000,
-            'kibana.alert.rule.references': [],
-            'kibana.alert.rule.risk_score_mapping': [
-              {
-                field: 'event.risk_score',
-                operator: 'equals',
-                value: '',
-              },
-            ],
-            'kibana.alert.rule.rule_id': '9a1a2dae-0b5f-4c3d-8305-a268d404c306',
-            'kibana.alert.rule.rule_name_override': 'message',
-            'kibana.alert.rule.severity_mapping': [
-              {
-                field: 'event.severity',
-                operator: 'equals',
-                severity: 'low',
-                value: '21',
-              },
-              {
-                field: 'event.severity',
-                operator: 'equals',
-                severity: 'medium',
-                value: '47',
-              },
-              {
-                field: 'event.severity',
-                operator: 'equals',
-                severity: 'high',
-                value: '73',
-              },
-              {
-                field: 'event.severity',
-                operator: 'equals',
-                severity: 'critical',
-                value: '99',
-              },
-            ],
-            'kibana.alert.rule.threat': [],
-            'kibana.alert.rule.timestamp_override': 'event.ingested',
-            'kibana.alert.rule.to': 'now',
-            'kibana.alert.rule.type': 'query',
-            'kibana.alert.rule.updated_at': '2022-05-23T11:01:34.044Z',
-            'kibana.alert.rule.updated_by': 'elastic',
-            'kibana.alert.rule.version': 3,
-            'kibana.alert.rule.risk_score': 47,
-            'kibana.alert.rule.severity': 'medium',
-            'kibana.alert.original_event.agent_id_status': 'auth_metadata_missing',
-            'kibana.alert.original_event.sequence': 15,
-            'kibana.alert.original_event.ingested': '2022-05-23T11:02:53Z',
-            'kibana.alert.original_event.code': 'behavior',
-            'kibana.alert.original_event.kind': 'alert',
-            'kibana.alert.original_event.module': 'endpoint',
-            'kibana.alert.original_event.action': 'rule_detection',
-            'kibana.alert.original_event.id': '962dba31-1306-4bb1-82c2-2a6d9ef8962d',
-            'kibana.alert.original_event.category': 'behavior',
-            'kibana.alert.original_event.type': 'info',
-            'kibana.alert.original_event.dataset': 'endpoint.diagnostic.collection',
-            'kibana.alert.uuid': '2f4c790211998ec3369f581b778e9761ae5647d041edd7b1245f7311fba06f37',
+          },
+        ],
+        destination: {
+          port: 443,
+          ip: '10.39.10.58',
+        },
+        rule: {
+          description: 'Behavior rule description',
+          id: 'e2d719cc-7044-4a46-b2ee-0a2993202096',
+        },
+        source: {
+          port: 59406,
+          ip: '10.199.40.10',
+        },
+        network: {
+          transport: 'tcp',
+          type: 'ipv4',
+          direction: 'outgoing',
+        },
+        file: {
+          path: 'C:/fake_behavior.exe',
+          name: 'fake_behavior.exe',
+        },
+        ecs: {
+          version: '1.6.0',
+        },
+        data_stream: {
+          namespace: 'default',
+          type: 'logs',
+          dataset: 'endpoint.alerts',
+        },
+        elastic: {
+          agent: {
+            id: 'd2529c31-5415-492a-9c9b-87a77e8874d5',
           },
         },
-      ],
-    },
-    aggregations: {
-      endpoint_alert_count: {
-        value: 1,
+        host: {
+          hostname: 'Host-uu8vmc2z8a',
+          os: {
+            Ext: {
+              variant: 'Windows Server',
+            },
+            name: 'Windows',
+            family: 'windows',
+            version: '10.0',
+            platform: 'Windows',
+            full: 'Windows Server 2016',
+          },
+          ip: ['10.23.178.108'],
+          name: 'Host-uu8vmc2z8a',
+          id: 'c1e90e16-0130-46d4-88de-ee338f13fed7',
+          mac: ['ee-83-79-cf-1a-13', 'a7-79-da-62-9e-78'],
+          architecture: 'a4rwx2t7yu',
+        },
+        'event.agent_id_status': 'auth_metadata_missing',
+        'event.sequence': 15,
+        'event.ingested': '2022-05-23T11:02:53Z',
+        'event.code': 'behavior',
+        'event.kind': 'signal',
+        'event.module': 'endpoint',
+        'event.action': 'rule_detection',
+        'event.id': '962dba31-1306-4bb1-82c2-2a6d9ef8962d',
+        'event.category': 'behavior',
+        'event.type': 'info',
+        'event.dataset': 'endpoint.diagnostic.collection',
+        'kibana.alert.original_time': '2022-05-23T11:02:59.511Z',
+        'kibana.alert.ancestors': [
+          {
+            id: 'juKV8IABsphBWHn-nT4H',
+            type: 'event',
+            index: '.ds-logs-endpoint.alerts-default-2022.05.23-000001',
+            depth: 0,
+          },
+        ],
+        'kibana.alert.status': 'active',
+        'kibana.alert.workflow_status': 'open',
+        'kibana.alert.depth': 1,
+        'kibana.alert.reason':
+          'behavior event with process explorer.exe, file fake_behavior.exe,:59406,:443, on Host-uu8vmc2z8a created medium alert Endpoint Security.',
+        'kibana.alert.severity': 'medium',
+        'kibana.alert.risk_score': 47,
+        'kibana.alert.rule.actions': [],
+        'kibana.alert.rule.author': ['Elastic'],
+        'kibana.alert.rule.created_at': '2022-05-23T11:01:34.044Z',
+        'kibana.alert.rule.created_by': 'elastic',
+        'kibana.alert.rule.description':
+          'Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.',
+        'kibana.alert.rule.enabled': true,
+        'kibana.alert.rule.exceptions_list': [
+          {
+            id: 'endpoint_list',
+            list_id: 'endpoint_list',
+            namespace_type: 'agnostic',
+            type: 'endpoint',
+          },
+        ],
+        'kibana.alert.rule.false_positives': [],
+        'kibana.alert.rule.from': 'now-10m',
+        'kibana.alert.rule.immutable': true,
+        'kibana.alert.rule.interval': '5m',
+        'kibana.alert.rule.license': 'Elastic License v2',
+        'kibana.alert.rule.max_signals': 10000,
+        'kibana.alert.rule.references': [],
+        'kibana.alert.rule.risk_score_mapping': [
+          {
+            field: 'event.risk_score',
+            operator: 'equals',
+            value: '',
+          },
+        ],
+        'kibana.alert.rule.rule_id': '9a1a2dae-0b5f-4c3d-8305-a268d404c306',
+        'kibana.alert.rule.rule_name_override': 'message',
+        'kibana.alert.rule.severity_mapping': [
+          {
+            field: 'event.severity',
+            operator: 'equals',
+            severity: 'low',
+            value: '21',
+          },
+          {
+            field: 'event.severity',
+            operator: 'equals',
+            severity: 'medium',
+            value: '47',
+          },
+          {
+            field: 'event.severity',
+            operator: 'equals',
+            severity: 'high',
+            value: '73',
+          },
+          {
+            field: 'event.severity',
+            operator: 'equals',
+            severity: 'critical',
+            value: '99',
+          },
+        ],
+        'kibana.alert.rule.threat': [],
+        'kibana.alert.rule.timestamp_override': 'event.ingested',
+        'kibana.alert.rule.to': 'now',
+        'kibana.alert.rule.type': 'query',
+        'kibana.alert.rule.updated_at': '2022-05-23T11:01:34.044Z',
+        'kibana.alert.rule.updated_by': 'elastic',
+        'kibana.alert.rule.version': 3,
+        'kibana.alert.rule.risk_score': 47,
+        'kibana.alert.rule.severity': 'medium',
+        'kibana.alert.original_event.agent_id_status': 'auth_metadata_missing',
+        'kibana.alert.original_event.sequence': 15,
+        'kibana.alert.original_event.ingested': '2022-05-23T11:02:53Z',
+        'kibana.alert.original_event.code': 'behavior',
+        'kibana.alert.original_event.kind': 'alert',
+        'kibana.alert.original_event.module': 'endpoint',
+        'kibana.alert.original_event.action': 'rule_detection',
+        'kibana.alert.original_event.id': '962dba31-1306-4bb1-82c2-2a6d9ef8962d',
+        'kibana.alert.original_event.category': 'behavior',
+        'kibana.alert.original_event.type': 'info',
+        'kibana.alert.original_event.dataset': 'endpoint.diagnostic.collection',
+        'kibana.alert.uuid': '2f4c790211998ec3369f581b778e9761ae5647d041edd7b1245f7311fba06f37',
       },
     },
-  };
+  ];
 };
 
 export const stubProcessTree = (): ResolverNode[] => [
