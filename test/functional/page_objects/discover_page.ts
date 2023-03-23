@@ -390,7 +390,7 @@ export class DiscoverPageObject extends FtrService {
   public async getAllFieldNames() {
     const sidebar = await this.testSubjects.find('discover-sidebar');
     const $ = await sidebar.parseDomContent();
-    return $('.dscSidebarField__name')
+    return $('.kbnFieldButton__name')
       .toArray()
       .map((field) => $(field).text());
   }
