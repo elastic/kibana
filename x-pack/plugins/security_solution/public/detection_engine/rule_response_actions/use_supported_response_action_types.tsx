@@ -5,22 +5,42 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useUserPrivileges } from '../../common/components/user_privileges';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import type { ResponseActionType } from './get_supported_response_actions';
 import { getSupportedResponseActions, responseActionTypes } from './get_supported_response_actions';
-import { useOsqueryEnabled } from './use_osquery_enabled';
 
 export const useSupportedResponseActionTypes = () => {
   const [supportedResponseActionTypes, setSupportedResponseActionTypes] = useState<
     ResponseActionType[] | undefined
   >();
 
-  const isOsqueryEnabled = useOsqueryEnabled();
+  const isEndpointEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
+  const { canIsolateHost } = useUserPrivileges().endpointPrivileges;
+
+  const enabledFeatures = useMemo(
+    () => ({
+      endpoint: isEndpointEnabled,
+    }),
+    [isEndpointEnabled]
+  );
+
+  const userHasPermissionsToExecute = useMemo(
+    () => ({
+      endpoint: canIsolateHost,
+    }),
+    [canIsolateHost]
+  );
 
   useEffect(() => {
-    const supportedTypes = getSupportedResponseActions(responseActionTypes);
+    const supportedTypes = getSupportedResponseActions(
+      responseActionTypes,
+      enabledFeatures,
+      userHasPermissionsToExecute
+    );
     setSupportedResponseActionTypes(supportedTypes);
-  }, [isOsqueryEnabled]);
+  }, [isEndpointEnabled, enabledFeatures, userHasPermissionsToExecute]);
 
   return supportedResponseActionTypes;
 };

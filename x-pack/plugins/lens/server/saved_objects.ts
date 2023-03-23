@@ -50,12 +50,8 @@ export function setupSavedObjects(
           type: 'keyword',
         },
         state: {
-          type: 'flattened',
-        },
-        expression: {
-          index: false,
-          doc_values: false,
-          type: 'keyword',
+          dynamic: false,
+          properties: {},
         },
       },
     },
