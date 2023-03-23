@@ -19,7 +19,7 @@ import type {
   AddVersionOpts,
   VersionedRoute,
   VersionedRouteConfig,
-} from '@kbn/core-versioned-http-server';
+} from '@kbn/core-http-server';
 import type { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type { Method } from './types';
 

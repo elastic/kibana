@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
-  "id": "@kbn/core-versioned-http-server-internal",
+  "id": "@kbn/core-http-versioned-router-server-internal",
   "owner": "@elastic/kibana-core"
 }

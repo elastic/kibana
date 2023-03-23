@@ -7,12 +7,12 @@
  */
 
 import type { IRouter } from '@kbn/core-http-server';
-import type { VersionedRouter } from '@kbn/core-versioned-http-server';
 import type {
+  VersionedRouter,
   VersionedRoute,
   VersionedRouteConfig,
   VersionedRouterRoute,
-} from '@kbn/core-versioned-http-server';
+} from '@kbn/core-http-server';
 import { InternalVersionedRoute } from './internal_versioned_route';
 import { Method } from './types';
 
