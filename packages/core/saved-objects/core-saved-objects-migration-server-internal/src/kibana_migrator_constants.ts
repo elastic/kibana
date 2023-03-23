@@ -23,6 +23,10 @@ export interface TypeStatusDetails {
 
 export const MAIN_SAVED_OBJECT_INDEX = '.kibana';
 
+// ensure plugins don't try to convert SO namespaceTypes after 8.0.0
+// see https://github.com/elastic/kibana/issues/147344
+export const ALLOWED_CONVERT_VERSION = '8.0.0';
+
 export const DEFAULT_TYPE_INDEX_MAP: TypeIndexMap = {
   '.kibana_task_manager': ['task'],
   '.kibana': [

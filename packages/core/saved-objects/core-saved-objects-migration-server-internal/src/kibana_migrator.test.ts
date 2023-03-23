@@ -29,6 +29,21 @@ jest.mock('./document_migrator', () => {
   };
 });
 
+const mappingsResponseWithoutTypeIndexMap: estypes.IndicesGetMappingResponse = {
+  '.kibana_8.7.0_001': {
+    mappings: {
+      _meta: {
+        migrationMappingPropertyHashes: {
+          references: '7997cf5a56cc02bdc9c93361bde732b0',
+          // ...
+        },
+        // we do not add a `typeIndexMap`
+        // simulating a Kibana < 8.8.0 that does not have one yet
+      },
+    },
+  },
+};
+
 const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
   types.forEach((type) =>
@@ -96,21 +111,21 @@ describe('KibanaMigrator', () => {
   });
 
   describe('runMigrations', () => {
-    it('throws if prepareMigrations is not called first', async () => {
+    it('throws if prepareMigrations is not called first', () => {
       const options = mockOptions();
-
-      options.client.indices.get.mockResponse({}, { statusCode: 200 });
-
       const migrator = new KibanaMigrator(options);
 
-      await expect(() => migrator.runMigrations()).toThrowErrorMatchingInlineSnapshot(
-        `"Migrations are not ready. Make sure prepareMigrations is called first."`
+      expect(migrator.runMigrations()).rejects.toThrowError(
+        'Migrations are not ready. Make sure prepareMigrations is called first.'
       );
     });
 
     it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
       options.client.indices.get.mockResponse({}, { statusCode: 200 });
+      options.client.indices.getMapping.mockResponse(mappingsResponseWithoutTypeIndexMap, {
+        statusCode: 200,
+      });
 
       options.client.cluster.getSettings.mockResponse(
         {
@@ -132,6 +147,9 @@ describe('KibanaMigrator', () => {
 
     it('emits results on getMigratorResult$()', async () => {
       const options = mockV2MigrationOptions();
+      options.client.indices.getMapping.mockResponse(mappingsResponseWithoutTypeIndexMap, {
+        statusCode: 200,
+      });
       const migrator = new KibanaMigrator(options);
       const migratorStatus = lastValueFrom(migrator.getStatus$().pipe(take(3)));
       migrator.prepareMigrations();
@@ -166,6 +184,9 @@ describe('KibanaMigrator', () => {
         },
         { statusCode: 200 }
       );
+      options.client.indices.getMapping.mockResponse(mappingsResponseWithoutTypeIndexMap, {
+        statusCode: 200,
+      });
 
       const migrator = new KibanaMigrator(options);
       migrator.prepareMigrations();
@@ -180,6 +201,9 @@ describe('KibanaMigrator', () => {
         completed: true,
         error: { type: 'elasticsearch_exception', reason: 'task failed with an error' },
         task: { description: 'task description' } as any,
+      });
+      options.client.indices.getMapping.mockResponse(mappingsResponseWithoutTypeIndexMap, {
+        statusCode: 200,
       });
 
       const migrator = new KibanaMigrator(options);

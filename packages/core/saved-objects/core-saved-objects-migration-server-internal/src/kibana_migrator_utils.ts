@@ -7,12 +7,12 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { Logger } from '@kbn/logging';
 import type { IndexMap } from './core';
 import {
   type TypeIndexMap,
   TypeStatus,
   TypeStatusDetails,
-  DEFAULT_TYPE_INDEX_MAP,
   MAIN_SAVED_OBJECT_INDEX,
 } from './kibana_migrator_constants';
 
@@ -41,15 +41,58 @@ export function createMultiPromiseDefer(indices: string[]): Record<string, Defer
 
 export async function checkTypeIndexDistribution(
   client: ElasticsearchClient,
-  desiredIndexMap: TypeIndexMap
+  desiredIndexMap: TypeIndexMap,
+  defaultIndexTypeMap: TypeIndexMap
 ): Promise<Record<string, TypeStatusDetails>> {
   const mapping = await client.indices.getMapping({
     index: MAIN_SAVED_OBJECT_INDEX,
   });
-  const meta = Object.values(mapping)[0].mappings._meta;
-  const currentIndexMap: TypeIndexMap = meta?.typeIndexMap ?? DEFAULT_TYPE_INDEX_MAP;
+  const meta = Object.values(mapping)?.[0].mappings._meta;
+  const currentIndexMap: TypeIndexMap = meta?.typeIndexMap ?? defaultIndexTypeMap;
 
   return calculateTypeStatuses(currentIndexMap, desiredIndexMap);
+}
+
+export async function getIndicesInvoledInRelocation({
+  client,
+  typeIndexMap,
+  defaultIndexTypeMap,
+  logger,
+}: {
+  client: ElasticsearchClient;
+  typeIndexMap: TypeIndexMap;
+  defaultIndexTypeMap: TypeIndexMap;
+  logger: Logger;
+}): Promise<string[]> {
+  const indicesWithMovingTypesSet = new Set<string>();
+
+  try {
+    const typeIndexDistribution = await checkTypeIndexDistribution(
+      client,
+      typeIndexMap,
+      defaultIndexTypeMap
+    );
+
+    const relocated = Object.entries(typeIndexDistribution).filter(
+      ([, { status }]) => status === TypeStatus.Moved
+    );
+    relocated.forEach(([, { currentIndex, targetIndex }]) => {
+      indicesWithMovingTypesSet.add(currentIndex!);
+      indicesWithMovingTypesSet.add(targetIndex!);
+    });
+
+    return Array.from(indicesWithMovingTypesSet);
+  } catch (error) {
+    if (error.body?.status === 404) {
+      logger.debug(
+        `The ${MAIN_SAVED_OBJECT_INDEX} index does NOT exist. Assuming this is a fresh deployment`
+      );
+      return [];
+    } else {
+      logger.fatal('Cannot query the meta information of the main saved object index');
+      throw error;
+    }
+  }
 }
 
 export function indexMapToTypeIndexMap(indexMap: IndexMap): TypeIndexMap {
