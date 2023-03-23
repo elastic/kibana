@@ -14,6 +14,7 @@ import {
   Polygon,
   Position,
 } from 'geojson';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/data-plugin/common';
 import type { MapGeoJSONFeature } from '@kbn/mapbox-gl';
@@ -62,6 +63,7 @@ export interface BoundsRequestMeta {
   timeslice?: Timeslice;
   isFeatureEditorOpenForLayer: boolean;
   joinKeyFilter?: Filter;
+  executionContext: KibanaExecutionContext;
 }
 
 export interface GetFeatureActionsArgs {
@@ -84,7 +86,7 @@ export interface GetFeatureActionsArgs {
 
 export interface IVectorSource extends ISource {
   isMvt(): boolean;
-  getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
+  getTooltipProperties(properties: GeoJsonProperties, executionContext: KibanaExecutionContext): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     layerDataFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void

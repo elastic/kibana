@@ -45,6 +45,7 @@ export async function syncBoundsData({
     applyGlobalQuery: source.getApplyGlobalQuery(),
     applyGlobalTime: source.getApplyGlobalTime(),
     isFeatureEditorOpenForLayer,
+    executionContext: dataFilters.executionContext,
   };
 
   let bounds = null;
