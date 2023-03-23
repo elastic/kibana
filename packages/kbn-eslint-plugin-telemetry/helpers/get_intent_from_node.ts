@@ -80,7 +80,7 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
           return '';
         }
 
-        const object: TSESTree.LeftHandSideExpression = callee.object;
+        const object: TSESTree.Expression = callee.object;
         const property: TSESTree.Expression | TSESTree.PrivateIdentifier = callee.property;
 
         if (!('name' in object) || !('name' in property)) {

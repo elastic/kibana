@@ -35,6 +35,7 @@ export const createAPMTransactionErrorRateIndicator = (
     transactionName: 'irrelevant',
     transactionType: 'irrelevant',
     goodStatusCodes: ['2xx', '3xx', '4xx'],
+    index: 'metrics-apm*',
     ...params,
   },
 });
@@ -49,6 +50,7 @@ export const createAPMTransactionDurationIndicator = (
     transactionName: 'irrelevant',
     transactionType: 'irrelevant',
     threshold: 500,
+    index: 'metrics-apm*',
     ...params,
   },
 });
@@ -76,7 +78,6 @@ const defaultSLO: Omit<SLO, 'id' | 'revision' | 'createdAt' | 'updatedAt'> = {
   },
   indicator: createAPMTransactionDurationIndicator(),
   settings: {
-    timestampField: '@timestamp',
     syncDelay: new Duration(1, DurationUnit.Minute),
     frequency: new Duration(1, DurationUnit.Minute),
   },

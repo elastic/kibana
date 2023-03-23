@@ -40,7 +40,12 @@ import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
 import { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
-import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
+import type {
+  DraggingIdentifier,
+  DragDropIdentifier,
+  DragContextState,
+  DropType,
+} from '@kbn/dom-drag-drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
   LensSortActionData,
@@ -215,24 +220,6 @@ export type TableChangeType =
   | 'extended'
   | 'reorder'
   | 'layers';
-
-export type DropType =
-  | 'field_add'
-  | 'field_replace'
-  | 'reorder'
-  | 'move_compatible'
-  | 'replace_compatible'
-  | 'move_incompatible'
-  | 'replace_incompatible'
-  | 'replace_duplicate_compatible'
-  | 'duplicate_compatible'
-  | 'swap_compatible'
-  | 'replace_duplicate_incompatible'
-  | 'duplicate_incompatible'
-  | 'swap_incompatible'
-  | 'field_combine'
-  | 'combine_compatible'
-  | 'combine_incompatible';
 
 export interface DatasourceSuggestion<T = unknown> {
   state: T;

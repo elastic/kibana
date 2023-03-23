@@ -38,10 +38,10 @@ export const AnalyticsCollectionEvents: React.FC<AnalyticsCollectionEventsProps>
   const { navigateToUrl } = useValues(KibanaLogic);
 
   useEffect(() => {
-    analyticsEventsIndexExists(collection.id);
+    analyticsEventsIndexExists(collection.events_datastream);
 
     const interval = setInterval(() => {
-      analyticsEventsIndexExists(collection.id);
+      analyticsEventsIndexExists(collection.events_datastream);
     }, EVENTS_POLLING_INTERVAL);
 
     return () => clearInterval(interval);
@@ -83,7 +83,7 @@ export const AnalyticsCollectionEvents: React.FC<AnalyticsCollectionEventsProps>
               onClick={() =>
                 navigateToUrl(
                   generateEncodedPath(COLLECTION_VIEW_PATH, {
-                    id: collection.id,
+                    id: collection.name,
                     section: 'integrate',
                   })
                 )

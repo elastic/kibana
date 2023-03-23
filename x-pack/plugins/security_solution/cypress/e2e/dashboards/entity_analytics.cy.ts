@@ -17,7 +17,6 @@ import {
   ENABLE_HOST_RISK_SCORE_BUTTON,
   ENABLE_USER_RISK_SCORE_BUTTON,
   HOSTS_DONUT_CHART,
-  HOSTS_TABLE,
   HOSTS_TABLE_ROWS,
   HOST_RISK_SCORE_NO_DATA_DETECTED,
   UPGRADE_HOST_RISK_SCORE_BUTTON,
@@ -28,17 +27,19 @@ import {
   USER_RISK_SCORE_NO_DATA_DETECTED,
   USERS_TABLE_ALERT_CELL,
   HOSTS_TABLE_ALERT_CELL,
+  HOSTS_TABLE,
 } from '../../screens/entity_analytics';
 import { openRiskTableFilterAndSelectTheLowOption } from '../../tasks/host_risk';
 import { createRule } from '../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { getNewRule } from '../../objects/rule';
-import { QUERY_TAB_BUTTON } from '../../screens/timeline';
-import { closeTimeline } from '../../tasks/timeline';
 import { clickOnFirstHostsAlerts, clickOnFirstUsersAlerts } from '../../tasks/risk_scores';
+import { OPTION_LIST_LABELS, OPTION_LIST_VALUES } from '../../screens/common/filter_group';
 
 const TEST_USER_ALERTS = 2;
+const TEST_USER_NAME = 'test';
 const SIEM_KIBANA_HOST_ALERTS = 2;
+const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 
 describe('Entity Analytics Dashboard', () => {
   before(() => {
@@ -160,10 +161,14 @@ describe('Entity Analytics Dashboard', () => {
         cy.get(HOSTS_TABLE_ALERT_CELL).first().should('include.text', SIEM_KIBANA_HOST_ALERTS);
       });
 
-      it('opens timeline when alerts count is clicked', () => {
+      it('opens alerts page when alerts count is clicked', () => {
         clickOnFirstHostsAlerts();
-        cy.get(QUERY_TAB_BUTTON).should('contain.text', SIEM_KIBANA_HOST_ALERTS);
-        closeTimeline();
+        cy.url().should('include', ALERTS_URL);
+
+        cy.get(OPTION_LIST_LABELS).eq(0).should('include.text', 'Status');
+        cy.get(OPTION_LIST_VALUES(0)).should('include.text', 'open');
+        cy.get(OPTION_LIST_LABELS).eq(3).should('include.text', 'Host');
+        cy.get(OPTION_LIST_VALUES(3)).should('include.text', SIEM_KIBANA_HOST_NAME);
       });
     });
   });
@@ -220,10 +225,15 @@ describe('Entity Analytics Dashboard', () => {
         cy.get(USERS_TABLE_ALERT_CELL).first().should('include.text', TEST_USER_ALERTS);
       });
 
-      it('opens timeline when alerts count is clicked', () => {
+      it('opens alerts page when alerts count is clicked', () => {
         clickOnFirstUsersAlerts();
-        cy.get(QUERY_TAB_BUTTON).should('contain.text', TEST_USER_ALERTS);
-        closeTimeline();
+
+        cy.url().should('include', ALERTS_URL);
+
+        cy.get(OPTION_LIST_LABELS).eq(0).should('include.text', 'Status');
+        cy.get(OPTION_LIST_VALUES(0)).should('include.text', 'open');
+        cy.get(OPTION_LIST_LABELS).eq(2).should('include.text', 'User');
+        cy.get(OPTION_LIST_VALUES(2)).should('include.text', TEST_USER_NAME);
       });
     });
   });

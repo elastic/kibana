@@ -12,9 +12,9 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { DragContext, DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { Easteregg } from './easteregg';
 import { NativeRenderer } from '../../native_renderer';
-import { DragContext, DragDropIdentifier } from '../../drag_drop';
 import {
   StateSetter,
   DatasourceDataPanelProps,

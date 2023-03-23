@@ -21,6 +21,7 @@ import {
 } from '@kbn/charts-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { ISearchStart } from '@kbn/data-plugin/public';
+import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
 import type { Document } from './persistence/saved_object_store';
 import {
   Datasource,
@@ -35,7 +36,6 @@ import {
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
-import type { DraggingIdentifier } from './drag_drop';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {

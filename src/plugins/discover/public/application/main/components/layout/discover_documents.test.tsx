@@ -22,7 +22,7 @@ import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { EsHitRecord } from '../../../../types';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { AppState } from '../../services/discover_app_state_container';
+import { DiscoverAppState } from '../../services/discover_app_state_container';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -84,7 +84,7 @@ describe('Discover documents layout', () => {
   test('should set rounded width to state on resize column', () => {
     const state = {
       grid: { columns: { timestamp: { width: 173 }, someField: { width: 197 } } },
-    } as AppState;
+    } as DiscoverAppState;
     const container = getDiscoverStateMock({});
     container.appState.update(state);
 
