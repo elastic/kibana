@@ -19,6 +19,8 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    { "path": "../../../src/setup_node_env/tsconfig.json" },
+    // add references to other TypeScript projects the plugin depends on
     "@kbn/embeddable-plugin",
     "@kbn/data-views-plugin",
     "@kbn/cloud-plugin",
@@ -84,5 +86,6 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/monaco",
+    "@kbn/repo-info"
   ],
 }
