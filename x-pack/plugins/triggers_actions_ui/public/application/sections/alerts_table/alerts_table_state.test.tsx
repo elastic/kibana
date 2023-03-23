@@ -341,6 +341,25 @@ describe('AlertsTableState', () => {
       });
     });
 
+    it('should not fetch cases if the column is not visible', async () => {
+      mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
+
+      const props = mockCustomProps({
+        cases: { featureId: 'test-feature-id', owner: ['test-owner'] },
+        columns: [
+          {
+            id: AlertsField.name,
+            displayAsText: 'Name',
+          },
+        ],
+      });
+
+      render(<AlertsTableWithLocale {...props} />);
+      await waitFor(() => {
+        expect(useBulkGetCasesMock).toHaveBeenCalledWith(['test-id-2'], false);
+      });
+    });
+
     it('calls canUseCases with an empty array if the case configuration is not defined', async () => {
       render(<AlertsTableWithLocale {...tableProps} />);
       expect(mockCaseService.helpers.canUseCases).toHaveBeenCalledWith([]);

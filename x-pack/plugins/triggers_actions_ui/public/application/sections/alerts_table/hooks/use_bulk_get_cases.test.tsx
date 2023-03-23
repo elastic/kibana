@@ -50,7 +50,7 @@ describe('useBulkGetCases', () => {
     );
   });
 
-  it('does not call the api if the user does not have read permissions', async () => {
+  it('does not call the api if the fetchCases is false', async () => {
     const spy = jest.spyOn(api, 'bulkGetCases');
     spy.mockResolvedValue(response);
 

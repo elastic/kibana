@@ -109,6 +109,9 @@ const getCaseIdsFromAlerts = (alerts: Alerts): Set<string> =>
       .flat()
   );
 
+const isCasesColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
+  columns.some(({ id }) => id === ALERT_CASE_IDS);
+
 const AlertsTableState = (props: AlertsTableStateProps) => {
   return (
     <QueryClientProvider client={alertsTableQueryClient}>
@@ -240,11 +243,13 @@ const AlertsTableStateWithQueryProvider = ({
   const casesPermissions = casesService?.helpers.canUseCases(
     alertsTableConfiguration?.cases?.owner ?? []
   );
+
   const hasCaseReadPermissions = Boolean(casesPermissions?.read);
+  const fetchCases = isCasesColumnEnabled(columns) && hasCaseReadPermissions;
 
   const { data: cases, isFetching: isLoadingCases } = useBulkGetCases(
     Array.from(caseIds.values()),
-    hasCaseReadPermissions
+    fetchCases
   );
 
   const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
