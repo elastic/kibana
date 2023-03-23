@@ -22,8 +22,7 @@
     ],
     "patterns": [
       "_bulk",
-      "{indices}/_bulk",
-      "{indices}/{type}/_bulk"
+      "{indices}/_bulk"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-bulk.html"
   }

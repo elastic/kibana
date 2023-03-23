@@ -142,6 +142,7 @@ export const MetricItem = ({
             isPopoverOpen={isPopoverOpen}
             setIsPopoverOpen={setIsPopoverOpen}
             position="relative"
+            locationId={monitor.location.id}
           />
         )}
         {configIdByLocation && (
