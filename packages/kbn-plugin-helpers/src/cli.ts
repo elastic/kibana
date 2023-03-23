@@ -136,6 +136,12 @@ export function runCli() {
         }
 
         const plugin = loadKibanaPlatformPlugin(found.dir);
+
+        if (!plugin.manifest.ui) {
+          log.info('Your plugin is server only and there is no need to run a dev task in order to get it ready to test. Please just run `yarn start` at the Kibana root and your plugin will be started.')
+          return;
+        }
+
         const config = await loadConfig(log, plugin);
         const sourceDir = plugin.directory;
 
