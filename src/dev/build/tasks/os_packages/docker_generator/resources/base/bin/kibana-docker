@@ -101,6 +101,7 @@ kibana_vars=(
     logging.root
     logging.root.appenders
     logging.root.level
+    map.emsUrl
     map.includeElasticMapsService
     map.tilemap.options.attribution
     map.tilemap.options.maxZoom

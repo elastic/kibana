@@ -24,6 +24,8 @@ import {
 import { fromQuery } from '../../shared/links/url_helpers';
 import { TransactionOverview } from '.';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import { MockTimeRangeContextProvider } from '../../../context/time_range_metadata/mock_time_range_metadata_context_provider';
 
 const KibanaReactContext = createKibanaReactContext({
   uiSettings: { get: () => true },
@@ -72,9 +74,13 @@ function setup({
       <KibanaReactContext.Provider>
         <MockApmPluginContextWrapper history={history}>
           <UrlParamsProvider>
-            <ApmServiceContextProvider>
-              <TransactionOverview />
-            </ApmServiceContextProvider>
+            <MockTimeRangeContextProvider>
+              <ApmTimeRangeMetadataContextProvider>
+                <ApmServiceContextProvider>
+                  <TransactionOverview />
+                </ApmServiceContextProvider>
+              </ApmTimeRangeMetadataContextProvider>
+            </MockTimeRangeContextProvider>
           </UrlParamsProvider>
         </MockApmPluginContextWrapper>
       </KibanaReactContext.Provider>
