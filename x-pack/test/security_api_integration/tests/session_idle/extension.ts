@@ -32,8 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     return searchResponse.hits.hits.map((hit) => hit._source!.createdAt).sort();
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/136688
-  describe.skip('Session', () => {
+  describe('Session', () => {
     let sessionCookie: Cookie;
 
     const saveCookie = async (response: any) => {
