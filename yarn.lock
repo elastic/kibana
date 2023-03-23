@@ -4237,10 +4237,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/generate-csv@link:x-pack/plugins/generate_csv":
-  version "0.0.0"
-  uid ""
-
 "@kbn/generate@link:packages/kbn-generate":
   version "0.0.0"
   uid ""

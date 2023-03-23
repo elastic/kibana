@@ -752,8 +752,6 @@
       "@kbn/functional-with-es-ssl-cases-test-plugin/*": ["x-pack/test/functional_with_es_ssl/plugins/cases/*"],
       "@kbn/generate": ["packages/kbn-generate"],
       "@kbn/generate/*": ["packages/kbn-generate/*"],
-      "@kbn/generate-csv": ["x-pack/plugins/generate_csv"],
-      "@kbn/generate-csv/*": ["x-pack/plugins/generate_csv/*"],
       "@kbn/get-repo-files": ["packages/kbn-get-repo-files"],
       "@kbn/get-repo-files/*": ["packages/kbn-get-repo-files/*"],
       "@kbn/global-search-bar-plugin": ["x-pack/plugins/global_search_bar"],
