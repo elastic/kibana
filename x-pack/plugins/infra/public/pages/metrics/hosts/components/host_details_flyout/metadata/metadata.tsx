@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { useSourceContext } from '../../../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../../../common/inventory_models';
 import type { InventoryItemType } from '../../../../../../../common/inventory_models/types';
@@ -29,13 +29,11 @@ const Metadata = ({ node, currentTimeRange }: TabProps) => {
   const nodeId = node.name;
   const inventoryModel = findInventoryModel(NODE_TYPE);
   const { sourceId } = useSourceContext();
-  const { loading: metadataLoading, metadata } = useMetadata(
-    nodeId,
-    NODE_TYPE,
-    inventoryModel.requiredMetrics,
-    sourceId,
-    currentTimeRange
-  );
+  const {
+    loading: metadataLoading,
+    error,
+    metadata,
+  } = useMetadata(nodeId, NODE_TYPE, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
 
@@ -43,14 +41,45 @@ const Metadata = ({ node, currentTimeRange }: TabProps) => {
     return <LoadingPlaceholder />;
   }
 
+  if (error) {
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorTitle', {
+          defaultMessage: 'Sorry, there was an error',
+        })}
+        color="danger"
+        iconType="error"
+      >
+        <p>
+          {i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorMessage', {
+            defaultMessage: 'There was an error loading your data. Try to',
+          })}{' '}
+          <EuiLink
+            data-test-subj="infraMetadataThisLinkCanHelpLink"
+            onClick={() => window.location.reload()}
+          >
+            {i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorAction', {
+              defaultMessage: 'reload the page',
+            })}
+          </EuiLink>{' '}
+          {i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorActionMessage', {
+            defaultMessage: 'and open the host details again.',
+          })}
+        </p>
+      </EuiCallOut>
+    );
+  }
+
   return fields.length > 0 ? (
     <Table rows={fields} />
   ) : (
-    <EuiText>
-      {i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
-        defaultMessage: 'No metadata found for this host',
+    <EuiCallOut
+      title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound', {
+        defaultMessage: 'Sorry, there is no metadata related to this host.',
       })}
-    </EuiText>
+      size="s"
+      iconType="iInCircle"
+    />
   );
 };
 
