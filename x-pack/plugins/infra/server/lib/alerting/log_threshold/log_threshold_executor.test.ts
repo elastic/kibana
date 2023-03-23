@@ -140,7 +140,9 @@ const baseRuleParams: Pick<RuleParams, 'count' | 'timeSize' | 'timeUnit' | 'logV
 
 const TIMESTAMP_FIELD = '@timestamp';
 const FILEBEAT_INDEX = 'filebeat-*';
-const EXECUTION_TIMESTAMP = new Date('2022-01-01T00:00:00.000Z').valueOf();
+const EXECUTION_TIMESTAMP = {
+  lte: new Date('2022-01-01T00:00:00.000Z').valueOf(),
+};
 
 const runtimeMappings: estypes.MappingRuntimeFields = {
   runtime_field: {
