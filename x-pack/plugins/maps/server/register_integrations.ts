@@ -31,7 +31,7 @@ export function registerIntegrations(
         src: core.http.basePath.prepend(`/plugins/${APP_ID}/assets/gdal_logo.svg`),
       },
     ],
-    categories: ['enterprise_search'],
+    categories: ['custom'],
     shipper: 'other',
     isBeta: false,
   });
@@ -50,7 +50,7 @@ export function registerIntegrations(
         src: 'logoMaps',
       },
     ],
-    categories: ['enterprise_search'],
+    categories: ['custom'],
     shipper: 'other',
     isBeta: false,
   });

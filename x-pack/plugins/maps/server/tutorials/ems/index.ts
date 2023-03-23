@@ -78,6 +78,6 @@ Indexing EMS administrative boundaries in Elasticsearch allows for search on bou
     previewImagePath: `/plugins/${APP_ID}/assets/boundaries_screenshot.png`,
     onPrem: instructions,
     elasticCloud: instructions,
-    integrationBrowserCategories: ['enterprise_search'],
+    integrationBrowserCategories: ['custom'],
   });
 }
