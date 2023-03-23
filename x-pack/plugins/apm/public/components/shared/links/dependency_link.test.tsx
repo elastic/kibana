@@ -13,7 +13,9 @@ import * as stories from './dependency_link.stories';
 const { Example } = composeStories(stories);
 
 describe('DependencyLink', () => {
-  it('renders', () => {
-    expect(() => render(<Example />)).not.toThrowError();
+  it('renders', async () => {
+    const { findByText } = render(<Example />);
+
+    expect(await findByText('postgres')).toBeDefined();
   });
 });

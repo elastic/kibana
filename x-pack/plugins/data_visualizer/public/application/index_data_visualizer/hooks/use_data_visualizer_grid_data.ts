@@ -392,7 +392,7 @@ export const useDataVisualizerGridData = (
   const createNonMetricCards = useCallback(() => {
     const allNonMetricFields = dataViewFields.filter((f) => {
       return (
-        f.type !== KBN_FIELD_TYPES.NUMBER &&
+        (f.type !== KBN_FIELD_TYPES.NUMBER || f.timeSeriesMetric === 'counter') &&
         f.displayName !== undefined &&
         isDisplayField(f.displayName) === true
       );
