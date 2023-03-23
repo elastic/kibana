@@ -121,6 +121,10 @@ export interface LinkItem {
    */
   sideNavDisabled?: boolean;
   /**
+   * Disables this id in the breadcrumb. Defaults to false.
+   */
+  skipBreadcrumb?: boolean;
+  /**
    * Disables the state query string in the URL. Defaults to false.
    */
   skipUrlState?: boolean;

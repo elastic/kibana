@@ -28,7 +28,12 @@ export const dashboardViewLinks: LinkItem = {
     }),
   ],
   sideNavDisabled: true,
+  // Dashboard view does not display as a landing card or icon
   landingPageDisabled: true,
+  // Dashboard view needs url state
+  skipUrlState: false,
+  // Security / Dashboards / {Dashboard title}
+  skipBreadcrumb: true,
 };
 
 export const dashboardsLandingLinks: LinkItem = {
