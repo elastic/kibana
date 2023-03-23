@@ -37,7 +37,9 @@ describe('SelectSeverity', () => {
     );
 
     // assert initial state
-    expect(getAllByText('warning')).toHaveLength(2);
+    // EuiSuperSelect was refactored to update SR-only
+    // text, reducing the text count to 1.
+    expect(getAllByText('warning')).toHaveLength(1);
     expect(queryByText('minor')).not.toBeInTheDocument();
     expect(queryByText('major')).not.toBeInTheDocument();
     expect(queryByText('critical')).not.toBeInTheDocument();
@@ -48,7 +50,7 @@ describe('SelectSeverity', () => {
     });
 
     // assert open popover
-    expect(getAllByText('warning')).toHaveLength(3);
+    expect(getAllByText('warning')).toHaveLength(2);
     expect(getAllByText('minor')).toHaveLength(1);
     expect(getAllByText('major')).toHaveLength(1);
     expect(getAllByText('critical')).toHaveLength(1);
@@ -63,7 +65,7 @@ describe('SelectSeverity', () => {
     await waitFor(() => {
       expect(queryByText('warning')).not.toBeInTheDocument();
       expect(queryByText('minor')).not.toBeInTheDocument();
-      expect(getAllByText('major')).toHaveLength(2);
+      expect(getAllByText('major')).toHaveLength(1);
       expect(queryByText('critical')).not.toBeInTheDocument();
     });
   });
