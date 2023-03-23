@@ -32,6 +32,7 @@ import {
 import type {
   SearchHit,
   SearchRequest as ESSearchRequest,
+  SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Agent, AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
@@ -161,7 +162,7 @@ export interface ITelemetryReceiver {
 
   fetchPrebuiltRuleAlerts(): Promise<{ events: TelemetryEvent[]; count: number }>;
 
-  fetchTimelineEndpointAlerts(interval: number): Array<SearchHit<EnhancedAlertEvent>>;
+  fetchTimelineEndpointAlerts(interval: number): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
 
   buildProcessTree(
     entityId: string,
@@ -716,6 +717,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     ).id;
 
     let fetchMore = true;
+    let searchAfter: SortResults | undefined;
     let alertsToReturn: Array<SearchHit<EnhancedAlertEvent>> = [];
     while (fetchMore) {
       const query: ESSearchRequest = {
@@ -763,8 +765,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           },
         },
         track_total_hits: false,
-        sort: [{ _shard_doc: 'desc' }] as unknown as string[],
+        sort: [
+          { '@timestamp': { order: 'asc', format: 'strict_date_optional_time_nanos' } },
+          { _shard_doc: 'desc' },
+        ] as unknown as string[],
         pit: { id: pitId },
+        search_after: searchAfter,
+        size: 1000,
       };
 
       this.logger.debug(`Getting alerts with point in time (PIT) query: ${JSON.stringify(query)}`);
@@ -772,12 +779,17 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       let response = null;
       try {
         response = await this.esClient.search<EnhancedAlertEvent>(query);
+        const numOfHits = response?.hits.hits.length;
+
+        if (numOfHits > 0) {
+          const lastHit = response?.hits.hits[numOfHits - 1];
+          searchAfter = lastHit?.sort;
+        }
       } catch (e) {
         this.logger.debug(e);
       }
 
-      fetchMore =
-        pitId !== response?.pit_id || response?.hits.hits.length === 0 || response === null;
+      fetchMore = response?.hits.hits.length !== 0;
 
       const alerts = response?.hits.hits;
       alertsToReturn = alertsToReturn.concat(alerts ?? []);
