@@ -23,9 +23,11 @@ import type { CancellationToken } from '@kbn/reporting-plugin/common/cancellatio
 import { CONTENT_TYPE_CSV } from '@kbn/reporting-plugin/common/constants';
 import { AuthenticationExpiredError, ReportingError } from '@kbn/reporting-plugin/common/errors';
 import { byteSizeValueToNumber } from '@kbn/reporting-plugin/common/schema_utils';
+import { TaskRunResult } from '@kbn/reporting-plugin/common/types';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { i18nTexts } from './i18n_texts';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
+import { JobParams } from '../types';
 
 interface Clients {
   es: IScopedClusterClient;
@@ -44,7 +46,7 @@ export class CsvGenerator {
   private csvRowCount = 0;
 
   constructor(
-    private job: Omit<JobParamsCSV, 'version'>,
+    private job: Omit<JobParams, 'version'>,
     private config: ReportingConfigType['csv'],
     private clients: Clients,
     private dependencies: Dependencies,

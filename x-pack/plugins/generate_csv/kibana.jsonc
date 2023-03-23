@@ -1,0 +1,50 @@
+{
+  "type": "plugin",
+  "id": "@kbn/generate-csv",
+  "owner": "@elastic/appex-sharedux",
+  "plugin": {
+    "id": "generateCsv",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "generateCsv"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "data",
+      "encryptedSavedObjects",
+      "navigation",
+      "customIntegrations",
+      "share",
+      "unifiedSearch",
+      "savedObjectsTagging",
+      "taskManager",
+      "guidedOnboarding",
+      "files"
+    ],
+    "optionalPlugins": [
+      "features",
+      "cloud",
+      "usageCollection",
+      "home",
+      "globalSearch",
+      "telemetry",
+      "discover",
+      "ingestPipelines",
+      "spaces",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "cloudChat",
+      "esUiShared",
+      "infra",
+      "kibanaUtils",
+      "usageCollection",
+      "unifiedSearch"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}
