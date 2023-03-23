@@ -90,7 +90,7 @@ const alerts = [
     [AlertsField.uuid]: ['bf5f6d63-5afd-48e0-baf6-f28c2b68db46'],
   },
   {
-    [AlertsField.name]: ['five'],git
+    [AlertsField.name]: ['five'],
     [AlertsField.reason]: ['six'],
     [AlertsField.uuid]: ['1047d115-5afd-469e-baf6-f28c2b68db46'],
   },
