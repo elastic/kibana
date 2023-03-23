@@ -19,7 +19,7 @@ export const useSourceNotifier = () => {
       }),
       body: [
         i18n.translate('xpack.infra.sourceConfiguration.updateFailureBody', {
-          defaultMessage: 'Changes for your Metrics configuration were not applied.',
+          defaultMessage: 'We couldn’t apply the changes to the Metrics configuration. Try again later.',
         }),
         message,
       ]
@@ -32,10 +32,7 @@ export const useSourceNotifier = () => {
     notifications.toasts.success({
       toastLifeTimeMs: 3000,
       title: i18n.translate('xpack.infra.sourceConfiguration.updateSuccessTitle', {
-        defaultMessage: 'Configuration update successful',
-      }),
-      body: i18n.translate('xpack.infra.sourceConfiguration.updateSuccessBody', {
-        defaultMessage: 'Changes for your Metrics configuration have been successfully applied.',
+        defaultMessage: 'Metrics settings successfully updated',
       }),
     });
   };
