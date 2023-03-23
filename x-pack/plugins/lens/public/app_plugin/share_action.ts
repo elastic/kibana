@@ -95,11 +95,12 @@ export function getLocatorParams(
 export async function getShareURL(
   shortUrlService: (params: LensAppLocatorParams) => Promise<string>,
   services: Pick<LensAppServices, 'application' | 'data'>,
-  configuration: ShareableConfiguration
+  configuration: ShareableConfiguration,
+  shareUrlEnabled: boolean
 ) {
   const locatorParams = getLocatorParams(services.data, configuration);
   return {
-    shareableUrl: await shortUrlService(locatorParams),
+    shareableUrl: await (shareUrlEnabled ? shortUrlService(locatorParams) : undefined),
     savedObjectURL: getShareURLForSavedObject(services, configuration.currentDoc),
     locatorParams,
   };
