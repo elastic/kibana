@@ -589,7 +589,8 @@ export const LensTopNavMenu = ({
                 visualization,
                 currentDoc,
                 adHocDataViews: adHocDataViews.map((dataView) => dataView.toSpec()),
-              }
+              },
+              shareUrlEnabled
             );
             const sharingData = {
               activeData,
