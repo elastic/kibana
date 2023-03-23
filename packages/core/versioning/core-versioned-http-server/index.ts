@@ -9,10 +9,8 @@
 export type {
   Version,
   AddVersionOpts,
-  CreateVersionedRouterArgs,
   RequestValidation,
   ResponseValidation,
-  CreateVersionedRouter,
   VersionedRoute,
   VersionedRouteConfig,
   VersionedRouteRegistrar,
