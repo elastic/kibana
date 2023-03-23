@@ -106,7 +106,7 @@ export function runCli() {
         boolean: ['dist', 'watch'],
         alias: {
           d: 'dist',
-          w: 'watch'
+          w: 'watch',
         },
         help: `
           --dist, -d  Outputs bundles in dist mode instead
@@ -114,12 +114,12 @@ export function runCli() {
         `,
       },
       async run({ log, flags }) {
-        const dist = flags['dist'];
+        const dist = flags.dist;
         if (dist !== undefined && typeof dist !== 'boolean') {
           throw createFlagError('expected a single --dist flag');
         }
 
-        const watch = flags['watch'];
+        const watch = flags.watch;
         if (watch !== undefined && typeof watch !== 'boolean') {
           throw createFlagError('expected a single --watch flag');
         }
@@ -138,7 +138,9 @@ export function runCli() {
         const plugin = loadKibanaPlatformPlugin(found.dir);
 
         if (!plugin.manifest.ui) {
-          log.info('Your plugin is server only and there is no need to run a dev task in order to get it ready to test. Please just run `yarn start` at the Kibana root and your plugin will be started.')
+          log.info(
+            'Your plugin is server only and there is no need to run a dev task in order to get it ready to test. Please just run `yarn start` at the Kibana root and your plugin will be started.'
+          );
           return;
         }
 
@@ -154,7 +156,7 @@ export function runCli() {
           config,
           sourceDir,
           buildDir: '',
-          kibanaVersion: 'kibana'
+          kibanaVersion: 'kibana',
         };
 
         await Tasks.initDev(context);
