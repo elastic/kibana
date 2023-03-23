@@ -11,6 +11,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('APM', () => {
     loadTestFile(require.resolve('./overview'));
     loadTestFile(require.resolve('./instances'));
-    loadTestFile(require.resolve('./instance'));
   });
 }

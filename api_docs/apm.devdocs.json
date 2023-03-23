@@ -202,9 +202,9 @@
               "APMPluginSetupDependencies",
               ") => { config$: ",
               "Observable",
-              "<Readonly<{} & { autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+              "<Readonly<{} & { indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
               "SearchAggregatedTransactionSetting",
-              "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; forceSyntheticSource: boolean; }>>; getApmIndices: () => Promise<Readonly<{ error: string; onboarding: string; span: string; transaction: string; metric: string; }>>; createApmEventClient: ({ request, context, debug, }: { debug?: boolean | undefined; request: ",
+              "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; }>>; getApmIndices: () => Promise<Readonly<{ error: string; onboarding: string; span: string; transaction: string; metric: string; }>>; createApmEventClient: ({ request, context, debug, }: { debug?: boolean | undefined; request: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",
@@ -448,9 +448,9 @@
             "label": "config",
             "description": [],
             "signature": [
-              "{ readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
+              "{ readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
               "SearchAggregatedTransactionSetting",
-              "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; readonly forceSyntheticSource: boolean; }"
+              "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly forceSyntheticSource: boolean; }"
             ],
             "path": "x-pack/plugins/apm/server/routes/typings.ts",
             "deprecated": false,
@@ -546,7 +546,7 @@
                 "section": "def-server.LicensingPluginStart",
                 "text": "LicensingPluginStart"
               },
-              ">; }; observability: { setup: { getAlertDetailsConfig(): Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
+              ">; }; observability: { setup: { getAlertDetailsConfig(): Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
               {
                 "pluginId": "@kbn/core-http-request-handler-context-server",
                 "scope": "common",
@@ -810,7 +810,7 @@
         "label": "APIEndpoint",
         "description": [],
         "signature": [
-          "\"POST /internal/apm/data_view/static\" | \"GET /internal/apm/data_view/title\" | \"GET /internal/apm/environments\" | \"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics\" | \"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name\" | \"POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/errors/{groupId}/samples\" | \"GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}\" | \"GET /internal/apm/services/{serviceName}/errors/distribution\" | \"GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions\" | \"POST /internal/apm/latency/overall_distribution/transactions\" | \"GET /internal/apm/services/{serviceName}/metrics/charts\" | \"GET /internal/apm/services/{serviceName}/metrics/nodes\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/charts\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/summary\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/functions_overview\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances\" | \"GET /internal/apm/observability_overview\" | \"GET /internal/apm/observability_overview/has_data\" | \"GET /internal/apm/service-map\" | \"GET /internal/apm/service-map/service/{serviceName}\" | \"GET /internal/apm/service-map/dependency\" | \"GET /internal/apm/services\" | \"POST /internal/apm/services/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/metadata/details\" | \"GET /internal/apm/services/{serviceName}/metadata/icons\" | \"GET /internal/apm/services/{serviceName}/agent\" | \"GET /internal/apm/services/{serviceName}/transaction_types\" | \"GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata\" | \"GET /api/apm/services/{serviceName}/annotation/search\" | \"POST /api/apm/services/{serviceName}/annotation\" | \"GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}\" | \"GET /internal/apm/services/{serviceName}/throughput\" | \"GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics\" | \"GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/dependencies\" | \"GET /internal/apm/services/{serviceName}/dependencies/breakdown\" | \"GET /internal/apm/services/{serviceName}/anomaly_charts\" | \"GET /internal/apm/services/{serviceName}/alerts_count\" | \"GET /internal/apm/service-groups\" | \"GET /internal/apm/service-group\" | \"POST /internal/apm/service-group\" | \"DELETE /internal/apm/service-group\" | \"GET /internal/apm/service-group/services\" | \"GET /internal/apm/service-group/counts\" | \"GET /internal/apm/suggestions\" | \"GET /internal/apm/traces/{traceId}\" | \"GET /internal/apm/traces\" | \"GET /internal/apm/traces/{traceId}/root_transaction\" | \"GET /internal/apm/transactions/{transactionId}\" | \"GET /internal/apm/traces/find\" | \"POST /internal/apm/traces/aggregated_critical_path\" | \"GET /internal/apm/traces/{traceId}/transactions/{transactionId}\" | \"GET /internal/apm/traces/{traceId}/spans/{spanId}\" | \"GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics\" | \"GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/latency\" | \"GET /internal/apm/services/{serviceName}/transactions/traces/samples\" | \"GET /internal/apm/services/{serviceName}/transaction/charts/breakdown\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/error_rate\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name\" | \"GET /internal/apm/rule_types/transaction_error_rate/chart_preview\" | \"GET /internal/apm/rule_types/transaction_duration/chart_preview\" | \"GET /internal/apm/rule_types/error_count/chart_preview\" | \"GET /api/apm/settings/agent-configuration\" | \"GET /api/apm/settings/agent-configuration/view\" | \"DELETE /api/apm/settings/agent-configuration\" | \"PUT /api/apm/settings/agent-configuration\" | \"POST /api/apm/settings/agent-configuration/search\" | \"GET /api/apm/settings/agent-configuration/environments\" | \"GET /api/apm/settings/agent-configuration/agent_name\" | \"GET /internal/apm/settings/anomaly-detection/jobs\" | \"POST /internal/apm/settings/anomaly-detection/jobs\" | \"GET /internal/apm/settings/anomaly-detection/environments\" | \"POST /internal/apm/settings/anomaly-detection/update_to_v3\" | \"GET /internal/apm/settings/apm-index-settings\" | \"GET /internal/apm/settings/apm-indices\" | \"POST /internal/apm/settings/apm-indices/save\" | \"GET /internal/apm/settings/custom_links/transaction\" | \"GET /internal/apm/settings/custom_links\" | \"POST /internal/apm/settings/custom_links\" | \"PUT /internal/apm/settings/custom_links/{id}\" | \"DELETE /internal/apm/settings/custom_links/{id}\" | \"GET /api/apm/sourcemaps\" | \"POST /api/apm/sourcemaps\" | \"DELETE /api/apm/sourcemaps/{id}\" | \"POST /internal/apm/sourcemaps/migrate_fleet_artifacts\" | \"GET /internal/apm/fleet/has_apm_policies\" | \"GET /internal/apm/fleet/agents\" | \"POST /api/apm/fleet/apm_server_schema\" | \"GET /internal/apm/fleet/apm_server_schema/unsupported\" | \"GET /internal/apm/fleet/migration_check\" | \"POST /internal/apm/fleet/cloud_apm_package_policy\" | \"GET /internal/apm/fleet/java_agent_versions\" | \"GET /internal/apm/dependencies/top_dependencies\" | \"GET /internal/apm/dependencies/upstream_services\" | \"GET /internal/apm/dependencies/metadata\" | \"GET /internal/apm/dependencies/charts/latency\" | \"GET /internal/apm/dependencies/charts/throughput\" | \"GET /internal/apm/dependencies/charts/error_rate\" | \"GET /internal/apm/dependencies/operations\" | \"GET /internal/apm/dependencies/charts/distribution\" | \"GET /internal/apm/dependencies/operations/spans\" | \"GET /internal/apm/correlations/field_candidates/transactions\" | \"GET /internal/apm/correlations/field_value_stats/transactions\" | \"POST /internal/apm/correlations/field_value_pairs/transactions\" | \"POST /internal/apm/correlations/significant_correlations/transactions\" | \"POST /internal/apm/correlations/p_values/transactions\" | \"GET /internal/apm/fallback_to_transactions\" | \"GET /internal/apm/has_data\" | \"GET /internal/apm/event_metadata/{processorEvent}/{id}\" | \"GET /internal/apm/agent_keys\" | \"GET /internal/apm/agent_keys/privileges\" | \"POST /internal/apm/api_key/invalidate\" | \"POST /api/apm/agent_keys\" | \"GET /internal/apm/storage_explorer\" | \"GET /internal/apm/services/{serviceName}/storage_details\" | \"GET /internal/apm/storage_chart\" | \"GET /internal/apm/storage_explorer/privileges\" | \"GET /internal/apm/storage_explorer_summary_stats\" | \"GET /internal/apm/storage_explorer/is_cross_cluster_search\" | \"GET /internal/apm/storage_explorer/get_services\" | \"GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents\" | \"GET /internal/apm/traces/{traceId}/span_links/{spanId}/children\" | \"GET /internal/apm/services/{serviceName}/infrastructure_attributes\" | \"GET /internal/apm/debug-telemetry\" | \"GET /internal/apm/time_range_metadata\" | \"GET /internal/apm/settings/labs\" | \"GET /internal/apm/get_agents_per_service\" | \"GET /internal/apm/services/{serviceName}/agent_instances\" | \"GET /internal/apm/services/{serviceName}/mobile/filters\" | \"GET /internal/apm/mobile-services/{serviceName}/transactions/charts/sessions\" | \"GET /internal/apm/mobile-services/{serviceName}/transactions/charts/http_requests\" | \"GET /internal/apm/mobile-services/{serviceName}/stats\" | \"GET /internal/apm/mobile-services/{serviceName}/location/stats\""
+          "\"POST /internal/apm/data_view/static\" | \"GET /internal/apm/data_view/title\" | \"GET /internal/apm/environments\" | \"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics\" | \"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name\" | \"POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/errors/{groupId}/samples\" | \"GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}\" | \"GET /internal/apm/services/{serviceName}/errors/distribution\" | \"GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions\" | \"POST /internal/apm/latency/overall_distribution/transactions\" | \"GET /internal/apm/services/{serviceName}/metrics/charts\" | \"GET /internal/apm/services/{serviceName}/metrics/nodes\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/charts\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/summary\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/functions_overview\" | \"GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances\" | \"GET /internal/apm/observability_overview\" | \"GET /internal/apm/observability_overview/has_data\" | \"GET /internal/apm/service-map\" | \"GET /internal/apm/service-map/service/{serviceName}\" | \"GET /internal/apm/service-map/dependency\" | \"GET /internal/apm/services\" | \"POST /internal/apm/services/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/metadata/details\" | \"GET /internal/apm/services/{serviceName}/metadata/icons\" | \"GET /internal/apm/services/{serviceName}/agent\" | \"GET /internal/apm/services/{serviceName}/transaction_types\" | \"GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata\" | \"GET /api/apm/services/{serviceName}/annotation/search\" | \"POST /api/apm/services/{serviceName}/annotation\" | \"GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}\" | \"GET /internal/apm/services/{serviceName}/throughput\" | \"GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics\" | \"GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/dependencies\" | \"GET /internal/apm/services/{serviceName}/dependencies/breakdown\" | \"GET /internal/apm/services/{serviceName}/anomaly_charts\" | \"GET /internal/apm/services/{serviceName}/alerts_count\" | \"GET /internal/apm/service-groups\" | \"GET /internal/apm/service-group\" | \"POST /internal/apm/service-group\" | \"DELETE /internal/apm/service-group\" | \"GET /internal/apm/service-group/services\" | \"GET /internal/apm/service-group/counts\" | \"GET /internal/apm/suggestions\" | \"GET /internal/apm/traces/{traceId}\" | \"GET /internal/apm/traces\" | \"GET /internal/apm/traces/{traceId}/root_transaction\" | \"GET /internal/apm/transactions/{transactionId}\" | \"GET /internal/apm/traces/find\" | \"POST /internal/apm/traces/aggregated_critical_path\" | \"GET /internal/apm/traces/{traceId}/transactions/{transactionId}\" | \"GET /internal/apm/traces/{traceId}/spans/{spanId}\" | \"GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics\" | \"GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/latency\" | \"GET /internal/apm/services/{serviceName}/transactions/traces/samples\" | \"GET /internal/apm/services/{serviceName}/transaction/charts/breakdown\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/error_rate\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate\" | \"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name\" | \"GET /internal/apm/rule_types/transaction_error_rate/chart_preview\" | \"GET /internal/apm/rule_types/transaction_duration/chart_preview\" | \"GET /internal/apm/rule_types/error_count/chart_preview\" | \"GET /api/apm/settings/agent-configuration\" | \"GET /api/apm/settings/agent-configuration/view\" | \"DELETE /api/apm/settings/agent-configuration\" | \"PUT /api/apm/settings/agent-configuration\" | \"POST /api/apm/settings/agent-configuration/search\" | \"GET /api/apm/settings/agent-configuration/environments\" | \"GET /api/apm/settings/agent-configuration/agent_name\" | \"GET /internal/apm/settings/anomaly-detection/jobs\" | \"POST /internal/apm/settings/anomaly-detection/jobs\" | \"GET /internal/apm/settings/anomaly-detection/environments\" | \"POST /internal/apm/settings/anomaly-detection/update_to_v3\" | \"GET /internal/apm/settings/apm-index-settings\" | \"GET /internal/apm/settings/apm-indices\" | \"POST /internal/apm/settings/apm-indices/save\" | \"GET /internal/apm/settings/custom_links/transaction\" | \"GET /internal/apm/settings/custom_links\" | \"POST /internal/apm/settings/custom_links\" | \"PUT /internal/apm/settings/custom_links/{id}\" | \"DELETE /internal/apm/settings/custom_links/{id}\" | \"GET /api/apm/sourcemaps\" | \"POST /api/apm/sourcemaps\" | \"DELETE /api/apm/sourcemaps/{id}\" | \"POST /internal/apm/sourcemaps/migrate_fleet_artifacts\" | \"GET /internal/apm/fleet/has_apm_policies\" | \"GET /internal/apm/fleet/agents\" | \"POST /api/apm/fleet/apm_server_schema\" | \"GET /internal/apm/fleet/apm_server_schema/unsupported\" | \"GET /internal/apm/fleet/migration_check\" | \"POST /internal/apm/fleet/cloud_apm_package_policy\" | \"GET /internal/apm/fleet/java_agent_versions\" | \"GET /internal/apm/dependencies/top_dependencies\" | \"GET /internal/apm/dependencies/upstream_services\" | \"GET /internal/apm/dependencies/metadata\" | \"GET /internal/apm/dependencies/charts/latency\" | \"GET /internal/apm/dependencies/charts/throughput\" | \"GET /internal/apm/dependencies/charts/error_rate\" | \"GET /internal/apm/dependencies/operations\" | \"GET /internal/apm/dependencies/charts/distribution\" | \"GET /internal/apm/dependencies/operations/spans\" | \"GET /internal/apm/correlations/field_candidates/transactions\" | \"GET /internal/apm/correlations/field_value_stats/transactions\" | \"POST /internal/apm/correlations/field_value_pairs/transactions\" | \"POST /internal/apm/correlations/significant_correlations/transactions\" | \"POST /internal/apm/correlations/p_values/transactions\" | \"GET /internal/apm/fallback_to_transactions\" | \"GET /internal/apm/has_data\" | \"GET /internal/apm/event_metadata/{processorEvent}/{id}\" | \"GET /internal/apm/agent_keys\" | \"GET /internal/apm/agent_keys/privileges\" | \"POST /internal/apm/api_key/invalidate\" | \"POST /api/apm/agent_keys\" | \"GET /internal/apm/storage_explorer\" | \"GET /internal/apm/services/{serviceName}/storage_details\" | \"GET /internal/apm/storage_chart\" | \"GET /internal/apm/storage_explorer/privileges\" | \"GET /internal/apm/storage_explorer_summary_stats\" | \"GET /internal/apm/storage_explorer/is_cross_cluster_search\" | \"GET /internal/apm/storage_explorer/get_services\" | \"GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents\" | \"GET /internal/apm/traces/{traceId}/span_links/{spanId}/children\" | \"GET /internal/apm/services/{serviceName}/infrastructure_attributes\" | \"GET /internal/apm/debug-telemetry\" | \"GET /internal/apm/time_range_metadata\" | \"GET /internal/apm/settings/labs\" | \"GET /internal/apm/get_agents_per_service\" | \"GET /internal/apm/services/{serviceName}/agent_instances\" | \"GET /internal/apm/services/{serviceName}/mobile/filters\" | \"GET /internal/apm/mobile-services/{serviceName}/transactions/charts/sessions\" | \"GET /internal/apm/mobile-services/{serviceName}/transactions/charts/http_requests\" | \"GET /internal/apm/mobile-services/{serviceName}/stats\" | \"GET /internal/apm/mobile-services/{serviceName}/location/stats\" | \"GET /internal/apm/mobile-services/{serviceName}/terms\""
         ],
         "path": "x-pack/plugins/apm/server/routes/apm_routes/get_global_apm_server_route_repository.ts",
         "deprecated": false,
@@ -840,9 +840,9 @@
         "label": "APMConfig",
         "description": [],
         "signature": [
-          "{ readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
+          "{ readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
           "SearchAggregatedTransactionSetting",
-          "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; readonly forceSyntheticSource: boolean; }"
+          "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly forceSyntheticSource: boolean; }"
         ],
         "path": "x-pack/plugins/apm/server/index.ts",
         "deprecated": false,
@@ -872,7 +872,71 @@
         "label": "APMServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /internal/apm/mobile-services/{serviceName}/location/stats\": ",
+          "{ \"GET /internal/apm/mobile-services/{serviceName}/terms\": ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/apm/mobile-services/{serviceName}/terms\", ",
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ serviceName: ",
+          "StringC",
+          "; }>; query: ",
+          "IntersectionC",
+          "<[",
+          "TypeC",
+          "<{ kuery: ",
+          "StringC",
+          "; }>, ",
+          "TypeC",
+          "<{ start: ",
+          "Type",
+          "<number, string, unknown>; end: ",
+          "Type",
+          "<number, string, unknown>; }>, ",
+          "TypeC",
+          "<{ environment: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"ENVIRONMENT_NOT_DEFINED\">, ",
+          "LiteralC",
+          "<\"ENVIRONMENT_ALL\">, ",
+          "BrandC",
+          "<",
+          "StringC",
+          ", ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.NonEmptyStringBrand",
+            "text": "NonEmptyStringBrand"
+          },
+          ">]>; }>, ",
+          "TypeC",
+          "<{ size: ",
+          "Type",
+          "<number, unknown, unknown>; fieldName: ",
+          "StringC",
+          "; }>]>; }>, ",
+          {
+            "pluginId": "apm",
+            "scope": "server",
+            "docId": "kibApmPluginApi",
+            "section": "def-server.APMRouteHandlerResources",
+            "text": "APMRouteHandlerResources"
+          },
+          ", { terms: ",
+          "MobileTermsByFieldResponse",
+          "; }, ",
+          "APMRouteCreateOptions",
+          ">; \"GET /internal/apm/mobile-services/{serviceName}/location/stats\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -1198,7 +1262,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { mobileFilters: MobileFilters; }, ",
+          ", { mobileFilters: ",
+          "MobileFiltersResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/agent_instances\": ",
           {
@@ -1258,7 +1324,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { items: { serviceNode?: string | undefined; environments: string[]; agentVersion: string; lastReport: string; }[]; }, ",
+          ", { items: ",
+          "AgentExplorerAgentInstancesResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/get_agents_per_service\": ",
           {
@@ -1320,9 +1388,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { items: { serviceName: string; environments: string[]; agentName: ",
-          "AgentName",
-          "; agentVersion: string[]; agentDocsPageUrl?: string | undefined; instances: number; }[]; }, ",
+          ", ",
+          "AgentExplorerAgentsResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/settings/labs\": ",
           {
@@ -1748,7 +1816,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { tracesPerMinute: number; numberOfServices: number; totalSize: number; diskSpaceUsedPct: number; estimatedIncrementalSize: number; dailyDataGeneration: number; }, ",
+          ", ",
+          "StorageExplorerSummaryStatisticsResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/storage_explorer/privileges\": ",
           {
@@ -1846,7 +1916,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { storageTimeSeries: { serviceName: string; timeseries: { x: number; y: number; }[]; }[]; }, ",
+          ", { storageTimeSeries: ",
+          "SizeTimeseriesResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/storage_details\": ",
           {
@@ -1930,15 +2002,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { processorEventStats: { processorEvent: ",
-          {
-            "pluginId": "observability",
-            "scope": "common",
-            "docId": "kibObservabilityPluginApi",
-            "section": "def-common.ProcessorEvent",
-            "text": "ProcessorEvent"
-          },
-          "; docs: number; size: number; }[]; indicesStats: { indexName: string; numberOfDocs: number; primary?: string | number | undefined; replica?: string | number | undefined; size?: number | undefined; dataStream?: string | undefined; lifecyclePhase?: string | undefined; }[]; }, ",
+          ", ",
+          "StorageDetailsResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/storage_explorer\": ",
           {
@@ -2018,9 +2084,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { serviceStatistics: { serviceName: string; environments: string[]; size?: number | undefined; agentName: ",
-          "AgentName",
-          "; sampling: number; }[]; }, ",
+          ", { serviceStatistics: ",
+          "StorageExplorerServiceStatisticsResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"POST /api/apm/agent_keys\": ",
           {
@@ -2056,9 +2122,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { agentKey: ",
-          "SecurityCreateApiKeyResponse",
-          "; }, ",
+          ", ",
+          "CreateAgentKeyResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"POST /internal/apm/api_key/invalidate\": ",
           {
@@ -2082,7 +2148,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { invalidatedAgentKeys: string[]; }, ",
+          ", ",
+          "InvalidateAgentKeyResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/agent_keys/privileges\": ",
           {
@@ -2100,7 +2168,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { areApiKeysEnabled: boolean; isAdmin: boolean; canManage: boolean; }, ",
+          ", ",
+          "AgentKeysPrivilegesResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/agent_keys\": ",
           {
@@ -2118,15 +2188,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { agentKeys: ",
-          {
-            "pluginId": "security",
-            "scope": "common",
-            "docId": "kibSecurityPluginApi",
-            "section": "def-common.ApiKey",
-            "text": "ApiKey"
-          },
-          "[]; }, ",
+          ", ",
+          "AgentKeysResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/event_metadata/{processorEvent}/{id}\": ",
           {
@@ -2312,11 +2376,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { failedTransactionsCorrelations: ",
-          "FailedTransactionsCorrelation",
-          "[]; ccsWarning: boolean; fallbackResult?: ",
-          "FailedTransactionsCorrelation",
-          " | undefined; }, ",
+          ", ",
+          "PValuesResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"POST /internal/apm/correlations/significant_correlations/transactions\": ",
           {
@@ -2394,11 +2456,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { latencyCorrelations: ",
-          "LatencyCorrelation",
-          "[]; ccsWarning: boolean; totalDocCount: number; fallbackResult?: ",
-          "LatencyCorrelation",
-          " | undefined; }, ",
+          ", ",
+          "SignificantCorrelationsResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"POST /internal/apm/correlations/field_value_pairs/transactions\": ",
           {
@@ -2464,9 +2524,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { fieldValuePairs: ",
-          "FieldValuePair",
-          "[]; errors: any[]; }, ",
+          ", ",
+          "FieldValuePairsResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/correlations/field_value_stats/transactions\": ",
           {
@@ -2600,7 +2660,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { fieldCandidates: string[]; }, ",
+          ", ",
+          "DurationFieldCandidatesResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/dependencies/operations/spans\": ",
           {
@@ -2726,11 +2788,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { allSpansDistribution: ",
-          "OverallLatencyDistributionResponse",
-          "; failedSpansDistribution: ",
-          "OverallLatencyDistributionResponse",
-          "; }, ",
+          ", ",
+          "DependencyLatencyDistributionResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/dependencies/operations\": ",
           {
@@ -2922,7 +2982,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentTimeseries: { x: number; y: number | null; }[]; comparisonTimeseries: { x: number; y: number | null; }[] | null; }, ",
+          ", ",
+          "ThroughputChartsForDependencyResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/dependencies/charts/latency\": ",
           {
@@ -2986,7 +3048,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentTimeseries: { x: number; y: number; }[]; comparisonTimeseries: { x: number; y: number; }[] | null; }, ",
+          ", ",
+          "LatencyChartsDependencyResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/dependencies/metadata\": ",
           {
@@ -3018,7 +3082,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { metadata: { spanType: string | undefined; spanSubtype: string | undefined; }; }, ",
+          ", { metadata: ",
+          "MetadataForDependencyResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/dependencies/upstream_services\": ",
           {
@@ -3088,25 +3154,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { services: { currentStats: { latency: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; throughput: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; errorRate: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; totalTime: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; } & { impact: number; }; previousStats: ({ latency: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; throughput: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; errorRate: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; totalTime: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; } & { impact: number; }) | null; location: ",
-          "Node",
-          "; }[]; }, ",
+          ", ",
+          "UpstreamServicesForDependencyResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/dependencies/top_dependencies\": ",
           {
@@ -3170,25 +3220,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { dependencies: { currentStats: { latency: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; throughput: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; errorRate: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; totalTime: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; } & { impact: number; }; previousStats: ({ latency: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; throughput: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; errorRate: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; totalTime: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; } & { impact: number; }) | null; location: ",
-          "Node",
-          "; }[]; }, ",
+          ", ",
+          "TopDependenciesResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/fleet/java_agent_versions\": ",
           {
@@ -3250,15 +3284,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { has_cloud_agent_policy: boolean; has_cloud_apm_package_policy: boolean; cloud_apm_migration_enabled: boolean; has_required_role: boolean | undefined; cloud_apm_package_policy: ",
-          {
-            "pluginId": "fleet",
-            "scope": "common",
-            "docId": "kibFleetPluginApi",
-            "section": "def-common.PackagePolicy",
-            "text": "PackagePolicy"
-          },
-          " | undefined; has_apm_integrations: boolean; latest_apm_package_version: string; }, ",
+          ", ",
+          "RunMigrationCheckResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/fleet/apm_server_schema/unsupported\": ",
           {
@@ -3276,7 +3304,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { unsupported: { key: string; value: any; }[]; }, ",
+          ", { unsupported: ",
+          "UnsupportedApmServerSchema",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"POST /api/apm/fleet/apm_server_schema\": ",
           {
@@ -3322,7 +3352,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { cloudStandaloneSetup: { apmServerUrl: string | undefined; secretToken: string | undefined; } | undefined; fleetAgents: never[]; isFleetEnabled: false; } | { cloudStandaloneSetup: { apmServerUrl: string | undefined; secretToken: string | undefined; } | undefined; isFleetEnabled: true; fleetAgents: { id: string; name: string; apmServerUrl: any; secretToken: any; }[]; }, ",
+          ", ",
+          "FleetAgentResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/fleet/has_apm_policies\": ",
           {
@@ -3446,9 +3478,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { artifacts: ",
-          "ArtifactSourceMap",
-          "[]; total: number; } | undefined, ",
+          ", ",
+          "ListSourceMapArtifactsResponse",
+          " | undefined, ",
           "APMRouteCreateOptions",
           ">; \"DELETE /internal/apm/settings/custom_links/{id}\": ",
           {
@@ -3692,9 +3724,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", ",
-          "ApmIndicesConfig",
-          ", ",
+          ", Readonly<{ error: string; onboarding: string; span: string; transaction: string; metric: string; }>, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/settings/apm-index-settings\": ",
           {
@@ -3712,7 +3742,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { apmIndexSettings: { configurationName: \"error\" | \"metric\" | \"span\" | \"transaction\" | \"onboarding\"; defaultValue: string; savedValue: string | undefined; }[]; }, ",
+          ", { apmIndexSettings: ",
+          "ApmIndexSettingsResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"POST /internal/apm/settings/anomaly-detection/update_to_v3\": ",
           {
@@ -3858,7 +3890,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { environments: { name: string; alreadyConfigured: boolean; }[]; }, ",
+          ", { environments: ",
+          "EnvironmentsResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"POST /api/apm/settings/agent-configuration/search\": ",
           {
@@ -4106,7 +4140,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { latencyChartPreview: { name: string; data: { x: number; y: number | null; }[]; }[]; }, ",
+          ", { latencyChartPreview: ",
+          "TransactionDurationChartPreviewResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/rule_types/error_count/chart_preview\": ",
           {
@@ -4250,7 +4286,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { errorRateChartPreview: { x: number; y: number; }[]; }, ",
+          ", { errorRateChartPreview: ",
+          "TransactionErrorRateChartPreviewResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name\": ",
           {
@@ -4318,13 +4356,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: { transactionColdstartRate: ",
-          "Coordinate",
-          "[]; average: number | null; }; previousPeriod: { transactionColdstartRate: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; average: number | null; } | { transactionColdstartRate: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; average: null; }; }, ",
+          ", ",
+          "ColdstartRateResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate\": ",
           {
@@ -4390,13 +4424,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: { transactionColdstartRate: ",
-          "Coordinate",
-          "[]; average: number | null; }; previousPeriod: { transactionColdstartRate: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; average: number | null; } | { transactionColdstartRate: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; average: null; }; }, ",
+          ", ",
+          "ColdstartRateResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/transactions/charts/error_rate\": ",
           {
@@ -4466,13 +4496,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: { timeseries: ",
-          "Coordinate",
-          "[]; average: number | null; }; previousPeriod: { timeseries: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; average: number | null; } | { timeseries: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; average: null; }; }, ",
+          ", ",
+          "FailedTransactionRateResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/transaction/charts/breakdown\": ",
           {
@@ -4536,7 +4562,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { timeseries: { title: string; color: string; type: string; data: { x: number; y: number | null; }[]; hideLegend: boolean; legendValue: string; }[]; }, ",
+          ", ",
+          "TransactionBreakdownResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/transactions/traces/samples\": ",
           {
@@ -4608,7 +4636,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { traceSamples: { transactionId: string; traceId: string; }[]; }, ",
+          ", ",
+          "TransactionTraceSamplesResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/transactions/charts/latency\": ",
           {
@@ -4692,11 +4722,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: { overallAvgDuration: number | null; latencyTimeseries: { x: number; y: number | null; }[]; }; previousPeriod: { latencyTimeseries: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; overallAvgDuration: number | null; } | { latencyTimeseries: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; overallAvgDuration: null; }; }, ",
+          ", ",
+          "TransactionLatencyResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics\": ",
           {
@@ -4778,23 +4806,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: ",
-          "Dictionary",
-          "<{ transactionName: string; latency: ",
-          "Coordinate",
-          "[]; throughput: ",
-          "Coordinate",
-          "[]; errorRate: ",
-          "Coordinate",
-          "[]; impact: number; }>; previousPeriod: ",
-          "Dictionary",
-          "<{ errorRate: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; throughput: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; latency: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; transactionName: string; impact: number; }>; }, ",
+          ", ",
+          "ServiceTransactionGroupDetailedStatisticsResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics\": ",
           {
@@ -4868,7 +4882,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { transactionGroups: { transactionType: string; name: string; latency: number | null; throughput: number; errorRate: number; impact: number; }[]; transactionOverflowCount: number; maxTransactionGroupsExceeded: boolean; }, ",
+          ", ",
+          "ServiceTransactionGroupsResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/traces/{traceId}/spans/{spanId}\": ",
           {
@@ -5064,7 +5080,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { traceSamples: { traceId: string; transactionId: string; }[]; }, ",
+          ", { traceSamples: ",
+          "TraceSamplesResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/transactions/{transactionId}\": ",
           {
@@ -5172,11 +5190,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { items: { key: ",
-          "BucketKey",
-          "; serviceName: string; transactionName: string; averageResponseTime: number | null; transactionsPerMinute: number; transactionType: string; impact: number; agentName: ",
-          "AgentName",
-          "; }[]; }, ",
+          ", ",
+          "TopTracesPrimaryStatsResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/traces/{traceId}\": ",
           {
@@ -5304,9 +5320,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { items: { serviceName: string; environments: string[]; agentName: ",
-          "AgentName",
-          "; }[]; }, ",
+          ", { items: ",
+          "LookupServicesResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"DELETE /internal/apm/service-group\": ",
           {
@@ -5590,7 +5606,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { breakdown: { title: string; data: { x: number; y: number; }[]; }[]; }, ",
+          ", { breakdown: ",
+          "ServiceDependenciesBreakdownResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/dependencies\": ",
           {
@@ -5650,25 +5668,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { serviceDependencies: { currentStats: { latency: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; throughput: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; errorRate: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; totalTime: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; } & { impact: number; }; previousStats: ({ latency: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; throughput: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; errorRate: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; totalTime: { value: number | null; timeseries: ",
-          "Coordinate",
-          "[]; }; } & { impact: number; }) | null; location: ",
-          "Node",
-          "; }[]; }, ",
+          ", { serviceDependencies: ",
+          "ServiceDependenciesResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics\": ",
           {
@@ -5750,31 +5752,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: ",
-          "Dictionary",
-          "<{ serviceNodeName: string; errorRate?: ",
-          "Coordinate",
-          "[] | undefined; latency?: ",
-          "Coordinate",
-          "[] | undefined; throughput?: ",
-          "Coordinate",
-          "[] | undefined; cpuUsage?: ",
-          "Coordinate",
-          "[] | undefined; memoryUsage?: ",
-          "Coordinate",
-          "[] | undefined; }>; previousPeriod: ",
-          "Dictionary",
-          "<{ cpuUsage: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; errorRate: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; latency: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; memoryUsage: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; throughput: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; serviceNodeName: string; }>; }, ",
+          ", ",
+          "ServiceInstancesDetailedStatisticsResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics\": ",
           {
@@ -5852,7 +5832,11 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: { serviceNodeName: string; errorRate?: number | undefined; latency?: number | undefined; throughput?: number | undefined; cpuUsage?: number | null | undefined; memoryUsage?: number | null | undefined; }[]; previousPeriod: { serviceNodeName: string; errorRate?: number | undefined; latency?: number | undefined; throughput?: number | undefined; cpuUsage?: number | null | undefined; memoryUsage?: number | null | undefined; }[]; }, ",
+          ", { currentPeriod: ",
+          "ServiceInstanceMainStatisticsResponse",
+          "; previousPeriod: ",
+          "ServiceInstanceMainStatisticsResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/throughput\": ",
           {
@@ -5922,9 +5906,11 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: { x: number; y: number | null; }[]; previousPeriod: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; }, ",
+          ", { currentPeriod: ",
+          "ServiceThroughputResponse",
+          "; previousPeriod: ",
+          "ServiceThroughputResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}\": ",
           {
@@ -5956,29 +5942,11 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { '@timestamp': string; agent: (",
-          "Agent",
-          " & { name: string; version: string; }) | ({ name: string; version: string; } & ",
-          "Agent",
-          "); service: ",
-          "Service",
-          " | (",
-          "Service",
-          " & { name: string; node?: { name: string; } | undefined; environment?: string | undefined; version?: string | undefined; }) | (",
-          "Service",
-          " & { node?: { name: string; } | undefined; }) | (",
-          "Service",
-          " & { name: string; node?: { name: string; } | undefined; environment?: string | undefined; version?: string | undefined; } & { node?: { name: string; } | undefined; }) | (",
-          "Service",
-          " & { node?: { name: string; } | undefined; } & { name: string; node?: { name: string; } | undefined; environment?: string | undefined; version?: string | undefined; }); container: ",
-          "Container",
-          " | undefined; kubernetes: ",
-          "Kubernetes",
-          " | undefined; host: ",
-          "Host",
-          " | undefined; cloud: ",
-          "Cloud",
-          " | undefined; }, ",
+          ", ",
+          "ServiceInstanceMetadataDetailsResponse",
+          " & ({} | ",
+          "ServiceInstanceContainerMetadataDetails",
+          "), ",
           "APMRouteCreateOptions",
           ">; \"POST /api/apm/services/{serviceName}/annotation\": ",
           {
@@ -6080,9 +6048,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { annotations: ",
-          "Annotation",
-          "[]; }, ",
+          ", ",
+          "ServiceAnnotationResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata\": ",
           {
@@ -6140,7 +6108,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { host: string | number; containerId: string | number; }, ",
+          ", ",
+          "ServiceNodeMetadataResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/transaction_types\": ",
           {
@@ -6170,7 +6140,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { transactionTypes: string[]; }, ",
+          ", ",
+          "ServiceTransactionTypesResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/agent\": ",
           {
@@ -6200,9 +6172,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { agentName?: string | undefined; runtimeName?: string | undefined; serverlessType?: ",
-          "ServerlessType",
-          " | undefined; }, ",
+          ", ",
+          "ServiceAgentResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/metadata/icons\": ",
           {
@@ -6370,11 +6342,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: ",
-          "Dictionary",
-          "<{ serviceName: string; latency: { x: number; y: number | null; }[]; transactionErrorRate: { x: number; y: number; }[]; throughput: { x: number; y: number; }[]; }>; previousPeriod: ",
-          "Dictionary",
-          "<{ serviceName: string; latency: { x: number; y: number | null; }[]; transactionErrorRate: { x: number; y: number; }[]; throughput: { x: number; y: number; }[]; }>; }, ",
+          ", ",
+          "ServiceTransactionDetailedStatPeriodsResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services\": ",
           {
@@ -6470,21 +6440,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { items: ",
-          "JoinedReturnType",
-          "<{ serviceName: string; transactionType: string; environments: string[]; agentName: ",
-          "AgentName",
-          "; latency: number | null; transactionErrorRate: number; throughput: number; } | { serviceName: string; environments: string[]; agentName: ",
-          "AgentName",
-          "; } | { serviceName: string; healthStatus: ",
-          "ServiceHealthStatus",
-          "; } | { serviceName: string; alertsCount: number; }, { serviceName: string; transactionType: string; environments: string[]; agentName: ",
-          "AgentName",
-          "; latency: number | null; transactionErrorRate: number; throughput: number; } & { serviceName: string; environments: string[]; agentName: ",
-          "AgentName",
-          "; } & { serviceName: string; healthStatus: ",
-          "ServiceHealthStatus",
-          "; } & { serviceName: string; alertsCount: number; }>; maxServiceCountExceeded: boolean; serviceOverflowCount: number; }, ",
+          ", ",
+          "ServicesItemsResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/service-map/dependency\": ",
           {
@@ -6540,11 +6498,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: ",
-          "NodeStats",
-          "; previousPeriod: ",
-          "NodeStats",
-          " | undefined; }, ",
+          ", ",
+          "ServiceMapServiceDependencyInfoResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/service-map/service/{serviceName}\": ",
           {
@@ -6600,11 +6556,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: ",
-          "NodeStats",
-          "; previousPeriod: ",
-          "NodeStats",
-          " | undefined; }, ",
+          ", ",
+          "ServiceMapServiceNodeInfoResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/service-map\": ",
           {
@@ -6660,11 +6614,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { elements: (",
-          "ConnectionElement",
-          " | { data: { id: string; 'span.type': string; label: string; groupedConnections: ({ 'service.name': string; 'service.environment': string | null; 'agent.name': string; serviceAnomalyStats?: ",
-          "ServiceAnomalyStats",
-          " | undefined; label: string | undefined; id?: string | undefined; parent?: string | undefined; position?: cytoscape.Position | undefined; } | { 'span.destination.service.resource': string; 'span.type': string; 'span.subtype': string; label: string | undefined; id?: string | undefined; parent?: string | undefined; position?: cytoscape.Position | undefined; } | { id: string; source: string | undefined; target: string | undefined; label: string | undefined; bidirectional?: boolean | undefined; isInverseEdge?: boolean | undefined; } | undefined)[]; }; } | { data: { id: string; source: string; target: string; }; })[]; }, ",
+          ", ",
+          "GroupResourceNodesResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/observability_overview/has_data\": ",
           {
@@ -6682,9 +6634,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { hasData: boolean; indices: ",
-          "ApmIndicesConfig",
-          "; }, ",
+          ", ",
+          "HasDataResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/observability_overview\": ",
           {
@@ -6718,7 +6670,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { serviceCount: number; transactionPerMinute: { value: undefined; timeseries: never[]; } | { value: number; timeseries: { x: number; y: number | null; }[]; }; }, ",
+          ", ",
+          "ObservabilityOverviewResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances\": ",
           {
@@ -6838,7 +6792,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { serverlessFunctionsOverview: { serverlessId: string; serverlessFunctionName: string; serverlessDurationAvg: number | null; billedDurationAvg: number | null; coldStartCount: number | null; avgMemoryUsed: number | undefined; memorySize: number | null; }[]; }, ",
+          ", { serverlessFunctionsOverview: ",
+          "ServerlessFunctionsOverviewResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/metrics/serverless/summary\": ",
           {
@@ -6898,7 +6854,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { memoryUsageAvgRate: number | undefined; serverlessFunctionsTotal: number | undefined; serverlessDurationAvg: number | null | undefined; billedDurationAvg: number | null | undefined; estimatedCost: number | undefined; }, ",
+          ", ",
+          "ServerlessSummaryResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/metrics/serverless/charts\": ",
           {
@@ -6958,19 +6916,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { charts: [",
+          ", { charts: ",
           "FetchAndTransformMetrics",
-          ", ",
-          "FetchAndTransformMetrics",
-          ", { series: { overallValue: number; data: { x: number; y: number | null | undefined; }[]; title: string; key: string; type: ",
-          "ChartType",
-          "; color: string; }[]; title: string; key: string; yUnit: ",
-          "YUnit",
-          "; description?: string | undefined; }, ",
-          "FetchAndTransformMetrics",
-          ", ",
-          "FetchAndTransformMetrics",
-          "]; }, ",
+          "[]; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/metrics/nodes\": ",
           {
@@ -7026,7 +6974,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { serviceNodes: { name: string; cpu: number | null; heapMemory: number | null; hostName: string | null | undefined; nonHeapMemory: number | null; threadCount: number | null; }[]; }, ",
+          ", { serviceNodes: ",
+          "ServiceNodesResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/metrics/charts\": ",
           {
@@ -7258,7 +7208,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { topErroneousTransactions: { transactionName: string; currentPeriodTimeseries: { x: number; y: number; }[]; previousPeriodTimeseries: { x: number; y: number; }[]; transactionType: string | undefined; occurrences: number; }[]; }, ",
+          ", ",
+          "TopErroneousTransactionsResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/errors/distribution\": ",
           {
@@ -7322,9 +7274,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: { x: number; y: number; }[]; previousPeriod: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; bucketSize: number; }, ",
+          ", ",
+          "ErrorDistributionResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}\": ",
           {
@@ -7384,11 +7336,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { transaction: ",
-          "Transaction",
-          " | undefined; error: ",
-          "APMError",
-          "; }, ",
+          ", ",
+          "ErrorSampleDetailsResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/errors/{groupId}/samples\": ",
           {
@@ -7446,7 +7396,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { errorSampleIds: string[]; occurrencesCount: number; }, ",
+          ", ",
+          "ErrorGroupSampleIdsResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics\": ",
           {
@@ -7514,15 +7466,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { currentPeriod: ",
-          "Dictionary",
-          "<{ groupId: string; timeseries: ",
-          "Coordinate",
-          "[]; }>; previousPeriod: ",
-          "Dictionary",
-          "<{ timeseries: { x: number; y: ",
-          "Maybe",
-          "<number>; }[]; groupId: string; }>; }, ",
+          ", ",
+          "ErrorGroupPeriodsResponse",
+          ", ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name\": ",
           {
@@ -7586,7 +7532,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { errorGroups: { groupId: string; name: string; lastSeen: number; occurrences: number; culprit: string | undefined; handled: boolean | undefined; type: string | undefined; }[]; }, ",
+          ", { errorGroups: ",
+          "ErrorGroupMainStatisticsResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/services/{serviceName}/errors/groups/main_statistics\": ",
           {
@@ -7652,7 +7600,9 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { errorGroups: { groupId: string; name: string; lastSeen: number; occurrences: number; culprit: string | undefined; handled: boolean | undefined; type: string | undefined; }[]; }, ",
+          ", { errorGroups: ",
+          "ErrorGroupMainStatisticsResponse",
+          "; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/environments\": ",
           {
@@ -7769,9 +7719,9 @@
           "description": [],
           "signature": [
             "Observable",
-            "<Readonly<{} & { autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+            "<Readonly<{} & { indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; searchAggregatedTransactions: ",
             "SearchAggregatedTransactionSetting",
-            "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; onboarding: string; }>; forceSyntheticSource: boolean; }>>"
+            "; telemetryCollectionEnabled: boolean; metricsInterval: number; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; forceSyntheticSource: boolean; }>>"
           ],
           "path": "x-pack/plugins/apm/server/types.ts",
           "deprecated": false,

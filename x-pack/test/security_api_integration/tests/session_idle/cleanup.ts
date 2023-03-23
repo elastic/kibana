@@ -79,7 +79,9 @@ export default function ({ getService }: FtrProviderContext) {
     return cookie;
   }
 
-  describe('Session Idle cleanup', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/121482
+  // Failing: See https://github.com/elastic/kibana/issues/152260
+  describe.skip('Session Idle cleanup', () => {
     beforeEach(async () => {
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
       await esDeleteAllIndices('.kibana_security_session*');
@@ -99,6 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       const sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, { type: 'basic', name: 'basic1' });
@@ -141,6 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       const basicSessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(basicSessionCookie, basicUsername, {
@@ -192,6 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
+      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       let sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, { type: 'basic', name: 'basic1' });

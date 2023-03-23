@@ -1,0 +1,15 @@
+{
+  "security.query_api_keys": {
+    "url_params": {
+      "with_limited_by": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_security/_query/api_key"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-query-api-key.html"
+  }
+}

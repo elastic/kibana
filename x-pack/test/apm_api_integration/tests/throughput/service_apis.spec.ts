@@ -29,6 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       end: new Date(end).toISOString(),
       environment: 'ENVIRONMENT_ALL',
     };
+
     const [
       serviceInventoryAPIResponse,
       serviceThroughputAPIResponse,
@@ -74,6 +75,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             kuery: `processor.event : "${processorEvent}"`,
             transactionType: 'request',
             latencyAggregationType: 'avg' as LatencyAggregationType,
+            ...(processorEvent === ProcessorEvent.metric
+              ? {
+                  documentType: ApmDocumentType.TransactionMetric,
+                  rollupInterval: RollupInterval.OneMinute,
+                }
+              : {
+                  documentType: ApmDocumentType.TransactionEvent,
+                  rollupInterval: RollupInterval.None,
+                }),
           },
         },
       }),

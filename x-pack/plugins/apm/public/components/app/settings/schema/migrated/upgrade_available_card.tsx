@@ -22,7 +22,7 @@ export function UpgradeAvailableCard({
 
   return (
     <EuiCard
-      icon={<EuiIcon size="xxl" type="alert" color="warning" />}
+      icon={<EuiIcon size="xxl" type="warning" color="warning" />}
       title={i18n.translate(
         'xpack.apm.settings.schema.upgradeAvailable.title',
         {
@@ -35,7 +35,10 @@ export function UpgradeAvailableCard({
           defaultMessage="Even though your APM integration is setup, a new version of the APM integration is available for upgrade with your package policy. {upgradePackagePolicyLink} to get the most out of your setup."
           values={{
             upgradePackagePolicyLink: (
-              <EuiLink href={upgradeApmPackagePolicyHref}>
+              <EuiLink
+                data-test-subj="apmUpgradeAvailableCardUpgradeYourApmIntegrationLink"
+                href={upgradeApmPackagePolicyHref}
+              >
                 {i18n.translate(
                   'xpack.apm.settings.schema.upgradeAvailable.upgradePackagePolicyLink',
                   { defaultMessage: 'Upgrade your APM integration' }
