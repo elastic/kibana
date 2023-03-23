@@ -11,7 +11,6 @@ import { AppMountParameters } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import translations from '@kbn/translations-plugin/translations/ja-JP.json';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -30,7 +29,6 @@ export const render = (component: React.ReactNode = {}) => {
         <PluginContext.Provider
           value={{
             appMountParameters,
-            ObservabilityPageTemplate: KibanaPageTemplate,
           }}
         >
           <EuiThemeProvider>{component}</EuiThemeProvider>

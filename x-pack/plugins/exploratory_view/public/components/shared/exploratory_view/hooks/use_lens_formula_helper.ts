@@ -8,12 +8,12 @@
 import { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-plugin/public';
-import { ObservabilityPublicPluginsStart } from '../../../..';
+import { ExploratoryViewPublicPluginsStart } from '../../../..';
 
 export const useLensFormulaHelper = () => {
   const {
     services: { lens },
-  } = useKibana<ObservabilityPublicPluginsStart>();
+  } = useKibana<ExploratoryViewPublicPluginsStart>();
 
   const { data: lensHelper } = useFetcher(async () => {
     return lens.stateHelperApi();

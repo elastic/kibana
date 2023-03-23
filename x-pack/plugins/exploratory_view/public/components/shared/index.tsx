@@ -17,7 +17,6 @@ import type { DatePickerProps } from './date_picker';
 import type { FilterValueLabelProps } from './filter_value_label/filter_value_label';
 import type { SelectableUrlListProps } from './exploratory_view/components/url_search/selectable_url_list';
 import type { ExploratoryViewPageProps } from './exploratory_view';
-export { createLazyObservabilityPageTemplate } from '@kbn/observability-plugin/public';
 export type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 
 const CoreVitalsLazy = lazy(() => import('./core_web_vitals'));
