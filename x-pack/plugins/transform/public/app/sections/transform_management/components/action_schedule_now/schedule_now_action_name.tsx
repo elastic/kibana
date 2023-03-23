@@ -58,7 +58,7 @@ export const ScheduleNowActionName: FC<ScheduleNowActionNameProps> = ({
 
   if (isBulkAction === true) {
     completedBatchTransformMessage = i18n.translate(
-      'xpack.transform.transformList.completeBatchTransformBulkActionToolTip',
+      'xpack.transform.transformList.cannotScheduleNowCompleteBatchTransformBulkActionToolTip',
       {
         defaultMessage:
           'One or more transforms are completed batch transforms and cannot be scheduled now.',
@@ -66,7 +66,7 @@ export const ScheduleNowActionName: FC<ScheduleNowActionNameProps> = ({
     );
   } else {
     completedBatchTransformMessage = i18n.translate(
-      'xpack.transform.transformList.completeBatchTransformToolTip',
+      'xpack.transform.transformList.cannotScheduleNowCompleteBatchTransformToolTip',
       {
         defaultMessage: '{transformId} is a completed batch transform and cannot be scheduled now.',
         values: { transformId: items[0] && items[0].config.id },
