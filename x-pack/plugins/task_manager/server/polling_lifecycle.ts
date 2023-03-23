@@ -7,7 +7,7 @@
 
 import { Subject, Observable, Subscription } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
+import { map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
@@ -83,8 +83,6 @@ export class TaskPollingLifecycle {
   public pool: TaskPool;
   // all task related events (task claimed, task marked as running, etc.) are emitted through events$
   private events$ = new Subject<TaskLifecycleEvent>();
-  // all on-demand requests we wish to pipe into the poller
-  private claimRequests$ = new Subject<Option<string>>();
   // our subscription to the poller
   private pollingSubscription: Subscription = Subscription.EMPTY;
 
@@ -174,7 +172,6 @@ export class TaskPollingLifecycle {
             logger,
             pollInterval$: pollIntervalConfiguration$,
             pollIntervalDelay$,
-            bufferCapacity: config.request_capacity,
             getCapacity: () => {
               const capacity = this.pool.availableWorkers;
               if (!capacity) {
@@ -184,7 +181,6 @@ export class TaskPollingLifecycle {
               }
               return capacity;
             },
-            pollRequests$: this.claimRequests$,
             work: this.pollForWork,
             // Time out the `work` phase if it takes longer than a certain number of polling cycles
             // The `work` phase includes the prework needed *before* executing a task
@@ -226,10 +222,6 @@ export class TaskPollingLifecycle {
     this.events$.next(event);
   };
 
-  public attemptToRun(task: string) {
-    this.claimRequests$.next(some(task));
-  }
-
   private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {
     return new TaskManagerRunner({
       logger: this.logger,
@@ -250,7 +242,7 @@ export class TaskPollingLifecycle {
     return !this.pollingSubscription.closed;
   }
 
-  private pollForWork = async (...tasksToClaim: string[]): Promise<TimedFillPoolResult> => {
+  private pollForWork = async (): Promise<TimedFillPoolResult> => {
     return fillPool(
       // claim available tasks
       () => {
