@@ -9,6 +9,7 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import type {
   Visualization,
@@ -21,7 +22,6 @@ import type {
   Suggestion,
   DatasourceLayers,
 } from '../../types';
-import type { DragDropIdentifier } from '../../drag_drop';
 import type { LayerType } from '../../../common';
 import { getLayerType } from './config_panel/add_layer';
 import {

@@ -10,6 +10,8 @@ import { pick, range as lodashRange, sum } from 'lodash';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 
@@ -40,6 +42,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               transactionType: 'request',
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
+              documentType: ApmDocumentType.TransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
             },
           },
         });
@@ -69,6 +73,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               transactionType: 'request',
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
+              documentType: ApmDocumentType.TransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
             },
           },
         });
@@ -145,6 +151,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               transactionType: 'request',
               environment: 'ENVIRONMENT_ALL',
               kuery: '',
+              documentType: ApmDocumentType.TransactionMetric,
+              rollupInterval: RollupInterval.OneMinute,
             },
           },
         });
