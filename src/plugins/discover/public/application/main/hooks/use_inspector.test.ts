@@ -13,6 +13,7 @@ import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
 import { OverlayRef } from '@kbn/core/public';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import { DataTableRecord } from '../../../types';
 
 describe('test useInspector', () => {
   test('inspector open function is executed, expanded doc is closed', async () => {
@@ -24,14 +25,14 @@ describe('test useInspector', () => {
     const requests = new RequestAdapter();
     const lensRequests = new RequestAdapter();
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-
+    stateContainer.internalState.transitions.setExpandedDoc({} as unknown as DataTableRecord);
     const { result } = renderHook(() => {
       return useInspector({
         stateContainer,
         inspector: discoverServiceMock.inspector,
       });
     });
-    act(() => {
+    await act(async () => {
       result.current();
     });
 
@@ -41,5 +42,6 @@ describe('test useInspector', () => {
       ...requests.getRequests(),
       ...lensRequests.getRequests(),
     ]);
+    expect(stateContainer.internalState.getState().expandedDoc).toBe(undefined);
   });
 });

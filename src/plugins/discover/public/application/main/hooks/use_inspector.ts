@@ -13,7 +13,6 @@ import {
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
 import { DiscoverStateContainer } from '../services/discover_state';
-import { DataTableRecord } from '../../../types';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 
 export interface InspectorAdapters {
@@ -25,21 +24,15 @@ export function useInspector({
   inspector,
   stateContainer,
 }: {
-  stateContainer: DiscoverStateContainer;
   inspector: InspectorPublicPluginStart;
+  stateContainer: DiscoverStateContainer;
 }) {
   const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
-  const setExpandedDoc = useCallback(
-    (doc: DataTableRecord | undefined) => {
-      stateContainer.internalState.transitions.setExpandedDoc(doc);
-    },
-    [stateContainer]
-  );
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
-    setExpandedDoc(undefined);
+    stateContainer.internalState.transitions.setExpandedDoc(undefined);
 
     const requestAdapters = inspectorAdapters.lensRequests
       ? [inspectorAdapters.requests, inspectorAdapters.lensRequests]
@@ -52,7 +45,7 @@ export function useInspector({
 
     setInspectorSession(session);
   }, [
-    setExpandedDoc,
+    stateContainer,
     inspectorAdapters.lensRequests,
     inspectorAdapters.requests,
     inspector,

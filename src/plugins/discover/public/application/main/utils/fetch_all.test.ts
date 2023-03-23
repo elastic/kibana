@@ -25,7 +25,6 @@ import { fetchDocuments } from './fetch_documents';
 import { fetchSql } from './fetch_sql';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 import { dataViewMock } from '../../../__mocks__/data_view';
-
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
 }));

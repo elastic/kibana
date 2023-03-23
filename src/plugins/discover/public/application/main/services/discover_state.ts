@@ -41,8 +41,8 @@ import {
   GLOBAL_STATE_URL_KEY,
 } from './discover_app_state_container';
 import {
-  getInternalStateContainer,
   DiscoverInternalStateContainer,
+  getInternalStateContainer,
 } from './discover_internal_state_container';
 import { DiscoverServices } from '../../../build_services';
 import {

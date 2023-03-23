@@ -8,8 +8,8 @@
 import { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
-import { updateVolatileSearchSource } from './update_search_source';
 import { DiscoverAppState } from '../services/discover_app_state_container';
+import { updateVolatileSearchSource } from './update_search_source';
 import { getRawRecordType } from './get_raw_record_type';
 import {
   checkHitCount,
@@ -107,7 +107,7 @@ export function fetchAll(
       // Only the document query should send its errors to main$, to cause the full Discover app
       // to get into an error state. The other queries will not cause all of Discover to error out
       // but their errors will be shown in-place (e.g. of the chart).
-      .catch(sendErrorTo(data, dataSubjects.documents$, dataSubjects.main$));
+      .catch(sendErrorTo(dataSubjects.documents$, dataSubjects.main$));
 
     // Return a promise that will resolve once all the requests have finished or failed
     return firstValueFrom(

@@ -98,6 +98,10 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
 
   const minVersion = useMemo(() => {
     if (!Array.isArray(agents)) {
+      // when agent is a query, don't set minVersion, so the versions are available to select
+      if (typeof agents === 'string') {
+        return undefined;
+      }
       return getMinVersion(availableVersions);
     }
     const versions = (agents as Agent[]).map(

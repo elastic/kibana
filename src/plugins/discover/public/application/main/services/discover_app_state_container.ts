@@ -178,7 +178,7 @@ export const getDiscoverAppStateContainer = ({
   };
 
   const replaceUrlState = async (newPartial: DiscoverAppState = {}, merge = true) => {
-    addLog('[appState] replace state in URL', { newPartial, merge });
+    addLog('[appState] replaceUrlState', { newPartial, merge });
     const state = merge ? { ...appStateContainer.getState(), ...newPartial } : newPartial;
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
