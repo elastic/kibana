@@ -196,9 +196,7 @@ export function FlameGraphsView({ children }: { children: React.ReactElement }) 
                   : comparisonScale
               }
               showInformationWindow={showInformationWindow}
-              onInformationWindowClose={() => {
-                setShowInformationWindow(false);
-              }}
+              toggleShowInformationWindow={toggleShowInformationWindow}
             />
           </AsyncComponent>
           {children}
