@@ -11,6 +11,7 @@ central place to:
 * <<create-edit-rules,Create and edit>> rules
 * <<controlling-rules,Manage rules>> including enabling/disabling, muting/unmuting, and deleting
 * Drill down to <<rule-details,rule details>>
+* Configure settings that apply to all rules in the space
 
 [role="screenshot"]
 image:images/rules-ui.png[Example rule listing in {rules-ui}]
