@@ -84,6 +84,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             };
           }),
           producer: 'alertsFixture',
+          revision: 0,
           ruleTypeId: 'test.always-firing',
           ruleTypeName: 'Test: Always Firing',
           muteAll: false,
@@ -432,6 +433,7 @@ instanceStateValue: true
               };
             }),
             producer: 'alertsFixture',
+            revision: 1,
             ruleTypeId: 'test.always-firing',
             ruleTypeName: 'Test: Always Firing',
             muteAll: false,

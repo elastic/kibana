@@ -210,6 +210,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.rule.interval': '5m',
         'kibana.alert.rule.max_signals': 100,
         'kibana.alert.rule.references': [],
+        'kibana.alert.rule.revision': 0,
         'kibana.alert.rule.risk_score_mapping': [],
         'kibana.alert.rule.rule_id': 'rule-1',
         'kibana.alert.rule.severity_mapping': [],

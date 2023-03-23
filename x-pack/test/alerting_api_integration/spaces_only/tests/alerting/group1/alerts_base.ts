@@ -123,6 +123,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
             };
           }),
           producer: 'alertsFixture',
+          revision: 0,
           ruleTypeId: 'test.always-firing',
           ruleTypeName: 'Test: Always Firing',
           muteAll: false,
