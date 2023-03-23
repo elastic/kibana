@@ -6,9 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ControlsPanels } from '../types';
-import { pluginServices } from '../../services';
+import { type IEmbeddable } from '@kbn/embeddable-plugin/public';
+
 import { getDataControlFieldRegistry } from '../editor/data_control_editor_tools';
+import { type ControlGroupContainer } from './control_group_container';
+import { pluginServices } from '../../services';
+import { CONTROL_GROUP_TYPE } from '../types';
+import { ControlsPanels } from '../types';
 
 export const getNextPanelOrder = (panels?: ControlsPanels) => {
   let nextOrder = 0;
@@ -33,4 +37,8 @@ export const getCompatibleControlType = async ({
   const fieldRegistry = await getDataControlFieldRegistry(dataView);
   const field = fieldRegistry[fieldName];
   return field.compatibleControlTypes[0];
+};
+
+export const isControlGroup = (embeddable: IEmbeddable): embeddable is ControlGroupContainer => {
+  return embeddable.isContainer && embeddable.type === CONTROL_GROUP_TYPE;
 };

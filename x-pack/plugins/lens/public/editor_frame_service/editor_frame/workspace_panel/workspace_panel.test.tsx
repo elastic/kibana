@@ -25,7 +25,7 @@ jest.mock('../../../debounced_component', () => {
 
 import { WorkspacePanel } from './workspace_panel';
 import { ReactWrapper } from 'enzyme';
-import { DragDrop, ChildDragDropProvider } from '../../../drag_drop';
+import { DragDrop, ChildDragDropProvider } from '@kbn/dom-drag-drop';
 import { buildExistsFilter } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -933,6 +933,7 @@ describe('workspace_panel', () => {
     async function initComponent(draggingContext = draggedField) {
       const mounted = await mountWithProvider(
         <ChildDragDropProvider
+          dataTestSubjPrefix="lnsDragDrop"
           dragging={draggingContext}
           setDragging={() => {}}
           setActiveDropTarget={() => {}}

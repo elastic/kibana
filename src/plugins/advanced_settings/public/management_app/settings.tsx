@@ -45,7 +45,8 @@ export type GroupedSettings = Record<string, FieldSetting[]>;
 
 interface Props {
   history: ScopedHistory;
-  enableSaving: boolean;
+  enableSaving: Record<UiSettingsScope, boolean>;
+  enableShowing: Record<UiSettingsScope, boolean>;
   settingsService: SettingsStart;
   docLinks: DocLinksStart['links'];
   toasts: ToastsStart;
@@ -58,7 +59,8 @@ const SPACE_SETTINGS_ID = 'space-settings';
 const GLOBAL_SETTINGS_ID = 'global-settings';
 
 export const Settings = (props: Props) => {
-  const { componentRegistry, history, settingsService, ...rest } = props;
+  const { componentRegistry, history, settingsService, enableSaving, enableShowing, ...rest } =
+    props;
   const uiSettings = settingsService.client;
   const globalUiSettings = settingsService.globalClient;
 
@@ -214,6 +216,7 @@ export const Settings = (props: Props) => {
         callOutSubtitle={callOutSubtitle(scope)}
         settingsService={settingsService}
         uiSettingsClient={getClientForScope(scope)}
+        enableSaving={enableSaving[scope]}
         {...rest}
       />
     );
@@ -231,7 +234,9 @@ export const Settings = (props: Props) => {
         ) : null,
       content: renderAdvancedSettings('namespace'),
     },
-    {
+  ];
+  if (enableShowing.global) {
+    tabs.push({
       id: GLOBAL_SETTINGS_ID,
       name: i18nTexts.globalTabTitle,
       append:
@@ -242,8 +247,8 @@ export const Settings = (props: Props) => {
           </EuiNotificationBadge>
         ) : null,
       content: renderAdvancedSettings('global'),
-    },
-  ];
+    });
+  }
 
   const [selectedTabId, setSelectedTabId] = useState(SPACE_SETTINGS_ID);
 
