@@ -91,7 +91,6 @@ export const LinkIcon = React.memo<LinkIconProps>(
 
     return (
       <Link
-        className="maintenanceWindowsLinkIcon"
         color={color}
         data-test-subj={dataTestSubj}
         disabled={disabled}
@@ -100,8 +99,8 @@ export const LinkIcon = React.memo<LinkIconProps>(
         onClick={onClick}
         aria-label={aria}
       >
-        <EuiIcon size={iconSize} type={iconType} />
-        <span className="maintenanceWindowsLinkIcon__label">{children}</span>
+        <EuiIcon data-test-subj="link-icon" size={iconSize} type={iconType} />
+        <span data-test-subj="link-icon-label">{children}</span>
       </Link>
     );
   }

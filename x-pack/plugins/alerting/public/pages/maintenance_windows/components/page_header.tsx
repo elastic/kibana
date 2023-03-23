@@ -16,7 +16,7 @@ import { TruncatedText } from './truncated_text';
 import { useMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 
 const LinkBack = styled.div.attrs({
-  className: 'maintenanceWindowsPageHeader__linkBack',
+  'data-test-subj': 'link-back',
 })`
   ${({ theme }) => css`
     font-size: ${theme.eui.euiFontSizeXS};

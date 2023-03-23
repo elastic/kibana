@@ -15,7 +15,13 @@ export const SubmitButton: React.FC = React.memo(() => {
   const { submit, isSubmitting } = useFormContext();
 
   return (
-    <EuiButton fill isDisabled={isSubmitting} isLoading={isSubmitting} onClick={submit}>
+    <EuiButton
+      data-test-subj="create-submit"
+      fill
+      isDisabled={isSubmitting}
+      isLoading={isSubmitting}
+      onClick={submit}
+    >
       {i18n.CREATE_MAINTENANCE_WINDOW}
     </EuiButton>
   );

@@ -12,7 +12,7 @@ import { useKibana } from '../utils/kibana_react';
 import { AlertingDeepLinkId, IAlertingDeepLinkId, useNavigation } from './use_navigation';
 import { APP_ID } from '../config/paths';
 
-const alertingBreadcrumbTitle: Record<IAlertingDeepLinkId, string> = {
+const breadcrumbTitle: Record<IAlertingDeepLinkId, string> = {
   [AlertingDeepLinkId.maintenanceWindows]: i18n.translate(
     'xpack.alerting.breadcrumbs.maintenanceWindowsLinkText',
     {
@@ -25,6 +25,10 @@ const alertingBreadcrumbTitle: Record<IAlertingDeepLinkId, string> = {
       defaultMessage: 'Create',
     }
   ),
+};
+
+const topLevelBreadcrumb: Record<string, IAlertingDeepLinkId> = {
+  [AlertingDeepLinkId.maintenanceWindowsCreate]: AlertingDeepLinkId.maintenanceWindows,
 };
 
 function addClickHandlers(
@@ -68,21 +72,17 @@ export const useBreadcrumbs = (pageDeepLink: IAlertingDeepLinkId) => {
         }),
         href: getAppUrl(),
       },
-      {
-        text: alertingBreadcrumbTitle[AlertingDeepLinkId.maintenanceWindows],
-        ...(pageDeepLink !== AlertingDeepLinkId.maintenanceWindows
-          ? {
-              href: getAppUrl({ deepLinkId: AlertingDeepLinkId.maintenanceWindows }),
-            }
-          : {}),
-      },
-      ...(pageDeepLink !== AlertingDeepLinkId.maintenanceWindows
+      ...(topLevelBreadcrumb[pageDeepLink]
         ? [
             {
-              text: alertingBreadcrumbTitle[pageDeepLink],
+              text: breadcrumbTitle[topLevelBreadcrumb[pageDeepLink]],
+              href: getAppUrl({ deepLinkId: topLevelBreadcrumb[pageDeepLink] }),
             },
           ]
         : []),
+      {
+        text: breadcrumbTitle[pageDeepLink],
+      },
     ];
 
     if (setBreadcrumbs) {

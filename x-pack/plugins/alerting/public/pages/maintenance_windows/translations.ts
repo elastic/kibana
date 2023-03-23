@@ -372,9 +372,9 @@ export const CREATE_FORM_OCURRENCES_SUMMARY = (count: number) =>
   });
 
 export const CREATE_FORM_RECURRING_SUMMARY = (
-  frequencySummary: string,
-  onSummary: string,
-  untilSummary: string
+  frequencySummary: string | null,
+  onSummary: string | null,
+  untilSummary: string | null
 ) =>
   i18n.translate('xpack.alerting.maintenanceWindows.createForm.recurrenceSummary', {
     defaultMessage: 'every {frequencySummary}{on}{until}',

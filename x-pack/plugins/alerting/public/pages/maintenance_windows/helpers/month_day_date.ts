@@ -8,7 +8,6 @@
 import type { Moment } from 'moment';
 
 export const monthDayDate = (date: Moment) => localDateWithoutYear(date, 'LL');
-export const abbrMonthDayDate = (date: Moment) => localDateWithoutYear(date, 'll');
 
 const localDateWithoutYear = (date: Moment, format: string) =>
   date

@@ -41,7 +41,7 @@ export const MaintenanceWindowsPage = React.memo(() => {
       />
 
       {!isLoading && total === 0 ? (
-        <EmptyPrompt onClickCreate={handleClickCreate} docLinks={docLinks} />
+        <EmptyPrompt onClickCreate={handleClickCreate} docLinks={docLinks.links} />
       ) : null}
     </>
   );

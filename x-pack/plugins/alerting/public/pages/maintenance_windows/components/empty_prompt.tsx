@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { DocLinks } from '@kbn/doc-links';
 import * as i18n from '../translations';
 
 interface EmptyPromptProps {
   onClickCreate: () => void;
-  docLinks: DocLinksStart;
+  docLinks: DocLinks;
   showCreateButton?: boolean;
 }
 
@@ -27,7 +27,7 @@ export const EmptyPrompt = React.memo<EmptyPromptProps>(
           <EuiButtonEmpty
             key="documentation-button"
             target="_blank"
-            href={docLinks.links.alerting.guide}
+            href={docLinks.alerting.guide}
             iconType="help"
           >
             {i18n.EMPTY_PROMPT_DOCUMENTATION}
