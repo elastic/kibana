@@ -59,40 +59,34 @@ export const byDataColorPaletteMap = (
 };
 
 const getDistinctColor = (
-  dataName: string,
+  categoricalKey: string,
   isSplitChart: boolean,
   overwriteColors: { [key: string]: string } = {},
   visParams: PartitionVisParams,
   palettes: PaletteRegistry | null,
   syncColors: boolean,
   { parentSeries, allSeries }: DistinctSeries,
-  name: string
+  formattedCategoricalKey: string
 ) => {
-  let overwriteColor;
+  // TODO move away from Record to a Map to avoid issues with reserved JS keywords
+  if (overwriteColors.hasOwnProperty(categoricalKey)) {
+    return overwriteColors[categoricalKey];
+  }
   // this is for supporting old visualizations (created by vislib plugin)
   // it seems that there for some aggs, the uiState saved from vislib is
   // different from how es-charts handles it
-  // TODO move away from Record to a Map to avoid issues with reserved JS keywords
-  if (overwriteColors.hasOwnProperty(name)) {
-    overwriteColor = overwriteColors[name];
+  if (overwriteColors.hasOwnProperty(formattedCategoricalKey)) {
+    return overwriteColors[formattedCategoricalKey];
   }
 
-  if (Object.keys(overwriteColors).includes(dataName)) {
-    overwriteColor = overwriteColors[dataName];
-  }
-
-  if (overwriteColor) {
-    return overwriteColor;
-  }
-
-  const index = allSeries.findIndex((d) => isEqual(d, dataName));
-  const isSplitParentLayer = isSplitChart && parentSeries.includes(dataName);
+  const index = allSeries.findIndex((d) => isEqual(d, categoricalKey));
+  const isSplitParentLayer = isSplitChart && parentSeries.includes(categoricalKey);
   return palettes?.get(visParams.palette.name).getCategoricalColor(
     [
       {
-        name: dataName,
+        name: categoricalKey,
         rankAtDepth: isSplitParentLayer
-          ? parentSeries.findIndex((d) => d === dataName)
+          ? parentSeries.findIndex((d) => d === categoricalKey)
           : index > -1
           ? index
           : 0,
@@ -193,7 +187,7 @@ const overrideColors = (
 export const getColor = (
   chartType: ChartTypes,
   // FIXME this could be both a string or a RangeKey see https://github.com/elastic/kibana/issues/153437
-  dataName: string,
+  categoricalKey: string, // could be RangeKey
   arrayNode: SimplifiedArrayNode,
   layerIndex: number,
   isSplitChart: boolean,
@@ -213,12 +207,14 @@ export const getColor = (
   // therefore change it for dark mode
   const defaultColor = isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
 
-  const name = column.format ? formatter.deserialize(column.format).convert(dataName) ?? '' : '';
+  const name = column.format
+    ? formatter.deserialize(column.format).convert(categoricalKey) ?? ''
+    : '';
 
   if (visParams.distinctColors) {
     return (
       getDistinctColor(
-        dataName,
+        categoricalKey,
         isSplitChart,
         overwriteColors,
         visParams,

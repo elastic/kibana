@@ -292,6 +292,10 @@ describe('getColor', () => {
     };
     const color = getColor(
       ChartTypes.PIE,
+      // There is the unhandled situation that the categoricalName passed is not a plain string but a RangeKey
+      // In this case, the internal code, thankfully, requires the stringified version of it and/or the formatted one
+      // handling also this badly configured type
+      // FIXME when getColor could handle both strings and RangeKey
       { gte: 1000, lt: 2000 } as unknown as string,
       d,
       0,
