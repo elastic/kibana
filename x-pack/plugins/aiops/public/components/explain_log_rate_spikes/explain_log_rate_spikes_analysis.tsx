@@ -12,8 +12,6 @@ import {
   EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
@@ -49,8 +47,7 @@ const groupResultsMessage = i18n.translate(
 const groupResultsHelpMessage = i18n.translate(
   'xpack.aiops.spikeAnalysisTable.groupedSwitchLabel.groupResultsHelpMessage',
   {
-    defaultMessage:
-      'In expanded row, field/value pairs which do not appear in other groups are marked by an asterisk (*).',
+    defaultMessage: 'Items which are unique to a group are marked by an asterisk (*).',
   }
 );
 
@@ -66,6 +63,7 @@ interface ExplainLogRateSpikesAnalysisProps {
   latest: number;
   /** Window parameters for the analysis */
   windowParameters: WindowParameters;
+  /** The search query to be applied to the analysis as a filter */
   searchQuery: Query['query'];
 }
 
@@ -185,7 +183,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
 
   const showSpikeAnalysisTable = data?.significantTerms.length > 0;
   const groupItemCount = groupTableItems.reduce((p, c) => {
-    return p + c.group.length;
+    return p + c.groupItemsSortedByUniqueness.length;
   }, 0);
   const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
 
@@ -201,6 +199,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       />
       {errors.length > 0 ? (
         <>
+          <EuiSpacer size="xs" />
           <EuiCallOut
             title={i18n.translate('xpack.aiops.analysis.errorCallOutTitle', {
               defaultMessage:
@@ -238,29 +237,22 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       ) : null}
       {showSpikeAnalysisTable && foundGroups && (
         <>
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem>
-              <EuiFormRow display="columnCompressedSwitch" label={groupResultsMessage}>
-                <EuiSwitch
-                  data-test-subj={`aiopsExplainLogRateSpikesGroupSwitch${
-                    groupResults ? ' checked' : ''
-                  }`}
-                  showLabel={false}
-                  label={''}
-                  checked={groupResults}
-                  onChange={onSwitchToggle}
-                  compressed
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {groupResults && (
-                <EuiFormRow helpText={groupResultsHelpMessage}>
-                  <></>
-                </EuiFormRow>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          <EuiFormRow
+            display="columnCompressedSwitch"
+            helpText={groupResults ? groupResultsHelpMessage : undefined}
+          >
+            <EuiSwitch
+              data-test-subj={`aiopsExplainLogRateSpikesGroupSwitch${
+                groupResults ? ' checked' : ''
+              }`}
+              showLabel={true}
+              label={groupResultsMessage}
+              checked={groupResults}
+              onChange={onSwitchToggle}
+              compressed
+            />
+          </EuiFormRow>
         </>
       )}
       <EuiSpacer size="xs" />
