@@ -266,7 +266,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     infra.logViews.defineInternalLogView(ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID, {
       logIndices: {
-        indexName: 'logs-elastic_analytics.events-*',
+        indexName: 'behavioral_analytics-events-*',
         type: 'index_name',
       },
       name: 'Enterprise Search Behavioral Analytics Logs',

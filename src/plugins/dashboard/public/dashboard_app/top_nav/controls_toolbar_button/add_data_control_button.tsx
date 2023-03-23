@@ -16,10 +16,10 @@ interface Props {
   controlGroup: ControlGroupContainer;
 }
 
-export const AddDataControlButton = ({ closePopover, controlGroup }: Props) => {
+export const AddDataControlButton = ({ closePopover, controlGroup, ...rest }: Props) => {
   return (
     <EuiContextMenuItem
-      key="addControl"
+      {...rest}
       icon="plusInCircle"
       data-test-subj="controls-create-button"
       aria-label={getAddControlButtonTitle()}

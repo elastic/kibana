@@ -23,18 +23,18 @@ import {
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
-import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
+import { DiscoverDataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
 import {
-  AppState,
+  DiscoverAppState,
   DiscoverAppStateContainer,
   getDiscoverAppStateContainer,
   GLOBAL_STATE_URL_KEY,
 } from './discover_app_state_container';
 import {
+  DiscoverInternalStateContainer,
   getInternalStateContainer,
-  InternalStateContainer,
 } from './discover_internal_state_container';
 import { DiscoverServices } from '../../../build_services';
 interface DiscoverStateContainerParams {
@@ -64,7 +64,7 @@ export interface DiscoverStateContainer {
   /**
    * Internal state that's used at several places in the UI
    */
-  internalState: InternalStateContainer;
+  internalState: DiscoverInternalStateContainer;
   /**
    * Service for handling search sessions
    */
@@ -72,7 +72,7 @@ export interface DiscoverStateContainer {
   /**
    * Data fetching related state
    **/
-  dataState: DataStateContainer;
+  dataState: DiscoverDataStateContainer;
   /**
    * functions executed by UI
    */
@@ -233,7 +233,7 @@ export function getDiscoverStateContainer({
 }
 
 export function createSearchSessionRestorationDataProvider(deps: {
-  appStateContainer: StateContainer<AppState>;
+  appStateContainer: StateContainer<DiscoverAppState>;
   data: DataPublicPluginStart;
   getSavedSearch: () => SavedSearch;
 }): SearchSessionInfoProvider {
@@ -272,7 +272,7 @@ function createUrlGeneratorState({
   getSavedSearchId,
   shouldRestoreSearchSession,
 }: {
-  appStateContainer: StateContainer<AppState>;
+  appStateContainer: StateContainer<DiscoverAppState>;
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
   shouldRestoreSearchSession: boolean;
