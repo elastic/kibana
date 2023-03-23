@@ -20,6 +20,7 @@ import {
   checkRecognizerSuccess,
 } from '../api.mock';
 import { useSecurityJobs } from './use_security_jobs';
+import { TestProviders } from '../../../mock';
 
 jest.mock('../../../../../common/machine_learning/has_ml_admin_permissions');
 jest.mock('../../../../../common/machine_learning/has_ml_license');
@@ -71,7 +72,9 @@ describe('useSecurityJobs', () => {
         bucketSpanSeconds: 900,
       };
 
-      const { result, waitForNextUpdate } = renderHook(() => useSecurityJobs());
+      const { result, waitForNextUpdate } = renderHook(() => useSecurityJobs(), {
+        wrapper: TestProviders,
+      });
       await waitForNextUpdate();
 
       expect(result.current.jobs).toHaveLength(6);
@@ -79,7 +82,9 @@ describe('useSecurityJobs', () => {
     });
 
     it('returns those permissions', async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSecurityJobs());
+      const { result, waitForNextUpdate } = renderHook(() => useSecurityJobs(), {
+        wrapper: TestProviders,
+      });
       await waitForNextUpdate();
 
       expect(result.current.isMlAdmin).toEqual(true);
@@ -88,7 +93,9 @@ describe('useSecurityJobs', () => {
 
     it('renders a toast error if an ML call fails', async () => {
       (getModules as jest.Mock).mockRejectedValue('whoops');
-      const { waitForNextUpdate } = renderHook(() => useSecurityJobs());
+      const { waitForNextUpdate } = renderHook(() => useSecurityJobs(), {
+        wrapper: TestProviders,
+      });
       await waitForNextUpdate();
 
       expect(appToastsMock.addError).toHaveBeenCalledWith('whoops', {
@@ -104,7 +111,9 @@ describe('useSecurityJobs', () => {
     });
 
     it('returns empty jobs and false predicates', () => {
-      const { result } = renderHook(() => useSecurityJobs());
+      const { result } = renderHook(() => useSecurityJobs(), {
+        wrapper: TestProviders,
+      });
 
       expect(result.current.jobs).toEqual([]);
       expect(result.current.isMlAdmin).toEqual(false);
