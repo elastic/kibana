@@ -172,7 +172,7 @@ export const EngineSchema: React.FC = () => {
       width: '2%',
     },
     {
-      name: i18n.translate('xpack.enterpriseSearch.content.engine.schema.fieldName.columnTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.engine.schema.field_name.columnTitle', {
         defaultMessage: 'Field name',
       }),
       render: ({ name, type }: SchemaField) => (
@@ -186,7 +186,7 @@ export const EngineSchema: React.FC = () => {
       width: '43%',
     },
     {
-      name: i18n.translate('xpack.enterpriseSearch.content.engine.schema.fieldType.columnTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.engine.schema.field_type.columnTitle', {
         defaultMessage: 'Field type',
       }),
       render: ({ type }: SchemaField) => {
@@ -195,7 +195,7 @@ export const EngineSchema: React.FC = () => {
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiBadge color="danger">
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.content.engine.schema.fieldType.conflict"
+                  id="xpack.enterpriseSearch.content.engine.schema.field_type.conflict"
                   defaultMessage="Conflict"
                 />
               </EuiBadge>
@@ -227,7 +227,7 @@ export const EngineSchema: React.FC = () => {
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.enterpriseSearch.content.engine.schema.fieldIndices.yes"
+                id="xpack.enterpriseSearch.content.engine.schema.field_indices.yes"
                 defaultMessage="Yes"
               />
             </p>
@@ -235,7 +235,7 @@ export const EngineSchema: React.FC = () => {
         ) : (
           <EuiBadge color="hollow">
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.engine.schema.fieldIndices.no"
+              id="xpack.enterpriseSearch.content.engine.schema.field_indices.no"
               defaultMessage="No"
             />
           </EuiBadge>
@@ -260,7 +260,7 @@ export const EngineSchema: React.FC = () => {
                 }}
               >
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.content.engine.schema.fieldIndices.moreInfo"
+                  id="xpack.enterpriseSearch.content.engine.schema.field_indices.moreInfo"
                   defaultMessage="More info"
                 />
               </EuiButtonEmpty>
