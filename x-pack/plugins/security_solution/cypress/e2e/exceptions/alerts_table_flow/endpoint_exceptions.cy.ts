@@ -30,7 +30,11 @@ import {
   submitNewExceptionItem,
 } from '../../../tasks/exceptions';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
-import { NO_EXCEPTIONS_EXIST_PROMPT } from '../../../screens/exceptions';
+import {
+  EXCEPTION_ITEM_CONTAINER,
+  FIELD_INPUT_PARENT,
+  NO_EXCEPTIONS_EXIST_PROMPT,
+} from '../../../screens/exceptions';
 import {
   removeException,
   goToAlertsTab,
@@ -57,6 +61,17 @@ describe('Endpoint Exceptions workflows from Alert', () => {
   });
 
   it('Should be able to create and close single Endpoint exception from overflow menu', () => {
+    // The Endpoint will populated with predefined fields
+    openAddEndpointExceptionFromFirstAlert();
+
+    // As the endpoint.alerts-* is used to trigger the alert the
+    // file.Ext.code_signature will be populated as the first item
+    cy.get(EXCEPTION_ITEM_CONTAINER)
+      .eq(0)
+      .find(FIELD_INPUT_PARENT)
+      .eq(0)
+      .should('have.text', 'file.Ext.code_signature');
+
     // The Endpoint will populated with predefined fields
     openAddEndpointExceptionFromFirstAlert();
 
