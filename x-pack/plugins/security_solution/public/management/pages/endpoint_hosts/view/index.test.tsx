@@ -19,11 +19,7 @@ import {
 } from '../store/mock_endpoint_result_list';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import type {
-  HostInfo,
-  HostPolicyResponse,
-  HostPolicyResponseAppliedAction,
-} from '../../../../../common/endpoint/types';
+import type { HostInfo, HostPolicyResponse } from '../../../../../common/endpoint/types';
 import { HostPolicyResponseActionStatus, HostStatus } from '../../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
@@ -59,6 +55,7 @@ import {
 import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
 import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
+import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
 
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
@@ -138,6 +135,8 @@ const timepickerRanges = [
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_license');
+jest.mock('../../../hooks/endpoint/use_get_endpoint_details');
+const mockUseGetEndpointDetails = useGetEndpointDetails as jest.Mock;
 
 describe('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
@@ -343,6 +342,7 @@ describe('when on the endpoint list page', () => {
         const rows = await renderResult.findAllByRole('row');
         expect(rows).toHaveLength(6);
       });
+
       it('should show total', async () => {
         const renderResult = render();
         await reactTestingLibrary.act(async () => {
@@ -351,6 +351,7 @@ describe('when on the endpoint list page', () => {
         const total = await renderResult.findByTestId('endpointListTableTotal');
         expect(total.textContent).toEqual('Showing 5 endpoints');
       });
+
       it('should display correct status', async () => {
         const renderResult = render();
         await reactTestingLibrary.act(async () => {
@@ -430,8 +431,29 @@ describe('when on the endpoint list page', () => {
       });
 
       describe('when the user clicks the first hostname in the table', () => {
+        const endpointDetails: HostInfo = mockEndpointDetailsApiResult();
         let renderResult: reactTestingLibrary.RenderResult;
         beforeEach(async () => {
+          mockUseGetEndpointDetails.mockReturnValue({
+            data: {
+              ...endpointDetails,
+              host_status: endpointDetails.host_status,
+              metadata: {
+                ...endpointDetails.metadata,
+                Endpoint: {
+                  ...endpointDetails.metadata.Endpoint,
+                  state: {
+                    ...endpointDetails.metadata.Endpoint.state,
+                    isolation: false,
+                  },
+                },
+                agent: {
+                  ...endpointDetails.metadata.agent,
+                  id: '1',
+                },
+              },
+            },
+          });
           renderResult = render();
           await reactTestingLibrary.act(async () => {
             await middlewareSpy.waitForAction('serverReturnedEndpointList');
@@ -510,13 +532,13 @@ describe('when on the endpoint list page', () => {
 
   describe('when there is a selected host in the url', () => {
     let hostDetails: HostInfo;
-    let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
+    const endpointDetails: HostInfo = mockEndpointDetailsApiResult();
     const mockEndpointListApi = (mockedPolicyResponse?: HostPolicyResponse) => {
       const {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         host_status,
         metadata: { agent, Endpoint, ...details },
-      } = mockEndpointDetailsApiResult();
+      } = endpointDetails;
 
       hostDetails = {
         host_status,
@@ -546,83 +568,35 @@ describe('when on the endpoint list page', () => {
       });
     };
 
-    const createPolicyResponse = (
-      overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
-    ): HostPolicyResponse => {
-      const policyResponse = docGenerator.generatePolicyResponse();
-      const malwareResponseConfigurations =
-        policyResponse.Endpoint.policy.applied.response.configurations.malware;
-      policyResponse.Endpoint.policy.applied.status = overallStatus;
-      malwareResponseConfigurations.status = overallStatus;
-      let downloadModelAction = policyResponse.Endpoint.policy.applied.actions.find(
-        (action) => action.name === 'download_model'
-      );
-
-      if (!downloadModelAction) {
-        downloadModelAction = {
-          name: 'download_model',
-          message: 'Failed to apply a portion of the configuration (kernel)',
-          status: overallStatus,
-        };
-        policyResponse.Endpoint.policy.applied.actions.push(downloadModelAction);
-      } else {
-        // Else, make sure the status of the generated action matches what was passed in
-        downloadModelAction.status = overallStatus;
-      }
-
-      if (
-        overallStatus === HostPolicyResponseActionStatus.failure ||
-        overallStatus === HostPolicyResponseActionStatus.warning
-      ) {
-        downloadModelAction.message = 'no action taken';
-      }
-
-      // Make sure that at least one configuration has the above action, else
-      // we get into an out-of-sync condition
-      if (
-        malwareResponseConfigurations.concerned_actions.indexOf(downloadModelAction.name) === -1
-      ) {
-        malwareResponseConfigurations.concerned_actions.push(downloadModelAction.name);
-      }
-
-      // Add an unknown Action Name - to ensure we handle the format of it on the UI
-      const unknownAction: HostPolicyResponseAppliedAction = {
-        status: HostPolicyResponseActionStatus.success,
-        message: 'test message',
-        name: 'a_new_unknown_action',
-      };
-      policyResponse.Endpoint.policy.applied.actions.push(unknownAction);
-      malwareResponseConfigurations.concerned_actions.push(unknownAction.name);
-
-      return policyResponse;
-    };
-
-    const dispatchServerReturnedEndpointPolicyResponse = (
-      overallStatus: HostPolicyResponseActionStatus = HostPolicyResponseActionStatus.success
-    ) => {
-      reactTestingLibrary.act(() => {
-        store.dispatch({
-          type: 'serverReturnedEndpointPolicyResponse',
-          payload: {
-            policy_response: createPolicyResponse(overallStatus),
+    const getMockUseEndpointDetails = (policyStatus?: HostPolicyResponseActionStatus) => {
+      return mockUseGetEndpointDetails.mockReturnValue({
+        data: {
+          ...hostDetails,
+          metadata: {
+            ...hostDetails.metadata,
+            Endpoint: {
+              ...hostDetails.metadata.Endpoint,
+              policy: {
+                ...hostDetails.metadata.Endpoint.policy,
+                applied: {
+                  ...hostDetails.metadata.Endpoint.policy.applied,
+                  status: policyStatus,
+                },
+              },
+            },
           },
-        });
+        },
       });
     };
 
-    beforeEach(async () => {
+    beforeEach(() => {
       mockEndpointListApi();
+      getMockUseEndpointDetails();
       mockUserPrivileges.mockReturnValue(getUserPrivilegesMockDefaultValue());
 
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/endpoints?selected_endpoint=1`);
       });
-
-      renderAndWaitForData = async () => {
-        const renderResult = render();
-        await middlewareSpy.waitForAction('serverReturnedEndpointDetails');
-        return renderResult;
-      };
     });
 
     afterEach(() => {
@@ -631,13 +605,13 @@ describe('when on the endpoint list page', () => {
     });
 
     it('should show the flyout and footer', async () => {
-      const renderResult = await renderAndWaitForData();
+      const renderResult = render();
       expect(renderResult.getByTestId('endpointDetailsFlyout')).not.toBeNull();
       expect(renderResult.getByTestId('endpointDetailsFlyoutFooter')).not.toBeNull();
     });
 
     it('should display policy name value as a link', async () => {
-      const renderResult = await renderAndWaitForData();
+      const renderResult = render();
       const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
@@ -646,7 +620,7 @@ describe('when on the endpoint list page', () => {
     });
 
     it('should display policy revision number', async () => {
-      const renderResult = await renderAndWaitForData();
+      const renderResult = render();
       const policyDetailsRevElement = await renderResult.findByTestId('policyDetailsRevNo');
       expect(policyDetailsRevElement).not.toBeNull();
       expect(policyDetailsRevElement.textContent).toEqual(
@@ -655,7 +629,7 @@ describe('when on the endpoint list page', () => {
     });
 
     it('should update the URL when policy name link is clicked', async () => {
-      const renderResult = await renderAndWaitForData();
+      const renderResult = render();
       const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
       const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
       reactTestingLibrary.act(() => {
@@ -668,7 +642,7 @@ describe('when on the endpoint list page', () => {
     });
 
     it('should update the URL when policy status link is clicked', async () => {
-      const renderResult = await renderAndWaitForData();
+      const renderResult = render();
       const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
       const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
       reactTestingLibrary.act(() => {
@@ -681,38 +655,40 @@ describe('when on the endpoint list page', () => {
     });
 
     it('should display Success overall policy status', async () => {
-      const renderResult = await renderAndWaitForData();
+      getMockUseEndpointDetails(HostPolicyResponseActionStatus.success);
+      const renderResult = render();
       const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
       expect(renderResult.getByTestId('policyStatusValue-success')).toBeTruthy();
       expect(policyStatusBadge.textContent).toEqual('Success');
     });
 
     it('should display Warning overall policy status', async () => {
-      mockEndpointListApi(createPolicyResponse(HostPolicyResponseActionStatus.warning));
-      const renderResult = await renderAndWaitForData();
-      const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
-      expect(policyStatusBadge.textContent).toEqual('Warning');
+      getMockUseEndpointDetails(HostPolicyResponseActionStatus.warning);
+      const renderResult = render();
+      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusLink.textContent).toEqual('Warning');
       expect(renderResult.getByTestId('policyStatusValue-warning')).toBeTruthy();
     });
 
     it('should display Failed overall policy status', async () => {
-      mockEndpointListApi(createPolicyResponse(HostPolicyResponseActionStatus.failure));
-      const renderResult = await renderAndWaitForData();
-      const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
-      expect(policyStatusBadge.textContent).toEqual('Failed');
+      getMockUseEndpointDetails(HostPolicyResponseActionStatus.failure);
+
+      const renderResult = render();
+      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusLink.textContent).toEqual('Failed');
       expect(renderResult.getByTestId('policyStatusValue-failure')).toBeTruthy();
     });
 
     it('should display Unknown overall policy status', async () => {
-      mockEndpointListApi(createPolicyResponse('' as HostPolicyResponseActionStatus));
-      const renderResult = await renderAndWaitForData();
-      const policyStatusBadge = await renderResult.findByTestId('policyStatusValue');
-      expect(policyStatusBadge.textContent).toEqual('Unknown');
+      getMockUseEndpointDetails('' as HostPolicyResponseActionStatus);
+      const renderResult = render();
+      const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
+      expect(policyStatusLink.textContent).toEqual('Unknown');
       expect(renderResult.getByTestId('policyStatusValue-')).toBeTruthy();
     });
 
     it('should show the Take Action button', async () => {
-      const renderResult = await renderAndWaitForData();
+      const renderResult = render();
       expect(renderResult.getByTestId('endpointDetailsActionsButton')).not.toBeNull();
     });
 
@@ -733,7 +709,7 @@ describe('when on the endpoint list page', () => {
 
       describe('when `canReadActionsLogManagement` is TRUE', () => {
         it('should start with the activity log tab as unselected', async () => {
-          const renderResult = await renderAndWaitForData();
+          const renderResult = render();
           const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
           const activityLogTab = renderResult.getByTestId(
             'endpoint-details-flyout-tab-activity_log'
@@ -746,7 +722,7 @@ describe('when on the endpoint list page', () => {
         });
 
         it('should show the activity log content when selected', async () => {
-          const renderResult = await renderAndWaitForData();
+          const renderResult = render();
           const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
           const activityLogTab = renderResult.getByTestId(
             'endpoint-details-flyout-tab-activity_log'
@@ -771,7 +747,7 @@ describe('when on the endpoint list page', () => {
               canAccessFleet: true,
             },
           });
-          const renderResult = await renderAndWaitForData();
+          const renderResult = render();
           const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
           const activityLogTab = renderResult.queryByTestId(
             'endpoint-details-flyout-tab-activity_log'
@@ -796,7 +772,7 @@ describe('when on the endpoint list page', () => {
             history.push(`${MANAGEMENT_PATH}/endpoints?selected_endpoint=1&show=activity_log`);
           });
 
-          const renderResult = await renderAndWaitForData();
+          const renderResult = render();
           const detailsTab = renderResult.getByTestId('endpoint-details-flyout-tab-details');
           const activityLogTab = renderResult.queryByTestId(
             'endpoint-details-flyout-tab-activity_log'
@@ -818,17 +794,13 @@ describe('when on the endpoint list page', () => {
           }
           throw new Error(`POST to '${requestOptions.path}' does not have a mock response!`);
         });
-        renderResult = await renderAndWaitForData();
+        renderResult = render();
         const policyStatusLink = await renderResult.findByTestId('policyStatusValue');
         const userChangedUrlChecker = middlewareSpy.waitForAction('userChangedUrl');
         reactTestingLibrary.act(() => {
           reactTestingLibrary.fireEvent.click(policyStatusLink);
         });
         await userChangedUrlChecker;
-        await middlewareSpy.waitForAction('serverReturnedEndpointPolicyResponse');
-        reactTestingLibrary.act(() => {
-          dispatchServerReturnedEndpointPolicyResponse();
-        });
       });
 
       afterEach(reactTestingLibrary.cleanup);
@@ -898,7 +870,7 @@ describe('when on the endpoint list page', () => {
         reactTestingLibrary.act(() => {
           history.push(`${MANAGEMENT_PATH}/endpoints?selected_endpoint=1&show=isolate`);
         });
-        renderResult = await renderAndWaitForData();
+        renderResult = render();
         // Need to reset `http.post` and adjust it so that the mock for http host
         // isolation api does not output error noise to the console
         coreStart.http.post.mockReset();
@@ -1274,6 +1246,7 @@ describe('when on the endpoint list page', () => {
       expect(banner).toHaveTextContent(transforms[1].id);
     });
   });
+
   describe('endpoint list onboarding screens with RBAC', () => {
     beforeEach(() => {
       setEndpointListApiMockImplementation(coreStart.http, {
@@ -1334,6 +1307,7 @@ describe('when on the endpoint list page', () => {
       expect(startButton).toBeNull();
     });
   });
+
   describe('endpoint list take action with RBAC controls', () => {
     let renderResult: ReturnType<AppContextTestRender['render']>;
 
