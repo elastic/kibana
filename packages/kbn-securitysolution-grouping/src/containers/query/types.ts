@@ -23,32 +23,33 @@ export type NamedAggregation = Record<string, estypes.AggregationsAggregationCon
 export interface GroupingQueryArgs {
   additionalFilters: BoolAgg[];
   from: string;
+  groupByFields: string[];
+  rootAggregations?: NamedAggregation[];
   runtimeMappings?: MappingRuntimeFields;
   additionalAggregationsRoot?: NamedAggregation[];
-  groupByFields: string[];
-  size?: number;
   pageNumber?: number;
+  size?: number;
   sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
-  additionalStatsAggregations: NamedAggregation[];
+  statsAggregations?: NamedAggregation[];
   to: string;
 }
 
 export interface MainAggregation extends NamedAggregation {
   groupByFields: {
-    terms?: estypes.AggregationsAggregationContainer['terms'];
-    multi_terms?: estypes.AggregationsAggregationContainer['multi_terms'];
     aggs: NamedAggregation;
+    multi_terms?: estypes.AggregationsAggregationContainer['multi_terms'];
+    terms?: estypes.AggregationsAggregationContainer['terms'];
   };
 }
 
 export interface GroupingQuery extends estypes.QueryDslQueryContainer {
-  size: number;
-  runtime_mappings: MappingRuntimeFields | undefined;
+  aggs: MainAggregation;
   query: {
     bool: {
       filter: Array<BoolAgg | RangeAgg>;
     };
   };
+  runtime_mappings: MappingRuntimeFields | undefined;
+  size: number;
   _source: boolean;
-  aggs: MainAggregation;
 }

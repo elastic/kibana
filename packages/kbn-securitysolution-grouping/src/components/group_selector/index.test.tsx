@@ -12,6 +12,7 @@ import React from 'react';
 
 const onGroupChange = jest.fn();
 const testProps = {
+  groupingId: 'test-grouping-id',
   fields: [
     {
       name: 'kibana.alert.rule.name',

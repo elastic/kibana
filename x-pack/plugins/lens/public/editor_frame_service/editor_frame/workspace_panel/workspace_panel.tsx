@@ -33,6 +33,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
+import { DragDrop, DragContext, DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
 import {
@@ -50,7 +51,6 @@ import {
   AddUserMessages,
   isMessageRemovable,
 } from '../../../types';
-import { DragDrop, DragContext, DragDropIdentifier } from '../../../drag_drop';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
@@ -711,7 +711,7 @@ export const VisualizationWrapper = ({
               </>
             }
             iconColor="danger"
-            iconType="alert"
+            iconType="warning"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -780,7 +780,7 @@ export const VisualizationWrapper = ({
                     </>
                   }
                   iconColor="danger"
-                  iconType="alert"
+                  iconType="warning"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -23,6 +23,7 @@ import type { DistributiveOmit } from '@elastic/eui';
 import type { ApmBase } from '@elastic/apm-rum';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type {
   CasesByAlertId,
   CasesByAlertIDRequest,
@@ -69,6 +70,7 @@ export interface CasesPluginStart {
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   apm?: ApmBase;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 /**

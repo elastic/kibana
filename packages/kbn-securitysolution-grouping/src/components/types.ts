@@ -23,17 +23,49 @@ export interface GroupingAggregation<T> {
   groupByFields?: {
     buckets?: Array<RawBucket<T>>;
   };
-  groupsNumber?: {
+  groupsCount?: {
     value?: number | null;
   };
-  unitCount0?: {
+  unitsCount?: {
     value?: number | null;
   };
 }
 
-export type GroupingFieldTotalAggregation = Record<
+export type GroupingFieldTotalAggregation<T> = Record<
   string,
-  { value?: number | null; buckets?: Array<{ doc_count?: number | null }> }
+  {
+    value?: number | null;
+    buckets?: Array<RawBucket<T>>;
+  }
 >;
+
+export interface BadgeMetric {
+  value: number;
+  color?: string;
+  width?: number;
+}
+
+export interface StatRenderer {
+  title: string;
+  renderer?: JSX.Element;
+  badge?: BadgeMetric;
+}
+
+export type GroupStatsRenderer<T> = (
+  selectedGroup: string,
+  fieldBucket: RawBucket<T>
+) => StatRenderer[];
+
+export type GroupPanelRenderer<T> = (
+  selectedGroup: string,
+  fieldBucket: RawBucket<T>
+) => JSX.Element | undefined;
+
+export type OnGroupToggle = (params: {
+  isOpen: boolean;
+  groupName?: string | undefined;
+  groupNumber: number;
+  groupingId: string;
+}) => void;
 
 export type { GroupingProps } from './grouping';

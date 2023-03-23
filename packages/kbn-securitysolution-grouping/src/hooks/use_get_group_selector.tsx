@@ -7,12 +7,14 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
-import { getGroupSelector, isNoneGroup } from '../..';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import { GroupSelector, isNoneGroup } from '..';
 import { groupActions, groupByIdSelector } from './state';
 import type { GroupOption } from './types';
 import { Action, defaultGroup, GroupMap } from './types';
+import { getTelemetryEvent } from '../telemetry/const';
 
 export interface UseGetGroupSelectorArgs {
   defaultGroupingOptions: GroupOption[];
@@ -21,6 +23,12 @@ export interface UseGetGroupSelectorArgs {
   groupingId: string;
   groupingState: GroupMap;
   maxGroupingLevels?: number;
+  onGroupChange?: (param: { groupByField: string; tableId: string }) => void;
+  tracker?: (
+    type: UiCounterMetricType,
+    event: string | string[],
+    count?: number | undefined
+  ) => void;
 }
 
 export const useGetGroupSelector = ({
@@ -30,6 +38,8 @@ export const useGetGroupSelector = ({
   groupingId,
   groupingState,
   maxGroupingLevels = 1,
+  onGroupChange,
+  tracker,
 }: UseGetGroupSelectorArgs) => {
   const { activeGroups: selectedGroups, options } =
     groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
@@ -60,7 +70,7 @@ export const useGetGroupSelector = ({
     [dispatch, groupingId]
   );
 
-  const onGroupChange = useCallback(
+  const onChange = useCallback(
     (groupSelection: string) => {
       if (selectedGroups.find((selected) => selected === groupSelection)) {
         const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
@@ -76,6 +86,14 @@ export const useGetGroupSelector = ({
           ? [groupSelection]
           : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection]
       );
+
+      // built-in telemetry: UI-counter
+      tracker?.(
+        METRIC_TYPE.CLICK,
+        getTelemetryEvent.groupChanged({ groupingId, selected: groupSelection })
+      );
+
+      onGroupChange?.({ tableId: groupingId, groupByField: groupSelection });
 
       // only update options if the new selection is a custom field
       if (
@@ -93,11 +111,14 @@ export const useGetGroupSelector = ({
     },
     [
       defaultGroupingOptions,
+      groupingId,
+      onGroupChange,
       options,
       selectedGroups,
       setGroupsActivePage,
       setOptions,
       setSelectedGroups,
+      tracker,
     ]
   );
 
@@ -119,12 +140,17 @@ export const useGetGroupSelector = ({
     );
   }, [defaultGroupingOptions, options, selectedGroups, setOptions]);
 
-  return getGroupSelector({
-    groupsSelected: selectedGroups,
-    'data-test-subj': 'alerts-table-group-selector',
-    onGroupChange,
-    fields,
-    options,
-    maxGroupingLevels,
-  });
+  return (
+    <GroupSelector
+      {...{
+        groupingId,
+        groupsSelected: selectedGroups,
+        'data-test-subj': 'alerts-table-group-selector',
+        onGroupChange: onChange,
+        fields,
+        maxGroupingLevels,
+        options,
+      }}
+    />
+  );
 };

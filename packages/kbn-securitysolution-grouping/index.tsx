@@ -6,22 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import {
-  GroupSelector,
-  GroupSelectorProps,
+import { getGroupingQuery, isNoneGroup, useGrouping } from './src';
+import type {   GroupingAggregation,
+  GroupingFieldTotalAggregation,
+  NamedAggregation,
   RawBucket,
-  getGroupingQuery,
-  isNoneGroup,
-  useGrouping,
+  StatRenderer,
   GroupingProps,
-  GroupsPagingSettingsById,
-} from './src';
-import type { NamedAggregation, GroupingFieldTotalAggregation, GroupingAggregation } from './src';
-
-export const getGroupSelector = (
-  props: GroupSelectorProps
-): React.ReactElement<GroupSelectorProps> => <GroupSelector {...props} />;
+  GroupsPagingSettingsById, } from './src';
 
 export { getGroupingQuery, isNoneGroup, useGrouping };
 
@@ -30,6 +22,7 @@ export type {
   GroupingFieldTotalAggregation,
   NamedAggregation,
   RawBucket,
+  StatRenderer,
   GroupingProps,
   GroupsPagingSettingsById,
 };

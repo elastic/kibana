@@ -21,7 +21,7 @@ import { useUpdateSlo } from '../../hooks/slo/use_update_slo';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
 import { buildSlo } from '../../data/slo/slo';
-import { paths } from '../../config';
+import { paths } from '../../config/paths';
 import { SloEditPage } from './slo_edit';
 
 jest.mock('react-router-dom', () => ({
@@ -403,48 +403,53 @@ describe('SLO Edit Page', () => {
         fireEvent.click(screen.queryByTestId('sloFormSubmitButton')!);
 
         expect(mockUpdate).toMatchInlineSnapshot(`
-            [MockFunction] {
-              "calls": Array [
-                Array [
-                  Object {
-                    "slo": Object {
-                      "budgetingMethod": "occurrences",
-                      "description": "some description useful",
-                      "indicator": Object {
-                        "params": Object {
-                          "filter": "baz: foo and bar > 2",
-                          "good": "http_status: 2xx",
-                          "index": "some-index",
-                          "total": "a query",
-                        },
-                        "type": "sli.kql.custom",
-                      },
-                      "name": "super important level service",
-                      "objective": Object {
-                        "target": 0.98,
-                      },
-                      "settings": Object {
-                        "frequency": "1m",
-                        "syncDelay": "1m",
-                        "timestampField": "@timestamp",
-                      },
-                      "timeWindow": Object {
-                        "duration": "30d",
-                        "isRolling": true,
-                      },
-                    },
-                    "sloId": "123",
-                  },
-                ],
-              ],
-              "results": Array [
+          [MockFunction] {
+            "calls": Array [
+              Array [
                 Object {
-                  "type": "return",
-                  "value": undefined,
+                  "slo": Object {
+                    "budgetingMethod": "occurrences",
+                    "description": "some description useful",
+                    "indicator": Object {
+                      "params": Object {
+                        "filter": "baz: foo and bar > 2",
+                        "good": "http_status: 2xx",
+                        "index": "some-index",
+                        "timestampField": "custom_timestamp",
+                        "total": "a query",
+                      },
+                      "type": "sli.kql.custom",
+                    },
+                    "name": "super important level service",
+                    "objective": Object {
+                      "target": 0.98,
+                    },
+                    "settings": Object {
+                      "frequency": "1m",
+                      "syncDelay": "1m",
+                    },
+                    "tags": Array [
+                      "k8s",
+                      "production",
+                      "critical",
+                    ],
+                    "timeWindow": Object {
+                      "duration": "30d",
+                      "isRolling": true,
+                    },
+                  },
+                  "sloId": "123",
                 },
               ],
-            }
-          `);
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+            ],
+          }
+        `);
       });
 
       it('blocks submitting if not all required values are filled in', async () => {

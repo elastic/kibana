@@ -8,7 +8,6 @@
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { get } from 'lodash/fp';
 import styled from 'styled-components';
 import { UsersTableType } from '../../../../explore/users/store/model';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
@@ -36,9 +35,11 @@ const StyledCellActions = styled(SecurityCellActions)`
   padding-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
+type OpenEntityOnAlertsPage = (entityName: string) => void;
+
 export const getRiskScoreColumns = (
   riskEntity: RiskScoreEntity,
-  openEntityInTimeline: (entityName: string, oldestAlertTimestamp?: string) => void
+  openEntityOnAlertsPage: OpenEntityOnAlertsPage
 ): HostRiskScoreColumns => [
   {
     field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
@@ -114,7 +115,7 @@ export const getRiskScoreColumns = (
     name: (
       <EuiToolTip content={i18n.ENTITY_RISK_TOOLTIP(riskEntity)}>
         <>
-          {i18n.ENTITY_RISK(riskEntity)}
+          {i18n.ENTITY_RISK_CLASSIFICATION(riskEntity)}
           <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
         </>
       </EuiToolTip>
@@ -139,9 +140,8 @@ export const getRiskScoreColumns = (
         data-test-subj="risk-score-alerts"
         disabled={alertCount === 0}
         onClick={() =>
-          openEntityInTimeline(
-            get('host.name', risk) ?? get('user.name', risk),
-            risk.oldestAlertTimestamp
+          openEntityOnAlertsPage(
+            riskEntity === RiskScoreEntity.host ? risk.host.name : risk.user.name
           )
         }
       >

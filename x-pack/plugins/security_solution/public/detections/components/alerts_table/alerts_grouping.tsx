@@ -5,21 +5,29 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
 import { useGrouping } from '@kbn/securitysolution-grouping';
 import type { TableIdLiteral } from '../../../../common/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
+import { defaultUnit } from '../../../common/components/toolbar/unit';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-
-import { getDefaultGroupingOptions } from './grouping_settings';
+import {
+  getAlertsGroupingQuery,
+  getDefaultGroupingOptions,
+  renderGroupPanel,
+  getStats,
+  useGroupTakeActionsItems } from './grouping_settings';
+import { useKibana } from '../../../common/lib/kibana';
 import { updateGroupSelector, updateSelectedGroup } from '../../../common/store/grouping/actions';
 import { GroupedSubLevel } from './alerts_sub_grouping';
+import { track } from '../../../common/lib/telemetry';
 
-interface OwnProps {
+
+export interface AlertsTableComponentProps {
   currentAlertStatusFilterValue?: Status;
   defaultFilters?: Filter[];
   from: string;
@@ -35,9 +43,8 @@ interface OwnProps {
   to: string;
 }
 
-export type AlertsTableComponentProps = OwnProps;
-
 export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
+  currentAlertStatusFilterValue,
   defaultFilters = [],
   from,
   globalFilters,
@@ -45,21 +52,48 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   hasIndexMaintenance,
   hasIndexWrite,
   loading,
-  tableId,
-  to,
+  renderChildComponent,
   runtimeMappings,
   signalIndexName,
-  currentAlertStatusFilterValue,
-  renderChildComponent,
+  tableId,
+  to,
 }) => {
   const dispatch = useDispatch();
 
   const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
+  const {
+    services: { telemetry },
+  } = useKibana();
+  const { onGroupChange, onGroupToggle } = useMemo(
+    () => ({
+      onGroupChange: (param: { groupByField: string; tableId: string }) => {
+        telemetry.reportAlertsGroupingChanged(param);
+      },
+      onGroupToggle: (param: {
+        isOpen: boolean;
+        groupName?: string | undefined;
+        groupNumber: number;
+        groupingId: string;
+      }) => telemetry.reportAlertsGroupingToggled({ ...param, tableId: param.groupingId }),
+    }),
+    [telemetry]
+  );
+
   const { groupSelector, getGrouping, selectedGroups, pagination } = useGrouping({
+    componentProps: {
+      groupPanelRenderer: renderGroupPanel,
+      groupStatsRenderer: getStats,
+      // inspectButton: inspect,
+      onGroupToggle,
+      renderChildComponent,
+      unit: defaultUnit,
+    },
     defaultGroupingOptions: getDefaultGroupingOptions(tableId),
-    groupingId: tableId,
     fields: indexPattern.fields,
+    groupingId: tableId,
     maxGroupingLevels: 3,
+    onGroupChange,
+    tracker: track,
   });
   const resetPagination = pagination.reset;
 
