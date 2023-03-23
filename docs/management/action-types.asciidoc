@@ -165,7 +165,7 @@ button appears in *{connectors-ui}*.
 image::images/connectors-with-missing-secrets.png[Connectors with missing secrets]
 
 [float]
-[[montoring-connectors]]
+[[monitoring-connectors]]
 === Monitoring connectors
 
 The <<task-manager-health-monitoring,Task Manager health API>> helps you understand the performance of all tasks in your environment.
