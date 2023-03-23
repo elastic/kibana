@@ -9,8 +9,8 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core-http-server';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import { VERSION_HEADER } from './internal_versioned_route';
-import { InternalVersionedRouter } from '.';
+import { VERSION_HEADER } from './core_versioned_route';
+import { CoreVersionedRouter } from '.';
 import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
 describe('Versioned route', () => {
@@ -21,7 +21,7 @@ describe('Versioned route', () => {
   });
 
   it('can register multiple handlers', () => {
-    const versionedRouter = InternalVersionedRouter.from({ router });
+    const versionedRouter = CoreVersionedRouter.from({ router });
     versionedRouter
       .get({ path: '/test/{id}', access: 'internal' })
       .addVersion({ version: '1', validate: false }, handlerFn)
@@ -36,7 +36,7 @@ describe('Versioned route', () => {
   });
 
   it('does not allow specifying a handler for the same version more than once', () => {
-    const versionedRouter = InternalVersionedRouter.from({ router });
+    const versionedRouter = CoreVersionedRouter.from({ router });
     expect(() =>
       versionedRouter
         .get({ path: '/test/{id}', access: 'internal' })
@@ -55,7 +55,7 @@ describe('Versioned route', () => {
     let validatedOutputBody = false;
 
     (router.post as jest.Mock).mockImplementation((opts: unknown, fn) => (handler = fn));
-    const versionedRouter = InternalVersionedRouter.from({ router });
+    const versionedRouter = CoreVersionedRouter.from({ router });
     versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
       {
         version: '1',

@@ -32,7 +32,7 @@ export const VERSION_HEADER = 'TBD';
 // This validation is a pass-through so that we can apply our version-specific validation later
 const passThroughValidation = { body: schema.any(), params: schema.any(), query: schema.any() };
 
-export class InternalVersionedRoute implements VersionedRoute {
+export class CoreVersionedRoute implements VersionedRoute {
   private readonly handlers = new Map<
     Version,
     {
@@ -52,7 +52,7 @@ export class InternalVersionedRoute implements VersionedRoute {
     path: string;
     options: VersionedRouteConfig<Method>;
   }) {
-    return new InternalVersionedRoute(router, method, path, options);
+    return new CoreVersionedRoute(router, method, path, options);
   }
 
   private constructor(

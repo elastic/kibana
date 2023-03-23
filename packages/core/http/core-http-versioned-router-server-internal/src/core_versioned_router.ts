@@ -8,20 +8,20 @@
 
 import type { IRouter } from '@kbn/core-http-server';
 import type { VersionedRouter, VersionedRoute, VersionedRouteConfig } from '@kbn/core-http-server';
-import { InternalVersionedRoute } from './internal_versioned_route';
+import { CoreVersionedRoute } from './core_versioned_route';
 import { Method, VersionedRouterRoute } from './types';
 
-export class InternalVersionedRouter implements VersionedRouter {
-  private readonly routes = new Set<InternalVersionedRoute>();
+export class CoreVersionedRouter implements VersionedRouter {
+  private readonly routes = new Set<CoreVersionedRoute>();
   public static from({ router }: { router: IRouter }) {
-    return new InternalVersionedRouter(router);
+    return new CoreVersionedRouter(router);
   }
   private constructor(private readonly router: IRouter) {}
 
   private registerVersionedRoute =
     (routeMethod: Method) =>
     (options: VersionedRouteConfig<Method>): VersionedRoute<Method, any> => {
-      const route = InternalVersionedRoute.from({
+      const route = CoreVersionedRoute.from({
         router: this.router,
         method: routeMethod,
         path: options.path,

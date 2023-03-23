@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { InternalVersionedRouter } from './internal_versioned_router';
+export { CoreVersionedRouter } from './core_versioned_router';

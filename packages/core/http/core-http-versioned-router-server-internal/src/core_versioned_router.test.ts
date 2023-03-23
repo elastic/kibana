@@ -8,7 +8,7 @@
 
 import type { IRouter } from '@kbn/core-http-server';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import { InternalVersionedRouter } from '.';
+import { CoreVersionedRouter } from '.';
 
 describe('Versioned router', () => {
   let router: IRouter;
@@ -17,7 +17,7 @@ describe('Versioned router', () => {
   });
 
   it('can register multiple routes', () => {
-    const versionedRouter = InternalVersionedRouter.from({ router });
+    const versionedRouter = CoreVersionedRouter.from({ router });
     versionedRouter.get({ path: '/test/{id}', access: 'internal' });
     versionedRouter.post({ path: '/test', access: 'internal' });
     versionedRouter.delete({ path: '/test', access: 'internal' });
