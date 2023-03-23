@@ -97,14 +97,12 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
 
+    const validation = handler.options.validate || undefined;
+
     const coreKibanaRequest = req as CoreKibanaRequest;
-    if (handler.options.validate && handler.options.validate.request) {
+    if (validation?.request) {
       try {
-        const { body, params, query } = validate(
-          req,
-          handler.options.validate.request,
-          handler.options.version
-        );
+        const { body, params, query } = validate(req, validation.request, handler.options.version);
         coreKibanaRequest.body = body;
         coreKibanaRequest.params = params;
         coreKibanaRequest.query = query;
@@ -123,12 +121,11 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     const result = await handler.fn(ctx, req, res);
 
-    if (this.validateResponses && handler.options.validate && handler.options.validate.response) {
-      const { response } = handler.options.validate;
+    if (this.validateResponses && validation?.response) {
       try {
         validate(
           req,
-          { body: response.body, unsafe: { body: response.unsafe } },
+          { body: validation.response.body, unsafe: { body: validation.response.unsafe } },
           handler.options.version
         );
       } catch (e) {
