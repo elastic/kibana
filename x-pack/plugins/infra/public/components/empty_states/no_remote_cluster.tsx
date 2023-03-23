@@ -17,7 +17,7 @@ export const NoRemoteCluster = () => {
   const goToSettings = (
     <EuiButton data-test-subj="infraHostsPageGoToSettings" color="danger" {...settingLinkProps}>
       {i18n.translate('xpack.infra.hostsPage.goToMetricsSettings', {
-        defaultMessage: 'Go to Metrics Settings',
+        defaultMessage: 'Check settings',
       })}
     </EuiButton>
   );
