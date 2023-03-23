@@ -108,7 +108,6 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
     [Header, passedProps]
   );
 
-  console.log('flyout', alert);
   return (
     <EuiFlyout onClose={onClose} size={flyoutSize} data-test-subj="alertsFlyout" ownFocus={false}>
       {isLoading && <EuiProgress size="xs" color="accent" data-test-subj="alertsFlyoutLoading" />}
