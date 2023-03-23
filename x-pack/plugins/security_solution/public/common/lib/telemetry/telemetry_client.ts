@@ -11,6 +11,9 @@ import type {
   ReportAlertsGroupingChangedParams,
   ReportAlertsGroupingToggledParams,
   ReportAlertsTakeActionParams,
+  ReportEntityDetailsClickedParams,
+  ReportEntityAlertsClickedParams,
+  ReportEntityRiskFilteredParams,
 } from './types';
 import { TelemetryEventTypes } from './types';
 
@@ -56,6 +59,28 @@ export class TelemetryClient implements TelemetryClientStart {
       groupNumber,
       status,
       groupByField,
+    });
+  };
+
+  public reportEntityDetailsClicked = ({ entity }: ReportEntityDetailsClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.EntityDetailsClicked, {
+      entity,
+    });
+  };
+
+  public reportEntityAlertsClicked = ({ entity }: ReportEntityAlertsClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.EntityAlertsClicked, {
+      entity,
+    });
+  };
+
+  public reportEntityRiskFiltered = ({
+    entity,
+    selectedSeverity,
+  }: ReportEntityRiskFilteredParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.EntityRiskFiltered, {
+      entity,
+      selectedSeverity,
     });
   };
 }

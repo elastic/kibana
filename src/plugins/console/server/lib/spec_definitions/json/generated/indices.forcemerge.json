@@ -12,7 +12,8 @@
         "all"
       ],
       "max_num_segments": "dynamic",
-      "only_expunge_deletes": "__flag__"
+      "only_expunge_deletes": "__flag__",
+      "wait_for_completion": "__flag__"
     },
     "methods": [
       "POST"

@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiHighlight } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
@@ -19,19 +18,17 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   FieldList,
   FieldListFilters,
-  FieldIcon,
+  FieldItemButton,
   GetCustomFieldType,
-  wrapFieldNameOnDot,
   FieldListGrouped,
   FieldListGroupedProps,
   FieldsGroupNames,
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
-import { FieldButton } from '@kbn/react-field';
+import { ChildDragDropProvider, DragDrop } from '@kbn/dom-drag-drop';
 import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
-import { ChildDragDropProvider, DragDrop } from '../../drag_drop';
 
 const getCustomFieldType: GetCustomFieldType<DatatableColumn> = (field) => field?.meta.type;
 
@@ -126,16 +123,13 @@ export function TextBasedDataPanel({
           }}
           dataTestSubj={`lnsFieldListPanelField-${field.name}`}
         >
-          <FieldButton
-            className={`lnsFieldItem lnsFieldItem--${field.meta.type}`}
+          <FieldItemButton<DatatableColumn>
+            isEmpty={false}
             isActive={false}
+            field={field}
+            fieldSearchHighlight={fieldSearchHighlight}
+            getCustomFieldType={getCustomFieldType}
             onClick={() => {}}
-            fieldIcon={<FieldIcon type={getCustomFieldType(field)} />}
-            fieldName={
-              <EuiHighlight search={wrapFieldNameOnDot(fieldSearchHighlight)}>
-                {wrapFieldNameOnDot(field.name)}
-              </EuiHighlight>
-            }
           />
         </DragDrop>
       );

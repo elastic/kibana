@@ -7,13 +7,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-
 import { PageTitle, PageTitleProps } from './page_title';
+import { alert } from '../mock/alert';
 
 describe('Page Title', () => {
   const defaultProps = {
-    title: 'Great success',
-    active: true,
+    alert,
   };
 
   const renderComp = (props: PageTitleProps) => {
@@ -22,7 +21,7 @@ describe('Page Title', () => {
 
   it('should display a title when it is passed', () => {
     const { getByText } = renderComp(defaultProps);
-    expect(getByText(defaultProps.title)).toBeTruthy();
+    expect(getByText(defaultProps.alert.reason)).toBeTruthy();
   });
 
   it('should display an active badge when active is true', async () => {
@@ -31,14 +30,10 @@ describe('Page Title', () => {
   });
 
   it('should display an inactive badge when active is false', async () => {
-    const { getByText } = renderComp({ ...defaultProps, active: false });
+    const updatedProps = { alert };
+    updatedProps.alert.active = false;
 
+    const { getByText } = renderComp({ ...updatedProps });
     expect(getByText('Recovered')).toBeTruthy();
-  });
-
-  it('should display no badge when active is not passed', async () => {
-    const { queryByTestId } = renderComp({ title: '123' });
-
-    expect(queryByTestId('page-title-active-badge')).not.toBeInTheDocument();
   });
 });

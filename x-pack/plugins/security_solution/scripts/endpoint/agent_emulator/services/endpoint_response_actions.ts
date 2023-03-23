@@ -248,27 +248,29 @@ export const sendEndpointActionResponse = async (
     // Index the file content (just one chunk)
     // call to `.index()` copied from File plugin here:
     // https://github.com/elastic/kibana/blob/main/src/plugins/files/server/blob_storage_service/adapters/es/content_stream/content_stream.ts#L195
-    await esClient.index(
-      {
-        index: FILE_STORAGE_DATA_INDEX,
-        id: `${fileMeta._id}.0`,
-        document: cborx.encode({
-          bid: fileMeta._id,
-          last: true,
-          data: Buffer.from(
-            'UEsDBAoACQAAAFZeRFWpAsDLHwAAABMAAAAMABwAYmFkX2ZpbGUudHh0VVQJAANTVjxjU1Y8Y3V4CwABBPUBAAAEFAAAAMOcoyEq/Q4VyG02U9O0LRbGlwP/y5SOCfRKqLz1rsBQSwcIqQLAyx8AAAATAAAAUEsBAh4DCgAJAAAAVl5EVakCwMsfAAAAEwAAAAwAGAAAAAAAAQAAAKSBAAAAAGJhZF9maWxlLnR4dFVUBQADU1Y8Y3V4CwABBPUBAAAEFAAAAFBLBQYAAAAAAQABAFIAAAB1AAAAAAA=',
-            'base64'
-          ),
-        }),
-        refresh: 'wait_for',
-      },
-      {
-        headers: {
-          'content-type': 'application/cbor',
-          accept: 'application/json',
+    await esClient
+      .index(
+        {
+          index: FILE_STORAGE_DATA_INDEX,
+          id: `${fileMeta._id}.0`,
+          document: cborx.encode({
+            bid: fileMeta._id,
+            last: true,
+            data: Buffer.from(
+              'UEsDBAoACQAAAFZeRFWpAsDLHwAAABMAAAAMABwAYmFkX2ZpbGUudHh0VVQJAANTVjxjU1Y8Y3V4CwABBPUBAAAEFAAAAMOcoyEq/Q4VyG02U9O0LRbGlwP/y5SOCfRKqLz1rsBQSwcIqQLAyx8AAAATAAAAUEsBAh4DCgAJAAAAVl5EVakCwMsfAAAAEwAAAAwAGAAAAAAAAQAAAKSBAAAAAGJhZF9maWxlLnR4dFVUBQADU1Y8Y3V4CwABBPUBAAAEFAAAAFBLBQYAAAAAAQABAFIAAAB1AAAAAAA=',
+              'base64'
+            ),
+          }),
+          refresh: 'wait_for',
         },
-      }
-    );
+        {
+          headers: {
+            'content-type': 'application/cbor',
+            accept: 'application/json',
+          },
+        }
+      )
+      .then(() => sleep(2000));
   }
 
   return endpointResponse;
