@@ -27,12 +27,12 @@ export function useInspector({
   inspector: InspectorPublicPluginStart;
   stateContainer: DiscoverStateContainer;
 }) {
-  const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
     stateContainer.internalState.transitions.setExpandedDoc(undefined);
+    const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
 
     const requestAdapters = inspectorAdapters.lensRequests
       ? [inspectorAdapters.requests, inspectorAdapters.lensRequests]
@@ -44,13 +44,7 @@ export function useInspector({
     );
 
     setInspectorSession(session);
-  }, [
-    stateContainer,
-    inspectorAdapters.lensRequests,
-    inspectorAdapters.requests,
-    inspector,
-    stateContainer.savedSearchState,
-  ]);
+  }, [stateContainer, inspector]);
 
   useEffect(() => {
     return () => {
