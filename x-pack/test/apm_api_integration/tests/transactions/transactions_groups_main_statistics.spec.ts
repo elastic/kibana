@@ -254,12 +254,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('should have transaction named _other', () => {
-          const serviceNamesList = response.body.transactionGroups.map((item) => item.name);
-          expect(serviceNamesList.includes(OVERFLOW_BUCKET_NAME)).to.be(true);
+          const transactionNamesList = response.body.transactionGroups.map((item) => item.name);
+          expect(transactionNamesList.includes(OVERFLOW_BUCKET_NAME)).to.be(true);
         });
 
         it('should have the correct value for transactionOverflowCount', function () {
-          expect(response.body.transactionOverflowCount).to.be(1015);
+          expect(response.body.transactionOverflowCount).to.be(290);
         });
       });
     }

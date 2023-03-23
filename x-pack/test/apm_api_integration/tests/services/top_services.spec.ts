@@ -554,10 +554,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ],
           {
             overflowSettings: {
-              maxGroups: 800,
+              maxGroups: 5,
               transactions: {
-                maxServices: 3,
-                maxTransactionGroupsPerService: 3,
+                maxServices: 2,
+                maxTransactionGroupsPerService: 2,
               },
             },
           }
@@ -601,7 +601,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('should have the correct value for serviceOverflowCount', function () {
-          expect(response.body.serviceOverflowCount).to.be(8);
+          expect(response.body.serviceOverflowCount).to.be(540);
         });
       });
     }

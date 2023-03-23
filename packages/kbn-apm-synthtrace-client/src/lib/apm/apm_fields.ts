@@ -154,6 +154,7 @@ export type ApmFields = Fields<{
     'service.target.type': string;
     'service.version': string;
     'service_transaction.aggregation.overflow_count': number;
+    'service_summary.aggregation.overflow_count': number;
     'span.action': string;
     'span.destination.service.resource': string;
     'span.destination.service.response_time.count': number;

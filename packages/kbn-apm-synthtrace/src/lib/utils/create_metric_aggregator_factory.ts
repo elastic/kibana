@@ -16,7 +16,7 @@ interface MetricGroupTracker {
   untracked: Set<any>;
 }
 
-interface GroupingOptions<TFields extends Fields> {
+export interface GroupingOptions<TFields extends Fields> {
   maxTotalGroups: number;
   overflowGroupingKey: string;
   overflowCountField: string;
@@ -105,6 +105,7 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
       if (!set) {
         set = init(event);
         set['@timestamp'] = timestamp;
+        // @ts-expect-error
         set[overflowFieldName] = 0;
         metrics.set(id, set);
       }
@@ -131,6 +132,7 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
         if (!isUntracked) {
           tracker.untracked.add(trackingKey);
+          // @ts-expect-error
           set[overflowFieldName]!++;
         }
 
@@ -179,6 +181,7 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
           set = getOrCreateOverflowSet(overflowBucketKey, trackingObject, timestamp);
 
           // increase the overflow count
+          // @ts-expect-error
           set[overflowFieldName]!++;
 
           return set;
