@@ -5,9 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import styled from 'styled-components';
 
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFieldSearch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch } from '@elastic/eui';
 import { AddFile } from './add_file';
 
 import * as i18n from './translations';
@@ -16,25 +15,6 @@ interface FilesUtilityBarProps {
   caseId: string;
   onSearch: (newSearch: string) => void;
 }
-
-const HiddenButtonGroup = styled(EuiButtonGroup)`
-  display: none;
-`;
-
-const tableViewSelectedId = 'tableViewSelectedId';
-const toggleButtonsIcons = [
-  {
-    id: 'thumbnailViewSelectedId',
-    label: 'Thumbnail view',
-    iconType: 'grid',
-    isDisabled: true,
-  },
-  {
-    id: tableViewSelectedId,
-    label: 'Table view',
-    iconType: 'editorUnorderedList',
-  },
-];
 
 export const FilesUtilityBar = ({ caseId, onSearch }: FilesUtilityBarProps) => {
   return (
@@ -49,16 +29,6 @@ export const FilesUtilityBar = ({ caseId, onSearch }: FilesUtilityBarProps) => {
           onSearch={onSearch}
           incremental={false}
           data-test-subj="case-detail-search-file"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem />
-      <EuiFlexItem grow={false}>
-        <HiddenButtonGroup
-          legend="Text align"
-          options={toggleButtonsIcons}
-          idSelected={tableViewSelectedId}
-          onChange={() => {}}
-          isIconOnly
         />
       </EuiFlexItem>
     </EuiFlexGroup>

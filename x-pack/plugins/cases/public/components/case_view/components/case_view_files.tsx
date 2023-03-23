@@ -80,6 +80,7 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
           <EuiFlexItem>
             <FilesUtilityBar caseId={caseData.id} onSearch={onSearchChange} />
             <FilesTable
+              caseId={caseData.id}
               isLoading={isLoading}
               items={caseFiles?.files ?? []}
               onChange={onTableChange}

@@ -14,6 +14,7 @@ import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { FilesTable } from './files_table';
 
 const defaultProps = {
+  caseId: 'foobar',
   items: [basicFileMock],
   pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 1 },
   onChange: jest.fn(),

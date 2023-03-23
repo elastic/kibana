@@ -35,10 +35,10 @@ export const FilePreview = ({ closePreview, selectedFile, getDownloadHref }: Fil
     <StyledOverlayMask>
       <EuiFocusTrap onClickOutside={closePreview}>
         <EuiImage
-          alt=""
+          alt={selectedFile.name}
           size="original"
           src={getDownloadHref({
-            id: selectedFile?.id || '',
+            id: selectedFile.id || '',
             fileKind: CASES_FILE_KINDS[APP_ID].id,
           })}
         />

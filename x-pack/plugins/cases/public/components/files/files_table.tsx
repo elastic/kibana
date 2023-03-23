@@ -9,43 +9,34 @@ import React, { useMemo, useState } from 'react';
 import type { Pagination, EuiBasicTableProps } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import {
-  EuiBasicTable,
-  EuiLoadingContent,
-  EuiSpacer,
-  EuiText,
-  EuiEmptyPrompt,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiLoadingContent, EuiSpacer, EuiText, EuiEmptyPrompt } from '@elastic/eui';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 
 import * as i18n from './translations';
 import { useFilesTableColumns } from './use_files_table_columns';
 import { FilePreview } from './file_preview';
+import { AddFile } from './add_file';
 
-const EmptyFilesTable = () => (
+const EmptyFilesTable = ({ caseId }: { caseId: string }) => (
   <EuiEmptyPrompt
     title={<h3>{i18n.NO_FILES}</h3>}
     data-test-subj="cases-files-table-empty"
     titleSize="xs"
-    actions={
-      <EuiButton size="s" iconType="plusInCircle" data-test-subj="case-files-table-upload-file">
-        {i18n.ADD_FILE}
-      </EuiButton>
-    }
+    actions={<AddFile caseId={caseId} />}
   />
 );
 
 EmptyFilesTable.displayName = 'EmptyFilesTable';
 
 interface FilesTableProps {
+  caseId: string;
   isLoading: boolean;
   items: FileJSON[];
   onChange: EuiBasicTableProps<FileJSON>['onChange'];
   pagination: Pagination;
 }
 
-export const FilesTable = ({ items, pagination, onChange, isLoading }: FilesTableProps) => {
+export const FilesTable = ({ caseId, items, pagination, onChange, isLoading }: FilesTableProps) => {
   const { client: filesClient } = useFilesContext();
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [selectedFile, setSelectedFile] = useState<FileJSON>();
@@ -76,7 +67,10 @@ export const FilesTable = ({ items, pagination, onChange, isLoading }: FilesTabl
   );
 
   return isLoading ? (
-    <EuiLoadingContent data-test-subj="cases-files-table-loading" lines={10} />
+    <>
+      <EuiSpacer size="l" />
+      <EuiLoadingContent data-test-subj="cases-files-table-loading" lines={10} />
+    </>
   ) : (
     <>
       {pagination.totalItemCount > 0 && (
@@ -95,7 +89,7 @@ export const FilesTable = ({ items, pagination, onChange, isLoading }: FilesTabl
         pagination={pagination}
         onChange={onChange}
         data-test-subj="cases-files-table"
-        noItemsMessage={<EmptyFilesTable />}
+        noItemsMessage={<EmptyFilesTable caseId={caseId} />}
       />
       {isPreviewVisible && selectedFile !== undefined && (
         <FilePreview
