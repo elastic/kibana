@@ -23,6 +23,8 @@ import type { Method } from './types';
 
 type Options = AddVersionOpts<unknown, unknown, unknown, unknown>;
 
+const VERSION_HEADER = 'Elastic-Api-Version';
+
 export class InternalVersionedRoute implements VersionedRoute {
   private readonly handlers = new Map<
     Version,
@@ -45,11 +47,27 @@ export class InternalVersionedRoute implements VersionedRoute {
     req: KibanaRequest,
     res: KibanaResponseFactory
   ) => {
-    return res.ok();
+    const version = req.headers[VERSION_HEADER] as undefined | Version;
+    if (!version) {
+      return res.custom({
+        statusCode: 406,
+        body: `No ${version} available "${this.method} ${this.path}". Please specify a version in the ${VERSION_HEADER} header.`,
+      });
+    }
+    const handler = this.handlers.get(version)?.handler;
+    if (!handler) {
+      return res.custom({
+        statusCode: 406,
+        body: `No ${version} available for ${this.method} ${this.path}. Available versions are: ${[
+          this.handlers.keys(),
+        ].join(',')}`,
+      });
+    }
+    return await handler(ctx, req, res);
   };
 
   public addVersion(options: Options, handler: RequestHandler<any, any, any, any>): VersionedRoute {
-    if (!this.handlers.has(options.version)) {
+    if (this.handlers.has(options.version)) {
       throw new Error(
         `Version ${
           options.version
