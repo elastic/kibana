@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "scripts/**/*",
     "__mocks__/**/*",
     "../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
@@ -15,7 +16,6 @@
   ],
   "exclude": [
     "target/**/*",
-    "scripts/apidoc_scripts/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
