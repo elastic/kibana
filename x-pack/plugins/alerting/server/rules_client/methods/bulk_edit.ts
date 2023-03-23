@@ -46,6 +46,7 @@ import {
   getBulkSnoozeAttributes,
   getBulkUnsnoozeAttributes,
   verifySnoozeScheduleLimit,
+  injectReferencesIntoParams,
 } from '../common';
 import {
   alertingAuthorizationFilterOpts,
@@ -419,10 +420,16 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
 
     validateScheduleInterval(context, attributes.schedule.interval, ruleType.id, rule.id);
 
+    const params = injectReferencesIntoParams<Params, RuleTypeParams>(
+      rule.id,
+      ruleType,
+      attributes.params,
+      rule.references || []
+    );
     const { modifiedParams: ruleParams, isParamsUpdateSkipped } = paramsModifier
-      ? await paramsModifier(attributes.params as Params)
+      ? await paramsModifier(params)
       : {
-          modifiedParams: attributes.params as Params,
+          modifiedParams: params,
           isParamsUpdateSkipped: true,
         };
 
