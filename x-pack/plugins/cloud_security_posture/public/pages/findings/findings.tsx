@@ -18,6 +18,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { Redirect, Switch, useHistory, useLocation } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
+import { NoFindingsStates } from '../../components/no_findings_states';
+import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { Configurations } from '../configurations';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { Vulnerabilities } from '../vulnerabilities';
@@ -25,6 +27,13 @@ import { Vulnerabilities } from '../vulnerabilities';
 export const Findings = () => {
   const history = useHistory();
   const location = useLocation();
+  const getSetupStatus = useCspSetupStatusApi();
+
+  const hasFindings =
+    getSetupStatus.data?.indicesDetails[0].status === 'not-empty' ||
+    getSetupStatus.data?.kspm.status === 'indexed' ||
+    getSetupStatus.data?.cspm.status === 'indexed';
+  if (!hasFindings) return <NoFindingsStates posturetype={'cspm'} />;
 
   const navigateToVulnerabilitiesTab = () => {
     history.push({ pathname: findingsNavigation.vulnerabilities.path });
