@@ -11,8 +11,8 @@ import type { VersionedTransformer } from '../../document_migrator';
 export const createDocumentMigrator = (): jest.Mocked<VersionedTransformer> => {
   return {
     migrationVersion: {},
-    migrate: jest.fn().mockImplementation((doc: any) => doc),
-    migrateAndConvert: jest.fn().mockImplementation((doc: any) => [doc]),
+    migrate: jest.fn().mockImplementation((doc: unknown) => doc),
+    migrateAndConvert: jest.fn().mockImplementation((doc: unknown) => [doc]),
     prepareMigrations: jest.fn(),
   };
 };
