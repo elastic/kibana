@@ -396,7 +396,7 @@ const AlertsTableStateWithQueryProvider = ({
         <CasesContext
           owner={alertsTableConfiguration.cases?.owner ?? []}
           permissions={casesPermissions}
-          features={{ alerts: { sync: false } }}
+          features={{ alerts: { sync: alertsTableConfiguration.cases?.syncAlerts ?? false } }}
         >
           <AlertsTableWithBulkActionsContext
             tableProps={tableProps}

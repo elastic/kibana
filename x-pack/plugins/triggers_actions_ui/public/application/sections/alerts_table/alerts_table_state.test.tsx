@@ -410,6 +410,26 @@ describe('AlertsTableState', () => {
         {}
       );
     });
+
+    it('should call the cases context with sync alerts turned on if defined in the cases config', async () => {
+      const props = mockCustomProps({
+        cases: { featureId: 'test-feature-id', owner: ['test-owner'], syncAlerts: true },
+      });
+
+      const CasesContextMock = jest.fn().mockReturnValue(null);
+      mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
+
+      render(<AlertsTableWithLocale {...props} />);
+      expect(CasesContextMock).toHaveBeenCalledWith(
+        {
+          children: expect.anything(),
+          owner: ['test-owner'],
+          permissions: { create: true, read: true },
+          features: { alerts: { sync: true } },
+        },
+        {}
+      );
+    });
   });
 
   describe('Alerts table configuration registry', () => {
