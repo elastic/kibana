@@ -8,11 +8,11 @@
 
 import './discover_field.scss';
 
-import React, { useState, useCallback, memo, useMemo } from 'react';
-import { EuiTitle, EuiSpacer } from '@elastic/eui';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   FieldItemButton,
   type FieldItemButtonProps,
@@ -20,12 +20,13 @@ import {
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
   FieldPopoverVisualize,
+  FieldsGroupNames,
 } from '@kbn/unified-field-list-plugin/public';
 import { DragDrop } from '@kbn/dom-drag-drop';
 import { DiscoverFieldStats } from './discover_field_stats';
 import { DiscoverFieldDetails } from './deprecated_stats/discover_field_details';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { SHOW_LEGACY_FIELD_TOP_VALUES, PLUGIN_ID } from '../../../../../common';
+import { PLUGIN_ID, SHOW_LEGACY_FIELD_TOP_VALUES } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
 import { type DataDocuments$ } from '../../services/discover_data_state_container';
 
@@ -184,6 +185,11 @@ export interface DiscoverFieldProps {
   highlight?: string;
 
   /**
+   * Group name in the field list
+   */
+  groupName: FieldsGroupNames;
+
+  /**
    * Group index in the field list
    */
   groupIndex: number;
@@ -211,6 +217,7 @@ function DiscoverFieldComponent({
   onDeleteField,
   showFieldStats,
   contextualFields,
+  groupName,
   groupIndex,
   itemIndex,
 }: DiscoverFieldProps) {
@@ -341,9 +348,10 @@ function DiscoverFieldComponent({
           order={order}
           value={value}
           onDragStart={closePopover}
-          isDisabled={alwaysShowActionButton}
+          isDisabled={alwaysShowActionButton || groupName === FieldsGroupNames.SelectedFields}
         >
           <FieldItemButton
+            size="xs"
             fieldSearchHighlight={highlight}
             className="dscSidebarItem"
             isEmpty={isEmpty}
