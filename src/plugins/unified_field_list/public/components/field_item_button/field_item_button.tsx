@@ -27,6 +27,7 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
   isEmpty: boolean; // whether the field has data or not
   infoIcon?: FieldButtonProps['fieldInfoIcon'];
   className?: FieldButtonProps['className'];
+  flush?: FieldButtonProps['flush'];
   getCustomFieldType?: GetCustomFieldType<T>;
   dataTestSubj?: string;
   size?: FieldButtonProps['size'];

@@ -94,6 +94,7 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
           key={entry.field.name}
           size="xs"
           className="dscSidebarItem dscSidebarItem--multi"
+          flush="both"
           isEmpty={false}
           isActive={false}
           shouldAlwaysShowAction={alwaysShowActionButton}
@@ -347,6 +348,7 @@ function DiscoverFieldComponent({
             className="dscSidebarItem"
             isEmpty={isEmpty}
             isActive={infoIsOpen}
+            flush={alwaysShowActionButton ? 'both' : undefined}
             shouldAlwaysShowAction={alwaysShowActionButton}
             onClick={isDocumentRecord && field.type !== '_source' ? togglePopover : undefined}
             {...getCommonFieldItemButtonProps({ field, isSelected, toggleDisplay })}

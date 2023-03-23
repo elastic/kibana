@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import './field_button.scss';
 import classNames from 'classnames';
 import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
 import { CommonProps } from '@elastic/eui';
+import './field_button.scss';
 
 export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
   /**
@@ -34,17 +34,20 @@ export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
    */
   isActive?: boolean;
   /**
-   * Styles the component differently to indicate it is draggable
-   */
-  isDraggable?: boolean;
-  /**
    * Custom drag handle element
    */
   dragHandle?: React.ReactElement;
   /**
-   * Use the small size in condensed areas
+   * Use the xs size in condensed areas
    */
-  size?: ButtonSize;
+  size: ButtonSize;
+  /**
+   * Whether to skip side paddings
+   */
+  flush?: 'both';
+  /**
+   * Custom class name
+   */
   className?: string;
   /**
    * The component will render a `<button>` when provided an `onClick`
@@ -63,7 +66,6 @@ export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
 const sizeToClassNameMap = {
   xs: 'kbnFieldButton--xs',
   s: 'kbnFieldButton--s',
-  m: null,
 } as const;
 
 export type ButtonSize = keyof typeof sizeToClassNameMap;
@@ -71,14 +73,14 @@ export type ButtonSize = keyof typeof sizeToClassNameMap;
 export const SIZES = Object.keys(sizeToClassNameMap) as ButtonSize[];
 
 export function FieldButton({
-  size = 'm',
+  size,
   isActive = false,
   fieldIcon,
   fieldName,
   fieldInfoIcon,
   fieldAction,
+  flush,
   className,
-  isDraggable = false,
   dragHandle,
   onClick,
   dataTestSubj,
@@ -88,8 +90,10 @@ export function FieldButton({
   const classes = classNames(
     'kbnFieldButton',
     size ? sizeToClassNameMap[size] : null,
-    { 'kbnFieldButton-isActive': isActive },
-    { 'kbnFieldButton--isDraggable': isDraggable },
+    {
+      'kbnFieldButton-isActive': isActive,
+      'kbnFieldButton--flushBoth': flush === 'both',
+    },
     className
   );
 
