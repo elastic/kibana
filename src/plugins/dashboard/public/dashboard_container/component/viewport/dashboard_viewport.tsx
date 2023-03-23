@@ -51,7 +51,13 @@ export const DashboardViewportComponent = () => {
   const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
 
   return (
-    <>
+    <div
+      css={css`
+        flex: auto;
+        display: flex;
+        flex-direction: column;
+      `}
+    >
       {controlsEnabled && controlGroup && viewMode !== ViewMode.PRINT ? (
         <div
           className={controlCount > 0 ? 'dshDashboardViewport-controls' : ''}
@@ -73,7 +79,7 @@ export const DashboardViewportComponent = () => {
         )}
         <DashboardGrid />
       </div>
-    </>
+    </div>
   );
 };
 
