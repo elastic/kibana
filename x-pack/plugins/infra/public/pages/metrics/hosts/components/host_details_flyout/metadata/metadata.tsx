@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useSourceContext } from '../../../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../../../common/inventory_models';
 import type { InventoryItemType } from '../../../../../../../common/inventory_models/types';
@@ -50,22 +51,22 @@ const Metadata = ({ node, currentTimeRange }: TabProps) => {
         color="danger"
         iconType="error"
       >
-        <p>
-          {i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorMessage', {
-            defaultMessage: 'There was an error loading your data. Try to',
-          })}{' '}
-          <EuiLink
-            data-test-subj="infraMetadataThisLinkCanHelpLink"
-            onClick={() => window.location.reload()}
-          >
-            {i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorAction', {
-              defaultMessage: 'reload the page',
-            })}
-          </EuiLink>{' '}
-          {i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorActionMessage', {
-            defaultMessage: 'and open the host details again.',
-          })}
-        </p>
+        <FormattedMessage
+          id="xpack.infra.hostsViewPage.hostDetail.metadata.errorMessage"
+          defaultMessage="There was an error loading your data. Try to {reload} and open the host details again."
+          values={{
+            reload: (
+              <EuiLink
+                data-test-subj="infraMetadataThisLinkCanHelpLink"
+                onClick={() => window.location.reload()}
+              >
+                {i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorAction', {
+                  defaultMessage: 'reload the page',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
       </EuiCallOut>
     );
   }
