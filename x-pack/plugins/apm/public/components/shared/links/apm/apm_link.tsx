@@ -100,5 +100,7 @@ export function LegacyAPMLink({
 
   const href = getLegacyApmHref({ basePath, path, search, query: mergedQuery });
 
-  return <EuiLink {...rest} href={href} />;
+  return (
+    <EuiLink data-test-subj="apmLegacyAPMLinkLink" {...rest} href={href} />
+  );
 }

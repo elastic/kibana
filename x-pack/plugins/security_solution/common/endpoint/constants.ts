@@ -40,7 +40,9 @@ export const METADATA_UNITED_TRANSFORM = 'endpoint.metadata_united-default';
 // united metadata transform destination index
 export const METADATA_UNITED_INDEX = '.metrics-endpoint.metadata_united_default';
 
+export const POLICY_RESPONSE_INDEX = 'metrics-endpoint.policy-default';
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
+
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
 // File storage indexes supporting endpoint Upload/download

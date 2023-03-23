@@ -73,7 +73,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
   const logsCount = data?.count || 0;
   const hasLogs = logsCount > 0;
   const calloutTint = hasLogs ? 'warning' : 'success';
-  const calloutIcon = hasLogs ? 'alert' : 'check';
+  const calloutIcon = hasLogs ? 'warning' : 'check';
   const calloutTestId = hasLogs ? 'hasWarningsCallout' : 'noWarningsCallout';
 
   const onResetClick = async () => {
@@ -103,7 +103,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
       <EuiCallOut
         title={i18nTexts.loadingError}
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="errorCallout"
       >
         <p>

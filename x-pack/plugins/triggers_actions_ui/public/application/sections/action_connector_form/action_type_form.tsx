@@ -452,7 +452,7 @@ export const ActionTypeForm = ({
                   >
                     <EuiIcon
                       data-test-subj="action-group-error-icon"
-                      type="alert"
+                      type="warning"
                       color="danger"
                       size="m"
                     />
@@ -502,7 +502,11 @@ export const ActionTypeForm = ({
                       )}
                       {warning && !isOpen && (
                         <EuiFlexItem grow={false}>
-                          <EuiBadge data-test-subj="warning-badge" iconType="alert" color="warning">
+                          <EuiBadge
+                            data-test-subj="warning-badge"
+                            iconType="warning"
+                            color="warning"
+                          >
                             {i18n.translate(
                               'xpack.triggersActionsUI.sections.actionTypeForm.actionWarningsTitle',
                               {
@@ -516,7 +520,7 @@ export const ActionTypeForm = ({
                         {checkEnabledResult.isEnabled === false && (
                           <>
                             <EuiIconTip
-                              type="alert"
+                              type="warning"
                               color="danger"
                               content={i18n.translate(
                                 'xpack.triggersActionsUI.sections.actionTypeForm.actionDisabledTitle',

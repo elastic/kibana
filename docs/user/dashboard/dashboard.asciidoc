@@ -293,6 +293,8 @@ To make changes to the panel, use the panel menu options.
 +
 To make changes without changing the original version, open the panel menu, then click *More > Unlink from library*.
 
+* *Convert to Lens* &mdash; Opens *TSVB* and aggregation-based visualizations in *Lens*.
+
 * *Edit panel settings* &mdash; Opens the *Panel settings* window to change the *title*, *description*, and *time range*.
 
 * *More > Replace panel* &mdash; Opens the *Visualize Library* so you can select a new panel to replace the existing panel.
@@ -343,9 +345,15 @@ To apply a panel-level time filter:
 
 . Open the panel menu, then select *More > Edit panel settings*.
 
-. Toggle the switch labelled *Apply a custom time range*.
+. Select *Apply a custom time range*.
 
 . Enter the time range you want to view, then click *Save*.
+
+To view and edit panel-level filters:
+
+. On the panel, click image:images/dashboard_panelFiltersButton_8.7.0.png[Panel filters button on panel header].
+
+. To edit, click *Edit filters*.
 
 [float]
 [[apply-design-options]]

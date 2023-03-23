@@ -7,19 +7,17 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, fromNullable, getOrElse } from 'fp-ts/lib/Option';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import {
   Logger,
   SavedObjectsClientContract,
   KibanaRequest,
   CoreKibanaRequest,
-  SavedObjectReference,
   IBasePath,
   SavedObject,
   Headers,
   FakeRawRequest,
+  SavedObjectReference,
 } from '@kbn/core/server';
 import { RunContext } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -34,7 +32,11 @@ import {
   isPersistedActionTask,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
-import { asSavedObjectExecutionSource } from './action_execution_source';
+import {
+  ActionExecutionSourceType,
+  asEmptySource,
+  asSavedObjectExecutionSource,
+} from './action_execution_source';
 import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
@@ -93,7 +95,15 @@ export class TaskRunnerFactory {
         const { spaceId } = actionTaskExecutorParams;
 
         const {
-          attributes: { actionId, params, apiKey, executionId, consumer, relatedSavedObjects },
+          attributes: {
+            actionId,
+            params,
+            apiKey,
+            executionId,
+            consumer,
+            source,
+            relatedSavedObjects,
+          },
           references,
         } = await getActionTaskParams(
           actionTaskExecutorParams,
@@ -118,12 +128,12 @@ export class TaskRunnerFactory {
             actionId: actionId as string,
             isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request,
-            ...getSourceFromReferences(references),
             taskInfo,
             executionId,
             consumer,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
             actionExecutionId,
+            ...getSource(references, source),
           });
         } catch (e) {
           logger.error(
@@ -188,7 +198,7 @@ export class TaskRunnerFactory {
         const { spaceId } = actionTaskExecutorParams;
 
         const {
-          attributes: { actionId, apiKey, executionId, consumer, relatedSavedObjects },
+          attributes: { actionId, apiKey, executionId, consumer, source, relatedSavedObjects },
           references,
         } = await getActionTaskParams(
           actionTaskExecutorParams,
@@ -206,8 +216,8 @@ export class TaskRunnerFactory {
           consumer,
           executionId,
           relatedSavedObjects: (relatedSavedObjects || []) as RelatedSavedObjects,
-          ...getSourceFromReferences(references),
           actionExecutionId,
+          ...getSource(references, source),
         });
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
@@ -275,12 +285,11 @@ async function getActionTaskParams(
   }
 }
 
-function getSourceFromReferences(references: SavedObjectReference[]) {
-  return pipe(
-    fromNullable(references.find((ref) => ref.name === 'source')),
-    map((source) => ({
-      source: asSavedObjectExecutionSource(pick(source, 'id', 'type')),
-    })),
-    getOrElse(() => ({}))
-  );
+function getSource(references: SavedObjectReference[], sourceType?: string) {
+  const sourceInReferences = references.find((ref) => ref.name === 'source');
+  if (sourceInReferences) {
+    return { source: asSavedObjectExecutionSource(pick(sourceInReferences, 'id', 'type')) };
+  }
+
+  return sourceType ? { source: asEmptySource(sourceType as ActionExecutionSourceType) } : {};
 }

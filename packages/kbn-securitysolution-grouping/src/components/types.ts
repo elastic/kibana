@@ -20,18 +20,50 @@ export type RawBucket<T> = GenericBuckets & T;
 /** Defines the shape of the aggregation returned by Elasticsearch */
 // TODO: write developer docs for these fields
 export interface GroupingAggregation<T> {
-  stackByMultipleFields0?: {
+  groupByFields?: {
     buckets?: Array<RawBucket<T>>;
   };
-  groupCount0?: {
+  groupsCount?: {
     value?: number | null;
   };
-  unitCount0?: {
+  unitsCount?: {
     value?: number | null;
   };
 }
 
-export type GroupingFieldTotalAggregation = Record<
+export type GroupingFieldTotalAggregation<T> = Record<
   string,
-  { value?: number | null; buckets?: Array<{ doc_count?: number | null }> }
+  {
+    value?: number | null;
+    buckets?: Array<RawBucket<T>>;
+  }
 >;
+
+export interface BadgeMetric {
+  value: number;
+  color?: string;
+  width?: number;
+}
+
+export interface StatRenderer {
+  title: string;
+  renderer?: JSX.Element;
+  badge?: BadgeMetric;
+}
+
+export type GroupStatsRenderer<T> = (
+  selectedGroup: string,
+  fieldBucket: RawBucket<T>
+) => StatRenderer[];
+
+export type GroupPanelRenderer<T> = (
+  selectedGroup: string,
+  fieldBucket: RawBucket<T>
+) => JSX.Element | undefined;
+
+export type OnGroupToggle = (params: {
+  isOpen: boolean;
+  groupName?: string | undefined;
+  groupNumber: number;
+  groupingId: string;
+}) => void;

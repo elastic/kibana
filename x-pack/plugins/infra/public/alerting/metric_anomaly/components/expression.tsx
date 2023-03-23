@@ -15,14 +15,13 @@ import {
   RuleTypeParamsExpressionProps,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { MetricAnomalyParams } from '../../../../common/alerting/metrics';
 import { ANOMALY_THRESHOLD } from '../../../../common/infra_ml';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { SubscriptionSplashPrompt } from '../../../components/subscription_splash_content';
-import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabilities';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { InfluencerFilter } from './influencer_filter';
@@ -51,15 +50,10 @@ export const defaultExpression = {
 
 export const Expression: React.FC<Props> = (props) => {
   const { hasInfraMLCapabilities, isLoading: isLoadingMLCapabilities } = useInfraMLCapabilities();
-  const { http, notifications } = useKibanaContextForPlugin().services;
   const { space } = useActiveKibanaSpace();
 
   const { setRuleParams, ruleParams, ruleInterval, metadata } = props;
-  const { source, createDerivedIndexPattern } = useSourceViaHttp({
-    sourceId: 'default',
-    fetch: http.fetch,
-    toastWarning: notifications.toasts.addWarning,
-  });
+  const { source, createDerivedIndexPattern } = useSourceContext();
 
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern(),
@@ -247,7 +241,7 @@ export const Expression: React.FC<Props> = (props) => {
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
-export default Expression;
+export default withSourceProvider<Props>(Expression)('default');
 
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`
   display: flex;
