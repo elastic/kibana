@@ -187,7 +187,7 @@ describe('TaskPoller', () => {
   );
 
   test(
-    'work times out whe nit exceeds a predefined amount of time',
+    'work times out when it exceeds a predefined amount of time',
     fakeSchedulers(async (advance) => {
       const pollInterval = 100;
       const workTimeout = pollInterval * 2;
@@ -199,9 +199,8 @@ describe('TaskPoller', () => {
         logger: loggingSystemMock.create().get(),
         pollInterval$: of(pollInterval),
         pollIntervalDelay$: of(0),
-        work: async (...resolvables) => {
-          await Promise.all(resolvables.map(([, future]) => future));
-          return resolvables.map(([name]) => name);
+        work: async () => {
+          return [];
         },
         getCapacity: () => 5,
         workTimeout,
