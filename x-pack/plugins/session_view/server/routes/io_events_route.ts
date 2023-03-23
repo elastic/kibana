@@ -94,12 +94,11 @@ export const searchProcessWithIOEvents = async (
       body: {
         query: {
           bool: {
-            filter: [
+            must: [
               { term: { [EVENT_ACTION]: 'text_output' } },
               { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
               ...rangeFilter,
             ],
-            must_not: [{ match_phrase: { PROCESS_ENTITY_ID_PROPERTY: '' } }],
           },
         },
         size: 0,
