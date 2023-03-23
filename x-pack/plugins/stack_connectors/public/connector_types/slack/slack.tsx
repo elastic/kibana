@@ -61,5 +61,23 @@ export function getConnectorType(): ConnectorTypeModel<
     },
     actionConnectorFields: lazy(() => import('./slack_connectors')),
     actionParamsFields: lazy(() => import('./slack_params')),
+    resetParamsOnConnectorChange: (
+      params: WebhookParams | PostMessageParams
+    ): WebhookParams | PostMessageParams | {} => {
+      if ((params as WebhookParams).message !== undefined) {
+        return {
+          subAction: 'postMessage',
+          subActionParams: {
+            channels: [],
+            text: (params as WebhookParams).message,
+          },
+        };
+      } else if ((params as PostMessageParams).subAction !== undefined) {
+        return {
+          message: (params as PostMessageParams).subActionParams.text,
+        };
+      }
+      return {};
+    },
   };
 }

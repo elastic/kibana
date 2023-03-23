@@ -305,7 +305,6 @@ describe('action_form', () => {
     const wrapper = mountWithIntl(
       <ActionForm
         actions={initialAlert.actions}
-        clearActionParams={jest.fn()}
         messageVariables={{
           params: [
             { name: 'testVar1', description: 'test var1' },
