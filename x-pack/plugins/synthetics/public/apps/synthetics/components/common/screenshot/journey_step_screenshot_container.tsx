@@ -52,7 +52,7 @@ export const JourneyStepScreenshotContainer = ({
     threshold: 0.1,
   });
 
-  const { imageResult, isLoading: imageBackoffLoading } = useRetrieveStepImage({
+  const { imageResult } = useRetrieveStepImage({
     hasIntersected: Boolean(intersection && intersection.intersectionRatio > 0),
     stepStatus,
     imgPath,
@@ -67,8 +67,7 @@ export const JourneyStepScreenshotContainer = ({
   const isLoading =
     // failed steps oftentimes do not have an associated image; therefore we don't wait for the image loading to resolve
     // if status is `failed`
-    (!!imageResultLoading && ![undefined, 'failed'].some((s) => s === stepStatus)) ||
-    imageBackoffLoading;
+    !!imageResultLoading && ![undefined, 'failed'].some((s) => s === stepStatus);
 
   return (
     <div ref={intersectionRef}>

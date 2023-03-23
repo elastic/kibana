@@ -52,7 +52,6 @@ export const useRetrieveStepImage = ({
   retryFetchOnRevisit: boolean;
 }) => {
   const [imgState, setImgState] = useState<ImageDataResult>({});
-  const [isLoading, setIsLoading] = useState(false);
   const skippedStep = stepStatus === 'skipped';
 
   const imageResult = useGetStepScreenshotUrls(checkGroup, imgPath, imgState);
@@ -69,7 +68,6 @@ export const useRetrieveStepImage = ({
         setImgState((prevState) => {
           return getUpdatedState({ prevState, imgPath, increment: true, loading: true });
         });
-        if (stepStatus !== 'failed') setIsLoading(true);
         const backoffOptions: Partial<BackoffOptions> | undefined = !testNowMode
           ? { shouldBackoff: false }
           : undefined;
@@ -87,7 +85,6 @@ export const useRetrieveStepImage = ({
       } else {
         return null;
       }
-      setIsLoading(false);
     }
     run();
   }, [
@@ -103,7 +100,7 @@ export const useRetrieveStepImage = ({
     shouldRetry,
   ]);
 
-  return { imageResult, isLoading };
+  return { imageResult };
 };
 
 /**
