@@ -78,6 +78,7 @@ export * from './typings';
 import { TopAlert } from './typings/alerts';
 import { AlertSummary } from './pages/alert_details/components/alert_summary';
 import { AlertSummaryField } from './pages/alert_details/components/alert_summary';
+export { observabilityFeatureId, observabilityAppId } from '../common';
 export type { TopAlert, AlertSummary, AlertSummaryField };
 
 export { useChartTheme } from './hooks/use_chart_theme';
