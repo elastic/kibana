@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import Path from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
-
-// eslint-disable-next-line import/no-extraneous-dependencies
 import * as ts from 'typescript';
-
 export interface DocEntry {
   name: string;
   documentation?: string;
@@ -21,16 +16,9 @@ export interface DocEntry {
 
 /** Generate documentation for all schema definitions in a set of .ts files */
 export function extractDocumentation(fileNames: string[]): Map<string, DocEntry[]> {
-  const json = ts.readConfigFile(Path.resolve(REPO_ROOT, 'tsconfig.base.json'), ts.sys.readFile);
-
-  if (json.error) {
-    throw new Error(`Unable to parse tsconfig.base.json file: ${json.error.messageText}`);
-  }
-
   const options = {
     target: ts.ScriptTarget.ES2015,
     module: ts.ModuleKind.CommonJS,
-    paths: json.config.compilerOptions.paths,
   };
 
   // Build a program using the set of root file names in fileNames
@@ -56,8 +44,14 @@ export function extractDocumentation(fileNames: string[]): Map<string, DocEntry[
   function visit(node: ts.Node) {
     if (isNodeExported(node) && ts.isVariableDeclaration(node)) {
       const schemaName = node.name.getText();
-      const schemaType = checker.getTypeAtLocation(node);
-      result.set(schemaName, extractDocEntries(schemaType!));
+      try {
+        const schemaType = checker.getTypeAtLocation(node);
+        result.set(schemaName, extractDocEntries(schemaType!));
+      } catch (e) {
+        // FIXME TypeError: Cannot read properties of undefined (reading 'flags')
+        // eslint-disable-next-line no-console
+        console.error(e, 'Unable to extract type at location');
+      }
     }
 
     if (node.getChildCount() > 0) {

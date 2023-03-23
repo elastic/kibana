@@ -13,7 +13,7 @@ const testProps: GroupingQueryArgs = {
   additionalFilters: [],
   from: '2022-12-28T15:35:32.871Z',
   groupByFields: ['host.name'],
-  metricsAggregations: [
+  statsAggregations: [
     {
       alertsCount: {
         cardinality: {

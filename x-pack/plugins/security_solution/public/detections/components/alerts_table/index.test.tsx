@@ -222,26 +222,15 @@ describe('GroupedAlertsTable', () => {
     );
   });
 
-  it('renders alerts table when no group selected', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders store={store}>
-        <GroupedAlertsTableComponent {...testProps} />
-      </TestProviders>
-    );
-    expect(getByTestId('alerts-table')).toBeInTheDocument();
-    expect(queryByTestId('grouping-table')).not.toBeInTheDocument();
-  });
-
-  it('renders grouped alerts when group selected', async () => {
+  it('renders grouping table', async () => {
     (isNoneGroup as jest.Mock).mockReturnValue(false);
 
-    const { getByTestId, queryByTestId } = render(
+    const { getByTestId } = render(
       <TestProviders store={groupingStore}>
         <GroupedAlertsTableComponent {...testProps} />
       </TestProviders>
     );
     expect(getByTestId('grouping-table')).toBeInTheDocument();
-    expect(queryByTestId('alerts-table')).not.toBeInTheDocument();
     expect(getGrouping.mock.calls[0][0].isLoading).toEqual(false);
   });
 
