@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { RequestHandlerContextBase } from '@kbn/core-http-server';
+import type { RequestHandlerContextBase } from '../..';
 import { VersionedRouter } from './types';
 
 interface MyCustomContext extends RequestHandlerContextBase {

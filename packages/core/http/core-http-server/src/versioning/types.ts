@@ -16,7 +16,7 @@ import type {
   RouteValidatorFullConfig,
   RequestHandlerContextBase,
   RouteValidationFunction,
-} from '@kbn/core-http-server';
+} from '../..';
 
 type RqCtx = RequestHandlerContextBase;
 

@@ -1,6 +1,4 @@
-# @kbn/core-versioned-http-server
-
-This package contains types for sever-side HTTP versioning.
+This folder contains types for sever-side HTTP versioning.
 
 ## Experimental
 
