@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('@kbn/generate-csv/public/generate_csv.ts', () => ({
+jest.mock('@kbn/generate-csv/public/generate_csv', () => ({
   CsvGenerator: class CsvGeneratorMock {
     generateData() {
       return {
