@@ -14,6 +14,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -49,12 +50,19 @@ export const SimulateWatchResultsFlyout = ({
         executeResults.watchStatus && executeResults.watchStatus.actionStatuses;
       return Object.keys(actions).map((actionKey) => {
         const actionStatus = actionStatuses.find((status) => status.id === actionKey);
+        const isConditionMet = executeResults.details.result.condition.met;
         return {
           actionId: actionKey,
           actionType: getTypeFromAction(actions[actionKey]),
           actionMode: actionModes[actionKey],
           actionState: actionStatus && actionStatus.state,
           actionReason: actionStatus && actionStatus.lastExecutionReason,
+          metCondition: isConditionMet,
+          actionStatus:
+            (isConditionMet &&
+              executeResults.details.result.actions.find((action: any) => action.id === actionKey)
+                .status) ||
+            '',
         };
       });
     }
@@ -113,6 +121,30 @@ export const SimulateWatchResultsFlyout = ({
         'xpack.watcher.sections.watchEdit.simulateResults.table.reasonColumnLabel',
         {
           defaultMessage: 'Reason',
+        }
+      ),
+    },
+    {
+      field: 'metCondition',
+      name: i18n.translate(
+        'xpack.watcher.sections.watchEdit.simulateResults.table.metConditionColumnLabel',
+        {
+          defaultMessage: 'Condition met',
+        }
+      ),
+      truncateText: true,
+      render: () => {
+        if (details.result.condition.met) {
+          return <EuiIcon color="green" type="check" />;
+        }
+      },
+    },
+    {
+      field: 'actionStatus',
+      name: i18n.translate(
+        'xpack.watcher.sections.watchEdit.simulateResults.table.statusColumnLabel',
+        {
+          defaultMessage: 'Status',
         }
       ),
     },
