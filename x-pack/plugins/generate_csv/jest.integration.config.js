@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test/jest_integration',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/fleet'],
+  roots: ['<rootDir>/x-pack/plugins/generate_csv'],
 };
