@@ -89,6 +89,11 @@ const alerts = [
     [AlertsField.reason]: ['four'],
     [AlertsField.uuid]: ['bf5f6d63-5afd-48e0-baf6-f28c2b68db46'],
   },
+  {
+    [AlertsField.name]: ['five'],
+    [AlertsField.reason]: ['six'],
+    [AlertsField.uuid]: ['1047d115-5afd-469e-baf6-f28c2b68db46'],
+  },
 ] as unknown as EcsFieldsResponse[];
 
 const FlyoutBody = ({ alert }: AlertsTableFlyoutBaseProps) => (
@@ -262,6 +267,44 @@ describe('AlertsTableState', () => {
           pagination: {
             pageIndex: 0,
             pageSize: 1,
+          },
+        })
+      );
+    });
+
+    it('Should be able to go back from last page to n - 1', async () => {
+      const wrapper = render(
+        <AlertsTableWithLocale
+          {...{
+            ...tableProps,
+            pageSize: 2,
+          }}
+        />
+      );
+
+      userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
+      const result = await wrapper.findAllByTestId('alertsFlyout');
+      expect(result.length).toBe(1);
+
+      hookUseFetchAlerts.mockClear();
+
+      userEvent.click(wrapper.queryAllByTestId('pagination-button-last')[0]);
+      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pagination: {
+            pageIndex: 1,
+            pageSize: 2,
+          },
+        })
+      );
+
+      hookUseFetchAlerts.mockClear();
+      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
+      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pagination: {
+            pageIndex: 0,
+            pageSize: 2,
           },
         })
       );
