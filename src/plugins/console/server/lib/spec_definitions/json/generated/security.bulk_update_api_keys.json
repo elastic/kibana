@@ -1,0 +1,11 @@
+{
+  "security.bulk_update_api_keys": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_security/api_key/_bulk_update"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-bulk-update-api-keys.html"
+  }
+}

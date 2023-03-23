@@ -1,0 +1,11 @@
+{
+  "security.activate_user_profile": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_security/profile/_activate"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-activate-user-profile.html"
+  }
+}
