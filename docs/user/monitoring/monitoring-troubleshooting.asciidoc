@@ -57,7 +57,7 @@ See <<monitoring-settings-kb>>.
 
 . Confirm that there is monitoring data available at that URL. It is stored in
 indices such as `.monitoring-kibana-*` and `.monitoring-es-*` or
-`metrics-kibana.stack_monitoring-*`, depending on which method is
+`metrics-kibana.stack_monitoring.*`, depending on which method is
 used to collect monitoring data. At a minimum, you must have monitoring data
 for the {es} production cluster. Once that data exists, {kib} can display
 monitoring data for other products in the cluster.
