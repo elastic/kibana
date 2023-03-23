@@ -10,7 +10,6 @@
         "indices",
         "shards"
       ],
-      "types": [],
       "include_segment_file_sizes": "__flag__",
       "include_unloaded_segments": "__flag__",
       "expand_wildcards": [
