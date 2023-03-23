@@ -254,6 +254,9 @@ describe('mappingFromFieldMap', () => {
                     producer: {
                       type: 'keyword',
                     },
+                    revision: {
+                      type: 'integer',
+                    },
                     rule_type_id: {
                       type: 'keyword',
                     },
