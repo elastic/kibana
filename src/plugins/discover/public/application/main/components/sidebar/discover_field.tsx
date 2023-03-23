@@ -345,6 +345,7 @@ function DiscoverFieldComponent({
       button={
         <DragDrop
           draggable
+          withDragHandle
           order={order}
           value={value}
           onDragStart={closePopover}

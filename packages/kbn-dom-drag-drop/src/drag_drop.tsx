@@ -82,7 +82,10 @@ interface BaseProps {
    * Indicates whether or not this component is draggable.
    */
   draggable?: boolean;
-
+  /**
+   * Whether to include a drag handle (your component should provide a slot for `dragHandle` prop)
+   */
+  withDragHandle?: boolean;
   /**
    * Additional class names to apply when another element is over the drop target
    */
@@ -266,6 +269,7 @@ const DragInner = memo(function DragInner({
   extraKeyboardHandler,
   ariaDescribedBy,
   setA11yMessage,
+  withDragHandle,
   dataTestSubjPrefix,
   onTrackUICounterEvent,
 }: DragInnerProps) {
@@ -487,10 +491,10 @@ const DragInner = memo(function DragInner({
         'data-test-subj': dataTestSubj || dataTestSubjPrefix,
         className: classNames(children.props.className, 'domDragDrop', 'domDragDrop-isDraggable'),
         draggable: true,
-        dragHandle: <DragHandle />,
         onDragEnd: dragEnd,
         onDragStart: dragStart,
         onMouseDown: removeSelection,
+        ...(withDragHandle ? { dragHandle: <DragHandle /> } : {}),
       })}
     </div>
   );

@@ -1,7 +1,6 @@
 @import './drag_drop_mixins';
 
 .domDragDrop {
-  user-select: none;
   transition: $euiAnimSpeedFast ease-in-out;
   transition-property: background-color, border-color, opacity;
   z-index: $domDragDropZLevel1;

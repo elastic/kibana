@@ -146,6 +146,7 @@ export function DraggableDimensionButton({
         }
         order={order}
         draggable
+        withDragHandle
         dragType={isOperation(dragging) ? 'move' : 'copy'}
         dropTypes={dropTypes}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}

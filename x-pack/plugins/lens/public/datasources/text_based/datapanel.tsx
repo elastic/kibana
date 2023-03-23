@@ -115,6 +115,7 @@ export function TextBasedDataPanel({
       return (
         <DragDrop
           draggable
+          withDragHandle
           order={[itemIndex]}
           value={{
             field: field.name,
@@ -130,7 +131,7 @@ export function TextBasedDataPanel({
             field={field}
             fieldSearchHighlight={fieldSearchHighlight}
             getCustomFieldType={getCustomFieldType}
-            onClick={() => {}}
+            onClick={undefined}
             // TODO: add to workplace buttons
           />
         </DragDrop>
