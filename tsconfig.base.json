@@ -564,6 +564,8 @@
       "@kbn/core-usage-data-server-mocks/*": ["packages/core/usage-data/core-usage-data-server-mocks/*"],
       "@kbn/core-versioned-http-server": ["packages/core/versioning/core-versioned-http-server"],
       "@kbn/core-versioned-http-server/*": ["packages/core/versioning/core-versioned-http-server/*"],
+      "@kbn/core-versioned-http-server-internal": ["packages/core/versioning/core-versioned-http-server-internal"],
+      "@kbn/core-versioned-http-server-internal/*": ["packages/core/versioning/core-versioned-http-server-internal/*"],
       "@kbn/cross-cluster-replication-plugin": ["x-pack/plugins/cross_cluster_replication"],
       "@kbn/cross-cluster-replication-plugin/*": ["x-pack/plugins/cross_cluster_replication/*"],
       "@kbn/crypto": ["packages/kbn-crypto"],

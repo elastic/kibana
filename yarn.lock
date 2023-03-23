@@ -3857,6 +3857,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-versioned-http-server-internal@link:packages/core/versioning/core-versioned-http-server-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-versioned-http-server@link:packages/core/versioning/core-versioned-http-server":
   version "0.0.0"
   uid ""

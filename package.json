@@ -330,6 +330,7 @@
     "@kbn/core-usage-data-server": "link:packages/core/usage-data/core-usage-data-server",
     "@kbn/core-usage-data-server-internal": "link:packages/core/usage-data/core-usage-data-server-internal",
     "@kbn/core-versioned-http-server": "link:packages/core/versioning/core-versioned-http-server",
+    "@kbn/core-versioned-http-server-internal": "link:packages/core/versioning/core-versioned-http-server-internal",
     "@kbn/cross-cluster-replication-plugin": "link:x-pack/plugins/cross_cluster_replication",
     "@kbn/crypto": "link:packages/kbn-crypto",
     "@kbn/crypto-browser": "link:packages/kbn-crypto-browser",
