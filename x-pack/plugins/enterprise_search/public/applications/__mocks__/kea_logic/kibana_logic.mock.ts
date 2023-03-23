@@ -10,9 +10,8 @@ import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
