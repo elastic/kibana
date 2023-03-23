@@ -16,11 +16,11 @@ export const createApiKey = async (
     name: keyName,
     role_descriptors: {
       [`${engineName}-key-role`]: {
-        applications: [
+        cluster: [],
+        indices: [
           {
-            application: 'enterprise-search',
-            privileges: ['engine:read'],
-            resources: [`engine:${engineName}`],
+            names: [`${engineName}`],
+            privileges: ['read'],
           },
         ],
       },

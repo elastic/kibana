@@ -78,7 +78,6 @@ const defaultSLO: Omit<SLO, 'id' | 'revision' | 'createdAt' | 'updatedAt'> = {
   },
   indicator: createAPMTransactionDurationIndicator(),
   settings: {
-    timestampField: '@timestamp',
     syncDelay: new Duration(1, DurationUnit.Minute),
     frequency: new Duration(1, DurationUnit.Minute),
   },
