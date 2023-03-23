@@ -38,6 +38,10 @@ export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
    */
   isDraggable?: boolean;
   /**
+   * Custom drag handle element
+   */
+  dragHandle?: React.ReactElement;
+  /**
    * Use the small size in condensed areas
    */
   size?: ButtonSize;
@@ -57,7 +61,8 @@ export interface FieldButtonProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const sizeToClassNameMap = {
-  s: 'kbnFieldButton--small',
+  xs: 'kbnFieldButton--xs',
+  s: 'kbnFieldButton--s',
   m: null,
 } as const;
 
@@ -74,6 +79,7 @@ export function FieldButton({
   fieldAction,
   className,
   isDraggable = false,
+  dragHandle,
   onClick,
   dataTestSubj,
   buttonProps,
@@ -99,6 +105,7 @@ export function FieldButton({
 
   return (
     <div className={classes} {...rest}>
+      {dragHandle && <div className="kbnFieldButton__dragHandle">{dragHandle}</div>}
       {onClick ? (
         <button
           onClick={(e) => {

@@ -1663,7 +1663,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     ) {
       const groupCapitalized = `${group[0].toUpperCase()}${group.slice(1).toLowerCase()}`;
       const allFieldsForType = await find.allByCssSelector(
-        `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .unifiedFieldItemButton--${type}`
+        `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .unifiedFieldListItemButton--${type}`
       );
       // map to testSubjId
       return Promise.all(allFieldsForType.map((el) => el.getAttribute('data-test-subj')));

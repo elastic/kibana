@@ -9,3 +9,4 @@
 export * from './types';
 export * from './providers';
 export * from './drag_drop';
+export { DropOverlayWrapper, type DropOverlayWrapperProps } from './drop_overlay_wrapper';

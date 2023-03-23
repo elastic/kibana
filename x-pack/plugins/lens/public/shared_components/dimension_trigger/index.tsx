@@ -7,6 +7,7 @@
 import { EuiText, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiTextProps } from '@elastic/eui/src/components/text/text';
 
 export const defaultDimensionTriggerTooltip = (
   <p>
@@ -20,13 +21,24 @@ export const defaultDimensionTriggerTooltip = (
   </p>
 );
 
-export const DimensionTrigger = ({ id, label }: { label: string; id: string }) => {
+export const DimensionTrigger = ({
+  id,
+  label,
+  color,
+  dataTestSubj,
+}: {
+  label: string;
+  id: string;
+  color?: EuiTextProps['color'];
+  dataTestSubj?: string;
+}) => {
   return (
     <EuiText
       size="s"
       id={id}
+      color={color}
       className="lnsLayerPanel__triggerText"
-      data-test-subj="lns-dimensionTrigger"
+      data-test-subj={dataTestSubj || 'lns-dimensionTrigger'}
     >
       <EuiFlexItem grow={true}>
         <span>

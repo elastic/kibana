@@ -26,12 +26,6 @@
 // Draggable item
 .domDragDrop-isDraggable {
   @include mixinDomDraggable;
-  @include mixinDomDragDropHover;
-
-  // Include a possible nested button like when using FieldButton
-  > .kbnFieldButton__button {
-    cursor: grab;
-  }
 
   &:focus {
     @include euiFocusRing;
@@ -39,14 +33,17 @@
 }
 
 // Drop area
-.domDragDrop-isDroppable {
+.domDragDrop-isDroppable:not(.domDragDrop__dropOverlayWrapper) {
   @include mixinDomDroppable;
 }
 
 // Drop area when there's an item being dragged
 .domDragDrop-isDropTarget {
-  @include mixinDomDroppable;
-  @include mixinDomDroppableActive;
+  &:not(.domDragDrop__dropOverlayWrapper) {
+    @include mixinDomDroppable;
+    @include mixinDomDroppableActive;
+  }
+
   > * {
     pointer-events: none;
   }
@@ -57,7 +54,7 @@
 }
 
 // Drop area while hovering with item
-.domDragDrop-isActiveDropTarget {
+.domDragDrop-isActiveDropTarget:not(.domDragDrop__dropOverlayWrapper) {
   z-index: $domDragDropZLevel3;
   @include mixinDomDroppableActiveHover;
 }
@@ -72,7 +69,7 @@
   text-decoration: line-through;
 }
 
-.domDragDrop-notCompatible {
+.domDragDrop-notCompatible:not(.domDragDrop__dropOverlayWrapper) {
   background-color: $euiColorHighlight !important;
   border: $euiBorderWidthThin dashed $euiBorderColor !important;
   &.domDragDrop-isActiveDropTarget {
@@ -91,12 +88,12 @@
   }
 }
 
-$lnsLayerPanelDimensionMargin: 8px;
+$reorderItemMargin: 8px;
 .domDragDrop__reorderableDrop {
   position: absolute;
   width: 100%;
   top: 0;
-  height: calc(100% + #{$lnsLayerPanelDimensionMargin});
+  height: calc(100% + #{$reorderItemMargin / 2});
 }
 
 .domDragDrop-translatableDrop {
@@ -146,6 +143,10 @@ $lnsLayerPanelDimensionMargin: 8px;
   }
 }
 
+.domDragDrop-isDragStarted {
+  opacity: .5;
+}
+
 .domDragDrop__extraDrops {
   opacity: 0;
   visibility: hidden;
@@ -193,11 +194,44 @@ $lnsLayerPanelDimensionMargin: 8px;
 
 .domDragDrop__extraDrop {
   position: relative;
-  height: $euiSizeXS * 10;
+  height: $euiSizeXS * 8;
   min-width: $euiSize * 7;
   color: $euiColorSuccessText;
   padding: $euiSizeXS;
   &.domDragDrop-incompatibleExtraDrop {
     color: $euiColorWarningText;
+  }
+}
+
+.domDragDrop__dragHandle {
+  opacity: .5;
+  transition: opacity $euiAnimSpeedFast ease;
+  cursor: grab;
+
+  .domDragDrop:hover & {
+    opacity: 1;
+  }
+}
+
+.domDragDrop__dropOverlayWrapper {
+  position: relative;
+  height: 100%;
+}
+
+.domDragDrop__dropOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: $domDragDropZLevel3;
+
+  .domDragDrop-isDropTarget & {
+    @include mixinDomDroppable;
+    @include mixinDomDroppableActive;
+  }
+
+  .domDragDrop-isActiveDropTarget & {
+    @include mixinDomDroppableActiveHover;
   }
 }

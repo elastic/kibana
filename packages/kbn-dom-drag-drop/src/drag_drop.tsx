@@ -23,7 +23,9 @@ import {
   announce,
   Ghost,
 } from './providers';
+import { DragHandle } from './drag_handle';
 import { DropType } from './types';
+import { REORDER_ITEM_MARGIN } from './constants';
 import './sass/drag_drop.scss';
 
 /**
@@ -71,6 +73,11 @@ interface BaseProps {
    * The React element which will be passed the draggable handlers
    */
   children: ReactElement;
+
+  /**
+   * Disable any drag & drop behaviour
+   */
+  isDisabled?: boolean;
   /**
    * Indicates whether or not this component is draggable.
    */
@@ -152,7 +159,7 @@ interface DropsInnerProps extends BaseProps {
   isNotDroppable: boolean;
 }
 
-const lnsLayerPanelDimensionMargin = 8;
+const REORDER_OFFSET = REORDER_ITEM_MARGIN / 2;
 
 /**
  * DragDrop component
@@ -173,6 +180,10 @@ export const DragDrop = (props: BaseProps) => {
     dataTestSubjPrefix,
     onTrackUICounterEvent,
   } = useContext(DragContext);
+
+  if (props.isDisabled) {
+    return props.children;
+  }
 
   const { value, draggable, dropTypes, reorderableGroup } = props;
   const isDragging = !!(draggable && value.id === dragging?.id);
@@ -417,12 +428,14 @@ const DragInner = memo(function DragInner({
     keyboardMode &&
     activeDropTarget &&
     activeDropTarget.dropType !== 'reorder';
+
   return (
     <div
       className={classNames(className, {
         'domDragDrop-isHidden':
           (activeDraggingProps && dragType === 'move' && !keyboardMode) ||
           shouldShowGhostImageInstead,
+        'domDragDrop-isDragStarted': activeDraggingProps,
       })}
       data-test-subj={`${dataTestSubjPrefix}_draggable-${value.humanData.label}`}
     >
@@ -474,6 +487,7 @@ const DragInner = memo(function DragInner({
         'data-test-subj': dataTestSubj || dataTestSubjPrefix,
         className: classNames(children.props.className, 'domDragDrop', 'domDragDrop-isDraggable'),
         draggable: true,
+        dragHandle: <DragHandle />,
         onDragEnd: dragEnd,
         onDragStart: dragStart,
         onMouseDown: removeSelection,
@@ -772,7 +786,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
       | KeyboardEvent<HTMLButtonElement>['currentTarget']
   ) => {
     if (currentTarget) {
-      const height = currentTarget.offsetHeight + lnsLayerPanelDimensionMargin;
+      const height = currentTarget.offsetHeight + REORDER_OFFSET;
       setReorderState((s: ReorderState) => ({
         ...s,
         draggingHeight: height,
@@ -875,7 +889,7 @@ const ReorderableDrag = memo(function ReorderableDrag(
         areItemsReordered
           ? {
               transform: `translateY(${direction === '+' ? '-' : '+'}${reorderedItems.reduce(
-                (acc, cur) => acc + Number(cur.height || 0) + lnsLayerPanelDimensionMargin,
+                (acc, cur) => acc + Number(cur.height || 0) + REORDER_OFFSET,
                 0
               )}px)`,
             }

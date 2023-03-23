@@ -97,7 +97,7 @@ export function DimensionButtonIcon({
   if (message || accessorConfig.triggerIconType !== 'none') {
     indicatorIcon = (
       <>
-        {accessorConfig.triggerIconType !== 'none' && (
+        {!message && accessorConfig.triggerIconType !== 'none' && (
           <EuiFlexItem grow={false}>{getIconFromAccessorConfig(accessorConfig)}</EuiFlexItem>
         )}
         {message && (

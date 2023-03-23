@@ -16,13 +16,13 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
+  FieldItemButton,
   FieldList,
   FieldListFilters,
-  FieldItemButton,
-  GetCustomFieldType,
   FieldListGrouped,
   FieldListGroupedProps,
   FieldsGroupNames,
+  GetCustomFieldType,
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
 import { ChildDragDropProvider, DragDrop } from '@kbn/dom-drag-drop';
@@ -108,7 +108,7 @@ export function TextBasedDataPanel({
   });
 
   const renderFieldItem: FieldListGroupedProps<DatatableColumn>['renderFieldItem'] = useCallback(
-    ({ field, itemIndex, fieldSearchHighlight }) => {
+    ({ field, itemIndex, fieldSearchHighlight, groupName }) => {
       if (!field) {
         return <></>;
       }
@@ -124,12 +124,14 @@ export function TextBasedDataPanel({
           dataTestSubj={`lnsFieldListPanelField-${field.name}`}
         >
           <FieldItemButton<DatatableColumn>
+            isSelected={groupName === FieldsGroupNames.SelectedFields}
             isEmpty={false}
             isActive={false}
             field={field}
             fieldSearchHighlight={fieldSearchHighlight}
             getCustomFieldType={getCustomFieldType}
             onClick={() => {}}
+            // TODO: add to workplace buttons
           />
         </DragDrop>
       );
