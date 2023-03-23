@@ -7,18 +7,10 @@
 import { ALERT_DURATION, ALERT_END } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import React from 'react';
-import {
-  type PartialCriterion,
-  Comparator,
-} from '../../../../../common/alerting/logs/log_threshold';
+import { type PartialCriterion } from '../../../../../common/alerting/logs/log_threshold';
 import { CriterionPreview } from '../expression_editor/criterion_preview_chart';
 import { AlertDetailsAppSectionProps } from './types';
 
-const chartCriterion: PartialCriterion = {
-  field: 'log.level',
-  comparator: Comparator.EQ,
-  value: 'error',
-};
 const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) => {
   const ruleWindowSizeMS = moment
     .duration(rule.params.timeSize, rule.params.timeUnit)
@@ -40,13 +32,18 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
     : Number(moment(alert.fields[ALERT_END]).add(ruleWindowSizeMS, 'millisecond').format('x'));
 
   return (
-    <CriterionPreview
-      ruleParams={rule.params}
-      sourceId={rule.params.logView.logViewId}
-      chartCriterion={chartCriterion}
-      showThreshold={true}
-      executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}
-    />
+    // Create a chart per-criteria
+    rule.params.criteria.map((criteria) => {
+      return (
+        <CriterionPreview
+          ruleParams={rule.params}
+          sourceId={rule.params.logView.logViewId}
+          chartCriterion={criteria as PartialCriterion}
+          showThreshold={true}
+          executionTimeRange={{ gte: rangeFrom, lte: rangeTo }}
+        />
+      );
+    })
   );
 };
 // eslint-disable-next-line import/no-default-export
