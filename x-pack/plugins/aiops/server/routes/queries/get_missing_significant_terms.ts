@@ -8,10 +8,10 @@
 import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 export function getMissingSignificantTerms(
-  deduplicatedSignificantTerms: SignificantTerm[],
+  significantTerms: SignificantTerm[],
   significantTermGroups: SignificantTermGroup[]
 ) {
-  return deduplicatedSignificantTerms.filter((cp) => {
+  return significantTerms.filter((cp) => {
     return !significantTermGroups.some((cpg) => {
       return cpg.group.some((d) => d.fieldName === cp.fieldName && d.fieldValue === cp.fieldValue);
     });

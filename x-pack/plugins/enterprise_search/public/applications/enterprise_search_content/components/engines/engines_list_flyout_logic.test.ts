@@ -24,7 +24,6 @@ const DEFAULT_VALUES: EngineListFlyoutValues = {
   isFetchEngineLoading: false,
 };
 const mockEngineData: EnterpriseSearchEngineDetails = {
-  created: '1999-12-31T23:59:59Z',
   indices: [
     {
       count: 10,
@@ -38,7 +37,7 @@ const mockEngineData: EnterpriseSearchEngineDetails = {
     },
   ],
   name: 'my-test-engine',
-  updated: '1999-12-31T23:59:59Z',
+  updated_at_millis: 1679337823167,
 };
 
 describe('EngineListFlyoutLogic', () => {

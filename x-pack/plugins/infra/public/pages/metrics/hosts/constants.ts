@@ -10,6 +10,8 @@ import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/
 import { AlertStatusFilter } from './types';
 
 export const ALERT_STATUS_ALL = 'all';
+export const TIMESTAMP_FIELD = '@timestamp';
+export const DATA_VIEW_PREFIX = 'infra_metrics';
 
 export const ALL_ALERTS: AlertStatusFilter = {
   status: ALERT_STATUS_ALL,

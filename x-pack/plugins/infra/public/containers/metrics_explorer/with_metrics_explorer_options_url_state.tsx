@@ -30,7 +30,7 @@ export const WithMetricsExplorerOptionsUrlState = () => {
     options,
     chartOptions,
     setChartOptions,
-    currentTimerange,
+    timeRange,
     setOptions: setRawOptions,
     setTimeRange,
   } = useMetricsExplorerOptionsContainerContext();
@@ -43,9 +43,9 @@ export const WithMetricsExplorerOptionsUrlState = () => {
     () => ({
       options,
       chartOptions,
-      timerange: currentTimerange,
+      timerange: timeRange,
     }),
-    [options, chartOptions, currentTimerange]
+    [options, chartOptions, timeRange]
   );
 
   const handleChange = (newUrlState: MetricsExplorerUrlState | undefined) => {

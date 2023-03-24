@@ -150,7 +150,6 @@ export const SelectSeverityUI: FC<
       prepend={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
         defaultMessage: 'Severity',
       })}
-      id="severityThreshold"
       data-test-subj={'mlAnomalySeverityThresholdControls'}
       className={classNames}
       hasDividers
