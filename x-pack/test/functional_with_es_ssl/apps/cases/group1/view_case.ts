@@ -423,9 +423,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const actionList = await userActionsLists[1].findAllByClassName('euiComment');
 
-        expect(await actionList[0].getAttribute('data-test-subj')).contain(
-          'comment-create-action'
-        );
+        expect(await actionList[0].getAttribute('data-test-subj')).contain('comment-create-action');
       });
     });
 

@@ -72,9 +72,7 @@ export const useUserActionsPagination = ({
 
   const showBottomList = lastPage > 0;
 
-  const showLoadMore =
-    !isLoadingInfiniteUserActions &&
-    userActivityQueryParams.page < lastPage;
+  const showLoadMore = !isLoadingInfiniteUserActions && userActivityQueryParams.page < lastPage;
 
   const infiniteCaseUserActions = useMemo<CaseUserActions[]>(() => {
     if (
