@@ -6,19 +6,23 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, act } from '@testing-library/react';
 
 import { MlPopover } from './ml_popover';
+import { TestProviders } from '../../mock';
 
 jest.mock('../../lib/kibana');
 
 describe('MlPopover', () => {
-  test('shows upgrade popover on mouse click', () => {
-    const wrapper = mountWithIntl(<MlPopover />);
+  test('shows upgrade popover on mouse click', async () => {
+    const { getByTestId } = render(<MlPopover />, {
+      wrapper: TestProviders,
+    });
 
-    // TODO: Update to use act() https://fb.me/react-wrap-tests-with-act
-    wrapper.find('[data-test-subj="integrations-button"]').first().simulate('click');
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="ml-popover-upgrade-contents"]').exists()).toEqual(true);
+    await act(async () => {
+      getByTestId('integrations-button').click();
+    });
+
+    expect(getByTestId('ml-popover-upgrade-contents')).toBeInTheDocument();
   });
 });
