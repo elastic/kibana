@@ -79,6 +79,7 @@ export type RuleActionParam = SavedObjectAttribute;
 
 export interface AlertsFilterTimeframe extends SavedObjectAttributes {
   days: Array<1 | 2 | 3 | 4 | 5 | 6 | 7>;
+  timezone: string;
   hours: {
     start: string;
     end: string;

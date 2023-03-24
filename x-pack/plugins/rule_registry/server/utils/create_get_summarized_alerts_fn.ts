@@ -572,9 +572,11 @@ const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryConta
       {
         script: {
           script: {
-            source: "params.days.contains(doc['kibana.alert.start'].value.dayOfWeek.getValue())",
+            source:
+              "params.days.contains(doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())",
             params: {
               days: alertsFilter.timeframe.days,
+              timezone: alertsFilter.timeframe.timezone,
             },
           },
         },
@@ -583,19 +585,31 @@ const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryConta
         script: {
           script: {
             source: `
-              def alertsTime = LocalTime.of(doc['kibana.alert.start'].value.getHour(), doc['kibana.alert.start'].value.getMinute());
+              def alertsDateTime = doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone));
+              def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
               def start = LocalTime.parse(params.start);
               def end = LocalTime.parse(params.end);
 
-              if (start.isBefore(alertsTime) && alertsTime.isBefore(end)) {
+              if (end.isBefore(start)){ // overnight
+                def dayEnd = LocalTime.parse("23:59:59");
+                def dayStart = LocalTime.parse("00:00:00");
+                if ((alertsTime.isAfter(start) && alertsTime.isBefore(dayEnd)) || (alertsTime.isAfter(dayStart) && alertsTime.isBefore(end))) {
                   return true;
-              } else {
+                } else {
                   return false;
+                }
+              } else {
+                if (alertsTime.isAfter(start) && alertsTime.isBefore(end)) {
+                    return true;
+                } else {
+                    return false;
+                }
               }
            `,
             params: {
               start: alertsFilter.timeframe.hours.start,
               end: alertsFilter.timeframe.hours.end,
+              timezone: alertsFilter.timeframe.timezone,
             },
           },
         },

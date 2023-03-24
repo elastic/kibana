@@ -43,7 +43,7 @@ describe('validateActions', () => {
         },
         alertsFilter: {
           query: { kql: 'test:1' },
-          timeframe: { days: [1], hours: { start: '10:00', end: '17:00' } },
+          timeframe: { days: [1], hours: { start: '10:00', end: '17:00' }, timezone: 'UTC' },
         },
       },
     ],
@@ -198,7 +198,7 @@ describe('validateActions', () => {
               ...data.actions[0],
               alertsFilter: {
                 query: { kql: 'test:1' },
-                timeframe: { days: [1], hours: { start: '19:00', end: '17:00' } },
+                timeframe: { days: [1], hours: { start: '30:00', end: '17:00' }, timezone: 'UTC' },
               },
             },
           ],
@@ -206,7 +206,7 @@ describe('validateActions', () => {
         false
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      '"Failed to validate actions due to the following error: Action\'s alertsFilter time range has a start time later then end time: start(19:00) > end(17:00)"'
+      '"Failed to validate actions due to the following error: Action\'s alertsFilter time range has an invalid value: 30:00-17:00"'
     );
   });
 
@@ -220,6 +220,59 @@ describe('validateActions', () => {
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       '"Failed to validate actions due to the following error: This ruleType (My test rule) can\'t have an action with Alerts Filter. Actions: [111]"'
+    );
+  });
+
+  it('should return error message if any action has alertsFilter timeframe has missing field', async () => {
+    await expect(
+      validateActions(
+        context as unknown as RulesClientContext,
+        ruleType,
+        {
+          ...data,
+          actions: [
+            {
+              ...data.actions[0],
+              alertsFilter: {
+                query: { kql: 'test:1' },
+                // @ts-ignore
+                timeframe: { days: [1], hours: { start: '10:00', end: '17:00' } },
+              },
+            },
+          ],
+        },
+        false
+      )
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"Failed to validate actions due to the following error: Action\'s alertsFilter timeframe has missing fields: days, hours or timezone: 111"'
+    );
+  });
+  it('should return error message if any action has alertsFilter timeframe has invalid days', async () => {
+    await expect(
+      validateActions(
+        context as unknown as RulesClientContext,
+        ruleType,
+        {
+          ...data,
+          actions: [
+            {
+              ...data.actions[0],
+              alertsFilter: {
+                query: { kql: 'test:1' },
+                timeframe: {
+                  // @ts-ignore
+                  days: [0, 8],
+                  hours: { start: '10:00', end: '17:00' },
+                  timezone: 'UTC',
+                },
+              },
+            },
+          ],
+        },
+        false
+      )
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      '"Failed to validate actions due to the following error: Action\'s alertsFilter days has invalid values: (111:[0,8]) "'
     );
   });
 });

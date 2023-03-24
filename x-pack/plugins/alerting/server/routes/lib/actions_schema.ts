@@ -55,6 +55,7 @@ export const actionsSchema = schema.arrayOf(
                 validate: validateHours,
               }),
             }),
+            timezone: schema.string(),
           })
         ),
       })

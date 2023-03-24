@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { validateHours } from '../../routes/lib/validate_hours';
 import { RawRule, RuleNotifyWhen } from '../../types';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { NormalizedAlertAction } from '../types';
@@ -118,7 +119,9 @@ export async function validateActions(
   const scheduleInterval = parseDuration(data.schedule.interval);
   const actionsWithInvalidThrottles = [];
   const actionWithoutQueryAndTimeframe = [];
+  const actionWithInvalidTimeframe = [];
   const actionsWithInvalidTimeRange = [];
+  const actionsWithInvalidDays = [];
   const actionsWithAlertsFilterWithoutSummaryGetter = [];
 
   for (const action of actions) {
@@ -142,10 +145,28 @@ export async function validateActions(
       if (!alertsFilter.query && !alertsFilter.timeframe) {
         actionWithoutQueryAndTimeframe.push(action);
       }
-      // alertsFilter time range filter's start time can't be before end time
-      if (alertsFilter?.timeframe?.hours) {
-        if (alertsFilter.timeframe.hours.end < alertsFilter.timeframe.hours.start) {
-          actionsWithInvalidTimeRange.push(action);
+      if (alertsFilter.timeframe) {
+        // hours, days and timezone fields are required
+        if (
+          !alertsFilter.timeframe.hours ||
+          !alertsFilter.timeframe.days ||
+          !alertsFilter.timeframe.timezone
+        ) {
+          actionWithInvalidTimeframe.push(action);
+        }
+        // alertsFilter time range filter's start time can't be before end time
+        if (alertsFilter.timeframe.hours) {
+          if (
+            validateHours(alertsFilter.timeframe.hours.start) ||
+            validateHours(alertsFilter.timeframe.hours.end)
+          ) {
+            actionsWithInvalidTimeRange.push(action);
+          }
+        }
+        if (alertsFilter.timeframe.days) {
+          if (alertsFilter.timeframe.days.some((day) => ![1, 2, 3, 4, 5, 6, 7].includes(day))) {
+            actionsWithInvalidDays.push(action);
+          }
         }
       }
     }
@@ -177,17 +198,39 @@ export async function validateActions(
     );
   }
 
+  if (actionWithInvalidTimeframe.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionWithInvalidTimeframe', {
+        defaultMessage: `Action's alertsFilter timeframe has missing fields: days, hours or timezone: {uuids}`,
+        values: {
+          uuids: actionWithInvalidTimeframe.map((a) => a.uuid).join(', '),
+        },
+      })
+    );
+  }
+
+  if (actionsWithInvalidDays.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidDays', {
+        defaultMessage: `Action's alertsFilter days has invalid values: {uuidAndDays}`,
+        values: {
+          uuidAndDays: actionsWithInvalidDays
+            .map((a) => `(${a.uuid}:[${a.alertsFilter!.timeframe!.days}]) `)
+            .join(', '),
+        },
+      })
+    );
+  }
+
   if (actionsWithInvalidTimeRange.length > 0) {
     errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidTimeRange', {
-        defaultMessage: `Action's alertsFilter time range has a start time later then end time: {hours}`,
+        defaultMessage: `Action's alertsFilter time range has an invalid value: {hours}`,
         values: {
           hours: actionsWithInvalidTimeRange
             .map(
               (a) =>
-                `start(${a.alertsFilter!.timeframe!.hours.start}) > end(${
-                  a.alertsFilter!.timeframe!.hours.end
-                })`
+                `${a.alertsFilter!.timeframe!.hours.start}-${a.alertsFilter!.timeframe!.hours.end}`
             )
             .join(', '),
         },
