@@ -115,9 +115,10 @@ export class Plugin
         });
       },
       order: 8300,
-      title: i18n.translate('xpack.observability.overviewLinkTitle', {
-        defaultMessage: 'Overview',
+      title: i18n.translate('xpack.exploratoryView.appTitle', {
+        defaultMessage: 'Exploratory View',
       }),
+      searchable: false,
       navLinkStatus: AppNavLinkStatus.hidden,
       status: AppStatus.inaccessible,
       updater$: appUpdater$,
