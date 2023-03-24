@@ -123,7 +123,9 @@ export async function optimize({
       // Cleanup unnecessary files
       try {
         Fs.unlinkSync(Path.resolve(bundle.outputDir, '.kbn-optimizer-cache'));
-      } catch {}
+      } catch {
+        // no-op
+      }
 
       // Unsubscribe from eventObservable
       eventSubscription.unsubscribe();
