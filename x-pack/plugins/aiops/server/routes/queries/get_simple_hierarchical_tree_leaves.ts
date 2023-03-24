@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ChangePointGroup } from '@kbn/ml-agg-utils';
+import { orderBy } from 'lodash';
+import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
 import { stringHash } from '@kbn/ml-string-hash';
 
 import type { SimpleHierarchicalTreeNode } from '../../../common/types';
@@ -15,7 +16,7 @@ import type { SimpleHierarchicalTreeNode } from '../../../common/types';
  */
 export function getSimpleHierarchicalTreeLeaves(
   tree: SimpleHierarchicalTreeNode,
-  leaves: ChangePointGroup[],
+  leaves: SignificantTermGroup[],
   level = 1
 ) {
   if (tree.children.length === 0) {
@@ -38,5 +39,23 @@ export function getSimpleHierarchicalTreeLeaves(
     return [];
   }
 
-  return leaves;
+  // Sort by length of group items to make sure in the `reduce` afterwards to add larger groups first.
+  const sortedLeaves = orderBy(leaves, [(d) => d.group.length], ['desc']);
+
+  // Checks if a group is a subset of items already present in a larger group.
+  const filteredLeaves = sortedLeaves.reduce<SignificantTermGroup[]>((p, c) => {
+    const isSubset = p.some((pG) =>
+      c.group.every((cGI) =>
+        pG.group.some((pGI) => pGI.fieldName === cGI.fieldName && pGI.fieldValue === cGI.fieldValue)
+      )
+    );
+
+    if (!isSubset) {
+      p.push(c);
+    }
+
+    return p;
+  }, []);
+
+  return filteredLeaves;
 }

@@ -18,13 +18,17 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { isArray } from 'lodash/fp';
 import React from 'react';
+import type { RawBucket } from '@kbn/securitysolution-grouping';
+import type { AlertsGroupingAggregation } from './types';
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import type { GenericBuckets } from '../../../../../common/search_strategy';
-import type { RawBucket } from '../../../../common/components/grouping';
 import { PopoverItems } from '../../../../common/components/popover_items';
 import { COLUMN_TAGS } from '../../../pages/detection_engine/rules/translations';
 
-export const getSelectedGroupButtonContent = (selectedGroup: string, bucket: RawBucket) => {
+export const renderGroupPanel = (
+  selectedGroup: string,
+  bucket: RawBucket<AlertsGroupingAggregation>
+) => {
   switch (selectedGroup) {
     case 'kibana.alert.rule.name':
       return isArray(bucket.key) ? (
@@ -54,15 +58,15 @@ const RuleNameGroupContent = React.memo<{
     </EuiBadge>
   );
   return (
-    <>
+    <div style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
       <EuiFlexGroup data-test-subj="rule-name-group-renderer" gutterSize="m" alignItems="center">
-        <EuiFlexItem grow={false} style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
+        <EuiFlexItem grow={false} style={{ display: 'contents' }}>
           <EuiTitle size="xs">
             <h5 className="eui-textTruncate">{ruleName.trim()}</h5>
           </EuiTitle>
         </EuiFlexItem>
         {tags && tags.length > 0 ? (
-          <EuiFlexItem onClick={(e) => e.stopPropagation()} grow={false}>
+          <EuiFlexItem grow={false}>
             <PopoverItems
               items={tags.map((tag) => tag.key.toString())}
               popoverTitle={COLUMN_TAGS}
@@ -80,7 +84,7 @@ const RuleNameGroupContent = React.memo<{
           <EuiTextColor color="subdued">{ruleDescription}</EuiTextColor>
         </p>
       </EuiText>
-    </>
+    </div>
   );
 });
 RuleNameGroupContent.displayName = 'RuleNameGroup';

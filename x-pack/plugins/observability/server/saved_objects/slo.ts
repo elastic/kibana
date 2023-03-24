@@ -49,13 +49,13 @@ export const slo: SavedObjectsType = {
       },
       settings: {
         properties: {
-          timestampField: { type: 'keyword' },
           syncDelay: { type: 'keyword' },
           frequency: { type: 'keyword' },
         },
       },
       revision: { type: 'short' },
       enabled: { type: 'boolean' },
+      tags: { type: 'keyword' },
       createdAt: { type: 'date' },
       updatedAt: { type: 'date' },
     },

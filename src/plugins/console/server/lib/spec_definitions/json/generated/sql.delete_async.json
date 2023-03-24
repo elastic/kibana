@@ -1,0 +1,11 @@
+{
+  "sql.delete_async": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_sql/async/delete/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-async-sql-search-api.html"
+  }
+}

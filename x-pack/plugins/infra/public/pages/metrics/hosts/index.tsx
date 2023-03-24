@@ -22,18 +22,13 @@ import { fullHeightContentStyles } from '../../../page_template.styles';
 import { UnifiedSearchProvider } from './hooks/use_unified_search';
 import { HostContainer } from './components/hosts_container';
 import { ExperimentalBadge } from '../../../components/experimental_badge';
+import { NoRemoteCluster } from '../../../components/empty_states';
 
 const HOSTS_FEEDBACK_LINK = 'https://ela.st/host-feedback';
 
 export const HostsPage = () => {
-  const {
-    hasFailedLoadingSource,
-    isLoading,
-    loadSourceFailureMessage,
-    loadSource,
-    source,
-    metricIndicesExist,
-  } = useSourceContext();
+  const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
+
   useTrackPageview({ app: 'infra_metrics', path: 'hosts' });
   useTrackPageview({ app: 'infra_metrics', path: 'hosts', delay: 15000 });
 
@@ -42,60 +37,73 @@ export const HostsPage = () => {
       text: hostsTitle,
     },
   ]);
+
+  const { metricIndicesExist, remoteClustersExist } = source?.status ?? {};
+
+  if (isLoading && !source) return <SourceLoadingPage />;
+
+  if (!remoteClustersExist) {
+    return <NoRemoteCluster />;
+  }
+
+  if (!metricIndicesExist) {
+    return (
+      <MetricsPageTemplate hasData={metricIndicesExist} data-test-subj="noMetricsIndicesPrompt" />
+    );
+  }
+
+  if (loadSourceFailureMessage)
+    return <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />;
+
   return (
     <EuiErrorBoundary>
-      {isLoading && !source ? (
-        <SourceLoadingPage />
-      ) : metricIndicesExist && source ? (
-        <div className={APP_WRAPPER_CLASS}>
-          <MetricsPageTemplate
-            hasData={metricIndicesExist}
-            pageHeader={{
-              alignItems: 'center',
-              pageTitle: (
-                <div
-                  css={css`
-                    display: flex;
-                    align-items: center;
-                    gap: 0.75rem;
-                  `}
-                >
-                  <h1>{hostsTitle}</h1>
-                  <ExperimentalBadge />
-                </div>
-              ),
-              rightSideItems: [
-                <EuiButton
-                  href={HOSTS_FEEDBACK_LINK}
-                  target="_blank"
-                  color="warning"
-                  iconType="editorComment"
-                >
-                  <FormattedMessage
-                    id="xpack.infra.hostsPage.tellUsWhatYouThinkLink"
-                    defaultMessage="Tell us what you think!"
-                  />
-                </EuiButton>,
-              ],
-            }}
-            pageSectionProps={{
-              contentProps: {
-                css: fullHeightContentStyles,
-              },
-            }}
-          >
+      <div className={APP_WRAPPER_CLASS}>
+        <MetricsPageTemplate
+          hasData={metricIndicesExist}
+          pageHeader={{
+            alignItems: 'center',
+            pageTitle: (
+              <div
+                css={css`
+                  display: flex;
+                  align-items: center;
+                  gap: 0.75rem;
+                `}
+              >
+                <h1>{hostsTitle}</h1>
+                <ExperimentalBadge />
+              </div>
+            ),
+            rightSideItems: [
+              <EuiButton
+                data-test-subj="infraHostsPageTellUsWhatYouThinkButton"
+                href={HOSTS_FEEDBACK_LINK}
+                target="_blank"
+                color="warning"
+                iconType="editorComment"
+              >
+                <FormattedMessage
+                  id="xpack.infra.hostsPage.tellUsWhatYouThinkLink"
+                  defaultMessage="Tell us what you think!"
+                />
+              </EuiButton>,
+            ],
+          }}
+          pageSectionProps={{
+            contentProps: {
+              css: fullHeightContentStyles,
+            },
+          }}
+        >
+          {source && (
             <MetricsDataViewProvider metricAlias={source.configuration.metricAlias}>
               <UnifiedSearchProvider>
                 <HostContainer />
               </UnifiedSearchProvider>
             </MetricsDataViewProvider>
-          </MetricsPageTemplate>
-        </div>
-      ) : hasFailedLoadingSource ? (
-        <SourceErrorPage errorMessage={loadSourceFailureMessage || ''} retry={loadSource} />
-      ) : (
-        <MetricsPageTemplate hasData={metricIndicesExist} data-test-subj="noMetricsIndicesPrompt" />
-      )}
+          )}
+        </MetricsPageTemplate>
+      </div>
     </EuiErrorBoundary>
   );
 };

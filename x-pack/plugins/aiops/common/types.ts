@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
+import type { SignificantTerm, FieldValuePair } from '@kbn/ml-agg-utils';
 
-export interface ChangePointDuplicateGroup {
-  keys: Pick<ChangePoint, keyof ChangePoint>;
-  group: ChangePoint[];
+export interface SignificantTermDuplicateGroup {
+  keys: Pick<SignificantTerm, keyof SignificantTerm>;
+  group: SignificantTerm[];
 }
 
 export type FieldValuePairCounts = Record<string, Record<string, number>>;
@@ -23,9 +23,14 @@ export interface ItemsetResult {
   total_doc_count: number;
 }
 
+interface SimpleHierarchicalTreeNodeSet extends FieldValuePair {
+  docCount: number;
+  pValue: number | null;
+}
+
 export interface SimpleHierarchicalTreeNode {
   name: string;
-  set: FieldValuePair[];
+  set: SimpleHierarchicalTreeNodeSet[];
   docCount: number;
   pValue: number | null;
   children: SimpleHierarchicalTreeNode[];

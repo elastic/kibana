@@ -18,7 +18,7 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { useUiTracker } from '@kbn/observability-plugin/public';
-import { useSourceViaHttp } from '../../../../../../containers/metrics_source/use_source_via_http';
+import { useSourceContext } from '../../../../../../containers/metrics_source';
 import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
 import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
 import { FixedDatePicker } from '../../../../../../components/fixed_datepicker';
@@ -42,9 +42,7 @@ export const JobSetupScreen = (props: Props) => {
   const [filter, setFilter] = useState<string>('');
   const [filterQuery, setFilterQuery] = useState<string>('');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
-  const { createDerivedIndexPattern } = useSourceViaHttp({
-    sourceId: 'default',
-  });
+  const { createDerivedIndexPattern } = useSourceContext();
 
   const indicies = h.sourceConfiguration.indices;
 
@@ -193,7 +191,7 @@ export const JobSetupScreen = (props: Props) => {
               defaultMessage="Something went wrong creating the necessary ML jobs."
             />
             <EuiSpacer />
-            <EuiButton fill onClick={createJobs}>
+            <EuiButton data-test-subj="infraJobSetupScreenTryAgainButton" fill onClick={createJobs}>
               <FormattedMessage
                 id="xpack.infra.ml.steps.setupProcess.tryAgainButton"
                 defaultMessage="Try again"
@@ -332,7 +330,10 @@ export const JobSetupScreen = (props: Props) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={props.closeFlyout}>
+            <EuiButtonEmpty
+              data-test-subj="infraJobSetupScreenCancelButton"
+              onClick={props.closeFlyout}
+            >
               <FormattedMessage
                 id="xpack.infra.ml.steps.setupProcess.cancelButton"
                 defaultMessage="Cancel"
@@ -340,7 +341,12 @@ export const JobSetupScreen = (props: Props) => {
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill={true} fullWidth={false} onClick={createJobs}>
+            <EuiButton
+              data-test-subj="infraJobSetupScreenEnableJobsButton"
+              fill={true}
+              fullWidth={false}
+              onClick={createJobs}
+            >
               <FormattedMessage
                 id="xpack.infra.ml.steps.setupProcess.enableButton"
                 defaultMessage="Enable jobs"

@@ -1105,6 +1105,41 @@ describe('XYChart component', () => {
     expect(wrapper.find(Settings).at(0).prop('allowBrushingLastHistogramBin')).toEqual(true);
   });
 
+  test('should not render tooltip header if no x axis', () => {
+    const { args, data } = sampleArgs();
+    const component = shallow(
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          layers: [
+            {
+              layerId: 'first',
+              type: 'dataLayer',
+              layerType: LayerTypes.DATA,
+              seriesType: 'line',
+              isHorizontal: false,
+              isStacked: false,
+              isPercentage: false,
+              showLines: true,
+              xAccessor: undefined,
+              accessors: ['a', 'b'],
+              columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+              xScaleType: 'ordinal',
+              isHistogram: false,
+              palette: mockPaletteOutput,
+              table: data,
+            },
+          ],
+          detailedTooltip: false,
+        }}
+      />
+    );
+    const tooltip = component.find(Tooltip);
+    const headerFormatter = tooltip.prop('headerFormatter');
+    expect(headerFormatter).toBeUndefined();
+  });
+
   test('should not have tooltip actions for the detailed tooltip', () => {
     const { args, data } = sampleArgs();
 

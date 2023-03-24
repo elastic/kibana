@@ -33,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ruleTypeId: '.index-threshold',
       schedule: { interval: '1m' },
       tags: [],
+      actions: [],
     };
 
     before(async () => {
@@ -41,17 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await rules.api.deleteRule(ruleId);
-    });
-
-    it('connectors list screenshot', async () => {
-      await pageObjects.common.navigateToApp('connectors');
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      await commonScreenshots.takeScreenshot(
-        'connector-listing',
-        screenshotDirectories,
-        1400,
-        1024
-      );
     });
 
     it('rules list screenshot', async () => {

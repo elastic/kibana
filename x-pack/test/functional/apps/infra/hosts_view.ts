@@ -196,6 +196,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Metrics Tab', () => {
+        before(async () => {
+          browser.scrollTop();
+          await pageObjects.infraHostsView.visitMetricsTab();
+        });
+
         it('should load 8 lens metric charts', async () => {
           const metricCharts = await pageObjects.infraHostsView.getAllMetricsCharts();
           expect(metricCharts.length).to.equal(8);
@@ -217,6 +222,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const COLUMNS = 5;
 
         before(async () => {
+          browser.scrollTop();
           await pageObjects.infraHostsView.visitAlertTab();
         });
 
@@ -231,7 +237,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(alertsCount).to.be('6');
         });
 
-        describe('#FilterButtonGroup', () => {
+        // FLAKY: https://github.com/elastic/kibana/issues/153236
+        describe.skip('#FilterButtonGroup', () => {
           it('can be filtered to only show "active" alerts using the filter button', async () => {
             await pageObjects.infraHostsView.setAlertStatusFilter(ALERT_STATUS_ACTIVE);
             await retry.try(async () => {
