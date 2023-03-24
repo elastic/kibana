@@ -9,11 +9,13 @@ import { schema } from '@kbn/config-schema';
 
 import {
   EnterpriseSearchEngineDetails,
+  EnterpriseSearchEngineDetailsResponse,
   EnterpriseSearchEnginesResponse,
   EnterpriseSearchEngineUpsertResponse,
 } from '../../../common/types/engines';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { createApiKey } from '../../lib/engines/create_api_key';
+import { fetchIndicesStats } from '../../lib/engines/fetch_indices_stats';
 
 import { fetchEngineFieldCapabilities } from '../../lib/engines/field_capabilities';
 import { RouteDependencies } from '../../plugin';
@@ -63,7 +65,13 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
         method: 'GET',
         path: `/_application/search_application/${request.params.engine_name}`,
       });
-      return response.ok({ body: engine });
+      const indicesStats = await fetchIndicesStats(client, engine.indices);
+      const hydratedEngineResponse: EnterpriseSearchEngineDetailsResponse = {
+        ...engine,
+        indices: indicesStats,
+      };
+
+      return response.ok({ body: hydratedEngineResponse });
     })
   );
 
@@ -171,7 +179,7 @@ export function registerEnginesRoutes({ config, log, router }: RouteDependencies
       const engineName = decodeURIComponent(request.params.engine_name);
       const { client } = (await context.core).elasticsearch;
 
-      const engine = await fetchEnterpriseSearch<EnterpriseSearchEngineDetails>(
+      const engine = await fetchEnterpriseSearch<EnterpriseSearchEngineDetailsResponse>(
         config,
         request,
         `/api/engines/${engineName}`

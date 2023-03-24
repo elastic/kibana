@@ -20,11 +20,14 @@ export interface EnterpriseSearchEngine {
 }
 
 export interface EnterpriseSearchEngineDetails {
-  indices: EnterpriseSearchEngineIndex[];
+  indices: string[];
   updated_at_millis: number;
   name: string;
 }
-
+export interface EnterpriseSearchEngineDetailsResponse
+  extends Omit<EnterpriseSearchEngineDetails, 'indices'> {
+  indices: EnterpriseSearchEngineIndex[];
+}
 export interface EnterpriseSearchEngineIndex {
   count: number;
   health: HealthStatus | 'unknown';
