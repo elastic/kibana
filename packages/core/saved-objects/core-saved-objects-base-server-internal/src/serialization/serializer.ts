@@ -87,8 +87,15 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
 
     const { namespaceTreatment = 'strict' } = options;
     const { _id, _source, _seq_no, _primary_term } = doc;
-    const { type, namespaces, originId, migrationVersion, references, coreMigrationVersion } =
-      _source;
+    const {
+      type,
+      namespaces,
+      originId,
+      migrationVersion,
+      references,
+      coreMigrationVersion,
+      typeMigrationVersion,
+    } = _source;
 
     const version =
       _seq_no != null || _primary_term != null
@@ -109,6 +116,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       references: references || [],
       ...(migrationVersion && { migrationVersion }),
       ...(coreMigrationVersion && { coreMigrationVersion }),
+      ...(typeMigrationVersion != null ? { typeMigrationVersion } : {}),
       ...(_source.updated_at && { updated_at: _source.updated_at }),
       ...(_source.created_at && { created_at: _source.created_at }),
       ...(version && { version }),
@@ -135,6 +143,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       version,
       references,
       coreMigrationVersion,
+      typeMigrationVersion,
     } = savedObj;
     const source = {
       [type]: attributes,
@@ -145,6 +154,7 @@ export class SavedObjectsSerializer implements ISavedObjectsSerializer {
       ...(originId && { originId }),
       ...(migrationVersion && { migrationVersion }),
       ...(coreMigrationVersion && { coreMigrationVersion }),
+      ...(typeMigrationVersion != null ? { typeMigrationVersion } : {}),
       ...(updated_at && { updated_at }),
       ...(createdAt && { created_at: createdAt }),
     };

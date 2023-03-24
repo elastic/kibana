@@ -515,12 +515,12 @@ export class DataViewsService {
    */
   getFieldsForIndexPattern = async (
     indexPattern: DataView | DataViewSpec,
-    options?: GetFieldsOptions
+    options?: Omit<GetFieldsOptions, 'allowNoIndex'>
   ) =>
     this.getFieldsForWildcard({
       type: indexPattern.type,
       rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
-      allowNoIndex: indexPattern.allowNoIndex,
+      allowNoIndex: true,
       ...options,
       pattern: indexPattern.title as string,
     });
@@ -530,7 +530,7 @@ export class DataViewsService {
     return this.apiClient.getFieldsForWildcard({
       type: dataView.type,
       rollupIndex: dataView?.typeMeta?.params?.rollup_index,
-      allowNoIndex: dataView.allowNoIndex,
+      allowNoIndex: true,
       pattern: dataView.getIndexPattern(),
       metaFields,
     });
@@ -538,12 +538,12 @@ export class DataViewsService {
 
   private getFieldsAndIndicesForWildcard = async (options: GetFieldsOptions) => {
     const metaFields = await this.config.get<string[]>(META_FIELDS);
-    return await this.apiClient.getFieldsForWildcard({
+    return this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
       type: options.type,
       rollupIndex: options.rollupIndex,
-      allowNoIndex: options.allowNoIndex,
+      allowNoIndex: true,
       indexFilter: options.indexFilter,
     });
   };

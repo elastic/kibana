@@ -164,6 +164,19 @@ describe('IndexPatterns', () => {
     expect(apiClient.getFieldsForWildcard).toBeCalledTimes(2);
   });
 
+  test('getFieldsForWildcard called with allowNoIndex set to true as default ', async () => {
+    const id = '1';
+    await indexPatterns.get(id);
+    expect(apiClient.getFieldsForWildcard).toBeCalledWith({
+      allowNoIndex: true,
+      indexFilter: undefined,
+      metaFields: false,
+      pattern: 'something',
+      rollupIndex: undefined,
+      type: undefined,
+    });
+  });
+
   test('does cache ad-hoc data views', async () => {
     const id = '1';
 
@@ -608,9 +621,8 @@ describe('IndexPatterns', () => {
       expect(indexPattern.fields.length).toBe(1);
     });
 
-    test('refreshFields properly includes allowNoIndex', async () => {
+    test('refreshFields defaults allowNoIndex to true', async () => {
       const indexPatternSpec: DataViewSpec = {
-        allowNoIndex: true,
         title: 'test',
       };
 

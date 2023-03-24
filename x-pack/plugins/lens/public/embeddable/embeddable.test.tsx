@@ -1574,4 +1574,107 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(4);
     expect(expressionRenderer.mock.calls[1][0]!.padding).toBe(undefined);
   });
+
+  it('should reload only once when the attributes or savedObjectId and the search context change at the same time', async () => {
+    const createEmbeddable = async () => {
+      const currentExpressionRenderer = jest.fn((_props) => null);
+      const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
+      const query: Query = { language: 'kquery', query: '' };
+      const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: true } }];
+      const embeddable = new Embeddable(
+        {
+          timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+          attributeService,
+          data: dataMock,
+          uiSettings: { get: () => undefined } as unknown as IUiSettingsClient,
+          expressionRenderer: currentExpressionRenderer,
+          coreStart: {} as CoreStart,
+          basePath,
+          inspector: inspectorPluginMock.createStartContract(),
+          dataViews: {} as DataViewsContract,
+          capabilities: {
+            canSaveDashboards: true,
+            canSaveVisualizations: true,
+            discover: {},
+            navLinks: {},
+          },
+          getTrigger,
+          visualizationMap: defaultVisualizationMap,
+          datasourceMap: defaultDatasourceMap,
+          injectFilterReferences: jest.fn(mockInjectFilterReferences),
+          theme: themeServiceMock.createStartContract(),
+          documentToExpression: () =>
+            Promise.resolve({
+              ast: {
+                type: 'expression',
+                chain: [
+                  { type: 'function', function: 'my', arguments: {} },
+                  { type: 'function', function: 'expression', arguments: {} },
+                ],
+              },
+              indexPatterns: {},
+              indexPatternRefs: [],
+            }),
+        },
+        { id: '123', timeRange, query, filters } as LensEmbeddableInput
+      );
+      const reload = jest.spyOn(embeddable, 'reload');
+      const initializeSavedVis = jest.spyOn(embeddable, 'initializeSavedVis');
+
+      await embeddable.initializeSavedVis({
+        id: '123',
+        timeRange,
+        query,
+        filters,
+      } as LensEmbeddableInput);
+
+      embeddable.render(mountpoint);
+
+      return {
+        embeddable,
+        reload,
+        initializeSavedVis,
+        expressionRenderer: currentExpressionRenderer,
+      };
+    };
+
+    let test = await createEmbeddable();
+
+    expect(test.reload).toHaveBeenCalledTimes(1);
+    expect(test.initializeSavedVis).toHaveBeenCalledTimes(1);
+    expect(test.expressionRenderer).toHaveBeenCalledTimes(1);
+
+    // Test with savedObjectId and searchSessionId change
+    act(() => {
+      test.embeddable.updateInput({ savedObjectId: '123', searchSessionId: '456' });
+    });
+
+    // wait one tick to give embeddable time to initialize
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(test.reload).toHaveBeenCalledTimes(2);
+    expect(test.initializeSavedVis).toHaveBeenCalledTimes(2);
+    expect(test.expressionRenderer).toHaveBeenCalledTimes(2);
+
+    test = await createEmbeddable();
+
+    expect(test.reload).toHaveBeenCalledTimes(1);
+    expect(test.initializeSavedVis).toHaveBeenCalledTimes(1);
+    expect(test.expressionRenderer).toHaveBeenCalledTimes(1);
+
+    // Test with attributes and timeRange change
+    act(() => {
+      test.embeddable.updateInput({
+        attributes: { foo: 'bar' } as unknown as LensSavedObjectAttributes,
+        timeRange: { from: 'now-30d', to: 'now' },
+      });
+    });
+
+    // wait one tick to give embeddable time to initialize
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(test.reload).toHaveBeenCalledTimes(2);
+    expect(test.initializeSavedVis).toHaveBeenCalledTimes(2);
+    expect(test.expressionRenderer).toHaveBeenCalledTimes(2);
+  });
 });
