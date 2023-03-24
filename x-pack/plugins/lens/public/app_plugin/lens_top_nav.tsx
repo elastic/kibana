@@ -15,6 +15,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import moment from 'moment';
 import { LENS_APP_LOCATOR } from '../../common/locator/locator';
 import { ENABLE_SQL } from '../../common';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
@@ -458,8 +459,9 @@ export const LensTopNavMenu = ({
     isSaveable && application.capabilities.dashboard?.showWriteControls
   );
 
-  const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
-    defaultMessage: 'unsaved',
+  const defaultLensTitle = i18n.translate('dashboard.share.defaultDashboardTitle', {
+    defaultMessage: 'Lens Visualization [{date}]',
+    values: { date: moment().toISOString(true) },
   });
   const additionalMenuEntries = useMemo(() => {
     if (!visualization.activeId) return undefined;
@@ -596,7 +598,7 @@ export const LensTopNavMenu = ({
               activeData,
               csvEnabled,
               reportingDisabled: !csvEnabled,
-              title: title || unsavedTitle,
+              title: title || defaultLensTitle,
               locatorParams: {
                 id: LENS_APP_LOCATOR,
                 params: locatorParams,
@@ -742,7 +744,6 @@ export const LensTopNavMenu = ({
     initialContextIsEmbedded,
     activeData,
     isSaveable,
-    shortUrlService,
     application,
     getIsByValueMode,
     savingToLibraryPermitted,
@@ -753,7 +754,7 @@ export const LensTopNavMenu = ({
     lensInspector,
     title,
     share,
-    unsavedTitle,
+    shortUrlService,
     data,
     filters,
     query,
@@ -763,6 +764,8 @@ export const LensTopNavMenu = ({
     visualizationMap,
     visualization,
     currentDoc,
+    adHocDataViews,
+    defaultLensTitle,
     isCurrentStateDirty,
     onAppLeave,
     runSave,
@@ -777,7 +780,6 @@ export const LensTopNavMenu = ({
     isOnTextBasedMode,
     lensStore,
     theme$,
-    adHocDataViews,
   ]);
 
   const onQuerySubmitWrapped = useCallback(
