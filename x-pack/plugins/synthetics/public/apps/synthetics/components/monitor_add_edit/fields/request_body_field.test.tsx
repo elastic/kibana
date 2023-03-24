@@ -93,71 +93,74 @@ describe('<RequestBodyField />', () => {
     const { getByText, getByRole, getAllByRole, getByLabelText } = render(<WrappedComponent />);
 
     expect(getByLabelText('Text code editor')).toBeInTheDocument();
-    userEvent.type(getByRole('textbox'), 'text');
-    expect(getByRole('textbox')).toHaveValue('text');
+    const textbox = getByRole('textbox');
+    userEvent.type(textbox, 'text');
+    expect(textbox).toHaveValue('text');
 
     const xmlButton = getByText('XML').closest('button');
     if (xmlButton) {
       fireEvent.click(xmlButton);
     }
 
-    expect(getByText('XML').closest('button')).toHaveAttribute('aria-selected', 'true');
-    userEvent.type(getByRole('textbox'), 'xml');
-    expect(getByRole('textbox')).toHaveValue('textxml');
+    expect(xmlButton).toHaveAttribute('aria-selected', 'true');
+    userEvent.type(textbox, 'xml');
+    expect(textbox).toHaveValue('textxml');
 
     const jsonButton = getByText('JSON').closest('button');
     if (jsonButton) {
       fireEvent.click(jsonButton);
     }
 
-    expect(getByText('JSON').closest('button')).toHaveAttribute('aria-selected', 'true');
-    userEvent.type(getByRole('textbox'), 'json');
-    expect(getByRole('textbox')).toHaveValue('textxmljson');
+    expect(jsonButton).toHaveAttribute('aria-selected', 'true');
+    userEvent.type(textbox, 'json');
+    expect(textbox).toHaveValue('textxmljson');
 
     const formButton = getByText('Form').closest('button');
     if (formButton) {
       fireEvent.click(formButton);
     }
 
-    expect(getByText('Form').closest('button')).toHaveAttribute('aria-selected', 'true');
+    expect(formButton).toHaveAttribute('aria-selected', 'true');
     userEvent.click(getByText('Add form field'));
     expect(getByText('Key')).toBeInTheDocument();
     expect(getByText('Value')).toBeInTheDocument();
-    userEvent.type(getAllByRole('textbox')[0], 'formfield');
-    expect(getAllByRole('textbox')[0]).toHaveValue('formfield');
+    const keyValueTextBox = getAllByRole('textbox')[0];
+    userEvent.type(keyValueTextBox, 'formfield');
+    expect(keyValueTextBox).toHaveValue('formfield');
   });
 
   it('handles read only', async () => {
     const { getByText, getByRole, getByLabelText } = render(<WrappedComponent readOnly={true} />);
 
     expect(getByLabelText('Text code editor')).toBeInTheDocument();
-    userEvent.type(getByRole('textbox'), 'text');
-    expect(getByRole('textbox')).toHaveValue('');
+    const textbox = getByRole('textbox');
+    userEvent.type(textbox, 'text');
+    expect(textbox).toHaveValue('');
 
     const xmlButton = getByText('XML').closest('button');
     if (xmlButton) {
       fireEvent.click(xmlButton);
     }
 
-    expect(getByText('XML').closest('button')).toHaveAttribute('aria-selected', 'true');
-    userEvent.type(getByRole('textbox'), 'xml');
-    expect(getByRole('textbox')).toHaveValue('');
+    expect(xmlButton).toHaveAttribute('aria-selected', 'true');
+    userEvent.type(textbox, 'xml');
+    expect(textbox).toHaveValue('');
 
     const jsonButton = getByText('JSON').closest('button');
     if (jsonButton) {
       fireEvent.click(jsonButton);
     }
 
-    expect(getByText('JSON').closest('button')).toHaveAttribute('aria-selected', 'true');
-    userEvent.type(getByRole('textbox'), 'json');
-    expect(getByRole('textbox')).toHaveValue('');
+    expect(jsonButton).toHaveAttribute('aria-selected', 'true');
+    userEvent.type(textbox, 'json');
+    expect(textbox).toHaveValue('');
 
     const formButton = getByText('Form').closest('button');
     if (formButton) {
       fireEvent.click(formButton);
     }
 
-    expect(getByText('Form').closest('button')).toHaveAttribute('aria-selected', 'true');
+    expect(formButton).toHaveAttribute('aria-selected', 'true');
     expect(getByRole('button', { name: 'Add form field' })).toBeDisabled();
   });
 });
