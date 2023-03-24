@@ -373,7 +373,7 @@ const DragInner = memo(function DragInner({
         ghost: keyboardModeOn
           ? {
               children,
-              style: { width: currentTarget.offsetWidth, height: currentTarget.offsetHeight },
+              style: { width: currentTarget.offsetWidth, minHeight: currentTarget?.offsetHeight },
             }
           : undefined,
       });
