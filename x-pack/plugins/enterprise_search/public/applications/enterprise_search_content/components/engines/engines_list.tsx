@@ -59,7 +59,6 @@ export const EnginesList: React.FC = () => {
     openDeleteEngineModal,
     setSearchQuery,
     setIsFirstRequest,
-    showEmptyEngines,
   } = useActions(EnginesListLogic);
 
   const { openFetchEngineFlyout } = useActions(EnginesListFlyoutLogic);
@@ -83,23 +82,15 @@ export const EnginesList: React.FC = () => {
   const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
 
   // Don't fetch engines if we don't have a valid license
-  if (!isGated) {
-    useEffect(() => {
-      fetchEngines();
-    }, [meta.from, meta.size, throttledSearchQuery]);
+  useEffect(() => {
+    !isGated && fetchEngines();
+  }, [meta.from, meta.size, throttledSearchQuery]);
 
-    useEffect(() => {
-      // We don't want to trigger loading for each search query change, so we need this
-      // flag to set if the call to backend is first request.
-      setIsFirstRequest();
-    }, []);
-  } else {
-    useEffect(() => {
-      // We don't want to trigger loading for each search query change, so we need this
-      // flag to set if the call to backend is first request.
-      showEmptyEngines();
-    }, []);
-  }
+  useEffect(() => {
+    // We don't want to trigger loading for each search query change, so we need this
+    // flag to set if the call to backend is first request.
+    !isGated && setIsFirstRequest();
+  }, []);
 
   return (
     <>
@@ -146,7 +137,7 @@ export const EnginesList: React.FC = () => {
             : [],
         }}
         pageViewTelemetry="Engines"
-        isLoading={isLoading}
+        isLoading={isLoading && !isGated}
       >
         {isGated && (
           <EuiFlexItem>
