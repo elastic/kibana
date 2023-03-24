@@ -2102,6 +2102,7 @@ describe('createGetSummarizedAlertsFn', () => {
         timeframe: {
           days: [1, 2, 3, 4, 5],
           hours: { start: '08:00', end: '17:00' },
+          timezone: 'UTC',
         },
       },
     });
@@ -2147,9 +2148,10 @@ describe('createGetSummarizedAlertsFn', () => {
                   script: {
                     params: {
                       days: [1, 2, 3, 4, 5],
+                      timezone: 'UTC',
                     },
                     source:
-                      "params.days.contains(doc['kibana.alert.start'].value.dayOfWeek.getValue())",
+                      "params.days.contains(doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())",
                   },
                 },
               },
@@ -2159,16 +2161,28 @@ describe('createGetSummarizedAlertsFn', () => {
                     params: {
                       end: '17:00',
                       start: '08:00',
+                      timezone: 'UTC',
                     },
                     source: `
-              def alertsTime = LocalTime.of(doc['kibana.alert.start'].value.getHour(), doc['kibana.alert.start'].value.getMinute());
+              def alertsDateTime = doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone));
+              def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
               def start = LocalTime.parse(params.start);
               def end = LocalTime.parse(params.end);
 
-              if (start.isBefore(alertsTime) && alertsTime.isBefore(end)) {
+              if (end.isBefore(start)){ // overnight
+                def dayEnd = LocalTime.parse("23:59:59");
+                def dayStart = LocalTime.parse("00:00:00");
+                if ((alertsTime.isAfter(start) && alertsTime.isBefore(dayEnd)) || (alertsTime.isAfter(dayStart) && alertsTime.isBefore(end))) {
                   return true;
-              } else {
+                } else {
                   return false;
+                }
+              } else {
+                if (alertsTime.isAfter(start) && alertsTime.isBefore(end)) {
+                    return true;
+                } else {
+                    return false;
+                }
               }
            `,
                   },
@@ -2218,9 +2232,10 @@ describe('createGetSummarizedAlertsFn', () => {
                   script: {
                     params: {
                       days: [1, 2, 3, 4, 5],
+                      timezone: 'UTC',
                     },
                     source:
-                      "params.days.contains(doc['kibana.alert.start'].value.dayOfWeek.getValue())",
+                      "params.days.contains(doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())",
                   },
                 },
               },
@@ -2230,16 +2245,28 @@ describe('createGetSummarizedAlertsFn', () => {
                     params: {
                       end: '17:00',
                       start: '08:00',
+                      timezone: 'UTC',
                     },
                     source: `
-              def alertsTime = LocalTime.of(doc['kibana.alert.start'].value.getHour(), doc['kibana.alert.start'].value.getMinute());
+              def alertsDateTime = doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone));
+              def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
               def start = LocalTime.parse(params.start);
               def end = LocalTime.parse(params.end);
 
-              if (start.isBefore(alertsTime) && alertsTime.isBefore(end)) {
+              if (end.isBefore(start)){ // overnight
+                def dayEnd = LocalTime.parse("23:59:59");
+                def dayStart = LocalTime.parse("00:00:00");
+                if ((alertsTime.isAfter(start) && alertsTime.isBefore(dayEnd)) || (alertsTime.isAfter(dayStart) && alertsTime.isBefore(end))) {
                   return true;
-              } else {
+                } else {
                   return false;
+                }
+              } else {
+                if (alertsTime.isAfter(start) && alertsTime.isBefore(end)) {
+                    return true;
+                } else {
+                    return false;
+                }
               }
            `,
                   },
@@ -2289,9 +2316,10 @@ describe('createGetSummarizedAlertsFn', () => {
                   script: {
                     params: {
                       days: [1, 2, 3, 4, 5],
+                      timezone: 'UTC',
                     },
                     source:
-                      "params.days.contains(doc['kibana.alert.start'].value.dayOfWeek.getValue())",
+                      "params.days.contains(doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone)).dayOfWeek.getValue())",
                   },
                 },
               },
@@ -2301,16 +2329,28 @@ describe('createGetSummarizedAlertsFn', () => {
                     params: {
                       end: '17:00',
                       start: '08:00',
+                      timezone: 'UTC',
                     },
                     source: `
-              def alertsTime = LocalTime.of(doc['kibana.alert.start'].value.getHour(), doc['kibana.alert.start'].value.getMinute());
+              def alertsDateTime = doc['kibana.alert.start'].value.withZoneSameInstant(ZoneId.of(params.timezone));
+              def alertsTime = LocalTime.of(alertsDateTime.getHour(), alertsDateTime.getMinute());
               def start = LocalTime.parse(params.start);
               def end = LocalTime.parse(params.end);
 
-              if (start.isBefore(alertsTime) && alertsTime.isBefore(end)) {
+              if (end.isBefore(start)){ // overnight
+                def dayEnd = LocalTime.parse("23:59:59");
+                def dayStart = LocalTime.parse("00:00:00");
+                if ((alertsTime.isAfter(start) && alertsTime.isBefore(dayEnd)) || (alertsTime.isAfter(dayStart) && alertsTime.isBefore(end))) {
                   return true;
-              } else {
+                } else {
                   return false;
+                }
+              } else {
+                if (alertsTime.isAfter(start) && alertsTime.isBefore(end)) {
+                    return true;
+                } else {
+                    return false;
+                }
               }
            `,
                   },

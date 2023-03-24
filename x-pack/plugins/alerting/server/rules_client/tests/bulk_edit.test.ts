@@ -681,6 +681,7 @@ describe('bulkEdit()', () => {
           timeframe: {
             days: [1],
             hours: { start: '08:00', end: '17:00' },
+            timezone: 'UTC',
           },
         },
       };

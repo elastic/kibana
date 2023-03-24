@@ -28,6 +28,7 @@ describe('addGeneratedActionValues()', () => {
       timeframe: {
         days: [1, 2],
         hours: { start: '08:00', end: '17:00' },
+        timezone: 'UTC',
       },
     },
   };
