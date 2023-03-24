@@ -166,7 +166,7 @@ it('matches snapshot', () => {
       "kibana.alert.rule.revision": Object {
         "array": false,
         "required": true,
-        "type": "integer",
+        "type": "long",
       },
       "kibana.alert.rule.rule_id": Object {
         "array": false,

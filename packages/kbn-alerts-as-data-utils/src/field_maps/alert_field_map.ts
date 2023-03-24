@@ -114,7 +114,7 @@ export const alertFieldMap = {
     required: true,
   },
   [ALERT_RULE_REVISION]: {
-    type: 'integer',
+    type: 'long',
     array: false,
     required: true,
   },

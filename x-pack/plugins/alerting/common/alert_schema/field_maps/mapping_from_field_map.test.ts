@@ -255,7 +255,7 @@ describe('mappingFromFieldMap', () => {
                       type: 'keyword',
                     },
                     revision: {
-                      type: 'integer',
+                      type: 'long',
                     },
                     rule_type_id: {
                       type: 'keyword',
