@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens']);
+  const PageObjects = getPageObjects(['visualize', 'common', 'lens']);
   const elasticChart = getService('elasticChart');
 
   describe('lens formula tests', () => {
@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'formula',
-        formula: `ifelse(count() > 1, (count() + average(bytes)) / 2, count(kql='aaa'))`,
+        formula: `ifelse(count() > 1, (count() + average(bytes)) / 2, 5)`,
       });
 
       expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(0);
