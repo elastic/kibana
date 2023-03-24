@@ -14,6 +14,7 @@ import {
   generateMlInferencePipelineBody,
   getMlModelTypesForModelConfig,
   parseMlInferenceParametersFromPipeline,
+  SUPPORTED_PYTORCH_TASKS,
 } from '../../../../../../../common/ml_inference_pipeline';
 import { Status } from '../../../../../../../common/types/api';
 import { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
@@ -407,7 +408,10 @@ export const MLInferenceLogic = kea<
     supportedMLModels: [
       () => [selectors.mlModelsData],
       (mlModelsData: MLInferenceProcessorsValues['mlModelsData']) => {
-        return mlModelsData?.filter(isSupportedMLModel) ?? [];
+        return (mlModelsData?.filter(isSupportedMLModel) ?? [])
+          .sort((m1, m2) => m1.inference_config.text_expansion ? -1 :
+              m2.inference_config.text_expansion ? 1 :
+              m1.model_id.localeCompare(m2.model_id));
       },
     ],
     existingInferencePipelines: [

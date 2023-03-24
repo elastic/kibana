@@ -38,6 +38,9 @@ export const NLP_DISPLAY_TITLES: Record<string, string | undefined> = {
   text_embedding: i18n.translate('xpack.enterpriseSearch.content.ml_inference.text_embedding', {
     defaultMessage: 'Dense Vector Text Embedding',
   }),
+  text_expansion: i18n.translate('xpack.enterpriseSearch.content.ml_inference.text_expansion', {
+    defaultMessage: 'ELSER Text Expansion',
+  }),
   zero_shot_classification: i18n.translate(
     'xpack.enterpriseSearch.content.ml_inference.zero_shot_classification',
     {
