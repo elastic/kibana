@@ -153,7 +153,7 @@ Flapping occurs when the state of monitored assets, such as services, change too
 resulting in multiple alerts that might distract you from more important issues.
 To reduce the time to respond (MTTR), you can now identify frequent changes
 in your monitored assets by using pre-built configurations, highlighting alerts in the UI,
-and suppressing related notifications. For more information, check {kibana-ref}/alerting-getting-started.html[Alerting].
+and suppressing related notifications. For more information, check <<create-and-manage-rules>>.
 
 [role="screenshot"]
 image::images/highlights-alert-flapping.png[Alert flapping detection, width="75%"]
@@ -170,14 +170,14 @@ These situations increase the time to respond to each event and affect the overa
 With the new alert actions summarization feature, you can define how
 to aggregate several actions into a single one with these options:
 
-* *Alert summarization per each rule run.* For example, all the alerts that are
+* *Summary of alerts on check intervals* For example, all the alerts that are
 detected by the same rule run will be sent in a single notification.
-* *Alert summarization per custom time interval.*
+* *Summary of alerts on custom action intervals*
 For example, all the alerts that are detected in the last 10 hours will be sent in a single email.
 
 This feature aims to improve the way you consume notifications from third parties
 and improve the MTTR by reducing unnecessary noise.
-For more information, check {kibana-ref}/alerting-getting-started.html[Alerting].
+For more information, check <<alerting-getting-started>>.
 
 [role="screenshot"]
 image::images/highlights-alert-summaries.png[Alert summaries UI, width="75%"]
