@@ -242,7 +242,6 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(getByText(expectedError)).toBeTruthy();
   });
 
-
   it('allows the user to remove conditions', async () => {
     const selector: Selector = {
       type: 'file',
