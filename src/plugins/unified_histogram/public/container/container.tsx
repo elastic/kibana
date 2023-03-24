@@ -20,6 +20,8 @@ import {
 import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
 import {
+  columnsSelector,
+  currentSuggestionSelector,
   dataViewSelector,
   filtersSelector,
   querySelector,
@@ -155,6 +157,8 @@ export const UnifiedHistogramContainer = forwardRef<
   const query = useStateSelector(stateService?.state$, querySelector);
   const filters = useStateSelector(stateService?.state$, filtersSelector);
   const timeRange = useStateSelector(stateService?.state$, timeRangeSelector);
+  const columns = useStateSelector(stateService?.state$, columnsSelector);
+  const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
 
   // Don't render anything until the container is initialized
@@ -171,6 +175,8 @@ export const UnifiedHistogramContainer = forwardRef<
       query={query}
       filters={filters}
       timeRange={timeRange}
+      columns={columns}
+      currentSuggestion={currentSuggestion}
       topPanelHeight={topPanelHeight}
       input$={input$}
       lensSuggestionsApi={lensSuggestionsApi}

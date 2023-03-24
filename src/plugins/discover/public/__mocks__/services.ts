@@ -57,6 +57,14 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
   }));
   dataPlugin.dataViews = createDiscoverDataViewsMock();
+  expressionsPlugin.run = jest.fn(() =>
+    of({
+      partial: false,
+      result: {
+        rows: [],
+      },
+    })
+  ) as unknown as typeof expressionsPlugin.run;
 
   return {
     core: coreMock.createStart(),

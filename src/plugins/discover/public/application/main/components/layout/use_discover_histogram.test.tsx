@@ -211,7 +211,7 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
-      expect(api.state$.subscribe).toHaveBeenCalledTimes(2);
+      expect(api.state$.subscribe).toHaveBeenCalledTimes(4);
     });
 
     it('should sync Unified Histogram state with the state container', async () => {
@@ -225,6 +225,7 @@ describe('useDiscoverHistogram', () => {
         breakdownField: 'test',
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
+        dataView: dataViewWithTimefieldMock,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi({ initialized: true });
       api.state$ = new BehaviorSubject({ ...state, lensRequestAdapter });
@@ -249,6 +250,7 @@ describe('useDiscoverHistogram', () => {
         breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
+        dataView: dataViewWithTimefieldMock,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi({ initialized: true });
       api.state$ = new BehaviorSubject(state);
@@ -311,6 +313,7 @@ describe('useDiscoverHistogram', () => {
         breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
+        dataView: dataViewWithTimefieldMock,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi({ initialized: true });
       let params: Partial<UnifiedHistogramState> = {};
@@ -373,6 +376,7 @@ describe('useDiscoverHistogram', () => {
         breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
+        dataView: dataViewWithTimefieldMock,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi({ initialized: true });
       api.state$ = new BehaviorSubject({
@@ -388,52 +392,6 @@ describe('useDiscoverHistogram', () => {
         result: 100,
       });
       expect(mockCheckHitCount).toHaveBeenCalledWith(main$, 100);
-    });
-
-    it('should fetch total hits for text based', async () => {
-      mockQueryState = {
-        query: { sql: 'select * from index' },
-        filters: [],
-        time: {
-          from: 'now-15m',
-          to: 'now',
-        },
-      };
-
-      mockData.query.getState = () => mockQueryState;
-      const documents$ = new BehaviorSubject({
-        fetchStatus: FetchStatus.COMPLETE,
-        result: [{ raw: {}, flattened: {}, id: '1' }],
-      }) as unknown as DataDocuments$;
-      const main$ = new BehaviorSubject({
-        fetchStatus: FetchStatus.COMPLETE,
-        recordRawType: RecordRawType.DOCUMENT,
-        foundDocuments: true,
-      }) as DataMain$;
-      const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({
-        stateContainer,
-        documents$,
-        main$,
-        isPlainRecord: true,
-      });
-      const api = createMockUnifiedHistogramApi({ initialized: true });
-      let params: Partial<UnifiedHistogramState> = {};
-      api.setTotalHits = jest.fn((p) => {
-        params = { ...params, ...p };
-      });
-      act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
-      });
-      expect(api.setTotalHits).toHaveBeenCalledWith({
-        totalHitsResult: 1,
-        totalHitsStatus: FetchStatus.COMPLETE,
-      });
-      expect(documents$.value).toEqual({
-        fetchStatus: FetchStatus.COMPLETE,
-        result: [{ raw: {}, flattened: {}, id: '1' }],
-      });
-      expect(mockCheckHitCount).not.toHaveBeenCalled();
     });
 
     it('should not update total hits when the total hits state changes to an error', async () => {
@@ -464,6 +422,7 @@ describe('useDiscoverHistogram', () => {
         breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
+        dataView: dataViewWithTimefieldMock,
       } as unknown as UnifiedHistogramState;
       const api = createMockUnifiedHistogramApi({ initialized: true });
       api.state$ = new BehaviorSubject({

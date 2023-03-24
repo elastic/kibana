@@ -13,7 +13,6 @@ import { UnifiedHistogramChartLoadEvent, UnifiedHistogramFetchStatus } from '../
 import type { UnifiedHistogramStateService } from '../services/state_service';
 import {
   breakdownFieldSelector,
-  columnsSelector,
   chartHiddenSelector,
   dataViewSelector,
   querySelector,
@@ -22,13 +21,11 @@ import {
   timeIntervalSelector,
   totalHitsResultSelector,
   totalHitsStatusSelector,
-  currentSuggestionSelector,
 } from '../utils/state_selectors';
 import { useStateSelector } from '../utils/use_state_selector';
 
 export const useStateProps = (stateService: UnifiedHistogramStateService | undefined) => {
   const breakdownField = useStateSelector(stateService?.state$, breakdownFieldSelector);
-  const columns = useStateSelector(stateService?.state$, columnsSelector);
   const chartHidden = useStateSelector(stateService?.state$, chartHiddenSelector);
   const dataView = useStateSelector(stateService?.state$, dataViewSelector);
   const query = useStateSelector(stateService?.state$, querySelector);
@@ -37,7 +34,6 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
   const timeInterval = useStateSelector(stateService?.state$, timeIntervalSelector);
   const totalHitsResult = useStateSelector(stateService?.state$, totalHitsResultSelector);
   const totalHitsStatus = useStateSelector(stateService?.state$, totalHitsStatusSelector);
-  const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
 
   /**
    * Contexts
@@ -167,8 +163,6 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
     chart,
     breakdown,
     request,
-    columns,
-    currentSuggestion,
     isPlainRecord,
     onTopPanelHeightChange,
     onTimeIntervalChange,
