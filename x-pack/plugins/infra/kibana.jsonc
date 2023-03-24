@@ -13,6 +13,7 @@
     ],
     "requiredPlugins": [
       "alerting",
+      "bfetch",
       "cases",
       "charts",
       "data",

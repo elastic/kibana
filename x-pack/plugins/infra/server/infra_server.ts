@@ -35,6 +35,7 @@ import { initNodeDetailsRoute } from './routes/node_details';
 import { initOverviewRoute } from './routes/overview';
 import { initProcessListRoute } from './routes/process_list';
 import { initSnapshotRoute } from './routes/snapshot';
+import { initHostsRoute } from './routes/hosts';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   initIpToHostName(libs);
@@ -63,4 +64,5 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initGetLogAlertsChartPreviewDataRoute(libs);
   initProcessListRoute(libs);
   initOverviewRoute(libs);
+  initHostsRoute(libs);
 };

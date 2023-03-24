@@ -12,9 +12,14 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import createContainer from 'constate';
 import { BoolQuery } from '@kbn/es-query';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { estypes } from '@elastic/elasticsearch';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { InfraClientCoreStart } from '../../../../types';
 import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useSnapshot, type UseSnapshotRequest } from '../../inventory_view/hooks/use_snaphot';
@@ -32,6 +37,7 @@ const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
 
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
+  const { http } = useKibana<InfraClientCoreStart>().services;
   const { buildQuery, getDateRangeAsTimestamp } = useUnifiedSearchContext();
 
   const baseRequest = useMemo(
@@ -43,6 +49,24 @@ export const useHostsView = () => {
       }),
     [buildQuery, getDateRangeAsTimestamp, sourceId]
   );
+
+  const abortCtrlRef = useRef(new AbortController());
+  const [state, refetch] = useAsyncFn(
+    () => {
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
+      return fetchAlertsCount({
+        http,
+        signal: abortCtrlRef.current.signal,
+      });
+    },
+    [http],
+    { loading: true }
+  );
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
   // For the Unified Search, we create a data view, which for now will be built off of source.configuration.metricAlias too
@@ -73,6 +97,23 @@ export const [HostsViewProvider, useHostsViewContext] = HostsView;
 /**
  * Helpers
  */
+
+interface FetchAlertsCountParams {
+  http: HttpSetup;
+  signal: AbortSignal;
+}
+
+async function fetchAlertsCount({ http, signal }: FetchAlertsCountParams): Promise<unknown> {
+  return (
+    http
+      .post<estypes.SearchResponse<Record<string, unknown>>>(`/api/metrics/hosts`, {
+        signal,
+      })
+      // eslint-disable-next-line no-console
+      .then((res) => console.log('res', { res }))
+  );
+}
+
 const createSnapshotRequest = ({
   esQuery,
   sourceId,
