@@ -13,7 +13,6 @@ import { FieldButton, type FieldButtonProps } from '@kbn/react-field';
 import { EuiHighlight } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
-import { wrapFieldNameOnDot } from '../../utils/wrap_field_name_on_dot';
 import { FieldIcon, getFieldIconProps } from '../field_icon';
 import './field_item_button.scss';
 
@@ -85,11 +84,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
         }),
       }}
       fieldIcon={<FieldIcon {...iconProps} />}
-      fieldName={
-        <EuiHighlight search={wrapFieldNameOnDot(fieldSearchHighlight)}>
-          {wrapFieldNameOnDot(displayName)}
-        </EuiHighlight>
-      }
+      fieldName={<EuiHighlight search={fieldSearchHighlight || ''}>{displayName}</EuiHighlight>}
       fieldInfoIcon={infoIcon}
       onClick={onClick}
       {...otherProps}
