@@ -58,9 +58,9 @@ export const podNetworkTraffic: TSVBMetricModelCreator = (
           unit: '1s',
         },
         {
-          id: 'posonly-deriv-max-net-tx',
+          id: 'posonly-deriv-max-net-rx',
           type: 'calculation',
-          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-network-tx' }],
+          variables: [{ id: 'var-rate', name: 'rate', field: 'deriv-max-network-rx' }],
           script: 'params.rate > 0.0 ? params.rate : 0.0',
         },
         {
@@ -69,7 +69,7 @@ export const podNetworkTraffic: TSVBMetricModelCreator = (
           type: 'calculation',
           variables: [
             {
-              field: 'posonly-deriv-max-network-rx',
+              field: 'posonly-deriv-max-net-rx',
               id: 'var-rate',
               name: 'rate',
             },

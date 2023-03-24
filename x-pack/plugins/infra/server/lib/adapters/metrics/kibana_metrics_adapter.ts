@@ -61,10 +61,13 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     return Promise.all(requests)
       .then((results) => {
+        console.log(results);
+
         return results.filter(isVisSeriesData).map((result) => {
           const metricIds = Object.keys(result).filter(
             (k) => !['type', 'uiRestrictions', 'trackedEsSearches'].includes(k)
           );
+          console.log({ metricIds });
 
           return metricIds.map((id: string) => {
             if (!InventoryMetricRT.is(id)) {
@@ -77,7 +80,9 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
                 })
               );
             }
+
             const panel = result[id];
+
             return {
               id,
               series: panel.series.map((series) => {
@@ -107,6 +112,8 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     rawRequest: KibanaRequest
   ) {
     const createTSVBModel = get(metrics, ['tsvb', metricId]) as TSVBMetricModelCreator | undefined;
+    console.log({ createTSVBModel });
+
     if (!createTSVBModel) {
       throw new Error(
         i18n.translate('xpack.infra.metrics.missingTSVBModelError', {
