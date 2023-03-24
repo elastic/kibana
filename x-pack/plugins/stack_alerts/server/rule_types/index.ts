@@ -10,6 +10,7 @@ import { AlertingSetup, StackAlertsStartDeps } from '../types';
 import { register as registerIndexThreshold } from './index_threshold';
 import { register as registerGeoContainment } from './geo_containment';
 import { register as registerEsQuery } from './es_query';
+import { register as registerDataQuality } from './data_quality';
 interface RegisterRuleTypesParams {
   logger: Logger;
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
@@ -21,4 +22,5 @@ export function registerBuiltInRuleTypes(params: RegisterRuleTypesParams) {
   registerIndexThreshold(params);
   registerGeoContainment(params);
   registerEsQuery(params);
+  registerDataQuality(params);
 }
