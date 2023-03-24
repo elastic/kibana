@@ -36,7 +36,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'infraHome']);
   const testSubjects = getService('testSubjects');
 
-  describe('Infra Not Found page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/153207
+  describe.skip('Infra Not Found page', function () {
     this.tags('includeFirefox');
 
     // FLAKY: https://github.com/elastic/kibana/issues/153295

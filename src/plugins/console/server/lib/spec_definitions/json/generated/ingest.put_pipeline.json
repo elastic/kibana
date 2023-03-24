@@ -1,6 +1,7 @@
 {
   "ingest.put_pipeline": {
     "url_params": {
+      "if_version": 0,
       "master_timeout": "",
       "timeout": ""
     },
