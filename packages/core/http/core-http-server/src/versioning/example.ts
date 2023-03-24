@@ -36,7 +36,9 @@ const versionedRoute = versionedRouter
           body: schema.object({ foo: schema.string() }),
         },
         response: {
-          body: schema.object({ foo: schema.string() }),
+          200: {
+            body: schema.object({ foo: schema.string() }),
+          },
         },
       },
     },
@@ -60,7 +62,9 @@ const versionedRoute = versionedRouter
           body: schema.object({ fooString: schema.string() }),
         },
         response: {
-          body: schema.object({ fooName: schema.string() }),
+          200: {
+            body: schema.object({ fooName: schema.string() }),
+          },
         },
       },
     },
@@ -84,7 +88,9 @@ const versionedRoute = versionedRouter
           body: schema.object({ fooString: schema.string({ minLength: 0, maxLength: 1000 }) }),
         },
         response: {
-          body: schema.object({ fooName: schema.string() }),
+          200: {
+            body: schema.object({ fooName: schema.string() }),
+          },
         },
       },
     },

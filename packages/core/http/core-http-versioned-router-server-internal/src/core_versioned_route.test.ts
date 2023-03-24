@@ -86,13 +86,15 @@ describe('Versioned route', () => {
             }),
           },
           response: {
-            body: schema.object({
-              foo: schema.number({
-                validate: () => {
-                  validatedOutputBody = true;
-                },
+            200: {
+              body: schema.object({
+                foo: schema.number({
+                  validate: () => {
+                    validatedOutputBody = true;
+                  },
+                }),
               }),
-            }),
+            },
           },
         },
       },

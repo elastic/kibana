@@ -74,7 +74,7 @@ export type RequestValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
 
 /** @experimental */
 export interface ResponseValidation<R> {
-  body: RouteValidationFunction<R> | Type<R>;
+  [statusCode: number]: { body: RouteValidationFunction<R> | Type<R> };
   unsafe?: boolean;
 }
 
