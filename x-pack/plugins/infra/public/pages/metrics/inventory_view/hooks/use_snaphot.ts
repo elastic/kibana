@@ -8,7 +8,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
@@ -46,7 +46,6 @@ export function useSnapshot(
   }: UseSnapshotRequest,
   options?: UseSnapshotRequestOptions
 ) {
-  const requestMadeRef = useRef(false);
   const decodeResponse = (response: any) => {
     return pipe(
       SnapshotNodeResponseRT.decode(response),

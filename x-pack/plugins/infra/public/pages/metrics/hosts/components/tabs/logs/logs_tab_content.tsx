@@ -29,13 +29,14 @@ export const LogsTabContent = () => {
   const logsLinkToStreamQuery = useMemo(() => {
     const hostsFilterQueryParam = createHostsFilterQueryParam(hostNodes);
 
-    if (filterQuery.query && hostsFilterQueryParam)
+    if (filterQuery.query && hostsFilterQueryParam) {
       return `${filterQuery.query} and ${hostsFilterQueryParam}`;
+    }
 
     return filterQuery.query || hostsFilterQueryParam;
   }, [filterQuery.query, hostNodes]);
 
-  if (loading)
+  if (loading) {
     return (
       <EuiFlexGroup style={{ height: 300 }} direction="column" alignItems="stretch">
         <EuiFlexItem grow>
@@ -52,6 +53,7 @@ export const LogsTabContent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     );
+  }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-logs">
@@ -79,7 +81,9 @@ export const LogsTabContent = () => {
 };
 
 const createHostsFilterQueryParam = (hostNodes: SnapshotNode[]): string => {
-  if (!hostNodes.length) return '';
+  if (!hostNodes.length) {
+    return '';
+  }
 
   const joinedHosts = hostNodes.map((p) => p.name).join(' or ');
   const hostsQueryParam = `host.name:(${joinedHosts})`;
