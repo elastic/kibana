@@ -136,7 +136,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
             data-test-subj="systemTemplateEditCallout"
           >
             <FormattedMessage

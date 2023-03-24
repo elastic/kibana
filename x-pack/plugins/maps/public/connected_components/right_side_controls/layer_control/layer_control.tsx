@@ -68,7 +68,7 @@ function renderExpandButton({
       className="mapLayerControl__openLayerTOCButton"
       color="text"
       onClick={onClick}
-      iconType={hasErrors ? 'alert' : 'menuLeft'}
+      iconType={hasErrors ? 'warning' : 'menuLeft'}
       aria-label={expandLabel}
       data-test-subj="mapExpandLayerControlButton"
     />

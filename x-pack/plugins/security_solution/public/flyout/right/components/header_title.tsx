@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FLYOUT_HEADER_TITLE } from './test_ids';
+import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { HEADER_TITLE } from '../translations';
 
 /**
@@ -17,7 +17,7 @@ import { HEADER_TITLE } from '../translations';
 export const HeaderTitle: FC = memo(() => {
   return (
     <>
-      <EuiTitle size="s" data-test-subj={FLYOUT_HEADER_TITLE}>
+      <EuiTitle size="s" data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
         <h4>{HEADER_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />

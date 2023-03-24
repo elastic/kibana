@@ -17,8 +17,6 @@ import {
 } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
 import {
-  expectNumberOfRules,
-  expectToContainRule,
   filterByCustomRules,
   filterBySearchTerm,
   filterByTags,
@@ -35,8 +33,8 @@ import {
   filterByDisabledRules,
   expectFilterByPrebuiltRules,
   expectFilterByEnabledRules,
+  expectManagementTableRules,
 } from '../../tasks/alerts_detection_rules';
-import { RULES_MANAGEMENT_TABLE } from '../../screens/alerts_detection_rules';
 import { createRule } from '../../tasks/api_calls/rules';
 import {
   expectRowsPerPage,
@@ -106,14 +104,6 @@ function expectDefaultRulesTableState(): void {
   expectTableSorting('Enabled', 'desc');
   expectRowsPerPage(20);
   expectTablePage(1);
-}
-
-function expectManagementTableRules(ruleNames: string[]): void {
-  expectNumberOfRules(RULES_MANAGEMENT_TABLE, ruleNames.length);
-
-  for (const ruleName of ruleNames) {
-    expectToContainRule(RULES_MANAGEMENT_TABLE, ruleName);
-  }
 }
 
 describe('Persistent rules table state', () => {

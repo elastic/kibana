@@ -94,7 +94,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
                   defaultMessage="Some objects cannot be deleted"
                 />
               }
-              iconType="alert"
+              iconType="warning"
               color="warning"
             >
               <p>
@@ -119,7 +119,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
                   values={{ sharedObjectsCount }}
                 />
               }
-              iconType="alert"
+              iconType="warning"
               color="warning"
             >
               <p>

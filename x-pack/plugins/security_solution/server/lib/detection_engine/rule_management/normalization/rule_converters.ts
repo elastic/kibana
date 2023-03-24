@@ -692,6 +692,7 @@ export const internalRuleToAPIResponse = (
     tags: rule.tags,
     interval: rule.schedule.interval,
     enabled: rule.enabled,
+    revision: rule.revision,
     // Security solution shared rule params
     ...commonParamsCamelToSnake(rule.params),
     // Type specific security solution rule params

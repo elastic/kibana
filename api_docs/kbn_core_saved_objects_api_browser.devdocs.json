@@ -3925,18 +3925,6 @@
             "path": "src/plugins/visualizations/public/utils/saved_objects_utils/find_object_by_title.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/wizard/search_selection/show_saved_object.ts"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/services/dashboard_saved_object/lib/find_dashboard_saved_objects.ts"
           },

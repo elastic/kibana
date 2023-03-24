@@ -20,5 +20,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./available_versions'));
     loadTestFile(require.resolve('./request_diagnostics'));
     loadTestFile(require.resolve('./uploads'));
+    loadTestFile(require.resolve('./get_agents_by_actions'));
   });
 }

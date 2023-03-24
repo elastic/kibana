@@ -114,7 +114,12 @@ export const useTimeRange = ({
       >
         <EuiFlexItem grow={false}>{timeRangeDisplay}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIconTip type="alert" color="warning" title={toolTipTitle} content={toolTipContent} />
+          <EuiIconTip
+            type="warning"
+            color="warning"
+            title={toolTipTitle}
+            content={toolTipContent}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
