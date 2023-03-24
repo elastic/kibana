@@ -426,9 +426,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.discover.getSidebarAriaDescription()).to.be(
-          '0 available fields. 0 meta fields.'
+          '0 available fields. 0 empty fields. 0 meta fields.'
         );
-        await testSubjects.existOrFail(
+        await testSubjects.missingOrFail(
           `${PageObjects.discover.getSidebarSectionSelector('available')}-fetchWarning`
         );
         await testSubjects.existOrFail(
