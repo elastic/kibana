@@ -63,6 +63,7 @@ export function FlameGraph({
   const chartTheme: PartialTheme = {
     chartMargins: { top: 0, left: 0, bottom: 0, right: 0 },
     chartPaddings: { left: 0, right: 0, top: 0, bottom: 0 },
+    tooltip: { maxWidth: 500 },
   };
 
   const totalSamples = columnarData.viewModel.value[0];
@@ -94,7 +95,7 @@ export function FlameGraph({
         <EuiFlexGroup direction="row">
           {columnarData.viewModel.label.length > 0 && (
             <EuiFlexItem grow>
-              <Chart key={columnarData.key}>
+              <Chart key={columnarData.key} className="caue-chart">
                 <Settings
                   theme={chartTheme}
                   onElementClick={(elements) => {

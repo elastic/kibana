@@ -78,113 +78,101 @@ export function FlameGraphTooltip({
       : undefined;
 
   return (
-    <TooltipContainer>
+    <TooltipContainer className="Caue-tooltip">
       <EuiPanel paddingSize="s">
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="m"
-          style={{
-            overflowWrap: 'anywhere',
-          }}
-        >
-          <EuiFlexItem>
-            <strong>{label}</strong>
-          </EuiFlexItem>
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem>{label}</EuiFlexItem>
           <EuiHorizontalRule margin="none" style={{ background: theme.euiTheme.border.color }} />
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              {isRoot === false && (
-                <>
-                  <TooltipRow
-                    label={i18n.translate('xpack.profiling.flameGraphTooltip.inclusiveCpuLabel', {
-                      defaultMessage: `CPU incl. subfunctions`,
+          {isRoot === false && (
+            <>
+              <TooltipRow
+                label={i18n.translate('xpack.profiling.flameGraphTooltip.inclusiveCpuLabel', {
+                  defaultMessage: `CPU incl. subfunctions`,
+                })}
+                value={impactEstimates.percentage}
+                comparison={comparisonImpactEstimates?.percentage}
+                formatValue={asPercentage}
+                showDifference
+                formatDifferenceAsPercentage
+              />
+              <TooltipRow
+                label={i18n.translate('xpack.profiling.flameGraphTooltip.exclusiveCpuLabel', {
+                  defaultMessage: `CPU`,
+                })}
+                value={impactEstimates.percentageNoChildren}
+                comparison={comparisonImpactEstimates?.percentageNoChildren}
+                showDifference
+                formatDifferenceAsPercentage
+                formatValue={asPercentage}
+              />
+            </>
+          )}
+          <TooltipRow
+            label={i18n.translate('xpack.profiling.flameGraphTooltip.samplesLabel', {
+              defaultMessage: `Samples`,
+            })}
+            value={
+              isNumber(baselineScaleFactor) ? countInclusive * baselineScaleFactor : countInclusive
+            }
+            comparison={
+              isNumber(comparisonCountInclusive) && isNumber(comparisonScaleFactor)
+                ? comparisonCountInclusive * comparisonScaleFactor
+                : undefined
+            }
+            showDifference
+            formatDifferenceAsPercentage={false}
+          />
+          <TooltipRow
+            label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedCo2', {
+              defaultMessage: `Annualized CO2`,
+            })}
+            value={impactEstimates.annualizedCo2}
+            comparison={comparisonImpactEstimates?.annualizedCo2}
+            formatValue={asWeight}
+            showDifference
+            formatDifferenceAsPercentage={false}
+          />
+          <TooltipRow
+            label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedDollarCost', {
+              defaultMessage: `Annualized dollar cost`,
+            })}
+            value={impactEstimates.annualizedDollarCost}
+            comparison={comparisonImpactEstimates?.annualizedDollarCost}
+            formatValue={asCost}
+            showDifference
+            formatDifferenceAsPercentage={false}
+          />
+          {onShowMoreClick && (
+            <>
+              <EuiHorizontalRule
+                margin="none"
+                style={{ background: theme.euiTheme.border.color }}
+              />
+              <EuiFlexItem>
+                <EuiButtonEmpty size="s" iconType="inspect" onClick={onShowMoreClick}>
+                  <EuiText size="xs">
+                    {i18n.translate('xpack.profiling.flameGraphTooltip.showMoreButton', {
+                      defaultMessage: `Show more information`,
                     })}
-                    value={impactEstimates.percentage}
-                    comparison={comparisonImpactEstimates?.percentage}
-                    formatValue={asPercentage}
-                    showDifference
-                    formatDifferenceAsPercentage
-                  />
-                  <TooltipRow
-                    label={i18n.translate('xpack.profiling.flameGraphTooltip.exclusiveCpuLabel', {
-                      defaultMessage: `CPU`,
-                    })}
-                    value={impactEstimates.percentageNoChildren}
-                    comparison={comparisonImpactEstimates?.percentageNoChildren}
-                    showDifference
-                    formatDifferenceAsPercentage
-                    formatValue={asPercentage}
-                  />
-                </>
-              )}
-              <TooltipRow
-                label={i18n.translate('xpack.profiling.flameGraphTooltip.samplesLabel', {
-                  defaultMessage: `Samples`,
-                })}
-                value={
-                  isNumber(baselineScaleFactor)
-                    ? countInclusive * baselineScaleFactor
-                    : countInclusive
-                }
-                comparison={
-                  isNumber(comparisonCountInclusive) && isNumber(comparisonScaleFactor)
-                    ? comparisonCountInclusive * comparisonScaleFactor
-                    : undefined
-                }
-                showDifference
-                formatDifferenceAsPercentage={false}
-              />
-              <TooltipRow
-                label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedCo2', {
-                  defaultMessage: `Annualized CO2`,
-                })}
-                value={impactEstimates.annualizedCo2}
-                comparison={comparisonImpactEstimates?.annualizedCo2}
-                formatValue={asWeight}
-                showDifference
-                formatDifferenceAsPercentage={false}
-              />
-              <TooltipRow
-                label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedDollarCost', {
-                  defaultMessage: `Annualized dollar cost`,
-                })}
-                value={impactEstimates.annualizedDollarCost}
-                comparison={comparisonImpactEstimates?.annualizedDollarCost}
-                formatValue={asCost}
-                showDifference
-                formatDifferenceAsPercentage={false}
-              />
-              {onShowMoreClick && (
-                <>
-                  <EuiHorizontalRule
-                    margin="none"
-                    style={{ background: theme.euiTheme.border.color }}
-                  />
-                  <EuiFlexItem>
-                    <EuiButtonEmpty size="s" iconType="inspect" onClick={onShowMoreClick}>
-                      {i18n.translate('xpack.profiling.flameGraphTooltip.showMoreButton', {
-                        defaultMessage: `Show more information`,
+                  </EuiText>
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="iInCircle" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText color="subdued" size="xs">
+                      {i18n.translate('xpack.profiling.flameGraphTooltip.rightClickTip', {
+                        defaultMessage: `Right-click to stick tooltip`,
                       })}
-                    </EuiButtonEmpty>
+                    </EuiText>
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFlexGroup gutterSize="xs">
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="iInCircle" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText color="subdued" size="xs">
-                          {i18n.translate('xpack.profiling.flameGraphTooltip.rightClickTip', {
-                            defaultMessage: `Right-click to stick tooltip`,
-                          })}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </>
+          )}
         </EuiFlexGroup>
       </EuiPanel>
     </TooltipContainer>

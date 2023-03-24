@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
@@ -54,13 +54,15 @@ export function TooltipRow({
   }
 
   return (
-    <EuiFlexItem style={{ overflowWrap: 'anywhere' }}>
+    <EuiFlexItem>
       <EuiFlexGroup direction="row" gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
+            <strong>{label}:</strong>
+          </EuiText>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="xs">
-            <strong>{label}</strong>
-          </EuiText>
-          <EuiText size="xs" style={{ marginLeft: '20px' }}>
             {comparison !== undefined
               ? i18n.translate('xpack.profiling.flameGraphTooltip.valueLabel', {
                   defaultMessage: `{value} vs {comparison}`,
@@ -74,7 +76,6 @@ export function TooltipRow({
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="xs" />
     </EuiFlexItem>
   );
 }
