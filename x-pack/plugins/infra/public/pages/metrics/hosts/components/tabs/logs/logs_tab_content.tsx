@@ -28,7 +28,11 @@ export const LogsTabContent = () => {
 
   const logsLinkToStreamQuery = useMemo(() => {
     const hostsFilterQueryParam = createHostsFilterQueryParam(hostNodes);
-    return `${filterQuery.query ? filterQuery.query + ' and ' : ''}${hostsFilterQueryParam}`;
+
+    if (filterQuery.query && hostsFilterQueryParam)
+      return `${filterQuery.query} and ${hostsFilterQueryParam}`;
+
+    return filterQuery.query || hostsFilterQueryParam;
   }, [filterQuery.query, hostNodes]);
 
   if (loading)
@@ -75,5 +79,10 @@ export const LogsTabContent = () => {
 };
 
 const createHostsFilterQueryParam = (hostNodes: SnapshotNode[]): string => {
-  return hostNodes.map((p) => `host.name:${p.name}`).join(' or ');
+  if (!hostNodes.length) return '';
+
+  const joinedHosts = hostNodes.map((p) => p.name).join(' or ');
+  const hostsQueryParam = `host.name:(${joinedHosts})`;
+
+  return hostsQueryParam;
 };
