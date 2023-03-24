@@ -4,50 +4,47 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { DashboardContainer } from '@kbn/dashboard-plugin/public';
 import { LazyDashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { Filter, Query } from '@kbn/es-query';
 
-import { inputsSelectors } from '../../common/store';
-import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useRefetch } from '../hooks/use_refetch';
 
 const DashboardRendererComponent = ({
   canReadDashboard,
-  from,
+  filters,
   id,
   inputId = InputsModelId.global,
   onDashboardContainerLoaded,
+  query,
   savedObjectId,
-  to,
+  timeRange,
 }: {
   canReadDashboard: boolean;
-  from: string;
+  filters: Filter[];
   id: string;
   inputId?: InputsModelId.global | InputsModelId.timeline;
   onDashboardContainerLoaded?: (dashboardContainer: DashboardContainer) => void;
+  query: Query;
   savedObjectId: string | undefined;
-  to: string;
+  timeRange: {
+    from: string;
+    fromStr?: string | undefined;
+    to: string;
+    toStr?: string | undefined;
+  };
 }) => {
-  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
-  const getGlobalFiltersQuerySelector = useMemo(
-    () => inputsSelectors.globalFiltersQuerySelector(),
-    []
-  );
-  const query = useDeepEqualSelector(getGlobalQuerySelector);
-  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
   const [dashboardContainer, setDashboardContainer] = useState<DashboardContainer>();
-
-  console.log('query', query);
 
   const getCreationOptions = useCallback(
     () =>
       Promise.resolve({
-        overrideInput: { timeRange: { from, to }, viewMode: ViewMode.VIEW, query, filters },
+        overrideInput: { timeRange, viewMode: ViewMode.VIEW, query, filters },
       }),
-    [filters, from, query, to]
+    [filters, query, timeRange]
   );
   useRefetch({
     inputId,
@@ -55,11 +52,9 @@ const DashboardRendererComponent = ({
     container: dashboardContainer,
   });
 
-  const timerange = useMemo(() => ({ from, to }), [from, to]);
-
   useEffect(() => {
-    dashboardContainer?.updateInput({ timeRange: timerange, query, filters });
-  }, [dashboardContainer, filters, query, timerange]);
+    dashboardContainer?.updateInput({ timeRange, query, filters });
+  }, [dashboardContainer, filters, query, timeRange]);
 
   const handleDashboardLoaded = useCallback(
     (container: DashboardContainer) => {
@@ -68,7 +63,7 @@ const DashboardRendererComponent = ({
     },
     [onDashboardContainerLoaded]
   );
-  return savedObjectId && from && to && canReadDashboard ? (
+  return savedObjectId && canReadDashboard ? (
     <LazyDashboardContainerRenderer
       savedObjectId={savedObjectId}
       getCreationOptions={getCreationOptions}

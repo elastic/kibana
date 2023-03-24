@@ -40,3 +40,10 @@ export const SAVE_STATE_IN_URL_ERROR_TITLE = i18n.translate(
     defaultMessage: `Error saving state in URL`,
   }
 );
+
+export const EDIT_DASHBOARD_BUTTON_TITLE = i18n.translate(
+  'xpack.securitySolution.dashboards.dashboard.editDashboardButtonTitle',
+  {
+    defaultMessage: `Edit`,
+  }
+);
