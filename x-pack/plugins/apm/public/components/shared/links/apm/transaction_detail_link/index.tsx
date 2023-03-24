@@ -108,7 +108,7 @@ export function TransactionDetailLink({
         >
           <EuiText style={{ width: `${unit * 28}px` }} size="s">
             <FormattedMessage
-              defaultMessage="Current APM server capacity for handling unique transaction groups has been reached. There are at least {overflowCount, plural, one {1 transaction} other {# transactions}} missing in this list. Please decrease the number of transaction groups in your service or increase the memory allocated to APM server."
+              defaultMessage="Current APM server capacity for handling unique metrics groups has been reached. There are at least {overflowCount, plural, one {1 transaction metric group} other {# transaction metric groups}} in this list which {overflowCount, plural, one {is} other {are}} bucketed under a common bucket at the top of this list."
               id="xpack.apm.transactionDetail.maxGroups.message"
               values={{
                 overflowCount,
