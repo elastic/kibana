@@ -8,6 +8,7 @@
 import { isEmpty } from 'lodash/fp';
 import {
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiTextColor,
   EuiLoadingContent,
   EuiTitle,
@@ -15,10 +16,17 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import moment from 'moment';
+import { encode } from '@kbn/rison';
+import copy from 'copy-to-clipboard';
+import { useKibana } from '../../../../common/lib/kibana';
+import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertDetailsUrl } from '../../../../common/components/link_to';
 import {
@@ -31,7 +39,9 @@ import { EventDetails } from '../../../../common/components/event_details/event_
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { SecurityPageName } from '../../../../../common/constants';
+import { ALERTS_PATH, SecurityPageName, APP_ID } from '../../../../../common/constants';
+import { inputsSelectors } from '../../../../common/store';
+import { useGetAlertDetailsFlyoutLink } from './use_get_alert_details_flyout_link';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -82,6 +92,9 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
       deepLinkId: SecurityPageName.alerts,
       path: eventId && isAlert ? getAlertDetailsUrl(eventId) : '',
     });
+
+    const { isOnAlertsPage, copyAlertDetailsLink } = useGetAlertDetailsFlyoutLink({ timestamp });
+
     return (
       <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
         <EuiFlexItem grow={false}>
@@ -116,6 +129,11 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
           <EuiFlexItem grow={false}>
             <EuiButtonIcon iconType="cross" aria-label={i18n.CLOSE} onClick={handleOnEventClosed} />
           </EuiFlexItem>
+        )}
+        {isAlert && isOnAlertsPage && (
+          <EuiButtonEmpty onClick={copyAlertDetailsLink} iconType="share">
+            {i18n.SHARE_ALERT}
+          </EuiButtonEmpty>
         )}
       </StyledEuiFlexGroup>
     );
