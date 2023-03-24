@@ -65,7 +65,7 @@ export const updateExceptionListItemRoute = (router: ListsPluginRouter): void =>
           });
         } else {
           const exceptionLists = await getExceptionListClient(context);
-          const exceptionListItem = await exceptionLists.updateExceptionListItem({
+          const exceptionListItem = await exceptionLists.updateOverwriteExceptionListItem({
             _version,
             comments,
             description,

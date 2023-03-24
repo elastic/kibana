@@ -12,14 +12,14 @@ import {
   AlertSummaryWidgetCompactProps,
 } from './alert_summary_widget_compact';
 import { render } from '@testing-library/react';
-import { mockedAlertSummaryResponse, mockedChartThemes } from '../../../mock/alert_summary_widget';
+import { mockedAlertSummaryResponse, mockedChartProps } from '../../../mock/alert_summary_widget';
 
 describe('AlertSummaryWidgetCompact', () => {
   const renderComponent = (props: Partial<AlertSummaryWidgetCompactProps> = {}) =>
     render(
       <IntlProvider locale="en">
         <AlertSummaryWidgetCompact
-          chartThemes={mockedChartThemes}
+          chartProps={mockedChartProps}
           onClick={jest.fn}
           {...mockedAlertSummaryResponse}
           {...props}

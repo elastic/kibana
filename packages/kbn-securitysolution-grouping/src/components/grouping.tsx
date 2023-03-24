@@ -15,24 +15,33 @@ import {
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { defaultUnit, firstNonNullValue } from '../helpers';
 import { createGroupFilter } from './accordion_panel/helpers';
-import type { BadgeMetric, CustomMetric } from './accordion_panel';
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
-import { EmptyGroupingComponent } from './empty_resuls_panel';
-import { groupingContainerCss, groupsUnitCountCss } from './styles';
+import { EmptyGroupingComponent } from './empty_results_panel';
+import { groupingContainerCss, countCss } from './styles';
 import { GROUPS_UNIT } from './translations';
-import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } from './types';
+import type {
+  GroupingAggregation,
+  GroupingFieldTotalAggregation,
+  GroupPanelRenderer,
+  RawBucket,
+} from './types';
+import { getTelemetryEvent } from '../telemetry/const';
+import { GroupStatsRenderer, OnGroupToggle } from './types';
 
-export interface GroupingProps {
-  badgeMetricStats?: (fieldBucket: RawBucket) => BadgeMetric[];
-  customMetricStats?: (fieldBucket: RawBucket) => CustomMetric[];
-  data?: GroupingAggregation & GroupingFieldTotalAggregation;
-  groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element | undefined;
-  groupsSelector?: JSX.Element;
+export interface GroupingProps<T> {
+  data?: GroupingAggregation<T> & GroupingFieldTotalAggregation<T>;
+  groupingId: string;
+  groupPanelRenderer?: GroupPanelRenderer<T>;
+  groupSelector?: JSX.Element;
+  // list of custom UI components which correspond to your custom rendered metrics aggregations
+  groupStatsRenderer?: GroupStatsRenderer<T>;
   inspectButton?: JSX.Element;
   isLoading: boolean;
+  onGroupToggle?: OnGroupToggle;
   pagination: {
     pageIndex: number;
     pageSize: number;
@@ -40,63 +49,81 @@ export interface GroupingProps {
     onChangePage: (pageNumber: number) => void;
     itemsPerPageOptions: number[];
   };
-  renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
+  renderChildComponent: (groupFilter: Filter[]) => React.ReactElement;
   selectedGroup: string;
-  takeActionItems: (groupFilters: Filter[]) => JSX.Element[];
+  takeActionItems: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
+  tracker?: (
+    type: UiCounterMetricType,
+    event: string | string[],
+    count?: number | undefined
+  ) => void;
   unit?: (n: number) => string;
 }
 
-const GroupingComponent = ({
-  badgeMetricStats,
-  customMetricStats,
+const GroupingComponent = <T,>({
   data,
+  groupingId,
   groupPanelRenderer,
-  groupsSelector,
+  groupSelector,
+  groupStatsRenderer,
   inspectButton,
   isLoading,
+  onGroupToggle,
   pagination,
   renderChildComponent,
   selectedGroup,
   takeActionItems,
+  tracker,
   unit = defaultUnit,
-}: GroupingProps) => {
+}: GroupingProps<T>) => {
   const [trigger, setTrigger] = useState<
-    Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket }>
+    Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket<T> }>
   >({});
 
-  const groupsNumber = data?.groupsNumber?.value ?? 0;
+  const unitCount = data?.unitsCount?.value ?? 0;
   const unitCountText = useMemo(() => {
-    const count = data?.alertsCount?.value ?? 0;
-    return `${count.toLocaleString()} ${unit && unit(count)}`;
-  }, [data?.alertsCount?.value, unit]);
+    return `${unitCount.toLocaleString()} ${unit && unit(unitCount)}`;
+  }, [unitCount, unit]);
 
-  const unitGroupsCountText = useMemo(
-    () => `${groupsNumber.toLocaleString()} ${GROUPS_UNIT(groupsNumber)}`,
-    [groupsNumber]
+  const groupCount = data?.groupsCount?.value ?? 0;
+  const groupCountText = useMemo(
+    () => `${groupCount.toLocaleString()} ${GROUPS_UNIT(groupCount)}`,
+    [groupCount]
   );
 
   const groupPanels = useMemo(
     () =>
-      data?.stackByMultipleFields0?.buckets?.map((groupBucket) => {
+      data?.groupByFields?.buckets?.map((groupBucket, groupNumber) => {
         const group = firstNonNullValue(groupBucket.key);
-        const groupKey = `group0-${group}`;
+        const groupKey = `group-${groupNumber}-${group}`;
 
         return (
           <span key={groupKey}>
             <GroupPanel
               extraAction={
                 <GroupStats
-                  bucket={groupBucket}
-                  takeActionItems={takeActionItems(createGroupFilter(selectedGroup, group))}
-                  badgeMetricStats={badgeMetricStats && badgeMetricStats(groupBucket)}
-                  customMetricStats={customMetricStats && customMetricStats(groupBucket)}
+                  bucketKey={groupKey}
+                  takeActionItems={takeActionItems(
+                    createGroupFilter(selectedGroup, group),
+                    groupNumber
+                  )}
+                  statRenderers={
+                    groupStatsRenderer && groupStatsRenderer(selectedGroup, groupBucket)
+                  }
                 />
               }
               forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
               groupBucket={groupBucket}
-              groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(groupBucket)}
+              groupPanelRenderer={
+                groupPanelRenderer && groupPanelRenderer(selectedGroup, groupBucket)
+              }
               isLoading={isLoading}
               onToggleGroup={(isOpen) => {
+                // built-in telemetry: UI-counter
+                tracker?.(
+                  METRIC_TYPE.CLICK,
+                  getTelemetryEvent.groupToggled({ isOpen, groupingId, groupNumber })
+                );
                 setTrigger({
                   // ...trigger, -> this change will keep only one group at a time expanded and one table displayed
                   [groupKey]: {
@@ -104,11 +131,12 @@ const GroupingComponent = ({
                     selectedBucket: groupBucket,
                   },
                 });
+                onGroupToggle?.({ isOpen, groupName: group, groupNumber, groupingId });
               }}
               renderChildComponent={
                 trigger[groupKey] && trigger[groupKey].state === 'open'
                   ? renderChildComponent
-                  : () => null
+                  : () => <span />
               }
               selectedGroup={selectedGroup}
             />
@@ -117,20 +145,22 @@ const GroupingComponent = ({
         );
       }),
     [
-      badgeMetricStats,
-      customMetricStats,
-      data?.stackByMultipleFields0?.buckets,
+      data?.groupByFields?.buckets,
       groupPanelRenderer,
+      groupStatsRenderer,
+      groupingId,
       isLoading,
+      onGroupToggle,
       renderChildComponent,
       selectedGroup,
       takeActionItems,
+      tracker,
       trigger,
     ]
   );
   const pageCount = useMemo(
-    () => (groupsNumber && pagination.pageSize ? Math.ceil(groupsNumber / pagination.pageSize) : 1),
-    [groupsNumber, pagination.pageSize]
+    () => (groupCount && pagination.pageSize ? Math.ceil(groupCount / pagination.pageSize) : 1),
+    [groupCount, pagination.pageSize]
   );
   return (
     <>
@@ -141,20 +171,16 @@ const GroupingComponent = ({
         style={{ paddingBottom: 20, paddingTop: 20 }}
       >
         <EuiFlexItem grow={false}>
-          {groupsNumber > 0 ? (
+          {groupCount > 0 && unitCount > 0 ? (
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow={false}>
-                <span css={groupsUnitCountCss} data-test-subj="alert-count">
+                <span css={countCss} data-test-subj="unit-count">
                   {unitCountText}
                 </span>
               </EuiFlexItem>
               <EuiFlexItem>
-                <span
-                  css={groupsUnitCountCss}
-                  data-test-subj="groups-count"
-                  style={{ borderRight: 'none' }}
-                >
-                  {unitGroupsCountText}
+                <span css={countCss} data-test-subj="group-count" style={{ borderRight: 'none' }}>
+                  {groupCountText}
                 </span>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -163,12 +189,15 @@ const GroupingComponent = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs">
             {inspectButton && <EuiFlexItem>{inspectButton}</EuiFlexItem>}
-            <EuiFlexItem>{groupsSelector}</EuiFlexItem>
+            <EuiFlexItem>{groupSelector}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <div css={groupingContainerCss} className="eui-xScroll">
-        {groupsNumber > 0 ? (
+        {isLoading && (
+          <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
+        )}
+        {groupCount > 0 ? (
           <>
             {groupPanels}
             <EuiSpacer size="m" />
@@ -184,16 +213,11 @@ const GroupingComponent = ({
             />
           </>
         ) : (
-          <>
-            {isLoading && (
-              <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
-            )}
-            <EmptyGroupingComponent />
-          </>
+          <EmptyGroupingComponent />
         )}
       </div>
     </>
   );
 };
 
-export const Grouping = React.memo(GroupingComponent);
+export const Grouping = React.memo(GroupingComponent) as typeof GroupingComponent;

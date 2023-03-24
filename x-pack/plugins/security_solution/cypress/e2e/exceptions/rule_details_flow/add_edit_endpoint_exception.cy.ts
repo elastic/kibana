@@ -7,7 +7,7 @@
 
 import { getNewRule } from '../../../objects/rule';
 
-import { createCustomRule } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   esArchiverLoad,
@@ -59,22 +59,20 @@ describe('Add endpoint exception from rule details', () => {
     deleteAlertsAndRules();
     // create rule with exception
     createEndpointExceptionList().then((response) => {
-      createCustomRule(
-        {
-          ...getNewRule(),
-          customQuery: 'event.code:*',
-          dataSource: { index: ['auditbeat*'], type: 'indexPatterns' },
-          exceptionLists: [
-            {
-              id: response.body.id,
-              list_id: response.body.list_id,
-              type: response.body.type,
-              namespace_type: response.body.namespace_type,
-            },
-          ],
-        },
-        '2'
-      );
+      createRule({
+        ...getNewRule(),
+        query: 'event.code:*',
+        index: ['auditbeat*'],
+        exceptions_list: [
+          {
+            id: response.body.id,
+            list_id: response.body.list_id,
+            type: response.body.type,
+            namespace_type: response.body.namespace_type,
+          },
+        ],
+        rule_id: '2',
+      });
     });
   });
 
@@ -128,7 +126,7 @@ describe('Add endpoint exception from rule details', () => {
   it('edits an endpoint exception item', () => {
     const NEW_ITEM_NAME = 'Exception item-EDITED';
     const ITEM_FIELD = 'event.code';
-    const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
+    const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.type';
 
     // displays existing exception items
     cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
@@ -161,7 +159,7 @@ describe('Add endpoint exception from rule details', () => {
 
     // check that updates stuck
     cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', NEW_ITEM_NAME);
-    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.nameIS foo');
+    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.typeIS foo');
   });
 
   it('allows user to search for items', () => {

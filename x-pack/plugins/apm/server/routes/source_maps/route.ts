@@ -5,21 +5,21 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import * as t from 'io-ts';
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Artifact } from '@kbn/fleet-plugin/server';
+import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
+import * as t from 'io-ts';
+import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
+import { stringFromBufferRt } from '../../utils/string_from_buffer_rt';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   createFleetSourceMapArtifact,
   deleteFleetSourcemapArtifact,
-  listSourceMapArtifacts,
-  updateSourceMapsOnFleetPolicies,
   getCleanedBundleFilePath,
-  ArtifactSourceMap,
+  listSourceMapArtifacts,
+  ListSourceMapArtifactsResponse,
+  updateSourceMapsOnFleetPolicies,
 } from '../fleet/source_maps';
-import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
-import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { stringFromBufferRt } from '../../utils/string_from_buffer_rt';
 import { createApmSourceMap } from './create_apm_source_map';
 import { deleteApmSourceMap } from './delete_apm_sourcemap';
 import { runFleetSourcemapArtifactsMigration } from './schedule_source_map_migration';
@@ -52,7 +52,7 @@ const listSourceMapRoute = createApmServerRoute({
   async handler({
     params,
     plugins,
-  }): Promise<{ artifacts: ArtifactSourceMap[]; total: number } | undefined> {
+  }): Promise<ListSourceMapArtifactsResponse | undefined> {
     const { page, perPage } = params.query;
 
     try {

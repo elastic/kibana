@@ -7,7 +7,7 @@
 
 import { getNewRule } from '../../objects/rule';
 import { RULES_MONITORING_TAB, RULE_NAME } from '../../screens/alerts_detection_rules';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
@@ -19,7 +19,7 @@ describe('Rules talbes links', () => {
   });
   beforeEach(() => {
     deleteAlertsAndRules();
-    createCustomRuleEnabled(getNewRule(), 'rule1');
+    createRule({ ...getNewRule(), rule_id: 'rule1' });
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
   });
 

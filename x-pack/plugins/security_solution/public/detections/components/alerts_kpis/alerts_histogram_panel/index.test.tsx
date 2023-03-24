@@ -22,6 +22,7 @@ import { mockAlertSearchResponse } from './mock_data';
 import { ChartContextMenu } from '../../../pages/detection_engine/chart_panels/chart_context_menu';
 import { AlertsHistogramPanel, LEGEND_WITH_COUNTS_WIDTH } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
 
 jest.mock('../../../../common/containers/query_toggle');
 
@@ -790,6 +791,17 @@ describe('AlertsHistogramPanel', () => {
         expect(
           wrapper.find('[data-test-subj="embeddable-matrix-histogram"]').exists()
         ).toBeTruthy();
+      });
+    });
+
+    it('renders LensEmbeddable with 100% height', async () => {
+      await act(async () => {
+        mount(
+          <TestProviders>
+            <AlertsHistogramPanel {...defaultProps} />
+          </TestProviders>
+        );
+        expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual('100%');
       });
     });
 

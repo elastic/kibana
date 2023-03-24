@@ -52,11 +52,9 @@ describe('useLocationName', () => {
       { wrapper: WrapperWithState }
     );
     expect(result.current).toEqual({
-      geo: { lat: 41.25, lon: -95.86 },
       id: 'us_central',
       isServiceManaged: true,
       label: 'US Central',
-      status: 'ga',
       url: 'mockUrl',
     });
   });

@@ -343,7 +343,7 @@
           "\nBasic set of log-level flags, the common levels implemented between\nthe ToolingLog and the kbn_pm logger"
         ],
         "signature": [
-          "\"debug\" | \"info\" | \"verbose\" | \"quiet\""
+          "\"info\" | \"debug\" | \"verbose\" | \"quiet\""
         ],
         "path": "packages/kbn-some-dev-log/src/some_dev_log.ts",
         "deprecated": false,

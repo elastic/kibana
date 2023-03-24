@@ -24,8 +24,8 @@ interface Props extends Omit<EuiIconTipProps, 'type' | 'color'> {
 
 export const TooltipIcon: FC<Props> = ({ icon = IconType.info, ...rest }) => {
   const icons = {
-    [IconType.error]: { type: 'alert', color: 'danger' },
-    [IconType.warning]: { type: 'alert', color: 'warning' },
+    [IconType.error]: { type: 'error', color: 'danger' },
+    [IconType.warning]: { type: 'warning', color: 'warning' },
     [IconType.info]: { type: 'iInCircle', color: 'default' },
   };
 

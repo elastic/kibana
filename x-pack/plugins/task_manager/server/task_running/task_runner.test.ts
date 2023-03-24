@@ -22,7 +22,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
-import { throwUnrecoverableError } from './errors';
+import { throwRetryableError, throwUnrecoverableError } from './errors';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
@@ -306,12 +306,10 @@ describe('TaskManagerRunner', () => {
       expect(instance.enabled).not.toBeDefined();
     });
 
-    test('uses getRetry (returning date) to set retryAt when defined', async () => {
+    test('sets retryAt when there is an error', async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);
-      const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
       const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(nextRetry);
       const { runner, store } = await pendingStageSetup({
         instance: {
           id,
@@ -323,7 +321,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -334,11 +331,11 @@ describe('TaskManagerRunner', () => {
       await runner.markTaskAsRunning();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
       const instance = store.update.mock.calls[0][0];
 
+      const expectedRetryAt = new Date(Date.now() + calculateDelay(initialAttempts + 1));
       expect(instance.retryAt!.getTime()).toEqual(
-        new Date(nextRetry.getTime() + timeoutMinutes * 60 * 1000).getTime()
+        new Date(expectedRetryAt.getTime() + timeoutMinutes * 60 * 1000).getTime()
       );
       expect(instance.enabled).not.toBeDefined();
     });
@@ -346,9 +343,7 @@ describe('TaskManagerRunner', () => {
     test('it returns false when markTaskAsRunning fails due to VERSION_CONFLICT_STATUS', async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);
-      const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
       const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(nextRetry);
       const { runner, store } = await pendingStageSetup({
         instance: {
           id,
@@ -359,7 +354,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -377,9 +371,7 @@ describe('TaskManagerRunner', () => {
     test('it throw when markTaskAsRunning fails for unexpected reasons', async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);
-      const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
       const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(nextRetry);
       const { runner, store } = await pendingStageSetup({
         instance: {
           id,
@@ -390,7 +382,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -410,9 +401,7 @@ describe('TaskManagerRunner', () => {
     test(`it tries to increment a task's attempts when markTaskAsRunning fails for unexpected reasons`, async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);
-      const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
       const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(nextRetry);
       const { runner, store } = await pendingStageSetup({
         instance: {
           id,
@@ -423,7 +412,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -460,9 +448,7 @@ describe('TaskManagerRunner', () => {
     test(`it doesnt try to increment a task's attempts when markTaskAsRunning fails for version conflict`, async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);
-      const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
       const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(nextRetry);
       const { runner, store } = await pendingStageSetup({
         instance: {
           id,
@@ -473,7 +459,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -500,9 +485,7 @@ describe('TaskManagerRunner', () => {
     test(`it doesnt try to increment a task's attempts when markTaskAsRunning fails due to Saved Object not being found`, async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);
-      const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
       const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(nextRetry);
       const { runner, store } = await pendingStageSetup({
         instance: {
           id,
@@ -513,7 +496,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -539,79 +521,6 @@ describe('TaskManagerRunner', () => {
       expect(store.update).toHaveBeenCalledTimes(1);
     });
 
-    test('uses getRetry (returning true) to set retryAt when defined', async () => {
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(1, 3);
-      const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(true);
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: undefined,
-          enabled: true,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      await runner.markTaskAsRunning();
-
-      expect(store.update).toHaveBeenCalledTimes(1);
-      sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
-      const instance = store.update.mock.calls[0][0];
-
-      const attemptDelay = calculateDelay(initialAttempts + 1);
-      const timeoutDelay = timeoutMinutes * 60 * 1000;
-      expect(instance.retryAt!.getTime()).toEqual(
-        new Date(Date.now() + attemptDelay + timeoutDelay).getTime()
-      );
-      expect(instance.enabled).not.toBeDefined();
-    });
-
-    test('uses getRetry (returning false) to set retryAt when defined', async () => {
-      const id = _.random(1, 20).toString();
-      const initialAttempts = _.random(1, 3);
-      const timeoutMinutes = 1;
-      const getRetryStub = sinon.stub().returns(false);
-      const { runner, store } = await pendingStageSetup({
-        instance: {
-          id,
-          attempts: initialAttempts,
-          schedule: undefined,
-          enabled: true,
-        },
-        definitions: {
-          bar: {
-            title: 'Bar!',
-            timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
-            createTaskRunner: () => ({
-              run: async () => undefined,
-            }),
-          },
-        },
-      });
-
-      await runner.markTaskAsRunning();
-
-      expect(store.update).toHaveBeenCalledTimes(1);
-      sinon.assert.calledWith(getRetryStub, initialAttempts + 1);
-      const instance = store.update.mock.calls[0][0];
-
-      expect(instance.retryAt!).toBeNull();
-      expect(instance.status).toBe('running');
-      expect(instance.enabled).not.toBeDefined();
-    });
-
     test('bypasses getRetry (returning false) of a recurring task to set retryAt when defined', async () => {
       const id = _.random(1, 20).toString();
       const initialAttempts = _.random(1, 3);
@@ -629,7 +538,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: `${timeoutMinutes}m`,
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               run: async () => undefined,
             }),
@@ -1105,11 +1013,10 @@ describe('TaskManagerRunner', () => {
       expect(logger.debug).toHaveBeenCalledWith(`The task bar "foo" is not cancellable.`);
     });
 
-    test('uses getRetry function (returning date) on error when defined', async () => {
+    test('throws retry error (returning date) on error when defined', async () => {
       const initialAttempts = _.random(1, 3);
       const nextRetry = new Date(Date.now() + _.random(15, 100) * 1000);
       const id = Date.now().toString();
-      const getRetryStub = sinon.stub().returns(nextRetry);
       const error = new Error('Dangit!');
       const { runner, store } = await readyToRunStageSetup({
         instance: {
@@ -1120,10 +1027,9 @@ describe('TaskManagerRunner', () => {
         definitions: {
           bar: {
             title: 'Bar!',
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               async run() {
-                throw error;
+                throw throwRetryableError(error, nextRetry);
               },
             }),
           },
@@ -1133,17 +1039,15 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      sinon.assert.calledWith(getRetryStub, initialAttempts, error);
       const instance = store.update.mock.calls[0][0];
 
       expect(instance.runAt.getTime()).toEqual(nextRetry.getTime());
       expect(instance.enabled).not.toBeDefined();
     });
 
-    test('uses getRetry function (returning true) on error when defined', async () => {
+    test('throws retry error (returning true) on error when defined', async () => {
       const initialAttempts = _.random(1, 3);
       const id = Date.now().toString();
-      const getRetryStub = sinon.stub().returns(true);
       const error = new Error('Dangit!');
       const { runner, store } = await readyToRunStageSetup({
         instance: {
@@ -1154,10 +1058,9 @@ describe('TaskManagerRunner', () => {
         definitions: {
           bar: {
             title: 'Bar!',
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
-              async run() {
-                throw error;
+              run: async () => {
+                throwRetryableError(error, true);
               },
             }),
           },
@@ -1167,7 +1070,6 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      sinon.assert.calledWith(getRetryStub, initialAttempts, error);
       const instance = store.update.mock.calls[0][0];
 
       const expectedRunAt = new Date(Date.now() + calculateDelay(initialAttempts));
@@ -1175,10 +1077,9 @@ describe('TaskManagerRunner', () => {
       expect(instance.enabled).not.toBeDefined();
     });
 
-    test('uses getRetry function (returning false) on error when defined', async () => {
+    test('throws retry error (returning false) on error when defined', async () => {
       const initialAttempts = _.random(1, 3);
       const id = Date.now().toString();
-      const getRetryStub = sinon.stub().returns(false);
       const error = new Error('Dangit!');
       const { runner, store } = await readyToRunStageSetup({
         instance: {
@@ -1189,10 +1090,9 @@ describe('TaskManagerRunner', () => {
         definitions: {
           bar: {
             title: 'Bar!',
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               async run() {
-                throw error;
+                throwRetryableError(error, false);
               },
             }),
           },
@@ -1202,7 +1102,6 @@ describe('TaskManagerRunner', () => {
       await runner.run();
 
       expect(store.update).toHaveBeenCalledTimes(1);
-      sinon.assert.calledWith(getRetryStub, initialAttempts, error);
       const instance = store.update.mock.calls[0][0];
 
       expect(instance.status).toBe('failed');
@@ -1225,7 +1124,6 @@ describe('TaskManagerRunner', () => {
         definitions: {
           bar: {
             title: 'Bar!',
-            getRetry: getRetryStub,
             createTaskRunner: () => ({
               async run() {
                 throw error;
@@ -1490,10 +1388,13 @@ describe('TaskManagerRunner', () => {
           definitions: {
             bar: {
               title: 'Bar!',
-              getRetry: () => false,
               createTaskRunner: () => ({
                 async run() {
-                  return { error, state: {} };
+                  try {
+                    throwUnrecoverableError(error);
+                  } catch (e) {
+                    return { error: e, state: {} };
+                  }
                 },
               }),
             },
@@ -1537,7 +1438,6 @@ describe('TaskManagerRunner', () => {
           bar: {
             title: 'Bar!',
             timeout: '1m',
-            getRetry: () => false,
             createTaskRunner: () => ({
               async run() {
                 return { error, state: {}, runAt: moment().add(1, 'm').toDate() };

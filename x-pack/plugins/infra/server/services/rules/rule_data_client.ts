@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, Logger } from '@kbn/core/server';
-import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 
 import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
@@ -35,7 +35,7 @@ export const createRuleDataClient = ({
     componentTemplates: [
       {
         name: 'mappings',
-        mappings: mappingFromFieldMap(experimentalRuleFieldMap, 'strict'),
+        mappings: mappingFromFieldMap(legacyExperimentalFieldMap, 'strict'),
       },
     ],
   });

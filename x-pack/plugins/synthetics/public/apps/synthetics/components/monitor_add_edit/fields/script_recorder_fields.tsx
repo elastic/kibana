@@ -57,6 +57,7 @@ export function ScriptRecorderFields({ onChange, script, fileName, isEditable }:
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="syntheticsScriptRecorderFieldsShowScriptButton"
                 onClick={() => setShowScript(true)}
                 iconType="editorCodeBlock"
                 iconSide="right"
@@ -70,6 +71,7 @@ export function ScriptRecorderFields({ onChange, script, fileName, isEditable }:
             <EuiFlexItem grow={false}>
               {isEditable && (
                 <EuiButton
+                  data-test-subj="syntheticsScriptRecorderFieldsRemoveScriptButton"
                   onClick={() => onChange({ scriptText: '', fileName: '' })}
                   iconType="trash"
                   iconSide="right"

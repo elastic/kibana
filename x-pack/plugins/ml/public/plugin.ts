@@ -31,6 +31,7 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
 import {
@@ -68,6 +69,7 @@ export interface MlStartDependencies {
   lens?: LensPublicStart;
   cases?: CasesUiStart;
   security: SecurityPluginStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export interface MlSetupDependencies {
@@ -135,6 +137,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
             cases: pluginsStart.cases,
+            savedObjectsManagement: pluginsStart.savedObjectsManagement,
           },
           params
         );

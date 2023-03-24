@@ -5,23 +5,20 @@
  * 2.0.
  */
 
+import { isArray, parseInt } from 'lodash';
+
 import type {
   RuleIntervalFrom,
   Threat,
   ThreatSubtechnique,
   ThreatTechnique,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { parseInt } from 'lodash';
-import type {
-  CustomRule,
-  MachineLearningRule,
-  OverrideRule,
-  ThreatIndicatorRule,
-  ThresholdRule,
-  NewTermsRule,
-  Mitre,
-} from '../objects/rule';
-import { getMachineLearningRule } from '../objects/rule';
+import type { Actions } from '../objects/rule';
+// For some reason importing these functions from ../../public/detections/pages/detection_engine/rules/helpers
+// causes a "Webpack Compilation Error" in this file specifically, even though it imports fine in the test files
+// in ../e2e/*, so we have a copy of the implementations in the cypress helpers.
+import { convertHistoryStartToSize, getHumanizedDuration } from '../helpers/rules';
+
 import {
   ABOUT_CONTINUE_BTN,
   ABOUT_EDIT_TAB,
@@ -120,6 +117,15 @@ import { TIMELINE } from '../screens/timelines';
 import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
 import { BACK_TO_RULES_TABLE } from '../screens/rule_details';
+import type {
+  EqlRuleCreateProps,
+  MachineLearningRuleCreateProps,
+  NewTermsRuleCreateProps,
+  QueryRuleCreateProps,
+  RuleCreateProps,
+  ThreatMatchRuleCreateProps,
+  ThresholdRuleCreateProps,
+} from '../../common/detection_engine/rule_schema';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
@@ -138,32 +144,30 @@ export const createRuleWithoutEnabling = () => {
   cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
-export const fillAboutRule = (
-  rule: CustomRule | MachineLearningRule | ThresholdRule | ThreatIndicatorRule
-) => {
+export const fillAboutRule = (rule: RuleCreateProps) => {
   cy.get(RULE_NAME_INPUT).clear({ force: true }).type(rule.name, { force: true });
   cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true }).type(rule.description, { force: true });
   if (rule.severity) {
     fillSeverity(rule.severity);
   }
-  if (rule.riskScore) {
-    fillRiskScore(rule.riskScore);
+  if (rule.risk_score) {
+    fillRiskScore(rule.risk_score);
   }
   if (rule.tags) {
     fillRuleTags(rule.tags);
   }
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 
-  if (rule.referenceUrls) {
-    fillReferenceUrls(rule.referenceUrls);
+  if (rule.references) {
+    fillReferenceUrls(rule.references);
   }
 
-  if (rule.falsePositivesExamples) {
-    fillFalsePositiveExamples(rule.falsePositivesExamples);
+  if (rule.false_positives) {
+    fillFalsePositiveExamples(rule.false_positives);
   }
 
-  if (rule.mitre) {
-    fillMitre(rule.mitre);
+  if (rule.threat) {
+    fillMitre(rule.threat);
   }
   if (rule.note) {
     fillNote(rule.note);
@@ -179,28 +183,31 @@ export const fillNote = (note: string = ruleFields.investigationGuide) => {
   return note;
 };
 
-export const fillMitre = (mitreAttacks: Mitre[]) => {
+export const fillMitre = (mitreAttacks: Threat[]) => {
   let techniqueIndex = 0;
   let subtechniqueInputIndex = 0;
   mitreAttacks.forEach((mitre, tacticIndex) => {
     cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).eq(tacticIndex).click({ force: true });
-    cy.contains(MITRE_TACTIC, mitre.tactic).click();
+    cy.contains(MITRE_TACTIC, `${mitre.tactic.name} (${mitre.tactic.id})`).click();
 
-    mitre.techniques.forEach((technique) => {
-      cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).eq(tacticIndex).click({ force: true });
-      cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).eq(techniqueIndex).click({ force: true });
-      cy.contains(MITRE_TACTIC, technique.name).click();
-
-      technique.subtechniques.forEach((subtechnique) => {
-        cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).eq(techniqueIndex).click({ force: true });
-        cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN)
-          .eq(subtechniqueInputIndex)
-          .click({ force: true });
-        cy.contains(MITRE_TACTIC, subtechnique).click();
-        subtechniqueInputIndex++;
+    if (mitre.technique) {
+      mitre.technique.forEach((technique) => {
+        cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).eq(tacticIndex).click({ force: true });
+        cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).eq(techniqueIndex).click({ force: true });
+        cy.contains(MITRE_TACTIC, `${technique.name} (${technique.id})`).click();
+        if (technique.subtechnique) {
+          technique.subtechnique.forEach((subtechnique) => {
+            cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).eq(techniqueIndex).click({ force: true });
+            cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN)
+              .eq(subtechniqueInputIndex)
+              .click({ force: true });
+            cy.contains(MITRE_TACTIC, `${subtechnique.name} (${subtechnique.id})`).click();
+            subtechniqueInputIndex++;
+          });
+          techniqueIndex++;
+        }
       });
-      techniqueIndex++;
-    });
+    }
 
     cy.get(MITRE_ATTACK_ADD_TACTIC_BUTTON).click({ force: true });
   });
@@ -263,7 +270,7 @@ export const fillSeverity = (severity: string = ruleFields.ruleSeverity) => {
   return severity;
 };
 
-export const fillRiskScore = (riskScore: string = ruleFields.riskScore.toString()) => {
+export const fillRiskScore = (riskScore: number = ruleFields.riskScore) => {
   cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${riskScore}`, { force: true });
   return riskScore;
 };
@@ -283,37 +290,40 @@ export const fillReferenceUrls = (referenceUrls: string[] = ruleFields.reference
   return referenceUrls;
 };
 
-export const fillAboutRuleAndContinue = (
-  rule: CustomRule | MachineLearningRule | ThresholdRule | ThreatIndicatorRule
-) => {
+export const fillAboutRuleAndContinue = (rule: RuleCreateProps) => {
   fillAboutRule(rule);
   getAboutContinueButton().should('exist').click({ force: true });
 };
 
-export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
+export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
   cy.get(RULE_NAME_INPUT).type(rule.name, { force: true });
   cy.get(RULE_DESCRIPTION_INPUT).type(rule.description, { force: true });
 
   cy.get(SEVERITY_MAPPING_OVERRIDE_OPTION).click();
-  rule.severityOverride.forEach((severity, i) => {
-    cy.get(SEVERITY_OVERRIDE_ROW)
-      .eq(i)
-      .within(() => {
-        cy.get(COMBO_BOX_INPUT).eq(0).type(`${severity.sourceField}{enter}`);
-        cy.get(COMBO_BOX_INPUT).eq(1).type(`${severity.sourceValue}{enter}`);
-      });
-  });
+  if (rule.severity_mapping) {
+    rule.severity_mapping.forEach((severity, i) => {
+      cy.get(SEVERITY_OVERRIDE_ROW)
+        .eq(i)
+        .within(() => {
+          cy.get(COMBO_BOX_INPUT).eq(0).type(`${severity.field}{enter}`);
+          cy.get(COMBO_BOX_INPUT).eq(1).type(`${severity.value}{enter}`);
+        });
+    });
+  }
 
   if (rule.severity) {
     fillSeverity(rule.severity);
   }
 
   cy.get(RISK_MAPPING_OVERRIDE_OPTION).click();
-  cy.get(RISK_OVERRIDE).within(() => {
-    cy.get(COMBO_BOX_INPUT).type(`${rule.riskOverride}{enter}`);
-  });
+  if (rule.risk_score_mapping) {
+    const field = rule.risk_score_mapping[0].field;
+    cy.get(RISK_OVERRIDE).within(() => {
+      cy.get(COMBO_BOX_INPUT).type(`${field}{enter}`);
+    });
+  }
 
-  cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${rule.riskScore}`, { force: true });
+  cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${rule.risk_score}`, { force: true });
 
   if (rule.tags) {
     fillRuleTags(rule.tags);
@@ -321,43 +331,28 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: OverrideRule) => {
 
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 
-  if (rule.referenceUrls) {
-    fillReferenceUrls(rule.referenceUrls);
+  if (rule.references) {
+    fillReferenceUrls(rule.references);
   }
-  if (rule.falsePositivesExamples) {
-    fillFalsePositiveExamples(rule.falsePositivesExamples);
+  if (rule.false_positives) {
+    fillFalsePositiveExamples(rule.false_positives);
   }
-  if (rule.mitre) {
-    fillMitre(rule.mitre);
+  if (rule.threat) {
+    fillMitre(rule.threat);
   }
   if (rule.note) {
     fillNote(rule.note);
   }
 
   cy.get(RULE_NAME_OVERRIDE).within(() => {
-    cy.get(COMBO_BOX_INPUT).type(`${rule.nameOverride}{enter}`);
+    cy.get(COMBO_BOX_INPUT).type(`${rule.rule_name_override}{enter}`);
   });
 
   cy.get(RULE_TIMESTAMP_OVERRIDE).within(() => {
-    cy.get(COMBO_BOX_INPUT).type(`${rule.timestampOverride}{enter}`);
+    cy.get(COMBO_BOX_INPUT).type(`${rule.timestamp_override}{enter}`);
   });
 
   getAboutContinueButton().should('exist').click({ force: true });
-};
-
-const fillCustomQuery = (rule: CustomRule | OverrideRule) => {
-  if (rule.timeline?.id) {
-    cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
-    cy.get(TIMELINE(rule.timeline.id)).click();
-    cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
-    if (rule.dataSource.type === 'indexPatterns') {
-      removeAlertsIndex();
-    }
-  } else {
-    cy.get(CUSTOM_QUERY_INPUT)
-      .first()
-      .type(rule.customQuery || '');
-  }
 };
 
 // called after import rule from saved timeline
@@ -375,24 +370,31 @@ export const continueWithNextSection = () => {
   cy.get(CONTINUE_BUTTON).should('exist').click();
 };
 
-export const fillDefineCustomRuleAndContinue = (rule: CustomRule | OverrideRule) => {
-  if (rule.dataSource.type === 'dataView') {
+export const fillDefineCustomRuleAndContinue = (rule: QueryRuleCreateProps) => {
+  if (rule.data_view_id !== undefined) {
     cy.get(DATA_VIEW_OPTION).click();
-    cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.dataSource.dataView}{enter}`);
+    cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.data_view_id}{enter}`);
   }
-  fillCustomQuery(rule);
+  cy.get(CUSTOM_QUERY_INPUT)
+    .first()
+    .type(rule.query || '');
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
-export const fillScheduleRuleAndContinue = (rule: CustomRule | MachineLearningRule) => {
-  if (rule.runsEvery) {
-    cy.get(RUNS_EVERY_INTERVAL).type('{selectall}').type(rule.runsEvery.interval);
-    cy.get(RUNS_EVERY_TIME_TYPE).select(rule.runsEvery.timeType);
+export const fillScheduleRuleAndContinue = (rule: RuleCreateProps) => {
+  if (rule.interval) {
+    const intervalNumber = rule.interval.slice(0, rule.interval.length - 1);
+    const intervalType = rule.interval.charAt(rule.interval.length - 1);
+    cy.get(RUNS_EVERY_INTERVAL).type('{selectall}').type(intervalNumber);
+    cy.get(RUNS_EVERY_TIME_TYPE).select(intervalType);
   }
-  if (rule.lookBack) {
-    cy.get(LOOK_BACK_INTERVAL).type('{selectAll}').type(rule.lookBack.interval);
-    cy.get(LOOK_BACK_TIME_TYPE).select(rule.lookBack.timeType);
+  if (rule.from) {
+    const additionalLookback = getHumanizedDuration(rule.from, rule.interval ?? '5m');
+    const additionalLookbackNumber = additionalLookback.slice(0, additionalLookback.length - 1);
+    const additionalLookbackType = additionalLookback.charAt(additionalLookback.length - 1);
+    cy.get(LOOK_BACK_INTERVAL).type('{selectAll}').type(additionalLookbackNumber);
+    cy.get(LOOK_BACK_TIME_TYPE).select(additionalLookbackType);
   }
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
 };
@@ -404,55 +406,55 @@ export const fillFrom = (from: RuleIntervalFrom = ruleFields.ruleIntervalFrom) =
   cy.get(LOOK_BACK_TIME_TYPE).select(type);
 };
 
-export const fillRuleAction = (rule: CustomRule) => {
-  if (rule.actions) {
-    cy.get(ACTIONS_THROTTLE_INPUT).select(rule.actions.throttle);
-    rule.actions?.connectors.forEach((connector) => {
-      switch (connector.type) {
-        case 'index':
-          cy.get(INDEX_SELECTOR).click();
-          cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
-          fillIndexConnectorForm(connector);
-          break;
-        case 'email':
-          cy.get(EMAIL_ACTION_BTN).click();
-          cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
-          fillEmailConnectorForm(connector);
-          break;
-      }
-    });
-  }
+export const fillRuleAction = (actions: Actions) => {
+  cy.get(ACTIONS_THROTTLE_INPUT).select(actions.throttle);
+  actions.connectors.forEach((connector) => {
+    switch (connector.type) {
+      case 'index':
+        cy.get(INDEX_SELECTOR).click();
+        cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
+        fillIndexConnectorForm(connector);
+        break;
+      case 'email':
+        cy.get(EMAIL_ACTION_BTN).click();
+        cy.get(CREATE_ACTION_CONNECTOR_BTN).click();
+        fillEmailConnectorForm(connector);
+        break;
+    }
+  });
 };
 
-export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRule) => {
+export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProps) => {
   const thresholdField = 0;
   const threshold = 1;
 
   const typeThresholdField = ($el: Cypress.ObjectLike) =>
-    cy.wrap($el).type(rule.thresholdField, { delay: 35 });
+    cy
+      .wrap($el)
+      .type(isArray(rule.threshold.field) ? rule.threshold.field[0] : rule.threshold.field, {
+        delay: 35,
+      });
 
-  fillCustomQuery(rule);
+  cy.get(CUSTOM_QUERY_INPUT)
+    .first()
+    .type(rule.query || '');
   cy.get(THRESHOLD_INPUT_AREA)
     .find(INPUT)
     .then((inputs) => {
       cy.wrap(inputs[thresholdField]).click();
       cy.wrap(inputs[thresholdField]).pipe(typeThresholdField);
       cy.get(EUI_FILTER_SELECT_ITEM).click({ force: true });
-      cy.wrap(inputs[threshold]).clear().type(rule.threshold);
+      cy.wrap(inputs[threshold]).clear().type(`${rule.threshold.value}`);
     });
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
-export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
-  if (rule.customQuery == null) {
-    throw new TypeError('The rule custom query should never be undefined or null ');
-  }
-
+export const fillDefineEqlRuleAndContinue = (rule: EqlRuleCreateProps) => {
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
-  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.customQuery);
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.query);
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');
   cy.get(RULES_CREATION_PREVIEW_BUTTON).should('not.be.disabled').click({ force: true });
   cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).should('not.be.disabled').click({ force: true });
@@ -470,18 +472,21 @@ export const fillDefineEqlRuleAndContinue = (rule: CustomRule) => {
   cy.get(`${RULES_CREATION_FORM} ${EQL_QUERY_INPUT}`).should('not.exist');
 };
 
-export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRule) => {
-  fillCustomQuery(rule);
-  cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click().type(rule.newTermsFields[0], { delay: 35 });
+export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps) => {
+  cy.get(CUSTOM_QUERY_INPUT)
+    .first()
+    .type(rule.query || '');
+  cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).click().type(rule.new_terms_fields[0], { delay: 35 });
   cy.get(EUI_FILTER_SELECT_ITEM).click({ force: true });
   cy.focused().type('{esc}'); // Close combobox dropdown so next inputs can be interacted with
+  const historySize = convertHistoryStartToSize(rule.history_window_start);
+  const historySizeNumber = historySize.slice(0, historySize.length - 1);
+  const historySizeType = historySize.charAt(historySize.length - 1);
   cy.get(NEW_TERMS_INPUT_AREA)
     .find(NEW_TERMS_HISTORY_SIZE)
     .type('{selectAll}')
-    .type(rule.historyWindowSize.interval);
-  cy.get(NEW_TERMS_INPUT_AREA)
-    .find(NEW_TERMS_HISTORY_TIME_TYPE)
-    .select(rule.historyWindowSize.timeType);
+    .type(historySizeNumber);
+  cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_TIME_TYPE).select(historySizeType);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
@@ -606,21 +611,24 @@ export const getCustomQueryInvalidationText = () => cy.contains(CUSTOM_QUERY_REQ
  * Fills in the define indicator match rules and then presses the continue button
  * @param rule The rule to use to fill in everything
  */
-export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatIndicatorRule) => {
-  if (rule.dataSource.type === 'indexPatterns') {
-    fillIndexAndIndicatorIndexPattern(rule.dataSource.index, rule.indicatorIndexPattern);
+export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatMatchRuleCreateProps) => {
+  if (rule.index) {
+    fillIndexAndIndicatorIndexPattern(rule.index, rule.threat_index);
   }
   fillIndicatorMatchRow({
-    indexField: rule.indicatorMappingField,
-    indicatorIndexField: rule.indicatorIndexField,
+    indexField: rule.threat_mapping[0].entries[0].field,
+    indicatorIndexField: rule.threat_mapping[0].entries[0].value,
   });
   getCustomIndicatorQueryInput().type('{selectall}{enter}*:*');
   getDefineContinueButton().should('exist').click({ force: true });
   cy.get(CUSTOM_QUERY_INPUT).should('not.exist');
 };
 
-export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRule) => {
-  const text = rule.machineLearningJobs
+export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRuleCreateProps) => {
+  const jobsAsArray = isArray(rule.machine_learning_job_id)
+    ? rule.machine_learning_job_id
+    : [rule.machine_learning_job_id];
+  const text = jobsAsArray
     .map((machineLearningJob) => `${machineLearningJob}{downArrow}{enter}`)
     .join('');
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
@@ -628,12 +636,9 @@ export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRu
 
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
 
-  cy.get(ANOMALY_THRESHOLD_INPUT).type(
-    `{selectall}${getMachineLearningRule().anomalyScoreThreshold}`,
-    {
-      force: true,
-    }
-  );
+  cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${rule.anomaly_threshold}`, {
+    force: true,
+  });
   getDefineContinueButton().should('exist').click({ force: true });
 };
 

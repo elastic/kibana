@@ -9,6 +9,7 @@ import type { FileJSON, FileKind } from '@kbn/files-plugin/common';
 import type { FilesSetup } from '@kbn/files-plugin/server';
 import {
   APP_ID,
+  constructFileKindIdByOwner,
   constructFilesHttpOperationTag,
   MAX_FILE_SIZE,
   OBSERVABILITY_OWNER,
@@ -20,7 +21,7 @@ import { ALLOWED_MIME_TYPES, IMAGE_MIME_TYPES } from '../../common/constants/mim
 
 const buildFileKind = (owner: Owner): FileKind => {
   return {
-    id: owner,
+    id: constructFileKindIdByOwner(owner),
     http: fileKindHttpTags(owner),
     maxSizeBytes,
     allowedMimeTypes: ALLOWED_MIME_TYPES,
@@ -69,3 +70,5 @@ export const registerCaseFileKinds = (filesSetupPlugin: FilesSetup) => {
     filesSetupPlugin.registerFileKind(fileKind);
   }
 };
+
+export const MAX_FILES_PER_CASE = 100;

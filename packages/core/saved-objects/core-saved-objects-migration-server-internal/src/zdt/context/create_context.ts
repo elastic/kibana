@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { MigratorContext } from './types';
+import { getModelVersionMapForTypes } from '@kbn/core-saved-objects-base-server-internal';
+import { REMOVED_TYPES } from '../../core';
 import type { MigrateIndexOptions } from '../migrate_index';
+import type { MigratorContext } from './types';
 
 export type CreateContextOps = Omit<MigrateIndexOptions, 'logger'>;
 
@@ -15,6 +17,7 @@ export type CreateContextOps = Omit<MigrateIndexOptions, 'logger'>;
  * Create the context object that will be used for this index migration.
  */
 export const createContext = ({
+  kibanaVersion,
   types,
   docLinks,
   migrationConfig,
@@ -24,12 +27,15 @@ export const createContext = ({
   serializer,
 }: CreateContextOps): MigratorContext => {
   return {
+    kibanaVersion,
     indexPrefix,
     types,
+    typeModelVersions: getModelVersionMapForTypes(types.map((type) => typeRegistry.getType(type)!)),
     elasticsearchClient,
     typeRegistry,
     serializer,
     maxRetryAttempts: migrationConfig.retryAttempts,
     migrationDocLinks: docLinks.links.kibanaUpgradeSavedObjects,
+    deletedTypes: REMOVED_TYPES,
   };
 };

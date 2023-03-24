@@ -14,6 +14,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
+import { css } from '@emotion/react';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -53,6 +54,12 @@ export function DashboardApp({
   history,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  /**
+   * This state keeps track of the height of the top navigation bar so that padding at the
+   * top of the viewport can be adjusted dynamically.
+   */
+  const [topNavHeight, setTopNavHeight] = useState(0);
+
   useMount(() => {
     (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
   });
@@ -192,16 +199,27 @@ export function DashboardApp({
         <>
           {DashboardReduxWrapper && (
             <DashboardReduxWrapper>
-              <DashboardTopNav redirectTo={redirectTo} embedSettings={embedSettings} />
+              <DashboardTopNav
+                onHeightChange={setTopNavHeight}
+                redirectTo={redirectTo}
+                embedSettings={embedSettings}
+              />
             </DashboardReduxWrapper>
           )}
 
           {getLegacyConflictWarning?.()}
-          <DashboardContainerRenderer
-            savedObjectId={savedDashboardId}
-            getCreationOptions={getCreationOptions}
-            onDashboardContainerLoaded={(container) => setDashboardContainer(container)}
-          />
+          <div
+            className="dashboardViewportWrapper"
+            css={css`
+              padding-top: ${topNavHeight}px;
+            `}
+          >
+            <DashboardContainerRenderer
+              savedObjectId={savedDashboardId}
+              getCreationOptions={getCreationOptions}
+              onDashboardContainerLoaded={(container) => setDashboardContainer(container)}
+            />
+          </div>
         </>
       )}
     </div>

@@ -2628,9 +2628,11 @@ describe('successful migrations', () => {
         outcomeOrder: 0,
       });
     });
+  });
 
+  describe('8.8.0', () => {
     test('adds uuid to rule actions', () => {
-      const migration870 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.7.0'];
+      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
       const rule = getMockData(
         {
           params: { foo: true },
@@ -2638,9 +2640,9 @@ describe('successful migrations', () => {
         },
         true
       );
-      const migratedAlert870 = migration870(rule, migrationContext);
+      const migratedAlert880 = migration880(rule, migrationContext);
 
-      expect(migratedAlert870.attributes.actions).toEqual([
+      expect(migratedAlert880.attributes.actions).toEqual([
         {
           group: 'default',
           actionRef: '1',
@@ -2649,6 +2651,14 @@ describe('successful migrations', () => {
           uuid: expect.stringMatching(/.*\S.*/), // non-empty string
         },
       ]);
+    });
+
+    test('migrates rule to include revision and defaults revision to 0', () => {
+      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
+
+      const rule = getMockData();
+      const migratedAlert880 = migration880(rule, migrationContext);
+      expect(migratedAlert880.attributes.revision).toEqual(0);
     });
   });
 

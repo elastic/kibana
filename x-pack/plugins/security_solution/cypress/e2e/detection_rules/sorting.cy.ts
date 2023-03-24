@@ -22,7 +22,7 @@ import {
 import { login, visit } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
-import { createCustomRule } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import {
   getExistingRule,
@@ -37,10 +37,10 @@ describe('Alerts detection rules', () => {
   before(() => {
     cleanKibana();
     login();
-    createCustomRule(getNewRule(), '1');
-    createCustomRule(getExistingRule(), '2');
-    createCustomRule(getNewOverrideRule(), '3');
-    createCustomRule(getNewThresholdRule(), '4');
+    createRule({ ...getNewRule(), rule_id: '1' });
+    createRule({ ...getExistingRule(), rule_id: '2' });
+    createRule({ ...getNewOverrideRule(), rule_id: '3' });
+    createRule({ ...getNewThresholdRule(), rule_id: '4' });
   });
 
   it('Sorts by enabled rules', () => {
@@ -62,8 +62,8 @@ describe('Alerts detection rules', () => {
   });
 
   it('Pagination updates page number and results', () => {
-    createCustomRule({ ...getNewRule(), name: 'Test a rule' }, '5');
-    createCustomRule({ ...getNewRule(), name: 'Not same as first rule' }, '6');
+    createRule({ ...getNewRule(), name: 'Test a rule', rule_id: '5' });
+    createRule({ ...getNewRule(), name: 'Not same as first rule', rule_id: '6' });
 
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();

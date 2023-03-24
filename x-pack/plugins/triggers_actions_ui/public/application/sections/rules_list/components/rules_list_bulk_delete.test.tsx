@@ -127,7 +127,8 @@ const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: AllTheProviders });
 };
 
-describe('Rules list Bulk Delete', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/152521
+describe.skip('Rules list Bulk Delete', () => {
   beforeEach(async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
     loadRulesWithKueryFilter.mockResolvedValue({
