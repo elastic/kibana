@@ -21,6 +21,7 @@ import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isResponseError } from '../../utils/fetch_enterprise_search';
+import { isNotFoundException } from '../../utils/identify_exceptions';
 
 export function registerEnginesRoutes({ log, router }: RouteDependencies) {
   router.get(
@@ -168,36 +169,48 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
       validate: { params: schema.object({ engine_name: schema.string() }) },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
-      const engineName = decodeURIComponent(request.params.engine_name);
-      const { client } = (await context.core).elasticsearch;
+      try {
+        const engineName = decodeURIComponent(request.params.engine_name);
+        const { client } = (await context.core).elasticsearch;
 
-      const engine = await client.asCurrentUser.transport.request<EnterpriseSearchEngine>({
-        method: 'GET',
-        path: `/_application/search_application/${engineName}`,
-      });
-
-      if (!engine || (isResponseError(engine) && engine.responseStatus === 404)) {
-        return createError({
-          errorCode: ErrorCode.ENGINE_NOT_FOUND,
-          message: 'Could not find engine',
-          response,
-          statusCode: 404,
+        const engine = await client.asCurrentUser.transport.request<EnterpriseSearchEngine>({
+          method: 'GET',
+          path: `/_application/search_application/${engineName}`,
         });
-      }
-      if (isResponseError(engine)) {
-        return createError({
-          errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
-          message: 'Error fetching engine',
-          response,
-          statusCode: engine.responseStatus,
-        });
-      }
 
-      const data = await fetchEngineFieldCapabilities(client, engine);
-      return response.ok({
-        body: data,
-        headers: { 'content-type': 'application/json' },
-      });
+        if (!engine || (isResponseError(engine) && engine.responseStatus === 404)) {
+          return createError({
+            errorCode: ErrorCode.ENGINE_NOT_FOUND,
+            message: 'Could not find engine',
+            response,
+            statusCode: 404,
+          });
+        }
+        if (isResponseError(engine)) {
+          return createError({
+            errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
+            message: 'Error fetching engine',
+            response,
+            statusCode: engine.responseStatus,
+          });
+        }
+
+        const data = await fetchEngineFieldCapabilities(client, engine);
+        return response.ok({
+          body: data,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (e) {
+        if (isNotFoundException(e)) {
+          return createError({
+            errorCode: ErrorCode.ENGINE_NOT_FOUND,
+            message: 'Could not find engine',
+            response,
+            statusCode: 404,
+          });
+        }
+        throw e;
+      }
     })
   );
 }
