@@ -8,7 +8,6 @@
 import type { Action } from 'redux';
 import type { DataViewBase } from '@kbn/es-query';
 import type {
-  HostInfo,
   HostIsolationRequestBody,
   ISOLATION_ACTIONS,
   MetadataListResponse,
@@ -25,11 +24,6 @@ export interface ServerReturnedEndpointList {
 export interface ServerFailedToReturnEndpointList {
   type: 'serverFailedToReturnEndpointList';
   payload: ServerApiError;
-}
-
-export interface ServerReturnedEndpointDetails {
-  type: 'serverReturnedEndpointDetails';
-  payload: HostInfo;
 }
 
 export interface ServerFailedToReturnEndpointDetails {
@@ -140,17 +134,6 @@ export type EndpointIsolationRequestStateChange = Action<'endpointIsolationReque
   payload: EndpointState['isolationRequestState'];
 };
 
-export type EndpointPendingActionsStateChanged = Action<'endpointPendingActionsStateChanged'> & {
-  payload: EndpointState['endpointPendingActions'];
-};
-
-export interface EndpointDetailsLoad {
-  type: 'endpointDetailsLoad';
-  payload: {
-    endpointId: string;
-  };
-}
-
 export type LoadMetadataTransformStats = Action<'loadMetadataTransformStats'>;
 
 export type MetadataTransformStatsChanged = Action<'metadataTransformStatsChanged'> & {
@@ -160,9 +143,7 @@ export type MetadataTransformStatsChanged = Action<'metadataTransformStatsChange
 export type EndpointAction =
   | ServerReturnedEndpointList
   | ServerFailedToReturnEndpointList
-  | ServerReturnedEndpointDetails
   | ServerFailedToReturnEndpointDetails
-  | EndpointDetailsLoad
   | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding
   | ServerFailedToReturnPoliciesForOnboarding
@@ -183,6 +164,5 @@ export type EndpointAction =
   | ServerFailedToReturnEndpointsTotal
   | EndpointIsolationRequest
   | EndpointIsolationRequestStateChange
-  | EndpointPendingActionsStateChanged
   | LoadMetadataTransformStats
   | MetadataTransformStatsChanged;

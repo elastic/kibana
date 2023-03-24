@@ -17,13 +17,18 @@ interface PendingActions {
     | 'pendingKillProcess'
     | 'pendingSuspendProcess'
     | 'pendingRunningProcesses'
+    | 'pendingGetFile'
+    | 'pendingExecute'
   >;
 }
 export const usePendingActionsStatuses = (
-  pendingActions?: PendingActionsResponse | ImmutableObject<PendingActionsResponse>
+  pendingActions?: PendingActionsResponse | ImmutableObject<PendingActionsResponse>,
+  agentId?: string
 ): PendingActions => {
   const pendingActionRequests = useMemo(() => {
-    const pending = pendingActions?.data?.[0].pending_actions;
+    const pending = pendingActions?.data?.filter((action) => action.agent_id === agentId)[0]
+      ?.pending_actions;
+
     return {
       pendingActions: {
         pendingIsolate: pending?.isolate ?? 0,
@@ -31,9 +36,11 @@ export const usePendingActionsStatuses = (
         pendingKillProcess: pending?.['kill-process'] ?? 0,
         pendingSuspendProcess: pending?.['suspend-process'] ?? 0,
         pendingRunningProcesses: pending?.['running-processes'] ?? 0,
+        pendingGetFile: pending?.['get-file'] ?? 0,
+        pendingExecute: pending?.execute ?? 0,
       },
     };
-  }, [pendingActions?.data]);
+  }, [pendingActions, agentId]);
 
   return pendingActionRequests;
 };

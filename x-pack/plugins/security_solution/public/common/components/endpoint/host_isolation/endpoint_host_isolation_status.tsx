@@ -22,6 +22,8 @@ export interface EndpointHostIsolationStatusProps {
     pendingKillProcess?: number;
     pendingSuspendProcess?: number;
     pendingRunningProcesses?: number;
+    pendingGetFile?: number;
+    pendingExecute?: number;
   };
   'data-test-subj'?: string;
 }
@@ -44,6 +46,8 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
       pendingKillProcess = 0,
       pendingSuspendProcess = 0,
       pendingRunningProcesses = 0,
+      pendingGetFile = 0,
+      pendingExecute = 0,
     } = pendingActions;
 
     const wasReleasing = useRef<boolean>(false);
@@ -55,13 +59,17 @@ export const EndpointHostIsolationStatus = memo<EndpointHostIsolationStatusProps
         pendingUnIsolate +
         pendingKillProcess +
         pendingSuspendProcess +
-        pendingRunningProcesses,
+        pendingRunningProcesses +
+        pendingGetFile +
+        pendingExecute,
       [
         pendingIsolate,
         pendingKillProcess,
         pendingRunningProcesses,
         pendingSuspendProcess,
         pendingUnIsolate,
+        pendingGetFile,
+        pendingExecute,
       ]
     );
 
