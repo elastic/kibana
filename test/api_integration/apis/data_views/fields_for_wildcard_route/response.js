@@ -202,11 +202,11 @@ export default function ({ getService }) {
         });
     });
 
-    it('returns 404 when neither exists', async () => {
+    it('returns 200 when neither exists', async () => {
       await supertest
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({ pattern: 'bad_index,bad_index_2' })
-        .expect(404);
+        .expect(200);
     });
 
     it('returns 404 when no patterns exist', async () => {
