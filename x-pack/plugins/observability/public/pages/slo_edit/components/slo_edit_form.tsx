@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { EuiAvatar, EuiButton, EuiFlexGroup, EuiTimeline, EuiTimelineItem } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
+import { euiThemeVars } from '@kbn/ui-theme';
 import { useKibana } from '../../../utils/kibana_react';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
@@ -45,7 +45,7 @@ export function SloEditForm({ slo }: Props) {
     values: transformSloResponseToCreateSloInput(slo),
     mode: 'all',
   });
-  const { watch, getFieldState, getValues, formState } = methods;
+  const { watch, getFieldState, getValues, formState, trigger } = methods;
 
   const { isIndicatorSectionValid, isDescriptionSectionValid, isObjectiveSectionValid } =
     useSectionFormValidation({
@@ -61,6 +61,11 @@ export function SloEditForm({ slo }: Props) {
   const isEditMode = slo !== undefined;
 
   const handleSubmit = async () => {
+    const isValid = await trigger();
+    if (!isValid) {
+      return;
+    }
+
     const values = getValues();
 
     if (isEditMode) {
@@ -156,7 +161,6 @@ export function SloEditForm({ slo }: Props) {
               color="primary"
               data-test-subj="sloFormSubmitButton"
               fill
-              disabled={!formState.isValid}
               isLoading={isCreateSloLoading || isUpdateSloLoading}
               onClick={handleSubmit}
             >
