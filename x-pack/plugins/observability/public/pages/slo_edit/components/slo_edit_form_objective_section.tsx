@@ -14,7 +14,6 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -32,15 +31,6 @@ export function SloEditFormObjectiveSection() {
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
-      <EuiTitle>
-        <h2>
-          {i18n.translate('xpack.observability.slo.sloEdit.objectives.title', {
-            defaultMessage: 'Set objectives',
-          })}
-        </h2>
-      </EuiTitle>
-
-      <EuiSpacer size="xl" />
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
           <EuiFormLabel>
@@ -127,7 +117,6 @@ export function SloEditFormObjectiveSection() {
           <SloEditFormObjectiveSectionTimeslices />
         </>
       ) : null}
-      <EuiSpacer size="xl" />
     </EuiPanel>
   );
 }
