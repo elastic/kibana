@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiIcon } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -15,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { ValuesType } from 'utility-types';
 import { AgentExplorerFieldName } from '../../../../../../common/agent_explorer';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { AgentIcon } from '../../../../shared/agent_icon';
@@ -152,6 +154,39 @@ export function getAgentsColumns({
           )}
         />
       ),
+    },
+    {
+      field: AgentExplorerFieldName.AgentLastVersion,
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.agentExplorerTable.agentLatestVersionColumnTooltip',
+            {
+              defaultMessage:
+                'The latest released version of the agent. Needs public access to internet otherwise N/A will be listed for every agent.',
+            }
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.agentExplorerTable.agentLatestVersionColumnLabel',
+              { defaultMessage: 'Agent Latest Version' }
+            )}
+            &nbsp;
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
+            />
+          </>
+        </EuiToolTip>
+      ),
+      width: '10%',
+      align: 'center',
+      truncateText: true,
+      render: (_, { latestVersion }) =>
+        latestVersion ? <>{latestVersion}</> : <>{NOT_AVAILABLE_LABEL}</>,
     },
     {
       field: AgentExplorerFieldName.AgentDocsPageUrl,

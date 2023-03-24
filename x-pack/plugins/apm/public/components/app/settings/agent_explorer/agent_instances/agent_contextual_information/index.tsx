@@ -18,6 +18,7 @@ import { StickyProperties } from '../../../../../shared/sticky_properties';
 import { getComparisonEnabled } from '../../../../../shared/time_comparison/get_comparison_enabled';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { AgentExplorerDocsLink } from '../../agent_explorer_docs_link';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../../common/i18n';
 
 const serviceLabel = i18n.translate(
   'xpack.apm.agentInstancesDetails.serviceLabel',
@@ -40,6 +41,13 @@ const instancesLabel = i18n.translate(
   }
 );
 
+const latestVersionLabel = i18n.translate(
+  'xpack.apm.agentInstancesDetails.latestVersionLabel',
+  {
+    defaultMessage: 'Agent latest version',
+  }
+);
+
 const agentDocsLabel = i18n.translate(
   'xpack.apm.agentInstancesDetails.agentDocsUrlLabel',
   {
@@ -52,12 +60,14 @@ export function AgentContextualInformation({
   serviceName,
   agentDocsPageUrl,
   instances,
+  latestVersion,
   query,
 }: {
   agentName: AgentName;
   serviceName: string;
   agentDocsPageUrl?: string;
   instances: number;
+  latestVersion?: string;
   query: TypeOf<ApmRoutes, '/settings/agent-explorer'>['query'];
 }) {
   const { core } = useApmPluginContext();
@@ -88,7 +98,7 @@ export function AgentContextualInformation({
           }
         />
       ),
-      width: '25%',
+      width: '20%',
     },
     {
       label: agentNameLabel,
@@ -100,7 +110,7 @@ export function AgentContextualInformation({
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      width: '25%',
+      width: '20%',
     },
     {
       label: instancesLabel,
@@ -112,7 +122,13 @@ export function AgentContextualInformation({
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      width: '25%',
+      width: '20%',
+    },
+    {
+      label: latestVersionLabel,
+      fieldName: latestVersionLabel,
+      val: latestVersion ? <>{latestVersion}</> : <>{NOT_AVAILABLE_LABEL}</>,
+      width: '20%',
     },
     {
       label: agentDocsLabel,
@@ -129,7 +145,7 @@ export function AgentContextualInformation({
           }
         />
       ),
-      width: '25%',
+      width: '20%',
     },
   ];
 

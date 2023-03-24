@@ -95,6 +95,7 @@ export function AgentInstances({ agent, onClose }: Props) {
             serviceName={agent.serviceName}
             agentDocsPageUrl={agent.agentDocsPageUrl}
             instances={agent.instances}
+            latestVersion={agent.latestVersion}
             query={query}
           />
           <EuiHorizontalRule margin="m" />
