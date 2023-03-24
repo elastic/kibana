@@ -47,6 +47,7 @@ export function createServiceSummaryMetricsAggregator(
         {
           field: 'service.name',
           limit: options?.overflowSettings?.transactions?.maxServices ?? Number.POSITIVE_INFINITY,
+          topLevelLimit: options?.overflowSettings?.maxGroups ?? Number.POSITIVE_INFINITY,
         },
       ],
     },

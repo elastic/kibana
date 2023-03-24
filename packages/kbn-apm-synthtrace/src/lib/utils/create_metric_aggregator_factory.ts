@@ -20,7 +20,7 @@ export interface GroupingOptions<TFields extends Fields> {
   maxTotalGroups: number;
   overflowGroupingKey: string;
   overflowCountField: string;
-  groups?: Array<{ field: keyof TFields & string; limit: number }>;
+  groups?: Array<{ field: keyof TFields & string; limit: number; topLevelLimit: number }>;
 }
 
 function createMetricGroupTracker(): MetricGroupTracker {
@@ -120,26 +120,6 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
         return set;
       }
 
-      if (grouping && metrics.size >= grouping.maxTotalGroups) {
-        const metric: TFields = {
-          '@timestamp': timestamp,
-          [grouping.overflowGroupingKey]: OVERFLOW_BUCKET_NAME,
-        } as unknown as TFields;
-
-        const overflowTrackingKey = hashObject(metric);
-        set = getOrCreateOverflowSet(overflowTrackingKey, metric, timestamp);
-
-        const isUntracked = tracker.untracked.has(key);
-
-        if (!isUntracked) {
-          tracker.untracked.add(key);
-          // @ts-expect-error
-          set[overflowFieldName]!++;
-        }
-
-        return set;
-      }
-
       let groupTrackingMap = tracker;
 
       const trackingObject: TFields = {
@@ -147,12 +127,14 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
       } as TFields;
 
       for (let i = 0; i < groups.length; i++) {
-        const { field, limit } = groups[i];
+        const { field, limit, topLevelLimit } = groups[i];
         const fieldValue = event[field];
         trackingObject[field] = fieldValue;
 
         const isUntracked = groupTrackingMap.untracked.has(key);
-        const isOverLimit = groupTrackingMap.tracked.size >= limit;
+        const isGroupLevelOverLimit = groupTrackingMap.tracked.size >= limit;
+        const isTopLevelOverLimit = metrics.size >= topLevelLimit;
+        const isOverLimit = isGroupLevelOverLimit || isTopLevelOverLimit;
         const isNew = !isUntracked && !groupTrackingMap.tracked.has(fieldValue);
 
         if (isUntracked || (isNew && isOverLimit)) {

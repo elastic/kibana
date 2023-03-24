@@ -20,6 +20,7 @@ import { ValuesType } from 'utility-types';
 import { ScenarioOptions } from '../../../../cli/scenario';
 import { Logger } from '../../../utils/create_logger';
 import { fork, sequential } from '../../../utils/stream_utils';
+import { createBreakdownMetricsAggregator } from '../../aggregators/create_breakdown_metrics_aggregator';
 import { createServiceMetricsAggregator } from '../../aggregators/create_service_metrics_aggregator';
 import { createServiceSummaryMetricsAggregator } from '../../aggregators/create_service_summary_metrics_aggregator';
 import { createSpanMetricsAggregator } from '../../aggregators/create_span_metrics_aggregator';
@@ -141,7 +142,7 @@ export class ApmSynthtraceEsClient {
         ...serializationTransform,
         getIntakeDefaultsTransform(),
         fork(new PassThrough({ objectMode: true }), ...aggregators),
-        // createBreakdownMetricsAggregator('30s'),
+        createBreakdownMetricsAggregator('30s'),
         getApmServerMetadataTransform(this.version),
         getRoutingTransform(),
         getDedotTransform(),
