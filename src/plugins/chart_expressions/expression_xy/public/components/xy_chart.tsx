@@ -817,7 +817,7 @@ export function XYChart({
           <Tooltip<Record<string, string | number>, XYChartSeriesIdentifier>
             boundary={document.getElementById('app-fixed-viewport') ?? undefined}
             headerFormatter={
-              !args.detailedTooltip
+              !args.detailedTooltip && xAxisColumn
                 ? ({ value }) => (
                     <TooltipHeader
                       value={value}
