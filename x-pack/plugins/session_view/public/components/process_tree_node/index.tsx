@@ -246,6 +246,8 @@ export function ProcessTreeNode({
 
   const timeStampsNormal = formatDate(start, dateFormat);
 
+  const promptText = `${workingDirectory ?? ''} ${args?.join(' ')}`;
+
   return (
     <div>
       <div
@@ -273,7 +275,7 @@ export function ProcessTreeNode({
               <Nbsp />
               <EuiIcon type="user" />
               <Nbsp />
-              <b css={styles.darkText}>{dataOrDash(user?.name)}</b>
+              <b css={styles.darkText}>{user?.name || 'ID: ' + user?.id}</b>
             </span>
           ) : (
             <>
@@ -287,7 +289,7 @@ export function ProcessTreeNode({
               </EuiToolTip>
               <span css={styles.textSection}>
                 <TextHighlight
-                  text={`${workingDirectory ?? ''} ${args?.join(' ')}`}
+                  text={promptText}
                   match={process.searchMatched}
                   highlightStyle={styles.searchHighlight}
                 >
