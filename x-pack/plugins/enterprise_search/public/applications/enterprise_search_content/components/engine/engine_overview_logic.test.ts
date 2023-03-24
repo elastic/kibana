@@ -431,122 +431,122 @@ describe('EngineOverviewLogic', () => {
                 },
               },
             },
-            fields: [
-              {
-                indices: [
-                  {
-                    name: 'index-001',
-                    type: 'integer',
-                  },
-                  {
-                    name: 'index-002',
-                    type: 'integer',
-                  },
-                ],
-                name: '_doc_count',
-                type: 'integer',
-              },
-              {
-                indices: [
-                  {
-                    name: 'index-001',
-                    type: '_id',
-                  },
-                  {
-                    name: 'index-002',
-                    type: '_id',
-                  },
-                ],
-                name: '_id',
-                type: '_id',
-              },
-              {
-                indices: [
-                  {
-                    name: 'index-001',
-                    type: '_index',
-                  },
-                  {
-                    name: 'index-002',
-                    type: '_index',
-                  },
-                ],
-                name: '_index',
-                type: '_index',
-              },
-              {
-                indices: [
-                  {
-                    name: 'index-001',
-                    type: '_source',
-                  },
-                  {
-                    name: 'index-002',
-                    type: '_source',
-                  },
-                ],
-                name: '_source',
-                type: '_source',
-              },
-              {
-                indices: [
-                  {
-                    name: 'index-001',
-                    type: '_version',
-                  },
-                  {
-                    name: 'index-002',
-                    type: '_version',
-                  },
-                ],
-                name: '_version',
-                type: '_version',
-              },
-              {
-                indices: [
-                  {
-                    name: 'index-001',
-                    type: 'integer',
-                  },
-                  {
-                    name: 'index-002',
-                    type: 'integer',
-                  },
-                ],
-                name: 'age',
-                type: 'integer',
-              },
-              {
-                indices: [
-                  {
-                    name: 'index-001',
-                    type: 'keyword',
-                  },
-                  {
-                    name: 'index-002',
-                    type: 'keyword',
-                  },
-                ],
-                name: 'color',
-                type: 'keyword',
-              },
-              {
-                indices: [
-                  {
-                    name: 'index-001',
-                    type: 'text',
-                  },
-                  {
-                    name: 'index-002',
-                    type: 'text',
-                  },
-                ],
-                name: 'name',
-                type: 'text',
-              },
-            ] as SchemaField[],
             indices: ['index-001', 'index-002'],
           },
+          fields: [
+            {
+              indices: [
+                {
+                  name: 'index-001',
+                  type: 'integer',
+                },
+                {
+                  name: 'index-002',
+                  type: 'integer',
+                },
+              ],
+              name: '_doc_count',
+              type: 'integer',
+            },
+            {
+              indices: [
+                {
+                  name: 'index-001',
+                  type: '_id',
+                },
+                {
+                  name: 'index-002',
+                  type: '_id',
+                },
+              ],
+              name: '_id',
+              type: '_id',
+            },
+            {
+              indices: [
+                {
+                  name: 'index-001',
+                  type: '_index',
+                },
+                {
+                  name: 'index-002',
+                  type: '_index',
+                },
+              ],
+              name: '_index',
+              type: '_index',
+            },
+            {
+              indices: [
+                {
+                  name: 'index-001',
+                  type: '_source',
+                },
+                {
+                  name: 'index-002',
+                  type: '_source',
+                },
+              ],
+              name: '_source',
+              type: '_source',
+            },
+            {
+              indices: [
+                {
+                  name: 'index-001',
+                  type: '_version',
+                },
+                {
+                  name: 'index-002',
+                  type: '_version',
+                },
+              ],
+              name: '_version',
+              type: '_version',
+            },
+            {
+              indices: [
+                {
+                  name: 'index-001',
+                  type: 'integer',
+                },
+                {
+                  name: 'index-002',
+                  type: 'integer',
+                },
+              ],
+              name: 'age',
+              type: 'integer',
+            },
+            {
+              indices: [
+                {
+                  name: 'index-001',
+                  type: 'keyword',
+                },
+                {
+                  name: 'index-002',
+                  type: 'keyword',
+                },
+              ],
+              name: 'color',
+              type: 'keyword',
+            },
+            {
+              indices: [
+                {
+                  name: 'index-001',
+                  type: 'text',
+                },
+                {
+                  name: 'index-002',
+                  type: 'text',
+                },
+              ],
+              name: 'name',
+              type: 'text',
+            },
+          ] as SchemaField[],
           name: 'foo-engine',
           updated_at_millis: 2202018295,
         };
