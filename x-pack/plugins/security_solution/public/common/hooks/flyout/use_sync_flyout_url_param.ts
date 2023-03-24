@@ -6,17 +6,21 @@
  */
 
 import { useEffect } from 'react';
-
+import { useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { ALERTS_PATH } from '../../../../common/constants';
 import { useUpdateUrlParam } from '../../utils/global_query_string';
 import { TableId } from '../../../../common/types';
 import { useShallowEqualSelector } from '../use_selector';
 import { URL_PARAM_KEY } from '../use_url_state';
-import { dataTableSelectors } from '../../store/data_table';
+import { dataTableActions, dataTableSelectors } from '../../store/data_table';
 import { tableDefaults } from '../../store/data_table/defaults';
 import type { FlyoutUrlState } from './types';
 
 export const useSyncFlyoutUrlParam = () => {
   const updateUrlParam = useUpdateUrlParam<FlyoutUrlState>(URL_PARAM_KEY.flyout);
+  const { pathname } = useLocation();
+  const dispatch = useDispatch();
   const getDataTable = dataTableSelectors.getTableByIdSelector();
 
   // Only allow the alerts page for now to be saved in the url state
@@ -25,6 +29,18 @@ export const useSyncFlyoutUrlParam = () => {
   );
 
   useEffect(() => {
-    updateUrlParam(expandedDetail != null && !!expandedDetail?.query ? expandedDetail.query : null);
-  }, [expandedDetail, updateUrlParam]);
+    const isOnAlertsPage = pathname === ALERTS_PATH;
+    if (isOnAlertsPage && expandedDetail != null && expandedDetail?.query) {
+      updateUrlParam(expandedDetail.query.panelView ? expandedDetail.query : null);
+    } else if (!isOnAlertsPage && expandedDetail?.query?.panelView) {
+      // Close the detail panel as it's stored in a top level redux store maintained across views
+      dispatch(
+        dataTableActions.toggleDetailPanel({
+          id: TableId.alertsOnAlertsPage,
+        })
+      );
+      // Clear the reference from the url
+      updateUrlParam(null);
+    }
+  }, [dispatch, expandedDetail, pathname, updateUrlParam]);
 };

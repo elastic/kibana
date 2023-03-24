@@ -36,8 +36,8 @@ export const useInitFlyoutFromUrlParam = () => {
   }, []);
 
   const loadExpandedDetailFromUrl = useCallback(() => {
-    const { initialized, indexNames, isLoading, totalCount } = dataTableCurrent;
-    const isTableLoaded = initialized && indexNames.length > 0 && !isLoading && totalCount > 0;
+    const { initialized, isLoading, totalCount } = dataTableCurrent;
+    const isTableLoaded = initialized && !isLoading && totalCount > 0;
     if (urlDetails && isTableLoaded) {
       updateHasLoadedUrlDetails(true);
       dispatch(
