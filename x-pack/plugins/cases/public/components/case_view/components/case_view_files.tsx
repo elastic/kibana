@@ -30,14 +30,18 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
     page: 0,
     perPage: 10,
   });
-  const { data: caseFiles, isLoading } = useGetCaseFiles({
+  const {
+    data: caseFiles,
+    isLoading,
+    isPreviousData,
+  } = useGetCaseFiles({
     ...filteringOptions,
     caseId: caseData.id,
   });
 
   const onTableChange = useCallback(
     ({ page }: Criteria<FileJSON>) => {
-      if (page) {
+      if (page && !isPreviousData) {
         setFilteringOptions({
           ...filteringOptions,
           page: page.index,
@@ -45,7 +49,7 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
         });
       }
     },
-    [filteringOptions]
+    [filteringOptions, isPreviousData]
   );
 
   const onSearchChange = useCallback(

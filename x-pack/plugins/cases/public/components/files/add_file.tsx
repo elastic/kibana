@@ -20,14 +20,16 @@ import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { FileUpload } from '@kbn/shared-ux-file-upload';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 
-import { APP_ID, CommentType, ExternalReferenceStorageType } from '../../../common';
+import type { Owner } from '../../../common/constants/types';
+
+import { CommentType, ExternalReferenceStorageType } from '../../../common';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
+import { constructFileKindIdByOwner } from '../../../common/constants';
+import { useCasesToast } from '../../common/use_cases_toast';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { CASES_FILE_KINDS } from '../../files';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import * as i18n from './translations';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
-import { useCasesToast } from '../../common/use_cases_toast';
 
 interface AddFileProps {
   caseId: string;
@@ -97,7 +99,10 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
         // error toast is handled inside  createAttachments
 
         // we need to delete the file if attachment creation failed
-        await filesClient.delete({ kind: CASES_FILE_KINDS[APP_ID].id, id: file.id });
+        await filesClient.delete({
+          kind: constructFileKindIdByOwner(owner[0] as Owner),
+          id: file.id,
+        });
       }
 
       closeModal();
@@ -131,7 +136,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
           </EuiModalHeader>
           <EuiModalBody>
             <FileUpload
-              kind={CASES_FILE_KINDS[APP_ID].id}
+              kind={constructFileKindIdByOwner(owner[0] as Owner)}
               onDone={onUploadDone}
               onError={onError}
               meta={{ caseId, owner: owner[0] }}

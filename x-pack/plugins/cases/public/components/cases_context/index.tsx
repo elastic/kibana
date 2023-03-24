@@ -24,14 +24,13 @@ import type {
 import type { ReleasePhase } from '../types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
-import type { Owner } from '../../../common/constants/types';
 
 import { CasesGlobalComponents } from './cases_global_components';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import { useApplication } from './use_application';
 import { casesContextReducer, getInitialCasesContextState } from './cases_context_reducer';
-import { CASES_FILE_KINDS } from '../../files';
+import { isRegisteredOwner, CASES_FILE_KINDS } from '../../files';
 
 export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
@@ -131,10 +130,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
         return contextChildren;
       }
 
-      const isValidOwner = (ownerToCheck: string): ownerToCheck is Owner =>
-        ownerToCheck in CASES_FILE_KINDS;
-
-      if (isValidOwner(owner[0])) {
+      if (isRegisteredOwner(owner[0])) {
         return (
           <FilesContext client={getFilesClient(CASES_FILE_KINDS[owner[0]].id)}>
             {contextChildren}

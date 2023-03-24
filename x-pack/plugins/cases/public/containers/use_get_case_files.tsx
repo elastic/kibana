@@ -11,13 +11,14 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 import { useQuery } from '@tanstack/react-query';
 
+import type { Owner } from '../../common/constants/types';
 import type { ServerError } from '../types';
 
-import { APP_ID } from '../../common';
+import { constructFileKindIdByOwner } from '../../common/constants';
 import { useCasesToast } from '../common/use_cases_toast';
-import { CASES_FILE_KINDS } from '../files';
 import { casesQueriesKeys } from './constants';
 import * as i18n from './translations';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
 
 export interface CaseFilesFilteringOptions {
   page: number;
@@ -35,6 +36,7 @@ export const useGetCaseFiles = ({
   perPage,
   searchTerm,
 }: GetCaseFilesParams): UseQueryResult<{ files: FileJSON[]; total: number }> => {
+  const { owner } = useCasesContext();
   const { showErrorToast } = useCasesToast();
   const { client: filesClient } = useFilesContext();
 
@@ -42,7 +44,7 @@ export const useGetCaseFiles = ({
     casesQueriesKeys.caseFiles(caseId, { page, perPage, searchTerm }),
     () => {
       return filesClient.list({
-        kind: CASES_FILE_KINDS[APP_ID].id,
+        kind: constructFileKindIdByOwner(owner[0] as Owner),
         page: page + 1,
         ...(searchTerm && { name: `*${searchTerm}*` }),
         perPage,

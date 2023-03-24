@@ -12,8 +12,10 @@ import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import { EuiLink, EuiButtonIcon } from '@elastic/eui';
 
-import { APP_ID } from '../../../common';
-import { CASES_FILE_KINDS } from '../../files';
+import type { Owner } from '../../../common/constants/types';
+
+import { constructFileKindIdByOwner } from '../../../common/constants';
+import { useCasesContext } from '../cases_context/use_cases_context';
 import * as i18n from './translations';
 import { isImage } from './utils';
 
@@ -26,6 +28,8 @@ export const useFilesTableColumns = ({
   showPreview,
   getDownloadHref,
 }: FilesTableColumnsProps): Array<EuiBasicTableColumn<FileJSON>> => {
+  const { owner } = useCasesContext();
+
   return [
     {
       name: i18n.NAME,
@@ -64,7 +68,7 @@ export const useFilesTableColumns = ({
                 iconType={'download'}
                 aria-label={'download'}
                 href={getDownloadHref({
-                  fileKind: CASES_FILE_KINDS[APP_ID].id,
+                  fileKind: constructFileKindIdByOwner(owner[0] as Owner),
                   id: attachment.id,
                 })}
                 data-test-subj={'cases-files-table-action-download'}

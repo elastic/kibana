@@ -20,6 +20,9 @@ const buildFileKind = (owner: Owner): FileKindBrowser => {
   };
 };
 
+export const isRegisteredOwner = (ownerToCheck: string): ownerToCheck is Owner =>
+  ownerToCheck in CASES_FILE_KINDS;
+
 /**
  * The file kind definition for interacting with the file service for the UI
  */
