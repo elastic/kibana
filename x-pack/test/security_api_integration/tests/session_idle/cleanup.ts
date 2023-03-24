@@ -21,6 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const config = getService('config');
+  const retry = getService('retry');
   const log = getService('log');
   const randomness = getService('randomness');
   const { username: basicUsername, password: basicPassword } = adminTestUser;
@@ -48,6 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function getNumberOfSessionDocuments() {
+    await es.indices.refresh({ index: '.kibana_security_session*' });
     return (
       // @ts-expect-error doesn't handle total as number
       (await es.search({ index: '.kibana_security_session*' })).hits.total.value as number
@@ -79,9 +81,19 @@ export default function ({ getService }: FtrProviderContext) {
     return cookie;
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/121482
-  // Failing: See https://github.com/elastic/kibana/issues/152260
-  describe.skip('Session Idle cleanup', () => {
+  async function runCleanupTaskSoon() {
+    // In most cases, an error would mean the task is currently running so let's run it again
+    await retry.tryForTime(30000, async () => {
+      await supertest
+        .post('/session/_run_cleanup')
+        .set('kbn-xsrf', 'xxx')
+        .auth(adminTestUser.username, adminTestUser.password)
+        .send()
+        .expect(200);
+    });
+  }
+
+  describe('Session Idle cleanup', () => {
     beforeEach(async () => {
       await es.cluster.health({ index: '.kibana_security_session*', wait_for_status: 'green' });
       await esDeleteAllIndices('.kibana_security_session*');
@@ -101,20 +113,23 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
-      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       const sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, { type: 'basic', name: 'basic1' });
       expect(await getNumberOfSessionDocuments()).to.be(1);
 
-      // Cleanup routine runs every 20s, and idle timeout threshold is three times larger than 10s
-      // idle timeout, let's wait for 60s to make sure cleanup routine runs when idle timeout
-      // threshold is exceeded.
+      // Poke the background task to run
+      await runCleanupTaskSoon();
       log.debug('Waiting for cleanup job to run...');
-      await setTimeoutAsync(60000);
-
-      // Session info is removed from the index and cookie isn't valid anymore
-      expect(await getNumberOfSessionDocuments()).to.be(0);
+      // Cleanup routine runs every 20s, and idle timeout threshold is three times larger than 10s
+      // idle timeout (so, 30s). We just triggered the cleanup, so we'll wait for 40s to make sure
+      // cleanup routine runs after the idle timeout threshold is exceeded. Then we'll wait for a
+      // correct response.
+      await setTimeoutAsync(40000);
+      await retry.tryForTime(20000, async () => {
+        // Session info is removed from the index and cookie isn't valid anymore
+        expect(await getNumberOfSessionDocuments()).to.be(0);
+      });
 
       log.debug(`Authenticating as ${basicUsername} with invalid session cookie.`);
       await supertest
@@ -144,7 +159,6 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
-      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       const basicSessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(basicSessionCookie, basicUsername, {
@@ -153,14 +167,19 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(await getNumberOfSessionDocuments()).to.be(4);
 
-      // Cleanup routine runs every 20s, and idle timeout threshold is three times larger than 10s
-      // idle timeout, let's wait for 60s to make sure cleanup routine runs when idle timeout
-      // threshold is exceeded.
+      // Poke the background task to run
+      await runCleanupTaskSoon();
       log.debug('Waiting for cleanup job to run...');
-      await setTimeoutAsync(60000);
+      // Cleanup routine runs every 20s, and idle timeout threshold is three times larger than 10s
+      // idle timeout (so, 30s). We just triggered the cleanup, so we'll wait for 40s to make sure
+      // cleanup routine runs after the idle timeout threshold is exceeded. Then we'll wait for a
+      // correct response.
+      await setTimeoutAsync(40000);
+      await retry.tryForTime(20000, async () => {
+        // Session for basic and SAML that used global session settings should not be valid anymore.
+        expect(await getNumberOfSessionDocuments()).to.be(2);
+      });
 
-      // Session for basic and SAML that used global session settings should not be valid anymore.
-      expect(await getNumberOfSessionDocuments()).to.be(2);
       await supertest
         .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
@@ -196,7 +215,6 @@ export default function ({ getService }: FtrProviderContext) {
           params: { username: basicUsername, password: basicPassword },
         })
         .expect(200);
-      await es.indices.refresh({ index: '.kibana_security_session*' });
 
       let sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, { type: 'basic', name: 'basic1' });

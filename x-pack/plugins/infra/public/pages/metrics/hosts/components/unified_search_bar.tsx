@@ -15,7 +15,9 @@ import {
   type TimeRange,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGrid } from '@elastic/eui';
+import { EuiFlexGrid, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiHorizontalRule } from '@elastic/eui';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
@@ -54,7 +56,7 @@ export const UnifiedSearchBar = () => {
   };
 
   return (
-    <EuiFlexGrid gutterSize="s">
+    <StickyContainer>
       <SearchBar
         appName={'Infra Hosts'}
         displayStyle="inPage"
@@ -77,6 +79,26 @@ export const UnifiedSearchBar = () => {
         filters={searchCriteria.filters}
         onFiltersChange={onPanelFiltersChange}
       />
-    </EuiFlexGrid>
+      <EuiHorizontalRule margin="none" />
+    </StickyContainer>
+  );
+};
+
+const StickyContainer = (props: { children: React.ReactNode }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiFlexGrid
+      gutterSize="none"
+      css={css`
+        position: sticky;
+        top: calc(${euiTheme.size.xxxl} * 2);
+        z-index: ${euiTheme.levels.header};
+        background: ${euiTheme.colors.emptyShade};
+        padding-top: ${euiTheme.size.m};
+        margin-top: -${euiTheme.size.l};
+      `}
+      {...props}
+    />
   );
 };

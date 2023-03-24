@@ -5,15 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { renderHook } from '@testing-library/react-hooks';
+import React from 'react';
+import { act, renderHook } from '@testing-library/react-hooks';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { render } from '@testing-library/react';
 
 import { useGrouping } from './use_grouping';
 
 const defaultGroupingOptions = [
-  { label: 'ruleName', key: 'kibana.alert.rule.name' },
-  { label: 'userName', key: 'user.name' },
-  { label: 'hostName', key: 'host.name' },
-  { label: 'sourceIP', key: 'source.ip' },
+  { label: 'Rule name', key: 'kibana.alert.rule.name' },
+  { label: 'User name', key: 'user.name' },
+  { label: 'Host name', key: 'host.name' },
+  { label: 'Source IP', key: 'source.ip' },
 ];
 const groupingId = 'test-table';
 
@@ -22,33 +25,106 @@ const defaultArgs = {
   fields: [],
   groupingId,
   tracker: jest.fn(),
+  componentProps: {
+    groupPanelRenderer: jest.fn(),
+    groupStatsRenderer: jest.fn(),
+    inspectButton: <></>,
+    onGroupToggle: jest.fn(),
+    renderChildComponent: () => <p data-test-subj="innerTable">{'hello'}</p>,
+  },
 };
 
 const groupingArgs = {
-  from: '2020-07-07T08:20:18.966Z',
-  globalFilters: [],
-  hasIndexMaintenance: true,
-  globalQuery: {
-    query: 'query',
-    language: 'language',
-  },
-  hasIndexWrite: true,
+  data: {},
   isLoading: false,
-  renderChildComponent: jest.fn(),
-  runtimeMappings: {},
-  signalIndexName: 'test',
-  groupingId,
   takeActionItems: jest.fn(),
-  to: '2020-07-08T08:20:18.966Z',
 };
 
 describe('useGrouping', () => {
-  it('Returns the expected default results on initial mount', () => {
-    const { result } = renderHook(() => useGrouping(defaultArgs));
-    expect(result.current.selectedGroup).toEqual('none');
-    expect(result.current.getGrouping(groupingArgs).props.selectedGroup).toEqual('none');
-    expect(result.current.groupSelector.props.options).toEqual(defaultGroupingOptions);
-    const { reset, ...withoutReset } = result.current.pagination;
-    expect(withoutReset).toEqual({ pageIndex: 0, pageSize: 25 });
+  it('Renders child component without grouping table wrapper when no group is selected', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useGrouping(defaultArgs));
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      const { getByTestId, queryByTestId } = render(
+        <IntlProvider locale="en">
+          {result.current.getGrouping({
+            ...groupingArgs,
+            data: {
+              groupsCount: {
+                value: 9,
+              },
+              groupByFields: {
+                buckets: [
+                  {
+                    key: ['critical hosts', 'description'],
+                    key_as_string: 'critical hosts|description',
+                    doc_count: 3,
+                    unitsCount: {
+                      value: 3,
+                    },
+                  },
+                ],
+              },
+              unitsCount: {
+                value: 18,
+              },
+            },
+          })}
+        </IntlProvider>
+      );
+
+      expect(getByTestId('innerTable')).toBeInTheDocument();
+      expect(queryByTestId('grouping-table')).not.toBeInTheDocument();
+    });
+  });
+  it('Renders child component with grouping table wrapper when group is selected', async () => {
+    await act(async () => {
+      const getItem = jest.spyOn(window.localStorage.__proto__, 'getItem');
+      getItem.mockReturnValue(
+        JSON.stringify({
+          'test-table': {
+            activePage: 0,
+            itemsPerPage: 25,
+            activeGroup: 'kibana.alert.rule.name',
+            options: defaultGroupingOptions,
+          },
+        })
+      );
+
+      const { result, waitForNextUpdate } = renderHook(() => useGrouping(defaultArgs));
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+      const { getByTestId, queryByTestId } = render(
+        <IntlProvider locale="en">
+          {result.current.getGrouping({
+            ...groupingArgs,
+            data: {
+              groupsCount: {
+                value: 9,
+              },
+              groupByFields: {
+                buckets: [
+                  {
+                    key: ['critical hosts', 'description'],
+                    key_as_string: 'critical hosts|description',
+                    doc_count: 3,
+                    unitsCount: {
+                      value: 3,
+                    },
+                  },
+                ],
+              },
+              unitsCount: {
+                value: 18,
+              },
+            },
+          })}
+        </IntlProvider>
+      );
+
+      expect(getByTestId('grouping-table')).toBeInTheDocument();
+      expect(queryByTestId('innerTable')).not.toBeInTheDocument();
+    });
   });
 });

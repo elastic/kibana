@@ -17,3 +17,7 @@ export type ApmServiceTransactionDocumentType =
   | ApmDocumentType.ServiceTransactionMetric
   | ApmDocumentType.TransactionMetric
   | ApmDocumentType.TransactionEvent;
+
+export type ApmTransactionDocumentType =
+  | ApmDocumentType.TransactionMetric
+  | ApmDocumentType.TransactionEvent;
