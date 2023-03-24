@@ -1,7 +1,6 @@
 @import 'src/core/public/mixins';
 
-.dshAppWrapper__expandedPanel {
-  @include kibanaFullBodyHeight();
+.dshAppWrapper {
   display: flex;
   flex: 1;
   flex-direction: column;

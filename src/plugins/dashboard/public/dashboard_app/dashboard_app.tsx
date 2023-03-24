@@ -185,7 +185,7 @@ export function DashboardApp({
   }, [dashboardContainer, kbnUrlStateStorage]);
 
   return (
-    <div id="dshAppWrapper">
+    <div className="dshAppWrapper">
       {showNoDataPage && (
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}

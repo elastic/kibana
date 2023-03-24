@@ -600,15 +600,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   };
 
   public setExpandedPanelId = (newId?: string) => {
-    const dashboardWrapper = document.getElementById('dshAppWrapper');
-    if (dashboardWrapper) {
-      if (newId) {
-        dashboardWrapper.classList.add('dshAppWrapper__expandedPanel');
-      } else {
-        dashboardWrapper.classList.remove('dshAppWrapper__expandedPanel');
-      }
-    }
-
     if (!this.reduxEmbeddableTools) throw new Error();
     const {
       actions: { setExpandedPanelId },
