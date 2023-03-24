@@ -34,10 +34,6 @@ export const StepDetailPage = () => {
 
   useStepDetailsBreadcrumbs();
 
-  const activeStep = data?.steps?.find(
-    (step) => step.synthetics?.step?.index === Number(stepIndex)
-  );
-
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -51,7 +47,7 @@ export const StepDetailPage = () => {
 
   return (
     <>
-      <ErrorCallOut step={activeStep} />
+      <ErrorCallOut step={currentStep} />
       {data?.details?.journey?.config_id && (
         <MonitorDetailsLinkPortal
           configId={data.details.journey.config_id}
@@ -68,14 +64,14 @@ export const StepDetailPage = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={1}>
+            <EuiFlexGroup wrap>
+              <EuiFlexItem grow={1} style={{ minWidth: 150 }}>
                 <NetworkTimingsDonut />
               </EuiFlexItem>
-              <EuiFlexItem grow={1}>
+              <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
                 <BreakdownLegend />
               </EuiFlexItem>
-              <EuiFlexItem grow={2}>
+              <EuiFlexItem grow={2} style={{ minWidth: 200 }}>
                 <NetworkTimingsBreakdown monitorId={data?.details?.journey.monitor.id!} />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -109,7 +105,7 @@ export const StepDetailPage = () => {
         <WaterfallChartContainer
           checkGroup={checkGroupId}
           stepIndex={Number(stepIndex)}
-          activeStep={activeStep}
+          activeStep={currentStep}
         />
       )}
     </>

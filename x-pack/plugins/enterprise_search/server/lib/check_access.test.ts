@@ -47,7 +47,10 @@ describe('checkAccess', () => {
   const mockSpaces = spacesMock.createStart();
   const mockDependencies = {
     request: { auth: { isAuthenticated: true } },
-    config: { host: 'http://localhost:3002' },
+    config: {
+      canDeployEntSearch: true,
+      host: 'http://localhost:3002',
+    },
     security: mockSecurity,
     spaces: mockSpaces,
   } as any;
@@ -59,6 +62,7 @@ describe('checkAccess', () => {
       };
       expect(await checkAccess({ ...mockDependencies, security })).toEqual({
         hasAppSearchAccess: false,
+        hasSearchEnginesAccess: false,
         hasWorkplaceSearchAccess: false,
       });
     });
@@ -71,6 +75,7 @@ describe('checkAccess', () => {
       };
       expect(await checkAccess({ ...mockDependencies, request })).toEqual({
         hasAppSearchAccess: false,
+        hasSearchEnginesAccess: false,
         hasWorkplaceSearchAccess: false,
       });
     });
@@ -81,6 +86,7 @@ describe('checkAccess', () => {
       mockSpaces.spacesService.getActiveSpace.mockResolvedValueOnce(disabledSpace);
       expect(await checkAccess({ ...mockDependencies })).toEqual({
         hasAppSearchAccess: false,
+        hasSearchEnginesAccess: false,
         hasWorkplaceSearchAccess: false,
       });
     });
@@ -94,6 +100,7 @@ describe('checkAccess', () => {
         );
         expect(await checkAccess({ ...mockDependencies })).toEqual({
           hasAppSearchAccess: false,
+          hasSearchEnginesAccess: false,
           hasWorkplaceSearchAccess: false,
         });
       });
@@ -134,6 +141,7 @@ describe('checkAccess', () => {
         };
         expect(await checkAccess({ ...mockDependencies, security })).toEqual({
           hasAppSearchAccess: true,
+          hasSearchEnginesAccess: false,
           hasWorkplaceSearchAccess: true,
         });
       });
@@ -149,6 +157,7 @@ describe('checkAccess', () => {
         };
         expect(await checkAccess({ ...mockDependencies, security })).toEqual({
           hasAppSearchAccess: false,
+          hasSearchEnginesAccess: false,
           hasWorkplaceSearchAccess: false,
         });
       });
@@ -170,6 +179,7 @@ describe('checkAccess', () => {
           const config = { host: undefined };
           expect(await checkAccess({ ...mockDependencies, config })).toEqual({
             hasAppSearchAccess: false,
+            hasSearchEnginesAccess: false,
             hasWorkplaceSearchAccess: false,
           });
         });
@@ -180,11 +190,13 @@ describe('checkAccess', () => {
           (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => ({
             access: {
               hasAppSearchAccess: false,
+              hasSearchEnginesAccess: false,
               hasWorkplaceSearchAccess: true,
             },
           }));
           expect(await checkAccess(mockDependencies)).toEqual({
             hasAppSearchAccess: false,
+            hasSearchEnginesAccess: false,
             hasWorkplaceSearchAccess: true,
           });
         });
@@ -193,6 +205,7 @@ describe('checkAccess', () => {
           (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => ({}));
           expect(await checkAccess(mockDependencies)).toEqual({
             hasAppSearchAccess: false,
+            hasSearchEnginesAccess: false,
             hasWorkplaceSearchAccess: false,
           });
         });
@@ -204,6 +217,7 @@ describe('checkAccess', () => {
           }));
           expect(await checkAccess(mockDependencies)).toEqual({
             hasAppSearchAccess: false,
+            hasSearchEnginesAccess: false,
             hasWorkplaceSearchAccess: false,
           });
         });

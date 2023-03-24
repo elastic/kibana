@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/embeddable-enhanced-plugin",
+  "owner": "@elastic/kibana-presentation",
+  "description": "Extends embeddable plugin with more functionality",
+  "plugin": {
+    "id": "embeddableEnhanced",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "embeddable",
+      "kibanaReact",
+      "uiActions",
+      "uiActionsEnhanced"
+    ]
+  }
+}

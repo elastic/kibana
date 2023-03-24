@@ -11,7 +11,7 @@ KIBANA_DOCKER_CONTEXT="${KIBANA_DOCKER_CONTEXT:="default"}"
 
 echo "--- Create contexts"
 mkdir -p target
-node scripts/build --skip-initialize --skip-generic-folders --skip-platform-folders --skip-archives --docker-context-use-local-artifact $(echo "$BUILD_ARGS")
+node scripts/build --skip-initialize --skip-generic-folders --skip-platform-folders --skip-archives --docker-context-use-local-artifact "${BUILD_ARGS[@]}"
 
 echo "--- Setup context"
 DOCKER_BUILD_FOLDER=$(mktemp -d)

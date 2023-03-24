@@ -23,6 +23,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { ExperimentalFeaturesService } from '../../../../services';
+
 import type { OutputFormInputsType } from './use_output_form';
 
 export interface AdvancedOptionsSectionProps {
@@ -46,6 +48,7 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
     queueFlushTimeout,
     maxBatchBytes,
   } = inputs;
+  const { showExperimentalShipperOptions } = ExperimentalFeaturesService.get();
 
   return enabled ? (
     <EuiAccordion
@@ -135,168 +138,172 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
           </EuiFlexGroup>
         </EuiFormRow>
 
-        <EuiHorizontalRule />
+        {showExperimentalShipperOptions && (
+          <>
+            <EuiHorizontalRule />
 
-        <EuiFormRow fullWidth {...diskQueueEnabledInput.formRowProps}>
-          <EuiFlexGroup alignItems="flexStart">
-            <EuiFlexItem>
-              <EuiSwitch
-                data-test-subj="editOutputFlyout.diskQueueSwitch"
-                {...diskQueueEnabledInput.props}
-                label={
-                  <FormattedMessage
-                    id="xpack.fleet.settings.editOutputFlyout.diskQueueSwitchLabel"
-                    defaultMessage="Disk Queue"
+            <EuiFormRow fullWidth {...diskQueueEnabledInput.formRowProps}>
+              <EuiFlexGroup alignItems="flexStart">
+                <EuiFlexItem>
+                  <EuiSwitch
+                    data-test-subj="editOutputFlyout.diskQueueSwitch"
+                    {...diskQueueEnabledInput.props}
+                    label={
+                      <FormattedMessage
+                        id="xpack.fleet.settings.editOutputFlyout.diskQueueSwitchLabel"
+                        defaultMessage="Disk Queue"
+                      />
+                    }
                   />
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s" color="subdued">
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.diskQueueSwitchDescription"
-                  defaultMessage="Once enabled, events will be queued on disk if, for some reason, agent is not able to send them."
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
-        <EuiSpacer size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s" color="subdued">
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.diskQueueSwitchDescription"
+                      defaultMessage="Once enabled, events will be queued on disk if, for some reason, agent is not able to send them."
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+            <EuiSpacer size="m" />
 
-        <EuiFormRow fullWidth {...diskQueueEncryptionEnabled.formRowProps}>
-          <EuiFlexGroup alignItems="flexStart">
-            <EuiFlexItem>
-              <EuiSwitch
-                data-test-subj="editOutputFlyout.diskQueueEncryption"
-                {...diskQueueEncryptionEnabled.props}
-                label={
-                  <FormattedMessage
-                    id="xpack.fleet.settings.editOutputFlyout.diskQueueEncryptionLabel"
-                    defaultMessage="Encryption"
+            <EuiFormRow fullWidth {...diskQueueEncryptionEnabled.formRowProps}>
+              <EuiFlexGroup alignItems="flexStart">
+                <EuiFlexItem>
+                  <EuiSwitch
+                    data-test-subj="editOutputFlyout.diskQueueEncryption"
+                    {...diskQueueEncryptionEnabled.props}
+                    label={
+                      <FormattedMessage
+                        id="xpack.fleet.settings.editOutputFlyout.diskQueueEncryptionLabel"
+                        defaultMessage="Disk Queue Encryption"
+                      />
+                    }
                   />
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s" color="subdued">
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s" color="subdued">
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.diskQueueEncryptionDescription"
+                      defaultMessage="Enable encryption of data written to the disk queue."
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+            <EuiSpacer size="m" />
+            <EuiFormRow
+              fullWidth
+              label={
                 <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.diskQueueEncryptionDescription"
-                  defaultMessage="Enable encryption of data written to the disk queue."
+                  id="xpack.fleet.settings.editOutputFlyout.diskQueuePathLabel"
+                  defaultMessage="Disk Queue Path"
                 />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
-        <EuiSpacer size="m" />
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.diskQueuePathLabel"
-              defaultMessage="Disk Queue Path"
-            />
-          }
-          {...diskQueuePathInput.formRowProps}
-        >
-          <EuiFieldText
-            fullWidth
-            data-test-subj="settingsOutputsFlyout.diskQueuePath"
-            {...diskQueuePathInput.props}
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.editOutputFlyout.diskQueuePathPlaceholder',
-              {
-                defaultMessage: 'path_data/diskqueue',
               }
-            )}
-          />
-        </EuiFormRow>
+              {...diskQueuePathInput.formRowProps}
+            >
+              <EuiFieldText
+                fullWidth
+                data-test-subj="settingsOutputsFlyout.diskQueuePath"
+                {...diskQueuePathInput.props}
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.editOutputFlyout.diskQueuePathPlaceholder',
+                  {
+                    defaultMessage: 'path_data/diskqueue',
+                  }
+                )}
+              />
+            </EuiFormRow>
 
-        <EuiFormRow
-          fullWidth
-          {...diskQueueMaxSizeInput.formRowProps}
-          label={
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.diskQueueMaxSize"
-              defaultMessage="Maximum Disk Queue Size"
-            />
-          }
-        >
-          <EuiFlexGroup alignItems="flexStart">
-            <EuiFlexItem>
-              <EuiFieldNumber {...diskQueueMaxSizeInput.props} placeholder="Bytes" min={0} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s" color="subdued">
+            <EuiFormRow
+              fullWidth
+              {...diskQueueMaxSizeInput.formRowProps}
+              label={
                 <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.diskQueueMaxSizeDescription"
-                  defaultMessage="Limits the disk queue size for spooling of data. When data in the queue exceeds this limit, new events will be dropped."
+                  id="xpack.fleet.settings.editOutputFlyout.diskQueueMaxSize"
+                  defaultMessage="Maximum Disk Queue Size"
                 />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
+              }
+            >
+              <EuiFlexGroup alignItems="flexStart">
+                <EuiFlexItem>
+                  <EuiFieldNumber {...diskQueueMaxSizeInput.props} placeholder="Bytes" min={0} />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s" color="subdued">
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.diskQueueMaxSizeDescription"
+                      defaultMessage="Limits the disk queue size for spooling of data. When data in the queue exceeds this limit, new events will be dropped."
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
 
-        <EuiHorizontalRule />
+            <EuiHorizontalRule />
 
-        <EuiFormRow fullWidth {...loadBalanceEnabledInput.formRowProps}>
-          <EuiFlexGroup alignItems="flexStart">
-            <EuiFlexItem>
-              <EuiSwitch
-                data-test-subj="editOutputFlyout.loadBalancingSwitch"
-                {...loadBalanceEnabledInput.props}
-                label={
-                  <FormattedMessage
-                    id="xpack.fleet.settings.editOutputFlyout.loadBalancingSwitchLabel"
-                    defaultMessage="Load Balancing"
+            <EuiFormRow fullWidth {...loadBalanceEnabledInput.formRowProps}>
+              <EuiFlexGroup alignItems="flexStart">
+                <EuiFlexItem>
+                  <EuiSwitch
+                    data-test-subj="editOutputFlyout.loadBalancingSwitch"
+                    {...loadBalanceEnabledInput.props}
+                    label={
+                      <FormattedMessage
+                        id="xpack.fleet.settings.editOutputFlyout.loadBalancingSwitchLabel"
+                        defaultMessage="Load Balancing"
+                      />
+                    }
                   />
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s" color="subdued">
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.loadBalancingDescription"
-                  defaultMessage="Once enabled, the agents will balance the load across all the hosts defined for this output. This will increase the number of connections opened by the agent."
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s" color="subdued">
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.loadBalancingDescription"
+                      defaultMessage="Once enabled, the agents will balance the load across all the hosts defined for this output. This will increase the number of connections opened by the agent."
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
 
-        <EuiHorizontalRule />
+            <EuiHorizontalRule />
 
-        <EuiFormRow fullWidth>
-          <EuiFlexGroup alignItems="flexStart">
-            <EuiFlexItem>
-              <EuiSwitch
-                data-test-subj="editOutputFlyout.compressionSwitch"
-                {...diskQueueCompressionEnabled.props}
-                label={
-                  <FormattedMessage
-                    id="xpack.fleet.settings.editOutputFlyout.compressionSwitchLabel"
-                    defaultMessage="Compression"
+            <EuiFormRow fullWidth>
+              <EuiFlexGroup alignItems="flexStart">
+                <EuiFlexItem>
+                  <EuiSwitch
+                    data-test-subj="editOutputFlyout.compressionSwitch"
+                    {...diskQueueCompressionEnabled.props}
+                    label={
+                      <FormattedMessage
+                        id="xpack.fleet.settings.editOutputFlyout.compressionSwitchLabel"
+                        defaultMessage="Compression"
+                      />
+                    }
                   />
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiSelect
-                data-test-subj="editOutputFlyout.compressionLevelSelect"
-                id="selectCompressionLevel"
-                aria-label="Use aria labels when no actual label is in use"
-                {...compressionLevelInput.props}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s" color="subdued">
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.compressionSwitchDescription"
-                  defaultMessage="Level 1 compression is the fastest, Level 9 however would provide the most compression."
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiSelect
+                    data-test-subj="editOutputFlyout.compressionLevelSelect"
+                    id="selectCompressionLevel"
+                    aria-label="Use aria labels when no actual label is in use"
+                    {...compressionLevelInput.props}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s" color="subdued">
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.compressionSwitchDescription"
+                      defaultMessage="Level 1 compression is the fastest, Level 9 however would provide the most compression."
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+          </>
+        )}
       </>
     </EuiAccordion>
   ) : null;

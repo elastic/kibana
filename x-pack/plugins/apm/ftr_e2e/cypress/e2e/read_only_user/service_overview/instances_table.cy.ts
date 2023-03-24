@@ -24,7 +24,7 @@ const serviceRumOverviewHref = url.format({
 
 const testServiveHref = url.format({
   pathname: '/app/apm/services/test-service/overview',
-  query: { rangeFrom: start, rangeTo: end },
+  query: { rangeFrom: start, rangeTo: end, transactionType: 'type' },
 });
 
 const serviceNodeName = 'opbeans-java-prod-1';

@@ -9,7 +9,11 @@
 import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { of, delay, merge, tap, mergeMap } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import type { FileKind, FileJSON, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
+import type {
+  FileKindBrowser,
+  FileJSON,
+  BaseFilesClient as FilesClient,
+} from '@kbn/shared-ux-file-types';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 import { ImageMetadataFactory } from '@kbn/shared-ux-file-util';
 
@@ -29,7 +33,7 @@ describe('UploadState', () => {
     filesClient.create.mockReturnValue(of({ file: { id: 'test' } as FileJSON }) as any);
     filesClient.upload.mockReturnValue(of(undefined) as any);
     uploadState = new UploadState(
-      { id: 'test', http: {}, maxSizeBytes: 1000 } as FileKind,
+      { id: 'test', http: {}, maxSizeBytes: 1000 } as FileKindBrowser,
       filesClient,
       {},
       imageMetadataFactory
@@ -67,7 +71,7 @@ describe('UploadState', () => {
     });
   });
 
-  it('uploads all provided files and reports errors', async () => {
+  it('uploads all provided files', async () => {
     testScheduler.run(({ expectObservable, cold, flush }) => {
       const file1 = { name: 'test', size: 1 } as File;
       const file2 = { name: 'test 2', size: 1 } as File;
@@ -191,7 +195,7 @@ describe('UploadState', () => {
   it('option "allowRepeatedUploads" calls clear after upload is done', () => {
     testScheduler.run(({ expectObservable, cold }) => {
       uploadState = new UploadState(
-        { id: 'test', http: {}, maxSizeBytes: 1000 } as FileKind,
+        { id: 'test', http: {}, maxSizeBytes: 1000 } as FileKindBrowser,
         filesClient,
         { allowRepeatedUploads: true },
         imageMetadataFactory

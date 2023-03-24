@@ -25,6 +25,8 @@ describe('Security Telemetry filters', () => {
       'event.outcome': true,
       'event.provider': true,
       'event.type': true,
+      'powershell.file.script_block_text': true,
+      package_version: true,
     };
 
     it('filters top level', () => {
@@ -143,10 +145,12 @@ describe('Security Telemetry filters', () => {
         'kibana.random.long.alert.string': {
           info: 'data',
         },
+        'powershell.file.script_block_text': 'h1rY5xI2hC8S#Gv&CB**7hlYV7o',
       };
       expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
         'kibana.alert.ancestors': 'a',
         'kibana.alert.original_event.module': 'b',
+        'powershell.file.script_block_text': 'h1rY5xI2hC8S#Gv&CB**7hlYV7o',
       });
     });
 
@@ -160,6 +164,7 @@ describe('Security Telemetry filters', () => {
         'event.outcome': 'success',
         'event.provider': 'iam.amazonaws.com',
         'event.type': ['user', 'creation'],
+        package_version: '3.4.1',
       };
       expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
         'event.id': '36857486973080746231799376445175633955031786243637182487',
@@ -169,6 +174,7 @@ describe('Security Telemetry filters', () => {
         'event.outcome': 'success',
         'event.provider': 'iam.amazonaws.com',
         'event.type': ['user', 'creation'],
+        package_version: '3.4.1',
       });
     });
   });

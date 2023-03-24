@@ -17,7 +17,7 @@ describe('SiemClient', () => {
         [SIGNALS_INDEX_KEY]: 'mockSignalsIndex',
       };
       const spaceId = 'fooSpace';
-      const client = new AppClient(spaceId, mockConfig);
+      const client = new AppClient(spaceId, mockConfig, '8.7', 'main');
 
       expect(client.getSignalsIndex()).toEqual('mockSignalsIndex-fooSpace');
     });

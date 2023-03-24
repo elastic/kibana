@@ -525,7 +525,7 @@ test('Runs customize panel action on title click when in edit mode', async () =>
     ...s,
     universalActions: {
       ...s.universalActions,
-      customizePanelTitle: { execute: titleExecute, isCompatible: jest.fn() },
+      customizePanel: { execute: titleExecute, isCompatible: jest.fn() },
     },
   }));
 

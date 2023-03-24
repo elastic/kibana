@@ -15,6 +15,11 @@ export enum FlameGraphComparisonMode {
   Relative = 'relative',
 }
 
+export enum FlameGraphNormalizationMode {
+  Scale = 'scale',
+  Time = 'time',
+}
+
 export interface BaseFlameGraph {
   Size: number;
   Edges: number[][];

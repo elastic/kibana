@@ -12,13 +12,9 @@ import { EuiModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import {
-  ApplicationStart,
-  IUiSettingsClient,
-  SavedObjectsStart,
-  DocLinksStart,
-} from '@kbn/core/public';
+import { ApplicationStart, IUiSettingsClient, DocLinksStart, HttpStart } from '@kbn/core/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { SearchSelection } from './search_selection';
 import { GroupSelection } from './group_selection';
 import { AggBasedSelection } from './agg_based_selection';
@@ -34,13 +30,14 @@ interface TypeSelectionProps {
   addBasePath: (path: string) => string;
   uiSettings: IUiSettingsClient;
   docLinks: DocLinksStart;
-  savedObjects: SavedObjectsStart;
+  http: HttpStart;
   application: ApplicationStart;
   outsideVisualizeApp?: boolean;
   stateTransfer?: EmbeddableStateTransfer;
   originatingApp?: string;
   showAggsSelection?: boolean;
   selectedVisType?: BaseVisType;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 interface TypeSelectionState {
@@ -97,7 +94,8 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
             onSearchSelected={this.onSearchSelected}
             visType={this.state.visType}
             uiSettings={this.props.uiSettings}
-            savedObjects={this.props.savedObjects}
+            http={this.props.http}
+            savedObjectsManagement={this.props.savedObjectsManagement}
             goBack={() => this.setState({ showSearchVisModal: false })}
           />
         </EuiModal>

@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/share-examples-plugin",
+  "owner": "@elastic/kibana-app-services",
+  "description": "Small demos of share plugin usage",
+  "plugin": {
+    "id": "shareExamples",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "share"
+    ]
+  }
+}

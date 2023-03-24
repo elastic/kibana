@@ -817,7 +817,7 @@ export function XYChart({
           <Tooltip<Record<string, string | number>, XYChartSeriesIdentifier>
             boundary={document.getElementById('app-fixed-viewport') ?? undefined}
             headerFormatter={
-              !args.detailedTooltip
+              !args.detailedTooltip && xAxisColumn
                 ? ({ value }) => (
                     <TooltipHeader
                       value={value}
@@ -1033,6 +1033,9 @@ export function XYChart({
               fittingFunction={fittingFunction}
               emphasizeFitting={emphasizeFitting}
               yAxesConfiguration={yAxesConfiguration}
+              xAxisConfiguration={
+                xAxisConfig ? axesConfiguration[axesConfiguration.length - 1] : undefined
+              }
               shouldShowValueLabels={shouldShowValueLabels}
               formattedDatatables={formattedDatatables}
               chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}

@@ -46,7 +46,6 @@ describe('useLoadAlertSummary', () => {
         activeAlertCount: 0,
         activeAlerts: [],
         recoveredAlertCount: 0,
-        recoveredAlerts: [],
       },
     });
 

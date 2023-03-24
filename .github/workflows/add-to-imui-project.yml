@@ -1,31 +1,27 @@
-name: Add to Infra Monitoring UI project
+name: Add to Infrastructure Observability UI project
 on:
   issues:
-    types:
-      - labeled
+    types: [labeled]
 jobs:
   add_to_project:
+    name: Add issues to project
     runs-on: ubuntu-latest
     if: |
       contains(github.event.issue.labels.*.name, 'Team:Infra Monitoring UI') ||
       contains(github.event.issue.labels.*.name, 'Feature:Stack Monitoring') ||
       contains(github.event.issue.labels.*.name, 'Feature:Logs UI') ||
-      contains(github.event.issue.labels.*.name, 'Feature:Metrics UI')
+      contains(github.event.issue.labels.*.name, 'Feature:Metrics UI') ||
+      contains(github.event.issue.labels.*.name, 'Feature:ObsHosts')
     steps:
-      - uses: octokit/graphql-action@v2.x
-        id: add_to_project
+      - name: Add
+        uses: richkuz/projectnext-label-assigner@1.1.0
+        id: add_to_projects
         with:
-          headers: '{"GraphQL-Features": "projects_next_graphql"}'
-          query: |
-            mutation add_to_project($projectid:ID!,$contentid:ID!) {
-              addProjectNextItem(input:{projectId:$projectid contentId:$contentid}) {
-                projectNextItem {
-                  id
-                }
-              }
-            }
-          projectid: ${{ env.PROJECT_ID }}
-          contentid: ${{ github.event.issue.node_id }}
+          config: |
+            [
+              {"label": "Team:Infra Monitoring UI" , "projectNumber": 664}
+            ]
         env:
-          PROJECT_ID: "PN_kwDOAGc3Zs1EEA"
-          GITHUB_TOKEN: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}
+          GRAPHQL_API_BASE: 'https://api.github.com'
+          PAT_TOKEN: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

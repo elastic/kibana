@@ -25,6 +25,7 @@ const fields = [
     filterable: true,
     aggregatable: true,
     sortable: true,
+    visualizable: true,
   },
   {
     name: 'message',

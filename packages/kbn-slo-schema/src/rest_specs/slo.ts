@@ -17,7 +17,9 @@ import {
   objectiveSchema,
   optionalSettingsSchema,
   settingsSchema,
+  sloIdSchema,
   summarySchema,
+  tagsSchema,
   timeWindowSchema,
 } from '../schema';
 
@@ -31,23 +33,23 @@ const createSLOParamsSchema = t.type({
       budgetingMethod: budgetingMethodSchema,
       objective: objectiveSchema,
     }),
-    t.partial({ settings: optionalSettingsSchema }),
+    t.partial({ settings: optionalSettingsSchema, tags: tagsSchema }),
   ]),
 });
 
 const createSLOResponseSchema = t.type({
-  id: t.string,
+  id: sloIdSchema,
 });
 
 const deleteSLOParamsSchema = t.type({
   path: t.type({
-    id: t.string,
+    id: sloIdSchema,
   }),
 });
 
 const getSLOParamsSchema = t.type({
   path: t.type({
-    id: t.string,
+    id: sloIdSchema,
   }),
 });
 
@@ -66,7 +68,7 @@ const findSLOParamsSchema = t.partial({
 });
 
 const sloResponseSchema = t.type({
-  id: t.string,
+  id: sloIdSchema,
   name: t.string,
   description: t.string,
   indicator: indicatorSchema,
@@ -75,6 +77,8 @@ const sloResponseSchema = t.type({
   objective: objectiveSchema,
   revision: t.number,
   settings: settingsSchema,
+  enabled: t.boolean,
+  tags: tagsSchema,
   createdAt: dateType,
   updatedAt: dateType,
 });
@@ -88,7 +92,7 @@ const getSLOResponseSchema = sloWithSummaryResponseSchema;
 
 const updateSLOParamsSchema = t.type({
   path: t.type({
-    id: t.string,
+    id: sloIdSchema,
   }),
   body: t.partial({
     name: t.string,
@@ -98,7 +102,12 @@ const updateSLOParamsSchema = t.type({
     budgetingMethod: budgetingMethodSchema,
     objective: objectiveSchema,
     settings: optionalSettingsSchema,
+    tags: tagsSchema,
   }),
+});
+
+const manageSLOParamsSchema = t.type({
+  path: t.type({ id: sloIdSchema }),
 });
 
 const updateSLOResponseSchema = sloResponseSchema;
@@ -110,8 +119,17 @@ const findSLOResponseSchema = t.type({
   results: t.array(sloWithSummaryResponseSchema),
 });
 
-const fetchHistoricalSummaryParamsSchema = t.type({ body: t.type({ sloIds: t.array(t.string) }) });
-const fetchHistoricalSummaryResponseSchema = t.record(t.string, t.array(historicalSummarySchema));
+const fetchHistoricalSummaryParamsSchema = t.type({
+  body: t.type({ sloIds: t.array(sloIdSchema) }),
+});
+const fetchHistoricalSummaryResponseSchema = t.record(
+  sloIdSchema,
+  t.array(historicalSummarySchema)
+);
+
+const getSLODiagnosisParamsSchema = t.type({
+  path: t.type({ id: t.string }),
+});
 
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
@@ -122,6 +140,8 @@ type CreateSLOResponse = t.TypeOf<typeof createSLOResponseSchema>; // Raw respon
 
 type GetSLOResponse = t.OutputOf<typeof getSLOResponseSchema>;
 
+type ManageSLOParams = t.TypeOf<typeof manageSLOParamsSchema.props.path>;
+
 type UpdateSLOInput = t.OutputOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOParams = t.TypeOf<typeof updateSLOParamsSchema.props.body>;
 type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
@@ -131,6 +151,7 @@ type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
 
 type FetchHistoricalSummaryParams = t.TypeOf<typeof fetchHistoricalSummaryParamsSchema.props.body>;
 type FetchHistoricalSummaryResponse = t.OutputOf<typeof fetchHistoricalSummaryResponseSchema>;
+type HistoricalSummaryResponse = t.OutputOf<typeof historicalSummarySchema>;
 
 type BudgetingMethod = t.TypeOf<typeof budgetingMethodSchema>;
 
@@ -139,10 +160,12 @@ export {
   deleteSLOParamsSchema,
   findSLOParamsSchema,
   findSLOResponseSchema,
+  getSLODiagnosisParamsSchema,
   getSLOParamsSchema,
   getSLOResponseSchema,
   fetchHistoricalSummaryParamsSchema,
   fetchHistoricalSummaryResponseSchema,
+  manageSLOParamsSchema,
   sloResponseSchema,
   sloWithSummaryResponseSchema,
   updateSLOParamsSchema,
@@ -158,6 +181,8 @@ export type {
   GetSLOResponse,
   FetchHistoricalSummaryParams,
   FetchHistoricalSummaryResponse,
+  HistoricalSummaryResponse,
+  ManageSLOParams,
   SLOResponse,
   SLOWithSummaryResponse,
   UpdateSLOInput,

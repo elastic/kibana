@@ -331,11 +331,42 @@ describe('edit package policy page', () => {
     expect(useStartServices().application.navigateToUrl).not.toHaveBeenCalled();
   });
 
-  it('should show ready for upgrade if package useLatestPackageVersion and no conflicts', async () => {
-    (useUIExtension as MockFn).mockReturnValue({
-      useLatestPackageVersion: true,
-      Component: TestComponent,
+  it("throws when both 'package-policy-edit' and 'package-policy-replace-define-step' are defined", async () => {
+    (useUIExtension as MockFn)
+      .mockReturnValueOnce({
+        view: 'package-policy-edit',
+        Component: TestComponent,
+      })
+      .mockReturnValueOnce({
+        view: 'package-policy-replace-define-step',
+        Component: TestComponent,
+      })
+      .mockReturnValueOnce({
+        view: 'package-policy-edit-tabs',
+        Component: TestComponent,
+      });
+
+    render();
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('euiErrorBoundary')).toBeVisible();
     });
+  });
+
+  it('should show ready for upgrade if package useLatestPackageVersion and no conflicts', async () => {
+    (useUIExtension as MockFn)
+      .mockReturnValueOnce({
+        view: 'package-policy-edit',
+        useLatestPackageVersion: true,
+        Component: TestComponent,
+      })
+      .mockReturnValueOnce(undefined)
+      .mockReturnValueOnce({
+        view: 'package-policy-edit-tabs',
+        useLatestPackageVersion: true,
+        Component: TestComponent,
+      });
+
     (sendUpgradePackagePolicyDryRun as MockFn).mockResolvedValue({
       data: [
         {
@@ -357,10 +388,19 @@ describe('edit package policy page', () => {
   });
 
   it('should show review field conflicts if package useLatestPackageVersion and has conflicts', async () => {
-    (useUIExtension as MockFn).mockReturnValue({
-      useLatestPackageVersion: true,
-      Component: TestComponent,
-    });
+    (useUIExtension as MockFn)
+      .mockReturnValueOnce({
+        view: 'package-policy-edit',
+        useLatestPackageVersion: true,
+        Component: TestComponent,
+      })
+      .mockReturnValueOnce(undefined)
+      .mockReturnValueOnce({
+        view: 'package-policy-edit-tabs',
+        useLatestPackageVersion: true,
+        Component: TestComponent,
+      });
+
     (sendUpgradePackagePolicyDryRun as MockFn).mockResolvedValue({
       data: [
         {

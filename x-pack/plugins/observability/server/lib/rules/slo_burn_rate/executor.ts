@@ -58,8 +58,12 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
     } = services;
 
     const sloRepository = new KibanaSavedObjectsSLORepository(soClient);
-    const sliClient = new DefaultSLIClient(esClient.asCurrentUser);
+    const summaryClient = new DefaultSLIClient(esClient.asCurrentUser);
     const slo = await sloRepository.findById(params.sloId);
+
+    if (!slo.enabled) {
+      return { state: {} };
+    }
 
     const longWindowDuration = new Duration(
       params.longWindow.value,
@@ -70,7 +74,7 @@ export const getRuleExecutor = (): LifecycleRuleExecutor<
       toDurationUnit(params.shortWindow.unit)
     );
 
-    const sliData = await sliClient.fetchSLIDataFrom(slo, [
+    const sliData = await summaryClient.fetchSLIDataFrom(slo, [
       { name: LONG_WINDOW, duration: longWindowDuration.add(slo.settings.syncDelay) },
       { name: SHORT_WINDOW, duration: shortWindowDuration.add(slo.settings.syncDelay) },
     ]);

@@ -4,69 +4,133 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import {
-  EuiIcon,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
   EuiTitle,
   EuiButton,
-  EuiPanel,
-  EuiDragDropContext,
-  EuiDraggable,
-  EuiDroppable,
-  euiDragDropReorder,
   EuiSpacer,
 } from '@elastic/eui';
-import yaml from 'js-yaml';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
-import { getInputFromPolicy } from '../../common/utils';
 import {
-  ControlSelector,
-  ControlResponse,
-  DefaultSelector,
-  DefaultResponse,
-  ViewDeps,
-} from '../../types';
+  getInputFromPolicy,
+  getYamlFromSelectorsAndResponses,
+  getSelectorsAndResponsesFromYaml,
+  getDefaultSelectorByType,
+  getDefaultResponseByType,
+} from '../../common/utils';
+import { SelectorType, Selector, Response, ViewDeps } from '../../types';
 import * as i18n from './translations';
 import { ControlGeneralViewSelector } from '../control_general_view_selector';
 import { ControlGeneralViewResponse } from '../control_general_view_response';
+
+interface AddSelectorButtonProps {
+  type: 'Selector' | 'Response';
+  onSelectType(type: SelectorType): void;
+}
+
+/**
+ * dual purpose button for adding selectors and responses by type
+ */
+const AddButton = ({ type, onSelectType }: AddSelectorButtonProps) => {
+  const [isPopoverOpen, setPopover] = useState(false);
+  const onButtonClick = () => {
+    setPopover(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setPopover(false);
+  };
+
+  const addFile = useCallback(() => {
+    closePopover();
+    onSelectType('file');
+  }, [onSelectType]);
+
+  const addProcess = useCallback(() => {
+    closePopover();
+    onSelectType('process');
+  }, [onSelectType]);
+
+  const isSelector = type === 'Selector';
+
+  const items = [
+    <EuiContextMenuItem
+      key={`addFile${type}`}
+      icon="document"
+      onClick={addFile}
+      data-test-subj={`cloud-defend-btnAddFile${type}`}
+    >
+      {isSelector ? i18n.fileSelector : i18n.fileResponse}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key={`addProcess${type}`}
+      icon="gear"
+      onClick={addProcess}
+      data-test-subj={`cloud-defend-btnAddProcess${type}`}
+    >
+      {isSelector ? i18n.processSelector : i18n.processResponse}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key={`addNetwork${type}`}
+      icon="globe"
+      disabled
+      data-test-subj={`cloud-defend-btnAddNetwork${type}`}
+    >
+      {isSelector ? i18n.networkSelector : i18n.networkResponse}
+    </EuiContextMenuItem>,
+  ];
+
+  return (
+    <EuiPopover
+      id={`btnAdd${type}`}
+      display="block"
+      button={
+        <EuiButton
+          fullWidth
+          color="primary"
+          iconType="plusInCircle"
+          onClick={onButtonClick}
+          data-test-subj={`cloud-defend-btnAdd${type}`}
+        >
+          {isSelector ? i18n.addSelector : i18n.addResponse}
+        </EuiButton>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenuPanel size="s" items={items} />
+    </EuiPopover>
+  );
+};
 
 export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
   const styles = useStyles();
   const input = getInputFromPolicy(policy, INPUT_CONTROL);
   const configuration = input?.vars?.configuration?.value || '';
-  const json = useMemo<{ selectors: ControlSelector[]; responses: ControlResponse[] }>(() => {
-    try {
-      const result = yaml.load(configuration);
-
-      if (result && result.hasOwnProperty('selectors') && result.hasOwnProperty('responses')) {
-        return result;
-      }
-    } catch {
-      // noop
-    }
-
-    return { selectors: [], responses: [] };
+  const { selectors, responses } = useMemo(() => {
+    return getSelectorsAndResponsesFromYaml(configuration);
   }, [configuration]);
 
-  const { selectors, responses } = json;
-
   const onUpdateYaml = useCallback(
-    (newSelectors: ControlSelector[], newResponses: ControlResponse[]) => {
+    (newSelectors: Selector[], newResponses: Response[]) => {
       if (input?.vars?.configuration) {
         const isValid =
           !newSelectors.find((selector) => selector.hasErrors) &&
           !newResponses.find((response) => response.hasErrors);
 
-        // remove hasErrors prop prior to yaml conversion
-        newSelectors.forEach((selector) => delete selector.hasErrors);
-        newResponses.forEach((response) => delete response.hasErrors);
-
-        const yml = yaml.dump({ selectors: newSelectors, responses: newResponses });
-        input.vars.configuration.value = yml;
+        input.vars.configuration.value = getYamlFromSelectorsAndResponses(
+          newSelectors,
+          newResponses
+        );
 
         onChange({ isValid, updatedPolicy: { ...policy } });
       }
@@ -93,26 +157,32 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
     [selectors]
   );
 
-  const onAddSelector = useCallback(() => {
-    const newSelector = { ...DefaultSelector };
-    const dupe = selectors.find((selector) => selector.name === newSelector.name);
+  const onAddSelector = useCallback(
+    (type: SelectorType) => {
+      const newSelector = getDefaultSelectorByType(type);
+      const dupe = selectors.find((selector) => selector.name === newSelector.name);
 
-    if (dupe) {
-      newSelector.name = incrementName(dupe.name);
-    }
+      if (dupe) {
+        newSelector.name = incrementName(dupe.name);
+      }
 
-    selectors.push(newSelector);
-    onUpdateYaml(selectors, responses);
-  }, [incrementName, onUpdateYaml, responses, selectors]);
+      selectors.push(newSelector);
+      onUpdateYaml(selectors, responses);
+    },
+    [incrementName, onUpdateYaml, responses, selectors]
+  );
 
-  const onAddResponse = useCallback(() => {
-    const newResponse = { ...DefaultResponse };
-    responses.push(newResponse);
-    onUpdateYaml(selectors, responses);
-  }, [onUpdateYaml, responses, selectors]);
+  const onAddResponse = useCallback(
+    (type: SelectorType) => {
+      const newResponse = getDefaultResponseByType(type);
+      responses.push(newResponse);
+      onUpdateYaml(selectors, responses);
+    },
+    [onUpdateYaml, responses, selectors]
+  );
 
   const onDuplicateSelector = useCallback(
-    (selector: ControlSelector) => {
+    (selector: Selector) => {
       const duplicate = JSON.parse(JSON.stringify(selector));
 
       duplicate.name = incrementName(duplicate.name);
@@ -156,7 +226,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
   );
 
   const onDuplicateResponse = useCallback(
-    (response: ControlResponse) => {
+    (response: Response) => {
       const duplicate = { ...response };
       responses.push(duplicate);
       onUpdateYaml(selectors, responses);
@@ -174,11 +244,15 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
   );
 
   const onSelectorChange = useCallback(
-    (updatedSelector: ControlSelector, index: number) => {
+    (updatedSelector: Selector, index: number) => {
       const old = selectors[index];
 
-      const updatedSelectors: ControlSelector[] = [...selectors];
-      let updatedResponses: ControlResponse[] = [...responses];
+      if (updatedSelector.hasErrors === false) {
+        delete updatedSelector.hasErrors;
+      }
+
+      const updatedSelectors: Selector[] = [...selectors];
+      let updatedResponses: Response[] = [...responses];
 
       if (old.name !== updatedSelector.name) {
         // update all references to this selector in responses
@@ -208,21 +282,10 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
   );
 
   const onResponseChange = useCallback(
-    (updatedResponse: ControlResponse, index: number) => {
-      const updatedResponses: ControlResponse[] = [...responses];
-
+    (updatedResponse: Response, index: number) => {
+      const updatedResponses: Response[] = [...responses];
       updatedResponses[index] = updatedResponse;
       onUpdateYaml(selectors, updatedResponses);
-    },
-    [onUpdateYaml, responses, selectors]
-  );
-
-  const onResponseDragEnd = useCallback(
-    ({ source, destination }) => {
-      if (source && destination) {
-        const reorderedResponses = euiDragDropReorder(responses, source.index, destination.index);
-        onUpdateYaml(selectors, reorderedResponses);
-      }
     },
     [onUpdateYaml, responses, selectors]
   );
@@ -259,15 +322,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
         );
       })}
 
-      <EuiButton
-        fullWidth
-        color="primary"
-        iconType="plusInCircle"
-        onClick={onAddSelector}
-        data-test-subj="cloud-defend-btnaddselector"
-      >
-        {i18n.addSelector}
-      </EuiButton>
+      <AddButton type="Selector" onSelectType={onAddSelector} />
 
       <EuiSpacer size="m" />
 
@@ -280,62 +335,23 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
         </EuiText>
       </EuiFlexItem>
 
-      <EuiFlexItem>
-        <EuiDragDropContext onDragEnd={onResponseDragEnd}>
-          <EuiDroppable droppableId="cloudDefendControlResponses">
-            {responses.map((response, i) => {
-              return (
-                <EuiDraggable
-                  key={i}
-                  css={styles.draggable}
-                  index={i}
-                  draggableId={i + ''}
-                  customDragHandle={true}
-                  hasInteractiveChildren={true}
-                >
-                  {(provided) => (
-                    <EuiPanel paddingSize="m" hasShadow={false} color="subdued" css={styles.panel}>
-                      <EuiFlexGroup direction="column">
-                        <EuiFlexItem grow={false}>
-                          <EuiPanel
-                            color="transparent"
-                            paddingSize="xs"
-                            {...provided.dragHandleProps}
-                            aria-label="Drag Handle"
-                          >
-                            <EuiIcon type="grab" />
-                          </EuiPanel>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <ControlGeneralViewResponse
-                            index={i}
-                            response={response}
-                            responses={responses}
-                            selectors={selectors}
-                            onRemove={onRemoveResponse}
-                            onDuplicate={onDuplicateResponse}
-                            onChange={onResponseChange}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiPanel>
-                  )}
-                </EuiDraggable>
-              );
-            })}
-          </EuiDroppable>
-        </EuiDragDropContext>
-        <EuiButton
-          fullWidth
-          color="primary"
-          iconType="plusInCircle"
-          onClick={onAddResponse}
-          data-test-subj="cloud-defend-btnaddresponse"
-        >
-          {i18n.addResponse}
-        </EuiButton>
-        <EuiSpacer size="m" />
-      </EuiFlexItem>
+      {responses.map((response, i) => {
+        return (
+          <EuiFlexItem key={i}>
+            <ControlGeneralViewResponse
+              index={i}
+              response={response}
+              responses={responses}
+              selectors={selectors}
+              onRemove={onRemoveResponse}
+              onDuplicate={onDuplicateResponse}
+              onChange={onResponseChange}
+            />
+          </EuiFlexItem>
+        );
+      })}
+      <AddButton type="Response" onSelectType={onAddResponse} />
+      <EuiSpacer size="m" />
     </EuiFlexGroup>
   );
 };

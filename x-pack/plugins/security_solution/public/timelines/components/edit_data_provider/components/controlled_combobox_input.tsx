@@ -10,12 +10,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 
-import { isStringOrNumberArray } from '../../timeline/helpers';
+import { isPrimitiveArray } from '../../timeline/helpers';
+import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import * as i18n from '../translations';
 
 interface ControlledDataProviderInput {
   onChangeCallback: (value: string | number | string[]) => void;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
 }
 
 export const ControlledComboboxInput = ({
@@ -71,9 +72,9 @@ export const ControlledComboboxInput = ({
 };
 
 export const convertValuesToComboboxValueArray = (
-  values: string | number | Array<string | number>
+  values: PrimitiveOrArrayOfPrimitives
 ): EuiComboBoxOptionOption[] =>
-  isStringOrNumberArray(values) ? values.map((item) => ({ label: String(item) })) : [];
+  isPrimitiveArray(values) ? values.map((item) => ({ label: String(item) })) : [];
 
 export const convertComboboxValuesToStringArray = (values: EuiComboBoxOptionOption[]): string[] =>
   values.map((item) => item.label);

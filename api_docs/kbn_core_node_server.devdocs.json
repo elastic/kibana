@@ -96,6 +96,19 @@
             "path": "packages/core/node/core-node-server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-node-server",
+            "id": "def-common.NodeRoles.migrator",
+            "type": "boolean",
+            "tags": [],
+            "label": "migrator",
+            "description": [
+              "\nStart Kibana with the specific purpose of completing the migrations phase then shutting down."
+            ],
+            "path": "packages/core/node/core-node-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

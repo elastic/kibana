@@ -27,6 +27,8 @@ import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -60,6 +62,19 @@ jest.mock('react-router-dom', () => {
 
 const mockFilterManager = createFilterManagerMock();
 
+const stubSecurityDataView = createStubDataView({
+  spec: {
+    id: 'security',
+    title: 'security',
+  },
+});
+
+const mockDataViewsService = {
+  ...dataViewPluginMocks.createStartContract(),
+  get: () => Promise.resolve(stubSecurityDataView),
+  clearInstanceCache: () => Promise.resolve(),
+};
+
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
 
@@ -74,6 +89,7 @@ jest.mock('../../../common/lib/kibana', () => {
             siem: { crud_alerts: true, read_alerts: true },
           },
         },
+        dataViews: mockDataViewsService,
         cases: {
           ui: { getCasesContext: mockCasesContext },
         },
@@ -97,6 +113,13 @@ jest.mock('../../../common/lib/kibana', () => {
           get: jest.fn(),
           set: jest.fn(),
         },
+        triggersActionsUi: {
+          alertsTableConfigurationRegistry: {},
+          getAlertsStateTable: () => <></>,
+        },
+        sessionView: {
+          getSessionView: jest.fn().mockReturnValue(<div />),
+        },
       },
     }),
     useToasts: jest.fn().mockReturnValue({
@@ -104,6 +127,17 @@ jest.mock('../../../common/lib/kibana', () => {
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
       remove: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('../../../timelines/components/side_panel/hooks/use_detail_panel', () => {
+  return {
+    useDetailPanel: () => ({
+      openEventDetailsPanel: jest.fn(),
+      handleOnDetailsPanelClosed: () => {},
+      DetailsPanel: () => <div />,
+      shouldShowDetailsPanel: false,
     }),
   };
 });
@@ -122,6 +156,9 @@ jest.mock('../../components/alerts_table/timeline_actions/use_add_bulk_to_timeli
 jest.mock('../../components/alerts_table/timeline_actions/use_bulk_add_to_case_actions', () => ({
   useBulkAddToCaseActions: jest.fn(() => []),
 }));
+
+jest.mock('../../../common/components/visualization_actions/lens_embeddable');
+jest.mock('../../../common/components/page/use_refetch_by_session');
 
 describe('DetectionEnginePageComponent', () => {
   beforeAll(() => {

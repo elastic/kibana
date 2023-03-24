@@ -10,13 +10,11 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
 import {
   getAllMonitors,
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { GetMonitorDownStatusMessageParams } from '../../legacy_uptime/lib/requests/get_monitor_status';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { StatusRuleParams } from '../../../common/rules/status_rule';
@@ -26,9 +24,10 @@ import {
   OverviewStatus,
   OverviewStatusMetaData,
 } from '../../../common/runtime_types';
-import { statusCheckTranslations } from '../../legacy_uptime/lib/alerts/translations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
+import { monitorAttributes } from '../../../common/types/saved_objects';
+import { AlertConfigKey } from '../../../common/constants/monitor_management';
 
 export interface StaleDownConfig extends OverviewStatusMetaData {
   isDeleted?: boolean;
@@ -67,11 +66,11 @@ export class StatusRuleExecutor {
   }
 
   async getAllLocationNames() {
-    const { publicLocations, privateLocations } = await getAllLocations(
-      this.server,
-      this.syntheticsMonitorClient,
-      this.soClient
-    );
+    const { publicLocations, privateLocations } = await getAllLocations({
+      server: this.server,
+      syntheticsMonitorClient: this.syntheticsMonitorClient,
+      savedObjectsClient: this.soClient,
+    });
 
     publicLocations.forEach((loc) => {
       this.locationIdNameMap[loc.label] = loc.id;
@@ -90,27 +89,46 @@ export class StatusRuleExecutor {
     await this.getAllLocationNames();
     this.monitors = await getAllMonitors({
       soClient: this.soClient,
-      search: `attributes.${AlertConfigKey.STATUS_ENABLED}: true`,
+      filter: `${monitorAttributes}.${AlertConfigKey.STATUS_ENABLED}: true`,
     });
 
-    const { allIds, enabledIds, listOfLocations, monitorLocationMap, projectMonitorsCount } =
-      await processMonitors(
-        this.monitors,
-        this.server,
-        this.soClient,
-        this.syntheticsMonitorClient
-      );
+    const {
+      allIds,
+      enabledMonitorQueryIds,
+      listOfLocations,
+      monitorLocationMap,
+      projectMonitorsCount,
+      monitorQueryIdToConfigIdMap,
+    } = await processMonitors(
+      this.monitors,
+      this.server,
+      this.soClient,
+      this.syntheticsMonitorClient
+    );
 
-    return { enabledIds, listOfLocations, allIds, monitorLocationMap, projectMonitorsCount };
+    return {
+      enabledMonitorQueryIds,
+      listOfLocations,
+      allIds,
+      monitorLocationMap,
+      projectMonitorsCount,
+      monitorQueryIdToConfigIdMap,
+    };
   }
 
   async getDownChecks(
     prevDownConfigs: OverviewStatus['downConfigs'] = {}
   ): Promise<AlertOverviewStatus> {
-    const { listOfLocations, enabledIds, allIds, monitorLocationMap, projectMonitorsCount } =
-      await this.getMonitors();
+    const {
+      listOfLocations,
+      enabledMonitorQueryIds,
+      allIds,
+      monitorLocationMap,
+      projectMonitorsCount,
+      monitorQueryIdToConfigIdMap,
+    } = await this.getMonitors();
 
-    if (enabledIds.length > 0) {
+    if (enabledMonitorQueryIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
         this.esClient,
         listOfLocations,
@@ -118,8 +136,9 @@ export class StatusRuleExecutor {
           to: 'now',
           from: this.previousStartedAt?.toISOString() ?? 'now-1m',
         },
-        enabledIds,
-        monitorLocationMap
+        enabledMonitorQueryIds,
+        monitorLocationMap,
+        monitorQueryIdToConfigIdMap
       );
 
       const downConfigs = currentStatus.downConfigs;
@@ -138,21 +157,24 @@ export class StatusRuleExecutor {
         staleDownConfigs,
         projectMonitorsCount,
         allMonitorsCount: allIds.length,
-        disabledMonitorsCount: allIds.length - enabledIds.length,
+        disabledMonitorsCount: allIds.length - enabledMonitorQueryIds.length,
+        allIds,
       };
     }
     const staleDownConfigs = this.markDeletedConfigs(prevDownConfigs);
     return {
       downConfigs: { ...prevDownConfigs },
       upConfigs: {},
+      pendingConfigs: {},
       staleDownConfigs,
       down: 0,
       up: 0,
       pending: 0,
-      enabledIds,
+      enabledMonitorQueryIds,
       allMonitorsCount: allIds.length,
       disabledMonitorsCount: allIds.length,
       projectMonitorsCount,
+      allIds,
     };
   }
 
@@ -180,17 +202,5 @@ export class StatusRuleExecutor {
     });
 
     return staleDownConfigs;
-  }
-
-  async getStatusMessage(downMonParams?: GetMonitorDownStatusMessageParams) {
-    let statusMessage = '';
-    if (downMonParams?.info) {
-      statusMessage = statusCheckTranslations.downMonitorsLabel(
-        downMonParams.count!,
-        downMonParams.interval!,
-        downMonParams.numTimes
-      );
-    }
-    return statusMessage;
   }
 }

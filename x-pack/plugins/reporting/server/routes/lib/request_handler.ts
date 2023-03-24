@@ -66,14 +66,14 @@ export class RequestHandler {
       throw new Error(`Export type ${exportTypeId} is not an async job type!`);
     }
 
-    // 1. ensure the incoming params have a version field
+    // 1. ensure the incoming params have a version field (should be set by the UI)
     jobParams.version = checkParamsVersion(jobParams, logger);
 
     // 2. encrypt request headers for the running report job to authenticate itself with Kibana
     // 3. call the export type's createJobFn to create the job payload
     const [headers, job] = await Promise.all([
       this.encryptHeaders(),
-      createJob(jobParams, context),
+      createJob(jobParams, context, this.req),
     ]);
 
     const payload = {

@@ -176,7 +176,9 @@ export async function loadIndexPatterns({
   }
   indexPatterns.push(
     ...(await Promise.all(
-      Object.values(adHocDataViews || {}).map((spec) => dataViews.create(spec))
+      Object.values(adHocDataViews || {}).map((spec) =>
+        dataViews.create({ ...spec, allowNoIndex: true })
+      )
     ))
   );
 

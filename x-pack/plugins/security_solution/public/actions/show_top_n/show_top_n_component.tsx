@@ -14,7 +14,7 @@ import { StatefulTopN } from '../../common/components/top_n';
 import { useGetUserCasesPermissions } from '../../common/lib/kibana';
 import { APP_ID } from '../../../common/constants';
 import { getScopeFromPath, useSourcererDataView } from '../../common/containers/sourcerer';
-import type { ShowTopNActionContext } from './default/show_top_n';
+import type { SecurityCellActionExecutionContext } from '../types';
 
 export const TopNAction = ({
   onClose,
@@ -22,20 +22,21 @@ export const TopNAction = ({
   casesService,
 }: {
   onClose: () => void;
-  context: ShowTopNActionContext;
+  context: SecurityCellActionExecutionContext;
   casesService: CasesUiStart;
 }) => {
   const { pathname } = useLocation();
   const { browserFields, indexPattern } = useSourcererDataView(getScopeFromPath(pathname));
   const userCasesPermissions = useGetUserCasesPermissions();
   const CasesContext = casesService.ui.getCasesContext();
+  const { field, nodeRef, metadata } = context;
 
-  if (!context.nodeRef?.current) return null;
+  if (!nodeRef?.current) return null;
 
   return (
     <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
       <EuiWrappingPopover
-        button={context.nodeRef.current}
+        button={nodeRef.current}
         isOpen={true}
         closePopover={onClose}
         anchorPosition={'downCenter'}
@@ -45,11 +46,11 @@ export const TopNAction = ({
         attachToAnchor={false}
       >
         <StatefulTopN
-          field={context.field.name}
+          field={field.name}
           showLegend
-          scopeId={context.metadata?.scopeId}
+          scopeId={metadata?.scopeId}
           toggleTopN={onClose}
-          value={context.field.value}
+          value={field.value}
           indexPattern={indexPattern}
           browserFields={browserFields}
         />

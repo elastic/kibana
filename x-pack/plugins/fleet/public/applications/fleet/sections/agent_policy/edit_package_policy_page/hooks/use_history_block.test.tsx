@@ -11,6 +11,8 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { useHistoryBlock } from './use_history_block';
 
+// our test mountHistory prepends the basePath to URLs, however useHistory state doesnt have the basePath
+// in production, so we have to prepend it to the state.pathname, this results in /mock/mock in the assertions
 describe('useHistoryBlock', () => {
   describe('without search params', () => {
     it('should not block if not edited', () => {
@@ -38,7 +40,7 @@ describe('useHistoryBlock', () => {
 
       expect(renderer.startServices.overlays.openConfirm).toBeCalled();
       expect(renderer.startServices.application.navigateToUrl).toBeCalledWith(
-        '/mock/test',
+        '/mock/mock/test',
         expect.anything()
       );
     });
@@ -83,7 +85,7 @@ describe('useHistoryBlock', () => {
 
       expect(renderer.startServices.overlays.openConfirm).toBeCalled();
       expect(renderer.startServices.application.navigateToUrl).toBeCalledWith(
-        '/mock/test?param=test',
+        '/mock/mock/test?param=test',
         expect.anything()
       );
     });
@@ -129,7 +131,7 @@ describe('useHistoryBlock', () => {
 
       expect(renderer.startServices.overlays.openConfirm).toBeCalled();
       expect(renderer.startServices.application.navigateToUrl).toBeCalledWith(
-        '/mock/test#/hash',
+        '/mock/mock/test#/hash',
         expect.anything()
       );
     });

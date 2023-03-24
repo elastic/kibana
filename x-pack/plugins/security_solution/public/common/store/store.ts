@@ -24,6 +24,8 @@ import { BehaviorSubject, pluck } from 'rxjs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import reduceReducers from 'reduce-reducers';
+import { initialGroupingState } from './grouping/reducer';
+import type { GroupState } from './grouping/types';
 import {
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_INDEX_KEY,
@@ -127,6 +129,10 @@ export const createStoreFactory = async (
     },
   };
 
+  const groupsInitialState: GroupState = {
+    groups: initialGroupingState,
+  };
+
   const timelineReducer = reduceReducers(
     timelineInitialState.timeline,
     startPlugins.timelines?.getTimelineReducer() ?? {},
@@ -145,7 +151,8 @@ export const createStoreFactory = async (
       signalIndexName: signal.name,
       enableExperimental,
     },
-    dataTableInitialState
+    dataTableInitialState,
+    groupsInitialState
   );
 
   const rootReducer = {

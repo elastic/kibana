@@ -97,8 +97,8 @@ export const getChunks = (text: string = '') => {
 };
 
 // Helper component for adding middle text truncation, e.g.
-// really-really-really-long....ompressed.js
-// Can be used to accomodate content in sidebar item rendering.
+// really-really-really-long....Compressed.js
+// Can be used to accommodate content in sidebar item rendering.
 export const MiddleTruncatedText = ({
   index,
   ariaLabel,
@@ -173,7 +173,12 @@ export const MiddleTruncatedText = ({
         </>
       </WaterfallChartTooltip>
       <span>
-        <EuiLink href={url} external target="_blank">
+        <EuiLink
+          data-test-subj="syntheticsMiddleTruncatedTextLink"
+          href={url}
+          external
+          target="_blank"
+        >
           <EuiScreenReaderOnly>
             <span>
               <FormattedMessage

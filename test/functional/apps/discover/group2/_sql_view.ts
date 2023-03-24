@@ -39,6 +39,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('test', () => {
       it('should render sql view correctly', async function () {
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
+
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(true);
         expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
         expect(await testSubjects.exists('addFilter')).to.be(true);
@@ -49,15 +51,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(true);
-        expect(await testSubjects.exists('fieldFilterSearchInput')).to.be(true);
-        expect(await testSubjects.exists('toggleFieldFilterButton')).to.be(true);
-        expect(await testSubjects.exists('fieldTypesHelpButton')).to.be(true);
+        expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
+        expect(await testSubjects.exists('fieldListFiltersFieldTypeFilterToggle')).to.be(true);
         await testSubjects.click('field-@message-showDetails');
         expect(await testSubjects.exists('discoverFieldListPanelEdit-@message')).to.be(true);
 
         await PageObjects.discover.selectTextBaseLang('SQL');
+        await PageObjects.discover.waitUntilSidebarHasLoaded();
 
-        expect(await testSubjects.exists('fieldFilterSearchInput')).to.be(true);
+        expect(await testSubjects.exists('fieldListFiltersFieldSearch')).to.be(true);
         expect(await testSubjects.exists('unifiedTextLangEditor')).to.be(true);
         expect(await testSubjects.exists('superDatePickerToggleQuickMenuButton')).to.be(true);
 
@@ -70,8 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('shareTopNavButton')).to.be(false);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(false);
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
-        expect(await testSubjects.exists('toggleFieldFilterButton')).to.be(false);
-        expect(await testSubjects.exists('fieldTypesHelpButton')).to.be(false);
+        expect(await testSubjects.exists('fieldListFiltersFieldTypeFilterToggle')).to.be(true);
         await testSubjects.click('field-@message-showDetails');
         expect(await testSubjects.exists('discoverFieldListPanelEditItem')).to.be(false);
       });

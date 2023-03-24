@@ -1,5 +1,6 @@
 {
   "type": "shared-common",
   "id": "@kbn/core-i18n-server-mocks",
+  "devOnly": true,
   "owner": "@elastic/kibana-core"
 }

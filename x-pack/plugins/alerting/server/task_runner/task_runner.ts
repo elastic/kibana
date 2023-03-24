@@ -45,6 +45,7 @@ import {
   RuleTypeState,
   parseDuration,
   RawAlertInstance,
+  RuleLastRunOutcomeOrderMap,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -257,6 +258,8 @@ export class TaskRunner<
       updatedAt,
       enabled,
       actions,
+      muteAll,
+      snoozeSchedule,
     } = rule;
     const {
       params: { alertId: ruleId, spaceId },
@@ -295,6 +298,8 @@ export class TaskRunner<
       ...wrappedClientOptions,
       searchSourceClient,
     });
+    const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
+    const flappingSettings = await rulesSettingsClient.flapping().get();
 
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
@@ -371,8 +376,11 @@ export class TaskRunner<
                 updatedAt,
                 throttle,
                 notifyWhen,
+                muteAll,
+                snoozeSchedule,
               },
               logger: this.logger,
+              flappingSettings,
             })
           );
 
@@ -418,6 +426,8 @@ export class TaskRunner<
         ruleLabel,
         ruleRunMetricsStore,
         shouldLogAndScheduleActionsForAlerts: this.shouldLogAndScheduleActionsForAlerts(),
+        flappingSettings,
+        notifyWhen,
       });
     });
 
@@ -436,7 +446,7 @@ export class TaskRunner<
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
     });
 
-    let executionHandlerRunResult: RunResult = { throttledActions: {} };
+    let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
       await rulesClient.clearExpiredSnoozes({ id: rule.id });
@@ -450,11 +460,13 @@ export class TaskRunner<
         this.countUsageOfActionExecutionAfterRuleCancellation();
       } else {
         executionHandlerRunResult = await executionHandler.run({
-          ...this.legacyAlertsClient.getProcessedAlerts('active'),
+          ...this.legacyAlertsClient.getProcessedAlerts('activeCurrent'),
           ...this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent'),
         });
       }
     });
+
+    this.legacyAlertsClient.setFlapping(flappingSettings);
 
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
@@ -472,7 +484,7 @@ export class TaskRunner<
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: alertsToReturn,
       alertRecoveredInstances: recoveredAlertsToReturn,
-      summaryActions: executionHandlerRunResult.throttledActions,
+      summaryActions: executionHandlerRunResult.throttledSummaryActions,
     };
   }
 
@@ -487,6 +499,7 @@ export class TaskRunner<
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule`;
       apm.currentTransaction.addLabels({
+        alerting_rule_space_id: spaceId,
         alerting_rule_id: ruleId,
       });
     }
@@ -816,10 +829,12 @@ export class TaskRunner<
     this.logger.debug(
       `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - execution error due to timeout`
     );
+    const outcome = 'failed';
     await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
       executionStatus: ruleExecutionStatusToRaw(executionStatus),
       lastRun: {
-        outcome: 'failed',
+        outcome,
+        outcomeOrder: RuleLastRunOutcomeOrderMap[outcome],
         warning: RuleExecutionStatusErrorReasons.Timeout,
         outcomeMsg,
         alertsCount: {},

@@ -22,6 +22,7 @@ import type { ManagementPluginState } from '../../management';
 import type { UsersPluginState } from '../../explore/users/store';
 import type { GlobalUrlParam } from './global_url_param';
 import type { DataTableState } from './data_table/types';
+import type { GroupState } from './grouping/types';
 
 export type State = HostsPluginState &
   UsersPluginState &
@@ -34,8 +35,8 @@ export type State = HostsPluginState &
     inputs: InputsState;
     sourcerer: SourcererState;
     globalUrlParam: GlobalUrlParam;
-  } & DataTableState;
-
+  } & DataTableState &
+  GroupState;
 /**
  * The Redux store type for the Security app.
  */

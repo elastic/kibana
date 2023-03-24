@@ -56,6 +56,7 @@ export const getTimelinesTableColumns = ({
   enableExportTimelineDownloader,
   itemIdToExpandedNotesRowMap,
   onCreateRule,
+  onCreateRuleFromEql,
   onOpenDeleteTimelineModal,
   onOpenTimeline,
   onToggleShowNotes,
@@ -68,6 +69,7 @@ export const getTimelinesTableColumns = ({
   enableExportTimelineDownloader?: EnableExportTimelineDownloader;
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
   onCreateRule?: OnCreateRuleFromTimeline;
+  onCreateRuleFromEql?: OnCreateRuleFromTimeline;
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
   onSelectionChange: OnSelectionChange;
@@ -88,6 +90,7 @@ export const getTimelinesTableColumns = ({
     ...(actionTimelineToShow.length
       ? getActionsColumns({
           onCreateRule,
+          onCreateRuleFromEql,
           actionTimelineToShow,
           deleteTimelines,
           enableExportTimelineDownloader,
@@ -107,6 +110,7 @@ export interface TimelinesTableProps {
   itemIdToExpandedNotesRowMap: Record<string, JSX.Element>;
   enableExportTimelineDownloader?: EnableExportTimelineDownloader;
   onCreateRule?: OnCreateRuleFromTimeline;
+  onCreateRuleFromEql?: OnCreateRuleFromTimeline;
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
   onSelectionChange: OnSelectionChange;
@@ -137,6 +141,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     itemIdToExpandedNotesRowMap,
     enableExportTimelineDownloader,
     onCreateRule,
+    onCreateRuleFromEql,
     onOpenDeleteTimelineModal,
     onOpenTimeline,
     onSelectionChange,
@@ -188,6 +193,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
           itemIdToExpandedNotesRowMap,
           enableExportTimelineDownloader,
           onCreateRule,
+          onCreateRuleFromEql,
           onOpenDeleteTimelineModal,
           onOpenTimeline,
           onSelectionChange,
@@ -202,6 +208,7 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         itemIdToExpandedNotesRowMap,
         enableExportTimelineDownloader,
         onCreateRule,
+        onCreateRuleFromEql,
         onOpenDeleteTimelineModal,
         onOpenTimeline,
         onSelectionChange,

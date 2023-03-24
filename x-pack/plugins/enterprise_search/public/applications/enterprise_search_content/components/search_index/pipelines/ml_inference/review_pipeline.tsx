@@ -9,7 +9,14 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -20,7 +27,7 @@ export const ReviewPipeline: React.FC = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem grow={false}>
-        <EuiText>
+        <EuiTitle size="xs">
           <h4>
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.review.title',
@@ -29,15 +36,10 @@ export const ReviewPipeline: React.FC = () => {
               }
             )}
           </h4>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow>
-        <EuiCodeBlock language="json" isCopyable overflowHeight="400px">
-          {JSON.stringify(mlInferencePipeline ?? {}, null, 2)}
-        </EuiCodeBlock>
+        </EuiTitle>
+        <EuiSpacer size="m" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiSpacer />
         <EuiText>
           <p>
             {i18n.translate(
@@ -49,6 +51,12 @@ export const ReviewPipeline: React.FC = () => {
             )}
           </p>
         </EuiText>
+        <EuiSpacer size="m" />
+      </EuiFlexItem>
+      <EuiFlexItem grow>
+        <EuiCodeBlock language="json" isCopyable overflowHeight="400px">
+          {JSON.stringify(mlInferencePipeline ?? {}, null, 2)}
+        </EuiCodeBlock>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

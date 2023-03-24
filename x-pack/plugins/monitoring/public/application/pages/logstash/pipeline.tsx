@@ -10,6 +10,7 @@ import { find } from 'lodash';
 import moment from 'moment';
 import { useRouteMatch } from 'react-router-dom';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { EuiSpacer } from '@elastic/eui';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 import { List } from '../../../components/logstash/pipeline_viewer/models/list';
@@ -56,6 +57,7 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
   });
 
   const getPageData = useCallback(async () => {
+    const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = pipelineHash
       ? `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}/${pipelineHash}`
       : `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}`;
@@ -65,6 +67,10 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
       body: JSON.stringify({
         ccs,
         detailVertexId: detailVertexId || undefined,
+        timeRange: {
+          min: bounds.min.toISOString(),
+          max: bounds.max.toISOString(),
+        },
       }),
     });
     const myData = response;
@@ -112,6 +118,7 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
     minIntervalSeconds,
     pipelineHash,
     pipelineId,
+    services.data?.query.timefilter.timefilter,
   ]);
 
   useEffect(() => {
@@ -168,16 +175,17 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
           pipelineHash={pipelineHash}
         />
       </div>
-      <div>
-        {pipelineState && (
+      {pipelineState && (
+        <div>
+          <EuiSpacer size="s" />
           <PipelineViewer
             pipeline={List.fromPipeline(Pipeline.fromPipelineGraph(pipelineState.config.graph))}
             timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
             setDetailVertexId={onVertexChange}
             detailVertex={data.vertex ? vertexFactory(null, data.vertex) : null}
           />
-        )}
-      </div>
+        </div>
+      )}
     </LogstashTemplate>
   );
 };

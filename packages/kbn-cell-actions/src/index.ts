@@ -6,8 +6,34 @@
  * Side Public License, v 1.
  */
 
-export { CellActions } from './components';
+// Types and enums
+export type {
+  CellAction,
+  CellActionsProps,
+  CellActionExecutionContext,
+  CellActionCompatibilityContext,
+  CellActionTemplate,
+  CellActionFactory,
+  CellActionExtend,
+} from './types';
+export type { UseDataGridColumnsCellActions, UseDataGridColumnsCellActionsProps } from './hooks';
+
+// Constants
+export { CellActionsMode, FILTER_CELL_ACTION_TYPE, COPY_CELL_ACTION_TYPE } from './constants';
+
+// Components and hooks
 export { CellActionsProvider } from './context';
-export { useDataGridColumnsCellActions, type UseDataGridColumnsCellActionsProps } from './hooks';
-export { CellActionsMode } from './types';
-export type { CellAction, CellActionExecutionContext } from './types';
+export { CellActions } from './components';
+export { useDataGridColumnsCellActions } from './hooks';
+
+// Generic actions
+export { createCopyToClipboardActionFactory } from './actions/copy_to_clipboard';
+export {
+  createFilterInActionFactory,
+  createFilterOutActionFactory,
+  addFilterIn,
+  addFilterOut,
+} from './actions/filter';
+
+// Action factory
+export { createCellActionFactory } from './actions/factory';

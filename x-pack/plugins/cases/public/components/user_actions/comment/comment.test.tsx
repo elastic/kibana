@@ -223,13 +223,13 @@ describe('createCommentUserActionBuilder', () => {
       );
 
       expect(result.getByText('Solve this fast!')).toBeInTheDocument();
-      expect(result.getByTestId('property-actions')).toBeInTheDocument();
+      expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-      userEvent.click(result.getByTestId('property-actions-ellipses'));
+      userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
       await waitForEuiPopoverOpen();
 
-      expect(result.queryByTestId('property-actions-pencil')).toBeInTheDocument();
-      userEvent.click(result.getByTestId('property-actions-pencil'));
+      expect(result.queryByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
+      userEvent.click(result.getByTestId('property-actions-user-action-pencil'));
 
       await waitFor(() => {
         expect(builderArgs.handleManageMarkdownEditId).toHaveBeenCalledWith('basic-comment-id');
@@ -254,13 +254,13 @@ describe('createCommentUserActionBuilder', () => {
       );
 
       expect(result.getByText('Solve this fast!')).toBeInTheDocument();
-      expect(result.getByTestId('property-actions')).toBeInTheDocument();
+      expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-      userEvent.click(result.getByTestId('property-actions-ellipses'));
+      userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
       await waitForEuiPopoverOpen();
 
-      expect(result.queryByTestId('property-actions-quote')).toBeInTheDocument();
-      userEvent.click(result.getByTestId('property-actions-quote'));
+      expect(result.queryByTestId('property-actions-user-action-quote')).toBeInTheDocument();
+      userEvent.click(result.getByTestId('property-actions-user-action-quote'));
 
       await waitFor(() => {
         expect(builderArgs.handleManageQuote).toHaveBeenCalledWith('Solve this fast!');
@@ -769,14 +769,14 @@ describe('createCommentUserActionBuilder', () => {
 });
 
 const deleteAttachment = async (result: RenderResult, deleteIcon: string, buttonLabel: string) => {
-  expect(result.getByTestId('property-actions')).toBeInTheDocument();
+  expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
-  userEvent.click(result.getByTestId('property-actions-ellipses'));
+  userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
   await waitForEuiPopoverOpen();
 
-  expect(result.queryByTestId(`property-actions-${deleteIcon}`)).toBeInTheDocument();
+  expect(result.queryByTestId(`property-actions-user-action-${deleteIcon}`)).toBeInTheDocument();
 
-  userEvent.click(result.getByTestId(`property-actions-${deleteIcon}`));
+  userEvent.click(result.getByTestId(`property-actions-user-action-${deleteIcon}`));
 
   await waitFor(() => {
     expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();

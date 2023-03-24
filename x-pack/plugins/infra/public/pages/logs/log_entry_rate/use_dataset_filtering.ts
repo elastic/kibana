@@ -32,9 +32,21 @@ function reducer(state: ReducerState, action: ReducerAction) {
         selectedDatasets: action.payload.datasets,
       };
     case 'updateDatasetsFilters':
-      const datasetsToAdd = action.payload.filters
-        .filter((filter) => !state.selectedDatasets.includes(filter.meta.params.query))
-        .map((filter) => filter.meta.params.query);
+      const datasetsToAdd = action.payload.filters.reduce(
+        (prevFilters: string[], nextFilter: Filter) => {
+          const query =
+            typeof nextFilter.meta.params === 'object' &&
+            'query' in nextFilter.meta.params &&
+            nextFilter.meta.params?.query;
+          const queryString = query ? String(query) : '';
+          if (!state.selectedDatasets.includes(queryString)) {
+            prevFilters.push(queryString);
+          }
+          return prevFilters;
+        },
+        []
+      );
+
       return {
         ...state,
         selectedDatasets: [...state.selectedDatasets, ...datasetsToAdd],
@@ -77,11 +89,16 @@ export const useDatasetFiltering = () => {
   // be re-added via the embeddable as it will be seen as a duplicate to the FilterManager,
   // and no update will be emitted.
   useEffect(() => {
-    const filtersToRemove = reducerState.selectedDatasetsFilters.filter(
-      (filter) => !reducerState.selectedDatasets.includes(filter.meta.params.query)
-    );
+    const filtersToRemove = reducerState.selectedDatasetsFilters.filter((filter: Filter) => {
+      const query =
+        typeof filter.meta.params === 'object' &&
+        'query' in filter.meta.params &&
+        filter.meta.params?.query;
+      const queryString = query ? String(query) : '';
+      return !reducerState.selectedDatasets.includes(queryString);
+    });
     if (filtersToRemove.length > 0) {
-      filtersToRemove.forEach((filter) => {
+      filtersToRemove.forEach((filter: Filter) => {
         services.data.query.filterManager.removeFilter(filter);
       });
     }

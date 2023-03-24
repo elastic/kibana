@@ -10,9 +10,12 @@ import { TestNowResponse } from '../../../../../common/types';
 import { apiService } from '../../../../utils/api_service';
 import { API_URLS } from '../../../../../common/constants';
 
-export const triggerTestNowMonitor = async (
-  configId: string
-): Promise<TestNowResponse | undefined> => {
+export const triggerTestNowMonitor = async ({
+  configId,
+}: {
+  configId: string;
+  name: string;
+}): Promise<TestNowResponse | undefined> => {
   return await apiService.get(API_URLS.TRIGGER_MONITOR + `/${configId}`);
 };
 

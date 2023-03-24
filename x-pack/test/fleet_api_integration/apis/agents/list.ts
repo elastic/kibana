@@ -130,11 +130,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return metrics if available and called with withMetrics', async () => {
+      const now = Date.now();
       await es.index({
         index: 'metrics-elastic_agent.elastic_agent-default',
         refresh: 'wait_for',
         document: {
-          '@timestamp': new Date(Date.now() - 3 * 60 * 1000).toISOString(),
+          '@timestamp': new Date(now - 2 * 60 * 1000).toISOString(),
           data_stream: {
             namespace: 'default',
             type: 'metrics',
@@ -159,7 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
         index: 'metrics-elastic_agent.elastic_agent-default',
         refresh: 'wait_for',
         document: {
-          '@timestamp': new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+          '@timestamp': new Date(now - 1 * 60 * 1000).toISOString(),
           elastic_agent: { id: 'agent1', process: 'elastic_agent' },
           data_stream: {
             namespace: 'default',
@@ -196,6 +197,26 @@ export default function ({ getService }: FtrProviderContext) {
       const agent2: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent2');
       expect(agent2.metrics?.memory_size_byte_avg).equal(undefined);
       expect(agent2.metrics?.cpu_avg).equal(undefined);
+    });
+
+    it('should return a status summary if getStatusSummary provided', async () => {
+      const { body: apiResponse } = await supertest
+        .get('/api/fleet/agents?getStatusSummary=true&perPage=0')
+        .expect(200);
+
+      expect(apiResponse.items).to.eql([]);
+
+      expect(apiResponse.statusSummary).to.eql({
+        degraded: 0,
+        enrolling: 0,
+        error: 0,
+        inactive: 0,
+        offline: 4,
+        online: 0,
+        unenrolled: 0,
+        unenrolling: 0,
+        updating: 0,
+      });
     });
   });
 }

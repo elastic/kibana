@@ -8,6 +8,7 @@
 import { EnterpriseSearchMetric, EnterpriseSearchMetricFields } from '../metrics';
 import { createQuery } from '../create_query';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
+import { getEntsearchDataset } from '../cluster/get_index_patterns';
 
 /**
  * {@code createQuery} for all Enterprise Search instances.
@@ -53,6 +54,8 @@ export function createEnterpriseSearchQuery(options: {
         },
         { term: { 'event.dataset': 'enterprisesearch.health' } },
         { term: { 'event.dataset': 'enterprisesearch.stats' } },
+        { term: { 'data_stream.dataset': getEntsearchDataset('health') } },
+        { term: { 'data_stream.dataset': getEntsearchDataset('stats') } },
       ],
     },
   });

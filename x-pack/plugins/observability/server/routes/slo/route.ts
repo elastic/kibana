@@ -11,13 +11,15 @@ import {
   deleteSLOParamsSchema,
   fetchHistoricalSummaryParamsSchema,
   findSLOParamsSchema,
+  getSLODiagnosisParamsSchema,
   getSLOParamsSchema,
+  manageSLOParamsSchema,
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
 import {
   CreateSLO,
   DefaultResourceInstaller,
-  DefaultSLIClient,
+  DefaultSummaryClient,
   DefaultTransformManager,
   DeleteSLO,
   FindSLO,
@@ -36,6 +38,8 @@ import { DefaultHistoricalSummaryClient } from '../../services/slo/historical_su
 import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summary';
 import type { IndicatorTypes } from '../../domain/models';
 import type { ObservabilityRequestHandlerContext } from '../../types';
+import { ManageSLO } from '../../services/slo/manage_slo';
+import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
@@ -50,7 +54,7 @@ const isLicenseAtLeastPlatinum = async (context: ObservabilityRequestHandlerCont
 const createSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos',
   options: {
-    tags: [],
+    tags: ['access:slo_write'],
   },
   params: createSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -75,7 +79,7 @@ const createSLORoute = createObservabilityServerRoute({
 const updateSLORoute = createObservabilityServerRoute({
   endpoint: 'PUT /api/observability/slos/{id}',
   options: {
-    tags: [],
+    tags: ['access:slo_write'],
   },
   params: updateSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -99,7 +103,7 @@ const updateSLORoute = createObservabilityServerRoute({
 const deleteSLORoute = createObservabilityServerRoute({
   endpoint: 'DELETE /api/observability/slos/{id}',
   options: {
-    tags: [],
+    tags: ['access:slo_write'],
   },
   params: deleteSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -122,7 +126,7 @@ const deleteSLORoute = createObservabilityServerRoute({
 const getSLORoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/slos/{id}',
   options: {
-    tags: [],
+    tags: ['access:slo_read'],
   },
   params: getSLOParamsSchema,
   handler: async ({ context, params }) => {
@@ -133,10 +137,58 @@ const getSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const sliClient = new DefaultSLIClient(esClient);
-    const getSLO = new GetSLO(repository, sliClient);
+    const summaryClient = new DefaultSummaryClient(esClient);
+    const getSLO = new GetSLO(repository, summaryClient);
 
     const response = await getSLO.execute(params.path.id);
+
+    return response;
+  },
+});
+
+const enableSLORoute = createObservabilityServerRoute({
+  endpoint: 'POST /api/observability/slos/{id}/enable',
+  options: {
+    tags: ['access:slo_write'],
+  },
+  params: manageSLOParamsSchema,
+  handler: async ({ context, params, logger }) => {
+    if (!isLicenseAtLeastPlatinum(context)) {
+      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+    }
+
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
+    const manageSLO = new ManageSLO(repository, transformManager);
+
+    const response = await manageSLO.enable(params.path.id);
+
+    return response;
+  },
+});
+
+const disableSLORoute = createObservabilityServerRoute({
+  endpoint: 'POST /api/observability/slos/{id}/disable',
+  options: {
+    tags: ['access:slo_write'],
+  },
+  params: manageSLOParamsSchema,
+  handler: async ({ context, params, logger }) => {
+    if (!isLicenseAtLeastPlatinum(context)) {
+      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+    }
+
+    const soClient = (await context.core).savedObjects.client;
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
+    const manageSLO = new ManageSLO(repository, transformManager);
+
+    const response = await manageSLO.disable(params.path.id);
 
     return response;
   },
@@ -145,7 +197,7 @@ const getSLORoute = createObservabilityServerRoute({
 const findSLORoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/slos',
   options: {
-    tags: [],
+    tags: ['access:slo_read'],
   },
   params: findSLOParamsSchema,
   handler: async ({ context, params }) => {
@@ -156,8 +208,8 @@ const findSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
-    const sliClient = new DefaultSLIClient(esClient);
-    const findSLO = new FindSLO(repository, sliClient);
+    const summaryClient = new DefaultSummaryClient(esClient);
+    const findSLO = new FindSLO(repository, summaryClient);
 
     const response = await findSLO.execute(params?.query ?? {});
 
@@ -168,7 +220,7 @@ const findSLORoute = createObservabilityServerRoute({
 const fetchHistoricalSummary = createObservabilityServerRoute({
   endpoint: 'POST /internal/observability/slos/_historical_summary',
   options: {
-    tags: [],
+    tags: ['access:slo_read'],
   },
   params: fetchHistoricalSummaryParamsSchema,
   handler: async ({ context, params }) => {
@@ -188,11 +240,43 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
   },
 });
 
+const getDiagnosisRoute = createObservabilityServerRoute({
+  endpoint: 'GET /internal/observability/slos/_diagnosis',
+  options: {
+    tags: [],
+  },
+  params: undefined,
+  handler: async ({ context }) => {
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const licensing = await context.licensing;
+
+    return getGlobalDiagnosis(esClient, licensing);
+  },
+});
+
+const getSloDiagnosisRoute = createObservabilityServerRoute({
+  endpoint: 'GET /internal/observability/slos/{id}/_diagnosis',
+  options: {
+    tags: [],
+  },
+  params: getSLODiagnosisParamsSchema,
+  handler: async ({ context, params }) => {
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const soClient = (await context.core).savedObjects.client;
+
+    return getSloDiagnosis(params.path.id, { esClient, soClient });
+  },
+});
+
 export const slosRouteRepository = {
   ...createSLORoute,
   ...deleteSLORoute,
+  ...disableSLORoute,
+  ...enableSLORoute,
+  ...fetchHistoricalSummary,
   ...findSLORoute,
   ...getSLORoute,
-  ...fetchHistoricalSummary,
   ...updateSLORoute,
+  ...getDiagnosisRoute,
+  ...getSloDiagnosisRoute,
 };

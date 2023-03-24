@@ -146,6 +146,11 @@
     "@kbn/core-mount-utils-browser",
     "@kbn/core-execution-context-browser",
     "@kbn/core-lifecycle-browser",
+    "@kbn/core-custom-branding-browser",
+    "@kbn/core-custom-branding-server",
+    "@kbn/core-elasticsearch-client-server-internal",
+    "@kbn/tooling-log",
+    "@kbn/stdio-dev-helpers",
   ],
   "exclude": [
     "target/**/*",

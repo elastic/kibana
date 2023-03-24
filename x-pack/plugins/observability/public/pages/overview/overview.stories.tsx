@@ -16,7 +16,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
-import { OverviewPage } from '.';
+import { OverviewPage } from './overview';
 import { alertsFetchData } from './mock/alerts.mock';
 import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
 import { emptyResponse as emptyLogsResponse, fetchLogsData } from './mock/logs.mock';
@@ -77,9 +77,7 @@ const withCore = makeDecorator({
 
     const config: ConfigSchema = {
       unsafe: {
-        slo: { enabled: false },
         alertDetails: {
-          apm: { enabled: false },
           logs: { enabled: false },
           metrics: { enabled: false },
           uptime: { enabled: false },

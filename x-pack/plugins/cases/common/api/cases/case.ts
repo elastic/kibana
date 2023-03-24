@@ -8,10 +8,10 @@
 import * as rt from 'io-ts';
 
 import { NumberFromString } from '../saved_object';
-import { UserRT } from '../user';
+import { UserRt } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
-import { CaseConnectorRt } from '../connectors';
+import { CaseConnectorRt } from '../connectors/connector';
 import { CaseAssigneesRt } from './assignee';
 
 export const AttachmentTotalsRt = rt.type({
@@ -97,7 +97,7 @@ export const CaseUserActionExternalServiceRt = rt.type({
   external_title: rt.string,
   external_url: rt.string,
   pushed_at: rt.string,
-  pushed_by: UserRT,
+  pushed_by: UserRt,
 });
 
 export const CaseExternalServiceBasicRt = rt.intersection([
@@ -114,12 +114,12 @@ export const CaseAttributesRt = rt.intersection([
   rt.type({
     duration: rt.union([rt.number, rt.null]),
     closed_at: rt.union([rt.string, rt.null]),
-    closed_by: rt.union([UserRT, rt.null]),
+    closed_by: rt.union([UserRt, rt.null]),
     created_at: rt.string,
-    created_by: UserRT,
+    created_by: UserRt,
     external_service: CaseFullExternalServiceRt,
     updated_at: rt.union([rt.string, rt.null]),
-    updated_by: rt.union([UserRT, rt.null]),
+    updated_by: rt.union([UserRt, rt.null]),
   }),
 ]);
 

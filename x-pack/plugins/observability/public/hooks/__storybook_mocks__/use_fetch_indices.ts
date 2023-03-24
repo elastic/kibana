@@ -9,10 +9,21 @@ import { Index, UseFetchIndicesResponse } from '../use_fetch_indices';
 
 export const useFetchIndices = (): UseFetchIndicesResponse => {
   return {
-    loading: false,
-    error: false,
-    indices: Array.from({ length: 5 }, (_, i) => ({
-      name: `.index${i}`,
-    })) as Index[],
+    isLoading: false,
+    isError: false,
+    isSuccess: true,
+    indices: [
+      ...Array(10)
+        .fill(0)
+        .map((_, i) => ({
+          name: `.index-${i}`,
+        })),
+      ...Array(10)
+        .fill(0)
+        .map((_, i) => ({
+          name: `.some-other-index-${i}`,
+        })),
+    ] as Index[],
+    refetch: function () {} as UseFetchIndicesResponse['refetch'],
   };
 };

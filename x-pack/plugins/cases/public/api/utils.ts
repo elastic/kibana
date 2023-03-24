@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isArray, set, camelCase, isObject, omit, get } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { isArray, camelCase, isObject, omit, get } from 'lodash';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,

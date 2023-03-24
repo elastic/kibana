@@ -23,6 +23,7 @@ interface SuggestionsSelectProps {
   placeholder: string;
   dataTestSubj?: string;
   prepend?: string;
+  serviceName?: string;
 }
 
 export function SuggestionsSelect({
@@ -38,6 +39,7 @@ export function SuggestionsSelect({
   dataTestSubj,
   isClearable = true,
   prepend,
+  serviceName,
 }: SuggestionsSelectProps) {
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
@@ -59,11 +61,12 @@ export function SuggestionsSelect({
             fieldValue: searchValue,
             start,
             end,
+            serviceName,
           },
         },
       });
     },
-    [fieldName, searchValue, start, end],
+    [fieldName, searchValue, start, end, serviceName],
     { preservePreviousData: false }
   );
 

@@ -5,33 +5,37 @@
  * 2.0.
  */
 
-import { toDateRange } from '../../domain/services';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { GetSLO } from './get_slo';
-import { createSLIClientMock, createSLORepositoryMock } from './mocks';
-import { SLIClient } from './sli_client';
+import { createSummaryClientMock, createSLORepositoryMock } from './mocks';
 import { SLORepository } from './slo_repository';
+import { SummaryClient } from './summary_client';
 
 describe('GetSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
-  let mockSLIClient: jest.Mocked<SLIClient>;
+  let mockSummaryClient: jest.Mocked<SummaryClient>;
   let getSLO: GetSLO;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
-    mockSLIClient = createSLIClientMock();
-    getSLO = new GetSLO(mockRepository, mockSLIClient);
+    mockSummaryClient = createSummaryClientMock();
+    getSLO = new GetSLO(mockRepository, mockSummaryClient);
   });
 
   describe('happy path', () => {
     it('retrieves the SLO from the repository', async () => {
       const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
       mockRepository.findById.mockResolvedValueOnce(slo);
-      mockSLIClient.fetchCurrentSLIData.mockResolvedValueOnce({
+      mockSummaryClient.fetchSummary.mockResolvedValueOnce({
         [slo.id]: {
-          good: 9999,
-          total: 10000,
-          dateRange: toDateRange(slo.timeWindow),
+          status: 'HEALTHY',
+          sliValue: 0.9999,
+          errorBudget: {
+            initial: 0.001,
+            consumed: 0.1,
+            remaining: 0.9,
+            isEstimated: false,
+          },
         },
       });
 
@@ -50,6 +54,7 @@ describe('GetSLO', () => {
             transactionName: 'irrelevant',
             transactionType: 'irrelevant',
             goodStatusCodes: ['2xx', '3xx', '4xx'],
+            index: 'metrics-apm*',
           },
           type: 'sli.apm.transactionErrorRate',
         },
@@ -61,7 +66,6 @@ describe('GetSLO', () => {
           isRolling: true,
         },
         settings: {
-          timestampField: '@timestamp',
           syncDelay: '1m',
           frequency: '1m',
         },
@@ -75,8 +79,10 @@ describe('GetSLO', () => {
             isEstimated: false,
           },
         },
+        tags: ['critical', 'k8s'],
         createdAt: slo.createdAt.toISOString(),
         updatedAt: slo.updatedAt.toISOString(),
+        enabled: slo.enabled,
         revision: slo.revision,
       });
     });

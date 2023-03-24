@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SchemaArray, SchemaValue } from '@kbn/analytics-client';
+import type { RootSchema } from '@kbn/analytics-client';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 
 export interface TelemetryServiceSetupParams {
@@ -24,36 +24,24 @@ export interface HostsViewQuerySubmittedParams {
   query: string;
 }
 
-export interface HostsViewQuerySubmittedSchema {
-  control_filters: SchemaArray<string, string>;
-  filters: SchemaArray<string, string>;
-  interval: SchemaValue<string>;
-  query: SchemaValue<string>;
-}
-
 export interface HostEntryClickedParams {
   hostname: string;
-  cloud_provider?: string;
+  cloud_provider?: string | null;
 }
 
-export interface HostEntryClickedSchema {
-  hostname: SchemaValue<string>;
-  cloud_provider: SchemaValue<string | undefined>;
-}
+export type InfraTelemetryEventParams = HostsViewQuerySubmittedParams | HostEntryClickedParams;
 
 export interface ITelemetryClient {
   reportHostEntryClicked(params: HostEntryClickedParams): void;
   reportHostsViewQuerySubmitted(params: HostsViewQuerySubmittedParams): void;
 }
 
-export type InfraTelemetryEventParams = HostsViewQuerySubmittedParams | HostEntryClickedParams;
-
 export type InfraTelemetryEvent =
   | {
       eventType: InfraTelemetryEventTypes.HOSTS_VIEW_QUERY_SUBMITTED;
-      schema: HostsViewQuerySubmittedSchema;
+      schema: RootSchema<HostsViewQuerySubmittedParams>;
     }
   | {
       eventType: InfraTelemetryEventTypes.HOSTS_ENTRY_CLICKED;
-      schema: HostEntryClickedSchema;
+      schema: RootSchema<HostEntryClickedParams>;
     };

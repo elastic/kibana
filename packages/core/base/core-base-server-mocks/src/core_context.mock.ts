@@ -23,7 +23,7 @@ function create({
   logger?: jest.Mocked<LoggerFactory>;
   configService?: jest.Mocked<IConfigService>;
 } = {}): DeeplyMockedKeys<CoreContext> {
-  return { coreId: Symbol(), env, logger, configService };
+  return { coreId: Symbol(), env: env as DeeplyMockedKeys<typeof env>, logger, configService };
 }
 
 export const mockCoreContext = {

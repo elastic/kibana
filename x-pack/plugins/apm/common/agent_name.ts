@@ -6,6 +6,7 @@
  */
 
 import { AgentName } from '../typings/es_schemas/ui/fields/agent';
+import { ServerlessType } from './serverless';
 
 /*
  * Agent names can be any string. This list only defines the official agents
@@ -72,6 +73,10 @@ export function isMobileAgentName(agentName?: string) {
   return isIosAgentName(agentName) || isAndroidAgentName(agentName);
 }
 
+export function isRumOrMobileAgent(agentName?: string) {
+  return isRumAgentName(agentName) || isMobileAgentName(agentName);
+}
+
 export function isIosAgentName(agentName?: string) {
   const lowercased = agentName && agentName.toLowerCase();
   return lowercased === 'ios/swift';
@@ -81,8 +86,18 @@ export function isJRubyAgent(agentName?: string, runtimeName?: string) {
   return agentName === 'ruby' && runtimeName?.toLowerCase() === 'jruby';
 }
 
-export function isServerlessAgent(runtimeName?: string) {
-  return runtimeName?.toLowerCase().startsWith('aws_lambda');
+export function isServerlessAgent(serverlessType?: ServerlessType) {
+  return (
+    isAWSLambdaAgent(serverlessType) || isAzureFunctionsAgent(serverlessType)
+  );
+}
+
+export function isAWSLambdaAgent(serverlessType?: ServerlessType) {
+  return serverlessType === ServerlessType.AWS_LAMBDA;
+}
+
+export function isAzureFunctionsAgent(serverlessType?: ServerlessType) {
+  return serverlessType === ServerlessType.AZURE_FUNCTIONS;
 }
 
 export function isAndroidAgentName(agentName?: string) {

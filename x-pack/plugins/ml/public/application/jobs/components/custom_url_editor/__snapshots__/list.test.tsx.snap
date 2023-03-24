@@ -155,6 +155,9 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       </EuiFormRow>
     </EuiFlexItem>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
   <EuiFlexGroup
     data-test-subj="mlJobEditCustomUrlItem_1"
     key="url_1"
@@ -306,6 +309,9 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       </EuiFormRow>
     </EuiFlexItem>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
   <EuiFlexGroup
     data-test-subj="mlJobEditCustomUrlItem_2"
     key="url_2"
@@ -457,5 +463,8 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       </EuiFormRow>
     </EuiFlexItem>
   </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
 </div>
 `;

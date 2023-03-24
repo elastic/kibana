@@ -37,7 +37,6 @@ export type {
 export type { CreateOptions } from './methods/create';
 export type { FindOptions, FindResult } from './methods/find';
 export type { UpdateOptions } from './methods/update';
-export type { AggregateOptions, AggregateResult } from './methods/aggregate';
 export type { GetAlertSummaryParams } from './methods/get_alert_summary';
 export type {
   GetExecutionLogByIdParams,
@@ -72,6 +71,10 @@ export interface RulesClientContext {
 }
 
 export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
+
+export type NormalizedAlertActionWithUuid = Omit<RuleAction, 'actionTypeId' | 'uuid'> & {
+  uuid: string;
+};
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];

@@ -21,6 +21,9 @@ import {
   TIMESTAMP,
   ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
+import { AlertWithCommonFields800 } from '../8.0.0';
+
+import { SuppressionFields860 } from '../8.6.0';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.7.0.
 Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.7.0.
@@ -32,6 +35,11 @@ Then, update `../index.ts` to import from the new folder that has the latest sch
 new schemas to the union of all alert schemas, and re-export the new schemas as the `*Latest` schemas.
 */
 
+export interface SuppressionFields870 extends SuppressionFields860 {
+  [ALERT_INSTANCE_ID]: string;
+}
+
+export type AlertWithSuppressionFields870<T> = AlertWithCommonFields800<T> & SuppressionFields870;
 const commonAlertIdFieldNames = [ALERT_INSTANCE_ID, ALERT_UUID];
 export type CommonAlertIdFieldName870 = Values<typeof commonAlertIdFieldNames>;
 

@@ -21,5 +21,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./bulk_delete'));
+    loadTestFile(require.resolve('./clean'));
   });
 }

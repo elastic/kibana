@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { IRuleTypeAlerts } from '../types';
 
+export interface InitializationPromise {
+  result: boolean;
+  error?: string;
+}
 export interface ResourceInstallationHelper {
   add: (context: IRuleTypeAlerts, timeoutMs?: number) => void;
-  setReadyToInitialize: (timeoutMs?: number) => void;
-  getInitializedContexts: () => Map<string, Promise<boolean>>;
+  getInitializedContext: (context: string, delayMs?: number) => Promise<InitializationPromise>;
 }
 
 /**
@@ -25,57 +29,49 @@ export interface ResourceInstallationHelper {
  * running, kick off the processing loop
  */
 export function createResourceInstallationHelper(
-  initFn: (context: IRuleTypeAlerts, timeoutMs?: number) => Promise<void>
+  logger: Logger,
+  commonResourcesInitPromise: Promise<InitializationPromise>,
+  installFn: (context: IRuleTypeAlerts, timeoutMs?: number) => Promise<void>
 ): ResourceInstallationHelper {
-  let readyToInitialize = false;
-  let isInitializing: boolean = false;
-  const contextsToInitialize: IRuleTypeAlerts[] = [];
-  const initializedContexts: Map<string, Promise<boolean>> = new Map();
+  const initializedContexts: Map<string, Promise<InitializationPromise>> = new Map();
 
   const waitUntilContextResourcesInstalled = async (
     context: IRuleTypeAlerts,
     timeoutMs?: number
-  ): Promise<boolean> => {
+  ): Promise<InitializationPromise> => {
     try {
-      await initFn(context, timeoutMs);
-      return true;
-    } catch (err) {
-      return false;
-    }
-  };
-
-  const startInitialization = (timeoutMs?: number) => {
-    if (!readyToInitialize) {
-      return;
-    }
-
-    setImmediate(async () => {
-      isInitializing = true;
-      while (contextsToInitialize.length > 0) {
-        const context = contextsToInitialize.pop()!;
-        initializedContexts.set(
-          context.context,
-
-          // Return a promise than can be checked when needed
-          waitUntilContextResourcesInstalled(context, timeoutMs)
+      const { result: commonInitResult, error: commonInitError } = await commonResourcesInitPromise;
+      if (commonInitResult) {
+        await installFn(context, timeoutMs);
+        return successResult();
+      } else {
+        logger.warn(
+          `Common resources were not initialized, cannot initialize context for ${context.context}`
         );
+        return errorResult(commonInitError);
       }
-      isInitializing = false;
-    });
+    } catch (err) {
+      logger.error(`Error initializing context ${context.context} - ${err.message}`);
+      return errorResult(err.message);
+    }
   };
+
   return {
     add: (context: IRuleTypeAlerts, timeoutMs?: number) => {
-      contextsToInitialize.push(context);
-      if (!isInitializing) {
-        startInitialization(timeoutMs);
-      }
+      initializedContexts.set(
+        context.context,
+
+        // Return a promise than can be checked when needed
+        waitUntilContextResourcesInstalled(context, timeoutMs)
+      );
     },
-    setReadyToInitialize: (timeoutMs?: number) => {
-      readyToInitialize = true;
-      startInitialization(timeoutMs);
-    },
-    getInitializedContexts: () => {
-      return initializedContexts;
+    getInitializedContext: async (context: string): Promise<InitializationPromise> => {
+      return initializedContexts.has(context)
+        ? initializedContexts.get(context)!
+        : errorResult(`Unrecognized context ${context}`);
     },
   };
 }
+
+export const successResult = () => ({ result: true });
+export const errorResult = (error?: string) => ({ result: false, error });

@@ -195,7 +195,7 @@ export async function getAgentActions(esClient: ElasticsearchClient, actionId: s
   return res.hits.hits.map((hit) => ({
     ...hit._source,
     id: hit._id,
-  }));
+  })) as FleetServerAgentAction[];
 }
 
 export async function getUnenrollAgentActions(
@@ -234,14 +234,128 @@ export async function getUnenrollAgentActions(
 }
 
 export async function cancelAgentAction(esClient: ElasticsearchClient, actionId: string) {
+  const getUpgradeActions = async () => {
+    const res = await esClient.search<FleetServerAgentAction>({
+      index: AGENT_ACTIONS_INDEX,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                action_id: actionId,
+              },
+            },
+          ],
+        },
+      },
+      size: SO_SEARCH_LIMIT,
+    });
+
+    if (res.hits.hits.length === 0) {
+      throw new AgentActionNotFoundError('Action not found');
+    }
+
+    const upgradeActions: FleetServerAgentAction[] = res.hits.hits
+      .map((hit) => hit._source as FleetServerAgentAction)
+      .filter(
+        (action: FleetServerAgentAction | undefined): boolean =>
+          !!action && !!action.agents && !!action.action_id && action.type === 'UPGRADE'
+      );
+    return upgradeActions;
+  };
+
+  const cancelActionId = uuidv4();
+  const now = new Date().toISOString();
+
+  const cancelledActions: Array<{ agents: string[] }> = [];
+
+  const createAction = async (action: FleetServerAgentAction) => {
+    await createAgentAction(esClient, {
+      id: cancelActionId,
+      type: 'CANCEL',
+      agents: action.agents!,
+      data: {
+        target_id: action.action_id,
+      },
+      created_at: now,
+      expiration: action.expiration,
+    });
+    cancelledActions.push({
+      agents: action.agents!,
+    });
+  };
+
+  let upgradeActions = await getUpgradeActions();
+  for (const action of upgradeActions) {
+    await createAction(action);
+  }
+
+  const updateAgentsToHealthy = async (action: FleetServerAgentAction) => {
+    appContextService
+      .getLogger()
+      .info(
+        `Moving back ${
+          action.agents!.length
+        } agents from updating to healthy state after cancel upgrade`
+      );
+    const errors = {};
+    await bulkUpdateAgents(
+      esClient,
+      action.agents!.map((agentId: string) => ({
+        agentId,
+        data: {
+          upgraded_at: null,
+          upgrade_started_at: null,
+        },
+      })),
+      errors
+    );
+    if (Object.keys(errors).length > 0) {
+      appContextService
+        .getLogger()
+        .info(`Errors while bulk updating agents for cancel action: ${JSON.stringify(errors)}`);
+    }
+  };
+
+  for (const action of upgradeActions) {
+    await updateAgentsToHealthy(action);
+  }
+
+  // At the end of cancel, doing one more query on upgrade action to find those docs that were possibly created by a concurrent upgrade action.
+  // This is to make sure we cancel all upgrade batches.
+  upgradeActions = await getUpgradeActions();
+  if (cancelledActions.length < upgradeActions.length) {
+    const missingBatches = upgradeActions.filter(
+      (upgradeAction) =>
+        !cancelledActions.some(
+          (cancelled) => upgradeAction.agents && cancelled.agents[0] === upgradeAction.agents[0]
+        )
+    );
+    appContextService.getLogger().debug(`missing batches to cancel: ${missingBatches.length}`);
+    if (missingBatches.length > 0) {
+      for (const missingBatch of missingBatches) {
+        await createAction(missingBatch);
+        await updateAgentsToHealthy(missingBatch);
+      }
+    }
+  }
+
+  return {
+    created_at: now,
+    id: cancelActionId,
+    type: 'CANCEL',
+  } as AgentAction;
+}
+
+async function getAgentActionsByIds(esClient: ElasticsearchClient, actionIds: string[]) {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,
     query: {
       bool: {
-        must: [
+        filter: [
           {
-            term: {
-              action_id: actionId,
+            terms: {
+              action_id: actionIds,
             },
           },
         ],
@@ -254,43 +368,19 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
     throw new AgentActionNotFoundError('Action not found');
   }
 
-  const cancelActionId = uuidv4();
-  const now = new Date().toISOString();
-  for (const hit of res.hits.hits) {
-    if (!hit._source || !hit._source.agents || !hit._source.action_id) {
-      continue;
-    }
-    if (hit._source.type === 'UPGRADE') {
-      await bulkUpdateAgents(
-        esClient,
-        hit._source.agents.map((agentId) => ({
-          agentId,
-          data: {
-            upgraded_at: null,
-            upgrade_started_at: null,
-          },
-        })),
-        {}
-      );
-    }
-    await createAgentAction(esClient, {
-      id: cancelActionId,
-      type: 'CANCEL',
-      agents: hit._source.agents,
-      data: {
-        target_id: hit._source.action_id,
-      },
-      created_at: now,
-      expiration: hit._source.expiration,
-    });
-  }
-
-  return {
-    created_at: now,
-    id: cancelActionId,
-    type: 'CANCEL',
-  } as AgentAction;
+  return res.hits.hits.map((hit) => ({
+    ...hit._source,
+    id: hit._id,
+  })) as FleetServerAgentAction[];
 }
+
+export const getAgentsByActionsIds = async (
+  esClient: ElasticsearchClient,
+  actionsIds: string[]
+) => {
+  const actions = await getAgentActionsByIds(esClient, actionsIds);
+  return actions.flatMap((a) => a?.agents).filter((agent) => !!agent) as string[];
+};
 
 export interface ActionsService {
   getAgent: (
@@ -305,6 +395,5 @@ export interface ActionsService {
     esClient: ElasticsearchClient,
     newAgentAction: Omit<AgentAction, 'id'>
   ) => Promise<AgentAction>;
-
   getAgentActions: (esClient: ElasticsearchClient, actionId: string) => Promise<any[]>;
 }

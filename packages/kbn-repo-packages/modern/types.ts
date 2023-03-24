@@ -7,6 +7,7 @@
  */
 
 import type { Package } from './package';
+import type { PLUGIN_CATEGORY } from './plugin_category_info';
 
 /**
  * Simple parsed representation of a package.json file, validated
@@ -33,8 +34,7 @@ export interface ParsedPackageJson {
 }
 
 export type KibanaPackageType =
-  | 'plugin-browser'
-  | 'plugin-server'
+  | 'plugin'
   | 'shared-browser'
   | 'shared-server'
   | 'shared-common'
@@ -79,23 +79,35 @@ interface PackageManifestBaseFields {
      */
     noParse?: string[];
   };
+  /**
+   * A breif description of the package and what it provides
+   */
+  description?: string;
+  /**
+   * Creates sections in the documentations based on the exports of the folders listed here.
+   * If you need this you should probably split up your package, which is why this is deprecated.
+   * @deprecated
+   */
+  serviceFolders?: string[];
 }
 
 export interface PluginPackageManifest extends PackageManifestBaseFields {
-  type: 'plugin-browser' | 'plugin-server';
+  type: 'plugin';
   /**
-   * Details about the plugin which is contained within this package.
+   * Details about the plugin in this package
    */
   plugin: {
     id: string;
+    browser: boolean;
+    server: boolean;
     configPath?: string | string[];
     requiredPlugins?: string[];
     optionalPlugins?: string[];
     requiredBundles?: string[];
-    description?: string;
     enabledOnAnonymousPages?: boolean;
-    serviceFolders?: string[];
     type?: 'preboot';
+    extraPublicDirs?: string[];
+    [PLUGIN_CATEGORY]?: PluginCategoryInfo;
   };
 }
 
@@ -149,6 +161,14 @@ export interface PluginSelector {
    * Absolute paths to parent directories of plugin packages which will always be included, regardless of the other settings
    */
   limitParentDirs?: readonly string[];
+  /**
+   * When set to true, only select plugins which have server-side components
+   */
+  server?: boolean;
+  /**
+   * When set to true, only select plugins which have browser-side components
+   */
+  browser?: boolean;
 }
 
 export interface KbnImportReq {
@@ -166,7 +186,7 @@ export interface KbnImportReq {
   full: string;
 }
 
-export interface PluginTypeInfo {
+export interface PluginCategoryInfo {
   /** is this an oss plugin? */
   oss: boolean;
   /** is this an example plugin? */

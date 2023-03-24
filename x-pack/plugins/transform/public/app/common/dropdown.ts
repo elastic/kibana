@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { type EuiComboBoxOptionOption } from '@elastic/eui';
 // The display label used for an aggregation e.g. sum(bytes).
 export type Label = string;
 
@@ -14,7 +15,7 @@ export interface DropDownLabel {
 }
 
 // Label object structure for EUI's ComboBox with support for nesting.
-export interface DropDownOption {
+export interface DropDownOption extends EuiComboBoxOptionOption {
   label: Label;
   options: DropDownLabel[];
 }

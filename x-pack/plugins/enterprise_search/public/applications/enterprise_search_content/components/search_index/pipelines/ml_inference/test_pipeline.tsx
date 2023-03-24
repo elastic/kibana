@@ -19,6 +19,7 @@ import {
   EuiFormRow,
   EuiResizableContainer,
   EuiSpacer,
+  EuiTitle,
   EuiText,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
@@ -53,59 +54,107 @@ export const TestPipeline: React.FC = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
+        <EuiTitle size="xs">
+          <h4>
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.title',
+              { defaultMessage: 'Review pipeline results' }
+            )}
+          </h4>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText color="subdued">
+          <p>
+            <strong>
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.optionalCallout',
+                { defaultMessage: 'This step is optional.' }
+              )}
+            </strong>
+            &nbsp;
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.description',
+              {
+                defaultMessage:
+                  'You can simulate your pipeline results by passing an array of documents.',
+              }
+            )}
+            <br />
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.example.code"
+              defaultMessage="Use JSON format: {code}"
+              values={{
+                code: (
+                  <EuiCode>{`[{"_index":"index","_id":"id","_source":{"${sourceField}":"bar"}}]`}</EuiCode>
+                ),
+              }}
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument',
+            { defaultMessage: 'Search for a document' }
+          )}
+          helpText={i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument.helptext',
+            {
+              defaultMessage: 'Use a document to test your new pipeline. Search using document IDs',
+            }
+          )}
+          isInvalid={showGetDocumentErrors}
+          error={getDocumentsErr}
+        >
+          <EuiFieldText
+            fullWidth
+            prepend={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument.documentId',
+              { defaultMessage: 'Document ID' }
+            )}
+            inputRef={(ref: HTMLInputElement) => {
+              inputRef.current = ref;
+            }}
+            isInvalid={showGetDocumentErrors}
+            isLoading={isGetDocumentsLoading}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && inputRef.current?.value.trim().length !== 0) {
+                makeGetDocumentRequest({
+                  documentId: inputRef.current?.value.trim() ?? '',
+                  indexName,
+                });
+              }
+            }}
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+      </EuiFlexItem>
+      <EuiFlexItem>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiText>
-              <h4>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.title',
-                  { defaultMessage: 'Review pipeline results (optional)' }
-                )}
-              </h4>
-            </EuiText>
-            <EuiSpacer />
-            <EuiText>
               <h5>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.subtitle',
+                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.subtitle.documents',
                   { defaultMessage: 'Documents' }
                 )}
               </h5>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow
-              label={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument',
-                { defaultMessage: 'Add document' }
-              )}
-              helpText={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument.helptext',
-                { defaultMessage: 'Test with a document from your index' }
-              )}
-              isInvalid={showGetDocumentErrors}
-              error={getDocumentsErr}
-            >
-              <EuiFieldText
-                prepend={i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument.documentId',
-                  { defaultMessage: 'Document ID' }
+            <EuiText>
+              <h5>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.subtitle.result',
+                  { defaultMessage: 'Result' }
                 )}
-                inputRef={(ref: HTMLInputElement) => {
-                  inputRef.current = ref;
-                }}
-                isInvalid={showGetDocumentErrors}
-                isLoading={isGetDocumentsLoading}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && inputRef.current?.value.trim().length !== 0) {
-                    makeGetDocumentRequest({
-                      documentId: inputRef.current?.value.trim() ?? '',
-                      indexName,
-                    });
-                  }
-                }}
-              />
-            </EuiFormRow>
+              </h5>
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -146,41 +195,14 @@ export const TestPipeline: React.FC = () => {
       </EuiFlexItem>
       <EuiSpacer />
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs">
-          <EuiFlexItem>
-            <EuiText size="s">
-              <p>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.description',
-                  {
-                    defaultMessage:
-                      'You can simulate your pipeline results by passing an array of documents.',
-                  }
-                )}
-                <br />
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.example.code"
-                  defaultMessage="Use JSON format: {code}"
-                  values={{
-                    code: (
-                      <EuiCode>{`[{"_index":"index","_id":"id","_source":{"${sourceField}":"bar"}}]`}</EuiCode>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <div>
-              <EuiButton onClick={simulatePipeline}>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.runButton',
-                  { defaultMessage: 'Simulate Pipeline' }
-                )}
-              </EuiButton>
-            </div>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <div>
+          <EuiButton onClick={simulatePipeline}>
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.runButton',
+              { defaultMessage: 'Simulate Pipeline' }
+            )}
+          </EuiButton>
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

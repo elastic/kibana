@@ -7,7 +7,9 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { PublicUiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+
+export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 
 /** @public */
 export interface UiSettingsState {

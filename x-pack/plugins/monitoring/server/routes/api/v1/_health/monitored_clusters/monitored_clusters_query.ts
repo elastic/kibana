@@ -11,6 +11,7 @@ import {
   getElasticsearchDataset,
   getKibanaDataset,
   getLogstashDataset,
+  getEntsearchDataset,
 } from '../../../../../lib/cluster/get_index_patterns';
 
 const MAX_BUCKET_SIZE = 100;
@@ -187,7 +188,7 @@ export const enterpriseSearchQuery = ({ timeRange, timeout }: QueryOptions) => {
           size: MAX_BUCKET_SIZE,
         },
         aggs: {
-          enterpriseSearch: {
+          enterprisesearch: {
             terms: {
               field: 'agent.id',
             },
@@ -200,6 +201,11 @@ export const enterpriseSearchQuery = ({ timeRange, timeout }: QueryOptions) => {
                         {
                           term: {
                             'metricset.name': 'health',
+                          },
+                        },
+                        {
+                          term: {
+                            'data_stream.dataset': getEntsearchDataset('health'),
                           },
                         },
                       ],
@@ -217,6 +223,11 @@ export const enterpriseSearchQuery = ({ timeRange, timeout }: QueryOptions) => {
                         {
                           term: {
                             'metricset.name': 'stats',
+                          },
+                        },
+                        {
+                          term: {
+                            'data_stream.dataset': getEntsearchDataset('stats'),
                           },
                         },
                       ],

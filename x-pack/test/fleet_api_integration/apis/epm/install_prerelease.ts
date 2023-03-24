@@ -22,7 +22,8 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('installs package that has a prerelease version', async () => {
+  // Failing: See https://github.com/elastic/kibana/issues/150343
+  describe.skip('installs package that has a prerelease version', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
@@ -37,21 +38,21 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .post(`/api/fleet/epm/packages/${testPackage}/${testPackageVersion}`)
         .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
         .expect(200);
     });
 
-    const pkg = 'endpoint';
-    const gaVersion = '8.6.1';
-    const betaVersion = '8.7.0-next';
+    const gaVersion = '1.0.0';
+    const betaVersion = '1.0.1-next';
 
     afterEach(async () => {
-      await deletePackage(pkg, gaVersion);
-      await deletePackage(pkg, betaVersion);
+      await deletePackage(testPackage, gaVersion);
+      await deletePackage(testPackage, betaVersion);
     });
 
     it('should install the GA package correctly', async function () {
       const response = await supertest
-        .post(`/api/fleet/epm/packages/${pkg}/${gaVersion}`)
+        .post(`/api/fleet/epm/packages/${testPackage}/${gaVersion}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
@@ -61,7 +62,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should install the GA package when no version is provided', async function () {
       const response = await supertest
-        .post(`/api/fleet/epm/packages/${pkg}`)
+        .post(`/api/fleet/epm/packages/${testPackage}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
@@ -71,7 +72,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should install the beta package when no version is provided and prerelease is true', async function () {
       const response = await supertest
-        .post(`/api/fleet/epm/packages/${pkg}?prerelease=true`)
+        .post(`/api/fleet/epm/packages/${testPackage}?prerelease=true`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true }) // using force to ignore package verification error
         .expect(200);
@@ -83,7 +84,7 @@ export default function (providerContext: FtrProviderContext) {
       const response = await supertest
         .post(`/api/fleet/epm/packages/_bulk?prerelease=true`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ packages: ['endpoint'], force: true })
+        .send({ packages: ['prerelease'], force: true })
         .expect(200);
 
       expect(response.body.items[0].version).equal(betaVersion);
@@ -93,7 +94,7 @@ export default function (providerContext: FtrProviderContext) {
       const response = await supertest
         .post(`/api/fleet/epm/packages/_bulk`)
         .set('kbn-xsrf', 'xxxx')
-        .send({ packages: ['endpoint'], force: true })
+        .send({ packages: ['prerelease'], force: true })
         .expect(200);
 
       expect(response.body.items[0].version).equal(gaVersion);

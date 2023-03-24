@@ -6,8 +6,9 @@
  */
 import React, { useCallback } from 'react';
 
-import { useParams } from 'react-router-dom';
+import { useParams, useRouteMatch } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { MONITOR_ERRORS_ROUTE, MONITOR_HISTORY_ROUTE } from '../../../../../common/constants';
 import { ClientPluginsStart } from '../../../../plugin';
 import { PLUGIN } from '../../../../../common/constants/plugin';
 import { useSelectedLocation } from './hooks/use_selected_location';
@@ -22,6 +23,9 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
 
   const { services } = useKibana<ClientPluginsStart>();
 
+  const isErrorsTab = useRouteMatch(MONITOR_ERRORS_ROUTE);
+  const isHistoryTab = useRouteMatch(MONITOR_HISTORY_ROUTE);
+
   return (
     <MonitorLocationSelect
       isDisabled={isDisabled}
@@ -30,11 +34,21 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
       selectedLocation={selectedLocation}
       onChange={useCallback(
         (id, label) => {
-          services.application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
-            path: `/monitor/${monitorId}?locationId=${id}`,
-          });
+          if (isErrorsTab) {
+            services.application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
+              path: `/monitor/${monitorId}/errors?locationId=${id}`,
+            });
+          } else if (isHistoryTab) {
+            services.application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
+              path: `/monitor/${monitorId}/history/?locationId=${id}`,
+            });
+          } else {
+            services.application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
+              path: `/monitor/${monitorId}?locationId=${id}`,
+            });
+          }
         },
-        [monitorId, services.application]
+        [isErrorsTab, isHistoryTab, monitorId, services.application]
       )}
     />
   );

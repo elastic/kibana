@@ -71,5 +71,5 @@ export interface InjectedMetadata {
       user: Record<string, any>; // unreferencing UserProvidedValues here
     };
   };
-  customBranding: Pick<CustomBranding, 'logo' | 'customizedLogo'>;
+  customBranding: Pick<CustomBranding, 'logo' | 'customizedLogo' | 'pageTitle'>;
 }

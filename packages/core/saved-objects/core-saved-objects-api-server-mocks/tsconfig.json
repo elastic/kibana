@@ -13,7 +13,6 @@
   "kbn_references": [
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-api-server-internal",
-    "@kbn/core-saved-objects-utils-server",
     "@kbn/logging-mocks",
     "@kbn/core-saved-objects-server",
   ],

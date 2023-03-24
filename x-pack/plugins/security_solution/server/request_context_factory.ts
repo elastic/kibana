@@ -40,6 +40,8 @@ interface ConstructorOptions {
   plugins: SecuritySolutionPluginSetupDependencies;
   endpointAppContextService: EndpointAppContextService;
   ruleExecutionLogService: IRuleExecutionLogService;
+  kibanaVersion: string;
+  kibanaBranch: string;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -64,6 +66,8 @@ export class RequestContextFactory implements IRequestContextFactory {
     appClientFactory.setup({
       getSpaceId: startPlugins.spaces?.spacesService?.getSpaceId,
       config,
+      kibanaVersion: options.kibanaVersion,
+      kibanaBranch: options.kibanaBranch,
     });
 
     // List of endpoint authz for the current request's user. Will be initialized the first

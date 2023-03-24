@@ -14,7 +14,15 @@ import { ServerLogActionParams } from '../types';
 
 export const ServerLogParamsFields: React.FunctionComponent<
   ActionParamsProps<ServerLogActionParams>
-> = ({ actionParams, editAction, index, errors, messageVariables, defaultMessage }) => {
+> = ({
+  actionParams,
+  editAction,
+  index,
+  errors,
+  messageVariables,
+  defaultMessage,
+  useDefaultMessage,
+}) => {
   const { message, level } = actionParams;
   const levelOptions = [
     { value: 'trace', text: 'Trace' },
@@ -36,6 +44,7 @@ export const ServerLogParamsFields: React.FunctionComponent<
   >([false, defaultMessage]);
   useEffect(() => {
     if (
+      useDefaultMessage ||
       !actionParams?.message ||
       (isUsingDefault &&
         actionParams?.message === defaultMessageUsed &&

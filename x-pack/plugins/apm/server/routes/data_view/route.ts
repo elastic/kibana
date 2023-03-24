@@ -46,7 +46,6 @@ const dataViewTitleRoute = createApmServerRoute({
   handler: async ({
     context,
     config,
-    logger,
   }): Promise<{ apmDataViewTitle: string }> => {
     const coreContext = await context.core;
     const apmIndicies = await getApmIndices({

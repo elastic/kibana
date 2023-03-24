@@ -52,12 +52,17 @@ export const getFileWriteIndexName = (aliasName: string) => aliasName + '-000001
  * // return 'agent'
  */
 export const getIntegrationNameFromFileDataIndexName = (indexName: string): string => {
-  const integrationNameIndexPosition = FILE_STORAGE_DATA_INDEX_PATTERN.split('-').indexOf('*');
+  return getIntegrationNameFromIndexName(indexName, FILE_STORAGE_DATA_INDEX_PATTERN);
+};
+
+export const getIntegrationNameFromIndexName = (
+  indexName: string,
+  indexPattern: string
+): string => {
+  const integrationNameIndexPosition = indexPattern.split('-').indexOf('*');
 
   if (integrationNameIndexPosition === -1) {
-    throw new Error(
-      `Unable to parse index name. No '*' in index pattern: ${FILE_STORAGE_DATA_INDEX_PATTERN}`
-    );
+    throw new Error(`Unable to parse index name. No '*' in index pattern: ${indexPattern}`);
   }
 
   const indexPieces = indexName.split('-');
@@ -66,7 +71,7 @@ export const getIntegrationNameFromFileDataIndexName = (indexName: string): stri
     return indexPieces[integrationNameIndexPosition];
   }
 
-  throw new Error(`Index name ${indexName} does not seem to be a File Data storage index`);
+  throw new Error(`Index name ${indexName} does not seem to be a File storage index`);
 };
 
 export const getFileStorageWriteIndexBody = (aliasName: string) => ({

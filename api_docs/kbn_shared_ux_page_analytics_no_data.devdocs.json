@@ -66,7 +66,7 @@
           "\nA pure component of an entire page that can be displayed when Kibana \"has no data\", specifically for Analytics."
         ],
         "signature": [
-          "({ kibanaGuideDocLink, onDataViewCreated, allowAdHocDataView, }: ",
+          "({ kibanaGuideDocLink, onDataViewCreated, allowAdHocDataView, showPlainSpinner, }: ",
           "Props",
           ") => JSX.Element"
         ],
@@ -79,7 +79,7 @@
             "id": "def-common.AnalyticsNoDataPage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  kibanaGuideDocLink,\n  onDataViewCreated,\n  allowAdHocDataView,\n}",
+            "label": "{\n  kibanaGuideDocLink,\n  onDataViewCreated,\n  allowAdHocDataView,\n  showPlainSpinner,\n}",
             "description": [],
             "signature": [
               "Props"

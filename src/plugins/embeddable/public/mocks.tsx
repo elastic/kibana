@@ -14,6 +14,11 @@ import { type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
 
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import {
+  SavedObjectManagementTypeInfo,
+  SavedObjectsManagementPluginStart,
+} from '@kbn/saved-objects-management-plugin/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { UiActionsService } from './lib/ui_actions';
 import { EmbeddablePublicPlugin } from './plugin';
 import {
@@ -156,10 +161,28 @@ const createInstance = (setupPlugins: Partial<EmbeddableSetupDependencies> = {})
   const setup = plugin.setup(coreMock.createSetup(), {
     uiActions: setupPlugins.uiActions || uiActionsPluginMock.createSetupContract(),
   });
+  const savedObjectsManagementMock = {
+    parseQuery: (query: Query, types: SavedObjectManagementTypeInfo[]) => {
+      return {
+        queryText: 'some search',
+      };
+    },
+    getTagFindReferences: ({
+      selectedTags,
+      taggingApi,
+    }: {
+      selectedTags?: string[];
+      taggingApi?: SavedObjectsTaggingApi;
+    }) => {
+      return undefined;
+    },
+  };
   const doStart = (startPlugins: Partial<EmbeddableStartDependencies> = {}) =>
     plugin.start(coreMock.createStart(), {
       uiActions: startPlugins.uiActions || uiActionsPluginMock.createStartContract(),
       inspector: inspectorPluginMock.createStartContract(),
+      savedObjectsManagement:
+        savedObjectsManagementMock as unknown as SavedObjectsManagementPluginStart,
     });
   return {
     plugin,

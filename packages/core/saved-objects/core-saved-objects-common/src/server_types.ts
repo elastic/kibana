@@ -58,6 +58,11 @@ export interface SavedObjectReference {
   id: string;
 }
 
+/**
+ * Definition of the Saved Object interface
+ *
+ * @public
+ */
 export interface SavedObject<T = unknown> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
@@ -75,10 +80,15 @@ export interface SavedObject<T = unknown> {
   attributes: T;
   /** {@inheritdoc SavedObjectReference} */
   references: SavedObjectReference[];
-  /** {@inheritdoc SavedObjectsMigrationVersion} */
+  /**
+   * {@inheritdoc SavedObjectsMigrationVersion}
+   * @deprecated Use `typeMigrationVersion` instead.
+   */
   migrationVersion?: SavedObjectsMigrationVersion;
   /** A semver value that is used when upgrading objects between Kibana versions. */
   coreMigrationVersion?: string;
+  /** A semver value that is used when migrating documents between Kibana versions. */
+  typeMigrationVersion?: string;
   /**
    * Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with
    * `namespaceType: 'agnostic'`.

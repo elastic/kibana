@@ -53,7 +53,13 @@ const PercentageInfo = ({
   const percentage = getPostureScorePercentage(postureScore);
 
   return (
-    <EuiTitle css={{ fontSize: compact ? euiTheme.size.l : euiTheme.size.xxl }}>
+    <EuiTitle
+      css={{
+        fontSize: compact ? euiTheme.size.l : euiTheme.size.xxl,
+        paddingLeft: compact ? euiTheme.size.s : euiTheme.size.xs,
+        marginBottom: compact ? euiTheme.size.s : 'none',
+      }}
+    >
       <h3>{percentage}</h3>
     </EuiTitle>
   );

@@ -509,9 +509,11 @@
             "type": "Object",
             "tags": [],
             "label": "blockList",
-            "description": [],
+            "description": [
+              "\nAdd to blocklist feature"
+            ],
             "signature": [
-              "{ exceptionListApiClient: unknown; useSetUrlParams: () => (params: Record<string, string | number | null | undefined>, replace?: boolean | undefined) => void; getFlyoutComponent: () => React.NamedExoticComponent<",
+              "{ canWriteBlocklist: boolean; exceptionListApiClient: unknown; useSetUrlParams: () => (params: Record<string, string | number | null | undefined>, replace?: boolean | undefined) => void; getFlyoutComponent: () => React.NamedExoticComponent<",
               "BlockListFlyoutProps",
               ">; getFormComponent: () => React.NamedExoticComponent<",
               "BlockListFormProps",

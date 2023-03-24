@@ -26,6 +26,19 @@ describe('ui settings service', () => {
           schema: schema.string(),
         },
       });
+      // global uiSettings have to be registerd to be set
+      uiSettings.registerGlobal({
+        custom: {
+          value: '42',
+          schema: schema.string(),
+        },
+      });
+      uiSettings.registerGlobal({
+        foo: {
+          value: 'foo',
+          schema: schema.string(),
+        },
+      });
 
       await root.start();
     });

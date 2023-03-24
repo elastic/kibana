@@ -8,7 +8,7 @@
 
 import Path from 'path';
 import Os from 'os';
-import { getPluginSearchPaths } from '@kbn/plugin-discovery';
+import { getPackages, getPluginPackagesFilter, type PluginSelector } from '@kbn/repo-packages';
 
 import {
   Bundle,
@@ -20,7 +20,7 @@ import {
   omit,
 } from '../common';
 
-import { findKibanaPlatformPlugins, KibanaPlatformPlugin } from './kibana_platform_plugins';
+import { toKibanaPlatformPlugin, KibanaPlatformPlugin } from './kibana_platform_plugins';
 import { getPluginBundles } from './get_plugin_bundles';
 import { filterById } from './filter_by_id';
 import { focusBundles } from './focus_bundles';
@@ -64,16 +64,15 @@ interface Options {
   /** set to true to inspecting workers when the parent process is being inspected */
   inspectWorkers?: boolean;
 
-  /** include only oss plugins in default scan dirs */
-  oss?: boolean;
   /** include examples in default scan dirs */
   examples?: boolean;
-  /** absolute paths to specific plugins that should be built */
+  /** discover and build test plugins along with the standard plugins */
+  testPlugins?: boolean;
+  /** absolute paths to specific plugins which should be built */
   pluginPaths?: string[];
-  /** absolute paths to directories that should be built, overrides the default scan dirs */
+  /** absolute paths to directories, any plugins in these directories will be built */
   pluginScanDirs?: string[];
-  /** absolute paths that should be added to the default scan dirs */
-  extraPluginScanDirs?: string[];
+
   /**
    * array of comma separated patterns that will be matched against bundle ids.
    * bundles will only be built if they match one of the specified patterns.
@@ -86,6 +85,7 @@ interface Options {
    *  --filter f*r # [foobar], excludes [foo, bar]
    */
   filter?: string[];
+
   /**
    * behaves just like filter, but includes required bundles and plugins of the
    * listed bundle ids. Filters only apply to bundles selected by focus
@@ -109,9 +109,6 @@ interface Options {
 
   /** path to a limits.yml file that should be used to inform ci-stats of metric limits */
   limitsPath?: string;
-
-  /** discover and build test plugins along with the standard plugins */
-  testPlugins?: boolean;
 }
 
 export interface ParsedOptions {
@@ -122,19 +119,17 @@ export interface ParsedOptions {
   profileWebpack: boolean;
   cache: boolean;
   dist: boolean;
-  pluginPaths: string[];
-  pluginScanDirs: string[];
   filters: string[];
   focus: string[];
   inspectWorkers: boolean;
   includeCoreBundle: boolean;
   themeTags: ThemeTags;
+  pluginSelector: PluginSelector;
 }
 
 export class OptimizerConfig {
   static parseOptions(options: Options): ParsedOptions {
     const watch = !!options.watch;
-    const oss = !!options.oss;
     const dist = !!options.dist;
     const examples = !!options.examples;
     const profileWebpack = !!options.profileWebpack;
@@ -155,31 +150,6 @@ export class OptimizerConfig {
       throw new TypeError('outputRoot must be an absolute path');
     }
 
-    const pluginScanDirs =
-      options.pluginScanDirs ||
-      getPluginSearchPaths({
-        rootDir: repoRoot,
-        oss,
-        examples,
-        testPlugins,
-      });
-
-    if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {
-      throw new TypeError('pluginScanDirs must all be absolute paths');
-    }
-
-    for (const extraPluginScanDir of options.extraPluginScanDirs || []) {
-      if (!Path.isAbsolute(extraPluginScanDir)) {
-        throw new TypeError('extraPluginScanDirs must all be absolute paths');
-      }
-      pluginScanDirs.push(extraPluginScanDir);
-    }
-
-    const pluginPaths = options.pluginPaths || [];
-    if (!pluginPaths.every((s) => Path.isAbsolute(s))) {
-      throw new TypeError('pluginPaths must all be absolute paths');
-    }
-
     const maxWorkerCount = process.env.KBN_OPTIMIZER_MAX_WORKERS
       ? parseInt(process.env.KBN_OPTIMIZER_MAX_WORKERS, 10)
       : options.maxWorkerCount ?? pickMaxWorkerCount(dist);
@@ -191,6 +161,21 @@ export class OptimizerConfig {
       options.themes || (dist ? '*' : process.env.KBN_OPTIMIZER_THEMES)
     );
 
+    const pluginPaths = options.pluginPaths;
+    if (
+      pluginPaths !== undefined &&
+      !(Array.isArray(pluginPaths) && pluginPaths.every((p) => typeof p === 'string'))
+    ) {
+      throw new TypeError('pluginPaths must be an array of strings or undefined');
+    }
+    const pluginScanDirs = options.pluginScanDirs;
+    if (
+      pluginScanDirs !== undefined &&
+      !(Array.isArray(pluginScanDirs) && pluginScanDirs.every((p) => typeof p === 'string'))
+    ) {
+      throw new TypeError('pluginScanDirs must be an array of strings or undefined');
+    }
+
     return {
       watch,
       dist,
@@ -199,31 +184,42 @@ export class OptimizerConfig {
       maxWorkerCount,
       profileWebpack,
       cache,
-      pluginScanDirs,
-      pluginPaths,
       filters,
       focus,
       inspectWorkers,
       includeCoreBundle,
       themeTags,
+      pluginSelector: {
+        examples,
+        testPlugins,
+        paths: pluginPaths,
+        parentDirs: pluginScanDirs,
+      },
     };
   }
 
   static create(inputOptions: Options) {
     const limits = inputOptions.limitsPath ? readLimits(inputOptions.limitsPath) : {};
     const options = OptimizerConfig.parseOptions(inputOptions);
-    const plugins = findKibanaPlatformPlugins(options.pluginScanDirs, options.pluginPaths);
+    const plugins = getPackages(options.repoRoot)
+      .filter(getPluginPackagesFilter(options.pluginSelector))
+      .map((pkg) => toKibanaPlatformPlugin(options.repoRoot, pkg));
+
     const bundles = [
       ...(options.includeCoreBundle
         ? [
             new Bundle({
               type: 'entry',
               id: 'core',
-              publicDirNames: ['public'],
               sourceRoot: options.repoRoot,
               contextDir: Path.resolve(options.repoRoot, 'src/core'),
               outputDir: Path.resolve(options.outputRoot, 'src/core/target/public'),
               pageLoadAssetSizeLimit: limits.pageLoadAssetSize?.core,
+              remoteInfo: {
+                pkgId: '@kbn/core',
+                targets: ['public'],
+              },
+              ignoreMetrics: false,
             }),
           ]
         : []),

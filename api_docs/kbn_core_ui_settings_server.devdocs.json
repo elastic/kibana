@@ -43,15 +43,15 @@
               "\nReturns registered uiSettings values {@link UiSettingsParams}"
             ],
             "signature": [
-              "() => Readonly<Record<string, ",
+              "() => Readonly<Record<string, Omit<",
               {
                 "pluginId": "@kbn/core-ui-settings-common",
                 "scope": "common",
                 "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-                "section": "def-common.PublicUiSettingsParams",
-                "text": "PublicUiSettingsParams"
+                "section": "def-common.UiSettingsParams",
+                "text": "UiSettingsParams"
               },
-              ">>"
+              "<unknown>, \"schema\">>>"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-server/src/ui_settings_client.ts",
             "deprecated": false,

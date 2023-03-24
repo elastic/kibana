@@ -1,5 +1,5 @@
 {
-  "name": "app_link_test",
+  "name": "@kbn/app-link-test-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/app_link_test",
   "kibana": {

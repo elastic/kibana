@@ -11,7 +11,6 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from '@kbn/rison';
-import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
@@ -33,14 +32,15 @@ import {
   type Dictionary,
   type SetUrlState,
 } from '@kbn/ml-url-state';
+import { getSavedSearch, type SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
-  IndexDataVisualizerViewProps,
+  type IndexDataVisualizerViewProps,
   IndexDataVisualizerView,
 } from './components/index_data_visualizer_view';
 import { useDataVisualizerKibana } from '../kibana_context';
-import { GetAdditionalLinks } from '../common/components/results_links';
-import { DATA_VISUALIZER_APP_LOCATOR, IndexDataVisualizerLocatorParams } from './locator';
+import type { GetAdditionalLinks } from '../common/components/results_links';
+import { DATA_VISUALIZER_APP_LOCATOR, type IndexDataVisualizerLocatorParams } from './locator';
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
 import { INDEX_DATA_VISUALIZER_NAME } from '../common/constants';
 import { DV_STORAGE_KEYS } from './types/storage';
@@ -100,9 +100,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
   const { search: urlSearchString } = useLocation();
 
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>(undefined);
-  const [currentSavedSearch, setCurrentSavedSearch] = useState<SimpleSavedObject<unknown> | null>(
-    null
-  );
+  const [currentSavedSearch, setCurrentSavedSearch] = useState<SavedSearch | null>(null);
 
   const [currentSessionId, setCurrentSessionId] = useState<string | undefined>(undefined);
 
@@ -161,21 +159,21 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
       if (typeof parsedQueryString?.savedSearchId === 'string') {
         const savedSearchId = parsedQueryString.savedSearchId;
         try {
-          const savedSearch = await savedObjectsClient.get('search', savedSearchId);
-          const dataViewId = savedSearch.references.find((ref) => ref.type === 'index-pattern')?.id;
-          if (dataViewId !== undefined && savedSearch) {
-            try {
-              const dataView = await dataViews.get(dataViewId);
-              setCurrentSavedSearch(savedSearch);
-              setCurrentDataView(dataView);
-            } catch (e) {
-              toasts.addError(e, {
-                title: i18n.translate('xpack.dataVisualizer.index.dataViewErrorMessage', {
-                  defaultMessage: 'Error finding data view',
-                }),
-              });
-            }
+          const savedSearch = await getSavedSearch(savedSearchId, {
+            search,
+            savedObjectsClient,
+          });
+          const dataView = savedSearch.searchSource.getField('index');
+
+          if (!dataView) {
+            toasts.addDanger({
+              title: i18n.translate('xpack.dataVisualizer.index.dataViewErrorMessage', {
+                defaultMessage: 'Error finding data view',
+              }),
+            });
           }
+          setCurrentSavedSearch(savedSearch);
+          setCurrentDataView(dataView);
         } catch (e) {
           toasts.addError(e, {
             title: i18n.translate('xpack.dataVisualizer.index.savedSearchErrorMessage', {
@@ -192,7 +190,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
       }
     };
     getDataView();
-  }, [savedObjectsClient, toasts, dataViews, urlSearchString]);
+  }, [savedObjectsClient, toasts, dataViews, urlSearchString, search]);
 
   const setUrlState: SetUrlState = useCallback(
     (

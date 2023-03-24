@@ -23,7 +23,7 @@ import {
   EuiModalBody,
 } from '@elastic/eui';
 
-import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { resetAdvancedJob } from '../../../../../common/job_creator/util/general';
@@ -54,9 +54,10 @@ interface Props {
 export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
   const {
     services: {
-      savedObjects,
+      http,
       uiSettings,
       data: { dataViews },
+      savedObjectsManagement,
     },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
@@ -129,12 +130,10 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
       <EuiModal onClose={onClose} data-test-subj="mlJobMgmtImportJobsFlyout">
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <h1>
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.title"
-                defaultMessage="Change data view"
-              />
-            </h1>
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.datafeedStep.dataView.step0.title"
+              defaultMessage="Change data view"
+            />
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
@@ -148,7 +147,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
 
               <EuiSpacer size="s" />
 
-              <SavedObjectFinderUi
+              <SavedObjectFinder
                 key="searchSavedObjectFinder"
                 onChoose={onDataViewSelected}
                 showFilter
@@ -172,8 +171,11 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                   },
                 ]}
                 fixedPageSize={fixedPageSize}
-                uiSettings={uiSettings}
-                savedObjects={savedObjects}
+                services={{
+                  uiSettings,
+                  http,
+                  savedObjectsManagement,
+                }}
               />
             </>
           )}

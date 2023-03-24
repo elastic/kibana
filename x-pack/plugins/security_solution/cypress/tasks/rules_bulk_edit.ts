@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TIMELINE_SEARCHBOX, EUI_FILTER_SELECT_ITEM } from '../screens/common/controls';
+import { TIMELINE_SEARCHBOX, EUI_SELECTABLE_LIST_ITEM } from '../screens/common/controls';
 
 import {
   BULK_ACTIONS_BTN,
@@ -226,7 +226,7 @@ export const selectTimelineTemplate = (timelineTitle: string) => {
 export const checkTagsInTagsFilter = (tags: string[]) => {
   cy.get(RULES_TAGS_FILTER_BTN).contains(`Tags${tags.length}`).click();
 
-  cy.get(EUI_FILTER_SELECT_ITEM)
+  cy.get(EUI_SELECTABLE_LIST_ITEM)
     .should('have.length', tags.length)
     .each(($el, index) => {
       cy.wrap($el).should('have.text', tags[index]);

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IRouter, SavedObjectsType } from '@kbn/core/server';
-import { SavedObjectManagementTypeInfo } from '../../common';
+import type { IRouter, SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectManagementTypeInfo } from '../../common';
 
 const convertType = (sot: SavedObjectsType): SavedObjectManagementTypeInfo => {
   return {

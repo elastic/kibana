@@ -228,6 +228,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             transactionId: ids.producerConsumer.transactionCId,
             spanName: 'Transaction C',
             duration: 1000000,
+            environment: 'production',
           });
 
           const serviceDDetails = spanALinksDetails.childrenLinks.spanLinksDetails.find(
@@ -244,6 +245,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             transactionId: ids.producerMultiple.transactionDId,
             spanName: 'Transaction D',
             duration: 1000000,
+            environment: 'production',
           });
         });
       });
@@ -299,6 +301,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 duration: 100000,
                 spanSubtype: 'http',
                 spanType: 'external',
+                environment: 'production',
               },
             },
           ]);
@@ -341,6 +344,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 duration: 100000,
                 spanSubtype: 'http',
                 spanType: 'external',
+                environment: 'production',
               },
             },
             {
@@ -352,6 +356,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 transactionId: ids.producerExternalOnly.transactionBId,
                 duration: 1000000,
                 spanName: 'Transaction B',
+                environment: 'production',
               },
             },
             {
@@ -375,6 +380,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 duration: 100000,
                 spanSubtype: 'http',
                 spanType: 'external',
+                environment: 'production',
               },
             },
           ]);
@@ -396,6 +402,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 transactionId: ids.producerMultiple.transactionDId,
                 spanName: 'Transaction D',
                 duration: 1000000,
+                environment: 'production',
               },
             },
           ]);
@@ -438,6 +445,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 duration: 100000,
                 spanSubtype: 'http',
                 spanType: 'external',
+                environment: 'production',
               },
             },
             {
@@ -451,6 +459,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 duration: 100000,
                 spanSubtype: 'http',
                 spanType: 'external',
+                environment: 'production',
               },
             },
           ]);
@@ -475,6 +484,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 duration: 100000,
                 spanSubtype: 'http',
                 spanType: 'external',
+                environment: 'production',
               },
             },
             {
@@ -486,6 +496,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 transactionId: ids.producerConsumer.transactionCId,
                 spanName: 'Transaction C',
                 duration: 1000000,
+                environment: 'production',
               },
             },
           ]);

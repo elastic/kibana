@@ -55,6 +55,7 @@ const getMockedTimefilter = () => {
       enableAutoRefreshSelector: jest.fn(),
       getRefreshInterval: jest.fn(),
       setRefreshInterval: jest.fn(),
+      getActiveBounds: jest.fn(),
       getTime: jest.fn(),
       isAutoRefreshSelectorEnabled: jest.fn(),
       isTimeRangeSelectorEnabled: jest.fn(),
@@ -68,7 +69,7 @@ const getMockedTimefilter = () => {
   };
 };
 
-const getMockedDatePickeDependencies = () => {
+const getMockedDatePickerDependencies = () => {
   return {
     data: {
       query: {
@@ -138,7 +139,7 @@ describe('TimeSeriesExplorerUrlStateManager', () => {
     render(
       <MlContext.Provider value={kibanaContextValueMock}>
         <I18nProvider>
-          <DatePickerContextProvider {...getMockedDatePickeDependencies()}>
+          <DatePickerContextProvider {...getMockedDatePickerDependencies()}>
             <TimeSeriesExplorerUrlStateManager {...props} />
           </DatePickerContextProvider>
         </I18nProvider>

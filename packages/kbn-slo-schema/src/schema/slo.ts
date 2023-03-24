@@ -26,15 +26,18 @@ const objectiveSchema = t.intersection([
 ]);
 
 const settingsSchema = t.type({
-  timestampField: t.string,
   syncDelay: durationType,
   frequency: durationType,
 });
 
 const optionalSettingsSchema = t.partial({ ...settingsSchema.props });
 
+const tagsSchema = t.array(t.string);
+
+const sloIdSchema = t.string;
+
 const sloSchema = t.type({
-  id: t.string,
+  id: sloIdSchema,
   name: t.string,
   description: t.string,
   indicator: indicatorSchema,
@@ -43,6 +46,8 @@ const sloSchema = t.type({
   objective: objectiveSchema,
   settings: settingsSchema,
   revision: t.number,
+  enabled: t.boolean,
+  tags: tagsSchema,
   createdAt: dateType,
   updatedAt: dateType,
 });
@@ -55,7 +60,9 @@ export {
   occurrencesBudgetingMethodSchema,
   optionalSettingsSchema,
   settingsSchema,
+  sloIdSchema,
   sloSchema,
   sloWithSummarySchema,
+  tagsSchema,
   timeslicesBudgetingMethodSchema,
 };

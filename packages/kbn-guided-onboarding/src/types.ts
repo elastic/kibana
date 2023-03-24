@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-export type GuideId = 'kubernetes' | 'siem' | 'search' | 'testGuide';
+export type GuideId =
+  | 'kubernetes'
+  | 'siem'
+  | 'appSearch'
+  | 'websiteSearch'
+  | 'databaseSearch'
+  | 'testGuide';
 
 type KubernetesStepIds = 'add_data' | 'view_dashboard' | 'tour_observability';
 type SiemStepIds = 'add_data' | 'rules' | 'alertsCases';

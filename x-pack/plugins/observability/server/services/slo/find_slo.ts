@@ -6,9 +6,7 @@
  */
 
 import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
-import { IndicatorData, SLO, SLOId, SLOWithSummary } from '../../domain/models';
-import { computeErrorBudget, computeSLI, computeSummaryStatus } from '../../domain/services';
-import { SLIClient } from './sli_client';
+import { SLO, SLOId, SLOWithSummary, Summary } from '../../domain/models';
 import {
   Criteria,
   Paginated,
@@ -18,12 +16,13 @@ import {
   SortField,
   SortDirection,
 } from './slo_repository';
+import { SummaryClient } from './summary_client';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
 
 export class FindSLO {
-  constructor(private repository: SLORepository, private sliClient: SLIClient) {}
+  constructor(private repository: SLORepository, private summaryClient: SummaryClient) {}
 
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
     const pagination: Pagination = toPagination(params);
@@ -35,40 +34,27 @@ export class FindSLO {
       sort,
       pagination
     );
-    const indicatorDataBySlo = await this.sliClient.fetchCurrentSLIData(sloList);
-    const sloListWithSummary = computeSloWithSummary(sloList, indicatorDataBySlo);
+    const summaryBySlo = await this.summaryClient.fetchSummary(sloList);
 
-    return this.toResponse(sloListWithSummary, resultMeta);
-  }
+    const sloListWithSummary = mergeSloWithSummary(sloList, summaryBySlo);
 
-  private toResponse(
-    sloList: SLOWithSummary[],
-    resultMeta: Omit<Paginated<SLO>, 'results'>
-  ): FindSLOResponse {
     return findSLOResponseSchema.encode({
       page: resultMeta.page,
       perPage: resultMeta.perPage,
       total: resultMeta.total,
-      results: sloList,
+      results: sloListWithSummary,
     });
   }
 }
 
-function computeSloWithSummary(
+function mergeSloWithSummary(
   sloList: SLO[],
-  indicatorDataBySlo: Record<SLOId, IndicatorData>
+  summaryBySlo: Record<SLOId, Summary>
 ): SLOWithSummary[] {
-  const sloListWithSummary: SLOWithSummary[] = [];
-  for (const slo of sloList) {
-    const sliValue = computeSLI(indicatorDataBySlo[slo.id]);
-    const errorBudget = computeErrorBudget(slo, indicatorDataBySlo[slo.id]);
-    const status = computeSummaryStatus(slo, sliValue, errorBudget);
-    sloListWithSummary.push({
-      ...slo,
-      summary: { status, sliValue, errorBudget },
-    });
-  }
-  return sloListWithSummary;
+  return sloList.map((slo) => ({
+    ...slo,
+    summary: summaryBySlo[slo.id],
+  }));
 }
 
 function toPagination(params: FindSLOParams): Pagination {

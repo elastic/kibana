@@ -19,7 +19,7 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import type {
-  CaseUserActionAttributes,
+  CaseUserActionAttributesWithoutConnectorId,
   ConnectorUserAction,
   UserAction,
 } from '../../../common/api';
@@ -45,15 +45,15 @@ import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_fr
 import { transformFindResponseToExternalModel } from './transform';
 
 export const createUserActionFindSO = (
-  userAction: SavedObject<CaseUserActionAttributes>
-): SavedObjectsFindResult<CaseUserActionAttributes> => ({
+  userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>
+): SavedObjectsFindResult<CaseUserActionAttributesWithoutConnectorId> => ({
   ...userAction,
   score: 0,
 });
 
 export const createConnectorUserAction = (
-  overrides?: Partial<CaseUserActionAttributes>
-): SavedObject<CaseUserActionAttributes> => {
+  overrides?: Partial<CaseUserActionAttributesWithoutConnectorId>
+): SavedObject<CaseUserActionAttributesWithoutConnectorId> => {
   const { id, ...restConnector } = createConnectorObject().connector;
   return {
     ...createUserActionSO({
@@ -79,12 +79,12 @@ export const createUserActionSO = ({
   action: UserAction;
   type?: string;
   payload?: Record<string, unknown>;
-  attributesOverrides?: Partial<CaseUserActionAttributes>;
+  attributesOverrides?: Partial<CaseUserActionAttributesWithoutConnectorId>;
   commentId?: string;
   connectorId?: string;
   pushedConnectorId?: string;
   references?: SavedObjectReference[];
-}): SavedObject<CaseUserActionAttributes> => {
+}): SavedObject<CaseUserActionAttributesWithoutConnectorId> => {
   const defaultParams = {
     action,
     created_at: 'abc',
@@ -140,14 +140,14 @@ export const createUserActionSO = ({
           ]
         : []),
     ],
-  } as SavedObject<CaseUserActionAttributes>;
+  } as SavedObject<CaseUserActionAttributesWithoutConnectorId>;
 };
 
 export const updateConnectorUserAction = ({
   overrides,
 }: {
-  overrides?: Partial<CaseUserActionAttributes>;
-} = {}): SavedObject<CaseUserActionAttributes> => {
+  overrides?: Partial<CaseUserActionAttributesWithoutConnectorId>;
+} = {}): SavedObject<CaseUserActionAttributesWithoutConnectorId> => {
   const { id, ...restConnector } = createJiraConnector();
   return {
     ...createUserActionSO({
@@ -163,8 +163,8 @@ export const updateConnectorUserAction = ({
 export const pushConnectorUserAction = ({
   overrides,
 }: {
-  overrides?: Partial<CaseUserActionAttributes>;
-} = {}): SavedObject<CaseUserActionAttributes> => {
+  overrides?: Partial<CaseUserActionAttributesWithoutConnectorId>;
+} = {}): SavedObject<CaseUserActionAttributesWithoutConnectorId> => {
   const { connector_id: connectorId, ...restExternalService } = createExternalService();
   return {
     ...createUserActionSO({
@@ -177,7 +177,7 @@ export const pushConnectorUserAction = ({
   };
 };
 
-export const createCaseUserAction = (): SavedObject<CaseUserActionAttributes> => {
+export const createCaseUserAction = (): SavedObject<CaseUserActionAttributesWithoutConnectorId> => {
   const { id, ...restConnector } = createJiraConnector();
   return {
     ...createUserActionSO({
@@ -231,7 +231,7 @@ export const createExternalReferenceUserAction = () => {
 
 export const testConnectorId = (
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry,
-  userAction: SavedObject<CaseUserActionAttributes>,
+  userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>,
   path: string,
   expectedConnectorId = '1'
 ) => {
@@ -252,7 +252,9 @@ export const testConnectorId = (
     };
     const transformed = transformFindResponseToExternalModel(
       createSOFindResponse([
-        createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
+        createUserActionFindSO(
+          invalidUserAction as SavedObject<CaseUserActionAttributesWithoutConnectorId>
+        ),
       ]),
       persistableStateAttachmentTypeRegistry
     );
@@ -267,7 +269,9 @@ export const testConnectorId = (
     };
     const transformed = transformFindResponseToExternalModel(
       createSOFindResponse([
-        createUserActionFindSO(invalidUserAction as SavedObject<CaseUserActionAttributes>),
+        createUserActionFindSO(
+          invalidUserAction as SavedObject<CaseUserActionAttributesWithoutConnectorId>
+        ),
       ]),
       persistableStateAttachmentTypeRegistry
     ) as SavedObjectsFindResponse<ConnectorUserAction>;

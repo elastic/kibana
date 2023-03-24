@@ -20,6 +20,7 @@ import { TransactionsTable } from '../../../shared/transactions_table';
 import { replace } from '../../../shared/links/url_helpers';
 import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 import { MobileTransactionCharts } from './transaction_charts';
+import { MobileTreemap } from '../charts/mobile_treemap';
 
 export function MobileTransactionOverview() {
   const {
@@ -63,6 +64,18 @@ export function MobileTransactionOverview() {
       <EuiFlexItem>
         <EuiHorizontalRule />
       </EuiFlexItem>
+      <EuiFlexItem grow={10}>
+        <EuiPanel hasBorder={true}>
+          <MobileTreemap
+            serviceName={serviceName}
+            kuery={kueryWithMobileFilters}
+            environment={environment}
+            start={start}
+            end={end}
+          />
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiSpacer size="s" />
       <MobileTransactionCharts
         transactionType={transactionType}
         serviceName={serviceName}
@@ -78,7 +91,7 @@ export function MobileTransactionOverview() {
         <TransactionsTable
           hideViewTransactionsLink
           numberOfTransactionsPerPage={25}
-          showAggregationAccurateCallout
+          showMaxTransactionGroupsExceededWarning
           environment={environment}
           kuery={kueryWithMobileFilters}
           start={start}

@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { useMonitorDetailsPage } from '../use_monitor_details_page';
 import { useMonitorErrors } from '../hooks/use_monitor_errors';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { ErrorsTabContent } from './errors_tab_content';
@@ -22,9 +23,14 @@ import { ErrorsTabContent } from './errors_tab_content';
 export const MonitorErrors = () => {
   const { errorStates, loading, data } = useMonitorErrors();
 
-  const initialLoading = loading && !data;
+  const initialLoading = !data;
 
-  const emptyState = !loading && errorStates.length === 0;
+  const emptyState = !loading && errorStates && errorStates?.length === 0;
+
+  const redirect = useMonitorDetailsPage();
+  if (redirect) {
+    return redirect;
+  }
 
   return (
     <>
@@ -33,7 +39,7 @@ export const MonitorErrors = () => {
       {initialLoading && <LoadingErrors />}
       {emptyState && <EmptyErrors />}
       <div style={{ visibility: initialLoading || emptyState ? 'collapse' : 'initial' }}>
-        <ErrorsTabContent errorStates={errorStates} loading={loading} />
+        <ErrorsTabContent errorStates={errorStates ?? []} loading={loading} />
       </div>
     </>
   );
@@ -80,7 +86,8 @@ const EmptyErrors = () => {
 };
 
 const KEEP_CALM = i18n.translate('xpack.synthetics.errors.keepCalm', {
-  defaultMessage: 'Keep calm and carry on.',
+  defaultMessage:
+    'This monitor ran successfully during the selected period. Increase the time range to check for older errors.',
 });
 
 const NO_ERRORS_FOUND = i18n.translate('xpack.synthetics.errors.noErrorsFound', {

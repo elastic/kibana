@@ -489,22 +489,6 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable.getDescription",
-            "type": "Function",
-            "tags": [],
-            "label": "getDescription",
-            "description": [],
-            "signature": [
-              "() => string | undefined"
-            ],
-            "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
             "id": "def-public.MapEmbeddable.getFilters",
             "type": "Function",
             "tags": [],
@@ -850,10 +834,10 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable._getFilters",
+            "id": "def-public.MapEmbeddable._getInputFilters",
             "type": "Function",
             "tags": [],
-            "label": "_getFilters",
+            "label": "_getInputFilters",
             "description": [],
             "signature": [
               "() => ",

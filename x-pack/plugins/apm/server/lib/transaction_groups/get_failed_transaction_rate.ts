@@ -31,6 +31,7 @@ import {
 } from '../helpers/transaction_error_rate';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { APMEventClient } from '../helpers/create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../common/document_type';
 
 export async function getFailedTransactionRate({
   environment,
@@ -81,7 +82,11 @@ export async function getFailedTransactionRate({
     ...kqlQuery(kuery),
   ];
 
-  const outcomes = getOutcomeAggregation();
+  const outcomes = getOutcomeAggregation(
+    searchAggregatedTransactions
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.TransactionEvent
+  );
 
   const params = {
     apm: {
@@ -92,7 +97,7 @@ export async function getFailedTransactionRate({
       size: 0,
       query: { bool: { filter } },
       aggs: {
-        outcomes,
+        ...outcomes,
         timeseries: {
           date_histogram: {
             field: '@timestamp',
@@ -106,7 +111,7 @@ export async function getFailedTransactionRate({
             extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
           aggs: {
-            outcomes,
+            ...outcomes,
           },
         },
       },
@@ -124,7 +129,7 @@ export async function getFailedTransactionRate({
   const timeseries = getFailedTransactionRateTimeSeries(
     resp.aggregations.timeseries.buckets
   );
-  const average = calculateFailedTransactionRate(resp.aggregations.outcomes);
+  const average = calculateFailedTransactionRate(resp.aggregations);
 
   return { timeseries, average };
 }

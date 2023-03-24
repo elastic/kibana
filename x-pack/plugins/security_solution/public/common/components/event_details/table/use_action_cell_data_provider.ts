@@ -29,7 +29,7 @@ import { getDisplayValue } from '../../../../timelines/components/timeline/data_
 import { PORT_NAMES } from '../../../../explore/network/components/port/helpers';
 import { INDICATOR_REFERENCE } from '../../../../../common/cti/constants';
 import type { BrowserField } from '../../../containers/source';
-import type { DataProvider, QueryOperator } from '../../../../../common/types';
+import type { DataProvider, DataProvidersAnd, QueryOperator } from '../../../../../common/types';
 import { IS_OPERATOR } from '../../../../../common/types';
 
 export interface UseActionCellDataProvider {
@@ -68,6 +68,16 @@ export const getDataProvider = (
     displayValue: getDisplayValue(value),
   },
 });
+
+export const getDataProviderAnd = (
+  field: string,
+  id: string,
+  value: string | string[],
+  operator: QueryOperator = IS_OPERATOR
+): DataProvidersAnd => {
+  const { and, ...dataProvider } = getDataProvider(field, id, value, operator);
+  return dataProvider;
+};
 
 export const useActionCellDataProvider = ({
   contextId,

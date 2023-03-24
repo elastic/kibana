@@ -15,16 +15,15 @@ import type { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
 import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
 
 import type { RuleToImport } from '../../../../../common/detection_engine/rule_management';
-import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
 import type {
   AlertSuppression,
   RuleResponse,
+  AlertSuppressionCamel,
 } from '../../../../../common/detection_engine/rule_schema';
 
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesActionsSavedObject } from '../../rule_actions_legacy';
-import type { RuleExecutionSummariesByRuleId } from '../../rule_monitoring';
-import type { AlertSuppressionCamel, RuleAlertType, RuleParams } from '../../rule_schema';
+import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
@@ -96,12 +95,28 @@ export const transformAlertsToRules = (
   rules: RuleAlertType[],
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
 ): RuleResponse[] => {
-  return rules.map((rule) => internalRuleToAPIResponse(rule, null, legacyRuleActions[rule.id]));
+  return rules.map((rule) => internalRuleToAPIResponse(rule, legacyRuleActions[rule.id]));
+};
+
+/**
+ * Transforms a rule object to exportable format. Exportable format shouldn't contain runtime fields like
+ * `execution_summary`
+ */
+export const transformRuleToExportableFormat = (
+  rule: RuleResponse
+): Omit<RuleResponse, 'execution_summary'> => {
+  const exportedRule = {
+    ...rule,
+  };
+
+  // Fields containing runtime information shouldn't be exported. It causes import failures.
+  delete exportedRule.execution_summary;
+
+  return exportedRule;
 };
 
 export const transformFindAlerts = (
   ruleFindResults: FindResult<RuleParams>,
-  ruleExecutionSummariesByRuleId: RuleExecutionSummariesByRuleId,
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject | undefined>
 ): {
   page: number;
@@ -114,19 +129,17 @@ export const transformFindAlerts = (
     perPage: ruleFindResults.perPage,
     total: ruleFindResults.total,
     data: ruleFindResults.data.map((rule) => {
-      const executionSummary = ruleExecutionSummariesByRuleId[rule.id];
-      return internalRuleToAPIResponse(rule, executionSummary, legacyRuleActions[rule.id]);
+      return internalRuleToAPIResponse(rule, legacyRuleActions[rule.id]);
     }),
   };
 };
 
 export const transform = (
   rule: PartialRule<RuleParams>,
-  ruleExecutionSummary?: RuleExecutionSummary | null,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): RuleResponse | null => {
   if (isAlertType(rule)) {
-    return internalRuleToAPIResponse(rule, ruleExecutionSummary, legacyRuleActions);
+    return internalRuleToAPIResponse(rule, legacyRuleActions);
   }
 
   return null;
@@ -365,6 +378,7 @@ export const convertAlertSuppressionToCamel = (
   input
     ? {
         groupBy: input.group_by,
+        duration: input.duration,
       }
     : undefined;
 
@@ -374,5 +388,6 @@ export const convertAlertSuppressionToSnake = (
   input
     ? {
         group_by: input.groupBy,
+        duration: input.duration,
       }
     : undefined;

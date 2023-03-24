@@ -6,7 +6,7 @@
  */
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
@@ -16,9 +16,10 @@ import {
   EuiButtonIcon,
   EuiDataGridStyle,
   EuiLoadingContent,
+  EuiDataGridRefProps,
 } from '@elastic/eui';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
-import { AlertsTableProps } from '../../../types';
+import { AlertsTableProps, FetchAlertData } from '../../../types';
 import {
   ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
   ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL,
@@ -26,6 +27,9 @@ import {
 
 import './alerts_table.scss';
 import { getToolbarVisibility } from './toolbar';
+import { InspectButtonContainer } from './toolbar/components/inspect';
+import { SystemCellId } from './types';
+import { SystemCellFactory, systemCells } from './cells';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 
@@ -36,18 +40,44 @@ const GridStyles: EuiDataGridStyle = {
   fontSize: 's',
 };
 
+const basicRenderCellValue = ({
+  data,
+  columnId,
+}: {
+  data: Array<{ field: string; value: string[] }>;
+  ecsData?: FetchAlertData['ecsAlertsData'][number];
+  columnId: string;
+}) => {
+  const value = data.find((d) => d.field === columnId)?.value ?? [];
+  if (Array.isArray(value)) {
+    return <>{value.length ? value.join() : '--'}</>;
+  }
+  return <>{value}</>;
+};
+
+const isSystemCell = (columnId: string): columnId is SystemCellId => {
+  return systemCells.includes(columnId as SystemCellId);
+};
+
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
-  const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
+  const dataGridRef = useRef<EuiDataGridRefProps>(null);
+  const [_, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
   const alertsData = props.useFetchAlertsData();
   const {
     activePage,
     alerts,
+    oldAlertsData,
+    ecsAlertsData,
     alertsCount,
     isLoading,
     onPageChange,
     onSortChange,
     sort: sortingFields,
+    refresh: alertsRefresh,
+    getInspectQuery,
   } = alertsData;
+  const { cases, isLoading: isLoadingCases } = props.casesData;
+
   const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
 
   const { renderCustomActionsRow, actionsColumnWidth, getSetIsActionLoadingCallback } =
@@ -61,10 +91,17 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     bulkActionsState,
     bulkActions,
     setIsBulkActionsLoading,
+    clearSelection,
   } = useBulkActions({
     alerts,
+    query: props.query,
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
   });
+
+  const refresh = useCallback(() => {
+    alertsRefresh();
+    clearSelection();
+  }, [alertsRefresh, clearSelection]);
 
   const {
     pagination,
@@ -86,6 +123,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     updatedAt,
     browserFields,
     onChangeVisibleColumns,
+    showAlertStatusWithFlapping = false,
+    showInspectButton = false,
   } = props;
 
   // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
@@ -98,6 +137,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     },
     [alerts, setFlyoutAlertIndex]
   );
+
+  const fieldBrowserOptions = props.alertsTableConfiguration.useFieldBrowserOptions
+    ? props.alertsTableConfiguration?.useFieldBrowserOptions({
+        onToggleColumn,
+      })
+    : undefined;
 
   const toolbarVisibility = useCallback(() => {
     const { rowSelection } = bulkActionsState;
@@ -114,6 +159,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       browserFields,
       controls: props.controls,
       setIsBulkActionsLoading,
+      clearSelection,
+      refresh,
+      fieldBrowserOptions,
+      getInspectQuery,
+      showInspectButton,
+      toolbarVisiblityProp: props.toolbarVisibility,
     });
   }, [
     bulkActionsState,
@@ -128,6 +179,12 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     browserFields,
     props.controls,
     setIsBulkActionsLoading,
+    clearSelection,
+    refresh,
+    fieldBrowserOptions,
+    getInspectQuery,
+    showInspectButton,
+    props.toolbarVisibility,
   ])();
 
   const leadingControlColumns = useMemo(() => {
@@ -172,12 +229,18 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
                   </EuiFlexItem>
                 )}
                 {renderCustomActionsRow &&
-                  alerts[visibleRowIndex] &&
+                  ecsAlertsData[visibleRowIndex] &&
                   renderCustomActionsRow({
                     alert: alerts[visibleRowIndex],
+                    ecsAlert: ecsAlertsData[visibleRowIndex],
+                    nonEcsData: oldAlertsData[visibleRowIndex],
+                    rowIndex: visibleRowIndex,
                     setFlyoutAlert: handleFlyoutAlert,
                     id: props.id,
+                    cveProps,
                     setIsActionLoading: getSetIsActionLoadingCallback(visibleRowIndex),
+                    refresh,
+                    clearSelection,
                   })}
               </EuiFlexGroup>
             );
@@ -195,6 +258,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   }, [
     actionsColumnWidth,
     alerts,
+    oldAlertsData,
+    ecsAlertsData,
     getBulkActionsLeadingControlColumn,
     handleFlyoutAlert,
     isBulkActionsColumnActive,
@@ -204,6 +269,8 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     renderCustomActionsRow,
     setFlyoutAlertIndex,
     getSetIsActionLoadingCallback,
+    refresh,
+    clearSelection,
   ]);
 
   useEffect(() => {
@@ -215,20 +282,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   }, [flyoutAlertIndex, pagination.pageIndex, pagination.pageSize]);
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
-
-  const basicRenderCellValue = ({
-    data,
-    columnId,
-  }: {
-    data: Array<{ field: string; value: string[] }>;
-    columnId: string;
-  }) => {
-    const value = data.find((d) => d.field === columnId)?.value ?? [];
-    if (Array.isArray(value)) {
-      return <>{value.length ? value.join() : '--'}</>;
-    }
-    return <>{value}</>;
-  };
 
   const renderCellValue = useCallback(
     () =>
@@ -243,62 +296,119 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const handleRenderCellValue = useCallback(
     (_props: EuiDataGridCellValueElementProps) => {
       // https://github.com/elastic/eui/issues/5811
-      const alert = alerts[_props.rowIndex - pagination.pageSize * pagination.pageIndex];
+      const idx = _props.rowIndex - pagination.pageSize * pagination.pageIndex;
+      const alert = alerts[idx];
+      // ecsAlert is needed for security solution
+      const ecsAlert = ecsAlertsData[idx];
       if (alert) {
         const data: Array<{ field: string; value: string[] }> = [];
         Object.entries(alert ?? {}).forEach(([key, value]) => {
           data.push({ field: key, value: value as string[] });
         });
+
+        if (isSystemCell(_props.columnId)) {
+          return (
+            <SystemCellFactory
+              alert={alert}
+              columnId={_props.columnId}
+              isLoading={isLoading || isLoadingCases}
+              cases={cases}
+              showAlertStatusWithFlapping={showAlertStatusWithFlapping}
+            />
+          );
+        }
+
         return renderCellValue({
           ..._props,
           data,
+          ecsData: ecsAlert,
         });
       } else if (isLoading) {
         return <EuiLoadingContent lines={1} />;
       }
       return null;
     },
-    [alerts, isLoading, pagination.pageIndex, pagination.pageSize, renderCellValue]
+    [
+      alerts,
+      ecsAlertsData,
+      cases,
+      isLoading,
+      isLoadingCases,
+      pagination.pageIndex,
+      pagination.pageSize,
+      renderCellValue,
+      showAlertStatusWithFlapping,
+    ]
   );
 
+  const { getCellActions, visibleCellActions, disabledCellActions } = props.alertsTableConfiguration
+    ?.useCellActions
+    ? props.alertsTableConfiguration?.useCellActions({
+        columns: props.columns,
+        data: oldAlertsData,
+        ecsData: ecsAlertsData,
+        dataGridRef,
+        pageSize: pagination.pageSize,
+      })
+    : { getCellActions: () => null, visibleCellActions: undefined, disabledCellActions: [] };
+
+  const columnsWithCellActions = useMemo(() => {
+    if (getCellActions) {
+      return props.columns.map((col, idx) => ({
+        ...col,
+        ...(!(disabledCellActions ?? []).includes(col.id)
+          ? {
+              cellActions: getCellActions(col.id, idx) ?? [],
+              visibleCellActions,
+            }
+          : {}),
+      }));
+    }
+    return props.columns;
+  }, [getCellActions, disabledCellActions, props.columns, visibleCellActions]);
+
   return (
-    <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
-      <Suspense fallback={null}>
-        {flyoutAlertIndex > -1 && (
-          <AlertsFlyout
-            alert={alerts[flyoutAlertIndex]}
-            alertsCount={alertsCount}
-            onClose={handleFlyoutClose}
-            alertsTableConfiguration={props.alertsTableConfiguration}
-            flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
-            onPaginate={onPaginateFlyout}
-            isLoading={isLoading}
-            id={props.id}
+    <InspectButtonContainer>
+      <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
+        <Suspense fallback={null}>
+          {flyoutAlertIndex > -1 && (
+            <AlertsFlyout
+              alert={alerts[flyoutAlertIndex]}
+              alertsCount={alertsCount}
+              onClose={handleFlyoutClose}
+              alertsTableConfiguration={props.alertsTableConfiguration}
+              flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
+              onPaginate={onPaginateFlyout}
+              isLoading={isLoading}
+              id={props.id}
+            />
+          )}
+        </Suspense>
+        {alertsCount > 0 && (
+          <EuiDataGrid
+            aria-label="Alerts table"
+            data-test-subj="alertsTable"
+            columns={columnsWithCellActions}
+            columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
+            trailingControlColumns={props.trailingControlColumns}
+            leadingControlColumns={leadingControlColumns}
+            rowCount={alertsCount}
+            renderCellValue={handleRenderCellValue}
+            gridStyle={{ ...GridStyles, ...(props.gridStyle ?? {}) }}
+            sorting={{ columns: sortingColumns, onSort }}
+            toolbarVisibility={toolbarVisibility}
+            pagination={{
+              ...pagination,
+              pageSizeOptions: props.pageSizeOptions,
+              onChangeItemsPerPage: onChangePageSize,
+              onChangePage: onChangePageIndex,
+            }}
+            rowHeightsOptions={props.rowHeightsOptions}
+            ref={dataGridRef}
           />
         )}
-      </Suspense>
-      {alertsCount > 0 && (
-        <EuiDataGrid
-          aria-label="Alerts table"
-          data-test-subj="alertsTable"
-          columns={props.columns}
-          columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
-          trailingControlColumns={props.trailingControlColumns}
-          leadingControlColumns={leadingControlColumns}
-          rowCount={alertsCount}
-          renderCellValue={handleRenderCellValue}
-          gridStyle={{ ...GridStyles, rowClasses }}
-          sorting={{ columns: sortingColumns, onSort }}
-          toolbarVisibility={toolbarVisibility}
-          pagination={{
-            ...pagination,
-            pageSizeOptions: props.pageSizeOptions,
-            onChangeItemsPerPage: onChangePageSize,
-            onChangePage: onChangePageIndex,
-          }}
-        />
-      )}
-    </section>
+      </section>
+    </InspectButtonContainer>
   );
 };
 

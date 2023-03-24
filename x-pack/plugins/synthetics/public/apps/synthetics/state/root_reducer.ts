@@ -7,6 +7,7 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
+import { overviewStatusReducer, OverviewStatusStateReducer } from './overview_status';
 import { browserJourneyReducer } from './browser_journey';
 import { defaultAlertingReducer, DefaultAlertingState } from './alert_rules';
 import { manualTestRunsReducer, ManualTestRunsState } from './manual_test_runs';
@@ -21,7 +22,6 @@ import { agentPoliciesReducer, AgentPoliciesState } from './private_locations';
 import { networkEventsReducer, NetworkEventsState } from './network_events';
 import { monitorDetailsReducer, MonitorDetailsState } from './monitor_details';
 import { uiReducer, UiState } from './ui';
-import { indexStatusReducer, IndexStatusState } from './index_status';
 import { syntheticsEnablementReducer, SyntheticsEnablementState } from './synthetics_enablement';
 import { monitorListReducer, MonitorListState } from './monitor_list';
 import { serviceLocationsReducer, ServiceLocationsState } from './service_locations';
@@ -35,7 +35,6 @@ export interface SyntheticsAppState {
   pingStatus: PingStatusState;
   elasticsearch: QueriesState;
   monitorList: MonitorListState;
-  indexStatus: IndexStatusState;
   overview: MonitorOverviewState;
   networkEvents: NetworkEventsState;
   agentPolicies: AgentPoliciesState;
@@ -45,6 +44,7 @@ export interface SyntheticsAppState {
   defaultAlerting: DefaultAlertingState;
   dynamicSettings: DynamicSettingsState;
   serviceLocations: ServiceLocationsState;
+  overviewStatus: OverviewStatusStateReducer;
   syntheticsEnablement: SyntheticsEnablementState;
 }
 
@@ -53,7 +53,6 @@ export const rootReducer = combineReducers<SyntheticsAppState>({
   settings: settingsReducer,
   pingStatus: pingStatusReducer,
   monitorList: monitorListReducer,
-  indexStatus: indexStatusReducer,
   overview: monitorOverviewReducer,
   networkEvents: networkEventsReducer,
   elasticsearch: elasticsearchReducer,
@@ -61,6 +60,7 @@ export const rootReducer = combineReducers<SyntheticsAppState>({
   monitorDetails: monitorDetailsReducer,
   browserJourney: browserJourneyReducer,
   manualTestRuns: manualTestRunsReducer,
+  overviewStatus: overviewStatusReducer,
   defaultAlerting: defaultAlertingReducer,
   dynamicSettings: dynamicSettingsReducer,
   serviceLocations: serviceLocationsReducer,

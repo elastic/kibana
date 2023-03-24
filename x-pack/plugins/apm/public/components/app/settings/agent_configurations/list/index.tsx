@@ -80,6 +80,7 @@ export function AgentConfigurationList({
           }
         >
           <EuiButton
+            data-test-subj="apmAgentConfigurationListCreateConfigurationButton"
             color="primary"
             fill
             href={createAgentConfigurationHref}
@@ -97,7 +98,7 @@ export function AgentConfigurationList({
 
   const failurePrompt = (
     <EuiEmptyPrompt
-      iconType="alert"
+      iconType="warning"
       body={
         <>
           <p>
@@ -158,6 +159,7 @@ export function AgentConfigurationList({
       sortable: true,
       render: (_, config: Config) => (
         <EuiButtonEmpty
+          data-test-subj="apmColumnsButton"
           flush="left"
           size="s"
           color="primary"

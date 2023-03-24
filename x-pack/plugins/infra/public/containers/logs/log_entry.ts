@@ -30,7 +30,10 @@ export const useLogEntry = ({
       return !!logEntryId && !!sourceId
         ? {
             request: {
-              params: logEntrySearchRequestParamsRT.encode({ sourceId, logEntryId }),
+              params: logEntrySearchRequestParamsRT.encode({
+                logView: { type: 'log-view-reference', logViewId: sourceId },
+                logEntryId,
+              }),
             },
             options: { strategy: LOG_ENTRY_SEARCH_STRATEGY },
           }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { css } from 'styled-components';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
@@ -18,6 +18,7 @@ import { InputsModelId } from '../../store/inputs/constants';
 import { useRefetchByRestartingSession } from '../page/use_refetch_by_session';
 import { LensEmbeddable } from './lens_embeddable';
 import type { EmbeddableData, VisualizationEmbeddableProps } from './types';
+import { useSourcererDataView } from '../../containers/sourcerer';
 
 const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> = (props) => {
   const dispatch = useDispatch();
@@ -28,18 +29,22 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
     label,
     donutTextWrapperClassName,
     onLoad,
-    ...lensPorps
+    ...lensProps
   } = props;
-  const { session, refetchByRestartingSession } = useRefetchByRestartingSession({
-    inputId,
-    queryId: id,
-  });
+  const { session, refetchByRestartingSession, refetchByDeletingSession } =
+    useRefetchByRestartingSession({
+      inputId,
+      queryId: id,
+    });
+  const { indicesExist } = useSourcererDataView(lensProps.scopeId);
+
+  const memorizedTimerange = useRef(lensProps.timerange);
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
-  const { inspect } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
+  const { inspect, searchSessionId } = useDeepEqualSelector((state) => getGlobalQuery(state, id));
   const visualizationData = inspect?.response
     ? parseVisualizationData<VisualizationAlertsByStatusResponse>(inspect?.response)
     : null;
-  const dataExists = visualizationData != null && visualizationData[0]?.hits.total !== 0;
+  const dataExists = visualizationData != null && visualizationData[0]?.hits?.total !== 0;
   const donutTextWrapperStyles = dataExists
     ? css`
         top: 40%;
@@ -70,17 +75,42 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
   );
 
   useEffect(() => {
-    dispatch(
-      inputsActions.setQuery({
-        inputId,
-        id,
-        searchSessionId: session.current.start(),
-        refetch: refetchByRestartingSession,
-        loading: false,
-        inspect: null,
-      })
-    );
-  }, [dispatch, inputId, id, refetchByRestartingSession, session]);
+    // This handles timerange update when (alert) indices not found
+    if (
+      (!indicesExist && memorizedTimerange.current?.from !== lensProps.timerange.from) ||
+      memorizedTimerange.current?.to !== lensProps.timerange.to
+    ) {
+      memorizedTimerange.current = lensProps.timerange;
+      dispatch(inputsActions.deleteOneQuery({ inputId, id }));
+    }
+  }, [dispatch, id, indicesExist, inputId, lensProps.timerange]);
+
+  useEffect(() => {
+    // This handles initial mount and refetch when (alert) indices not found
+    if (!searchSessionId) {
+      setTimeout(() => {
+        dispatch(
+          inputsActions.setQuery({
+            inputId,
+            id,
+            searchSessionId: session.current.start(),
+            refetch: dataExists ? refetchByRestartingSession : refetchByDeletingSession,
+            loading: false,
+            inspect: null,
+          })
+        );
+      }, 200);
+    }
+  }, [
+    dispatch,
+    inputId,
+    id,
+    session,
+    dataExists,
+    refetchByRestartingSession,
+    searchSessionId,
+    refetchByDeletingSession,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -88,22 +118,26 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
     };
   }, [dispatch, id, inputId]);
 
+  if ((!lensProps.getLensAttributes && !lensProps.lensAttributes) || !lensProps.timerange) {
+    return null;
+  }
+
   if (isDonut) {
     return (
       <DonutChartWrapper
         isChartEmbeddablesEnabled={true}
         dataExists={dataExists}
         label={label}
-        title={dataExists ? <ChartLabel count={visualizationData[0]?.hits.total} /> : null}
+        title={dataExists ? <ChartLabel count={visualizationData[0]?.hits?.total} /> : null}
         donutTextWrapperClassName={donutTextWrapperClassName}
         donutTextWrapperStyles={donutTextWrapperStyles}
       >
-        <LensEmbeddable {...lensPorps} id={id} onLoad={onEmbeddableLoad} />
+        <LensEmbeddable {...lensProps} id={id} onLoad={onEmbeddableLoad} />
       </DonutChartWrapper>
     );
   }
 
-  return <LensEmbeddable {...lensPorps} id={id} onLoad={onEmbeddableLoad} />;
+  return <LensEmbeddable {...lensProps} id={id} onLoad={onEmbeddableLoad} />;
 };
 
 export const VisualizationEmbeddable = React.memo(VisualizationEmbeddableComponent);

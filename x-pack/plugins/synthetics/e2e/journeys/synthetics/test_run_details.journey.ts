@@ -34,6 +34,12 @@ journey(`TestRunDetailsPage`, async ({ page, params }) => {
       },
       'a47bfc4e-361a-4eb0-83f3-b5bb68781b5b'
     );
+    await services.addTestSummaryDocument({
+      docType: 'summaryUp',
+      monitorId: 'a47bfc4e-361a-4eb0-83f3-b5bb68781b5b',
+      configId: 'a47bfc4e-361a-4eb0-83f3-b5bb68781b5b',
+      locationName: 'North America - US Central',
+    });
   });
 
   after(async () => {
@@ -59,6 +65,6 @@ journey(`TestRunDetailsPage`, async ({ page, params }) => {
 
     await page.waitForSelector('text=Test run details');
     await page.waitForSelector('text=Go to https://www.google.com');
-    await page.waitForSelector('text=After 2.1 s');
+    await page.waitForSelector('text=After 2.12 s');
   });
 });

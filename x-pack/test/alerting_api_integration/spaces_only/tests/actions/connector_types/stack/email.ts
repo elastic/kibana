@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ObjectRemover } from '../../../../../common/lib';
-import { EmailDomainsAllowed } from '../../../../config';
+import { EmailDomainsAllowed } from '../../config';
 
 const EmailDomainAllowed = EmailDomainsAllowed[EmailDomainsAllowed.length - 1];
 

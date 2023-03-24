@@ -48,4 +48,5 @@ export interface ObservabilityAppServices {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   uiSettings: IUiSettingsClient;
   isDev?: boolean;
+  kibanaVersion: string;
 }

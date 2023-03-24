@@ -71,9 +71,8 @@ jest.mock('../../../../common/components/query_bar', () => ({
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
-jest.mock('../../../../common/components/visualization_actions', () => ({
-  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
-}));
+jest.mock('../../../../common/components/visualization_actions/actions');
+jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
 
 const myState: State = mockGlobalState;
 const { storage } = createSecuritySolutionStorageMock();

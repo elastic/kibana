@@ -15,6 +15,7 @@ const baseAllowlistFields: AllowlistFields = {
   executable: true,
   code_signature: true,
   command_line: true,
+  env_vars: true,
   hash: true,
   pid: true,
   pe: true,
@@ -38,6 +39,8 @@ const baseAllowlistFields: AllowlistFields = {
       integrity_level_name: true,
       security_attributes: true,
     },
+    effective_parent: true,
+    device: true,
   },
   thread: true,
   working_directory: true,
@@ -54,9 +57,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     malware_signature: true,
     pe: true,
     Ext: {
-      device: {
-        volume_device_type: true,
-      },
+      device: true,
       load_index: true,
       relative_file_creation_time: true,
       relative_file_name_modify_time: true,
@@ -114,6 +115,8 @@ const allowlistBaseEventFields: AllowlistFields = {
     id: true,
   },
   Persistence: true,
+  /* eslint-disable @typescript-eslint/naming-convention */
+  Effective_process: true,
 };
 
 // Allow list for the data we include in the events. True means that it is deep-cloned
@@ -146,5 +149,6 @@ export const endpointAllowlistFields: AllowlistFields = {
   host: {
     os: true,
   },
+  package_version: true,
   ...allowlistBaseEventFields,
 };

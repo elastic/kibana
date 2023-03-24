@@ -53,6 +53,7 @@ interface AlertContextMenuProps {
   ecsRowData: Ecs;
   onRuleChange?: () => void;
   scopeId: string;
+  refetch: (() => void) | undefined;
 }
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux> = ({
@@ -65,6 +66,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   scopeId,
   globalQuery,
   timelineQuery,
+  refetch,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [isOsqueryFlyoutOpen, setOsqueryFlyoutOpen] = useState(false);
@@ -144,8 +146,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       }
     } else {
       refetchQuery(globalQuery);
+      if (refetch) refetch();
     }
-  }, [scopeId, globalQuery, timelineQuery, routeProps]);
+  }, [scopeId, globalQuery, timelineQuery, routeProps, refetch]);
 
   const ruleIndex =
     ecsRowData['kibana.alert.rule.parameters']?.index ?? ecsRowData?.signal?.rule?.index;
@@ -245,6 +248,17 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     ]
   );
 
+  const osqueryFlyout = useMemo(() => {
+    return (
+      <OsqueryFlyout
+        agentId={agentId}
+        defaultValues={alertId ? { alertIds: [alertId] } : undefined}
+        onClose={handleOnOsqueryClick}
+        ecsData={ecsRowData}
+      />
+    );
+  }, [agentId, alertId, ecsRowData, handleOnOsqueryClick]);
+
   return (
     <>
       {items.length > 0 && (
@@ -285,14 +299,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       {isAddEventFilterModalOpen && ecsRowData != null && (
         <EventFiltersFlyout data={ecsRowData} onCancel={closeAddEventFilterModal} />
       )}
-      {isOsqueryFlyoutOpen && agentId && ecsRowData != null && (
-        <OsqueryFlyout
-          agentId={agentId}
-          defaultValues={alertId ? { alertIds: [alertId] } : undefined}
-          onClose={handleOnOsqueryClick}
-          ecsData={ecsRowData}
-        />
-      )}
+      {isOsqueryFlyoutOpen && agentId && ecsRowData != null && osqueryFlyout}
     </>
   );
 };

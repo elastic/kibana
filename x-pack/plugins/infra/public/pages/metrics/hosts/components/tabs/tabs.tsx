@@ -6,36 +6,68 @@
  */
 
 import React from 'react';
-import { EuiTabbedContent, EuiSpacer, type EuiTabbedContentTab } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
 import { MetricsGrid } from './metrics/metrics_grid';
+import { AlertsTabContent } from './alerts';
 
-interface WrapperProps {
-  children: React.ReactElement;
-}
-const Wrapper = ({ children }: WrapperProps) => {
+import { AlertsTabBadge } from './alerts_tab_badge';
+import { TabIds, useTabId } from '../../hooks/use_tab_id';
+
+const tabs = [
+  {
+    id: TabIds.METRICS,
+    name: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.title', {
+      defaultMessage: 'Metrics',
+    }),
+    'data-test-subj': 'hostsView-tabs-metrics',
+  },
+  {
+    id: TabIds.ALERTS,
+    name: i18n.translate('xpack.infra.hostsViewPage.tabs.alerts.title', {
+      defaultMessage: 'Alerts',
+    }),
+    append: <AlertsTabBadge />,
+    'data-test-subj': 'hostsView-tabs-alerts',
+  },
+];
+
+export const Tabs = () => {
+  const [selectedTabId, setSelectedTabId] = useTabId(tabs[0].id);
+  // This map allow to keep track of which tabs content have been rendered the first time.
+  // We need it in order to load a tab content only if it gets clicked, and then keep it in the DOM for performance improvement.
+  const renderedTabsSet = useLazyRef(() => new Set([selectedTabId]));
+
+  const tabEntries = tabs.map((tab, index) => (
+    <EuiTab
+      {...tab}
+      key={index}
+      onClick={() => {
+        renderedTabsSet.current.add(tab.id); // On a tab click, mark the tab content as allowed to be rendered
+        setSelectedTabId(tab.id);
+      }}
+      isSelected={tab.id === selectedTabId}
+      append={tab.append}
+    >
+      {tab.name}
+    </EuiTab>
+  ));
+
   return (
     <>
-      <EuiSpacer size="s" />
-      {children}
+      <EuiTabs>{tabEntries}</EuiTabs>
+      <EuiSpacer />
+      {renderedTabsSet.current.has(TabIds.METRICS) && (
+        <div hidden={selectedTabId !== TabIds.METRICS}>
+          <MetricsGrid />
+        </div>
+      )}
+      {renderedTabsSet.current.has(TabIds.ALERTS) && (
+        <div hidden={selectedTabId !== TabIds.ALERTS}>
+          <AlertsTabContent />
+        </div>
+      )}
     </>
   );
-};
-export const Tabs = () => {
-  const tabs: EuiTabbedContentTab[] = [
-    {
-      id: 'metrics',
-      name: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.title', {
-        defaultMessage: 'Metrics',
-      }),
-      'data-test-subj': 'hostsView-tabs-metrics',
-      content: (
-        <Wrapper>
-          <MetricsGrid />
-        </Wrapper>
-      ),
-    },
-  ];
-
-  return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />;
 };

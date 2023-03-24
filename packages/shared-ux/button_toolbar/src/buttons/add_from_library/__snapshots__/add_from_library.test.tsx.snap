@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<ToolbarButton /> is rendered 1`] = `
+exports[`<AddFromLibraryButton /> is rendered 1`] = `
 <button
-  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-EuiButton"
   intl="[object Object]"
   type="button"
 >

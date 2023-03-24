@@ -178,14 +178,91 @@ describe('ExperimentDatastreamSettings', () => {
           },
         },
       ]);
-      expect(experimentalDataFeatures).toEqual([
+    });
+  });
+  describe('TSDB', () => {
+    it('should be enabled and unchecked by default', () => {
+      const mockSetNewExperimentalDataFeatures = jest.fn();
+      const res = createFleetTestRendererMock().render(
+        <ExperimentDatastreamSettings
+          registryDataStream={{ type: 'logs', dataset: 'test' } as unknown as RegistryDataStream}
+          experimentalDataFeatures={[]}
+          setNewExperimentalDataFeatures={mockSetNewExperimentalDataFeatures}
+        />
+      );
+
+      const tsdbSwitch = res.getByTestId('packagePolicyEditor.tsdbExperimentalFeature.switch');
+
+      expect(tsdbSwitch).toBeEnabled();
+      expect(tsdbSwitch).not.toBeChecked();
+      expect(mockSetNewExperimentalDataFeatures).not.toBeCalled();
+    });
+
+    it('should be enabled and checked if registry data streams includes "elasticsearch.index_mode: time_series"', () => {
+      const mockSetNewExperimentalDataFeatures = jest.fn();
+      const res = createFleetTestRendererMock().render(
+        <ExperimentDatastreamSettings
+          registryDataStream={
+            {
+              type: 'logs',
+              dataset: 'test',
+              elasticsearch: {
+                index_mode: 'time_series',
+              },
+            } as unknown as RegistryDataStream
+          }
+          experimentalDataFeatures={[]}
+          setNewExperimentalDataFeatures={mockSetNewExperimentalDataFeatures}
+        />
+      );
+
+      const tsdbSwitch = res.getByTestId('packagePolicyEditor.tsdbExperimentalFeature.switch');
+
+      expect(tsdbSwitch).toBeEnabled();
+      expect(tsdbSwitch).toBeChecked();
+      expect(mockSetNewExperimentalDataFeatures).not.toBeCalled();
+    });
+
+    it('should not mutate other experimental features when changed', () => {
+      const experimentalDataFeatures = [
         {
           data_stream: 'logs-test',
           features: {
-            synthetic_source: true,
-            tsdb: false,
             doc_value_only_numeric: false,
             doc_value_only_other: false,
+            synthetic_source: true,
+            tsdb: false,
+          },
+        },
+      ];
+
+      const mockSetNewExperimentalDataFeatures = jest.fn();
+      const res = createFleetTestRendererMock().render(
+        <ExperimentDatastreamSettings
+          registryDataStream={
+            {
+              type: 'logs',
+              dataset: 'test',
+            } as unknown as RegistryDataStream
+          }
+          experimentalDataFeatures={experimentalDataFeatures}
+          setNewExperimentalDataFeatures={mockSetNewExperimentalDataFeatures}
+        />
+      );
+
+      act(() => {
+        fireEvent.click(res.getByTestId('packagePolicyEditor.tsdbExperimentalFeature.switch'));
+      });
+
+      expect(mockSetNewExperimentalDataFeatures).toBeCalled();
+      expect(mockSetNewExperimentalDataFeatures.mock.calls[0][0]).toEqual([
+        {
+          data_stream: 'logs-test',
+          features: {
+            doc_value_only_numeric: false,
+            doc_value_only_other: false,
+            synthetic_source: true,
+            tsdb: true,
           },
         },
       ]);

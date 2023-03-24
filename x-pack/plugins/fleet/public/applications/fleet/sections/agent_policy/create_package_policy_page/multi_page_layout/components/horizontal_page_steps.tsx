@@ -28,7 +28,7 @@ const NumberlessHorizontalSteps = styled(EuiStepsHorizontal)`
   .euiStepHorizontal {
     padding: 25px 16px 16px;
   }
-  .euiStepHorizontal-isIncomplete .euiStepHorizontal__title {
+  .euiStepHorizontal[data-step-status='incomplete'] .euiStepHorizontal__title {
     color: #69707d;
   }
 `;

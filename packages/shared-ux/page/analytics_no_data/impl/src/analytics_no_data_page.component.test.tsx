@@ -27,6 +27,7 @@ describe('AnalyticsNoDataPageComponent', () => {
         <AnalyticsNoDataPage
           onDataViewCreated={onDataViewCreated}
           kibanaGuideDocLink={'http://www.test.com'}
+          showPlainSpinner={false}
         />
       </AnalyticsNoDataPageProvider>
     );
@@ -50,6 +51,7 @@ describe('AnalyticsNoDataPageComponent', () => {
           onDataViewCreated={onDataViewCreated}
           kibanaGuideDocLink={'http://www.test.com'}
           allowAdHocDataView={true}
+          showPlainSpinner={false}
         />
       </AnalyticsNoDataPageProvider>
     );

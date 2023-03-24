@@ -19,25 +19,40 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
+import { getClusterIdQuery } from './benchmarks_section';
+import { CSPM_POLICY_TEMPLATE, INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
 import { Cluster } from '../../../../common/types';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 
 const defaultClusterTitle = i18n.translate(
   'xpack.csp.dashboard.benchmarkSection.defaultClusterTitle',
-  { defaultMessage: 'Cluster ID' }
+  { defaultMessage: 'ID' }
 );
+
+const getClusterTitle = (cluster: Cluster) => {
+  if (cluster.meta.benchmark.posture_type === CSPM_POLICY_TEMPLATE) {
+    return cluster.meta.cloud?.account.name;
+  }
+
+  return cluster.meta.cluster?.name;
+};
+
+const getClusterId = (cluster: Cluster) => {
+  const assetIdentifierId = cluster.meta.assetIdentifierId;
+  if (cluster.meta.benchmark.posture_type === CSPM_POLICY_TEMPLATE) return assetIdentifierId;
+  return assetIdentifierId.slice(0, 6);
+};
 
 export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
   const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
 
-  const shortId = cluster.meta.clusterId.slice(0, 6);
-  const title = cluster.meta.clusterName || defaultClusterTitle;
+  const assetId = getClusterId(cluster);
+  const title = getClusterTitle(cluster) || defaultClusterTitle;
 
-  const handleClusterTitleClick = (clusterId: string) => {
-    navToFindings({ cluster_id: clusterId });
+  const handleClusterTitleClick = () => {
+    return navToFindings(getClusterIdQuery(cluster));
   };
 
   return (
@@ -54,25 +69,25 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
               <strong>
                 <FormattedMessage
                   id="xpack.csp.dashboard.benchmarkSection.clusterTitleTooltip.clusterTitle"
-                  defaultMessage="{title} - {shortId}"
+                  defaultMessage="{title} - {assetId}"
                   values={{
                     title,
-                    shortId,
+                    assetId,
                   }}
                 />
               </strong>
             </EuiText>
           }
         >
-          <EuiLink onClick={() => handleClusterTitleClick(cluster.meta.clusterId)} color="text">
+          <EuiLink onClick={handleClusterTitleClick} color="text">
             <EuiTitle css={{ fontSize: 20 }}>
               <h5>
                 <FormattedMessage
                   id="xpack.csp.dashboard.benchmarkSection.clusterTitle"
-                  defaultMessage="{title} - {shortId}"
+                  defaultMessage="{title} - {assetId}"
                   values={{
                     title,
-                    shortId,
+                    assetId,
                   }}
                 />
               </h5>
@@ -93,7 +108,7 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
         grow={true}
         style={{ justifyContent: 'flex-end', paddingBottom: euiTheme.size.m }}
       >
-        <CISBenchmarkIcon type={cluster.meta.benchmarkId} name={cluster.meta.benchmarkName} />
+        <CISBenchmarkIcon type={cluster.meta.benchmark.id} name={cluster.meta.benchmark.name} />
       </EuiFlexItem>
       {INTERNAL_FEATURE_FLAGS.showManageRulesMock && (
         <EuiFlexItem grow={false}>

@@ -281,11 +281,15 @@ export const getDataFilters = createSelector(
 
 export const getSpatialFiltersLayer = createSelector(
   getFilters,
+  getEmbeddableSearchContext,
   getMapSettings,
-  (filters, settings) => {
+  (filters, embeddableSearchContext, settings) => {
     const featureCollection: FeatureCollection = {
       type: 'FeatureCollection',
-      features: extractFeaturesFromFilters(filters),
+      features: extractFeaturesFromFilters([
+        ...filters,
+        ...(embeddableSearchContext?.filters ?? []),
+      ]),
     };
     const geoJsonSourceDescriptor = GeoJsonFileSource.createDescriptor({
       __featureCollection: featureCollection,

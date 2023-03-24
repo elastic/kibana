@@ -93,13 +93,19 @@ Instead, we should strip away the unique information and group our transactions 
 In this case, that means naming all blog transactions, `/blog`, and all documentation transactions, `/guide`.
 
 If you feel like you'd be losing valuable information by following this naming convention, don't fret!
-You can always add additional metadata to your transactions using {apm-guide-ref-v}/metadata.html#labels-fields[labels] (indexed) or
-{apm-guide-ref-v}/metadata.html#custom-fields[custom context] (non-indexed).
+You can always add additional metadata to your transactions using {apm-guide-ref}/metadata.html#labels-fields[labels] (indexed) or
+{apm-guide-ref}/metadata.html#custom-fields[custom context] (non-indexed).
 
 After ensuring you've correctly named your transactions,
-you might still see an error in the APM app related to too many transaction names.
-If this is the case, you can increase the default number of transaction groups displayed in the APM app by configuring
-<<apm-settings-kb,`xpack.apm.ui.transactionGroupBucketSize`>>.
+you might still see errors in the APM app related to transaction group limit reached:
+
+`The number of transaction groups has been reached. Current APM server capacity for handling unique transaction groups has been reached. There are at least X transactions missing in this list. Please decrease the number of transaction groups in your service or increase the memory allocated to APM server.`
+
+You will see this warning if an agent is creating too many transaction groups. This could indicate incorrect instrumentation which will have to be fixed in your application. Alternatively you can increase the memory of the APM server.
+
+`Number of transaction groups exceed the allowed maximum(1,000) that are displayed. The maximum number of transaction groups displayed in Kibana has been reached. Try narrowing down results by using the query bar..`
+
+You will see this warning if your results have more than `1000` unique transaction groups. Alternatively you can use the query bar to reduce the number of unique transaction groups in your results.
 
 **More information**
 

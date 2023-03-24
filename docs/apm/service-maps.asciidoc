@@ -112,7 +112,7 @@ iOS agent:: _Not yet supported_
 Java agent:: ≥ v1.13.0
 .NET agent:: ≥ v1.3.0
 Node.js agent:: ≥ v3.6.0
-PHP agent:: _Not yet supported_
+PHP agent:: ≥ v1.2.0
 Python agent:: ≥ v5.5.0
 Ruby agent:: ≥ v3.6.0
 Real User Monitoring (RUM) agent:: ≥ v4.7.0

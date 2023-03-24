@@ -18,7 +18,7 @@ import { ViewMode, EmbeddablePhaseEvent } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
-import { useDashboardContainerContext } from '../../dashboard_container_renderer';
+import { useDashboardContainerContext } from '../../dashboard_container_context';
 import { DashboardLoadedEventStatus, DashboardRenderPerformanceStats } from '../../types';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
 import { getPanelLayoutsAreEqual } from '../../embeddable/integrations/diff_state/dashboard_diffing_utils';
@@ -68,14 +68,13 @@ function ResponsiveGrid({
   });
 
   const MARGINS = useMargins ? 8 : 0;
-  // We can't take advantage of isDraggable or isResizable due to performance concerns:
-  // https://github.com/STRML/react-grid-layout/issues/240
+
   return (
     <ReactGridLayout
       width={lastValidGridSize}
       className={classes}
-      isDraggable={true}
-      isResizable={true}
+      isDraggable={!maximizedPanelId}
+      isResizable={!maximizedPanelId}
       // There is a bug with d3 + firefox + elements using transforms.
       // See https://github.com/elastic/kibana/issues/16870 for more context.
       useCSSTransforms={false}
@@ -177,6 +176,7 @@ export const DashboardGrid = () => {
         },
         {} as { [key: string]: DashboardPanelState }
       );
+
       // onLayoutChange gets called by react grid layout a lot more than it should, so only dispatch the updated panels if the layout has actually changed
       if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
         dispatch(setPanels(updatedPanels));

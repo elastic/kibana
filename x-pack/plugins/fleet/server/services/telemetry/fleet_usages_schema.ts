@@ -189,4 +189,26 @@ export const fleetUsagesSchema: RootSchema<any> = {
       },
     },
   },
+  agent_logs_panics_last_hour: {
+    type: 'array',
+    _meta: {
+      description: 'Array of log messages containing the word panic from the last hour',
+    },
+    items: {
+      properties: {
+        timestamp: {
+          type: 'date',
+          _meta: {
+            description: 'Timestamp of the log message containing the word panic',
+          },
+        },
+        message: {
+          type: 'text',
+          _meta: {
+            description: 'Log message containing the word panic',
+          },
+        },
+      },
+    },
+  },
 };

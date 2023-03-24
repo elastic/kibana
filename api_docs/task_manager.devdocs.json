@@ -473,15 +473,15 @@
               "\nlist of failed tasks and errors caused failure"
             ],
             "signature": [
-              "{ task: ",
+              "{ type: string; id: string; error: ",
               {
-                "pluginId": "taskManager",
-                "scope": "server",
-                "docId": "kibTaskManagerPluginApi",
-                "section": "def-server.ConcreteTaskInstance",
-                "text": "ConcreteTaskInstance"
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
               },
-              "; error: Error; }[]"
+              "; }[]"
             ],
             "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
             "deprecated": false,
@@ -702,6 +702,33 @@
       },
       {
         "parentPluginId": "taskManager",
+        "id": "def-server.IntervalSchedule",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntervalSchedule",
+        "description": [],
+        "path": "x-pack/plugins/task_manager/server/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.IntervalSchedule.interval",
+            "type": "string",
+            "tags": [],
+            "label": "interval",
+            "description": [
+              "\nAn interval in minutes (e.g. '5m'). If specified, this is a recurring task."
+            ],
+            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
         "id": "def-server.RunContext",
         "type": "Interface",
         "tags": [],
@@ -891,7 +918,13 @@
               "\nA TaskSchedule string, which specifies this as a recurring task.\n\nCurrently, this supports a single format: an interval in minutes or seconds (e.g. '5m', '30s')."
             ],
             "signature": [
-              "IntervalSchedule",
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.IntervalSchedule",
+                "text": "IntervalSchedule"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
@@ -1073,55 +1106,6 @@
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "taskManager",
-            "id": "def-server.TaskRegisterDefinition.getRetry",
-            "type": "Function",
-            "tags": [],
-            "label": "getRetry",
-            "description": [
-              "\nFunction that customizes how the task should behave when the task fails. This\nfunction can return `true`, `false` or a Date. True will tell task manager\nto retry using default delay logic. False will tell task manager to stop retrying\nthis task. Date will suggest when to the task manager the task should retry.\nThis function isn't used for recurring tasks, those retry as per their configured recurring schedule."
-            ],
-            "signature": [
-              "((attempts: number, error: object) => boolean | Date) | undefined"
-            ],
-            "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "taskManager",
-                "id": "def-server.TaskRegisterDefinition.getRetry.$1",
-                "type": "number",
-                "tags": [],
-                "label": "attempts",
-                "description": [],
-                "signature": [
-                  "number"
-                ],
-                "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "taskManager",
-                "id": "def-server.TaskRegisterDefinition.getRetry.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "error",
-                "description": [],
-                "signature": [
-                  "object"
-                ],
-                "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           },
           {
             "parentPluginId": "taskManager",

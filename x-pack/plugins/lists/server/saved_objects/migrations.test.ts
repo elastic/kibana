@@ -22,6 +22,7 @@ const DEFAULT_EXCEPTION_LIST_SO: ExceptionListSoSchema = {
   created_by: 'user',
   description: 'description',
   entries: undefined,
+  expire_time: undefined,
   immutable: false,
   item_id: undefined,
   list_id: 'some_list',

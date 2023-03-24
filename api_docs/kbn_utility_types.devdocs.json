@@ -262,6 +262,21 @@
       },
       {
         "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.ArrayElement",
+        "type": "Type",
+        "tags": [],
+        "label": "ArrayElement",
+        "description": [],
+        "signature": [
+          "A extends readonly (infer T)[] ? T : never"
+        ],
+        "path": "packages/kbn-utility-types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
         "id": "def-common.Assign",
         "type": "Type",
         "tags": [
@@ -738,6 +753,23 @@
         ],
         "signature": [
           "T extends any[] ? T[number] : T extends object ? T[keyof T] : never"
+        ],
+        "path": "packages/kbn-utility-types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-common.WithRequiredProperty",
+        "type": "Type",
+        "tags": [],
+        "label": "WithRequiredProperty",
+        "description": [
+          "\nTakes a type and makes selected properties required.\n"
+        ],
+        "signature": [
+          "Omit<Type, Key> & { [Property in Key]-?: Type[Property]; }"
         ],
         "path": "packages/kbn-utility-types/index.ts",
         "deprecated": false,

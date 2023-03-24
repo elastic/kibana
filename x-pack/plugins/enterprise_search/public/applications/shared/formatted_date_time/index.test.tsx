@@ -16,7 +16,7 @@ describe('FormattedDateTime', () => {
     const date = new Date('1970-01-01T12:00:00');
     const wrapper = mountWithIntl(<FormattedDateTime date={date} />);
 
-    expect(wrapper.text()).toEqual('Jan 1, 1970 12:00 PM');
+    expect(wrapper.text()).toEqual('Jan 1, 1970 12:00 PM');
   });
 
   it('does not render time if hideTime is passed', () => {

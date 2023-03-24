@@ -46,6 +46,7 @@ import {
   getBulkSnoozeAttributes,
   getBulkUnsnoozeAttributes,
   verifySnoozeScheduleLimit,
+  injectReferencesIntoParams,
 } from '../common';
 import {
   alertingAuthorizationFilterOpts,
@@ -54,19 +55,23 @@ import {
   API_KEY_GENERATE_CONCURRENCY,
 } from '../common/constants';
 import { getMappedParams } from '../common/mapped_params_utils';
-import { getAlertFromRaw, extractReferences, validateActions, updateMeta } from '../lib';
+import { getAlertFromRaw, extractReferences, validateActions, updateMeta, addUuid } from '../lib';
 import {
   NormalizedAlertAction,
   BulkOperationError,
   RuleBulkOperationAggregation,
   RulesClientContext,
   CreateAPIKeyResult,
+  NormalizedAlertActionWithUuid,
 } from '../types';
 
 export type BulkEditFields = keyof Pick<
   Rule,
   'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen' | 'snoozeSchedule' | 'apiKey'
 >;
+
+export const bulkEditFieldsToExcludeFromRevisionUpdates: ReadonlySet<BulkEditOperation['field']> =
+  new Set(['snoozeSchedule', 'apiKey']);
 
 export type BulkEditOperation =
   | {
@@ -125,16 +130,22 @@ export type RuleParamsModifier<Params extends RuleTypeParams> = (
   params: Params
 ) => Promise<RuleParamsModifierResult<Params>>;
 
+export type ShouldIncrementRevision<Params extends RuleTypeParams> = (
+  params?: RuleTypeParams
+) => boolean;
+
 export interface BulkEditOptionsFilter<Params extends RuleTypeParams> {
   filter?: string | KueryNode;
   operations: BulkEditOperation[];
   paramsModifier?: RuleParamsModifier<Params>;
+  shouldIncrementRevision?: ShouldIncrementRevision<Params>;
 }
 
 export interface BulkEditOptionsIds<Params extends RuleTypeParams> {
   ids: string[];
   operations: BulkEditOperation[];
   paramsModifier?: RuleParamsModifier<Params>;
+  shouldIncrementRevision?: ShouldIncrementRevision<Params>;
 }
 
 export type BulkEditOptions<Params extends RuleTypeParams> =
@@ -243,12 +254,13 @@ export async function bulkEdit<Params extends RuleTypeParams>(
     context.logger,
     `rulesClient.update('operations=${JSON.stringify(options.operations)}, paramsModifier=${
       options.paramsModifier ? '[Function]' : undefined
-    }')`,
+    }', shouldIncrementRevision=${options.shouldIncrementRevision ? '[Function]' : undefined}')`,
     (filterKueryNode: KueryNode | null) =>
       bulkEditOcc(context, {
         filter: filterKueryNode,
         operations: options.operations,
         paramsModifier: options.paramsModifier,
+        shouldIncrementRevision: options.shouldIncrementRevision,
       }),
     qNodeFilterWithAuth
   );
@@ -283,10 +295,12 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
     filter,
     operations,
     paramsModifier,
+    shouldIncrementRevision,
   }: {
     filter: KueryNode | null;
     operations: BulkEditOptions<Params>['operations'];
     paramsModifier: BulkEditOptions<Params>['paramsModifier'];
+    shouldIncrementRevision?: BulkEditOptions<Params>['shouldIncrementRevision'];
   }
 ): Promise<{
   apiKeysToInvalidate: string[];
@@ -325,6 +339,7 @@ async function bulkEditOcc<Params extends RuleTypeParams>(
           skipped,
           errors,
           username,
+          shouldIncrementRevision,
         }),
       { concurrency: API_KEY_GENERATE_CONCURRENCY }
     );
@@ -394,6 +409,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
   skipped,
   errors,
   username,
+  shouldIncrementRevision = () => true,
 }: {
   context: RulesClientContext;
   rule: SavedObjectsFindResult<RawRule>;
@@ -404,6 +420,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
   skipped: BulkActionSkipResult[];
   errors: BulkOperationError[];
   username: string | null;
+  shouldIncrementRevision: BulkEditOptions<Params>['shouldIncrementRevision'];
 }): Promise<void> {
   try {
     if (rule.attributes.apiKey) {
@@ -419,12 +436,27 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
 
     validateScheduleInterval(context, attributes.schedule.interval, ruleType.id, rule.id);
 
+    const params = injectReferencesIntoParams<Params, RuleTypeParams>(
+      rule.id,
+      ruleType,
+      attributes.params,
+      rule.references || []
+    );
     const { modifiedParams: ruleParams, isParamsUpdateSkipped } = paramsModifier
-      ? await paramsModifier(attributes.params as Params)
+      ? await paramsModifier(params)
       : {
-          modifiedParams: attributes.params as Params,
+          modifiedParams: params,
           isParamsUpdateSkipped: true,
         };
+
+    // Increment revision if params ended up being modified AND it wasn't already incremented as part of attribute update
+    if (
+      shouldIncrementRevision(ruleParams) &&
+      !isParamsUpdateSkipped &&
+      rule.attributes.revision === attributes.revision
+    ) {
+      attributes.revision += 1;
+    }
 
     // If neither attributes nor parameters were updated, mark
     // the rule as skipped and continue to the next rule.
@@ -452,7 +484,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
     } = await extractReferences(
       context,
       ruleType,
-      ruleActions.actions,
+      ruleActions.actions as NormalizedAlertActionWithUuid[],
       validatedMutatedAlertTypeParams
     );
 
@@ -527,7 +559,11 @@ async function getUpdatedAttributesFromOperations(
 ) {
   let attributes = cloneDeep(rule.attributes);
   let ruleActions = {
-    actions: injectReferencesIntoActions(rule.id, rule.attributes.actions, rule.references || []),
+    actions: injectReferencesIntoActions(
+      rule.id,
+      rule.attributes.actions || [],
+      rule.references || []
+    ),
   };
 
   let hasUpdateApiKeyOperation = false;
@@ -540,23 +576,28 @@ async function getUpdatedAttributesFromOperations(
     // the `isAttributesUpdateSkipped` flag to false.
     switch (operation.field) {
       case 'actions': {
+        const updatedOperation = {
+          ...operation,
+          value: addUuid(operation.value),
+        };
+
         try {
           await validateActions(context, ruleType, {
             ...attributes,
-            actions: operation.value,
+            actions: updatedOperation.value,
           });
         } catch (e) {
           // If validateActions fails on the first attempt, it may be because of legacy rule-level frequency params
           attributes = await attemptToMigrateLegacyFrequency(
             context,
-            operation,
+            updatedOperation,
             attributes,
             ruleType
           );
         }
 
         const { modifiedAttributes, isAttributeModified } = applyBulkEditOperation(
-          operation,
+          updatedOperation,
           ruleActions
         );
         if (isAttributeModified) {
@@ -566,7 +607,7 @@ async function getUpdatedAttributesFromOperations(
 
         // TODO https://github.com/elastic/kibana/issues/148414
         // If any action-level frequencies get pushed into a SIEM rule, strip their frequencies
-        const firstFrequency = operation.value[0]?.frequency;
+        const firstFrequency = updatedOperation.value[0]?.frequency;
         if (rule.attributes.consumer === AlertConsumers.SIEM && firstFrequency) {
           ruleActions.actions = ruleActions.actions.map((action) => omit(action, 'frequency'));
           if (!attributes.notifyWhen) {
@@ -635,6 +676,14 @@ async function getUpdatedAttributesFromOperations(
           isAttributesUpdateSkipped = false;
         }
       }
+    }
+    // Only increment revision if update wasn't skipped and `operation.field` should result in a revision increment
+    if (
+      !isAttributesUpdateSkipped &&
+      !bulkEditFieldsToExcludeFromRevisionUpdates.has(operation.field) &&
+      rule.attributes.revision - attributes.revision === 0
+    ) {
+      attributes.revision += 1;
     }
   }
   return {

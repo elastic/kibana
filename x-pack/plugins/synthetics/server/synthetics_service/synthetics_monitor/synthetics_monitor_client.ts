@@ -30,7 +30,6 @@ import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/syn
 
 export class SyntheticsMonitorClient {
   public syntheticsService: SyntheticsService;
-
   public privateLocationAPI: SyntheticsPrivateLocation;
 
   constructor(syntheticsService: SyntheticsService, server: UptimeServerSetup) {

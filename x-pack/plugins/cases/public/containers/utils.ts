@@ -22,6 +22,7 @@ import type {
   CaseResolveResponse,
   SingleCaseMetricsResponse,
   User,
+  CaseUserActionStatsResponse,
 } from '../../common/api';
 import {
   CaseResponseRt,
@@ -33,6 +34,7 @@ import {
   CommentType,
   CaseResolveResponseRt,
   SingleCaseMetricsResponseRt,
+  CaseUserActionStatsResponseRt,
 } from '../../common/api';
 import type { Case, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
@@ -84,6 +86,14 @@ export const decodeCaseUserActionsResponse = (respUserActions?: CaseUserActionsR
     fold(throwErrors(createToasterPlainError), identity)
   );
 
+export const decodeCaseUserActionStatsResponse = (
+  caseUserActionsStats: CaseUserActionStatsResponse
+) =>
+  pipe(
+    CaseUserActionStatsResponseRt.decode(caseUserActionsStats),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
 export const valueToUpdateIsSettings = (
   key: UpdateByKey['updateKey'],
   value: UpdateByKey['updateValue']
@@ -115,6 +125,7 @@ export const createUpdateSuccessToaster = (
 
   const toast: ToastInputFields = {
     title: i18n.UPDATED_CASE(caseAfterUpdate.title),
+    className: 'eui-textBreakWord',
   };
 
   if (valueToUpdateIsSettings(key, value) && value?.syncAlerts && caseHasAlerts) {
