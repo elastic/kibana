@@ -14,15 +14,15 @@ import { EsQueryRuleParams, SearchType } from './types';
 import { validateExpression } from './validation';
 
 const PLUGIN_ID = 'discover';
-const ES_QUERY_ALERT_TYPE = '.data-quality';
+const DATA_QUALITY_ALERT_TYPE = '.data-quality';
 
 export function getRuleType(alerting: AlertingSetup): RuleTypeModel<EsQueryRuleParams> {
   registerNavigation(alerting);
 
   return {
-    id: ES_QUERY_ALERT_TYPE,
+    id: DATA_QUALITY_ALERT_TYPE,
     description: i18n.translate('xpack.stackAlerts.esQuery.ui.alertType.descriptionText', {
-      defaultMessage: 'Alert when matches are found during the latest query run.',
+      defaultMessage: 'Alert when data quality issues are found',
     }),
     iconClass: 'logoElastic',
     documentationUrl: (docLinks) => docLinks.links.alerting.esQuery,
@@ -46,7 +46,7 @@ export function getRuleType(alerting: AlertingSetup): RuleTypeModel<EsQueryRuleP
 function registerNavigation(alerting: AlertingSetup) {
   alerting.registerNavigation(
     PLUGIN_ID,
-    ES_QUERY_ALERT_TYPE,
+    DATA_QUALITY_ALERT_TYPE,
     (alert: SanitizedRule<EsQueryRuleParams<SearchType.searchSource>>) => {
       return `/app/discover#/viewAlert/${alert.id}`;
     }

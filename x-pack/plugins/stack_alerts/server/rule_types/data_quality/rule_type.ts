@@ -18,7 +18,7 @@ import {
 } from './rule_type_params';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ExecutorOptions } from './types';
-import { ActionGroupId, ES_QUERY_ID } from './constants';
+import { ActionGroupId, DATA_QUALITY_ID } from './constants';
 import { executor } from './executor';
 import { isEsQueryRule } from './util';
 
@@ -33,7 +33,7 @@ export function getRuleType(
   typeof ActionGroupId
 > {
   const ruleTypeName = i18n.translate('xpack.stackAlerts.dataQuality.alertTypeTitle', {
-    defaultMessage: 'Elasticsearch query',
+    defaultMessage: 'Data Quality',
   });
 
   const actionGroupName = i18n.translate(
@@ -85,47 +85,10 @@ export function getRuleType(
     }
   );
 
-  const actionVariableContextQueryLabel = i18n.translate(
-    'xpack.stackAlerts.esQuery.actionVariableContextQueryLabel',
-    {
-      defaultMessage: 'The string representation of the Elasticsearch query.',
-    }
-  );
-
-  const actionVariableContextSizeLabel = i18n.translate(
-    'xpack.stackAlerts.esQuery.actionVariableContextSizeLabel',
-    {
-      defaultMessage: 'The number of hits to retrieve for each query.',
-    }
-  );
-
-  const actionVariableContextThresholdLabel = i18n.translate(
-    'xpack.stackAlerts.esQuery.actionVariableContextThresholdLabel',
-    {
-      defaultMessage:
-        "An array of values to use as the threshold. 'between' and 'notBetween' require two values.",
-    }
-  );
-
-  const actionVariableContextThresholdComparatorLabel = i18n.translate(
-    'xpack.stackAlerts.esQuery.actionVariableContextThresholdComparatorLabel',
-    {
-      defaultMessage: 'A function to determine if the threshold was met.',
-    }
-  );
-
   const actionVariableContextConditionsLabel = i18n.translate(
     'xpack.stackAlerts.esQuery.actionVariableContextConditionsLabel',
     {
       defaultMessage: 'A string that describes the threshold condition.',
-    }
-  );
-
-  const actionVariableSearchConfigurationLabel = i18n.translate(
-    'xpack.stackAlerts.esQuery.actionVariableContextSearchConfigurationLabel',
-    {
-      defaultMessage:
-        'Serialized search source fields used to fetch the documents from Elasticsearch.',
     }
   );
 
@@ -138,7 +101,7 @@ export function getRuleType(
   );
 
   return {
-    id: ES_QUERY_ID,
+    id: DATA_QUALITY_ID,
     name: ruleTypeName,
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
     defaultActionGroupId: ActionGroupId,
@@ -155,14 +118,7 @@ export function getRuleType(
         { name: 'conditions', description: actionVariableContextConditionsLabel },
         { name: 'link', description: actionVariableContextLinkLabel, usesPublicBaseUrl: true },
       ],
-      params: [
-        { name: 'size', description: actionVariableContextSizeLabel },
-        { name: 'threshold', description: actionVariableContextThresholdLabel },
-        { name: 'thresholdComparator', description: actionVariableContextThresholdComparatorLabel },
-        { name: 'searchConfiguration', description: actionVariableSearchConfigurationLabel },
-        { name: 'esQuery', description: actionVariableContextQueryLabel },
-        { name: 'index', description: actionVariableContextIndexLabel },
-      ],
+      params: [{ name: 'index', description: actionVariableContextIndexLabel }],
     },
     useSavedObjectReferences: {
       extractReferences: (params) => {

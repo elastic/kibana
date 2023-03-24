@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, useCallback } from 'react';
-import deepEqual from 'fast-deep-equal';
+import React from 'react';
 import 'brace/theme/github';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,39 +17,12 @@ import { QueryFormTypeChooser } from './query_form_type_chooser';
 import { isSearchSourceRule } from '../util';
 import { ALL_EXPRESSION_ERROR_KEYS } from '../constants';
 
-function areSearchSourceExpressionPropsEqual(
-  prevProps: Readonly<PropsWithChildren<SearchSourceExpressionProps>>,
-  nextProps: Readonly<PropsWithChildren<SearchSourceExpressionProps>>
-) {
-  const areErrorsEqual = deepEqual(prevProps.errors, nextProps.errors);
-  const areRuleParamsEqual = deepEqual(prevProps.ruleParams, nextProps.ruleParams);
-  return areErrorsEqual && areRuleParamsEqual;
-}
-
-const SearchSourceExpressionMemoized = memo<SearchSourceExpressionProps>(
-  SearchSourceExpression,
-  areSearchSourceExpressionPropsEqual
-);
-
 export const EsQueryRuleTypeExpression: React.FunctionComponent<
   RuleTypeParamsExpressionProps<EsQueryRuleParams, EsQueryRuleMetaData>
 > = (props) => {
   const { ruleParams, errors, setRuleProperty, setRuleParams } = props;
   const isSearchSource = isSearchSourceRule(ruleParams);
   // metadata provided only when open alert from Discover page
-  const isManagementPage = props.metadata?.isManagementPage ?? true;
-
-  const formTypeSelected = useCallback(
-    (searchType: SearchType | null) => {
-      if (!searchType) {
-        // @ts-expect-error Reset rule params regardless of their type
-        setRuleProperty('params', {});
-        return;
-      }
-      setRuleParams('searchType', searchType);
-    },
-    [setRuleParams, setRuleProperty]
-  );
 
   const expressionGenericErrorMessage = i18n.translate(
     'xpack.stackAlerts.esQuery.ui.alertParams.fixErrorInExpressionBelowValidationMessage',
@@ -83,21 +55,7 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
     <>
       {expressionError}
 
-      {/* Showing the selected type */}
-      {isManagementPage && (
-        <QueryFormTypeChooser
-          searchType={ruleParams.searchType as SearchType}
-          onFormTypeSelect={formTypeSelected}
-        />
-      )}
-
-      {ruleParams.searchType && isSearchSource && (
-        <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
-      )}
-
-      {ruleParams.searchType && !isSearchSource && (
-        <EsQueryExpression {...props} ruleParams={ruleParams} />
-      )}
+      <EsQueryExpression {...props} ruleParams={ruleParams} />
 
       <EuiHorizontalRule />
     </>

@@ -36,9 +36,7 @@ export interface EsQueryRuleMetaData {
   isManagementPage?: boolean;
 }
 
-export type EsQueryRuleParams<T = SearchType> = T extends SearchType.searchSource
-  ? CommonEsQueryRuleParams & OnlySearchSourceRuleParams
-  : CommonEsQueryRuleParams & OnlyEsQueryRuleParams;
+export type EsQueryRuleParams = CommonEsQueryRuleParams & { index: any; timeField: any };
 
 export interface OnlyEsQueryRuleParams {
   esQuery: string;
