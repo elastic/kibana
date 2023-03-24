@@ -28,6 +28,7 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
   infoIcon?: FieldButtonProps['fieldInfoIcon'];
   className?: FieldButtonProps['className'];
   flush?: FieldButtonProps['flush'];
+  dragHandle?: FieldButtonProps['dragHandle'];
   getCustomFieldType?: GetCustomFieldType<T>;
   dataTestSubj?: string;
   size?: FieldButtonProps['size'];
@@ -81,9 +82,9 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
 }: FieldItemButtonProps<T>) {
   const displayName = field.displayName || field.name;
   const title =
-    displayName !== field.name
+    displayName !== field.name && field.name !== '___records___'
       ? i18n.translate('unifiedFieldList.fieldItemButton.fieldTitle', {
-          defaultMessage: '{fieldName} ({fieldDisplayName})',
+          defaultMessage: '{fieldDisplayName} ({fieldName})',
           values: {
             fieldName: field.name,
             fieldDisplayName: displayName,
@@ -183,9 +184,9 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       isActive={isActive}
       buttonProps={{
         ['aria-label']: i18n.translate('unifiedFieldList.fieldItemButton.ariaLabel', {
-          defaultMessage: 'Preview {fieldName}: {fieldType}',
+          defaultMessage: 'Preview {fieldDisplayName}: {fieldType}',
           values: {
-            fieldName: displayName,
+            fieldDisplayName: displayName,
             fieldType: getCustomFieldType ? getCustomFieldType(field) : field.type,
           },
         }),
