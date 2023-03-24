@@ -73,7 +73,6 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
             },
             error: (err) => {
               if (isErrorResponse(err)) {
-                console.error(err);
                 if (addInspectorRequest) {
                   addInspectorRequest({
                     data: {
@@ -102,6 +101,7 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
           });
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...fnDeps]);
 
   const { rawResponse } = response as any;
