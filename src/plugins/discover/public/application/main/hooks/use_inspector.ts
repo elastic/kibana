@@ -13,7 +13,7 @@ import {
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { DataTableRecord } from '../../../types';
+import { DiscoverStateContainer } from '../services/discover_state';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 
 export interface InspectorAdapters {
@@ -22,21 +22,21 @@ export interface InspectorAdapters {
 }
 
 export function useInspector({
-  setExpandedDoc,
   inspector,
+  stateContainer,
   inspectorAdapters,
   savedSearch,
 }: {
   inspectorAdapters: InspectorAdapters;
   savedSearch: SavedSearch;
-  setExpandedDoc: (doc?: DataTableRecord) => void;
   inspector: InspectorPublicPluginStart;
+  stateContainer: DiscoverStateContainer;
 }) {
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
-    setExpandedDoc(undefined);
+    stateContainer.internalState.transitions.setExpandedDoc(undefined);
 
     const requestAdapters = inspectorAdapters.lensRequests
       ? [inspectorAdapters.requests, inspectorAdapters.lensRequests]
@@ -49,7 +49,7 @@ export function useInspector({
 
     setInspectorSession(session);
   }, [
-    setExpandedDoc,
+    stateContainer,
     inspectorAdapters.lensRequests,
     inspectorAdapters.requests,
     inspector,
