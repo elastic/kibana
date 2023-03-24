@@ -1475,7 +1475,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiSelectable.screenReaderInstructions',
       {
         defaultMessage:
-          'Use up and down arrows to move focus over options. Enter to select. Escape to collapse options.',
+          'Use the Up and Down arrow keys to move focus over options. Press Enter to select. Press Escape to collapse options.',
       }
     ),
     'euiSelectable.searchResults': ({ resultsLength }: EuiValues) =>
@@ -1664,11 +1664,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
           'You are in a form selector and must select a single option. Use the Up and Down arrow keys to navigate or Escape to close.',
       }
     ),
-    'euiSuperSelectControl.selectAnOption': ({ selectedValue }: EuiValues) =>
-      i18n.translate('core.euiSuperSelectControl.selectAnOption', {
-        defaultMessage: 'Select an option: {selectedValue}, is selected',
-        values: { selectedValue },
-      }),
     'euiSuperUpdateButton.cannotUpdateTooltip': i18n.translate(
       'core.euiSuperUpdateButton.cannotUpdateTooltip',
       {
@@ -1812,5 +1807,25 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Loaded {contentAriaLabel}',
         values: { contentAriaLabel },
       }),
+    'euiDualRange.sliderScreenReaderInstructions': i18n.translate(
+      'core.euiDualRange.sliderScreenReaderInstructions',
+      {
+        defaultMessage:
+          'You are in a custom range slider. Use the Up and Down arrow keys to change the minimum value. Press Tab to interact with the maximum value.',
+        description: 'Screen reader instructions for changing dual range slider values.',
+      }
+    ),
+    'euiRange.sliderScreenReaderInstructions': i18n.translate(
+      'core.euiRange.sliderScreenReaderInstructions',
+      {
+        defaultMessage:
+          'You are in a custom range slider. Use the Up and Down arrow keys to change the value.',
+        description: 'Screen reader instructions for changing range slider values.',
+      }
+    ),
+    'euiSuperSelect.ariaLabel': i18n.translate('core.euiSuperSelect.ariaLabel', {
+      defaultMessage: 'Select listbox',
+      description: 'Accessible label for Super Selects without a visible label.',
+    }),
   };
 };

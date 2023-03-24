@@ -78,6 +78,13 @@
     {
       "groupName": "typescript",
       "matchPackageNames": ["typescript", "prettier", "@types/jsdom"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "enabled": true
+    },
+    {
+      "groupName": "typescript-eslint",
       "matchPackagePatterns": ["^@typescript-eslint"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],

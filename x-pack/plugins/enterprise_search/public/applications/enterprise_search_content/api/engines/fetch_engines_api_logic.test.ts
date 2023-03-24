@@ -46,13 +46,13 @@ describe('FetchEnginesAPILogic', () => {
       await nextTick();
 
       expect(http.get).toHaveBeenCalledWith('/internal/enterprise_search/engines', {
-        query: { from: 0, size: 10, q: 'te' },
+        query: { from: 0, size: 10, q: 'te*' },
       });
 
       await expect(result).resolves.toEqual({
         result: 'result',
         params: {
-          q: 'te',
+          q: 'te*',
           from: 0,
           size: 10,
         },
