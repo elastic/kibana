@@ -378,6 +378,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('filters by comment successfully', async () => {
+        await header.waitUntilLoadingHasFinished();
+
         await testSubjects.click('user-actions-filter-activity-button-comments');
 
         await header.waitUntilLoadingHasFinished();
@@ -419,9 +421,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           '[data-test-subj="user-actions-list"]'
         );
 
-        const firstActionsList = await userActionsLists[0].findAllByClassName('euiComment');
+        const actionList = await userActionsLists[1].findAllByClassName('euiComment');
 
-        expect(await firstActionsList[0].getAttribute('data-test-subj')).contain(
+        expect(await actionList[0].getAttribute('data-test-subj')).contain(
           'comment-create-action'
         );
       });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexItem, EuiPanel, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { css } from '@emotion/react';
@@ -21,8 +21,9 @@ import { UserToolTip } from '../user_profiles/user_tooltip';
 import { Username } from '../user_profiles/username';
 import { HoverableAvatar } from '../user_profiles/hoverable_avatar';
 import { UserActionsList } from './user_actions_list';
-import * as i18n from './translations';
 import { useUserActionsPagination } from './use_user_actions_pagination';
+import { useLastPageUserActions } from './use_user_actions_last_page';
+import { ShowMoreButton } from './show_more_button';
 
 const BottomUserActionsListWrapper = styled(EuiFlexItem)`
   padding-top: 16px;
@@ -39,9 +40,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
   } = props;
   const { detailName: caseId } = useCaseViewParams();
   const {
-    caseUserActions,
     infiniteCaseUserActions,
-    isLoadingUserActions,
     isLoadingInfiniteUserActions,
     lastPage,
     hasNextPage,
@@ -52,6 +51,12 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     userActivityQueryParams,
     userActionsStats,
     caseId: caseData.id,
+  });
+
+  const { isLoadingLastPageUserActions, lastPageUserActions } = useLastPageUserActions({
+    userActivityQueryParams,
+    caseId: caseData.id,
+    lastPage,
   });
 
   const alertIdsWithoutRuleInfo = useMemo(
@@ -132,7 +137,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
       isLoading={
         showLoadMore && hasNextPage
           ? isLoadingInfiniteUserActions
-          : isLoadingUserActions || loadingCommentIds.includes(NEW_COMMENT_ID)
+          : isLoadingLastPageUserActions || loadingCommentIds.includes(NEW_COMMENT_ID)
       }
     >
       <EuiPanel
@@ -168,32 +173,12 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
           bottomActions={lastPage === 0 ? bottomActions : []}
           isExpandable
         />
-        {showLoadMore && hasNextPage && (
-          <EuiPanel
-            color="subdued"
-            css={css`
-              display: flex;
-              justify-content: center;
-              margin-block: ${euiTheme.size.base};
-              margin-inline-start: ${euiTheme.size.xxxl};
-            `}
-          >
-            <EuiButton
-              fill
-              color="text"
-              size="s"
-              onClick={handleShowMore}
-              data-test-subj="show-more-user-actions"
-            >
-              {i18n.SHOW_MORE}
-            </EuiButton>
-          </EuiPanel>
-        )}
+        {showLoadMore && hasNextPage && <ShowMoreButton onShowMoreClick={handleShowMore} />}
         {showBottomList ? (
           <BottomUserActionsListWrapper>
             <UserActionsList
               {...props}
-              caseUserActions={caseUserActions}
+              caseUserActions={lastPageUserActions}
               loadingAlertData={loadingAlertData}
               manualAlertsData={manualAlertsData}
               bottomActions={bottomActions}

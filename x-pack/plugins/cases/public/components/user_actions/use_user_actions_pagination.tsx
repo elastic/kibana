@@ -10,7 +10,6 @@ import deepEqual from 'fast-deep-equal';
 
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 import type { CaseUserActions, CaseUserActionsStats } from '../../containers/types';
-import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
 interface UserActionsPagination {
@@ -45,17 +44,12 @@ export const useUserActionsPagination = ({
     }
   }, [userActionsStats, userActivityQueryParams]);
 
-  const isExpandable = lastPage > 0 && userActivityQueryParams.page < lastPage;
+  const isExpandable = lastPage > 1 && userActivityQueryParams.page < lastPage;
 
   const skipRefetchInfiniteActions =
     userActivityQueryParams.sortOrder === 'asc' &&
     deepEqual(activityParams.current, userActivityQueryParams) &&
     !isFirstRender.current; // do not refetch top actions when new action added in the bottom list
-
-  const skipRefetchBottomActions =
-    userActivityQueryParams.sortOrder === 'desc' &&
-    deepEqual(activityParams.current, userActivityQueryParams) &&
-    !isFirstRender.current; // do not refetch bottom actions when new action added in the top list
 
   const {
     data: caseInfiniteUserActionsData,
@@ -68,24 +62,17 @@ export const useUserActionsPagination = ({
     isExpandable && (isFirstRender.current || !skipRefetchInfiniteActions)
   );
 
-  const { data: caseUserActionsData, isLoading: isLoadingUserActions } = useFindCaseUserActions(
-    caseId,
-    { ...userActivityQueryParams, page: lastPage },
-    isFirstRender.current || !skipRefetchBottomActions
-  );
-
   if (isFirstRender.current) {
     isFirstRender.current = false;
   }
 
-  if (skipRefetchInfiniteActions || skipRefetchBottomActions) {
+  if (skipRefetchInfiniteActions) {
     activityParams.current = userActivityQueryParams;
   }
 
   const showBottomList = lastPage > 0;
 
   const showLoadMore =
-    !isLoadingUserActions &&
     !isLoadingInfiniteUserActions &&
     userActivityQueryParams.page < lastPage;
 
@@ -105,22 +92,12 @@ export const useUserActionsPagination = ({
     return userActionsData;
   }, [caseInfiniteUserActionsData, isLoadingInfiniteUserActions]);
 
-  const caseUserActions = useMemo<CaseUserActions[]>(() => {
-    if (isLoadingUserActions || !caseUserActionsData) {
-      return [];
-    }
-
-    return caseUserActionsData.userActions;
-  }, [caseUserActionsData, isLoadingUserActions]);
-
   return {
     lastPage,
     showBottomList,
     showLoadMore,
-    isLoadingUserActions,
     isLoadingInfiniteUserActions,
     infiniteCaseUserActions,
-    caseUserActions,
     hasNextPage,
     fetchNextPage,
   };

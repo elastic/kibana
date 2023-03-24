@@ -9,11 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { useUserActionsPagination } from './use_user_actions_pagination';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
-import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
-import {
-  defaultUseFindCaseUserActions,
-  defaultInfiniteUseFindCaseUserActions,
-} from '../case_view/mocks';
+import { defaultInfiniteUseFindCaseUserActions } from '../case_view/mocks';
 import { basicCase } from '../../containers/mock';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 
@@ -31,16 +27,13 @@ const userActionsStats = {
 };
 
 jest.mock('../../containers/use_infinite_find_case_user_actions');
-jest.mock('../../containers/use_find_case_user_actions');
 jest.mock('../../common/lib/kibana');
 
-const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
 
 describe('useUserActionsPagination', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
     useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
   });
 
@@ -54,16 +47,10 @@ describe('useUserActionsPagination', () => {
     );
 
     expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledTimes(1);
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledTimes(1);
 
     expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
       basicCase.id,
       userActivityQueryParams,
-      true
-    );
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-      basicCase.id,
-      { ...userActivityQueryParams, page: 3 },
       true
     );
 
@@ -73,9 +60,7 @@ describe('useUserActionsPagination', () => {
           lastPage: 3,
           showBottomList: true,
           showLoadMore: true,
-          isLoadingUserActions: false,
           isLoadingInfiniteUserActions: defaultInfiniteUseFindCaseUserActions.isLoading,
-          caseUserActions: defaultUseFindCaseUserActions.data.userActions,
           infiniteCaseUserActions: defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,
           hasNextPage: defaultInfiniteUseFindCaseUserActions.hasNextPage,
           fetchNextPage: defaultInfiniteUseFindCaseUserActions.fetchNextPage,
@@ -84,15 +69,30 @@ describe('useUserActionsPagination', () => {
     });
   });
 
-  it('renders non expandable option when actions are less than 10', async () => {
-    useInfiniteFindCaseUserActionsMock.mockReturnValue({
-      ...defaultInfiniteUseFindCaseUserActions,
-      data: {
-        perPageParams: undefined,
-        pages: { total: 25, perPage: 10, page: 1, userActions: [] },
-      },
-    });
+  it('returns correct last page', async () => {
+    const { result, waitFor } = renderHook(() =>
+      useUserActionsPagination({
+        userActionsStats: { total: 38, totalComments: 17, totalOtherActions: 21 },
+        userActivityQueryParams: {
+          ...userActivityQueryParams,
+          type: 'user',
+        },
+        caseId: basicCase.id,
+      })
+    );
 
+    expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => {
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          lastPage: 2,
+        })
+      );
+    });
+  });
+
+  it('renders less than 10 user actions correctly', async () => {
     const { result, waitFor } = renderHook(() =>
       useUserActionsPagination({
         userActionsStats: { total: 9, totalComments: 3, totalOtherActions: 6 },
@@ -106,14 +106,7 @@ describe('useUserActionsPagination', () => {
       userActivityQueryParams,
       false
     );
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-      basicCase.id,
-      userActivityQueryParams,
-      true
-    );
-
     expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledTimes(1);
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledTimes(1);
 
     await waitFor(() => {
       expect(result.current).toEqual(
@@ -121,10 +114,8 @@ describe('useUserActionsPagination', () => {
           lastPage: 1,
           showBottomList: true,
           showLoadMore: false,
-          isLoadingUserActions: defaultUseFindCaseUserActions.isLoading,
           isLoadingInfiniteUserActions: false,
-          caseUserActions: defaultUseFindCaseUserActions.data.userActions,
-          infiniteCaseUserActions: [],
+          infiniteCaseUserActions: defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,
           hasNextPage: false,
         })
       );
@@ -132,7 +123,6 @@ describe('useUserActionsPagination', () => {
   });
 
   it('returns loading state correctly', async () => {
-    useFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
     useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
 
     const { result, waitFor } = renderHook(() =>
@@ -148,14 +138,8 @@ describe('useUserActionsPagination', () => {
       userActivityQueryParams,
       true
     );
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-      basicCase.id,
-      { ...userActivityQueryParams, page: 3 },
-      true
-    );
 
     expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledTimes(1);
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledTimes(1);
 
     await waitFor(() => {
       expect(result.current).toEqual(
@@ -163,9 +147,7 @@ describe('useUserActionsPagination', () => {
           lastPage: 3,
           showBottomList: true,
           showLoadMore: false,
-          isLoadingUserActions: true,
           isLoadingInfiniteUserActions: true,
-          caseUserActions: [],
           infiniteCaseUserActions: [],
           hasNextPage: undefined,
           fetchNextPage: undefined,
@@ -196,11 +178,6 @@ describe('useUserActionsPagination', () => {
       userActivityQueryParams,
       false
     );
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-      basicCase.id,
-      userActivityQueryParams,
-      true
-    );
 
     await waitFor(() => {
       expect(result.current).toEqual(
@@ -208,9 +185,7 @@ describe('useUserActionsPagination', () => {
           lastPage: 1,
           showBottomList: true,
           showLoadMore: false,
-          isLoadingUserActions: false,
           isLoadingInfiniteUserActions: defaultInfiniteUseFindCaseUserActions.isLoading,
-          caseUserActions: defaultInfiniteUseFindCaseUserActions.data.pages[0].userActions,
           infiniteCaseUserActions: [],
           hasNextPage: false,
           fetchNextPage: defaultInfiniteUseFindCaseUserActions.fetchNextPage,
