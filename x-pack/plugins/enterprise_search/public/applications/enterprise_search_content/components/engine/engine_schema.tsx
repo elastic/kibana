@@ -36,12 +36,9 @@ import { EngineIndicesLogic } from './engine_indices_logic';
 
 import { EngineViewLogic } from './engine_view_logic';
 
-const CONFLICT = 'conflict';
-const UNMAPPED = 'unmapped';
-
 const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaField }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
-  const notInAllIndices = schemaField.indices.some((i) => i.type === UNMAPPED);
+  const notInAllIndices = schemaField.indices.some((i) => i.type === 'unmapped');
 
   const columns: Array<EuiBasicTableColumn<SchemaField['indices'][0]>> = [
     {
@@ -72,7 +69,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
         }
       ),
       render: (name: string) => {
-        if (name === UNMAPPED)
+        if (name === 'unmapped')
           return (
             <EuiBadge color="warning">
               <FormattedMessage
@@ -165,7 +162,7 @@ export const EngineSchema: React.FC = () => {
   const columns: Array<EuiBasicTableColumn<SchemaField>> = [
     {
       render: ({ type }: SchemaField) => {
-        if (type !== CONFLICT) return null;
+        if (type !== 'conflict') return null;
         return <EuiIcon type="error" color="danger" />;
       },
       width: '2%',
@@ -177,7 +174,7 @@ export const EngineSchema: React.FC = () => {
       render: ({ name, type }: SchemaField) => (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           {name.includes('.') && <EuiIcon type="sortRight" color="subdued" />}
-          <EuiText size="s" color={type === CONFLICT ? 'danger' : 'primary'}>
+          <EuiText size="s" color={type === 'conflict' ? 'danger' : 'primary'}>
             <p>{name}</p>
           </EuiText>
         </EuiFlexGroup>
@@ -189,7 +186,7 @@ export const EngineSchema: React.FC = () => {
         defaultMessage: 'Field type',
       }),
       render: ({ type }: SchemaField) => {
-        if (type === CONFLICT) {
+        if (type === 'conflict') {
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiBadge color="danger">
@@ -221,7 +218,7 @@ export const EngineSchema: React.FC = () => {
         }
       ),
       render: ({ indices }: SchemaField) => {
-        const inAllIndices = indices.every((i) => i.type !== UNMAPPED);
+        const inAllIndices = indices.every((i) => i.type !== 'unmapped');
         return inAllIndices ? (
           <EuiText size="s" color="subdued">
             <p>
@@ -245,7 +242,7 @@ export const EngineSchema: React.FC = () => {
     {
       render: (schemaField: SchemaField) => {
         const { name, type, indices } = schemaField;
-        if (type === CONFLICT || indices.some((i) => i.type === UNMAPPED)) {
+        if (type === 'conflict' || indices.some((i) => i.type === 'unmapped')) {
           const icon = itemIdToExpandedRowMap[name] ? 'arrowUp' : 'arrowDown';
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
