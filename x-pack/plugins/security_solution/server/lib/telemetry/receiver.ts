@@ -788,7 +788,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
         fetchMore = numOfHits > 0;
       } catch (e) {
-        this.logger.debug(e);
+        tlog(this.logger, e);
         fetchMore = false;
       }
 
@@ -803,12 +803,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     try {
       await this.esClient.closePointInTime({ id: pitId });
     } catch (error) {
-      this.logger.debug(
+      tlog(
+        this.logger,
         `Error trying to close point in time: "${pitId}", it will expire within "${keepAlive}". Error is: "${error}"`
       );
     }
 
-    this.logger.debug(`Timeline alerts to return: ${alertsToReturn.length}`);
+    tlog(this.logger, `Timeline alerts to return: ${alertsToReturn.length}`);
     return alertsToReturn;
   }
 

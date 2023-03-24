@@ -25,7 +25,7 @@ export function createTelemetryTimelineTaskConfig() {
   return {
     type: 'security:telemetry-timelines',
     title: 'Security Solution Timeline telemetry',
-    interval: '3m',
+    interval: '3h',
     timeout: '10m',
     version: '1.0.0',
     runTask: async (
