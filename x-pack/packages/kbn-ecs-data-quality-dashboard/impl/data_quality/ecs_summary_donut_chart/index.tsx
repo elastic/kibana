@@ -107,7 +107,7 @@ const EcsSummaryDonutChartComponent: React.FC<Props> = ({
         groupByRollup: (d: Datum) => d.categoryId,
         nodeLabel: (d: Datum) => getNodeLabel(d),
         shape: {
-          fillColor: (dataName) => getFillColor(dataName),
+          fillColor: getFillColor,
         },
       },
     ],

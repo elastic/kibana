@@ -22,7 +22,9 @@ import type { RiskSeverity } from '../../../../../common/search_strategy';
 const DONUT_HEIGHT = 120;
 
 const fillColor: FillColor = (dataName) => {
-  return RISK_SEVERITY_COLOUR[dataName as RiskSeverity] ?? emptyDonutColor;
+  return Object.hasOwn(RISK_SEVERITY_COLOUR, dataName)
+    ? RISK_SEVERITY_COLOUR[dataName as RiskSeverity]
+    : emptyDonutColor;
 };
 
 const DonutContainer = styled(EuiFlexItem)`

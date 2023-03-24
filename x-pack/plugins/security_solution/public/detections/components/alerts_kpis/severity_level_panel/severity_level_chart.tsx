@@ -9,7 +9,6 @@ import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLoadingSpinner } from '@elastic/eui';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Key } from '@elastic/charts';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
@@ -44,7 +43,7 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
       : 0;
   }, [data]);
 
-  const fillColor: FillColor = useCallback((dataName: Key) => {
+  const fillColor: FillColor = useCallback((dataName) => {
     return getSeverityColor(dataName);
   }, []);
 

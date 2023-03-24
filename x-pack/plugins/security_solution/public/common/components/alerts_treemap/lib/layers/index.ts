@@ -19,11 +19,8 @@ const groupByRollup = (d: Datum) => d.key;
  */
 export const getGroupFromPath = (path: ArrayNode['path']): string | undefined => {
   const OFFSET_FROM_END = 2; // The offset from the end of the path array containing the group
-
-  const pathLength = path.length;
-  const groupIndex = pathLength - OFFSET_FROM_END;
-
-  return Array.isArray(path) && groupIndex > 0 ? path[groupIndex].value : undefined;
+  const groupIndex = path.length - OFFSET_FROM_END;
+  return groupIndex > 0 ? path[groupIndex].value : undefined;
 };
 
 export const getLayersOneDimension = ({
