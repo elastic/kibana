@@ -11,7 +11,16 @@ import * as path from 'path';
 describe('schema_extractor', () => {
   it('should serialize schema definition', () => {
     const result = extractDocumentation([
-      path.resolve(__dirname, '..', 'schemas', 'datafeeds_schema.ts'),
+      path.resolve(
+        __dirname,
+        '..',
+        '..',
+        '..',
+        'server',
+        'routes',
+        'schemas',
+        'datafeeds_schema.ts'
+      ),
     ]);
 
     expect(result.get('startDatafeedSchema')).toEqual([
@@ -165,7 +174,16 @@ describe('schema_extractor', () => {
 
   it('serializes schema with nested objects and nullable', () => {
     const result = extractDocumentation([
-      path.resolve(__dirname, '..', 'schemas', 'results_service_schema.ts'),
+      path.resolve(
+        __dirname,
+        '..',
+        '..',
+        '..',
+        'server',
+        'routes',
+        'schemas',
+        'results_service_schema.ts'
+      ),
     ]);
     expect(result.get('getCategorizerStatsSchema')).toEqual([
       {
