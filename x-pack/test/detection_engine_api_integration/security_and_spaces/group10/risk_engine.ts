@@ -51,14 +51,17 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  const getRiskScoreAfterRuleCreationAndExecution = async (
-    documentId: string,
-    {
-      alerts = 1,
-      riskScore = 21,
-      maxSignals = 100,
-    }: { alerts?: number; riskScore?: number; maxSignals?: number } = {}
-  ) => {
+  const createAndSyncRuleAndAlerts = async ({
+    documentId,
+    alerts = 1,
+    riskScore = 21,
+    maxSignals = 100,
+  }: {
+    alerts?: number;
+    documentId: string;
+    riskScore?: number;
+    maxSignals?: number;
+  }): Promise<void> => {
     const rule = getRuleForSignalTesting(['ecs_compliant']);
     const { id } = await createRule(supertest, log, {
       ...rule,
@@ -68,14 +71,28 @@ export default ({ getService }: FtrProviderContext): void => {
     });
     await waitForRuleSuccessOrStatus(supertest, log, id);
     await waitForSignalsToBePresent(supertest, log, alerts, [id]);
+  };
 
-    const { body } = await supertest
+  const getRiskScores = async ({ body }: { body: object }): Promise<{ scores: unknown[] }> => {
+    const { body: result } = await supertest
       .post(RISK_SCORES_URL)
       .set('kbn-xsrf', 'true')
-      .send({})
+      .send(body)
       .expect(200);
+    return result;
+  };
 
-    return body;
+  const getRiskScoreAfterRuleCreationAndExecution = async (
+    documentId: string,
+    {
+      alerts = 1,
+      riskScore = 21,
+      maxSignals = 100,
+    }: { alerts?: number; riskScore?: number; maxSignals?: number } = {}
+  ) => {
+    await createAndSyncRuleAndAlerts({ documentId, alerts, riskScore, maxSignals });
+
+    return await getRiskScores({ body: {} });
   };
 
   describe('Risk engine', () => {
