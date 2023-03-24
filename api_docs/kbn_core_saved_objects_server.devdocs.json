@@ -9490,22 +9490,6 @@
                 "path": "x-pack/plugins/alerting/server/saved_objects/index.ts"
               },
               {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/plugins/saved_objects_tagging/server/saved_objects/tag.ts"
-              },
-              {
-                "plugin": "savedSearch",
-                "path": "src/plugins/saved_search/server/saved_objects/search.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/saved_objects/workpad.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/saved_objects/custom_element.ts"
-              },
-              {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/server/saved_objects.ts"
               },
@@ -9528,6 +9512,22 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/plugins/cases/server/saved_object_types/connector_mappings.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/plugins/saved_objects_tagging/server/saved_objects/tag.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/plugins/saved_search/server/saved_objects/search.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/saved_objects/workpad.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/saved_objects/custom_element.ts"
               },
               {
                 "plugin": "graph",

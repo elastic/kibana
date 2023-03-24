@@ -12,10 +12,6 @@ import { identity } from 'fp-ts/lib/function';
 
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import {
-  isCommentRequestTypeExternalReference,
-  isCommentRequestTypePersistableState,
-} from '../../../common/utils/attachments';
 import type { CaseResponse } from '../../../common/api';
 import { CommentRequestRt, throwErrors } from '../../../common/api';
 
@@ -26,6 +22,7 @@ import type { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
 import { Operations } from '../../authorization';
 import type { AddArgs } from './types';
+import { validateRegisteredAttachments } from './validators';
 
 /**
  * Create an attachment to a case.
@@ -58,23 +55,11 @@ export const addComment = async (
       entities: [{ owner: comment.owner, id: savedObjectID }],
     });
 
-    if (
-      isCommentRequestTypeExternalReference(query) &&
-      !externalReferenceAttachmentTypeRegistry.has(query.externalReferenceAttachmentTypeId)
-    ) {
-      throw Boom.badRequest(
-        `Attachment type ${query.externalReferenceAttachmentTypeId} is not registered.`
-      );
-    }
-
-    if (
-      isCommentRequestTypePersistableState(query) &&
-      !persistableStateAttachmentTypeRegistry.has(query.persistableStateAttachmentTypeId)
-    ) {
-      throw Boom.badRequest(
-        `Attachment type ${query.persistableStateAttachmentTypeId} is not registered.`
-      );
-    }
+    validateRegisteredAttachments({
+      query,
+      persistableStateAttachmentTypeRegistry,
+      externalReferenceAttachmentTypeRegistry,
+    });
 
     const createdDate = new Date().toISOString();
 

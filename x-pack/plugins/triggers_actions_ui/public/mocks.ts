@@ -9,8 +9,8 @@ import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
-import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
-import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
+import { getAddRuleFlyoutLazy } from './common/get_add_rule_flyout';
+import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
 import { TypeRegistry } from './application/type_registry';
 import {
   ActionTypeModel,
@@ -70,16 +70,16 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         connectorServices,
       });
     },
-    getAddAlertFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
-      return getAddAlertFlyoutLazy({
+    getAddRuleFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
+      return getAddRuleFlyoutLazy({
         ...props,
         actionTypeRegistry,
         ruleTypeRegistry,
         connectorServices,
       });
     },
-    getEditAlertFlyout: (props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
-      return getEditAlertFlyoutLazy({
+    getEditRuleFlyout: (props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
+      return getEditRuleFlyoutLazy({
         ...props,
         actionTypeRegistry,
         ruleTypeRegistry,

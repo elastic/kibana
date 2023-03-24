@@ -35,7 +35,7 @@ export function ContextErrorMessage({ status }: ContextErrorMessageProps) {
         />
       }
       color="danger"
-      iconType="alert"
+      iconType="warning"
       data-test-subj="contextErrorMessageTitle"
     >
       <EuiText data-test-subj="contextErrorMessageBody">

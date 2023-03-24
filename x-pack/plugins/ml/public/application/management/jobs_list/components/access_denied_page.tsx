@@ -20,7 +20,7 @@ export const AccessDeniedPage = () => (
       data-test-subj="mlPageAccessDenied"
     >
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         title={
           <h2>
             <FormattedMessage

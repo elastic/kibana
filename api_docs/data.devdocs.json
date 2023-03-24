@@ -5698,59 +5698,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-public.AggFunctionsMapping.aggGeoHash",
-            "type": "Object",
-            "tags": [],
-            "label": "aggGeoHash",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionFunctionDefinition",
-                "text": "ExpressionFunctionDefinition"
-              },
-              "<\"aggGeoHash\", any, Arguments, ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.AggExpressionType",
-                "text": "AggExpressionType"
-              },
-              ", ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExecutionContext",
-                "text": "ExecutionContext"
-              },
-              "<",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Adapters",
-                "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">>"
-            ],
-            "path": "src/plugins/data/common/search/aggs/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-public.AggFunctionsMapping.aggHistogram",
             "type": "Object",
             "tags": [],
@@ -7408,6 +7355,59 @@
                 "text": "ExpressionFunctionDefinition"
               },
               "<\"aggTopMetrics\", any, AggArgs, ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggExpressionType",
+                "text": "AggExpressionType"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.AggFunctionsMapping.aggRate",
+            "type": "Object",
+            "tags": [],
+            "label": "aggRate",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"aggRate\", any, AggArgs, ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -10936,10 +10936,6 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/types/index.ts"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/server/routes/settings/apm_indices/route.ts"
           },
           {
             "plugin": "savedObjectsTaggingOss",
@@ -15007,10 +15003,6 @@
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
               },
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/register_index_pattern_usage_collection.ts"
-              },
-              {
                 "plugin": "dataViewManagement",
                 "path": "src/plugins/data_view_management/public/components/edit_index_pattern/scripted_fields_table/scripted_fields_table.tsx"
               },
@@ -18278,33 +18270,7 @@
                   "ExistsRequest",
                   ", options?: ",
                   "TransportRequestOptions",
-                  " | undefined): Promise<boolean>; }; security: ",
-                  "default",
-                  "; ping: { (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
-                  "PingRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<boolean>; (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
-                  "PingRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<boolean, unknown>>; (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
-                  "PingRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<boolean>; }; nodes: ",
-                  "default",
-                  "; indices: ",
-                  "default",
-                  "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  " | undefined): Promise<boolean>; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -18686,7 +18652,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; info: { (this: That, params?: ",
+                  ">; }; indices: ",
+                  "default",
+                  "; info: { (this: That, params?: ",
                   "InfoRequest",
                   " | ",
                   "InfoRequest",
@@ -18864,7 +18832,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "MtermvectorsResponse",
-                  ">; }; openPointInTime: { (this: That, params: ",
+                  ">; }; nodes: ",
+                  "default",
+                  "; openPointInTime: { (this: That, params: ",
                   "OpenPointInTimeRequest",
                   " | ",
                   "OpenPointInTimeRequest",
@@ -18890,7 +18860,27 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "OpenPointInTimeResponse",
-                  ">; }; putScript: { (this: That, params: ",
+                  ">; }; ping: { (this: That, params?: ",
+                  "PingRequest",
+                  " | ",
+                  "PingRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<boolean>; (this: That, params?: ",
+                  "PingRequest",
+                  " | ",
+                  "PingRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<boolean, unknown>>; (this: That, params?: ",
+                  "PingRequest",
+                  " | ",
+                  "PingRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<boolean>; }; putScript: { (this: That, params: ",
                   "PutScriptRequest",
                   " | ",
                   "PutScriptRequest",
@@ -19153,6 +19143,8 @@
                   " | undefined): Promise<",
                   "SearchTemplateResponse",
                   "<TDocument>>; }; searchableSnapshots: ",
+                  "default",
+                  "; security: ",
                   "default",
                   "; shutdown: ",
                   "default",
@@ -22628,10 +22620,6 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_views.ts"
-              },
-              {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/register_index_pattern_usage_collection.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -28713,10 +28701,6 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/types/index.ts"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/apm/server/routes/settings/apm_indices/route.ts"
           },
           {
             "plugin": "savedObjectsTaggingOss",

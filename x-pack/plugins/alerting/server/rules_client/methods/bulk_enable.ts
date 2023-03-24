@@ -10,7 +10,7 @@ import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { Logger } from '@kbn/core/server';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RawRule, IntervalSchedule } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -36,10 +36,18 @@ const getShouldScheduleTask = async (
   if (!scheduledTaskId) return true;
   try {
     // make sure scheduledTaskId exist
-    await withSpan({ name: 'getShouldScheduleTask', type: 'rules' }, () =>
-      context.taskManager.get(scheduledTaskId)
-    );
-    return false;
+    return await withSpan({ name: 'getShouldScheduleTask', type: 'rules' }, async () => {
+      const task = await context.taskManager.get(scheduledTaskId);
+
+      // Check whether task status is unrecognized. If so, we want to delete
+      // this task and create a fresh one
+      if (task.status === TaskStatus.Unrecognized) {
+        await context.taskManager.removeIfExists(scheduledTaskId);
+        return true;
+      }
+
+      return false;
+    });
   } catch (err) {
     return true;
   }

@@ -28,6 +28,7 @@ export const DisabledCallout = () => {
         <p>{CALLOUT_MANAGEMENT_DESCRIPTION}</p>
         {enablement.canEnable ? (
           <EuiButton
+            data-test-subj="syntheticsDisabledCalloutButton"
             fill
             color="primary"
             onClick={() => {
@@ -39,7 +40,7 @@ export const DisabledCallout = () => {
         ) : (
           <p>
             {CALLOUT_MANAGEMENT_CONTACT_ADMIN}{' '}
-            <EuiLink href="#" target="_blank">
+            <EuiLink data-test-subj="syntheticsDisabledCalloutLink" href="#" target="_blank">
               {LEARN_MORE_LABEL}
             </EuiLink>
           </p>

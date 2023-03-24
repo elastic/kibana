@@ -29,13 +29,27 @@ export function SetupInstructionsLink({
 }) {
   const { core } = useApmPluginContext();
   return (
-    <EuiLink href={core.http.basePath.prepend('/app/home#/tutorial/apm')}>
+    <EuiLink
+      data-test-subj="apmSetupInstructionsLinkLink"
+      href={core.http.basePath.prepend('/app/home#/tutorial/apm')}
+    >
       {buttonFill ? (
-        <EuiButton size="s" color="primary" fill={buttonFill} iconType="help">
+        <EuiButton
+          data-test-subj="apmSetupInstructionsLinkButton"
+          size="s"
+          color="primary"
+          fill={buttonFill}
+          iconType="help"
+        >
           {SETUP_INSTRUCTIONS_LABEL}
         </EuiButton>
       ) : (
-        <EuiButtonEmpty size="s" color="primary" iconType="indexOpen">
+        <EuiButtonEmpty
+          data-test-subj="apmSetupInstructionsLinkButton"
+          size="s"
+          color="primary"
+          iconType="indexOpen"
+        >
           {ADD_DATA_LABEL}
         </EuiButtonEmpty>
       )}

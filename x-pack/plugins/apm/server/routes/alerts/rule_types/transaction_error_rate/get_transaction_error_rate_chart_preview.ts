@@ -25,6 +25,11 @@ import { APMConfig } from '../../../..';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../../common/document_type';
 
+export type TransactionErrorRateChartPreviewResponse = Array<{
+  x: number;
+  y: number;
+}>;
+
 export async function getTransactionErrorRateChartPreview({
   config,
   apmEventClient,
@@ -33,7 +38,7 @@ export async function getTransactionErrorRateChartPreview({
   config: APMConfig;
   apmEventClient: APMEventClient;
   alertParams: AlertParams;
-}) {
+}): Promise<TransactionErrorRateChartPreviewResponse> {
   const { serviceName, environment, transactionType, interval, start, end } =
     alertParams;
 

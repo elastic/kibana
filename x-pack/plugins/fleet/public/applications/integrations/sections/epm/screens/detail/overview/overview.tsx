@@ -49,7 +49,7 @@ const UnverifiedCallout: React.FC = () => {
         title={i18n.translate('xpack.fleet.epm.verificationWarningCalloutTitle', {
           defaultMessage: 'Integration not verified',
         })}
-        iconType="alert"
+        iconType="warning"
         color="warning"
       >
         <p>

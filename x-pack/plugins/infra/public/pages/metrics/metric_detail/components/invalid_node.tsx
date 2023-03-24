@@ -46,7 +46,12 @@ export const InvalidNodeError: React.FunctionComponent<InvalidNodeErrorProps> = 
       actions={
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiButton {...tutorialLinkProps} color="primary" fill>
+            <EuiButton
+              data-test-subj="infraInvalidNodeErrorViewSetupInstructionsButton"
+              {...tutorialLinkProps}
+              color="primary"
+              fill
+            >
               <FormattedMessage
                 id="xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel"
                 defaultMessage="View setup instructions"
