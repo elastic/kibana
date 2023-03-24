@@ -20,6 +20,8 @@ jest.mock('./app_context', () => {
       getLogger: jest.fn(() => {
         return { error: jest.fn(), debug: jest.fn() };
       }),
+      writeCustomAuditLog: jest.fn(),
+      writeCustomSoAuditLog: jest.fn(),
     },
   };
 });

@@ -270,6 +270,8 @@ jest.mock('./app_context', () => ({
           },
         }
       ),
+    writeCustomAuditLog: jest.fn(),
+    writeCustomSoAuditLog: jest.fn(),
   },
 }));
 

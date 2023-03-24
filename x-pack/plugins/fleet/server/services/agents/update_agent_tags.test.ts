@@ -21,6 +21,8 @@ jest.mock('../app_context', () => {
     appContextService: {
       getLogger: () => loggerMock.create(),
       getConfig: () => {},
+      writeCustomAuditLog: jest.fn(),
+      writeCustomSoAuditLog: jest.fn(),
     },
   };
 });

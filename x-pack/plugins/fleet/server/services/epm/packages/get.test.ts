@@ -34,6 +34,16 @@ const mockGetSettings = getSettings as jest.Mock;
 mockGetSettings.mockResolvedValue({ prerelease_integrations_enabled: true });
 
 describe('When using EPM `get` services', () => {
+  beforeEach(() => {
+    const mockContract = createAppContextStartContractMock();
+    appContextService.start(mockContract);
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+  });
+
   describe('and invoking getPackageUsageStats()', () => {
     let soClient: jest.Mocked<SavedObjectsClientContract>;
 
@@ -188,9 +198,6 @@ describe('When using EPM `get` services', () => {
 
   describe('getPackages', () => {
     beforeEach(() => {
-      const mockContract = createAppContextStartContractMock();
-      appContextService.start(mockContract);
-      jest.clearAllMocks();
       MockRegistry.fetchList.mockResolvedValue([
         {
           name: 'nginx',
