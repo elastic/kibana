@@ -6,10 +6,9 @@
  */
 
 import { APP_ID } from '../../../common/constants';
-import { mergeExecutionContext } from './execution_context_utils';
+import { getExecutionContextId, mergeExecutionContext } from './execution_context_utils';
 
 describe('mergeExecutionContext', () => {
-
   test('should merge with context',  () => {
     const mergeContext = { description: 'es_pew_pew_source:connections' };
     const context = { name: APP_ID };
@@ -51,5 +50,33 @@ describe('mergeExecutionContext', () => {
       }
     });
   });
+});
 
+describe('getExecutionContextId', () => {
+  test('should return executionContextId',  () => {
+    const context = { name: APP_ID, id: 'map1234' };
+    expect(getExecutionContextId(context)).toBe('map1234');
+  });
+
+  test('should return executionContextId with hierarchical context',  () => {
+    const context = {
+      name: 'dashboard',
+      child: {
+        name: APP_ID,
+        id: 'map1234'
+      }
+    };
+    expect(getExecutionContextId(context)).toBe('map1234');
+  });
+
+  test('should return undefined if "maps" context can not be found',  () => {
+    const context = {
+      name: 'dashboard',
+      child: {
+        name: 'lens',
+        id: 'lens1234'
+      }
+    };
+    expect(getExecutionContextId(context)).toBeUndefined();
+  });
 });

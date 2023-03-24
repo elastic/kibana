@@ -15,12 +15,12 @@ import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  APP_ID,
   MVT_GETTILE_API_PATH,
   API_ROOT_PATH,
   MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
 } from '../../common/constants';
-import { makeExecutionContext } from '../../common/execution_context';
 import { getAggsTileRequest, getHitsTileRequest } from '../../common/mvt_request_body';
 
 const CACHE_TIMEOUT_SECONDS = 60 * 60;
@@ -50,6 +50,7 @@ export function initMVTRoutes({
           requestBody: schema.string(),
           index: schema.string(),
           token: schema.maybe(schema.string()),
+          executionContextId: schema.maybe(schema.string()),
         }),
       },
     },
@@ -82,15 +83,22 @@ export function initMVTRoutes({
         return response.badRequest();
       }
 
+      const executionContext: KibanaExecutionContext = {
+        type: 'server',
+        name: APP_ID,
+        description: 'mvt:get_hits_tile',
+        url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/${z}/${x}/${y}.pbf`,
+      };
+      if (query.executionContextId) {
+        executionContext.id = query.executionContextId;
+      }
+
       const { stream, headers, statusCode } = await getTile({
         abortController: makeAbortController(request),
         body: tileRequest.body,
         context,
         core,
-        executionContext: makeExecutionContext({
-          description: 'mvt:get_hits_tile',
-          url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/${z}/${x}/${y}.pbf`,
-        }),
+        executionContext,
         logger,
         path: tileRequest.path,
       });
@@ -117,6 +125,7 @@ export function initMVTRoutes({
           renderAs: schema.string(),
           token: schema.maybe(schema.string()),
           gridPrecision: schema.number(),
+          executionContextId: schema.maybe(schema.string()),
         }),
       },
     },
@@ -151,15 +160,22 @@ export function initMVTRoutes({
         return response.badRequest();
       }
 
+      const executionContext: KibanaExecutionContext = {
+        type: 'server',
+        name: APP_ID,
+        description: 'mvt:get_aggs_tile',
+        url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/${z}/${x}/${y}.pbf`,
+      };
+      if (query.executionContextId) {
+        executionContext.id = query.executionContextId;
+      }
+
       const { stream, headers, statusCode } = await getTile({
         abortController: makeAbortController(request),
         body: tileRequest.body,
         context,
         core,
-        executionContext: makeExecutionContext({
-          description: 'mvt:get_aggs_tile',
-          url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/${z}/${x}/${y}.pbf`,
-        }),
+        executionContext,
         logger,
         path: tileRequest.path,
       });

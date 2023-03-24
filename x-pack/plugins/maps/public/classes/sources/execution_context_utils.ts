@@ -9,7 +9,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { APP_ID } from '../../../common/constants';
 
 export function mergeExecutionContext(mergeContext: Partial<KibanaExecutionContext>, context: KibanaExecutionContext): KibanaExecutionContext {
-  if (context.name === APP_ID) {
+  if (isMapContext(context)) {
     return {
       ...context,
       ...mergeContext,
@@ -26,4 +26,20 @@ export function mergeExecutionContext(mergeContext: Partial<KibanaExecutionConte
   }
 
   return context;
+}
+
+export function getExecutionContextId(context: KibanaExecutionContext): string | undefined {
+  if (isMapContext(context)) {
+    return context.id;
+  }
+
+  if (context.child !== undefined) {
+    return getExecutionContextId(context.child);
+  }
+
+  return undefined;
+}
+
+function isMapContext(context: KibanaExecutionContext): boolean {
+  return context.name === APP_ID;
 }

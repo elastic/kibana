@@ -49,12 +49,13 @@ export default function ({ getPageObjects, getService }) {
         delete searchParams.token;
 
         expect(searchParams).to.eql({
-          buffer: 4,
+          buffer: '4',
+          executionContextId: 'bff99716-e3dc-11ea-87d0-0242ac130003',
           geometryFieldName: 'geometry',
           hasLabels: 'false',
           index: 'geo_shapes*',
           requestBody:
-            '(_source:!f,fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),size:10001)',
+            '(_source%3A!f%2Cfields%3A!(prop1)%2Cquery%3A(bool%3A(filter%3A!()%2Cmust%3A!()%2Cmust_not%3A!()%2Cshould%3A!()))%2Cruntime_mappings%3A()%2Csize%3A10001)',
         });
       });
 
