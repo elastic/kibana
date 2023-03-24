@@ -555,6 +555,7 @@ export function LayerPanel(
                             indexPatterns={dataViews.indexPatterns}
                           >
                             <DimensionButton
+                              className="lnsLayerPanel__dimension"
                               accessorConfig={accessorConfig}
                               label={columnLabelMap?.[accessorConfig.columnId] ?? ''}
                               group={group}

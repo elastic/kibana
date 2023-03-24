@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import classnames from 'classnames';
 import { EuiButtonIcon, EuiLink, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -22,7 +21,6 @@ const triggerLinkA11yText = (label: string) =>
   });
 
 export function DimensionButton({
-  className,
   dragHandle,
   group,
   children,
@@ -33,8 +31,8 @@ export function DimensionButton({
   message,
   ...otherProps // from Drag&Drop integration
 }: {
-  className?: string; // from Drag&Drop integration
-  dragHandle?: React.ReactElement;
+  className?: string;
+  dragHandle?: React.ReactElement; // from Drag&Drop integration
   group: VisualizationDimensionGroupConfig;
   children: React.ReactElement;
   onClick: (id: string) => void;
@@ -44,7 +42,7 @@ export function DimensionButton({
   message: UserMessage | undefined;
 }) {
   return (
-    <div className={classnames('lnsLayerPanel__dimension', className)} {...otherProps}>
+    <div {...otherProps}>
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>
         {dragHandle && (
           <EuiFlexItem grow={false} className="lnsLayerPanel__dimensionDragHandle">
