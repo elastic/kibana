@@ -35,7 +35,6 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 import { EngineIndicesLogic } from './engine_indices_logic';
 
 import { EngineViewLogic } from './engine_view_logic';
-import './engine_schema.scss';
 
 const CONFLICT = 'conflict';
 const UNMAPPED = 'unmapped';
@@ -129,7 +128,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
           </EuiCallOut>
         )}
         <EuiBasicTable
-          className="engineSchemaInnerTable"
+          css={{ '& .euiTable': { backgroundColor: 'transparent' } }}
           columns={columns}
           items={schemaField.indices}
         />
