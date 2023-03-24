@@ -12,40 +12,46 @@ import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
  * `account.cloud.name` or `cluster.id` based on the value of `rule.benchmark.posture_type`
  */
 export const getBelongsToRuntimeMapping = (): MappingRuntimeFields => ({
+  'rule.benchmark.posture_type': {
+    type: 'keyword',
+  },
+  'cloud.account.id': {
+    type: 'keyword',
+  },
+  'cloud.account.name': {
+    type: 'keyword',
+  },
   belongs_to: {
     type: 'keyword',
     script: {
       source: `
-        if (!doc.containsKey('rule.benchmark.posture_type'))
-          {
-            def belongs_to = doc["cluster_id"].value;
-            emit(belongs_to);
-            return
-          }
-        else
-        {
-          if(doc["rule.benchmark.posture_type"].size() > 0)
-            {
+      def belongs_to = "";
+
+      if (doc.containsKey('cluster_id') && doc["cluster_id"].size() > 0) {
+          belongs_to = doc["cluster_id"].value;
+      }
+
+      if (!doc.containsKey('rule.benchmark.posture_type')) {
+          emit(belongs_to);
+          return;
+      } else {
+          if (doc["rule.benchmark.posture_type"].size() > 0) {
               def policy_template_type = doc["rule.benchmark.posture_type"].value;
-              if (policy_template_type == "cspm")
-              {
-                def belongs_to = doc["cloud.account.name"].value;
-                emit(belongs_to);
-                return
+              if (policy_template_type == "cspm") {
+                if (doc.containsKey('cloud.account.name') && doc["cloud.account.name"].size() > 0 && doc["cloud.account.name"].value != '') {
+                      belongs_to = doc["cloud.account.name"].value;
+                  } else if (doc.containsKey('cloud.account.id') && doc["cloud.account.id"].size() > 0) {
+                      belongs_to = doc["cloud.account.id"].value;
+                  }
+              } else if (policy_template_type == "kspm") {
+                  if (doc.containsKey('cluster_id') && doc["cluster_id"].size() > 0) {
+                      belongs_to = doc["cluster_id"].value;
+                  }
               }
-
-              if (policy_template_type == "kspm")
-              {
-                def belongs_to = doc["cluster_id"].value;
-                emit(belongs_to);
-                return
-              }
-            }
-
-            def belongs_to = doc["cluster_id"].value;
-            emit(belongs_to);
-            return
-        }
+          }
+          emit(belongs_to);
+          return;
+      }
       `,
     },
   },

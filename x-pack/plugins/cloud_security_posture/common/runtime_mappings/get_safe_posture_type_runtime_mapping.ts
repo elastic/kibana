@@ -12,6 +12,15 @@ import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
  * `kspm` or `cspm` based on the value of `rule.benchmark.posture_type`
  */
 export const getSafePostureTypeRuntimeMapping = (): MappingRuntimeFields => ({
+  'rule.benchmark.posture_type': {
+    type: 'keyword',
+  },
+  'cloud.account.id': {
+    type: 'keyword',
+  },
+  'cloud.account.name': {
+    type: 'keyword',
+  },
   safe_posture_type: {
     type: 'keyword',
     script: {
