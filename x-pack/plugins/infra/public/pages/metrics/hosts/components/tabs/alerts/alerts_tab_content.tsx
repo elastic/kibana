@@ -101,14 +101,14 @@ const MemoAlertSummaryWidget = React.memo(
     const { charts, triggersActionsUi } = services;
     const { getAlertSummaryWidget: AlertSummaryWidget } = triggersActionsUi;
 
-    const chartThemes = {
+    const chartProps = {
       theme: charts.theme.useChartsTheme(),
       baseTheme: charts.theme.useChartsBaseTheme(),
     };
 
     return (
       <AlertSummaryWidget
-        chartThemes={chartThemes}
+        chartProps={chartProps}
         featureIds={infraAlertFeatureIds}
         filter={alertsQuery}
         fullSize

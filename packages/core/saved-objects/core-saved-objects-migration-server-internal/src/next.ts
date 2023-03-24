@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import * as Option from 'fp-ts/lib/Option';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { omit } from 'lodash';
 import type {
@@ -75,11 +76,16 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
-    UPDATE_SOURCE_MAPPINGS_PROPERTIES: (state: UpdateSourceMappingsPropertiesState) =>
-      Actions.updateMappings({
+    UPDATE_SOURCE_MAPPINGS_PROPERTIES: ({
+      sourceIndex,
+      sourceIndexMappings,
+      targetIndexMappings,
+    }: UpdateSourceMappingsPropertiesState) =>
+      Actions.updateSourceMappingsProperties({
         client,
-        index: state.sourceIndex.value, // attempt to update source mappings in-place
-        mappings: omit(state.targetIndexMappings, ['_meta']), // ._meta property will be updated on a later step
+        sourceIndex: sourceIndex.value,
+        sourceMappings: sourceIndexMappings.value,
+        targetMappings: targetIndexMappings,
       }),
     CLEANUP_UNKNOWN_AND_EXCLUDED: (state: CleanupUnknownAndExcluded) =>
       Actions.cleanupUnknownAndExcluded({
@@ -169,7 +175,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.refreshIndex({ client, index: state.targetIndex }),
     CHECK_TARGET_MAPPINGS: (state: CheckTargetMappingsState) =>
       Actions.checkTargetMappings({
-        actualMappings: state.targetIndexRawMappings,
+        actualMappings: Option.toUndefined(state.sourceIndexMappings),
         expectedMappings: state.targetIndexMappings,
       }),
     UPDATE_TARGET_MAPPINGS_PROPERTIES: (state: UpdateTargetMappingsPropertiesState) =>
@@ -233,7 +239,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.createIndex({
         client,
         indexName: state.sourceIndex.value,
-        mappings: state.legacyReindexTargetMappings,
+        mappings: state.sourceIndexMappings.value,
       }),
     LEGACY_REINDEX: (state: LegacyReindexState) =>
       Actions.reindex({

@@ -38,6 +38,7 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
       filter: 'baz: foo and bar > 2',
       good: 'http_status: 2xx',
       total: 'a query',
+      timestampField: 'custom_timestamp',
     },
   },
   timeWindow: {
@@ -48,7 +49,6 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
   budgetingMethod: 'occurrences',
   revision: 1,
   settings: {
-    timestampField: '@timestamp',
     syncDelay: '1m',
     frequency: '1m',
   },
@@ -62,6 +62,7 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
       isEstimated: false,
     },
   },
+  tags: ['k8s', 'production', 'critical'],
   enabled: true,
   createdAt: now,
   updatedAt: now,

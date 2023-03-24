@@ -8,6 +8,7 @@
 import React, { useCallback, useRef } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
+import { DragDropIdentifier, RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import {
   DatasourceMap,
@@ -23,7 +24,6 @@ import { ConfigPanelWrapper } from './config_panel';
 import { FrameLayout } from './frame_layout';
 import { SuggestionPanelWrapper } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
-import { DragDropIdentifier, RootDragDropProvider } from '../../drag_drop';
 import { EditorFrameStartPlugins } from '../service';
 import { getTopSuggestionForField, switchToSuggestion } from './suggestion_helpers';
 import {
@@ -108,7 +108,7 @@ export function EditorFrame(props: EditorFrameProps) {
   const bannerMessages = props.getUserMessages('banner', { severity: 'warning' });
 
   return (
-    <RootDragDropProvider>
+    <RootDragDropProvider dataTestSubj="lnsDragDrop" onTrackUICounterEvent={trackUiCounterEvents}>
       <FrameLayout
         bannerMessages={
           bannerMessages.length ? (

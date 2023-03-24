@@ -44,6 +44,7 @@ export const TestRunsTableHeader = ({
       <EuiFlexItem grow={false}>
         {showViewHistoryButton ? (
           <EuiLink
+            data-test-subj="syntheticsTestRunsTableHeaderLink"
             href={
               monitor?.[ConfigKey.CONFIG_ID]
                 ? history.createHref({
