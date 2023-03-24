@@ -29,6 +29,7 @@ import { ChildDragDropProvider, DragDrop } from '@kbn/dom-drag-drop';
 import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
+import { getFieldItemActions } from '../common/get_field_item_actions';
 
 const getCustomFieldType: GetCustomFieldType<DatatableColumn> = (field) => field?.meta.type;
 
@@ -52,6 +53,8 @@ export function TextBasedDataPanel({
   expressions,
   dataViews,
   layerFields,
+  hasSuggestionForField,
+  dropOntoWorkspace,
 }: TextBasedDataPanelProps) {
   const prevQuery = usePrevious(query);
   const [dataHasLoaded, setDataHasLoaded] = useState(false);
@@ -108,20 +111,30 @@ export function TextBasedDataPanel({
   });
 
   const renderFieldItem: FieldListGroupedProps<DatatableColumn>['renderFieldItem'] = useCallback(
-    ({ field, itemIndex, fieldSearchHighlight, groupName }) => {
+    ({ field, groupIndex, itemIndex, fieldSearchHighlight, groupName }) => {
       if (!field) {
         return <></>;
       }
+
+      const value = {
+        field: field.name,
+        id: field.id,
+        humanData: { label: field.name },
+      };
+      const order = [0, groupIndex, itemIndex];
+      const { buttonAddFieldToWorkspaceProps, onAddFieldToWorkspace } =
+        getFieldItemActions<DatatableColumn>({
+          value,
+          hasSuggestionForField,
+          dropOntoWorkspace,
+        });
+
       return (
         <DragDrop
           draggable
           withDragHandle
-          order={[itemIndex]}
-          value={{
-            field: field.name,
-            id: field.id,
-            humanData: { label: field.name },
-          }}
+          order={order}
+          value={value}
           dataTestSubj={`lnsFieldListPanelField-${field.name}`}
         >
           <FieldItemButton<DatatableColumn>
@@ -132,12 +145,13 @@ export function TextBasedDataPanel({
             fieldSearchHighlight={fieldSearchHighlight}
             getCustomFieldType={getCustomFieldType}
             onClick={undefined}
-            // TODO: add to workplace buttons
+            buttonAddFieldToWorkspaceProps={buttonAddFieldToWorkspaceProps}
+            onAddFieldToWorkspace={onAddFieldToWorkspace}
           />
         </DragDrop>
       );
     },
-    []
+    [hasSuggestionForField, dropOntoWorkspace]
   );
 
   return (

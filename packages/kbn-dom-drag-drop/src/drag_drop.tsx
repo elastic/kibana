@@ -439,7 +439,8 @@ const DragInner = memo(function DragInner({
         'domDragDrop-isHidden':
           (activeDraggingProps && dragType === 'move' && !keyboardMode) ||
           shouldShowGhostImageInstead,
-        'domDragDrop-isDragStarted': activeDraggingProps,
+        'domDragDrop--isDragStarted': activeDraggingProps,
+        'domDragDrop--withDragHandle': withDragHandle,
       })}
       data-test-subj={`${dataTestSubjPrefix}_draggable-${value.humanData.label}`}
     >

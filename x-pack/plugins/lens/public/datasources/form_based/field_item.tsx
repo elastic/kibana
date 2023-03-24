@@ -32,6 +32,7 @@ import type { IndexPattern, IndexPatternField } from '../../types';
 import type { LensAppServices } from '../../app_plugin/types';
 import { APP_ID } from '../../../common/constants';
 import { combineQueryAndFilters } from '../../app_plugin/show_underlying_data';
+import { getFieldItemActions } from '../common/get_field_item_actions';
 
 export interface FieldItemProps {
   isSelected: boolean;
@@ -137,28 +138,15 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     [field, indexPattern.id, itemIndex]
   );
 
-  const dropOntoWorkspaceAndClose = useCallback(() => {
-    closePopover();
-    dropOntoWorkspace(value);
-  }, [dropOntoWorkspace, closePopover, value]);
-
-  const onDragStart = useCallback(() => {
-    setOpen(false);
-  }, [setOpen]);
-
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
-  const canAddToWorkspace = hasSuggestionForField(value);
-  const addToWorkplaceButtonTitle = canAddToWorkspace
-    ? i18n.translate('xpack.lens.indexPattern.moveToWorkspace', {
-        defaultMessage: 'Add {field} to workspace',
-        values: {
-          field: value.field.displayName,
-        },
-      })
-    : i18n.translate('xpack.lens.indexPattern.moveToWorkspaceNotAvailable', {
-        defaultMessage:
-          'To visualize this field, please add it directly to the desired layer. Adding this field to the workspace is not supported based on your current configuration.',
-      });
+
+  const { buttonAddFieldToWorkspaceProps, onAddFieldToWorkspace } =
+    getFieldItemActions<IndexPatternField>({
+      value,
+      hasSuggestionForField,
+      dropOntoWorkspace,
+      closeFieldPopover: closePopover,
+    });
 
   return (
     <li>
@@ -180,7 +168,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             order={order}
             value={value}
             dataTestSubj={`lnsFieldListPanelField-${field.name}`}
-            onDragStart={onDragStart}
+            onDragStart={closePopover}
           >
             <FieldItemButton<IndexPatternField>
               isSelected={isSelected}
@@ -189,11 +177,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               field={field}
               fieldSearchHighlight={highlight}
               onClick={togglePopover}
-              buttonAddFieldToWorkspaceProps={{
-                isDisabled: !canAddToWorkspace,
-                'aria-label': addToWorkplaceButtonTitle,
-              }}
-              onAddFieldToWorkspace={dropOntoWorkspaceAndClose}
+              buttonAddFieldToWorkspaceProps={buttonAddFieldToWorkspaceProps}
+              onAddFieldToWorkspace={onAddFieldToWorkspace}
             />
           </DragDrop>
         }
@@ -202,11 +187,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             <FieldPopoverHeader
               field={dataViewField}
               closePopover={closePopover}
-              buttonAddFieldToWorkspaceProps={{
-                isDisabled: !canAddToWorkspace,
-                'aria-label': addToWorkplaceButtonTitle,
-              }}
-              onAddFieldToWorkspace={dropOntoWorkspaceAndClose}
+              buttonAddFieldToWorkspaceProps={buttonAddFieldToWorkspaceProps}
+              onAddFieldToWorkspace={onAddFieldToWorkspace}
               onAddFilter={addFilterAndClose}
               onEditField={editFieldAndClose}
               onDeleteField={removeFieldAndClose}

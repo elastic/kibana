@@ -13,7 +13,6 @@ $domDragDropZLevel3: 3;
 @mixin mixinDomDraggable {
   @include euiSlightShadow;
   background: $euiColorEmptyShade;
-  cursor: grab;
 }
 
 // Static styles for a drop area
