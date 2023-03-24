@@ -32,16 +32,10 @@ export const plugin: PluginInitializer<
 };
 
 export { ALL_VALUES_SELECTED } from './components/shared/exploratory_view/configurations/constants/url_constants';
-// export {
-//   enableInspectEsQueries,
-//   enableComparisonByDefault,
-//   apmServiceGroupMaxNumberOfServices,
-//   enableInfrastructureHostsView,
-//   enableAgentExplorerView,
-// } from '../common/ui_settings_keys';
-// export { uptimeOverviewLocatorID } from '../common';
 
 export * from './components/shared/action_menu';
+
+export { APP_ROUTE as EXPLORATORY_VIEW_APP_URL } from './constants';
 
 export type { UXMetrics } from './components/shared/core_web_vitals';
 

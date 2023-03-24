@@ -44,6 +44,7 @@ import { getExploratoryViewEmbeddable } from './components/shared/exploratory_vi
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
 import { registerDataHandler } from './data_handler';
+import { APP_ROUTE } from './constants';
 
 export interface ExploratoryViewPublicPluginsSetup {
   data: DataPublicPluginSetup;
@@ -97,7 +98,7 @@ export class Plugin
     const appUpdater$ = this.appUpdater$;
 
     core.application.register({
-      appRoute: '/app/exploratory-view',
+      appRoute: APP_ROUTE,
       category: DEFAULT_APP_CATEGORIES.observability,
       euiIconType: 'logoObservability',
       id: 'exploratory-view',
