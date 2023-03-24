@@ -20,6 +20,7 @@ import { RuleDetailsPage } from '../pages/rule_details';
 import { SlosPage } from '../pages/slos/slos';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';
 import { SloEditPage } from '../pages/slo_edit/slo_edit';
+import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 import { casesPath } from '../../common';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
@@ -95,7 +96,7 @@ export const routes = {
   },
   '/exploratory-view/': {
     handler: () => {
-      return <SimpleRedirect to="" redirectToApp="exploratory-view" />;
+      return <ObservabilityExploratoryView />;
     },
     params: {
       query: t.partial({
