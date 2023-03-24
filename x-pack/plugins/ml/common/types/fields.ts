@@ -25,8 +25,8 @@ export interface Field {
   id: FieldId;
   name: string;
   type: ES_FIELD_TYPES;
-  aggregatable: boolean; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! can these be non-optional?
-  counter: boolean; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! can these be non-optional?
+  aggregatable: boolean;
+  counter: boolean;
   aggIds?: AggId[];
   aggs?: Aggregation[];
   runtimeField?: estypes.MappingRuntimeField;
