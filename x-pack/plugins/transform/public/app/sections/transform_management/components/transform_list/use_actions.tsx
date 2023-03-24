@@ -17,7 +17,7 @@ import { useDiscoverAction } from '../action_discover';
 import { EditTransformFlyout } from '../edit_transform_flyout';
 import { useEditAction } from '../action_edit';
 import { useResetAction, ResetActionModal } from '../action_reset';
-import { useScheduleNowAction, ScheduleNowActionModal } from '../action_schedule_now';
+import { useScheduleNowAction } from '../action_schedule_now';
 import { useStartAction, StartActionModal } from '../action_start';
 import { useStopAction } from '../action_stop';
 import { useCreateAlertRuleAction } from '../action_create_alert';
@@ -47,7 +47,6 @@ export const useActions = ({
     modals: (
       <>
         {resetAction.isModalVisible && <ResetActionModal {...resetAction} />}
-        {scheduleNowAction.isModalVisible && <ScheduleNowActionModal {...scheduleNowAction} />}
         {startAction.isModalVisible && <StartActionModal {...startAction} />}
         {stopAction.isModalVisible && <StopActionModal {...stopAction} />}
 
