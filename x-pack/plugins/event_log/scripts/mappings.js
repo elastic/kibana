@@ -169,6 +169,9 @@ exports.EcsCustomPropertyMappings = {
                   },
                 },
               },
+              revision: {
+                type: 'long',
+              },
               rule_type_id: {
                 type: 'keyword',
                 ignore_above: 1024,

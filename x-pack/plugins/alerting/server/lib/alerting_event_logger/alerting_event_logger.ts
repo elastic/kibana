@@ -30,6 +30,7 @@ export interface RuleContextOpts {
   executionId: string;
   taskScheduledAt: Date;
   ruleName?: string;
+  revision?: number;
 }
 
 type RuleContext = RuleContextOpts & {
@@ -254,6 +255,7 @@ export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
     ],
     ruleName: context.ruleName,
     flapping: alert.flapping,
+    revision: context.revision,
   });
 }
 
@@ -284,6 +286,7 @@ export function createActionExecuteRecord(context: RuleContextOpts, action: Acti
     ],
     ruleName: context.ruleName,
     alertSummary: action.alertSummary,
+    revision: context.revision,
   });
 }
 
@@ -310,6 +313,7 @@ export function createExecuteTimeoutRecord(context: RuleContextOpts) {
       },
     ],
     ruleName: context.ruleName,
+    revision: context.revision,
   });
 }
 
@@ -322,6 +326,7 @@ export function initializeExecuteRecord(context: RuleContext) {
     spaceId: context.spaceId,
     executionId: context.executionId,
     action: EVENT_LOG_ACTIONS.execute,
+    revision: context.revision,
     task: {
       scheduled: context.taskScheduledAt.toISOString(),
       scheduleDelay: Millis2Nanos * context.taskScheduleDelay,

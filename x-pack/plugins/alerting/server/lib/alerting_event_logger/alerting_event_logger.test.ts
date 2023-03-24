@@ -51,6 +51,7 @@ const context: RuleContextOpts = {
   spaceId: 'test-space',
   executionId: 'abcd-efgh-ijklmnop',
   taskScheduledAt: new Date('2020-01-01T00:00:00.000Z'),
+  revision: 0,
 };
 
 const contextWithScheduleDelay = { ...context, taskScheduleDelay: 7200000 };

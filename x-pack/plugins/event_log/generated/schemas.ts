@@ -176,6 +176,7 @@ export const EventSchema = schema.maybe(
                     ),
                   })
                 ),
+                revision: ecsNumber(),
                 rule_type_id: ecsString(),
               })
             ),

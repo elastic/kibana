@@ -40,6 +40,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
       average: 0,
       valuesWithTimestamp: {},
     },
+    revision: rule.revision,
   };
 
   const alerts = new Map<string, AlertStatus>();

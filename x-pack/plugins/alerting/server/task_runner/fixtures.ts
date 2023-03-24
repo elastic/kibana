@@ -378,6 +378,7 @@ export const mockAAD = {
   'kibana.alert.rule.execution.uuid': 'c35db7cc-5bf7-46ea-b43f-b251613a5b72',
   'kibana.alert.rule.name': 'test-rule',
   'kibana.alert.rule.producer': 'infrastructure',
+  'kibana.alert.rule.revision': 0,
   'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
   'kibana.alert.rule.uuid': '0de91960-7643-11ed-b719-bb9db8582cb6',
   'kibana.space_ids': ['default'],

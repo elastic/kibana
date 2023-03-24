@@ -50,6 +50,7 @@ export const recoverRuleAlerts = async (
           state: instanceState,
           group: actionGroup,
           namespace: context.namespace,
+          revision: attributes.revision,
           spaceId: context.spaceId,
           savedObjects: [
             {

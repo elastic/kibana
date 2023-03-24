@@ -47,6 +47,7 @@ describe('getAlertInstanceSummaryRoute', () => {
       average: 0,
       valuesWithTimestamp: {},
     },
+    revision: 0,
   };
 
   it('gets alert instance summary', async () => {

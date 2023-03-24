@@ -41,6 +41,7 @@ interface CreateAlertEventLogRecordParams {
     ongoing: number;
     recovered: number;
   };
+  revision?: number;
 }
 
 export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecordParams): Event {
@@ -58,6 +59,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     spaceId,
     flapping,
     alertSummary,
+    revision,
   } = params;
   const alerting =
     params.instanceId || group || alertSummary
@@ -91,6 +93,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
       alert: {
         ...(flapping !== undefined ? { flapping } : {}),
         rule: {
+          revision,
           rule_type_id: ruleType.id,
           ...(consumer ? { consumer } : {}),
           ...(executionId
