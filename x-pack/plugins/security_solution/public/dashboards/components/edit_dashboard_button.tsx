@@ -16,28 +16,30 @@ import {
   RESTORE_URL_ERROR_TITLE,
   SAVE_STATE_IN_URL_ERROR_TITLE,
 } from '../pages/details/translations';
-import { useKibana } from '../../common/lib/kibana';
+import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { LinkButton } from '../../common/components/links';
 
 export interface EditDashboardButtonComponentProps {
-  query: Query;
-  filters: Filter[];
+  dashboardExists: boolean;
+  filters?: Filter[];
+  query?: Query;
+  savedObjectId: string | undefined;
+  showWriteControls: boolean;
   timeRange: {
     from: string;
     to: string;
     fromStr?: string | undefined;
     toStr?: string | undefined;
   };
-  savedObjectId: string | undefined;
-  showWriteControls: boolean;
 }
 
 const EditDashboardButtonComponent: React.FC<EditDashboardButtonComponentProps> = ({
-  query,
+  dashboardExists,
   filters,
-  timeRange,
+  query,
   savedObjectId,
   showWriteControls,
+  timeRange,
 }) => {
   const history = useHistory();
   const {
@@ -73,8 +75,14 @@ const EditDashboardButtonComponent: React.FC<EditDashboardButtonComponentProps> 
     kbnUrlStateStorage,
   });
 
-  return showWriteControls && savedObjectId ? (
-    <LinkButton color="primary" fill iconType="pencil" href={editDashboardUrl}>
+  return showWriteControls && dashboardExists ? (
+    <LinkButton
+      color="primary"
+      fill
+      iconType="pencil"
+      href={editDashboardUrl}
+      data-test-subj="dashboardEditButton"
+    >
       {EDIT_DASHBOARD_BUTTON_TITLE}
     </LinkButton>
   ) : null;

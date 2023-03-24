@@ -12,7 +12,7 @@ import type { DashboardContainer } from '@kbn/dashboard-plugin/public';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
 
-import { pick } from 'lodash/fp';
+import { isEmpty, pick } from 'lodash/fp';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useCapabilities } from '../../../common/lib/kibana';
@@ -53,7 +53,7 @@ const DashboardViewComponent: React.FC = () => {
   );
   const [dashboardDetails, setDashboardDetails] = useState<DashboardDetails>();
   const onDashboardContainerLoaded = useCallback((dashboardContainer: DashboardContainer) => {
-    const dashboardTitle = dashboardContainer.getTitle();
+    const dashboardTitle = dashboardContainer.getTitle().trim();
     setDashboardDetails({ dashboardTitle });
   }, []);
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
@@ -79,6 +79,7 @@ const DashboardViewComponent: React.FC = () => {
             savedObjectId={savedObjectId}
             showWriteControls={showWriteControls}
             timeRange={timeRange}
+            dashboardExists={!isEmpty(dashboardDetails?.dashboardTitle)}
           />
         </HeaderPage>
 
