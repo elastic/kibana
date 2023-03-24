@@ -785,11 +785,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           const lastHit = response?.hits.hits[numOfHits - 1];
           searchAfter = lastHit?.sort;
         }
+
+        fetchMore = numOfHits > 0;
       } catch (e) {
         this.logger.debug(e);
+        fetchMore = false;
       }
-
-      fetchMore = response?.hits.hits.length !== 0;
 
       const alerts = response?.hits.hits;
       alertsToReturn = alertsToReturn.concat(alerts ?? []);
