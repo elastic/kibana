@@ -11,7 +11,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
-import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
+import { useFetchApmIndex } from '../../../../../hooks/slo/use_fetch_apm_indices';
 import { FieldSelector } from '../apm_common/field_selector';
 import { QueryBuilder } from '../common/query_builder';
 

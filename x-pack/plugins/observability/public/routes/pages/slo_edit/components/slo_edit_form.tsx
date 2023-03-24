@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-import { useKibana } from '../../../utils/kibana_react';
-import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
-import { useUpdateSlo } from '../../../hooks/slo/use_update_slo';
+import { useKibana } from '../../../../utils/kibana_react';
+import { useCreateSlo } from '../../../../hooks/slo/use_create_slo';
+import { useUpdateSlo } from '../../../../hooks/slo/use_update_slo';
 import { useSectionFormValidation } from '../helpers/use_section_form_validation';
 import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
 import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
@@ -23,7 +23,7 @@ import {
   transformSloResponseToCreateSloInput,
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
-import { paths } from '../../../config/paths';
+import { paths } from '../../../routes';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
 

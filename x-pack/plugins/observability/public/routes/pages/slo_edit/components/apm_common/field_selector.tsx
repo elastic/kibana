@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import {
   Suggestion,
   useFetchApmSuggestions,
-} from '../../../../hooks/slo/use_fetch_apm_suggestions';
+} from '../../../../../hooks/slo/use_fetch_apm_suggestions';
 
 interface Option {
   label: string;

@@ -10,8 +10,8 @@ import { Control, Controller, FieldPath } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
 import { CreateSLOInput } from '@kbn/slo-schema';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { useKibana } from '../../../../utils/kibana_react';
-import { useCreateDataView } from '../../../../hooks/use_create_data_view';
+import { useKibana } from '../../../../../utils/kibana_react';
+import { useCreateDataView } from '../../../../../hooks/use_create_data_view';
 
 export interface Props {
   control: Control<CreateSLOInput>;
