@@ -1,0 +1,797 @@
+{
+  "id": "@kbn/dom-drag-drop",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/dom-drag-drop",
+        "id": "def-public.ChildDragDropProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "ChildDragDropProvider",
+        "description": [
+          "\nA React drag / drop provider that derives its state from a RootDragDropProvider. If\npart of a React application is rendered separately from the root, this provider can\nbe used to enable drag / drop functionality within the disconnected part.\n"
+        ],
+        "signature": [
+          "({\n  dragging,\n  setDragging,\n  setKeyboardMode,\n  keyboardMode,\n  activeDropTarget,\n  setActiveDropTarget,\n  setA11yMessage,\n  registerDropTarget,\n  dropTargetsByOrder,\n  dataTestSubjPrefix,\n  onTrackUICounterEvent,\n  children,\n}: ",
+          "ProviderProps",
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.ChildDragDropProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  dragging,\n  setDragging,\n  setKeyboardMode,\n  keyboardMode,\n  activeDropTarget,\n  setActiveDropTarget,\n  setA11yMessage,\n  registerDropTarget,\n  dropTargetsByOrder,\n  dataTestSubjPrefix,\n  onTrackUICounterEvent,\n  children,\n}",
+            "description": [],
+            "signature": [
+              "ProviderProps"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dom-drag-drop",
+        "id": "def-public.DragDrop",
+        "type": "Function",
+        "tags": [
+          "constructor"
+        ],
+        "label": "DragDrop",
+        "description": [
+          "\nDragDrop component"
+        ],
+        "signature": [
+          "(props: BaseProps) => JSX.Element"
+        ],
+        "path": "packages/kbn-dom-drag-drop/src/drag_drop.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DragDrop.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "BaseProps"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/drag_drop.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dom-drag-drop",
+        "id": "def-public.ReorderProvider",
+        "type": "Function",
+        "tags": [
+          "constructor"
+        ],
+        "label": "ReorderProvider",
+        "description": [
+          "\nTo create a reordering group, surround the elements from the same group with a `ReorderProvider`"
+        ],
+        "signature": [
+          "({\n  id,\n  children,\n  className,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n}: { id: string; children: React.ReactNode; className?: string | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.ReorderProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  id,\n  children,\n  className,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n}",
+            "description": [],
+            "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.ReorderProvider.$1.id",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.ReorderProvider.$1.children",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "children",
+                "description": [],
+                "signature": [
+                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.ReorderProvider.$1.className",
+                "type": "string",
+                "tags": [],
+                "label": "className",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.ReorderProvider.$1.dataTestSubj",
+                "type": "string",
+                "tags": [],
+                "label": "dataTestSubj",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dom-drag-drop",
+        "id": "def-public.RootDragDropProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "RootDragDropProvider",
+        "description": [
+          "\nA React provider that tracks the dragging state. This should\nbe placed at the root of any React application that supports\ndrag / drop.\n"
+        ],
+        "signature": [
+          "({\n  children,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n  onTrackUICounterEvent,\n}: { children: React.ReactNode; dataTestSubj?: string | undefined; onTrackUICounterEvent?: ((event: string) => void) | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.RootDragDropProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  children,\n  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,\n  onTrackUICounterEvent,\n}",
+            "description": [],
+            "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.RootDragDropProvider.$1.children",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "children",
+                "description": [],
+                "signature": [
+                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.RootDragDropProvider.$1.dataTestSubj",
+                "type": "string",
+                "tags": [],
+                "label": "dataTestSubj",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.RootDragDropProvider.$1.onTrackUICounterEvent",
+                "type": "Function",
+                "tags": [],
+                "label": "onTrackUICounterEvent",
+                "description": [],
+                "signature": [
+                  "((event: string) => void) | undefined"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/dom-drag-drop",
+        "id": "def-public.DragContextState",
+        "type": "Interface",
+        "tags": [],
+        "label": "DragContextState",
+        "description": [
+          "\nThe shape of the drag / drop context."
+        ],
+        "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DragContextState.dragging",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dragging",
+            "description": [
+              "\nThe item being dragged or undefined."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/dom-drag-drop",
+                "scope": "public",
+                "docId": "kibKbnDomDragDropPluginApi",
+                "section": "def-public.DraggingIdentifier",
+                "text": "DraggingIdentifier"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DragContextState.keyboardMode",
+            "type": "boolean",
+            "tags": [],
+            "label": "keyboardMode",
+            "description": [
+              "\nkeyboard mode"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DragContextState.setKeyboardMode",
+            "type": "Function",
+            "tags": [],
+            "label": "setKeyboardMode",
+            "description": [
+              "\nkeyboard mode"
+            ],
+            "signature": [
+              "(mode: boolean) => void"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.DragContextState.setKeyboardMode.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "mode",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DragContextState.setDragging",
+            "type": "Function",
+            "tags": [],
+            "label": "setDragging",
+            "description": [
+              "\nSet the item being dragged."
+            ],
+            "signature": [
+              "(dragging?: ",
+              {
+                "pluginId": "@kbn/dom-drag-drop",
+                "scope": "public",
+                "docId": "kibKbnDomDragDropPluginApi",
+                "section": "def-public.DraggingIdentifier",
+                "text": "DraggingIdentifier"
+              },
+              " | undefined) => void"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.DragContextState.setDragging.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "dragging",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dom-drag-drop",
+                    "scope": "public",
+                    "docId": "kibKbnDomDragDropPluginApi",
+                    "section": "def-public.DraggingIdentifier",
+                    "text": "DraggingIdentifier"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DragContextState.activeDropTarget",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "activeDropTarget",
+            "description": [],
+            "signature": [
+              "DropIdentifier",
+              " | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DragContextState.dropTargetsByOrder",
+            "type": "Object",
+            "tags": [],
+            "label": "dropTargetsByOrder",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              "DropIdentifier",
+              " | undefined> | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DragContextState.setActiveDropTarget",
+            "type": "Function",
+            "tags": [],
+            "label": "setActiveDropTarget",
+            "description": [],
+            "signature": [
+              "(newTarget?: ",
+              "DropIdentifier",
+              " | undefined) => void"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.DragContextState.setActiveDropTarget.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "newTarget",
+                "description": [],
+                "signature": [
+                  "DropIdentifier",
+                  " | undefined"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DragContextState.setA11yMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "setA11yMessage",
+            "description": [],
+            "signature": [
+              "(message: string) => void"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.DragContextState.setA11yMessage.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DragContextState.registerDropTarget",
+            "type": "Function",
+            "tags": [],
+            "label": "registerDropTarget",
+            "description": [],
+            "signature": [
+              "(order: number[], dropTarget?: ",
+              "DropIdentifier",
+              " | undefined) => void"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.DragContextState.registerDropTarget.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "order",
+                "description": [],
+                "signature": [
+                  "number[]"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.DragContextState.registerDropTarget.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "dropTarget",
+                "description": [],
+                "signature": [
+                  "DropIdentifier",
+                  " | undefined"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DragContextState.dataTestSubjPrefix",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubjPrefix",
+            "description": [
+              "\nCustomizable data-test-subj prefix"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DragContextState.onTrackUICounterEvent",
+            "type": "Function",
+            "tags": [],
+            "label": "onTrackUICounterEvent",
+            "description": [
+              "\nA custom callback for telemetry"
+            ],
+            "signature": [
+              "((event: string) => void) | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.DragContextState.onTrackUICounterEvent.$1",
+                "type": "string",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/dom-drag-drop",
+        "id": "def-public.DragDropIdentifier",
+        "type": "Type",
+        "tags": [],
+        "label": "DragDropIdentifier",
+        "description": [
+          "\nDrag Drop base identifier"
+        ],
+        "signature": [
+          "Record<string, unknown> & { id: string; humanData: ",
+          "HumanData",
+          "; }"
+        ],
+        "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dom-drag-drop",
+        "id": "def-public.DraggingIdentifier",
+        "type": "Type",
+        "tags": [],
+        "label": "DraggingIdentifier",
+        "description": [
+          "\nDragging identifier"
+        ],
+        "signature": [
+          "Record<string, unknown> & { id: string; humanData: ",
+          "HumanData",
+          "; } & { ghost?: ",
+          "Ghost",
+          " | undefined; }"
+        ],
+        "path": "packages/kbn-dom-drag-drop/src/providers/types.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dom-drag-drop",
+        "id": "def-public.DropType",
+        "type": "Type",
+        "tags": [],
+        "label": "DropType",
+        "description": [
+          "\nTypes of drop action"
+        ],
+        "signature": [
+          "\"reorder\" | \"field_add\" | \"field_replace\" | \"move_compatible\" | \"replace_compatible\" | \"move_incompatible\" | \"replace_incompatible\" | \"replace_duplicate_compatible\" | \"duplicate_compatible\" | \"swap_compatible\" | \"replace_duplicate_incompatible\" | \"duplicate_incompatible\" | \"swap_incompatible\" | \"field_combine\" | \"combine_compatible\" | \"combine_incompatible\""
+        ],
+        "path": "packages/kbn-dom-drag-drop/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/dom-drag-drop",
+        "id": "def-public.DragContext",
+        "type": "Object",
+        "tags": [],
+        "label": "DragContext",
+        "description": [
+          "\nThe drag / drop context singleton, used like so:\n\nconst { dragging, setDragging } = useContext(DragContext);"
+        ],
+        "signature": [
+          "React.Context<",
+          {
+            "pluginId": "@kbn/dom-drag-drop",
+            "scope": "public",
+            "docId": "kibKbnDomDragDropPluginApi",
+            "section": "def-public.DragContextState",
+            "text": "DragContextState"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-dom-drag-drop/src/providers/providers.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dom-drag-drop",
+        "id": "def-public.DropTargetSwapDuplicateCombine",
+        "type": "Object",
+        "tags": [],
+        "label": "DropTargetSwapDuplicateCombine",
+        "description": [
+          "\nHelpers for swap/duplicate/combine extra drops"
+        ],
+        "path": "packages/kbn-dom-drag-drop/src/drop_targets/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DropTargetSwapDuplicateCombine.getCustomDropTarget",
+            "type": "Function",
+            "tags": [],
+            "label": "getCustomDropTarget",
+            "description": [],
+            "signature": [
+              "(dropType: ",
+              {
+                "pluginId": "@kbn/dom-drag-drop",
+                "scope": "public",
+                "docId": "kibKbnDomDragDropPluginApi",
+                "section": "def-public.DropType",
+                "text": "DropType"
+              },
+              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/drop_targets/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.DropTargetSwapDuplicateCombine.getCustomDropTarget.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "dropType",
+                "description": [],
+                "signature": [
+                  "\"reorder\" | \"field_add\" | \"field_replace\" | \"move_compatible\" | \"replace_compatible\" | \"move_incompatible\" | \"replace_incompatible\" | \"replace_duplicate_compatible\" | \"duplicate_compatible\" | \"swap_compatible\" | \"replace_duplicate_incompatible\" | \"duplicate_incompatible\" | \"swap_incompatible\" | \"field_combine\" | \"combine_compatible\" | \"combine_incompatible\""
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/drop_targets/swap_duplicate_combine.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable",
+            "type": "Function",
+            "tags": [],
+            "label": "getAdditionalClassesOnDroppable",
+            "description": [],
+            "signature": [
+              "(dropType?: string | undefined) => \"domDragDrop-notCompatible\" | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/drop_targets/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable.$1",
+                "type": "string",
+                "tags": [],
+                "label": "dropType",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/drop_targets/swap_duplicate_combine.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/dom-drag-drop",
+            "id": "def-public.DropTargetSwapDuplicateCombine.getAdditionalClassesOnEnter",
+            "type": "Function",
+            "tags": [],
+            "label": "getAdditionalClassesOnEnter",
+            "description": [],
+            "signature": [
+              "(dropType?: string | undefined) => \"domDragDrop-isReplacing\" | undefined"
+            ],
+            "path": "packages/kbn-dom-drag-drop/src/drop_targets/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/dom-drag-drop",
+                "id": "def-public.DropTargetSwapDuplicateCombine.getAdditionalClassesOnEnter.$1",
+                "type": "string",
+                "tags": [],
+                "label": "dropType",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-dom-drag-drop/src/drop_targets/swap_duplicate_combine.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

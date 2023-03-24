@@ -61,6 +61,58 @@
       },
       {
         "parentPluginId": "unifiedFieldList",
+        "id": "def-public.FieldItemButton",
+        "type": "Function",
+        "tags": [
+          "constructor"
+        ],
+        "label": "FieldItemButton",
+        "description": [
+          "\nInner part of field list item"
+        ],
+        "signature": [
+          "({\n  field,\n  fieldSearchHighlight,\n  isActive,\n  isEmpty,\n  infoIcon,\n  className,\n  getCustomFieldType,\n  onClick,\n  ...otherProps\n}: ",
+          {
+            "pluginId": "unifiedFieldList",
+            "scope": "public",
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.FieldItemButtonProps",
+            "text": "FieldItemButtonProps"
+          },
+          "<T>) => JSX.Element"
+        ],
+        "path": "src/plugins/unified_field_list/public/components/field_item_button/field_item_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldItemButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  field,\n  fieldSearchHighlight,\n  isActive,\n  isEmpty,\n  infoIcon,\n  className,\n  getCustomFieldType,\n  onClick,\n  ...otherProps\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.FieldItemButtonProps",
+                "text": "FieldItemButtonProps"
+              },
+              "<T>"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_item_button/field_item_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
         "id": "def-public.FieldList",
         "type": "Function",
         "tags": [
@@ -1587,41 +1639,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "unifiedFieldList",
-        "id": "def-public.wrapFieldNameOnDot",
-        "type": "Function",
-        "tags": [],
-        "label": "wrapFieldNameOnDot",
-        "description": [
-          "\nWraps field name on dot"
-        ],
-        "signature": [
-          "(str: string | undefined) => string"
-        ],
-        "path": "src/plugins/unified_field_list/public/utils/wrap_field_name_on_dot.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "unifiedFieldList",
-            "id": "def-public.wrapFieldNameOnDot.$1",
-            "type": "string",
-            "tags": [],
-            "label": "str",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/unified_field_list/public/utils/wrap_field_name_on_dot.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -2317,6 +2334,151 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.FieldItemButtonProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldItemButtonProps",
+        "description": [
+          "\nProps of FieldItemButton component"
+        ],
+        "signature": [
+          {
+            "pluginId": "unifiedFieldList",
+            "scope": "public",
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.FieldItemButtonProps",
+            "text": "FieldItemButtonProps"
+          },
+          "<T>"
+        ],
+        "path": "src/plugins/unified_field_list/public/components/field_item_button/field_item_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldItemButtonProps.field",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_item_button/field_item_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldItemButtonProps.fieldSearchHighlight",
+            "type": "string",
+            "tags": [],
+            "label": "fieldSearchHighlight",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_item_button/field_item_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldItemButtonProps.isActive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isActive",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_item_button/field_item_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldItemButtonProps.isEmpty",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isEmpty",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_item_button/field_item_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldItemButtonProps.infoIcon",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "infoIcon",
+            "description": [],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_item_button/field_item_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldItemButtonProps.className",
+            "type": "string",
+            "tags": [],
+            "label": "className",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_item_button/field_item_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldItemButtonProps.getCustomFieldType",
+            "type": "Function",
+            "tags": [],
+            "label": "getCustomFieldType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.GetCustomFieldType",
+                "text": "GetCustomFieldType"
+              },
+              "<T> | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_item_button/field_item_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldItemButtonProps.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_item_button/field_item_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
