@@ -81,7 +81,11 @@ export const ScheduleNowActionName: FC<ScheduleNowActionNameProps> = ({
     transformNodes
   );
 
-  let content: string | undefined;
+  let content: string = i18n.translate('xpack.transform.transformList.scheduleNowToolTip', {
+    defaultMessage:
+      'Schedule the transform to instantly process data without waiting for the configured interval between checks for changes in the source indices.',
+  });
+
   if (actionIsDisabled && items.length > 0) {
     if (!canScheduleNowTransform) {
       content = createCapabilityFailureMessage('canScheduleNowTransform');
@@ -90,13 +94,9 @@ export const ScheduleNowActionName: FC<ScheduleNowActionNameProps> = ({
     }
   }
 
-  if ((forceDisable === true || actionIsDisabled) && content !== undefined) {
-    return (
-      <EuiToolTip position="top" content={content}>
-        <>{scheduleNowActionNameText}</>
-      </EuiToolTip>
-    );
-  }
-
-  return <>{scheduleNowActionNameText}</>;
+  return (
+    <EuiToolTip position="top" content={content}>
+      <>{scheduleNowActionNameText}</>
+    </EuiToolTip>
+  );
 };
