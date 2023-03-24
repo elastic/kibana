@@ -2499,9 +2499,13 @@ export class RulesClient {
               }
             }
 
-            const ruleParams = paramsModifier
-              ? await paramsModifier(attributes.params as Params)
-              : attributes.params;
+            const params = this.injectReferencesIntoParams<Params, RuleTypeParams>(
+              rule.id,
+              ruleType,
+              attributes.params,
+              rule.references || []
+            );
+            const ruleParams = paramsModifier ? await paramsModifier(params) : params;
 
             // validate rule params
             const validatedAlertTypeParams = validateRuleTypeParams(

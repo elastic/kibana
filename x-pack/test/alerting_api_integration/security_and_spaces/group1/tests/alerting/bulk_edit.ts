@@ -18,6 +18,8 @@ import {
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
+const SOURCE_LOG_DATA_INDEX = 'log-bulk-edit-rule';
+
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -608,5 +610,126 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         });
       });
     }
+
+    describe('do NOT delete reference for rule type like', () => {
+      const es = getService('es');
+
+      const createDataView = async (dataView: string) => {
+        return await supertest
+          .post(`/api/data_views/data_view`)
+          .set('kbn-xsrf', 'foo')
+          .send({ data_view: { title: dataView, timeFieldName: '@timestamp' } })
+          .expect(200);
+      };
+
+      const deleteDataView = async (dataViewId: string) => {
+        return await supertest
+          .delete(`/api/data_views/data_view/${dataViewId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+      };
+
+      const createSourceIndex = () => {
+        es.index({
+          index: SOURCE_LOG_DATA_INDEX,
+          body: {
+            settings: { number_of_shards: 1 },
+            mappings: {
+              properties: {
+                '@timestamp': { type: 'date' },
+                message: { type: 'keyword' },
+              },
+            },
+          },
+        });
+      };
+
+      before(async () => {
+        await createSourceIndex();
+      });
+
+      after(async () => {
+        await es.transport.request({
+          path: `${SOURCE_LOG_DATA_INDEX}`,
+          method: 'DELETE',
+        });
+      });
+
+      it('.esquery', async () => {
+        const dv = await createDataView(SOURCE_LOG_DATA_INDEX);
+        const space1 = UserAtSpaceScenarios[1].space.id;
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(space1)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              params: {
+                searchConfiguration: {
+                  query: {
+                    query: '_id:*',
+                    language: 'kuery',
+                  },
+                  index: dv.body.data_view.id,
+                },
+                searchType: 'searchSource',
+                timeWindowSize: 5,
+                timeWindowUnit: 'm',
+                threshold: [1000],
+                thresholdComparator: '>',
+                size: 100,
+                excludeHitsFromPreviousRun: true,
+              },
+              consumer: 'alerts',
+              schedule: { interval: '1m' },
+              tags: [],
+              name: 'Es Query',
+              rule_type_id: '.es-query',
+              actions: [],
+            })
+          )
+          .expect(200);
+        objectRemover.add(space1, createdRule.id, 'rule', 'alerting');
+
+        const searchRule = () =>
+          es.search<{ references: unknown }>({
+            index: '.kibana*',
+            query: {
+              bool: {
+                filter: [
+                  {
+                    term: {
+                      _id: `alert:${createdRule.id}`,
+                    },
+                  },
+                ],
+              },
+            },
+            fields: ['alert.params', 'references'],
+          });
+
+        const {
+          hits: { hits: alertHitsV1 },
+        } = await searchRule();
+
+        await supertest
+          .post(`${getUrlPrefix(space1)}/internal/alerting/rules/_bulk_edit`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            ids: [createdRule.id],
+            operations: [{ operation: 'set', field: 'apiKey' }],
+          });
+
+        const {
+          hits: { hits: alertHitsV2 },
+        } = await searchRule();
+
+        expect(alertHitsV1[0].fields).to.eql(alertHitsV2[0].fields);
+        expect(alertHitsV1[0]?._source?.references ?? true).to.eql(
+          alertHitsV2[0]?._source?.references ?? false
+        );
+
+        await deleteDataView(dv.body.data_view.id);
+      });
+    });
   });
 }
