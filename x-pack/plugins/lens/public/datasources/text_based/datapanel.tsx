@@ -145,6 +145,7 @@ export function TextBasedDataPanel({
             fieldSearchHighlight={fieldSearchHighlight}
             getCustomFieldType={getCustomFieldType}
             onClick={undefined}
+            canAddMultipleTimes
             buttonAddFieldToWorkspaceProps={buttonAddFieldToWorkspaceProps}
             onAddFieldToWorkspace={onAddFieldToWorkspace}
           />

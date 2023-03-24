@@ -177,6 +177,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
               field={field}
               fieldSearchHighlight={highlight}
               onClick={togglePopover}
+              canAddMultipleTimes
               buttonAddFieldToWorkspaceProps={buttonAddFieldToWorkspaceProps}
               onAddFieldToWorkspace={onAddFieldToWorkspace}
             />

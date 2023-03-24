@@ -91,6 +91,24 @@ describe('UnifiedFieldList <FieldItemButton />', () => {
         isSelected={true}
         isActive={false}
         onClick={jest.fn().mockName('click')}
+        canAddMultipleTimes={false}
+        onAddFieldToWorkspace={jest.fn().mockName('add')}
+        onRemoveFieldFromWorkspace={jest.fn().mockName('remove')}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  test('renders properly with an action when selected and multi select is allowed', () => {
+    const component = shallow(
+      <FieldItemButton
+        field={bytesField}
+        fieldSearchHighlight={undefined}
+        isEmpty={false}
+        isSelected={true}
+        isActive={false}
+        onClick={jest.fn().mockName('click')}
+        canAddMultipleTimes
         onAddFieldToWorkspace={jest.fn().mockName('add')}
         onRemoveFieldFromWorkspace={jest.fn().mockName('remove')}
       />
