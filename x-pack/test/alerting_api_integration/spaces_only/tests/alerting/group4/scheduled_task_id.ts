@@ -36,11 +36,13 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
     }
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/rules_scheduled_task_id');
+      await esArchiver.load('x-pack/test/functional/es_archives/rules_scheduled_task_id/rules');
+      await esArchiver.load('x-pack/test/functional/es_archives/rules_scheduled_task_id/tasks');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rules_scheduled_task_id');
+      await esArchiver.unload('x-pack/test/functional/es_archives/rules_scheduled_task_id/tasks');
+      await esArchiver.unload('x-pack/test/functional/es_archives/rules_scheduled_task_id/rules');
     });
 
     it('cannot create rule with same ID as a scheduled task ID used by another rule', async () => {
