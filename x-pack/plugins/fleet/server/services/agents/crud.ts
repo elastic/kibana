@@ -19,10 +19,11 @@ import { isAgentUpgradeable } from '../../../common/services';
 import { AGENTS_INDEX } from '../../constants';
 import { FleetError, isESClientError, AgentNotFoundError } from '../../errors';
 
+import { auditLoggingService } from '../audit_logging';
+
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
-import { auditLoggingService } from '../audit_logging';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive OR status:unenrolled`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;

@@ -41,8 +41,9 @@ import { deletePackageCache } from '../archive';
 import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
 
-import { getInstallation, kibanaSavedObjectTypes } from '.';
 import { auditLoggingService } from '../../audit_logging';
+
+import { getInstallation, kibanaSavedObjectTypes } from '.';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;

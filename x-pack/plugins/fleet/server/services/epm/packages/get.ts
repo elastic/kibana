@@ -41,8 +41,9 @@ import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 
-import { createInstallableFrom } from '.';
 import { auditLoggingService } from '../../audit_logging';
+
+import { createInstallableFrom } from '.';
 
 export type { SearchParams } from '../registry';
 export { getFile } from '../registry';

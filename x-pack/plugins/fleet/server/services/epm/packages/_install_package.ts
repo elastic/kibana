@@ -48,13 +48,14 @@ import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
 import { appContextService, packagePolicyService } from '../..';
 
+import { auditLoggingService } from '../../audit_logging';
+
 import {
   createInstallation,
   restartInstallation,
   installIndexTemplatesAndPipelines,
 } from './install';
 import { withPackageSpan } from './utils';
-import { auditLoggingService } from '../../audit_logging';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path

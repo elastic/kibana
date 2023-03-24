@@ -68,6 +68,8 @@ import { prepareToInstallPipelines } from '../elasticsearch/ingest_pipeline';
 
 import { prepareToInstallTemplates } from '../elasticsearch/template/install';
 
+import { auditLoggingService } from '../../audit_logging';
+
 import { formatVerificationResultForSO } from './package_verification';
 
 import { getInstallation, getInstallationObject } from '.';
@@ -77,7 +79,6 @@ import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackages } from './bundled_packages';
 import { withPackageSpan } from './utils';
-import { auditLoggingService } from '../../audit_logging';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
