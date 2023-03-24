@@ -17,6 +17,7 @@ export interface GetScoresParams {
   identifierType?: IdentifierType;
   enrichInputs?: boolean;
   range: { start: string; end: string };
+  weights?: { user?: number; host?: number };
 }
 
 export interface GetScoresResponse {
