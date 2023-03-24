@@ -41,7 +41,6 @@ describe('validateSLO', () => {
         const slo = createSLO({
           settings: {
             frequency: sixHours(),
-            timestampField: '@timestamp',
             syncDelay: oneMinute(),
           },
         });
@@ -52,7 +51,6 @@ describe('validateSLO', () => {
         const slo = createSLO({
           settings: {
             frequency: oneMinute(),
-            timestampField: '@timestamp',
             syncDelay: sixHours(),
           },
         });
