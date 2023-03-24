@@ -126,7 +126,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       mutableCoreKibanaRequest.query = {};
     }
 
-    const result = await handler.fn(ctx, req, res);
+    const result = await handler.fn(ctx, mutableCoreKibanaRequest, res);
 
     if (this.validateResponses && validation?.response?.[result.status]) {
       const responseValidation = validation.response[result.status];
