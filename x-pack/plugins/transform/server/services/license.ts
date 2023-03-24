@@ -30,6 +30,9 @@ interface SetupSettings {
   pluginId: string;
   minimumLicenseType: LicenseType;
   defaultErrorMessage: string;
+  licensing: LicensingPluginSetup;
+  logger: Logger;
+  coreStart: CoreStart;
 }
 
 type TransformRequestHandlerContext = CustomRequestHandlerContext<{
@@ -37,22 +40,22 @@ type TransformRequestHandlerContext = CustomRequestHandlerContext<{
 }>;
 
 export class License {
+  private coreStart: CoreStart;
   private licenseStatus: LicenseStatus = {
     isValid: false,
     isSecurityEnabled: false,
     message: 'Invalid License',
   };
 
-  setup(
-    { pluginId, minimumLicenseType, defaultErrorMessage }: SetupSettings,
-    {
-      licensing,
-      logger,
-    }: {
-      licensing: LicensingPluginSetup;
-      logger: Logger;
-    }
-  ) {
+  constructor({
+    pluginId,
+    minimumLicenseType,
+    defaultErrorMessage,
+    licensing,
+    logger,
+    coreStart,
+  }: SetupSettings) {
+    this.coreStart = coreStart;
     licensing.license$.subscribe((license) => {
       const { state, message } = license.check(pluginId, minimumLicenseType);
       const hasRequiredLicense = state === 'valid';
@@ -79,7 +82,6 @@ export class License {
   }
 
   guardApiRoute<Params, Query, Body>(
-    coreStart: CoreStart,
     handler: RequestHandler<Params, Query, Body, TransformRequestHandlerContext>
   ) {
     const license = this;
@@ -90,7 +92,7 @@ export class License {
       response: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       const licenseStatus = license.getStatus();
-      const executionContext = await createExecutionContext(coreStart, request.route.path);
+      const executionContext = await createExecutionContext(license.coreStart, request.route.path);
 
       if (!licenseStatus.isValid) {
         return response.customError({
@@ -101,7 +103,7 @@ export class License {
         });
       }
 
-      return await coreStart.executionContext.withContext(executionContext, () =>
+      return await license.coreStart.executionContext.withContext(executionContext, () =>
         handler(ctx, request, response)
       );
     };

@@ -27,11 +27,7 @@ interface TransformMessageQuery {
   sortDirection: 'asc' | 'desc';
 }
 
-export function registerTransformsAuditMessagesRoutes({
-  router,
-  license,
-  coreStart,
-}: RouteDependencies) {
+export function registerTransformsAuditMessagesRoutes({ router, license }: RouteDependencies) {
   /**
    * @apiGroup Transforms Audit Messages
    *
@@ -53,7 +49,6 @@ export function registerTransformsAuditMessagesRoutes({
       },
     },
     license.guardApiRoute<TransformIdParamSchema, TransformMessageQuery, undefined>(
-      coreStart,
       async (ctx, req, res) => {
         const { transformId } = req.params;
         const sortField = req.query?.sortField ?? 'timestamp';

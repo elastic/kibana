@@ -18,7 +18,7 @@ import { addBasePath } from '..';
 
 import { wrapError, wrapEsError } from './error_utils';
 
-export function registerFieldHistogramsRoutes({ router, license, coreStart }: RouteDependencies) {
+export function registerFieldHistogramsRoutes({ router, license }: RouteDependencies) {
   router.post<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
     {
       path: addBasePath('field_histograms/{dataViewTitle}'),
@@ -28,7 +28,6 @@ export function registerFieldHistogramsRoutes({ router, license, coreStart }: Ro
       },
     },
     license.guardApiRoute<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
-      coreStart,
       async (ctx, req, res) => {
         const { dataViewTitle } = req.params;
         const { query, fields, runtimeMappings, samplerShardSize } = req.body;

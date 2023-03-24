@@ -11,10 +11,10 @@ import { Privileges } from '../../../common/types/privileges';
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '..';
 
-export function registerPrivilegesRoute({ router, license, coreStart }: RouteDependencies) {
+export function registerPrivilegesRoute({ router, license }: RouteDependencies) {
   router.get(
     { path: addBasePath('privileges'), validate: {} },
-    license.guardApiRoute(coreStart, async (ctx, req, res) => {
+    license.guardApiRoute(async (ctx, req, res) => {
       const privilegesResult: Privileges = {
         hasAllPrivileges: true,
         missingPrivileges: {
