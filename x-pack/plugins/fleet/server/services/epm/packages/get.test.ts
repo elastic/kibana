@@ -37,11 +37,11 @@ describe('When using EPM `get` services', () => {
   beforeEach(() => {
     const mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
-    jest.clearAllMocks();
   });
 
   afterEach(() => {
     appContextService.stop();
+    jest.clearAllMocks();
   });
 
   describe('and invoking getPackageUsageStats()', () => {

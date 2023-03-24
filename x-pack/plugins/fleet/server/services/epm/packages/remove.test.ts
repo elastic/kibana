@@ -16,6 +16,8 @@ jest.mock('../..', () => {
         info: jest.fn(),
         error: jest.fn(),
       }),
+      writeCustomAuditLog: jest.fn(),
+      writeCustomSoAuditLog: jest.fn(),
     },
     packagePolicyService: {
       list: jest.fn().mockResolvedValue({ total: 1, items: [{ id: 'system-1' }] }),
