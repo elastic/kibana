@@ -58,6 +58,7 @@ const generateAlertingConfig = (): AlertingConfig => ({
       },
     },
   },
+  enableMaintenanceWindows: false,
 });
 
 const sampleRuleType: RuleType<never, never, {}, never, never, 'default'> = {
