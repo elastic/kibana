@@ -11,11 +11,11 @@
   border: $euiBorderWidthThin dashed $euiBorderColor;
   position: absolute !important;  // sass-lint:disable-line no-important
   margin: 0 !important;  // sass-lint:disable-line no-important
-  bottom: 100%;
+  top: 0;
   width: 100%;
   left: 0;
   opacity: .9;
-  transform: translate(-12px, 8px);
+  transform: translate(4px, 4px);
   z-index: $domDragDropZLevel3;
   pointer-events: none;
   outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
