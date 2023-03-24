@@ -774,7 +774,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         size: 1000,
       };
 
-      this.logger.debug(`Getting alerts with point in time (PIT) query: ${JSON.stringify(query)}`);
+      tlog(this.logger, `Getting alerts with point in time (PIT) query: ${JSON.stringify(query)}`);
 
       let response = null;
       try {
