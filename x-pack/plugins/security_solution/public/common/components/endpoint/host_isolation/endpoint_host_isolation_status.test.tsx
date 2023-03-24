@@ -81,7 +81,7 @@ describe('when using the EndpointHostIsolationStatus component', () => {
       },
     ],
     [
-      '10 actions pending',
+      '14 actions pending',
       {
         isIsolated: true,
         pendingActions: {
@@ -90,6 +90,8 @@ describe('when using the EndpointHostIsolationStatus component', () => {
           pendingKillProcess: 2,
           pendingSuspendProcess: 2,
           pendingRunningProcesses: 2,
+          pendingGetFile: 2,
+          pendingExecute: 2,
         },
       },
     ],
@@ -102,7 +104,43 @@ describe('when using the EndpointHostIsolationStatus component', () => {
         },
       },
     ],
-  ])('should show %s}', (expectedLabel, componentProps) => {
+    [
+      '1 action pending',
+      {
+        isIsolated: true,
+        pendingActions: {
+          pendingSuspendProcess: 1,
+        },
+      },
+    ],
+    [
+      '1 action pending',
+      {
+        isIsolated: true,
+        pendingActions: {
+          pendingRunningProcesses: 1,
+        },
+      },
+    ],
+    [
+      '1 action pending',
+      {
+        isIsolated: true,
+        pendingActions: {
+          pendingGetFile: 1,
+        },
+      },
+    ],
+    [
+      '1 action pending',
+      {
+        isIsolated: true,
+        pendingActions: {
+          pendingExecute: 1,
+        },
+      },
+    ],
+  ])('should show %s for %o', (expectedLabel, componentProps) => {
     const { getByTestId } = render(componentProps);
     expect(getByTestId('test').textContent).toBe(expectedLabel);
     // Validate that the text color is set to `subdued`

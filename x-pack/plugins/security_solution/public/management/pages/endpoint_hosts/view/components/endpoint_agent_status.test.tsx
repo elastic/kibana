@@ -14,7 +14,6 @@ import type { EndpointAgentStatusProps } from './endpoint_agent_status';
 import { EndpointAgentStatus } from './endpoint_agent_status';
 import type { HostMetadata } from '../../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../../common/endpoint/types';
-import { isLoadedResourceState } from '../../../../state';
 import { KibanaServices } from '../../../../../common/lib/kibana';
 
 jest.mock('../../../../../common/lib/kibana');
@@ -23,7 +22,6 @@ describe('When using the EndpointAgentStatus component', () => {
   let render: (
     props: EndpointAgentStatusProps
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
-  let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let httpMocks: ReturnType<typeof endpointPageHttpMock>;
   let endpointMeta: HostMetadata;
@@ -33,7 +31,6 @@ describe('When using the EndpointAgentStatus component', () => {
 
     (KibanaServices.get as jest.Mock).mockReturnValue(mockedContext.startServices);
     httpMocks = endpointPageHttpMock(mockedContext.coreStart.http);
-    waitForAction = mockedContext.middlewareSpy.waitForAction;
     endpointMeta = httpMocks.responseProvider.metadataList().data[0].metadata;
     render = async (props: EndpointAgentStatusProps) => {
       renderResult = mockedContext.render(<EndpointAgentStatus {...props} />);
@@ -75,12 +72,7 @@ describe('When using the EndpointAgentStatus component', () => {
         return response;
       });
 
-      const loadingPendingActions = waitForAction('endpointPendingActionsStateChanged', {
-        validate: (action) => isLoadedResourceState(action.payload),
-      });
-
       await render({ hostStatus: HostStatus.HEALTHY, endpointMetadata: endpointMeta });
-      await loadingPendingActions;
     });
 
     it('should show host pending action', () => {

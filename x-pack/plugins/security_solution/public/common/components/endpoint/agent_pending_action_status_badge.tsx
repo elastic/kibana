@@ -80,6 +80,28 @@ export const AgentPendingActionStatusBadge = memo<
                 <EuiFlexItem grow={false}>{pendingActions.pendingRunningProcesses}</EuiFlexItem>
               </EuiFlexGroup>
             )}
+            {!!pendingActions.pendingGetFile && (
+              <EuiFlexGroup gutterSize="none">
+                <EuiFlexItem>
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingGetFile"
+                    defaultMessage="Get file"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{pendingActions.pendingGetFile}</EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+            {!!pendingActions.pendingExecute && (
+              <EuiFlexGroup gutterSize="none">
+                <EuiFlexItem>
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.hostIsolationStatus.tooltipPendingExecute"
+                    defaultMessage="Execute"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{pendingActions.pendingExecute}</EuiFlexItem>
+              </EuiFlexGroup>
+            )}
           </div>
         }
       >

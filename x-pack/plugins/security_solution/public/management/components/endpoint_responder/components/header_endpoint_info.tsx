@@ -19,6 +19,7 @@ import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_
 import { usePendingActionsStatuses } from '../../endpoint_list/hooks/use_pending_actions_statuses';
 import { EndpointAgentAndIsolationStatus } from '../../endpoint_agent_and_isolation_status';
 import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
+import { DEFAULT_ENDPOINT_REFRESH_INTERVAL } from '../lib/constants';
 
 interface HeaderEndpointInfoProps {
   endpointId: string;
@@ -26,13 +27,13 @@ interface HeaderEndpointInfoProps {
 
 export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId }) => {
   const { data: endpointDetails, isFetching } = useGetEndpointDetails(endpointId, {
-    refetchInterval: 10000,
+    refetchInterval: DEFAULT_ENDPOINT_REFRESH_INTERVAL,
   });
   const { data: endpointPendingActions } = useGetEndpointPendingActionsSummary([endpointId], {
-    refetchInterval: 10000,
+    refetchInterval: DEFAULT_ENDPOINT_REFRESH_INTERVAL,
   });
 
-  const pendingActionRequests = usePendingActionsStatuses(endpointPendingActions);
+  const pendingActionRequests = usePendingActionsStatuses(endpointPendingActions, endpointId);
 
   if (isFetching && endpointPendingActions === undefined) {
     return <EuiSkeletonText lines={2} />;

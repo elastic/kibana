@@ -55,7 +55,7 @@ export const EndpointStatusActionResult = memo<
 
   const {
     pendingActions: { pendingIsolate, pendingUnIsolate },
-  } = usePendingActionsStatuses(endpointPendingActions);
+  } = usePendingActionsStatuses(endpointPendingActions, endpointId);
 
   useEffect(() => {
     if (!apiCalled) {

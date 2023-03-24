@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useGetEndpointDetails } from '../../../hooks';
 import { HostStatus } from '../../../../../common/endpoint/types';
+import { DEFAULT_ENDPOINT_REFRESH_INTERVAL } from '../lib/constants';
 
 interface OfflineCalloutProps {
   endpointId: string;
@@ -18,7 +19,7 @@ interface OfflineCalloutProps {
 
 export const OfflineCallout = memo<OfflineCalloutProps>(({ endpointId }) => {
   const { data: endpointDetails } = useGetEndpointDetails(endpointId, {
-    refetchInterval: 10000,
+    refetchInterval: DEFAULT_ENDPOINT_REFRESH_INTERVAL,
   });
 
   if (!endpointDetails) {
