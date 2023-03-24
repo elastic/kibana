@@ -26067,7 +26067,6 @@
     "xpack.observability.seriesEditor.show": "显示序列",
     "xpack.observability.serviceGroupMaxServicesUiSettingDescription": "限制给定服务组中服务的数量",
     "xpack.observability.serviceGroupMaxServicesUiSettingName": "服务组中的最大服务数",
-    "xpack.observability.slo.alerting.burnRate.fired": "告警",
     "xpack.observability.slo.alerting.reasonDescription": "告警原因的简洁描述",
     "xpack.observability.slo.alerting.thresholdDescription": "消耗速度阈值。",
     "xpack.observability.slo.alerting.timestampDescription": "检测到告警时的时间戳。",
