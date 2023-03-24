@@ -16,14 +16,9 @@ import { useAppUrl } from '../../common/lib/kibana';
 import { globalUrlParamSelectors } from '../../common/store/global_url_param';
 import { useShallowEqualSelector } from '../../common/hooks/use_selector';
 
-export const useDashboardAppLink = ({
-  query,
-  filters,
-  timeRange: { from, fromStr, to, toStr },
-  uiSettings,
-  savedObjectId,
-  kbnUrlStateStorage,
-}: {
+const GLOBAL_STATE_STORAGE_KEY = '_g';
+
+export interface UseDashboardAppLinkProps {
   query?: Query;
   filters?: Filter[];
   timeRange: {
@@ -35,11 +30,19 @@ export const useDashboardAppLink = ({
   uiSettings: IUiSettingsClient;
   savedObjectId: string | undefined;
   kbnUrlStateStorage: IKbnUrlStateStorage;
-}) => {
-  const GLOBAL_STATE_STORAGE_KEY = '_g';
+}
+
+export const useDashboardAppLink = ({
+  query,
+  filters,
+  timeRange: { from, fromStr, to, toStr },
+  uiSettings,
+  savedObjectId,
+  kbnUrlStateStorage,
+}: UseDashboardAppLinkProps) => {
   const { getAppUrl } = useAppUrl();
   const urlState = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
-  const useHash = uiSettings.get('state:storeInSessionStorage'); // use hash
+  const useHash = uiSettings.get('state:storeInSessionStorage');
   const [dashboardAppGlobalState, setDashboardAppGlobalState] = useState<QueryState>(
     kbnUrlStateStorage.get<QueryState>(GLOBAL_STATE_STORAGE_KEY) ?? ({} as QueryState)
   );
@@ -53,6 +56,11 @@ export const useDashboardAppLink = ({
   );
 
   useEffect(() => {
+    /** Dashboard app puts all the url states under _g key
+     *  Converting the url states form SecuritySolution to this format
+     *  by set and get from kbnUrlStateStorage
+     *  so we can maintain the states in Dashboard app
+     * */
     const setUrl = async () => {
       await kbnUrlStateStorage.set<QueryState>(
         GLOBAL_STATE_STORAGE_KEY,
