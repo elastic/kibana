@@ -252,7 +252,7 @@ export const basicFileMock: FileJSON = {
   alt: '',
   fileKind: '',
   status: 'READY',
-  extension: '.png',
+  extension: 'png',
 };
 
 export const caseWithAlerts = {

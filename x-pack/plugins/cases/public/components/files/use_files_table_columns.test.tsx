@@ -39,8 +39,8 @@ describe('useCasesColumns ', () => {
         },
         Object {
           "data-test-subj": "cases-files-table-filetype",
-          "field": "mimeType",
           "name": "Type",
+          "render": [Function],
         },
         Object {
           "data-test-subj": "cases-files-table-date-added",

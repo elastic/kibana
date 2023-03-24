@@ -28,7 +28,7 @@ export const FilesUtilityBar = ({ caseId, onSearch }: FilesUtilityBarProps) => {
           placeholder={i18n.SEARCH_PLACEHOLDER}
           onSearch={onSearch}
           incremental={false}
-          data-test-subj="case-detail-search-file"
+          data-test-subj="cases-files-search"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

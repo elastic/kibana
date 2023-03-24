@@ -51,15 +51,17 @@ type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResul
 
 window.scrollTo = jest.fn();
 
-const mockGetFilesClient = createMockFilesClient as unknown as (
-  scope: string
-) => ScopedFilesClient<unknown>;
+export const mockedFilesClient = createMockFilesClient() as unknown as ScopedFilesClient<unknown>;
+
+const mockGetFilesClient = () => mockedFilesClient;
+
+export const mockedTestProvidersOwner = [SECURITY_SOLUTION_OWNER];
 
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<TestProviderProps> = ({
   children,
   features,
-  owner = [SECURITY_SOLUTION_OWNER],
+  owner = mockedTestProvidersOwner,
   permissions = allCasesPermissions(),
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),

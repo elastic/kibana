@@ -45,6 +45,7 @@ export const FilePreview = ({ closePreview, selectedFile, getDownloadHref }: Fil
             id: selectedFile.id || '',
             fileKind: constructFileKindIdByOwner(owner[0] as Owner),
           })}
+          data-test-subj="cases-files-image-preview"
         />
       </EuiFocusTrap>
     </StyledOverlayMask>
