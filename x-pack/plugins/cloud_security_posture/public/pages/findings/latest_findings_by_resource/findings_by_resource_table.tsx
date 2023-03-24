@@ -166,7 +166,7 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
         )}
         tooltipContent={i18n.translate(
           'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnTooltipLabel',
-          { defaultMessage: 'Kubernetes Cluster ID or Cloud Account Name' }
+          { defaultMessage: 'Kubernetes Cluster ID or Cloud Account Name/ID' }
         )}
       />
     ),
