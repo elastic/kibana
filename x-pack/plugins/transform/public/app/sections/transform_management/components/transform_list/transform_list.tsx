@@ -57,7 +57,6 @@ import {
   isScheduleNowActionDisabled,
   useScheduleNowAction,
   ScheduleNowActionName,
-  ScheduleNowActionModal,
 } from '../action_schedule_now';
 import { isStopActionDisabled, StopActionName, useStopAction } from '../action_stop';
 
@@ -196,7 +195,9 @@ export const TransformList: FC<TransformListProps> = ({
     </div>,
     <div key="scheduleNowAction" className="transform__BulkActionItem">
       <EuiButtonEmpty
-        onClick={() => bulkScheduleNowAction.openModal(transformSelection)}
+        onClick={() =>
+          bulkScheduleNowAction.scheduleNowTransforms(transformSelection.map((i) => ({ id: i.id })))
+        }
         disabled={isScheduleNowActionDisabled(
           transformSelection,
           capabilities.canScheduleNowTransform,
@@ -326,9 +327,6 @@ export const TransformList: FC<TransformListProps> = ({
       {bulkDeleteAction.isModalVisible && <DeleteActionModal {...bulkDeleteAction} />}
       {bulkResetAction.isModalVisible && <ResetActionModal {...bulkResetAction} />}
       {bulkStopAction.isModalVisible && <StopActionModal {...bulkStopAction} />}
-      {bulkScheduleNowAction.isModalVisible && (
-        <ScheduleNowActionModal {...bulkScheduleNowAction} />
-      )}
 
       {/* Single Action Modals */}
       {singleActionModals}

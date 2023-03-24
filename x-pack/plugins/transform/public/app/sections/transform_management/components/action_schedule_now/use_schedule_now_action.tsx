@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useContext, useMemo } from 'react';
 
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
@@ -25,23 +25,6 @@ export const useScheduleNowAction = (forceDisable: boolean, transformNodes: numb
 
   const scheduleNowTransforms = useScheduleNowTransforms();
 
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [items, setItems] = useState<TransformListRow[]>([]);
-
-  const closeModal = () => setModalVisible(false);
-
-  const scheduleNowAndCloseModal = () => {
-    setModalVisible(false);
-    scheduleNowTransforms(items.map((i) => ({ id: i.id })));
-  };
-
-  const openModal = (newItems: TransformListRow[]) => {
-    if (Array.isArray(newItems)) {
-      setItems(newItems);
-      setModalVisible(true);
-    }
-  };
-
   const action: TransformListAction = useMemo(
     () => ({
       name: (item: TransformListRow) => (
@@ -57,18 +40,14 @@ export const useScheduleNowAction = (forceDisable: boolean, transformNodes: numb
       description: scheduleNowActionNameText,
       icon: 'play',
       type: 'icon',
-      onClick: (item: TransformListRow) => openModal([item]),
+      onClick: (item: TransformListRow) => scheduleNowTransforms([{ id: item.id }]),
       'data-test-subj': 'transformActionScheduleNow',
     }),
-    [canScheduleNowTransform, forceDisable, transformNodes]
+    [canScheduleNowTransform, forceDisable, scheduleNowTransforms, transformNodes]
   );
 
   return {
     action,
-    closeModal,
-    isModalVisible,
-    items,
-    openModal,
-    scheduleNowAndCloseModal,
+    scheduleNowTransforms,
   };
 };

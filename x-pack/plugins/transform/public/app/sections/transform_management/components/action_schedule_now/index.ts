@@ -6,5 +6,4 @@
  */
 
 export { useScheduleNowAction } from './use_schedule_now_action';
-export { ScheduleNowActionModal } from './schedule_now_action_modal';
 export { isScheduleNowActionDisabled, ScheduleNowActionName } from './schedule_now_action_name';
