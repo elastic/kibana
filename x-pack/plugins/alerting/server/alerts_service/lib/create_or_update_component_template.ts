@@ -23,10 +23,14 @@ interface CreateOrUpdateComponentTemplateOpts {
 const getIndexTemplatesUsingComponentTemplate = async (
   esClient: ElasticsearchClient,
   componentTemplateName: string,
-  totalFieldsLimit: number
+  totalFieldsLimit: number,
+  logger: Logger
 ) => {
   // Get all index templates and filter down to just the ones referencing this component template
-  const { index_templates: indexTemplates } = await esClient.indices.getIndexTemplate();
+  const { index_templates: indexTemplates } = await retryTransientEsErrors(
+    () => esClient.indices.getIndexTemplate(),
+    { logger }
+  );
   const indexTemplatesUsingComponentTemplate = (indexTemplates ?? []).filter(
     (indexTemplate: IndicesGetIndexTemplateIndexTemplateItem) =>
       indexTemplate.index_template.composed_of.includes(componentTemplateName)
@@ -34,19 +38,23 @@ const getIndexTemplatesUsingComponentTemplate = async (
   await asyncForEach(
     indexTemplatesUsingComponentTemplate,
     async (template: IndicesGetIndexTemplateIndexTemplateItem) => {
-      await esClient.indices.putIndexTemplate({
-        name: template.name,
-        body: {
-          ...template.index_template,
-          template: {
-            ...template.index_template.template,
-            settings: {
-              ...template.index_template.template?.settings,
-              'index.mapping.total_fields.limit': totalFieldsLimit,
+      await retryTransientEsErrors(
+        () =>
+          esClient.indices.putIndexTemplate({
+            name: template.name,
+            body: {
+              ...template.index_template,
+              template: {
+                ...template.index_template.template,
+                settings: {
+                  ...template.index_template.template?.settings,
+                  'index.mapping.total_fields.limit': totalFieldsLimit,
+                },
+              },
             },
-          },
-        },
-      });
+          }),
+        { logger }
+      );
     }
   );
 };
@@ -54,10 +62,11 @@ const getIndexTemplatesUsingComponentTemplate = async (
 const createOrUpdateComponentTemplateHelper = async (
   esClient: ElasticsearchClient,
   template: ClusterPutComponentTemplateRequest,
-  totalFieldsLimit: number
+  totalFieldsLimit: number,
+  logger: Logger
 ) => {
   try {
-    await esClient.cluster.putComponentTemplate(template);
+    await retryTransientEsErrors(() => esClient.cluster.putComponentTemplate(template), { logger });
   } catch (error) {
     const reason = error?.meta?.body?.error?.caused_by?.caused_by?.caused_by?.reason;
     if (reason && reason.match(/Limit of total fields \[\d+\] has been exceeded/) != null) {
@@ -68,10 +77,17 @@ const createOrUpdateComponentTemplateHelper = async (
       // number of new ECS fields pushes the composed mapping above the limit, this error will
       // occur. We have to update the field limit inside the index template now otherwise we
       // can never update the component template
-      await getIndexTemplatesUsingComponentTemplate(esClient, template.name, totalFieldsLimit);
+      await getIndexTemplatesUsingComponentTemplate(
+        esClient,
+        template.name,
+        totalFieldsLimit,
+        logger
+      );
 
       // Try to update the component template again
-      await esClient.cluster.putComponentTemplate(template);
+      await retryTransientEsErrors(() => esClient.cluster.putComponentTemplate(template), {
+        logger,
+      });
     } else {
       throw error;
     }
@@ -87,10 +103,7 @@ export const createOrUpdateComponentTemplate = async ({
   logger.info(`Installing component template ${template.name}`);
 
   try {
-    await retryTransientEsErrors(
-      () => createOrUpdateComponentTemplateHelper(esClient, template, totalFieldsLimit),
-      { logger }
-    );
+    await createOrUpdateComponentTemplateHelper(esClient, template, totalFieldsLimit, logger);
   } catch (err) {
     logger.error(`Error installing component template ${template.name} - ${err.message}`);
     throw err;
