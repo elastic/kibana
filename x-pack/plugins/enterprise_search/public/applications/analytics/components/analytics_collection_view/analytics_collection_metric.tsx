@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiProgress,
   EuiText,
+  EuiSkeletonRectangle,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -84,9 +85,11 @@ export const AnalyticsCollectionViewMetric: React.FC<
           ? css`
               border: 1px solid ${euiTheme.colors.primary};
               position: relative;
+              overflow: hidden;
             `
           : css`
               position: relative;
+              overflow: hidden;
             `
       }
     >
@@ -111,17 +114,21 @@ export const AnalyticsCollectionViewMetric: React.FC<
             </span>
           </EuiText>
         </EuiFlexGroup>
-        <EuiText color={isSelected ? euiTheme.colors.primaryText : color}>
-          <h2>
-            {metric === null ? (
-              i18n.translate('xpack.enterpriseSearch.analytics.collection.notAvailableLabel', {
-                defaultMessage: 'N/A',
-              })
-            ) : (
-              <EuiI18nNumber value={metric} />
-            )}
-          </h2>
-        </EuiText>
+        {isLoading ? (
+          <EuiSkeletonRectangle height={40} width="100%" />
+        ) : (
+          <EuiText color={isSelected ? euiTheme.colors.primaryText : color}>
+            <h2>
+              {metric === null ? (
+                i18n.translate('xpack.enterpriseSearch.analytics.collection.notAvailableLabel', {
+                  defaultMessage: 'N/A',
+                })
+              ) : (
+                <EuiI18nNumber value={metric} />
+              )}
+            </h2>
+          </EuiText>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );
