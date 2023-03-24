@@ -26,7 +26,8 @@ import { AnalyticsCollectionView } from './analytics_collection_view';
 
 const mockValues = {
   analyticsCollection: {
-    name: 'Analytics Collection 1',
+    events_datastream: 'analytics-events-example',
+    name: 'Analytics-Collection-1',
   } as AnalyticsCollection,
   dataViewId: '1234-1234-1234',
 };
@@ -61,9 +62,8 @@ describe('AnalyticsOverview', () => {
     setMockValues(mockValues);
     setMockActions(mockActions);
 
-    const wrapper = shallow(<AnalyticsCollectionView />);
+    shallow(<AnalyticsCollectionView />);
 
-    expect(wrapper.find(AnalyticsCollectionSettings)).toHaveLength(1);
     expect(mockActions.fetchAnalyticsCollection).toHaveBeenCalled();
   });
 
@@ -109,7 +109,8 @@ describe('AnalyticsOverview', () => {
     const wrapper = shallow(<AnalyticsCollectionView />);
     expect(wrapper?.find(AnalyticsCollectionChartWithLens)).toHaveLength(1);
     expect(wrapper?.find(AnalyticsCollectionChartWithLens).props()).toEqual({
-      id: 'analytics-collection-chart-1',
+      dataViewQuery: 'analytics-events-example',
+      id: 'analytics-collection-chart-Analytics-Collection-1',
       timeRange: {
         from: 'now-90d',
         to: 'now',
