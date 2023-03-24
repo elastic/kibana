@@ -41,14 +41,14 @@ describe('importDashboards(req)', () => {
           type: 'dashboard',
           attributes: { panelJSON: '{}' },
           references: [],
-          migrationVersion: {},
+          typeMigrationVersion: '',
         },
         {
           id: 'panel-01',
           type: 'visualization',
           attributes: { visState: '{}' },
           references: [],
-          migrationVersion: {},
+          typeMigrationVersion: '',
         },
       ],
       { overwrite: false }
@@ -78,7 +78,7 @@ describe('importDashboards(req)', () => {
           type: 'dashboard',
           attributes: { panelJSON: '{}' },
           references: [],
-          migrationVersion: {},
+          typeMigrationVersion: '',
         },
       ],
       { overwrite: false }

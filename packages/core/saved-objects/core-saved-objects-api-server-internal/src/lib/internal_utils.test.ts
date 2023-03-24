@@ -94,6 +94,7 @@ describe('#getSavedObjectFromSource', () => {
   const references = [{ type: 'ref-type', id: 'ref-id', name: 'ref-name' }];
   const migrationVersion = { foo: 'migrationVersion' };
   const coreMigrationVersion = 'coreMigrationVersion';
+  const typeMigrationVersion = 'typeMigrationVersion';
   const originId = 'originId';
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const updated_at = 'updatedAt';
@@ -112,6 +113,7 @@ describe('#getSavedObjectFromSource', () => {
         references,
         migrationVersion,
         coreMigrationVersion,
+        typeMigrationVersion,
         originId,
         updated_at,
         ...namespaceAttrs,
@@ -127,6 +129,7 @@ describe('#getSavedObjectFromSource', () => {
     expect(result).toEqual({
       attributes,
       coreMigrationVersion,
+      typeMigrationVersion,
       id,
       migrationVersion,
       namespaces: expect.anything(), // see specific test cases below
