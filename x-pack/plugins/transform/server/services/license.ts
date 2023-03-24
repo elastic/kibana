@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/core/server';
 import {
+  CoreStart,
   IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
@@ -16,6 +17,8 @@ import {
 
 import { LicensingPluginSetup, LicenseType } from '@kbn/licensing-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+
+import { PLUGIN } from '../../common/constants';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -42,7 +45,13 @@ export class License {
 
   setup(
     { pluginId, minimumLicenseType, defaultErrorMessage }: SetupSettings,
-    { licensing, logger }: { licensing: LicensingPluginSetup; logger: Logger }
+    {
+      licensing,
+      logger,
+    }: {
+      licensing: LicensingPluginSetup;
+      logger: Logger;
+    }
   ) {
     licensing.license$.subscribe((license) => {
       const { state, message } = license.check(pluginId, minimumLicenseType);
@@ -70,16 +79,18 @@ export class License {
   }
 
   guardApiRoute<Params, Query, Body>(
+    coreStart: CoreStart,
     handler: RequestHandler<Params, Query, Body, TransformRequestHandlerContext>
   ) {
     const license = this;
 
-    return function licenseCheck(
+    return async function licenseCheck(
       ctx: TransformRequestHandlerContext,
       request: KibanaRequest<Params, Query, Body>,
       response: KibanaResponseFactory
-    ): IKibanaResponse<any> | Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse<any>> {
       const licenseStatus = license.getStatus();
+      const executionContext = await createExecutionContext(coreStart, request.route.path);
 
       if (!licenseStatus.isValid) {
         return response.customError({
@@ -90,11 +101,24 @@ export class License {
         });
       }
 
-      return handler(ctx, request, response);
+      return await coreStart.executionContext.withContext(executionContext, () =>
+        handler(ctx, request, response)
+      );
     };
   }
 
   getStatus() {
     return this.licenseStatus;
   }
+}
+
+async function createExecutionContext(coreStart: CoreStart, id?: string) {
+  const labels = coreStart.executionContext.getAsLabels();
+  const page = labels.page as string;
+  return {
+    type: 'application',
+    name: PLUGIN.ID,
+    id: id ?? page,
+    page,
+  };
 }

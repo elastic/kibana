@@ -73,7 +73,7 @@ enum TRANSFORM_ACTIONS {
 }
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
-  const { router, license, getStartServices } = routeDependencies;
+  const { router, license, coreStart, dataViews } = routeDependencies;
   /**
    * @apiGroup Transforms
    *
@@ -87,6 +87,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   router.get(
     { path: addBasePath('transforms'), validate: false },
     license.guardApiRoute<estypes.TransformGetTransformRequest, undefined, undefined>(
+      coreStart,
       async (ctx, req, res) => {
         try {
           const esClient = (await ctx.core).elasticsearch.client;
@@ -128,18 +129,21 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       path: addBasePath('transforms/{transformId}'),
       validate: { params: transformIdParamSchema },
     },
-    license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
-      const { transformId } = req.params;
-      try {
-        const esClient = (await ctx.core).elasticsearch.client;
-        const body = await esClient.asCurrentUser.transform.getTransform({
-          transform_id: transformId,
-        });
-        return res.ok({ body });
-      } catch (e) {
-        return res.customError(wrapError(wrapEsError(e)));
+    license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(
+      coreStart,
+      async (ctx, req, res) => {
+        const { transformId } = req.params;
+        try {
+          const esClient = (await ctx.core).elasticsearch.client;
+          const body = await esClient.asCurrentUser.transform.getTransform({
+            transform_id: transformId,
+          });
+          return res.ok({ body });
+        } catch (e) {
+          return res.customError(wrapError(wrapEsError(e)));
+        }
       }
-    })
+    )
   );
 
   /**
@@ -152,6 +156,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   router.get(
     { path: addBasePath('transforms/_stats'), validate: false },
     license.guardApiRoute<estypes.TransformGetTransformStatsResponse, undefined, undefined>(
+      coreStart,
       async (ctx, req, res) => {
         try {
           const esClient = (await ctx.core).elasticsearch.client;
@@ -184,21 +189,24 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       path: addBasePath('transforms/{transformId}/_stats'),
       validate: { params: transformIdParamSchema },
     },
-    license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
-      const { transformId } = req.params;
-      try {
-        const esClient = (await ctx.core).elasticsearch.client;
-        const body = await esClient.asCurrentUser.transform.getTransformStats(
-          {
-            transform_id: transformId,
-          },
-          { maxRetries: 0 }
-        );
-        return res.ok({ body });
-      } catch (e) {
-        return res.customError(wrapError(wrapEsError(e)));
+    license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(
+      coreStart,
+      async (ctx, req, res) => {
+        const { transformId } = req.params;
+        try {
+          const esClient = (await ctx.core).elasticsearch.client;
+          const body = await esClient.asCurrentUser.transform.getTransformStats(
+            {
+              transform_id: transformId,
+            },
+            { maxRetries: 0 }
+          );
+          return res.ok({ body });
+        } catch (e) {
+          return res.customError(wrapError(wrapEsError(e)));
+        }
       }
-    })
+    )
   );
 
   /**
@@ -220,6 +228,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       },
     },
     license.guardApiRoute<TransformIdParamSchema, undefined, PutTransformsRequestSchema>(
+      coreStart,
       async (ctx, req, res) => {
         const { transformId } = req.params;
 
@@ -269,6 +278,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       },
     },
     license.guardApiRoute<TransformIdParamSchema, undefined, PostTransformsUpdateRequestSchema>(
+      coreStart,
       async (ctx, req, res) => {
         const { transformId } = req.params;
 
@@ -306,9 +316,10 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       },
     },
     license.guardApiRoute<undefined, undefined, DeleteTransformsRequestSchema>(
+      coreStart,
       async (ctx, req, res) => {
         try {
-          const [{ savedObjects, elasticsearch }, { dataViews }] = await getStartServices();
+          const { savedObjects, elasticsearch } = coreStart;
           const savedObjectsClient = savedObjects.getScopedClient(req);
           const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
 
@@ -355,6 +366,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       },
     },
     license.guardApiRoute<undefined, undefined, ResetTransformsRequestSchema>(
+      coreStart,
       async (ctx, req, res) => {
         try {
           const body = await resetTransforms(req.body, ctx, res);
@@ -395,6 +407,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       },
     },
     license.guardApiRoute<undefined, undefined, PostTransformsPreviewRequestSchema>(
+      coreStart,
       previewTransformHandler
     )
   );
@@ -416,6 +429,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       },
     },
     license.guardApiRoute<undefined, undefined, StartTransformsRequestSchema>(
+      coreStart,
       startTransformsHandler
     )
   );
@@ -436,7 +450,10 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
         body: stopTransformsRequestSchema,
       },
     },
-    license.guardApiRoute<undefined, undefined, StopTransformsRequestSchema>(stopTransformsHandler)
+    license.guardApiRoute<undefined, undefined, StopTransformsRequestSchema>(
+      coreStart,
+      stopTransformsHandler
+    )
   );
 
   /**
@@ -455,7 +472,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
         body: schema.maybe(schema.any()),
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
+    license.guardApiRoute(coreStart, async (ctx, req, res) => {
       try {
         const esClient = (await ctx.core).elasticsearch.client;
         const body = await esClient.asCurrentUser.search(req.body, { maxRetries: 0 });

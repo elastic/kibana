@@ -11,7 +11,7 @@ import { CoreSetup, CoreStart, Plugin, Logger, PluginInitializerContext } from '
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import { PluginSetupDependencies, PluginStartDependencies } from './types';
-import { ApiRoutes } from './routes';
+import { registerRoutes } from './routes';
 import { License } from './services';
 import { registerTransformHealthRuleType } from './lib/alerting';
 
@@ -27,7 +27,6 @@ const PLUGIN = {
 };
 
 export class TransformServerPlugin implements Plugin<{}, void, any, any> {
-  private readonly apiRoutes: ApiRoutes;
   private readonly license: License;
   private readonly logger: Logger;
 
@@ -35,7 +34,6 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
-    this.apiRoutes = new ApiRoutes();
     this.license = new License();
   }
 
@@ -73,10 +71,14 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
       ],
     });
 
-    this.apiRoutes.setup({
-      router,
-      license: this.license,
-      getStartServices,
+    getStartServices().then(([coreStart, depsStart]) => {
+      const { dataViews } = depsStart;
+      registerRoutes({
+        router,
+        license: this.license,
+        coreStart,
+        dataViews,
+      });
     });
 
     if (alerting) {

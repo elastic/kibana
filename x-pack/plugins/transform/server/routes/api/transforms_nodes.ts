@@ -34,7 +34,7 @@ export const isNodes = (arg: unknown): arg is Nodes => {
   );
 };
 
-export function registerTransformNodesRoutes({ router, license }: RouteDependencies) {
+export function registerTransformNodesRoutes({ router, license, coreStart }: RouteDependencies) {
   /**
    * @apiGroup Transform Nodes
    *
@@ -47,7 +47,7 @@ export function registerTransformNodesRoutes({ router, license }: RouteDependenc
       path: addBasePath('transforms/_nodes'),
       validate: false,
     },
-    license.guardApiRoute<undefined, undefined, undefined>(async (ctx, req, res) => {
+    license.guardApiRoute<undefined, undefined, undefined>(coreStart, async (ctx, req, res) => {
       try {
         const esClient = (await ctx.core).elasticsearch.client;
         // If security is enabled, check that the user has at least permission to
