@@ -92,7 +92,7 @@ export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) =
     });
     detailsThirdCol.unshift({
       title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.dependentVariable', {
-        defaultMessage: 'Dependent variable',
+        defaultMessage: 'Dependent variable1',
       }),
       description: dependentVariable,
     });

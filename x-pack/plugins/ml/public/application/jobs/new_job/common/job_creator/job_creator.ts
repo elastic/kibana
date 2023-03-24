@@ -775,6 +775,7 @@ export class JobCreator {
             name: id,
             type: Array.isArray(runtimeField) ? runtimeField[0].type : runtimeField.type,
             aggregatable: true,
+            counter: false,
             aggs: [],
             runtimeField,
           } as Field)
@@ -793,6 +794,7 @@ export class JobCreator {
         name: f,
         type: ES_FIELD_TYPES.KEYWORD,
         aggregatable: true,
+        counter: false,
       }));
     }
   }

@@ -154,6 +154,7 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
     name: 'Event rate',
     type: ES_FIELD_TYPES.INTEGER,
     aggregatable: true,
+    counter: false,
     aggs: [],
   };
 

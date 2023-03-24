@@ -90,7 +90,7 @@ export function getRichDetectors(
 export function createFieldOptions(fields: Field[], additionalFields: Field[]) {
   return [
     ...fields
-      .filter((f) => f.id !== EVENT_RATE_FIELD_ID)
+      .filter((f) => f.id !== EVENT_RATE_FIELD_ID && f.counter !== true)
       .map((f) => ({
         label: f.name,
         field: f,
@@ -348,6 +348,7 @@ export function collectAggs(o: any, aggFields: Field[]) {
               name: k,
               type: ES_FIELD_TYPES.KEYWORD,
               aggregatable: true,
+              counter: false,
             });
           }
         });

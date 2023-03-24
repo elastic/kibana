@@ -104,7 +104,7 @@ function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: Run
   const runtimeOptions: RuntimeOption[] = [];
   Object.keys(runtimeMappings).forEach((id) => {
     const field = runtimeMappings[id];
-    if (isRuntimeField(field) && shouldAddAsDepVarOption(id, field.type, jobType)) {
+    if (isRuntimeField(field) && shouldAddAsDepVarOption(id, field.type, false, jobType)) {
       runtimeOptions.push({
         label: id,
         field: { id, type: field.type as RuntimeMappingFieldType },
@@ -224,7 +224,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
         let resetDependentVariable = true;
         for (const field of fields) {
-          if (shouldAddAsDepVarOption(field.id, field.type, jobType)) {
+          if (shouldAddAsDepVarOption(field.id, field.type, field.counter ?? false, jobType)) {
             depVarOptions.push({
               label: field.id,
               field,
@@ -626,7 +626,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
             <EuiFormRow
               fullWidth
               label={i18n.translate('xpack.ml.dataframe.analytics.create.dependentVariableLabel', {
-                defaultMessage: 'Dependent variable',
+                defaultMessage: 'Dependent variable2',
               })}
               helpText={
                 dependentVariableOptions.length === 0 &&
