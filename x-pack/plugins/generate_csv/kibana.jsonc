@@ -11,34 +11,27 @@
       "generateCsv"
     ],
     "requiredPlugins": [
-      "licensing",
-      "data",
-      "encryptedSavedObjects",
-      "navigation",
-      "customIntegrations",
-      "share",
-      "unifiedSearch",
-      "savedObjectsTagging",
-      "taskManager",
-      "guidedOnboarding",
-      "files"
+     "data",
+     "discover",
+     "fieldFormats",
+     "esUiShared",
+     "home",
+     "management",
+     "licensing",
+     "uiActions",
+     "taskManager",
+     "embeddable",
+     "screenshotting",
+     "screenshotMode",
+     "share",
+     "features",
     ],
     "optionalPlugins": [
-      "features",
-      "cloud",
-      "usageCollection",
-      "home",
-      "globalSearch",
-      "telemetry",
-      "discover",
-      "ingestPipelines",
-      "spaces",
+  
     ],
     "requiredBundles": [
-      "usageCollection",
     ],
     "extraPublicDirs": [
-      "common"
     ]
   }
 }

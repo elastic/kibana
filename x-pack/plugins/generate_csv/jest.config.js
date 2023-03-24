@@ -14,7 +14,5 @@ module.exports = {
   },
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/generate_csv',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/generate_csv/{common,public,server}/**/*.{ts,tsx}',
-  ],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/generate_csv/{public,types}/**/*.{ts,tsx}'],
 };

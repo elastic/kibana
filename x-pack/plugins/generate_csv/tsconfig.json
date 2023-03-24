@@ -6,7 +6,6 @@
   "include": [
     "public/**/*",
     "types/**/*",
-    "index.ts",
   ],
   "kbn_references": [
     "@kbn/core",

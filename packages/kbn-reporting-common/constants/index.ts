@@ -50,3 +50,4 @@ export const byteSizeValueToNumber = (value: number | ByteSizeValue) => {
 
 export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
 export const UI_SETTINGS_SEARCH_INCLUDE_FROZEN = 'search:includeFrozen';
+export const CSV_REPORTING_ACTION = 'downloadCsvReport';
