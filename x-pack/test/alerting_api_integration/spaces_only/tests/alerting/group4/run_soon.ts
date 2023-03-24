@@ -22,6 +22,9 @@ export default function createRunSoonTests({ getService }: FtrProviderContext) {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
+      // Not 100% sure why, seems the rules need to be loaded separately to avoid the task
+      // failing to load the rule during execution and deleting itself. Otherwise
+      // we have flakiness
       await esArchiver.load('x-pack/test/functional/es_archives/rules_scheduled_task_id/rules');
       await esArchiver.load('x-pack/test/functional/es_archives/rules_scheduled_task_id/tasks');
     });
