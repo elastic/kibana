@@ -68,3 +68,9 @@ export const SUCCESSFUL_UPLOAD_FILE_NAME = (fileName: string) =>
     defaultMessage: 'File {fileName} uploaded successfully',
     values: { fileName },
   });
+
+export const SHOWING_FILES = (totalFiles: number) =>
+  i18n.translate('xpack.cases.caseView.files.showingFilesTitle', {
+    values: { totalFiles },
+    defaultMessage: 'Showing {totalFiles} {totalFiles, plural, =1 {file} other {files}}',
+  });

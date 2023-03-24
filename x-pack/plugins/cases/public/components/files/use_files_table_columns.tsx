@@ -35,18 +35,21 @@ export const useFilesTableColumns = ({
       name: i18n.NAME,
       'data-test-subj': 'cases-files-table-filename',
       render: (attachment: FileJSON) => {
+        const fileName = `${attachment.name}.${attachment.extension}`;
         if (isImage(attachment)) {
-          return <EuiLink onClick={() => showPreview(attachment)}>{attachment.name}</EuiLink>;
+          return <EuiLink onClick={() => showPreview(attachment)}>{fileName}</EuiLink>;
         } else {
-          return <span title={i18n.NO_PREVIEW}>{attachment.name}</span>;
+          return <span title={i18n.NO_PREVIEW}>{fileName}</span>;
         }
       },
       width: '60%',
     },
     {
       name: i18n.TYPE,
-      field: 'mimeType',
       'data-test-subj': 'cases-files-table-filetype',
+      render: (attachment: FileJSON) => {
+        return <span>{`${attachment.mimeType?.split('/')[0]}` || ''}</span>;
+      },
     },
     {
       name: i18n.DATE_ADDED,

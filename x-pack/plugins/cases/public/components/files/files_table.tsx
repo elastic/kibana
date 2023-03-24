@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
 import type { Pagination, EuiBasicTableProps } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
@@ -52,20 +52,6 @@ export const FilesTable = ({ caseId, items, pagination, onChange, isLoading }: F
     getDownloadHref: filesClient.getDownloadHref,
   });
 
-  const resultsCount = useMemo(
-    () => (
-      <>
-        <strong>
-          {pagination.pageSize * pagination.pageIndex + 1}
-          {'-'}
-          {pagination.pageSize * pagination.pageIndex + pagination.pageSize}
-        </strong>{' '}
-        {'of'} <strong>{pagination.totalItemCount}</strong>
-      </>
-    ),
-    [pagination.pageIndex, pagination.pageSize, pagination.totalItemCount]
-  );
-
   return isLoading ? (
     <>
       <EuiSpacer size="l" />
@@ -76,8 +62,8 @@ export const FilesTable = ({ caseId, items, pagination, onChange, isLoading }: F
       {pagination.totalItemCount > 0 && (
         <>
           <EuiSpacer size="xl" />
-          <EuiText size="xs" data-test-subj="cases-files-table-results-count">
-            {i18n.RESULTS_COUNT} {resultsCount}
+          <EuiText size="xs" color="subdued" data-test-subj="cases-files-table-results-count">
+            {i18n.SHOWING_FILES(pagination.totalItemCount)}
           </EuiText>
         </>
       )}
