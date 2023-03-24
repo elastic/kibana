@@ -18,7 +18,7 @@ import {
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-const SOURCE_LOG_DATA_INDEX = 'log-bulk-edit-rule'
+const SOURCE_LOG_DATA_INDEX = 'log-bulk-edit-rule';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {
@@ -642,21 +642,21 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             },
           },
         });
-      }
+      };
 
       before(async () => {
         await createSourceIndex();
-      })
+      });
 
       after(async () => {
         await es.transport.request({
           path: `${SOURCE_LOG_DATA_INDEX}`,
           method: 'DELETE',
         });
-      })
+      });
 
       it('.esquery', async () => {
-        const dv = await createDataView(SOURCE_LOG_DATA_INDEX)
+        const dv = await createDataView(SOURCE_LOG_DATA_INDEX);
         const space1 = UserAtSpaceScenarios[1].space.id;
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(space1)}/api/alerting/rule`)
@@ -667,19 +667,17 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 searchConfiguration: {
                   query: {
                     query: '_id:*',
-                    language: 'kuery'
+                    language: 'kuery',
                   },
-                  index: dv.body.data_view.id
+                  index: dv.body.data_view.id,
                 },
                 searchType: 'searchSource',
                 timeWindowSize: 5,
                 timeWindowUnit: 'm',
-                threshold: [
-                  1000
-                ],
+                threshold: [1000],
                 thresholdComparator: '>',
                 size: 100,
-                excludeHitsFromPreviousRun: true
+                excludeHitsFromPreviousRun: true,
               },
               consumer: 'alerts',
               schedule: { interval: '1m' },
