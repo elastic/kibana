@@ -116,14 +116,14 @@ export function LabelsFieldFilter(props: FilterProps) {
   );
 }
 
-const LABELS_LABEL = i18n.translate('xpack.observability.filters.expanded.labels.label', {
+const LABELS_LABEL = i18n.translate('xpack.exploratoryView.filters.expanded.labels.label', {
   defaultMessage: 'Labels',
 });
 
-const LABELS_FIELDS_LABEL = i18n.translate('xpack.observability.filters.expanded.labels.fields', {
+const LABELS_FIELDS_LABEL = i18n.translate('xpack.exploratoryView.filters.expanded.labels.fields', {
   defaultMessage: 'Label fields',
 });
 
-const BACK_TO_LABEL = i18n.translate('xpack.observability.filters.expanded.labels.backTo', {
+const BACK_TO_LABEL = i18n.translate('xpack.exploratoryView.filters.expanded.labels.backTo', {
   defaultMessage: 'Back to labels',
 });

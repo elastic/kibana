@@ -113,38 +113,38 @@ export const FieldLabels: Record<string, string> = {
   [SYNTHETICS_DOCUMENT_ONLOAD]: PAGE_LOAD_TIME_LABEL,
   [TRANSACTION_TIME_TO_FIRST_BYTE]: BACKEND_TIME_LABEL,
   [TRANSACTION_DURATION]: PAGE_LOAD_TIME_LABEL,
-  [SYNTHETICS_CONNECT_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.connect', {
+  [SYNTHETICS_CONNECT_TIMINGS]: i18n.translate('xpack.exploratoryView.expView.synthetics.connect', {
     defaultMessage: 'Connect',
   }),
-  [SYNTHETICS_DNS_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.dns', {
+  [SYNTHETICS_DNS_TIMINGS]: i18n.translate('xpack.exploratoryView.expView.synthetics.dns', {
     defaultMessage: 'DNS',
   }),
-  [SYNTHETICS_WAIT_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.wait', {
+  [SYNTHETICS_WAIT_TIMINGS]: i18n.translate('xpack.exploratoryView.expView.synthetics.wait', {
     defaultMessage: 'Wait',
   }),
-  [SYNTHETICS_SSL_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.ssl', {
+  [SYNTHETICS_SSL_TIMINGS]: i18n.translate('xpack.exploratoryView.expView.synthetics.ssl', {
     defaultMessage: 'SSL',
   }),
-  [SYNTHETICS_BLOCKED_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.blocked', {
+  [SYNTHETICS_BLOCKED_TIMINGS]: i18n.translate('xpack.exploratoryView.expView.synthetics.blocked', {
     defaultMessage: 'Blocked',
   }),
-  [SYNTHETICS_SEND_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.send', {
+  [SYNTHETICS_SEND_TIMINGS]: i18n.translate('xpack.exploratoryView.expView.synthetics.send', {
     defaultMessage: 'Send',
   }),
-  [SYNTHETICS_RECEIVE_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.receive', {
+  [SYNTHETICS_RECEIVE_TIMINGS]: i18n.translate('xpack.exploratoryView.expView.synthetics.receive', {
     defaultMessage: 'Receive',
   }),
-  [SYNTHETICS_TOTAL_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.total', {
+  [SYNTHETICS_TOTAL_TIMINGS]: i18n.translate('xpack.exploratoryView.expView.synthetics.total', {
     defaultMessage: 'Total',
   }),
 
-  'kibana.alert.rule.category': i18n.translate('xpack.observability.expView.alerts.category', {
+  'kibana.alert.rule.category': i18n.translate('xpack.exploratoryView.expView.alerts.category', {
     defaultMessage: 'Rule category',
   }),
-  'kibana.alert.rule.name': i18n.translate('xpack.observability.expView.alerts.name', {
+  'kibana.alert.rule.name': i18n.translate('xpack.exploratoryView.expView.alerts.name', {
     defaultMessage: 'Alert name',
   }),
-  'kibana.alert.status': i18n.translate('xpack.observability.expView.alerts.status', {
+  'kibana.alert.status': i18n.translate('xpack.exploratoryView.expView.alerts.status', {
     defaultMessage: 'Alert status',
   }),
 

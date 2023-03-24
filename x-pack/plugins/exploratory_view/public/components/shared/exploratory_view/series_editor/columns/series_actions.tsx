@@ -149,31 +149,31 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
   );
 }
 
-const EDIT_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.edit', {
+const EDIT_SERIES_LABEL = i18n.translate('xpack.exploratoryView.seriesEditor.edit', {
   defaultMessage: 'Edit series',
 });
 
-const HIDE_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.hide', {
+const HIDE_SERIES_LABEL = i18n.translate('xpack.exploratoryView.seriesEditor.hide', {
   defaultMessage: 'Hide series',
 });
 
-const SHOW_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.show', {
+const SHOW_SERIES_LABEL = i18n.translate('xpack.exploratoryView.seriesEditor.show', {
   defaultMessage: 'Show series',
 });
 
-const COPY_SERIES_LABEL = i18n.translate('xpack.observability.seriesEditor.clone', {
+const COPY_SERIES_LABEL = i18n.translate('xpack.exploratoryView.seriesEditor.clone', {
   defaultMessage: 'Duplicate series',
 });
 
 const DELETE_SERIES_LABEL = i18n.translate(
-  'xpack.observability.expView.seriesEditor.removeSeries',
+  'xpack.exploratoryView.expView.seriesEditor.removeSeries',
   {
     defaultMessage: 'Remove series',
   }
 );
 
 const DELETE_SERIES_TOOLTIP_LABEL = i18n.translate(
-  'xpack.observability.expView.seriesEditor.removeSeriesDisabled',
+  'xpack.exploratoryView.expView.seriesEditor.removeSeriesDisabled',
   {
     defaultMessage:
       'Main series cannot be removed. Please remove all series below before you can remove this.',
@@ -181,18 +181,21 @@ const DELETE_SERIES_TOOLTIP_LABEL = i18n.translate(
 );
 
 const VIEW_SAMPLE_DOCUMENTS_LABEL = i18n.translate(
-  'xpack.observability.seriesEditor.sampleDocuments',
+  'xpack.exploratoryView.seriesEditor.sampleDocuments',
   {
     defaultMessage: 'View transaction in Discover',
   }
 );
 
-const POPOVER_BUTTON_LABEL = i18n.translate('xpack.observability.seriesEditor.popoverButtonLabel', {
-  defaultMessage: 'View series actions',
-});
+const POPOVER_BUTTON_LABEL = i18n.translate(
+  'xpack.exploratoryView.seriesEditor.popoverButtonLabel',
+  {
+    defaultMessage: 'View series actions',
+  }
+);
 
 const ACTIONS_CONTEXT_MENU_LABEL = i18n.translate(
-  'xpack.observability.seriesEditor.actionsAriaContextLabel',
+  'xpack.exploratoryView.seriesEditor.actionsAriaContextLabel',
   {
     defaultMessage: 'Series actions list',
   }

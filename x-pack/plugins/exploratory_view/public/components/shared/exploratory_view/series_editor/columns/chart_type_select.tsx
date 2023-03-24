@@ -64,12 +64,12 @@ export function SeriesChartTypes({ seriesId, series, seriesConfig }: Props) {
 }
 
 const EDIT_CHART_TYPE_LABEL = i18n.translate(
-  'xpack.observability.expView.seriesEditor.editChartSeriesLabel',
+  'xpack.exploratoryView.expView.seriesEditor.editChartSeriesLabel',
   {
     defaultMessage: 'Edit chart type for series',
   }
 );
 
-const CHART_TYPE_LABEL = i18n.translate('xpack.observability.expView.chartTypes.label', {
+const CHART_TYPE_LABEL = i18n.translate('xpack.exploratoryView.expView.chartTypes.label', {
   defaultMessage: 'Chart type',
 });

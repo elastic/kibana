@@ -90,7 +90,7 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
                 <EuiFlexItem key={field} grow={false} style={{ maxWidth: 300 }}>
                   <FilterLabel
                     field={field}
-                    label={i18n.translate('xpack.observability.filters.label.wildcard', {
+                    label={i18n.translate('xpack.exploratoryView.filters.label.wildcard', {
                       defaultMessage: '{label} wildcard',
                       values: { label: labels[field] ?? field },
                     })}
@@ -109,7 +109,7 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
                 <EuiFlexItem key={field} grow={false} style={{ maxWidth: 300 }}>
                   <FilterLabel
                     field={field}
-                    label={i18n.translate('xpack.observability.filters.label.wildcard', {
+                    label={i18n.translate('xpack.exploratoryView.filters.label.wildcard', {
                       defaultMessage: '{label} wildcard',
                       values: { label: labels[field] ?? field },
                     })}
@@ -139,7 +139,7 @@ export function SelectedFilters({ seriesId, series, seriesConfig }: Props) {
               }}
               size="xs"
             >
-              {i18n.translate('xpack.observability.expView.seriesEditor.clearFilter', {
+              {i18n.translate('xpack.exploratoryView.expView.seriesEditor.clearFilter', {
                 defaultMessage: 'Clear filters',
               })}
             </EuiButtonEmpty>

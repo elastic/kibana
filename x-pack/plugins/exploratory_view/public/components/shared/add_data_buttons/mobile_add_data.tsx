@@ -15,7 +15,7 @@ export function MobileAddData() {
 
   return (
     <EuiHeaderLink
-      aria-label={i18n.translate('xpack.observability.page_header.addMobileDataLink.label', {
+      aria-label={i18n.translate('xpack.exploratoryView.page_header.addMobileDataLink.label', {
         defaultMessage: 'Navigate to a tutorial about adding mobile APM data',
       })}
       href={kibana.services?.application?.getUrlForApp('/home#/tutorial/apm')}
@@ -27,6 +27,6 @@ export function MobileAddData() {
   );
 }
 
-const ADD_DATA_LABEL = i18n.translate('xpack.observability.mobile.addDataButtonLabel', {
+const ADD_DATA_LABEL = i18n.translate('xpack.exploratoryView.mobile.addDataButtonLabel', {
   defaultMessage: 'Add Mobile data',
 });

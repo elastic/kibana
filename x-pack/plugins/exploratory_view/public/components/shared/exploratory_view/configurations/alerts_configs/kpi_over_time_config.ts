@@ -21,7 +21,7 @@ export function getAlertsKPIConfig({ spaceId }: ConfigProps): SeriesConfig {
     defaultSeriesType: 'line',
     seriesTypes: [],
     xAxisColumn: {
-      label: i18n.translate('xpack.observability.exploratoryView.alerts.alertStarted', {
+      label: i18n.translate('xpack.exploratoryView.exploratoryView.alerts.alertStarted', {
         defaultMessage: 'Timestamp',
       }),
       dataType: 'date',

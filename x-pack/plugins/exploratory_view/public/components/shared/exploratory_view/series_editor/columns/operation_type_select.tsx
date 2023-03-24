@@ -48,73 +48,73 @@ export function OperationTypeComponent({
   const options = [
     {
       value: 'min' as OperationType,
-      inputDisplay: i18n.translate('xpack.observability.expView.operationType.min', {
+      inputDisplay: i18n.translate('xpack.exploratoryView.expView.operationType.min', {
         defaultMessage: 'Min',
       }),
     },
     {
       value: 'max' as OperationType,
-      inputDisplay: i18n.translate('xpack.observability.expView.operationType.max', {
+      inputDisplay: i18n.translate('xpack.exploratoryView.expView.operationType.max', {
         defaultMessage: 'Max',
       }),
     },
     {
       value: 'average' as OperationType,
-      inputDisplay: i18n.translate('xpack.observability.expView.operationType.average', {
+      inputDisplay: i18n.translate('xpack.exploratoryView.expView.operationType.average', {
         defaultMessage: 'Average',
       }),
     },
     {
       value: 'median' as OperationType,
-      inputDisplay: i18n.translate('xpack.observability.expView.operationType.median', {
+      inputDisplay: i18n.translate('xpack.exploratoryView.expView.operationType.median', {
         defaultMessage: 'Median',
       }),
     },
     {
       value: 'sum' as OperationType,
-      inputDisplay: i18n.translate('xpack.observability.expView.operationType.sum', {
+      inputDisplay: i18n.translate('xpack.exploratoryView.expView.operationType.sum', {
         defaultMessage: 'Sum',
       }),
     },
     {
       value: 'last_value' as OperationType,
-      inputDisplay: i18n.translate('xpack.observability.expView.operationType.lastValue', {
+      inputDisplay: i18n.translate('xpack.exploratoryView.expView.operationType.lastValue', {
         defaultMessage: 'Last value',
       }),
     },
     {
       value: 'unique_count' as OperationType,
-      inputDisplay: i18n.translate('xpack.observability.expView.operationType.uniqueCount', {
+      inputDisplay: i18n.translate('xpack.exploratoryView.expView.operationType.uniqueCount', {
         defaultMessage: 'Unique count',
       }),
     },
     {
       value: '25th' as OperationType,
-      inputDisplay: i18n.translate('xpack.observability.expView.operationType.25thPercentile', {
+      inputDisplay: i18n.translate('xpack.exploratoryView.expView.operationType.25thPercentile', {
         defaultMessage: '25th Percentile',
       }),
     },
     {
       value: '75th' as OperationType,
-      inputDisplay: i18n.translate('xpack.observability.expView.operationType.75thPercentile', {
+      inputDisplay: i18n.translate('xpack.exploratoryView.expView.operationType.75thPercentile', {
         defaultMessage: '75th Percentile',
       }),
     },
     {
       value: '90th' as OperationType,
-      inputDisplay: i18n.translate('xpack.observability.expView.operationType.90thPercentile', {
+      inputDisplay: i18n.translate('xpack.exploratoryView.expView.operationType.90thPercentile', {
         defaultMessage: '90th Percentile',
       }),
     },
     {
       value: '95th' as OperationType,
-      inputDisplay: i18n.translate('xpack.observability.expView.operationType.95thPercentile', {
+      inputDisplay: i18n.translate('xpack.exploratoryView.expView.operationType.95thPercentile', {
         defaultMessage: '95th Percentile',
       }),
     },
     {
       value: '99th' as OperationType,
-      inputDisplay: i18n.translate('xpack.observability.expView.operationType.99thPercentile', {
+      inputDisplay: i18n.translate('xpack.exploratoryView.expView.operationType.99thPercentile', {
         defaultMessage: '99th Percentile',
       }),
     },

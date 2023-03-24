@@ -220,28 +220,28 @@ const EditorRowsWrapper = euiStyled.div`
 `;
 
 export const LOADING_VIEW = i18n.translate(
-  'xpack.observability.expView.seriesBuilder.loadingView',
+  'xpack.exploratoryView.expView.seriesBuilder.loadingView',
   {
     defaultMessage: 'Loading view ...',
   }
 );
 
 export const SELECT_REPORT_TYPE = i18n.translate(
-  'xpack.observability.expView.seriesBuilder.selectReportType',
+  'xpack.exploratoryView.expView.seriesBuilder.selectReportType',
   {
     defaultMessage: 'No report type selected',
   }
 );
 
 export const REPORT_TYPE_LABEL = i18n.translate(
-  'xpack.observability.expView.seriesBuilder.reportType',
+  'xpack.exploratoryView.expView.seriesBuilder.reportType',
   {
     defaultMessage: 'Report type',
   }
 );
 
 export const REPORT_TYPE_ARIA_LABEL = i18n.translate(
-  'xpack.observability.expView.seriesBuilder.reportType.aria',
+  'xpack.exploratoryView.expView.seriesBuilder.reportType.aria',
   {
     defaultMessage: 'This select allows you to choose the type of report you wish to create',
   }

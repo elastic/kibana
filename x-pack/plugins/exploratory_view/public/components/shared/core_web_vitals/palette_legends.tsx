@@ -76,7 +76,7 @@ export function PaletteLegends({ ranks, title, onItemHover, thresholds, isCls }:
               <PaletteLegend color={color}>
                 <EuiText size="xs" data-test-subj={`${labels[ind]}-${ranks?.[ind]}`}>
                   <FormattedMessage
-                    id="xpack.observability.ux.coreVitals.paletteLegend.rankPercentage"
+                    id="xpack.exploratoryView.ux.coreVitals.paletteLegend.rankPercentage"
                     defaultMessage="{labelsInd} ({ranksInd}%)"
                     values={{
                       labelsInd: labels[ind],

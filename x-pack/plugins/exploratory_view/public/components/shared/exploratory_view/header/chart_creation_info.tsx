@@ -25,7 +25,7 @@ export function ChartCreationInfo(props: Partial<ChartTimeRange>) {
             <EuiFlexItem>
               <EuiText size="xs">
                 <FormattedMessage
-                  id="xpack.observability.expView.seriesBuilder.creationTime"
+                  id="xpack.exploratoryView.expView.seriesBuilder.creationTime"
                   defaultMessage="Chart created"
                 />
               </EuiText>
@@ -43,7 +43,7 @@ export function ChartCreationInfo(props: Partial<ChartTimeRange>) {
             <EuiFlexItem>
               <EuiText size="xs">
                 <FormattedMessage
-                  id="xpack.observability.expView.seriesBuilder.creationContext"
+                  id="xpack.exploratoryView.expView.seriesBuilder.creationContext"
                   defaultMessage="Displaying from"
                 />
               </EuiText>

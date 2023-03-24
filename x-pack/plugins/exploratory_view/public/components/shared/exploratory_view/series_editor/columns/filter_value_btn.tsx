@@ -65,7 +65,7 @@ export function FilterValueButton({
       }}
     >
       {negate
-        ? i18n.translate('xpack.observability.expView.filterValueButton.negate', {
+        ? i18n.translate('xpack.exploratoryView.expView.filterValueButton.negate', {
             defaultMessage: 'Not {value}',
             values: { value },
           })

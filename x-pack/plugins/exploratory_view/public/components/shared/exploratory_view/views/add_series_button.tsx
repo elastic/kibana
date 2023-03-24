@@ -63,11 +63,14 @@ export function AddSeriesButton() {
     <EuiToolTip
       content={
         !reportType
-          ? i18n.translate('xpack.observability.expView.seriesBuilder.addSeries.selectReportType', {
-              defaultMessage: 'Please select report type before you can add series.',
-            })
+          ? i18n.translate(
+              'xpack.exploratoryView.expView.seriesBuilder.addSeries.selectReportType',
+              {
+                defaultMessage: 'Please select report type before you can add series.',
+              }
+            )
           : isAddDisabled
-          ? i18n.translate('xpack.observability.expView.seriesBuilder.addSeries.limitation', {
+          ? i18n.translate('xpack.exploratoryView.expView.seriesBuilder.addSeries.limitation', {
               defaultMessage: 'You can only add one series of this report type.',
             })
           : ''
@@ -81,7 +84,7 @@ export function AddSeriesButton() {
         size="s"
         buttonRef={addSeriesButtonRef}
       >
-        {i18n.translate('xpack.observability.expView.seriesBuilder.addSeries', {
+        {i18n.translate('xpack.exploratoryView.expView.seriesBuilder.addSeries', {
           defaultMessage: 'Add series',
         })}
       </EuiButton>

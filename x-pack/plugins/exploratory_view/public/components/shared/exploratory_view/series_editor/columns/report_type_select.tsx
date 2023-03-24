@@ -21,7 +21,7 @@ interface Props {
 
 const SELECT_REPORT = {
   reportType: SELECT_REPORT_TYPE,
-  label: i18n.translate('xpack.observability.expView.reportType.selectLabel', {
+  label: i18n.translate('xpack.exploratoryView.expView.reportType.selectLabel', {
     defaultMessage: 'Select report type',
   }),
 };

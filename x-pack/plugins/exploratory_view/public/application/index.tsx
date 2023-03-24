@@ -60,7 +60,7 @@ export const renderApp = ({
   const isDarkMode = core.uiSettings.get('theme:darkMode');
 
   core.chrome.setHelpExtension({
-    appName: i18n.translate('xpack.observability.feedbackMenu.appName', {
+    appName: i18n.translate('xpack.exploratoryView.feedbackMenu.appName', {
       defaultMessage: 'Observability',
     }),
     links: [{ linkType: 'discuss', href: 'https://ela.st/observability-discuss' }],

@@ -16,32 +16,35 @@ export enum DataTypes {
 }
 
 export const DataTypesLabels: Record<string, string> = {
-  [DataTypes.UX]: i18n.translate('xpack.observability.overview.exploratoryView.uxLabel', {
+  [DataTypes.UX]: i18n.translate('xpack.exploratoryView.overview.exploratoryView.uxLabel', {
     defaultMessage: 'User experience (RUM)',
   }),
 
   [DataTypes.SYNTHETICS]: i18n.translate(
-    'xpack.observability.overview.exploratoryView.syntheticsLabel',
+    'xpack.exploratoryView.overview.exploratoryView.syntheticsLabel',
     {
       defaultMessage: 'Synthetics monitoring',
     }
   ),
 
-  [DataTypes.METRICS]: i18n.translate('xpack.observability.overview.exploratoryView.metricsLabel', {
-    defaultMessage: 'Metrics',
-  }),
+  [DataTypes.METRICS]: i18n.translate(
+    'xpack.exploratoryView.overview.exploratoryView.metricsLabel',
+    {
+      defaultMessage: 'Metrics',
+    }
+  ),
 
-  [DataTypes.LOGS]: i18n.translate('xpack.observability.overview.exploratoryView.logsLabel', {
+  [DataTypes.LOGS]: i18n.translate('xpack.exploratoryView.overview.exploratoryView.logsLabel', {
     defaultMessage: 'Logs',
   }),
 
   [DataTypes.MOBILE]: i18n.translate(
-    'xpack.observability.overview.exploratoryView.mobileExperienceLabel',
+    'xpack.exploratoryView.overview.exploratoryView.mobileExperienceLabel',
     {
       defaultMessage: 'Mobile experience',
     }
   ),
-  [DataTypes.ALERTS]: i18n.translate('xpack.observability.overview.exploratoryView.alertsLabel', {
+  [DataTypes.ALERTS]: i18n.translate('xpack.exploratoryView.overview.exploratoryView.alertsLabel', {
     defaultMessage: 'Alerts',
   }),
 };

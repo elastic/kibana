@@ -69,7 +69,7 @@ export const useAddToCase = ({
             toasts.addSuccess(
               {
                 title: i18n.translate(
-                  'xpack.observability.expView.heading.addToCase.notification',
+                  'xpack.exploratoryView.expView.heading.addToCase.notification',
                   {
                     defaultMessage: 'Successfully added visualization to the case: {caseTitle}',
                     values: { caseTitle: theCase.title },
@@ -85,7 +85,7 @@ export const useAddToCase = ({
           (error) => {
             toasts.addError(error, {
               title: i18n.translate(
-                'xpack.observability.expView.heading.addToCase.notification.error',
+                'xpack.exploratoryView.expView.heading.addToCase.notification.error',
                 {
                   defaultMessage: 'Failed to add visualization to the selected case.',
                 }

@@ -27,10 +27,13 @@ export function TextReportDefinitionField({ series, field, seriesConfig, onChang
     <EuiFormRow label={label}>
       <EuiFieldText
         data-test-subj="o11yTextReportDefinitionFieldFieldText"
-        placeholder={i18n.translate('xpack.observability.textDefinitionField.placeholder.search', {
-          defaultMessage: 'Search {label}',
-          values: { label },
-        })}
+        placeholder={i18n.translate(
+          'xpack.exploratoryView.textDefinitionField.placeholder.search',
+          {
+            defaultMessage: 'Search {label}',
+            values: { label },
+          }
+        )}
         value={selectedTextReportDefinitions?.[field]}
         onChange={(e) => onChange(field, e.target.value)}
         compressed={false}

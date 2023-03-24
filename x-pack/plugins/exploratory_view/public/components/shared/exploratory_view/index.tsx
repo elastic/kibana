@@ -23,7 +23,7 @@ import { DataViewContextProvider } from './hooks/use_app_data_view';
 import { UrlStorageContextProvider } from './hooks/use_series_storage';
 import { RefreshButton } from './header/refresh_button';
 
-const PAGE_TITLE = i18n.translate('xpack.observability.expView.heading.label', {
+const PAGE_TITLE = i18n.translate('xpack.exploratoryView.expView.heading.label', {
   defaultMessage: 'Explore data',
 });
 
@@ -56,7 +56,7 @@ export function ExploratoryViewPage({
   useBreadcrumbs(
     [
       {
-        text: i18n.translate('xpack.observability.overview.exploratoryView', {
+        text: i18n.translate('xpack.exploratoryView.overview.exploratoryView', {
           defaultMessage: 'Explore data',
         }),
       },

@@ -15,7 +15,7 @@ export function UXAddData() {
 
   return (
     <EuiHeaderLink
-      aria-label={i18n.translate('xpack.observability.page_header.addUXDataLink.label', {
+      aria-label={i18n.translate('xpack.exploratoryView.page_header.addUXDataLink.label', {
         defaultMessage: 'Navigate to a tutorial about adding user experience APM data',
       })}
       href={kibana.services?.application?.getUrlForApp('/home#/tutorial/apm')}
@@ -27,6 +27,6 @@ export function UXAddData() {
   );
 }
 
-const ADD_DATA_LABEL = i18n.translate('xpack.observability.ux.addDataButtonLabel', {
+const ADD_DATA_LABEL = i18n.translate('xpack.exploratoryView.ux.addDataButtonLabel', {
   defaultMessage: 'Add UX data',
 });

@@ -39,7 +39,7 @@ export function EmptyView({
   }
 
   if (!series) {
-    emptyMessage = i18n.translate('xpack.observability.expView.seriesEditor.notFound', {
+    emptyMessage = i18n.translate('xpack.exploratoryView.expView.seriesEditor.notFound', {
       defaultMessage: 'No series found. Please add a series.',
     });
   }
@@ -75,25 +75,25 @@ const FlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
 
-export const EMPTY_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.emptyview', {
+export const EMPTY_LABEL = i18n.translate('xpack.exploratoryView.expView.seriesBuilder.emptyview', {
   defaultMessage: 'Nothing to display.',
 });
 
 export const CHOOSE_REPORT_DEFINITION = i18n.translate(
-  'xpack.observability.expView.seriesBuilder.emptyReportDefinition',
+  'xpack.exploratoryView.expView.seriesBuilder.emptyReportDefinition',
   {
     defaultMessage: 'Select a report definition to create a visualization.',
   }
 );
 
 export const SELECT_REPORT_TYPE_BELOW = i18n.translate(
-  'xpack.observability.expView.seriesBuilder.selectReportType.empty',
+  'xpack.exploratoryView.expView.seriesBuilder.selectReportType.empty',
   {
     defaultMessage: 'Select a report type to create a visualization.',
   }
 );
 
 const SELECTED_DATA_TYPE_FOR_REPORT = i18n.translate(
-  'xpack.observability.expView.reportType.selectDataType',
+  'xpack.exploratoryView.expView.reportType.selectDataType',
   { defaultMessage: 'Select a data type to create a visualization.' }
 );

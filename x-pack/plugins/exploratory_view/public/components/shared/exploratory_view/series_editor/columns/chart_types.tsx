@@ -15,7 +15,7 @@ import { ExploratoryViewPublicPluginsStart } from '../../../../../plugin';
 import { SeriesUrl } from '../../../../..';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 
-const CHART_TYPE_LABEL = i18n.translate('xpack.observability.expView.chartTypes.label', {
+const CHART_TYPE_LABEL = i18n.translate('xpack.exploratoryView.expView.chartTypes.label', {
   defaultMessage: 'Chart type',
 });
 

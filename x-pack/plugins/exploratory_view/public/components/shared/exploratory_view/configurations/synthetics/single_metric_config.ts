@@ -75,7 +75,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
       {
         id: 'monitor_duration',
         field: 'monitor.duration.us',
-        label: i18n.translate('xpack.observability.expView.avgDuration', {
+        label: i18n.translate('xpack.exploratoryView.expView.avgDuration', {
           defaultMessage: 'Avg. Duration',
         }),
         metricStateOptions: {
@@ -86,7 +86,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
       {
         id: 'step_duration',
         field: SYNTHETICS_STEP_DURATION,
-        label: i18n.translate('xpack.observability.expView.stepDuration', {
+        label: i18n.translate('xpack.exploratoryView.expView.stepDuration', {
           defaultMessage: 'Total step duration',
         }),
         metricStateOptions: {
@@ -96,7 +96,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
       },
       {
         id: 'monitor_total_runs',
-        label: i18n.translate('xpack.observability.expView.totalRuns', {
+        label: i18n.translate('xpack.exploratoryView.expView.totalRuns', {
           defaultMessage: 'Total Runs',
         }),
         metricStateOptions: {
@@ -108,7 +108,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
       },
       {
         id: 'monitor_complete',
-        label: i18n.translate('xpack.observability.expView.complete', {
+        label: i18n.translate('xpack.exploratoryView.expView.complete', {
           defaultMessage: 'Complete',
         }),
         metricStateOptions: {
@@ -120,7 +120,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
       },
       {
         id: 'monitor_errors',
-        label: i18n.translate('xpack.observability.expView.errors', {
+        label: i18n.translate('xpack.exploratoryView.expView.errors', {
           defaultMessage: 'Errors',
         }),
         metricStateOptions: {
@@ -134,7 +134,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
       },
       {
         id: 'monitor_failed_tests',
-        label: i18n.translate('xpack.observability.expView.failedTests', {
+        label: i18n.translate('xpack.exploratoryView.expView.failedTests', {
           defaultMessage: 'Failed tests',
         }),
         metricStateOptions: {

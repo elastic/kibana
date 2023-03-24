@@ -90,18 +90,21 @@ export function ExpandedSeriesRow(seriesProps: Props) {
   );
 }
 
-const BREAKDOWN_BY_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.breakdownBy', {
-  defaultMessage: 'Breakdown by',
-});
+const BREAKDOWN_BY_LABEL = i18n.translate(
+  'xpack.exploratoryView.expView.seriesBuilder.breakdownBy',
+  {
+    defaultMessage: 'Breakdown by',
+  }
+);
 
-const FILTERS_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.selectFilters', {
+const FILTERS_LABEL = i18n.translate('xpack.exploratoryView.expView.seriesBuilder.selectFilters', {
   defaultMessage: 'Filters',
 });
 
-const OPERATION_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.operation', {
+const OPERATION_LABEL = i18n.translate('xpack.exploratoryView.expView.seriesBuilder.operation', {
   defaultMessage: 'Operation',
 });
 
-const DATE_LABEL = i18n.translate('xpack.observability.expView.seriesBuilder.date', {
+const DATE_LABEL = i18n.translate('xpack.exploratoryView.expView.seriesBuilder.date', {
   defaultMessage: 'Date',
 });

@@ -68,7 +68,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
         <EuiToolTip
           content={
             <FormattedMessage
-              id="xpack.observability.expView.seriesEditor.selectReportMetric.noFieldData"
+              id="xpack.exploratoryView.expView.seriesEditor.selectReportMetric.noFieldData"
               defaultMessage="No data available for field {field}."
               values={{
                 field: <strong>{field}</strong>,
@@ -157,30 +157,30 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
 }
 
 const SELECT_REPORT_METRIC_LABEL = i18n.translate(
-  'xpack.observability.expView.seriesEditor.selectReportMetric',
+  'xpack.exploratoryView.expView.seriesEditor.selectReportMetric',
   {
     defaultMessage: 'Select report metric',
   }
 );
 
 const REMOVE_REPORT_METRIC_LABEL = i18n.translate(
-  'xpack.observability.expView.seriesEditor.removeReportMetric',
+  'xpack.exploratoryView.expView.seriesEditor.removeReportMetric',
   {
     defaultMessage: 'Remove report metric',
   }
 );
 
-const NO_DATA_AVAILABLE = i18n.translate('xpack.observability.expView.seriesEditor.noData', {
+const NO_DATA_AVAILABLE = i18n.translate('xpack.exploratoryView.expView.seriesEditor.noData', {
   defaultMessage: 'No data available',
 });
 
-const NO_PERMISSIONS = i18n.translate('xpack.observability.expView.seriesEditor.noPermissions', {
+const NO_PERMISSIONS = i18n.translate('xpack.exploratoryView.expView.seriesEditor.noPermissions', {
   defaultMessage:
     "Unable to create Data View. You don't have the required permission, please contact your admin.",
 });
 
 const REPORT_METRIC_TOOLTIP = i18n.translate(
-  'xpack.observability.expView.seriesEditor.reportMetricTooltip',
+  'xpack.exploratoryView.expView.seriesEditor.reportMetricTooltip',
   {
     defaultMessage: 'Report metric',
   }

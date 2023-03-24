@@ -67,7 +67,7 @@ export function useExploratoryView() {
 }
 
 export const SELECT_REPORT_TYPE = i18n.translate(
-  'xpack.observability.expView.seriesBuilder.selectReportType',
+  'xpack.exploratoryView.expView.seriesBuilder.selectReportType',
   {
     defaultMessage: 'No report type selected',
   }
