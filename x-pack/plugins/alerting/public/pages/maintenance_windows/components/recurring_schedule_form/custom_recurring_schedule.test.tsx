@@ -54,7 +54,7 @@ describe('CustomRecurringSchedule', () => {
 
     expect(result.getByTestId('interval-field')).toBeInTheDocument();
     expect(result.getByTestId('custom-frequency-field')).toBeInTheDocument();
-    expect(result.queryByTestId('byweekday-field')).not.toBeInTheDocument();
+    expect(result.getByTestId('byweekday-field')).toBeInTheDocument();
     expect(result.queryByTestId('bymonth-field')).not.toBeInTheDocument();
   });
 
@@ -112,9 +112,13 @@ describe('CustomRecurringSchedule', () => {
       'select'
     );
     const intervalInput = within(result.getByTestId('interval-field')).getByTestId('input');
+    const input5 = within(result.getByTestId('byweekday-field'))
+      .getByTestId('5')
+      .getAttribute('aria-pressed');
 
     expect(frequencyInput).toHaveValue('2');
     expect(intervalInput).toHaveValue(1);
+    expect(input5).toBe('true');
   });
 
   it('should prefill the form when provided with initialValue', () => {
