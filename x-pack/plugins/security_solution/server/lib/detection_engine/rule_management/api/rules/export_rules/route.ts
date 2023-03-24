@@ -92,8 +92,8 @@ export const exportRulesRoute = (
                 savedObjectsClient,
                 logger,
                 actionsExporter,
-                request
-                // actionsClient
+                request,
+                actionsClient
               );
 
         const responseBody = request.query.exclude_export_details
