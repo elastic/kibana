@@ -17,6 +17,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
@@ -26,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldIcon } from '@kbn/react-field';
 
 import { SchemaField } from '../../../../../common/types/engines';
+import { docLinks } from '../../../shared/doc_links';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
@@ -118,8 +120,14 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
               <p>
                 <FormattedMessage
                   id="xpack.enterpriseSearch.content.engine.schema.fieldIndices.notInAllIndices.description"
-                  defaultMessage="Learn more about field mapping in our documentation."
-                />
+                  defaultMessage="Learn more about field mapping in"
+                />{' '}
+                <EuiLink href={docLinks.elasticsearchMapping} target="_blank">
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.engine.schema.fieldIndices.notInAllIndices.link"
+                    defaultMessage="our documentation."
+                  />
+                </EuiLink>
               </p>
             </EuiText>
           </EuiCallOut>
