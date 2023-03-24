@@ -10,6 +10,7 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types'
 import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
 import { useGrouping } from '@kbn/securitysolution-grouping';
+import { isEmpty } from 'lodash/fp';
 import type { TableIdLiteral } from '../../../../common/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
@@ -17,7 +18,7 @@ import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { getDefaultGroupingOptions, renderGroupPanel, getStats } from './grouping_settings';
 import { useKibana } from '../../../common/lib/kibana';
-import { updateGroupSelector, updateSelectedGroup } from '../../../common/store/grouping/actions';
+import { updateGroupSelector } from '../../../common/store/grouping/actions';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { track } from '../../../common/lib/telemetry';
 
@@ -37,27 +38,16 @@ export interface AlertsTableComponentProps {
   to: string;
 }
 
-export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
-  currentAlertStatusFilterValue,
-  defaultFilters = [],
-  from,
-  globalFilters,
-  globalQuery,
-  hasIndexMaintenance,
-  hasIndexWrite,
-  loading,
-  renderChildComponent,
-  runtimeMappings,
-  signalIndexName,
-  tableId,
-  to,
-}) => {
+export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
+  return null;
   const dispatch = useDispatch();
 
-  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
+  const { indexPattern, selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+
   const {
     services: { telemetry },
   } = useKibana();
+
   const { onGroupChange, onGroupToggle } = useMemo(
     () => ({
       onGroupChange: (param: { groupByField: string; tableId: string }) => {
@@ -78,12 +68,12 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
       groupPanelRenderer: renderGroupPanel,
       groupStatsRenderer: getStats,
       onGroupToggle,
-      renderChildComponent,
+      renderChildComponent: props.renderChildComponent,
       unit: defaultUnit,
     },
-    defaultGroupingOptions: getDefaultGroupingOptions(tableId),
+    defaultGroupingOptions: getDefaultGroupingOptions(props.tableId),
     fields: indexPattern.fields,
-    groupingId: tableId,
+    groupingId: props.tableId,
     maxGroupingLevels: 3,
     onGroupChange,
     tracker: track,
@@ -91,71 +81,48 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   const resetPagination = pagination.reset;
 
   useEffect(() => {
+    console.log('useEffect 1');
     dispatch(updateGroupSelector({ groupSelector }));
   }, [dispatch, groupSelector]);
 
   useEffect(() => {
-    dispatch(
-      updateSelectedGroup({
-        selectedGroups,
-      })
-    );
-    resetPagination();
+    // console.log('useEffect 2');
+    // dispatch(
+    //   updateSelectedGroup({
+    //     selectedGroups,
+    //   })
+    // );
+    // resetPagination();
   }, [dispatch, resetPagination, selectedGroups]);
 
   const getLevel = useCallback(
-    (level: number, selectedGroup: string, parentGroupingFilter?: Filter[]) => {
-      return (
-        <GroupedSubLevel
-          currentAlertStatusFilterValue={currentAlertStatusFilterValue}
-          defaultFilters={defaultFilters}
-          from={from}
-          getGrouping={getGrouping}
-          globalFilters={globalFilters}
-          globalQuery={globalQuery}
-          groupingLevel={level}
-          hasIndexMaintenance={hasIndexMaintenance}
-          hasIndexWrite={hasIndexWrite}
-          loading={loading}
-          pagination={pagination}
-          parentGroupingFilter={parentGroupingFilter}
-          renderChildComponent={
-            level < selectedGroups.length - 1
-              ? (groupingFilters: Filter[]) =>
-                  getLevel(level + 1, selectedGroups[level + 1], [
-                    ...groupingFilters,
-                    ...(parentGroupingFilter ?? []),
-                  ])
-              : (groupingFilters: Filter[]) =>
-                  renderChildComponent([...groupingFilters, ...(parentGroupingFilter ?? [])])
-          }
-          runtimeMappings={runtimeMappings}
-          selectedGroup={selectedGroup}
-          signalIndexName={signalIndexName}
-          tableId={tableId}
-          to={to}
-        />
-      );
-    },
-    [
-      currentAlertStatusFilterValue,
-      defaultFilters,
-      from,
-      getGrouping,
-      globalFilters,
-      globalQuery,
-      hasIndexMaintenance,
-      hasIndexWrite,
-      loading,
-      pagination,
-      renderChildComponent,
-      runtimeMappings,
-      selectedGroups,
-      signalIndexName,
-      tableId,
-      to,
-    ]
+    (level: number, selectedGroup: string, parentGroupingFilter?: Filter[]) => (
+      <GroupedSubLevel
+        // all GroupedAlertsTableComponent are passed to GroupedSubLevel, renderChildComponent is overwritten below
+        {...props}
+        getGrouping={getGrouping}
+        groupingLevel={level}
+        pagination={pagination}
+        parentGroupingFilter={parentGroupingFilter}
+        renderChildComponent={
+          level < selectedGroups.length - 1
+            ? (groupingFilters: Filter[]) =>
+                getLevel(level + 1, selectedGroups[level + 1], [
+                  ...groupingFilters,
+                  ...(parentGroupingFilter ?? []),
+                ])
+            : (groupingFilters: Filter[]) =>
+                props.renderChildComponent([...groupingFilters, ...(parentGroupingFilter ?? [])])
+        }
+        selectedGroup={selectedGroup}
+      />
+    ),
+    [getGrouping, pagination, props, selectedGroups]
   );
+
+  if (isEmpty(selectedPatterns)) {
+    return null;
+  }
 
   return (
     <>

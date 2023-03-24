@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
@@ -88,9 +87,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     services: { uiSettings },
   } = useKibana();
-  const { browserFields, indexPattern, selectedPatterns } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.detections);
 
   // const { pageSize, pageIndex } = useGroupPaging({ selectedGroup, groupingId: tableId });
 
@@ -251,10 +248,6 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       selectedGroup,
     ]
   );
-
-  if (isEmpty(selectedPatterns)) {
-    return null;
-  }
 
   return groupedAlerts;
 };

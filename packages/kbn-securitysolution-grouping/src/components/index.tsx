@@ -19,4 +19,4 @@ export * from './grouping';
  * @returns {boolean} True if no group is selected
  */
 export const isNoneGroup = (groupKeys: string[]) =>
-  groupKeys && !!groupKeys.find((groupKey) => groupKey === NONE_GROUP_KEY);
+  !!groupKeys.find((groupKey) => groupKey === NONE_GROUP_KEY);

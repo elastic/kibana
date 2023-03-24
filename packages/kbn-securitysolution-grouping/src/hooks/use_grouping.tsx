@@ -112,7 +112,7 @@ export const useGrouping = <T,>({
      * @param props {@link DynamicGroupingProps}
      */
     (props: DynamicGroupingProps<T>): React.ReactElement =>
-      isNoneGroup(selectedGroups) ? (
+      isNoneGroup([props.selectedGroup]) ? (
         componentProps.renderChildComponent([])
       ) : (
         <GroupingComponent
@@ -124,7 +124,7 @@ export const useGrouping = <T,>({
           tracker={tracker}
         />
       ),
-    [componentProps, groupSelector, groupingId, pagination, selectedGroups, tracker]
+    [componentProps, groupSelector, groupingId, pagination, tracker]
   );
 
   const resetPagination = useCallback(() => {
