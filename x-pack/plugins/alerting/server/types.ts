@@ -363,13 +363,11 @@ export interface AlertsConfigType {
   healthCheck: {
     interval: string;
   };
-}
-
-export interface AlertsConfigType {
   invalidateApiKeysTask: {
     interval: string;
     removalDelay: string;
   };
+  enableMaintenanceWindows: boolean;
 }
 
 export interface InvalidatePendingApiKey {

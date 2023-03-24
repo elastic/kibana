@@ -74,6 +74,9 @@ export const plugin = (initContext: PluginInitializerContext) => new AlertingPlu
 
 export const config: PluginConfigDescriptor<AlertsConfigType> = {
   schema: configSchema,
+  exposeToBrowser: {
+    enableMaintenanceWindows: true,
+  },
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck', { level: 'warning' }),
     renameFromRoot(

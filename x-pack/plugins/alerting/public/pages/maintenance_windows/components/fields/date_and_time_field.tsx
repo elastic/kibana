@@ -18,14 +18,13 @@ import { get } from 'lodash';
 
 interface DateAndTimeFieldProps {
   field: FieldHook;
-  isDisabled: boolean;
   showTimeSelect?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
 export const DateAndTimeField: React.FC<DateAndTimeFieldProps> = React.memo(
-  ({ field, isDisabled, showTimeSelect = true, ...rest }) => {
+  ({ field, showTimeSelect = true, ...rest }) => {
     const { setFieldValue } = useFormContext();
     const [form] = useFormData({ watch: [field.path] });
     // parse from a string date to moment() if there is an intitial value
@@ -41,7 +40,7 @@ export const DateAndTimeField: React.FC<DateAndTimeFieldProps> = React.memo(
     );
 
     return (
-      <EuiFormRow label={field.label} isDisabled={isDisabled} {...rest} fullWidth>
+      <EuiFormRow label={field.label} {...rest} fullWidth>
         <EuiDatePicker
           showTimeSelect={showTimeSelect}
           selected={selected}

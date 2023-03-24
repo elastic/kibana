@@ -120,7 +120,6 @@ export const RecurringSchedule: React.FC = React.memo(() => {
             component={DateAndTimeField}
             componentProps={{
               'data-test-subj': 'until-field',
-              isDisabled: false,
               showTimeSelect: false,
               ...displayProps,
             }}

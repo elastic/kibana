@@ -15,9 +15,8 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { AlertingPluginStart, ConfigSchema } from '../plugin';
+import { AlertingPluginStart } from '../plugin';
 import { routes } from '../routes';
-import { PluginContext } from '../context/plugin_context';
 
 const App = React.memo(() => {
   return (
@@ -39,13 +38,11 @@ App.displayName = 'App';
 
 export const renderApp = ({
   core,
-  config,
   plugins,
   mountParams,
   kibanaVersion,
 }: {
   core: CoreStart;
-  config: ConfigSchema;
   plugins: AlertingPluginStart;
   mountParams: ManagementAppMountParams;
   kibanaVersion: string;
@@ -66,17 +63,15 @@ export const renderApp = ({
           kibanaVersion,
         }}
       >
-        <PluginContext.Provider value={{ config }}>
-          <Router history={history}>
-            <EuiThemeProvider darkMode={isDarkMode}>
-              <i18nCore.Context>
-                <QueryClientProvider client={queryClient}>
-                  <App />
-                </QueryClientProvider>
-              </i18nCore.Context>
-            </EuiThemeProvider>
-          </Router>
-        </PluginContext.Provider>
+        <Router history={history}>
+          <EuiThemeProvider darkMode={isDarkMode}>
+            <i18nCore.Context>
+              <QueryClientProvider client={queryClient}>
+                <App />
+              </QueryClientProvider>
+            </i18nCore.Context>
+          </EuiThemeProvider>
+        </Router>
       </KibanaContextProvider>
     </KibanaThemeProvider>,
     element

@@ -117,7 +117,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                     euiFieldProps: {
                       autoFocus: true,
                       fullWidth: true,
-                      disabled: false,
                     },
                   }}
                 />
@@ -136,7 +135,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                           component={DateAndTimeField}
                           componentProps={{
                             'data-test-subj': 'date-field',
-                            isDisabled: false,
                           }}
                         />
                       </EuiFlexItem>
@@ -148,7 +146,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                             euiFieldProps: {
                               autoFocus: false,
                               fullWidth: false,
-                              disabled: false,
                               type: 'number',
                               min: 1,
                               max: 24,
@@ -164,9 +161,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                       path="recurring"
                       componentProps={{
                         'data-test-subj': 'recurring-field',
-                        euiFieldProps: {
-                          disabled: false,
-                        },
                       }}
                     />
                   </EuiFlexItem>
