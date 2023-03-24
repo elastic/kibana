@@ -24,7 +24,7 @@ import type { FormBasedPrivateState } from './types';
 import { isSamplingValueEnabled } from './utils';
 import { TooltipWrapper } from '../../shared_components';
 
-const samplingValue = [0.0001, 0.001, 0.01, 0.1, 1];
+const samplingValue = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1];
 
 export function LayerSettingsPanel({
   state,
