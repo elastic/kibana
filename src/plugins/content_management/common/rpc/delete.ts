@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
-import type { Version } from '../types';
+import type { Version } from '@kbn/object-versioning';
 import { versionSchema } from './constants';
 
 import type { ProcedureSchemas } from './types';

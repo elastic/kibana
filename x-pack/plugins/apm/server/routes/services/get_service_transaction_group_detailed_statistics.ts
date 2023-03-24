@@ -34,7 +34,15 @@ import {
   getOutcomeAggregation,
 } from '../../lib/helpers/transaction_error_rate';
 
-export async function getServiceTransactionGroupDetailedStatistics({
+interface ServiceTransactionGroupDetailedStat {
+  transactionName: string;
+  latency: Coordinate[];
+  throughput: Coordinate[];
+  errorRate: Coordinate[];
+  impact: number;
+}
+
+async function getServiceTransactionGroupDetailedStatistics({
   environment,
   kuery,
   serviceName,
@@ -60,15 +68,7 @@ export async function getServiceTransactionGroupDetailedStatistics({
   start: number;
   end: number;
   offset?: string;
-}): Promise<
-  Array<{
-    transactionName: string;
-    latency: Coordinate[];
-    throughput: Coordinate[];
-    errorRate: Coordinate[];
-    impact: number;
-  }>
-> {
+}): Promise<ServiceTransactionGroupDetailedStat[]> {
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
@@ -181,6 +181,11 @@ export async function getServiceTransactionGroupDetailedStatistics({
   });
 }
 
+export interface ServiceTransactionGroupDetailedStatisticsResponse {
+  currentPeriod: Record<string, ServiceTransactionGroupDetailedStat>;
+  previousPeriod: Record<string, ServiceTransactionGroupDetailedStat>;
+}
+
 export async function getServiceTransactionGroupDetailedStatisticsPeriods({
   serviceName,
   transactionNames,
@@ -207,7 +212,7 @@ export async function getServiceTransactionGroupDetailedStatisticsPeriods({
   start: number;
   end: number;
   offset?: string;
-}) {
+}): Promise<ServiceTransactionGroupDetailedStatisticsResponse> {
   const commonProps = {
     apmEventClient,
     serviceName,

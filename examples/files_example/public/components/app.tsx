@@ -87,7 +87,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
         ) : status === 'AWAITING_UPLOAD' ? (
           <EuiIcon type="clock" aria-label={status} />
         ) : (
-          <EuiIcon color="danger" type="alert" arial-label={status} />
+          <EuiIcon color="danger" type="warning" arial-label={status} />
         ),
     },
     {

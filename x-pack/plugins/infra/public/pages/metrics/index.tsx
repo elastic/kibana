@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { RouteComponentProps, Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -52,6 +54,7 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
+  const queryClient = new QueryClient();
 
   const settingsTabTitle = i18n.translate('xpack.infra.metrics.settingsTabTitle', {
     defaultMessage: 'Settings',
@@ -73,60 +76,65 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
           <WaffleOptionsProvider>
             <WaffleTimeProvider>
               <WaffleFiltersProvider>
-                <InfraMLCapabilitiesProvider>
-                  <HelpCenterContent
-                    feedbackLink="https://discuss.elastic.co/c/metrics"
-                    appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
-                      defaultMessage: 'Metrics',
-                    })}
-                  />
-
-                  {setHeaderActionMenu && theme$ && (
-                    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-                      <EuiHeaderLinks gutterSize="xs">
-                        <EuiHeaderLink color={'text'} {...settingsLinkProps}>
-                          {settingsTabTitle}
-                        </EuiHeaderLink>
-                        <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
-                        <MetricsAlertDropdown />
-                        <EuiHeaderLink
-                          href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
-                          color="primary"
-                          iconType="indexOpen"
-                        >
-                          {ADD_DATA_LABEL}
-                        </EuiHeaderLink>
-                      </EuiHeaderLinks>
-                    </HeaderMenuPortal>
-                  )}
-                  <Switch>
-                    <Route path={'/inventory'} component={SnapshotPage} />
-                    <Route
-                      path={'/explorer'}
-                      render={(props) => (
-                        <WithSource>
-                          {({ configuration, createDerivedIndexPattern }) => (
-                            <MetricsExplorerOptionsContainer>
-                              <WithMetricsExplorerOptionsUrlState />
-                              {configuration ? (
-                                <PageContent
-                                  configuration={configuration}
-                                  createDerivedIndexPattern={createDerivedIndexPattern}
-                                />
-                              ) : (
-                                <SourceLoadingPage />
-                              )}
-                            </MetricsExplorerOptionsContainer>
-                          )}
-                        </WithSource>
-                      )}
+                <QueryClientProvider client={queryClient}>
+                  <ReactQueryDevtools initialIsOpen={false} />
+                  <InfraMLCapabilitiesProvider>
+                    <HelpCenterContent
+                      feedbackLink="https://discuss.elastic.co/c/metrics"
+                      appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
+                        defaultMessage: 'Metrics',
+                      })}
                     />
-                    <Route path="/detail/:type/:node" component={MetricDetail} />
-                    <Route path={'/hosts'} component={HostsLandingPage} />
-                    <Route path={'/settings'} component={MetricsSettingsPage} />
-                    <Route render={() => <NotFoundPage title="Infrastructure" />} />
-                  </Switch>
-                </InfraMLCapabilitiesProvider>
+
+                    {setHeaderActionMenu && theme$ && (
+                      <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
+                        <EuiHeaderLinks gutterSize="xs">
+                          <EuiHeaderLink color={'text'} {...settingsLinkProps}>
+                            {settingsTabTitle}
+                          </EuiHeaderLink>
+                          <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                          <MetricsAlertDropdown />
+                          <EuiHeaderLink
+                            href={kibana.services?.application?.getUrlForApp(
+                              '/integrations/browse'
+                            )}
+                            color="primary"
+                            iconType="indexOpen"
+                          >
+                            {ADD_DATA_LABEL}
+                          </EuiHeaderLink>
+                        </EuiHeaderLinks>
+                      </HeaderMenuPortal>
+                    )}
+                    <Switch>
+                      <Route path={'/inventory'} component={SnapshotPage} />
+                      <Route
+                        path={'/explorer'}
+                        render={(props) => (
+                          <WithSource>
+                            {({ configuration, createDerivedIndexPattern }) => (
+                              <MetricsExplorerOptionsContainer>
+                                <WithMetricsExplorerOptionsUrlState />
+                                {configuration ? (
+                                  <PageContent
+                                    configuration={configuration}
+                                    createDerivedIndexPattern={createDerivedIndexPattern}
+                                  />
+                                ) : (
+                                  <SourceLoadingPage />
+                                )}
+                              </MetricsExplorerOptionsContainer>
+                            )}
+                          </WithSource>
+                        )}
+                      />
+                      <Route path="/detail/:type/:node" component={MetricDetail} />
+                      <Route path={'/hosts'} component={HostsLandingPage} />
+                      <Route path={'/settings'} component={MetricsSettingsPage} />
+                      <Route render={() => <NotFoundPage title="Infrastructure" />} />
+                    </Switch>
+                  </InfraMLCapabilitiesProvider>
+                </QueryClientProvider>
               </WaffleFiltersProvider>
             </WaffleTimeProvider>
           </WaffleOptionsProvider>

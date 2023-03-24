@@ -26,6 +26,9 @@ export const update: ProcedureDefinition<Context, UpdateIn<string>> = {
         request: version,
         latest: contentDefinition.version.latest,
       },
+      utils: {
+        getTransforms: ctx.getTransformsFactory(contentTypeId),
+      },
     };
     const result = await crudInstance.update(storageContext, id, data, options);
 

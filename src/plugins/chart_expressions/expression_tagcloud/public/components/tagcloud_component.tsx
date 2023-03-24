@@ -218,7 +218,7 @@ export const TagCloudChart = ({
           {warning && (
             <div className="tgcChart__warning">
               <EuiIconTip
-                type="alert"
+                type="warning"
                 color="warning"
                 content={
                   <FormattedMessage
@@ -232,7 +232,7 @@ export const TagCloudChart = ({
           {tagCloudData.length > MAX_TAG_COUNT && (
             <div className="tgcChart__warning">
               <EuiIconTip
-                type="alert"
+                type="warning"
                 color="warning"
                 content={
                   <FormattedMessage

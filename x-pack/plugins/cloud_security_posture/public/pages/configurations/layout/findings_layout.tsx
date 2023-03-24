@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Serializable } from '@kbn/utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FindingsByResourcePage } from '../latest_findings_by_resource/use_findings_by_resource';
 import { MAX_FINDINGS_TO_LOAD } from '../../../common/constants';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
@@ -117,11 +118,15 @@ const baseColumns = [
     ),
     sortable: true,
     truncateText: true,
-    render: (name: string) => (
-      <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
-        <>{name}</>
-      </EuiToolTip>
-    ),
+    render: (name: FindingsByResourcePage['resource.name']) => {
+      if (!name) return;
+
+      return (
+        <EuiToolTip content={name} position="left" anchorClassName="eui-textTruncate">
+          <>{name}</>
+        </EuiToolTip>
+      );
+    },
   },
   {
     field: 'rule.name',

@@ -255,6 +255,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                       values={{
                         documentationLink: (
                           <EuiLink
+                            data-test-subj="infraExpressionRowLearnHowToAddMoreDataLink"
                             href="https://www.elastic.co/guide/en/observability/current/configure-settings.html"
                             target="BLANK"
                           >
@@ -277,6 +278,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 <EuiSpacer size={'xs'} />
                 <StyledExpressionRow>
                   <EuiButtonEmpty
+                    data-test-subj="infraExpressionRowAddWarningThresholdButton"
                     color={'primary'}
                     flush={'left'}
                     size="xs"
@@ -320,7 +322,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                   )}
                   iconSize="s"
                   color="text"
-                  iconType={'crossInACircleFilled'}
+                  iconType={'minusInCircleFilled'}
                   onClick={toggleWarningThreshold}
                 />
               </StyledExpressionRow>

@@ -23,6 +23,7 @@ import {
   LatencyDistributionChartType,
 } from '../../../common/latency_distribution_chart_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { OverallLatencyDistributionResponse } from './types';
 
 const latencyOverallTransactionDistributionRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
@@ -51,9 +52,7 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<import('./types').OverallLatencyDistributionResponse> => {
+  handler: async (resources): Promise<OverallLatencyDistributionResponse> => {
     const apmEventClient = await getApmEventClient(resources);
 
     const {

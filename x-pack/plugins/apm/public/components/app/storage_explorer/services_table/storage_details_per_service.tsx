@@ -169,7 +169,10 @@ export function StorageDetailsPerService({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink href={serviceOverviewLink}>
+              <EuiLink
+                data-test-subj="apmStorageDetailsPerServiceGoToServiceOverviewLink"
+                href={serviceOverviewLink}
+              >
                 {i18n.translate(
                   'xpack.apm.storageExplorer.serviceDetails.serviceOverviewLink',
                   {

@@ -7,8 +7,7 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-
-import type { Version } from '../../common';
+import type { ContentManagementGetTransformsFn, Version } from '@kbn/object-versioning';
 
 /** Context that is sent to all storage instance methods */
 export interface StorageContext {
@@ -16,6 +15,9 @@ export interface StorageContext {
   version: {
     request: Version;
     latest: Version;
+  };
+  utils: {
+    getTransforms: ContentManagementGetTransformsFn;
   };
 }
 

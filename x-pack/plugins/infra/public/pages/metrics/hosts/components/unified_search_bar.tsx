@@ -14,21 +14,18 @@ import {
   type Query,
   type TimeRange,
 } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid } from '@elastic/eui';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
+import { useMetricsDataViewContext } from '../hooks/use_data_view';
 
-interface Props {
-  dataView: DataView;
-}
-
-export const UnifiedSearchBar = ({ dataView }: Props) => {
+export const UnifiedSearchBar = () => {
   const {
     services: { unifiedSearch, application },
   } = useKibana<InfraClientStartDeps>();
+  const { dataView } = useMetricsDataViewContext();
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
 
   const { SearchBar } = unifiedSearch.ui;
@@ -61,7 +58,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
       <SearchBar
         appName={'Infra Hosts'}
         displayStyle="inPage"
-        indexPatterns={[dataView]}
+        indexPatterns={dataView && [dataView]}
         placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
           defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
         })}

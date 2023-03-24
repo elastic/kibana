@@ -1543,10 +1543,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@75.1.2":
-  version "75.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-75.1.2.tgz#c8ccb1728162b131e49a16833468ab2b0228f1bf"
-  integrity sha512-J6u16NR3BD5snje2CSWnk+JvEQ7y/8tzpmi2Ul+WWfzQwvf7DsKtouSIs91jdzC1QGSN26S1D3wKZvzaszXacg==
+"@elastic/eui@76.0.2":
+  version "76.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-76.0.2.tgz#5b99730de10785167b4ab98fcfdb8717018343ce"
+  integrity sha512-HB6HyjkWQ6akYBcIWl9vGenONpymP3q8cYUui/g4DS3/WPUp8R0jV/zEryjlJ5HyJ4Vp3THDoKtCmIEVy+wZvg==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -2893,6 +2893,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/assetManager-plugin@link:x-pack/plugins/asset_manager":
+  version "0.0.0"
+  uid ""
+
 "@kbn/audit-log-plugin@link:x-pack/test/security_api_integration/plugins/audit_log":
   version "0.0.0"
   uid ""
@@ -3969,6 +3973,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dom-drag-drop@link:packages/kbn-dom-drag-drop":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ebt-tools@link:packages/kbn-ebt-tools":
   version "0.0.0"
   uid ""
@@ -4058,6 +4066,10 @@
   uid ""
 
 "@kbn/eslint-plugin-imports@link:packages/kbn-eslint-plugin-imports":
+  version "0.0.0"
+  uid ""
+
+"@kbn/eslint-plugin-telemetry@link:packages/kbn-eslint-plugin-telemetry":
   version "0.0.0"
   uid ""
 
@@ -4578,6 +4590,10 @@
   uid ""
 
 "@kbn/notifications-plugin@link:x-pack/plugins/notifications":
+  version "0.0.0"
+  uid ""
+
+"@kbn/object-versioning@link:packages/kbn-object-versioning":
   version "0.0.0"
   uid ""
 
@@ -11611,9 +11627,9 @@ caniuse-api@^3.0.0:
     lodash.uniq "^4.5.0"
 
 caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001109, caniuse-lite@^1.0.30001335, caniuse-lite@^1.0.30001400:
-  version "1.0.30001409"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001409.tgz#6135da9dcab34cd9761d9cdb12a68e6740c5e96e"
-  integrity sha512-V0mnJ5dwarmhYv8/MzhJ//aW68UpvnQBXv8lJ2QUsvn2pHcmAuNtu8hQEDz37XnA1iE+lRR9CIfGWWpgJ5QedQ==
+  version "1.0.30001468"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001468.tgz#0101837c6a4e38e6331104c33dcfb3bdf367a4b7"
+  integrity sha512-zgAo8D5kbOyUcRAgSmgyuvBkjrGk5CGYG5TYgFdpQv+ywcyEpo1LOWoG8YmoflGnh+V+UsNuKYedsoYs0hzV5A==
 
 canvg@^3.0.9:
   version "3.0.9"
@@ -24172,9 +24188,9 @@ react-refresh@^0.11.0:
   integrity sha512-F27qZr8uUqwhWZboondsPx8tnC3Ct3SxZA3V5WyEvujRyyNv0VYPhoBg1gZ8/MV5tubQp76Trw8lTv9hzRBa+A==
 
 react-remove-scroll-bar@^2.3.3:
-  version "2.3.3"
-  resolved "https://registry.yarnpkg.com/react-remove-scroll-bar/-/react-remove-scroll-bar-2.3.3.tgz#e291f71b1bb30f5f67f023765b7435f4b2b2cd94"
-  integrity sha512-i9GMNWwpz8XpUpQ6QlevUtFjHGqnPG4Hxs+wlIJntu/xcsZVEpJcIV71K3ZkqNy2q3GfgvkD7y6t/Sv8ofYSbw==
+  version "2.3.4"
+  resolved "https://registry.yarnpkg.com/react-remove-scroll-bar/-/react-remove-scroll-bar-2.3.4.tgz#53e272d7a5cb8242990c7f144c44d8bd8ab5afd9"
+  integrity sha512-63C4YQBUt0m6ALadE9XV56hV8BgJWDmmTPY758iIJjfQKt2nYwoUrPk0LXRXcB/yIj82T1/Ixfdpdk68LwIB0A==
   dependencies:
     react-style-singleton "^2.2.1"
     tslib "^2.0.0"

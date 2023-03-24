@@ -193,7 +193,7 @@ export const JobSetupScreen = (props: Props) => {
               defaultMessage="Something went wrong creating the necessary ML jobs."
             />
             <EuiSpacer />
-            <EuiButton fill onClick={createJobs}>
+            <EuiButton data-test-subj="infraJobSetupScreenTryAgainButton" fill onClick={createJobs}>
               <FormattedMessage
                 id="xpack.infra.ml.steps.setupProcess.tryAgainButton"
                 defaultMessage="Try again"
@@ -332,7 +332,10 @@ export const JobSetupScreen = (props: Props) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={props.closeFlyout}>
+            <EuiButtonEmpty
+              data-test-subj="infraJobSetupScreenCancelButton"
+              onClick={props.closeFlyout}
+            >
               <FormattedMessage
                 id="xpack.infra.ml.steps.setupProcess.cancelButton"
                 defaultMessage="Cancel"
@@ -340,7 +343,12 @@ export const JobSetupScreen = (props: Props) => {
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill={true} fullWidth={false} onClick={createJobs}>
+            <EuiButton
+              data-test-subj="infraJobSetupScreenEnableJobsButton"
+              fill={true}
+              fullWidth={false}
+              onClick={createJobs}
+            >
               <FormattedMessage
                 id="xpack.infra.ml.steps.setupProcess.enableButton"
                 defaultMessage="Enable jobs"

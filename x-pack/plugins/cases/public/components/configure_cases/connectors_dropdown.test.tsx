@@ -195,7 +195,7 @@ describe('ConnectorsDropdown', () => {
                 color="warning"
                 content="This connector is deprecated. Update it, or create a new one."
                 size="m"
-                type="alert"
+                type="warning"
               />
             </EuiFlexItem>
           </EuiFlexGroup>,

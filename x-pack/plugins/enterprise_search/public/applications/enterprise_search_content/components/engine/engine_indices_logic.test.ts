@@ -20,7 +20,6 @@ const DEFAULT_VALUES: EngineIndicesLogicValues = {
 };
 
 const mockEngineData: EnterpriseSearchEngineDetails = {
-  created: '1999-12-31T23:59:59Z',
   indices: [
     {
       count: 10,
@@ -34,7 +33,7 @@ const mockEngineData: EnterpriseSearchEngineDetails = {
     },
   ],
   name: DEFAULT_VALUES.engineName,
-  updated: '1999-12-31T23:59:59Z',
+  updated_at_millis: 1679501369566,
 };
 
 describe('EngineViewLogic', () => {
