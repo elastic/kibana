@@ -145,6 +145,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
       await doAnyChangesMatch([
         /^x-pack\/plugins\/synthetics/,
         /^x-pack\/plugins\/observability\/public\/components\/shared\/exploratory_view/,
+        /^x-pack\/plugins\/exploratory_view/,
       ])
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
@@ -154,6 +155,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
       await doAnyChangesMatch([
         /^x-pack\/plugins\/ux/,
         /^x-pack\/plugins\/observability\/public\/components\/shared\/exploratory_view/,
+        /^x-pack\/plugins\/exploratory_view/,
       ])
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
