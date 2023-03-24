@@ -79,6 +79,7 @@ export interface SavedObjectsRawDocSource {
   namespace?: string;
   namespaces?: string[];
   migrationVersion?: SavedObjectsMigrationVersion;
+  typeMigrationVersion?: string;
   updated_at?: string;
   created_at?: string;
   references?: SavedObjectReference[];
@@ -100,6 +101,7 @@ interface SavedObjectDoc<T = unknown> {
   namespaces?: string[];
   migrationVersion?: SavedObjectsMigrationVersion;
   coreMigrationVersion?: string;
+  typeMigrationVersion?: string;
   version?: string;
   updated_at?: string;
   created_at?: string;

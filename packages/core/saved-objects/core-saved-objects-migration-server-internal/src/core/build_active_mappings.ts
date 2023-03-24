@@ -159,6 +159,9 @@ export function getBaseMappings(): IndexMapping {
       coreMigrationVersion: {
         type: 'keyword',
       },
+      typeMigrationVersion: {
+        type: 'version',
+      },
     },
   };
 }
