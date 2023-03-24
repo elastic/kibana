@@ -14,7 +14,9 @@ describe('OperationTypeSelect', function () {
   it('should render properly', function () {
     render(<OperationTypeSelect seriesId={0} series={mockUxSeries} />);
 
-    screen.getByText('Select an option: , is selected');
+    // SR-only text 'Select an option: , is selected'
+    // was removed here: https://github.com/elastic/eui/pull/6630#discussion_r1123655995
+    screen.getByRole('button');
   });
 
   it('should display selected value', function () {
