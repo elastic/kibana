@@ -9,7 +9,7 @@ import { APP_ID } from '../../../common/constants';
 import { getExecutionContextId, mergeExecutionContext } from './execution_context_utils';
 
 describe('mergeExecutionContext', () => {
-  test('should merge with context',  () => {
+  test('should merge with context', () => {
     const mergeContext = { description: 'es_pew_pew_source:connections' };
     const context = { name: APP_ID };
     expect(mergeExecutionContext(mergeContext, context)).toEqual({
@@ -18,64 +18,64 @@ describe('mergeExecutionContext', () => {
     });
   });
 
-  test('should merge with hierarchical context',  () => {
+  test('should merge with hierarchical context', () => {
     const mergeContext = { description: 'es_pew_pew_source:connections' };
     const context = {
       name: 'dashboard',
       child: {
-        name: APP_ID
-      }
+        name: APP_ID,
+      },
     };
     expect(mergeExecutionContext(mergeContext, context)).toEqual({
       name: 'dashboard',
       child: {
         description: 'es_pew_pew_source:connections',
         name: APP_ID,
-      }
+      },
     });
   });
 
-  test('should not merge if "maps" context can not be found',  () => {
+  test('should not merge if "maps" context can not be found', () => {
     const mergeContext = { description: 'es_pew_pew_source:connections' };
     const context = {
       name: 'dashboard',
       child: {
-        name: 'lens'
-      }
+        name: 'lens',
+      },
     };
     expect(mergeExecutionContext(mergeContext, context)).toEqual({
       name: 'dashboard',
       child: {
         name: 'lens',
-      }
+      },
     });
   });
 });
 
 describe('getExecutionContextId', () => {
-  test('should return executionContextId',  () => {
+  test('should return executionContextId', () => {
     const context = { name: APP_ID, id: 'map1234' };
     expect(getExecutionContextId(context)).toBe('map1234');
   });
 
-  test('should return executionContextId with hierarchical context',  () => {
+  test('should return executionContextId with hierarchical context', () => {
     const context = {
       name: 'dashboard',
       child: {
         name: APP_ID,
-        id: 'map1234'
-      }
+        id: 'map1234',
+      },
     };
     expect(getExecutionContextId(context)).toBe('map1234');
   });
 
-  test('should return undefined if "maps" context can not be found',  () => {
+  test('should return undefined if "maps" context can not be found', () => {
     const context = {
       name: 'dashboard',
       child: {
         name: 'lens',
-        id: 'lens1234'
-      }
+        id: 'lens1234',
+      },
     };
     expect(getExecutionContextId(context)).toBeUndefined();
   });

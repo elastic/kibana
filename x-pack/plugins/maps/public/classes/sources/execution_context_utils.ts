@@ -8,7 +8,10 @@
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { APP_ID } from '../../../common/constants';
 
-export function mergeExecutionContext(mergeContext: Partial<KibanaExecutionContext>, context: KibanaExecutionContext): KibanaExecutionContext {
+export function mergeExecutionContext(
+  mergeContext: Partial<KibanaExecutionContext>,
+  context: KibanaExecutionContext
+): KibanaExecutionContext {
   if (isMapContext(context)) {
     return {
       ...context,
@@ -20,8 +23,8 @@ export function mergeExecutionContext(mergeContext: Partial<KibanaExecutionConte
     return {
       ...context,
       child: {
-        ...mergeExecutionContext(mergeContext, context.child)
-      }
+        ...mergeExecutionContext(mergeContext, context.child),
+      },
     };
   }
 

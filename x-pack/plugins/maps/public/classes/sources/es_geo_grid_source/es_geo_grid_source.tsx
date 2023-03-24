@@ -339,7 +339,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
           }
         ),
         searchSessionId,
-        executionContext: mergeExecutionContext({ description: 'es_geo_grid_source:cluster_composite' }, executionContext),
+        executionContext: mergeExecutionContext(
+          { description: 'es_geo_grid_source:cluster_composite' },
+          executionContext
+        ),
         requestsAdapter: inspectorAdapters.requests,
       });
 
@@ -415,7 +418,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         defaultMessage: 'Elasticsearch geo grid aggregation request',
       }),
       searchSessionId,
-      executionContext: mergeExecutionContext({ description: 'es_geo_grid_source:cluster' }, executionContext),
+      executionContext: mergeExecutionContext(
+        { description: 'es_geo_grid_source:cluster' },
+        executionContext
+      ),
       requestsAdapter: inspectorAdapters.requests,
     });
 
