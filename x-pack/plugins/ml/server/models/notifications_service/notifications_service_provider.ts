@@ -168,7 +168,7 @@ export class NotificationsService {
               warning: 1,
               info: 2,
             };
-            return (a, b) => levelOrder[a.level] - levelOrder[b.level];
+            return (a, b) => levelOrder[b.level] - levelOrder[a.level];
           } else {
             const levelOrder: Record<NotificationSource['level'], number> = {
               error: 2,

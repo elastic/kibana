@@ -133,6 +133,7 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
 
       await retry.tryForTime(5000, async () => {
         await testSubjects.click(testSubjString);
+        await this.waitForTableToStartLoading();
         await this.waitForTableToLoad();
         await this.assertTableSorting(columnName, columnIndex, direction);
       });
