@@ -43,19 +43,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('index connector screenshots', async () => {
-      await es.indices.create({
-        index: testIndex,
-        body: {
-          mappings: {
-            properties: {
-              date_updated: {
-                type: 'date',
-                format: 'epoch_millis',
-              },
-            },
-          },
-        },
-      });
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await actions.common.openNewConnectorForm('index');
@@ -70,9 +57,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('index-params-test', screenshotDirectories);
       const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
       await flyOutCancelButton.click();
-    });
-    after(async () => {
-      await es.indices.delete({ index: testIndex });
     });
   });
 }
