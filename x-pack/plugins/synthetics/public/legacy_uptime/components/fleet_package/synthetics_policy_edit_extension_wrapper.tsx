@@ -7,11 +7,8 @@
 
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
-import type {
-  FleetStartServices,
-  PackagePolicyEditExtensionComponentProps,
-} from '@kbn/fleet-plugin/public';
+import { EuiButton, EuiCallOut } from '@elastic/eui';
+import type { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 /**
@@ -25,7 +22,6 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
     const { config_id: configId } = defaultConfig;
 
     const url = useEditMonitorLocator({ configId, locators });
-
 
     if (currentPolicy.is_managed) {
       return (
@@ -41,7 +37,10 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
         <EuiCallOut>
           <p>{EDIT_DISABLE_DESC}</p>
           {/* TODO Add a link to exact monitor*/}
-          <EuiButton href={`${http?.basePath.get()}/app/uptime/manage-monitors/all`}>
+          <EuiButton
+            data-test-subj="syntheticsSyntheticsPolicyEditExtensionWrapperButton"
+            href={`${http?.basePath.get()}/app/uptime/manage-monitors/all`}
+          >
             {EDIT_IN_UPTIME_LABEL}
           </EuiButton>
         </EuiCallOut>
