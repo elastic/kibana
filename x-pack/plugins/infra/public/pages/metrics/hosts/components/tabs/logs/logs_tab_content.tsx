@@ -7,7 +7,9 @@
 
 import React, { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { InfraLoadingPanel } from '../../../../../../components/loading';
 import { SnapshotNode } from '../../../../../../../common/http_api';
 import { LogStream } from '../../../../../../components/log_stream';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
@@ -19,7 +21,7 @@ import { LogsSearchBar } from './logs_search_bar';
 export const LogsTabContent = () => {
   const [filterQuery] = useLogsSearchUrlState();
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
-  const { from, to } = getDateRangeAsTimestamp();
+  const { from, to } = useMemo(() => getDateRangeAsTimestamp(), [getDateRangeAsTimestamp]);
   const { hostNodes, loading } = useHostsViewContext();
 
   const hostsFilterQuery = useMemo(() => createHostsFilter(hostNodes), [hostNodes]);
@@ -31,9 +33,18 @@ export const LogsTabContent = () => {
 
   if (loading)
     return (
-      <EuiFlexGroup style={{ height: 300 }} alignItems="center" justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xl" />
+      <EuiFlexGroup style={{ height: 300 }} direction="column" alignItems="stretch">
+        <EuiFlexItem grow>
+          <InfraLoadingPanel
+            width="100%"
+            height="100%"
+            text={
+              <FormattedMessage
+                id="xpack.infra.hostsViewPage.tabs.logs.loadingEntriesLabel"
+                defaultMessage="Loading entries"
+              />
+            }
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
