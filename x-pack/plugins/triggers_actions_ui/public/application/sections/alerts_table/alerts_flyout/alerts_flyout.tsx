@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { Suspense, lazy, useCallback, useMemo } from 'react';
+import React, { Suspense, lazy, useCallback, useMemo, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
@@ -26,6 +26,16 @@ const PAGINATION_LABEL = i18n.translate(
     defaultMessage: 'Alert navigation',
   }
 );
+
+function usePrevious(alert: EcsFieldsResponse) {
+  const ref = useRef<EcsFieldsResponse | null>(null);
+  useEffect(() => {
+    if (alert) {
+      ref.current = alert;
+    }
+  });
+  return ref.current;
+}
 
 interface AlertsFlyoutProps {
   alert: EcsFieldsResponse;
@@ -58,13 +68,14 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
     body: null,
     footer: null,
   };
-
+  const prevAlert = usePrevious(alert);
   const passedProps = useMemo(
     () => ({
-      alert,
+      alert: alert === undefined && prevAlert != null ? prevAlert : alert,
       id,
       isLoading,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [alert, id, isLoading]
   );
 
