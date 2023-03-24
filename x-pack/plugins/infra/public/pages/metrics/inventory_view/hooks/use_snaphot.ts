@@ -8,7 +8,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
@@ -46,6 +46,7 @@ export function useSnapshot(
   }: UseSnapshotRequest,
   options?: UseSnapshotRequestOptions
 ) {
+  const requestMadeRef = useRef(false);
   const decodeResponse = (response: any) => {
     return pipe(
       SnapshotNodeResponseRT.decode(response),
@@ -68,7 +69,7 @@ export function useSnapshot(
     dropPartialBuckets,
   };
 
-  const { error, loading, response, makeRequest } = useHTTPRequest(
+  const { error, loading, response, makeRequest, resetRequestState } = useHTTPRequest(
     '/api/metrics/snapshot',
     'POST',
     JSON.stringify(payload),
@@ -79,12 +80,13 @@ export function useSnapshot(
   );
 
   useEffect(() => {
-    (async () => {
-      if (sendRequestImmediately) {
-        await makeRequest();
-      }
-    })();
-  }, [makeRequest, sendRequestImmediately, requestTs]);
+    if (sendRequestImmediately) {
+      makeRequest();
+    }
+    return () => {
+      resetRequestState();
+    };
+  }, [makeRequest, sendRequestImmediately, resetRequestState, requestTs]);
 
   return {
     error: (error && error.message) || null,
