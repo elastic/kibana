@@ -33,7 +33,7 @@ export async function optimize({
     return;
   }
 
-  log.info(`running @kbn/optimizer ${!!watch ? 'in watch mode (use CTRL+C to quit)' : ''}`);
+  log.info(`running @kbn/optimizer${!!watch ? ' in watch mode (use CTRL+C to quit)' : ''}`);
   await log.indent(2, async () => {
     const optimizerConfig = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
@@ -130,7 +130,7 @@ export async function optimize({
       // Unsubscribe from eventObservable
       eventSubscription.unsubscribe();
 
-      log.info('exiting');
+      log.info('stopping @kbn/optimizer');
     };
 
     // if watch mode just wait for the first event then cleanup and exit
@@ -143,7 +143,7 @@ export async function optimize({
         });
       });
 
-      process.exit(0);
+      return;
     }
 
     // Wait for parent process to exit if not in watch mode
