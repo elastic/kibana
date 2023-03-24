@@ -20,7 +20,9 @@ import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
 import { AlertDetails } from './alert_details';
 import { alert, alertWithNoData } from '../../../data/alerts/alert';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
-import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Subset } from '../../../typings/utils';
+import type { ConfigSchema } from '../../../plugin/plugin';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -93,6 +95,16 @@ const params = {
   alertId: chance.guid(),
 };
 
+const config: Subset<ConfigSchema> = {
+  unsafe: {
+    alertDetails: {
+      logs: { enabled: true },
+      metrics: { enabled: true },
+      uptime: { enabled: true },
+    },
+  },
+};
+
 describe('Alert details', () => {
   jest
     .spyOn(useUiSettingHook, 'useUiSetting')
@@ -111,7 +123,7 @@ describe('Alert details', () => {
   it('should show the alert detail page with all necessary components', async () => {
     useFetchAlertDetailMock.mockReturnValue([false, alert]);
 
-    const alertDetails = render(<AlertDetails />);
+    const alertDetails = render(<AlertDetails />, config);
 
     await waitFor(() => expect(alertDetails.queryByTestId('centerJustifiedSpinner')).toBeFalsy());
 
