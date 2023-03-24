@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type {
   AggregationsAggregate,
+  OpenPointInTimeResponse,
   SearchRequest,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -28,6 +29,11 @@ import {
   SIGNALS_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
+import type {
+  SearchHit,
+  SearchRequest as ESSearchRequest,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Agent, AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
 import type {
@@ -156,9 +162,7 @@ export interface ITelemetryReceiver {
 
   fetchPrebuiltRuleAlerts(): Promise<{ events: TelemetryEvent[]; count: number }>;
 
-  fetchTimelineEndpointAlerts(
-    interval: number
-  ): Promise<SearchResponse<EnhancedAlertEvent, Record<string, AggregationsAggregate>>>;
+  fetchTimelineEndpointAlerts(interval: number): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
 
   buildProcessTree(
     entityId: string,
@@ -701,12 +705,22 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
 
-    const query: SearchRequest = {
-      expand_wildcards: ['open' as const, 'hidden' as const],
-      index: `${this.alertsIndex}*`,
-      ignore_unavailable: true,
-      body: {
-        size: 30,
+    // default is from looking at Kibana saved objects and online documentation
+    const keepAlive = '5m';
+
+    // create and assign an initial point in time
+    let pitId: OpenPointInTimeResponse['id'] = (
+      await this.esClient.openPointInTime({
+        index: `${this.alertsIndex}*`,
+        keep_alive: keepAlive,
+      })
+    ).id;
+
+    let fetchMore = true;
+    let searchAfter: SortResults | undefined;
+    let alertsToReturn: Array<SearchHit<EnhancedAlertEvent>> = [];
+    while (fetchMore) {
+      const query: ESSearchRequest = {
         query: {
           bool: {
             filter: [
@@ -750,10 +764,53 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             },
           },
         },
-      },
-    };
+        track_total_hits: false,
+        sort: [
+          { '@timestamp': { order: 'asc', format: 'strict_date_optional_time_nanos' } },
+          { _shard_doc: 'desc' },
+        ] as unknown as string[],
+        pit: { id: pitId },
+        search_after: searchAfter,
+        size: 1000,
+      };
 
-    return this.esClient.search<EnhancedAlertEvent>(query);
+      tlog(this.logger, `Getting alerts with point in time (PIT) query: ${JSON.stringify(query)}`);
+
+      let response = null;
+      try {
+        response = await this.esClient.search<EnhancedAlertEvent>(query);
+        const numOfHits = response?.hits.hits.length;
+
+        if (numOfHits > 0) {
+          const lastHit = response?.hits.hits[numOfHits - 1];
+          searchAfter = lastHit?.sort;
+        }
+
+        fetchMore = numOfHits > 0;
+      } catch (e) {
+        tlog(this.logger, e);
+        fetchMore = false;
+      }
+
+      const alerts = response?.hits.hits;
+      alertsToReturn = alertsToReturn.concat(alerts ?? []);
+
+      if (response?.pit_id != null) {
+        pitId = response?.pit_id;
+      }
+    }
+
+    try {
+      await this.esClient.closePointInTime({ id: pitId });
+    } catch (error) {
+      tlog(
+        this.logger,
+        `Error trying to close point in time: "${pitId}", it will expire within "${keepAlive}". Error is: "${error}"`
+      );
+    }
+
+    tlog(this.logger, `Timeline alerts to return: ${alertsToReturn.length}`);
+    return alertsToReturn;
   }
 
   public async buildProcessTree(

@@ -4783,6 +4783,64 @@
                 "daily": {
                   "type": "long"
                 },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
                 "assignees": {
                   "properties": {
                     "total": {
@@ -4871,6 +4929,64 @@
                       "type": "long"
                     }
                   }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -4900,6 +5016,64 @@
                       "type": "long"
                     }
                   }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -4927,6 +5101,64 @@
                     },
                     "totalWithAtLeastOne": {
                       "type": "long"
+                    }
+                  }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "average": {
+                            "type": "long"
+                          },
+                          "maxOnACase": {
+                            "type": "long"
+                          },
+                          "total": {
+                            "type": "long"
+                          },
+                          "type": {
+                            "type": "keyword"
+                          }
+                        }
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": {
+                          "type": "long"
+                        },
+                        "averageSize": {
+                          "type": "long"
+                        },
+                        "maxOnACase": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        }
+                      }
                     }
                   }
                 }

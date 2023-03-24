@@ -6,21 +6,20 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../hooks/use_app_toasts.mock';
+import { TestProviders } from '../../../mock';
 import { getJobsSummary } from '../../ml/api/get_jobs_summary';
 import { checkRecognizer, getModules } from '../api';
-import type { SecurityJob } from '../types';
 import {
-  mockJobsSummaryResponse,
-  mockGetModuleResponse,
   checkRecognizerSuccess,
+  mockGetModuleResponse,
+  mockJobsSummaryResponse,
 } from '../api.mock';
+import type { SecurityJob } from '../types';
 import { useSecurityJobs } from './use_security_jobs';
-import { TestProviders } from '../../../mock';
 
 jest.mock('../../../../../common/machine_learning/has_ml_admin_permissions');
 jest.mock('../../../../../common/machine_learning/has_ml_license');
@@ -30,8 +29,7 @@ jest.mock('../../ml/hooks/use_ml_capabilities');
 jest.mock('../../ml/api/get_jobs_summary');
 jest.mock('../api');
 
-// FLAKY: https://github.com/elastic/kibana/issues/153550
-describe.skip('useSecurityJobs', () => {
+describe('useSecurityJobs', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
@@ -94,13 +92,16 @@ describe.skip('useSecurityJobs', () => {
 
     it('renders a toast error if an ML call fails', async () => {
       (getModules as jest.Mock).mockRejectedValue('whoops');
-      const { waitForNextUpdate } = renderHook(() => useSecurityJobs(), {
+      const { waitFor } = renderHook(() => useSecurityJobs(), {
         wrapper: TestProviders,
       });
-      await waitForNextUpdate();
 
-      expect(appToastsMock.addError).toHaveBeenCalledWith('whoops', {
-        title: 'Security job fetch failure',
+      // addError might be called after an arbitrary number of renders, so we
+      // need to use waitFor here instead of waitForNextUpdate
+      await waitFor(() => {
+        expect(appToastsMock.addError).toHaveBeenCalledWith('whoops', {
+          title: 'Security job fetch failure',
+        });
       });
     });
   });
