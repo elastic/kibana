@@ -64,15 +64,15 @@ export function getConnectorType(): ConnectorTypeModel<
     resetParamsOnConnectorChange: (
       params: WebhookParams | PostMessageParams
     ): WebhookParams | PostMessageParams | {} => {
-      if ((params as WebhookParams).message !== undefined) {
+      if ('message' in params) {
         return {
           subAction: 'postMessage',
           subActionParams: {
             channels: [],
-            text: (params as WebhookParams).message,
+            text: params.message,
           },
         };
-      } else if ((params as PostMessageParams).subAction !== undefined) {
+      } else if ('subAction' in params) {
         return {
           message: (params as PostMessageParams).subActionParams.text,
         };
