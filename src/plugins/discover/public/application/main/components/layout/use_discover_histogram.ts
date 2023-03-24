@@ -16,8 +16,9 @@ import {
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useRef, useMemo, useState } from 'react';
-import { distinctUntilChanged, filter, map, Observable } from 'rxjs';
+import { distinctUntilChanged, filter, map, Observable, skip } from 'rxjs';
 import type { Suggestion } from '@kbn/lens-plugin/public';
+import useLatest from 'react-use/lib/useLatest';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
 import { FetchStatus } from '../../../types';
@@ -31,6 +32,7 @@ import type {
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import type { DiscoverStateContainer } from '../../services/discover_state';
+import { addLog } from '../../../../utils/add_log';
 
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
@@ -39,6 +41,7 @@ export interface UseDiscoverHistogramProps {
   inspectorAdapters: InspectorAdapters;
   savedSearchFetch$: DataFetch$;
   searchSessionId: string | undefined;
+  isPlainRecord: boolean;
 }
 
 export const useDiscoverHistogram = ({
@@ -48,6 +51,7 @@ export const useDiscoverHistogram = ({
   inspectorAdapters,
   savedSearchFetch$,
   searchSessionId,
+  isPlainRecord,
 }: UseDiscoverHistogramProps) => {
   const services = useDiscoverServices();
   const timefilter = services.data.query.timefilter.timefilter;
@@ -284,41 +288,47 @@ export const useDiscoverHistogram = ({
    * Data fetching
    */
 
-  const skipRefetch = useRef<boolean>();
+  const skipDiscoverRefetch = useRef<boolean>();
+  const skipLensSuggestionRefetch = useRef<boolean>();
+  const usingLensSuggestion = useLatest(isPlainRecord && !hideChart);
 
   // Skip refetching when showing the chart since Lens will
   // automatically fetch when the chart is shown
   useEffect(() => {
-    if (skipRefetch.current === undefined) {
-      skipRefetch.current = false;
+    if (skipDiscoverRefetch.current === undefined) {
+      skipDiscoverRefetch.current = false;
     } else {
-      skipRefetch.current = !hideChart;
+      skipDiscoverRefetch.current = !hideChart;
     }
   }, [hideChart]);
 
   // Trigger a unified histogram refetch when savedSearchFetch$ is triggered
   useEffect(() => {
     const subscription = savedSearchFetch$.subscribe(() => {
-      if (!skipRefetch.current) {
+      if (!skipDiscoverRefetch.current) {
+        addLog('Unified Histogram - Discover refetch');
         unifiedHistogram?.refetch();
       }
 
-      skipRefetch.current = false;
+      skipDiscoverRefetch.current = false;
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [savedSearchFetch$, unifiedHistogram]);
+  }, [savedSearchFetch$, unifiedHistogram, usingLensSuggestion]);
 
   // Reload the chart when the current suggestion changes
   const [currentSuggestion, setCurrentSuggestion] = useState<Suggestion>();
 
   useEffect(() => {
-    if (currentSuggestion) {
+    if (!skipLensSuggestionRefetch.current && currentSuggestion && usingLensSuggestion.current) {
+      addLog('Unified Histogram - Lens suggestion refetch');
       unifiedHistogram?.refetch();
     }
-  }, [currentSuggestion, unifiedHistogram]);
+
+    skipLensSuggestionRefetch.current = false;
+  }, [currentSuggestion, unifiedHistogram, usingLensSuggestion]);
 
   useEffect(() => {
     const subscription = createCurrentSuggestionObservable(unifiedHistogram?.state$)?.subscribe(
@@ -329,6 +339,22 @@ export const useDiscoverHistogram = ({
       subscription?.unsubscribe();
     };
   }, [unifiedHistogram]);
+
+  // When the data view or query changes, which will trigger a current suggestion change,
+  // skip the next refetch since we want to wait for the columns to update first, which
+  // doesn't happen until after the documents are fetched
+  useEffect(() => {
+    const subscription = createSkipFetchObservable(unifiedHistogram?.state$)?.subscribe(() => {
+      if (usingLensSuggestion.current) {
+        skipLensSuggestionRefetch.current = true;
+        skipDiscoverRefetch.current = true;
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [unifiedHistogram?.state$, usingLensSuggestion]);
 
   return { hideChart, setUnifiedHistogramApi };
 };
@@ -368,5 +394,13 @@ const createCurrentSuggestionObservable = (state$?: Observable<UnifiedHistogramS
   return state$?.pipe(
     map((state) => state.currentSuggestion),
     distinctUntilChanged(isEqual)
+  );
+};
+
+const createSkipFetchObservable = (state$?: Observable<UnifiedHistogramState>) => {
+  return state$?.pipe(
+    map((state) => [state.dataView.id, state.query]),
+    distinctUntilChanged(isEqual),
+    skip(1)
   );
 };
