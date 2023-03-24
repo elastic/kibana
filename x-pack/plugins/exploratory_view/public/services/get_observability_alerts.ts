@@ -22,6 +22,7 @@ export async function getObservabilityAlerts({ http }: { http: HttpSetup }) {
 
     return data.filter(({ consumer }) => allowedConsumers.includes(consumer));
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Error while fetching alerts', e);
     throw e;
   }
