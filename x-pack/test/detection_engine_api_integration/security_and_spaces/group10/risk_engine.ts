@@ -49,21 +49,21 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
 
   const createAndSyncRuleAndAlerts = async ({
-    documentId,
     alerts = 1,
     riskScore = 21,
     maxSignals = 100,
+    query,
   }: {
     alerts?: number;
-    documentId: string;
     riskScore?: number;
     maxSignals?: number;
+    query: string;
   }): Promise<void> => {
     const rule = getRuleForSignalTesting(['ecs_compliant']);
     const { id } = await createRule(supertest, log, {
       ...rule,
       risk_score: riskScore,
-      query: `id: ${documentId}`,
+      query: query,
       max_signals: maxSignals,
     });
     await waitForRuleSuccessOrStatus(supertest, log, id);
@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext): void => {
       maxSignals = 100,
     }: { alerts?: number; riskScore?: number; maxSignals?: number } = {}
   ) => {
-    await createAndSyncRuleAndAlerts({ documentId, alerts, riskScore, maxSignals });
+    await createAndSyncRuleAndAlerts({ query: `id: ${documentId}`, alerts, riskScore, maxSignals });
 
     return await getRiskScores({ body: {} });
   };
@@ -306,6 +306,86 @@ export default ({ getService }: FtrProviderContext): void => {
               calculatedLevel: 'Critical',
               calculatedScore: 259.237584867298,
               calculatedScoreNorm: 99.24869252193645,
+              identifierField: 'host.name',
+              identifierValue: 'host-1',
+            },
+          ]);
+        });
+      });
+
+      context.only('with risk weights', () => {
+        it('weights host scores differently when host risk weight is configured', async () => {
+          const documentId = uuidv4();
+          const doc = buildDocument({ host: { name: 'host-1' } }, documentId);
+          await indexListOfDocuments(Array(100).fill(doc));
+
+          await createAndSyncRuleAndAlerts({
+            query: `id: ${documentId}`,
+            alerts: 100,
+            riskScore: 100,
+          });
+          const { scores } = await getRiskScores({ body: { weights: { host: 0.5 } } });
+
+          expect(removeFields(scores)).to.eql([
+            {
+              calculatedLevel: 'Moderate',
+              calculatedScore: 120.6437049351858,
+              calculatedScoreNorm: 46.18824844379242,
+              identifierField: 'host.name',
+              identifierValue: 'host-1',
+            },
+          ]);
+        });
+
+        it('weights user scores differently if user risk weight is configured', async () => {
+          const documentId = uuidv4();
+          const doc = buildDocument({ user: { name: 'user-1' } }, documentId);
+          await indexListOfDocuments(Array(100).fill(doc));
+
+          await createAndSyncRuleAndAlerts({
+            query: `id: ${documentId}`,
+            alerts: 100,
+            riskScore: 100,
+          });
+          const { scores } = await getRiskScores({ body: { weights: { user: 0.7 } } });
+
+          expect(removeFields(scores)).to.eql([
+            {
+              calculatedLevel: 'Moderate',
+              calculatedScore: 168.9011869092601,
+              calculatedScoreNorm: 64.66354782130938,
+              identifierField: 'user.name',
+              identifierValue: 'user-1',
+            },
+          ]);
+        });
+
+        it('weights entity scores differently when host and user risk weights are configured', async () => {
+          const usersId = uuidv4();
+          const hostsId = uuidv4();
+          const userDocs = buildDocument({ user: { name: 'user-1' } }, usersId);
+          const hostDocs = buildDocument({ host: { name: 'host-1' } }, usersId);
+          await indexListOfDocuments(Array(50).fill(userDocs).concat(Array(50).fill(hostDocs)));
+
+          await createAndSyncRuleAndAlerts({
+            query: `id: ${hostsId} OR ${usersId}`,
+            alerts: 100,
+            riskScore: 100,
+          });
+          const { scores } = await getRiskScores({ body: { weights: { host: 0.4, user: 0.8 } } });
+
+          expect(removeFields(scores)).to.eql([
+            {
+              calculatedLevel: 'High',
+              calculatedScore: 186.47518232942502,
+              calculatedScoreNorm: 71.39172370958079,
+              identifierField: 'user.name',
+              identifierValue: 'user-1',
+            },
+            {
+              calculatedLevel: 'Low',
+              calculatedScore: 93.23759116471251,
+              calculatedScoreNorm: 35.695861854790394,
               identifierField: 'host.name',
               identifierValue: 'host-1',
             },
