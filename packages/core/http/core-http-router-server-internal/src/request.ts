@@ -120,9 +120,9 @@ export class CoreKibanaRequest<
 
   constructor(
     request: RawRequest,
-    public params: Params,
-    public query: Query,
-    public body: Body,
+    public readonly params: Params,
+    public readonly query: Query,
+    public readonly body: Body,
     // @ts-expect-error we will use this flag as soon as http request proxy is supported in the core
     // until that time we have to expose all the headers
     private readonly withoutSecretHeaders: boolean

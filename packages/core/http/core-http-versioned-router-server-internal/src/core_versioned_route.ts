@@ -21,6 +21,7 @@ import type {
   VersionedRouteConfig,
 } from '@kbn/core-http-server';
 import type { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import { Mutable } from 'utility-types';
 import type { Method } from './types';
 
 import { validate } from './validate';
@@ -105,13 +106,13 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     const validation = handler.options.validate || undefined;
 
-    const coreKibanaRequest = req as CoreKibanaRequest;
+    const mutableCoreKibanaRequest = req as Mutable<CoreKibanaRequest>;
     if (validation?.request) {
       try {
         const { body, params, query } = validate(req, validation.request, handler.options.version);
-        coreKibanaRequest.body = body;
-        coreKibanaRequest.params = params;
-        coreKibanaRequest.query = query;
+        mutableCoreKibanaRequest.body = body;
+        mutableCoreKibanaRequest.params = params;
+        mutableCoreKibanaRequest.query = query;
       } catch (e) {
         return res.custom({
           statusCode: 400,
@@ -120,9 +121,9 @@ export class CoreVersionedRoute implements VersionedRoute {
       }
     } else {
       // Preserve behavior of not passing through unvalidated data
-      coreKibanaRequest.body = {};
-      coreKibanaRequest.params = {};
-      coreKibanaRequest.query = {};
+      mutableCoreKibanaRequest.body = {};
+      mutableCoreKibanaRequest.params = {};
+      mutableCoreKibanaRequest.query = {};
     }
 
     const result = await handler.fn(ctx, req, res);

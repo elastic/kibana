@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core-http-server';
-import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { VERSION_HEADER } from './core_versioned_route';
 import { CoreVersionedRouter } from '.';
 import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
@@ -101,12 +101,12 @@ describe('Versioned route', () => {
 
     const kibanaResponse = await handler!(
       {} as any,
-      {
+      httpServerMock.createKibanaRequest({
         headers: { [VERSION_HEADER]: '1' },
         body: { foo: 1 },
         params: { foo: 1 },
         query: { foo: 1 },
-      } as any,
+      }),
       kibanaResponseFactory
     );
 
@@ -126,9 +126,9 @@ describe('Versioned route', () => {
     await expect(
       handler!(
         {} as any,
-        {
+        httpServerMock.createKibanaRequest({
           headers: { [VERSION_HEADER]: '999' },
-        } as any,
+        }),
         kibanaResponseFactory
       )
     ).resolves.toEqual({
@@ -150,9 +150,9 @@ describe('Versioned route', () => {
     await expect(
       handler!(
         {} as any,
-        {
+        httpServerMock.createKibanaRequest({
           headers: {},
-        } as any,
+        }),
         kibanaResponseFactory
       )
     ).resolves.toEqual({
@@ -177,10 +177,10 @@ describe('Versioned route', () => {
     await expect(
       handler!(
         {} as any,
-        {
+        httpServerMock.createKibanaRequest({
           headers: { [VERSION_HEADER]: '1' },
           body: {},
-        } as any,
+        }),
         kibanaResponseFactory
       )
     ).resolves.toEqual({
