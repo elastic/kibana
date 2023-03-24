@@ -7,11 +7,9 @@
 
 import { inRange } from 'lodash';
 import React, { ReactNode } from 'react';
-import { XAxis, XYPlot } from 'react-vis';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
 import { Mark } from '.';
-import { LastTickValue } from './last_tick_value';
 import { Marker } from './marker';
 import { PlotValues } from './plot_utils';
 
@@ -47,10 +45,18 @@ export function TimelineAxis({
   topTraceDuration,
 }: TimelineAxisProps) {
   const theme = useTheme();
-  const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
+  const { margins, tickValues, width, xMax, xScale } = plotValues;
   const tickFormatter = getDurationFormatter(xMax);
-  const xAxisTickValues = getXAxisTickValues(tickValues, topTraceDuration);
-  const topTraceDurationFormatted = tickFormatter(topTraceDuration).formatted;
+  const xTicks = getXAxisTickValues(tickValues, topTraceDuration).reduce<
+    Array<{ x: number; label: string }>
+  >((ticks, tick) => {
+    const x = xScale(tick);
+    return Number.isFinite(x)
+      ? [...ticks, { x, label: tickFormatter(tick).formatted }]
+      : ticks;
+  }, []);
+  const topTraceDurationPosition =
+    topTraceDuration > 0 ? xScale(topTraceDuration) : NaN;
 
   return (
     <div
@@ -63,41 +69,40 @@ export function TimelineAxis({
         width: '100%',
       }}
     >
-      <XYPlot
-        dontCheckIfEmpty
+      <svg
+        style={{ position: 'absolute', top: 0, left: 0 }}
         width={width}
         height={margins.top}
-        margin={{
-          top: margins.top,
-          left: margins.left,
-          right: margins.right,
-        }}
-        xDomain={xDomain}
       >
-        <XAxis
-          hideLine
-          orientation="top"
-          tickSize={0}
-          tickValues={xAxisTickValues}
-          tickFormat={(time?: number) => tickFormatter(time).formatted}
-          tickPadding={20}
-          style={{
-            text: { fill: theme.eui.euiColorDarkShade },
-          }}
-        />
+        <g transform={`translate(0 ${margins.top - 20})`}>
+          {xTicks.map(({ x, label }) => (
+            <text
+              key={`tick-${x}`}
+              x={x}
+              y={0}
+              textAnchor="middle"
+              fill={theme.eui.euiColorDarkShade}
+              fontSize={11}
+            >
+              {label}
+            </text>
+          ))}
+          {Number.isFinite(topTraceDurationPosition) && (
+            <text
+              key="topTrace"
+              x={topTraceDurationPosition}
+              y={0}
+              textAnchor="middle"
+            >
+              {tickFormatter(topTraceDuration).formatted}
+            </text>
+          )}
+        </g>
+      </svg>
 
-        {topTraceDuration > 0 && (
-          <LastTickValue
-            x={xScale(topTraceDuration) ?? 0}
-            value={topTraceDurationFormatted}
-            marginTop={28}
-          />
-        )}
-
-        {marks.map((mark) => (
-          <Marker key={mark.id} mark={mark} x={xScale(mark.offset) ?? 0} />
-        ))}
-      </XYPlot>
+      {marks.map((mark) => (
+        <Marker key={mark.id} mark={mark} x={xScale(mark.offset) ?? 0} />
+      ))}
     </div>
   );
 }
