@@ -1543,10 +1543,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@76.0.2":
-  version "76.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-76.0.2.tgz#5b99730de10785167b4ab98fcfdb8717018343ce"
-  integrity sha512-HB6HyjkWQ6akYBcIWl9vGenONpymP3q8cYUui/g4DS3/WPUp8R0jV/zEryjlJ5HyJ4Vp3THDoKtCmIEVy+wZvg==
+"@elastic/eui@76.3.0":
+  version "76.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-76.3.0.tgz#65ab0d106a6da4ed962454c59148a9743f61f1e4"
+  integrity sha512-faSemLNfRvOcNFRYk6t7f9sep8ekOawppEGs2opKiSPDBefd5JNawMzluHYpnmIJuHqlCRVjP/Ph6yWvJwWfQg==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
