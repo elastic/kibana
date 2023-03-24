@@ -182,7 +182,7 @@ function getLensAttributesXY(
   fields: FieldsMap,
   chartType: XYState['preferredSeriesType'],
   color: string
-): LensAttributesByType<XYState> {
+): LensAttributesByType<'lnsXY'> {
   const baseAttributes = getBaseAttributes(defaultIndexPattern, fields);
 
   const xyConfig: XYState = {
@@ -218,7 +218,7 @@ function getLensAttributesXY(
 function getLensAttributesHeatmap(
   defaultIndexPattern: DataView,
   fields: FieldsMap
-): LensAttributesByType<HeatmapVisualizationState> {
+): LensAttributesByType<'lnsHeatmap'> {
   const initialType = getInitialType(defaultIndexPattern);
   const dataLayer = getDataLayer(initialType, fields[initialType]);
   const heatmapDataLayer = {
@@ -267,7 +267,7 @@ function getLensAttributesHeatmap(
 function getLensAttributesDatatable(
   defaultIndexPattern: DataView,
   fields: FieldsMap
-): LensAttributesByType<DatatableVisualizationState> {
+): LensAttributesByType<'lnsDatatable'> {
   const initialType = getInitialType(defaultIndexPattern);
   const baseAttributes = getBaseAttributes(defaultIndexPattern, fields, initialType);
 
@@ -291,7 +291,7 @@ function getLensAttributesGauge(
   defaultIndexPattern: DataView,
   fields: FieldsMap,
   shape: GaugeVisualizationState['shape'] = 'horizontalBullet'
-): LensAttributesByType<GaugeVisualizationState> {
+): LensAttributesByType<'lnsGauge'> {
   const dataLayer = getDataLayer('number', fields.number, false);
   const gaugeDataLayer = {
     columnOrder: ['col1'],
@@ -322,7 +322,7 @@ function getLensAttributesGauge(
 function getLensAttributesPartition(
   defaultIndexPattern: DataView,
   fields: FieldsMap
-): LensAttributesByType<PieVisualizationState> {
+): LensAttributesByType<'lnsPie'> {
   const baseAttributes = getBaseAttributes(defaultIndexPattern, fields, 'number');
   const pieConfig: PieVisualizationState = {
     layers: [
@@ -352,7 +352,7 @@ function getLensAttributesMetric(
   defaultIndexPattern: DataView,
   fields: FieldsMap,
   color: string
-): LensAttributesByType<MetricVisualizationState> {
+): LensAttributesByType<'lnsMetric'> {
   const dataLayer = getDataLayer('string', fields.number, true);
   const baseAttributes = getBaseAttributes(defaultIndexPattern, fields, 'number', dataLayer);
   const metricConfig: MetricVisualizationState = {

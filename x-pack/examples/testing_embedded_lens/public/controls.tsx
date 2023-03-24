@@ -21,54 +21,46 @@ import {
   EuiToolTip,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import type {
-  DatatableVisualizationState,
-  GaugeVisualizationState,
-  HeatmapVisualizationState,
-  PieVisualizationState,
-  TypedLensByValueInput,
-  MetricVisualizationState,
-  XYState,
-} from '@kbn/lens-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
-export type LensAttributesByType<StateType> = Extract<
+export type LensAttributesByType<VizType> = Extract<
   TypedLensByValueInput['attributes'],
-  { state: { visualization: StateType } }
+  { visualizationType: VizType }
 >;
 
 function isXYChart(
   attributes: TypedLensByValueInput['attributes']
-): attributes is LensAttributesByType<XYState> {
+): attributes is LensAttributesByType<'lnsXY'> {
   return attributes.visualizationType === 'lnsXY';
 }
 
 function isPieChart(
   attributes: TypedLensByValueInput['attributes']
-): attributes is LensAttributesByType<PieVisualizationState> {
+): attributes is LensAttributesByType<'lnsPie'> {
   return attributes.visualizationType === 'lnsPie';
 }
 
 function isHeatmapChart(
   attributes: TypedLensByValueInput['attributes']
-): attributes is LensAttributesByType<HeatmapVisualizationState> {
+): attributes is LensAttributesByType<'lnsHeatmap'> {
   return attributes.visualizationType === 'lnsHeatmap';
 }
 
 function isDatatable(
   attributes: TypedLensByValueInput['attributes']
-): attributes is LensAttributesByType<DatatableVisualizationState> {
+): attributes is LensAttributesByType<'lnsDatatable'> {
   return attributes.visualizationType === 'lnsDatatable';
 }
 
 function isGaugeChart(
   attributes: TypedLensByValueInput['attributes']
-): attributes is LensAttributesByType<GaugeVisualizationState> {
+): attributes is LensAttributesByType<'lnsGauge'> {
   return attributes.visualizationType === 'lnsGauge';
 }
 
 function isMetricChart(
   attributes: TypedLensByValueInput['attributes']
-): attributes is LensAttributesByType<MetricVisualizationState> {
+): attributes is LensAttributesByType<'lnsMetric'> {
   return attributes.visualizationType === 'lnsMetric';
 }
 
