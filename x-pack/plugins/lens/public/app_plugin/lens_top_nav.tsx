@@ -459,7 +459,7 @@ export const LensTopNavMenu = ({
     isSaveable && application.capabilities.dashboard?.showWriteControls
   );
 
-  const defaultLensTitle = i18n.translate('dashboard.share.defaultDashboardTitle', {
+  const defaultLensTitle = i18n.translate('xpack.lens.app.share.defaultDashboardTitle', {
     defaultMessage: 'Lens Visualization [{date}]',
     values: { date: moment().toISOString(true) },
   });
