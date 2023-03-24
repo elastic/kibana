@@ -7,16 +7,58 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+import { useLeftPanelContext } from '../context';
 import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
+import { Resolver } from '../../../resolver/view';
+import { useTimelineDataFilters } from '../../../timelines/containers/use_timeline_data_filters';
+import { ERROR_TITLE, ERROR_MESSAGE } from '../../translations';
+import { ALERTS_ACTIONS } from '../../../common/lib/apm/user_actions';
+import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
+// import { useGlobalTime } from '../../../common/containers/use_global_time';
 
 export const ANALYZE_GRAPH_ID = 'analyze_graph';
+
+const ANALYZER = i18n.translate('xpack.securitySolution.flyout.analyzer', {
+  defaultMessage: 'analyzer',
+});
 
 /**
  * Analyzer graph view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const AnalyzeGraph: FC = () => {
-  return <EuiText data-test-subj={ANALYZER_GRAPH_TEST_ID}>{'Analyzer graph'}</EuiText>;
+  const { eventId } = useLeftPanelContext();
+  const scopeId = 'fly-out';
+  const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(false); // always false because flyout is not in timeline
+  const { startTransaction } = useStartTransaction();
+
+  if (!eventId) {
+    return (
+      <EuiEmptyPrompt
+        iconType="error"
+        color="danger"
+        title={<h2>{ERROR_TITLE(ANALYZER)}</h2>}
+        body={<p>{ERROR_MESSAGE(ANALYZER)}</p>}
+        data-test-subj={ANALYZER_GRAPH_TEST_ID}
+      />
+    );
+  }
+
+  startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
+
+  return (
+    <div data-test-subj={ANALYZER_GRAPH_TEST_ID}>
+      <Resolver
+        databaseDocumentID={eventId}
+        resolverComponentInstanceID={scopeId}
+        indices={selectedPatterns}
+        shouldUpdate={shouldUpdate}
+        filters={{ from, to }}
+      />
+    </div>
+  );
 };
 
 AnalyzeGraph.displayName = 'AnalyzeGraph';
