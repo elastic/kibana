@@ -288,17 +288,15 @@ export class IndexTable extends Component {
       );
     } else if (fieldName === 'data_stream' && value) {
       return (
-        <>
-          <EuiLink
-            data-test-subj="dataStreamLink"
-            {...reactRouterNavigate(history, {
-              pathname: getDataStreamDetailsLink(value),
-              search: '?isDeepLink=true',
-            })}
-          >
-            {value}
-          </EuiLink>
-        </>
+        <EuiLink
+          data-test-subj="dataStreamLink"
+          {...reactRouterNavigate(history, {
+            pathname: getDataStreamDetailsLink(value),
+            search: '?isDeepLink=true',
+          })}
+        >
+          {value}
+        </EuiLink>
       );
     }
 
