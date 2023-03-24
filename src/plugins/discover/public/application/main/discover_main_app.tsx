@@ -8,12 +8,10 @@
 import React, { useCallback, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useUrlTracking } from './hooks/use_url_tracking';
-import { useSearchSession } from './hooks/use_search_session';
 import { DiscoverStateContainer } from './services/discover_state';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
-import { useUrl } from './hooks/use_url';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias_match_redirect';
 import { useSavedSearchInitial } from './services/discover_state_provider';
@@ -45,11 +43,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   useUrlTracking(stateContainer.savedSearchState);
 
   /**
-   * Search session logic
-   */
-  useSearchSession({ services, stateContainer });
-
-  /**
    * Adhoc data views functionality
    */
   const { persistDataView } = useAdHocDataViews({
@@ -72,11 +65,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     stateContainer.actions.fetchData(true);
     return () => unsubscribe();
   }, [stateContainer]);
-
-  /**
-   * Url / Routing logic
-   */
-  useUrl({ history: usedHistory, stateContainer });
 
   /**
    * SavedSearch dependend initializing

@@ -16,6 +16,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import {
   DataPublicPluginStart,
+  noSearchSessionStorageCapabilityMessage,
   QueryState,
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
@@ -354,7 +355,9 @@ export function getDiscoverStateContainer({
     dataStateContainer.reset(nextSavedSearch);
     return nextSavedSearch;
   };
-
+  /**
+   * Wiring up all subscriptions to change of state
+   */
   const initializeAndSync = () => {
     const unsubscribeData = dataStateContainer.subscribe();
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
@@ -383,11 +386,39 @@ export function getDiscoverStateContainer({
       fetchData();
     });
 
+    services.data.search.session.enableStorage(
+      createSearchSessionRestorationDataProvider({
+        appStateContainer,
+        data: services.data,
+        getSavedSearch: () => savedSearchContainer.getState(),
+      }),
+      {
+        isDisabled: () =>
+          services.capabilities.discover.storeSearchSession
+            ? { disabled: false }
+            : {
+                disabled: true,
+                reasonText: noSearchSessionStorageCapabilityMessage,
+              },
+      }
+    );
+
+    // this listener is waiting for such a path http://localhost:5601/app/discover#/
+    // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
+    // to reload the page in a right way
+    const unlistenHistoryBasePath = history.listen(async ({ pathname, search, hash }) => {
+      if (!search && !hash && pathname === '/' && !savedSearchContainer.getId()) {
+        await loadSavedSearch();
+        fetchData(true);
+      }
+    });
+
     return () => {
       unsubscribeData();
       appStateUnsubscribe();
       appStateInitAndSyncUnsubscribe();
       filterUnsubscribe.unsubscribe();
+      unlistenHistoryBasePath();
     };
   };
 

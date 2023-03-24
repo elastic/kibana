@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { createBrowserHistory } from 'history';
+import { createBrowserHistory, History } from 'history';
 import { getDiscoverStateContainer } from '../application/main/services/discover_state';
 import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
 import { discoverServiceMock } from './services';
@@ -14,15 +14,17 @@ import { SavedSearch } from '@kbn/saved-search-plugin/public';
 export function getDiscoverStateMock({
   isTimeBased = true,
   savedSearch,
+  history,
 }: {
   isTimeBased?: boolean;
   savedSearch?: SavedSearch;
+  history?: History;
 }) {
-  const history = createBrowserHistory();
-  history.push('/');
+  const actualHistory = history ? history : createBrowserHistory();
+  actualHistory.push('/');
   const container = getDiscoverStateContainer({
     services: discoverServiceMock,
-    history,
+    history: actualHistory,
   });
   container.savedSearchState.set(
     savedSearch ? savedSearch : isTimeBased ? savedSearchMockWithTimeField : savedSearchMock

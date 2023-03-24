@@ -26,7 +26,8 @@ import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
 import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 import { copySavedSearch } from './discover_saved_search_container';
-
+import { createSearchSessionMock } from '../../../__mocks__/search_session';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 const startSync = (appState: DiscoverAppStateContainer) => {
   const { start, stop } = appState.syncState();
   start();
@@ -231,6 +232,37 @@ describe('createSearchSessionRestorationDataProvider', () => {
         pause: true,
         value: 0,
       });
+    });
+  });
+});
+
+describe('url', () => {
+  async function prepareTest(savedSearch: SavedSearch, path: string) {
+    const { history } = createSearchSessionMock();
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true, history, savedSearch });
+    const unsubscribe = stateContainer.actions.initializeAndSync();
+    const newFunction = jest.spyOn(stateContainer.savedSearchState, 'new');
+    history.push(path);
+    await waitFor(() => {
+      expect(history.location.pathname).toBe(path);
+    });
+    unsubscribe();
+    return { load: newFunction };
+  }
+  describe('test useUrl when the url is changed to /', () => {
+    test('savedSearchState.new is not triggered when the url is e.g. /new', async () => {
+      // the switch to loading the new saved search is taken care in the main route
+      const { load } = await prepareTest(savedSearchMockWithTimeFieldNew, '/new');
+      expect(load).toHaveBeenCalledTimes(0);
+    });
+    test('savedSearchState.new is not triggered when a persisted saved search is pre-selected', async () => {
+      // the switch to loading the new saved search is taken care in the main route
+      const { load } = await prepareTest(savedSearchMockWithTimeField, '/');
+      expect(load).toHaveBeenCalledTimes(0);
+    });
+    test('savedSearchState.new is triggered when a new saved search is pre-selected ', async () => {
+      const { load } = await prepareTest(savedSearchMockWithTimeFieldNew, '/');
+      expect(load).toHaveBeenCalledTimes(1);
     });
   });
 });
