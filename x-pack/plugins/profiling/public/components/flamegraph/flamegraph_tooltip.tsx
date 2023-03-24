@@ -165,7 +165,7 @@ export function FlameGraphTooltip({
                   <EuiFlexItem grow={false}>
                     <EuiText color="subdued" size="xs">
                       {i18n.translate('xpack.profiling.flameGraphTooltip.rightClickTip', {
-                        defaultMessage: `Right-click to stick tooltip`,
+                        defaultMessage: `Right-click to pin tooltip`,
                       })}
                     </EuiText>
                   </EuiFlexItem>
