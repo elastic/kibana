@@ -34,7 +34,6 @@
   transition-property: none !important;
 }
 
-
 /**
  * 1. Need to override the react grid layout height when a single panel is expanded. Important is required because
  * otherwise the height is set inline.
@@ -42,10 +41,6 @@
 .dshLayout-isMaximizedPanel {
   height: 100% !important; /* 1. */
 }
-
-/**
- * .dshLayout-withoutMargins only affects the panel styles themselves, see ../panel
- */
 
 /**
  * When a single panel is expanded, all the other panels are hidden in the grid.
