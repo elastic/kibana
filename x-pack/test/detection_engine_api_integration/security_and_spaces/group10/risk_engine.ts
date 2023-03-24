@@ -30,7 +30,7 @@ const removeFields = (scores: any[]) =>
 
 const createDocument = (body: any, id?: string) => {
   const documentId = uuidv4();
-  const firstTimestamp = new Date().toISOString();
+  const firstTimestamp = Date.now();
   const doc = {
     id: id || documentId,
     '@timestamp': firstTimestamp,
@@ -53,15 +53,21 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const getRiskScoreAfterRuleCreationAndExecution = async (
     documentId: string,
-    alertsNumber: number = 1
+    {
+      alerts = 1,
+      riskScore = 21,
+      maxSignals = 100,
+    }: { alerts?: number; riskScore?: number; maxSignals?: number } = {}
   ) => {
     const rule = getRuleForSignalTesting(['ecs_compliant']);
     const { id } = await createRule(supertest, log, {
       ...rule,
+      risk_score: riskScore,
       query: `id: ${documentId}`,
+      max_signals: maxSignals,
     });
     await waitForRuleSuccessOrStatus(supertest, log, id);
-    await waitForSignalsToBePresent(supertest, log, alertsNumber, [id]);
+    await waitForSignalsToBePresent(supertest, log, alerts, [id]);
 
     const { body } = await supertest
       .post(RISK_SCORES_URL)
@@ -72,7 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return body;
   };
 
-  describe.only('Risk engine', () => {
+  describe('Risk engine', () => {
     describe('tests with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -91,6 +97,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       beforeEach(async () => {
+        await deleteSignalsIndex(supertest, log);
+
         await deleteAllRules(supertest, log);
         await createSignalsIndex(supertest, log);
       });
@@ -100,131 +108,195 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllRules(supertest, log);
       });
 
-      it('risk scores calculated for 1 alert', async () => {
-        const documentId = uuidv4();
-        await indexListOfDocuments([createDocument(host('host-1'), documentId)]);
+      describe('rule risk score 21', () => {
+        it('risk scores calculated for 1 alert', async () => {
+          const documentId = uuidv4();
+          await indexListOfDocuments([createDocument(host('host-1'), documentId)]);
 
-        const body = await getRiskScoreAfterRuleCreationAndExecution(documentId);
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId);
 
-        expect(removeFields(body.scores)).to.eql([
-          {
-            calculatedLevel: 'Unknown',
-            calculatedScore: 1,
-            calculatedScoreNorm: 0.38284839203675347,
-            identifierField: 'host.name',
-            identifierValue: 'host-1',
-          },
-        ]);
+          expect(removeFields(body.scores)).to.eql([
+            {
+              calculatedLevel: 'Unknown',
+              calculatedScore: 21,
+              calculatedScoreNorm: 8.039816232771823,
+              identifierField: 'host.name',
+              identifierValue: 'host-1',
+            },
+          ]);
+        });
+
+        it('risk scores calculated for 2 alert with different host names', async () => {
+          const documentId = uuidv4();
+          await indexListOfDocuments([
+            createDocument(host('host-1'), documentId),
+            createDocument(host('host-2'), documentId),
+          ]);
+
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
+            alerts: 2,
+          });
+
+          expect(removeFields(body.scores)).to.eql([
+            {
+              calculatedLevel: 'Unknown',
+              calculatedScore: 21,
+              calculatedScoreNorm: 8.039816232771823,
+              identifierField: 'host.name',
+              identifierValue: 'host-1',
+            },
+            {
+              calculatedLevel: 'Unknown',
+              calculatedScore: 21,
+              calculatedScoreNorm: 8.039816232771823,
+              identifierField: 'host.name',
+              identifierValue: 'host-2',
+            },
+          ]);
+        });
+        it('risk scores calculated for 2 alert with different host names', async () => {
+          const documentId = uuidv4();
+          await indexListOfDocuments([
+            createDocument(host('host-1'), documentId),
+            createDocument(host('host-1'), documentId),
+          ]);
+
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
+            alerts: 2,
+          });
+
+          expect(removeFields(body.scores)).to.eql([
+            {
+              calculatedLevel: 'Unknown',
+              calculatedScore: 28.42462120245875,
+              calculatedScoreNorm: 10.88232052161514,
+              identifierField: 'host.name',
+              identifierValue: 'host-1',
+            },
+          ]);
+        });
+
+        it('risk scores calculated for 30 alert with different host names', async () => {
+          const documentId = uuidv4();
+          const doc = createDocument(host('host-1'), documentId);
+          await indexListOfDocuments(Array(30).fill(doc));
+
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
+            alerts: 30,
+          });
+
+          expect(removeFields(body.scores)).to.eql([
+            {
+              calculatedLevel: 'Unknown',
+              calculatedScore: 47.25513506055279,
+              calculatedScoreNorm: 18.091552473412246,
+              identifierField: 'host.name',
+              identifierValue: 'host-1',
+            },
+          ]);
+        });
+
+        it('risk scores calculated for 30 alert with same host names and 1 different', async () => {
+          const documentId = uuidv4();
+          const doc = createDocument(host('host-1'), documentId);
+          await indexListOfDocuments([
+            ...Array(30).fill(doc),
+            createDocument(host('host-2'), documentId),
+          ]);
+
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
+            alerts: 31,
+          });
+
+          expect(removeFields(body.scores)).to.eql([
+            {
+              calculatedLevel: 'Unknown',
+              calculatedScore: 47.25513506055279,
+              calculatedScoreNorm: 18.091552473412246,
+              identifierField: 'host.name',
+              identifierValue: 'host-1',
+            },
+            {
+              calculatedLevel: 'Unknown',
+              calculatedScore: 21,
+              calculatedScoreNorm: 8.039816232771823,
+              identifierField: 'host.name',
+              identifierValue: 'host-2',
+            },
+          ]);
+        });
+
+        it('risk scores calculated for 100 alert with the same host names', async () => {
+          const documentId = uuidv4();
+          const doc = createDocument(host('host-1'), documentId);
+          await indexListOfDocuments(Array(100).fill(doc));
+
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
+            alerts: 100,
+          });
+
+          expect(removeFields(body.scores)).to.eql([
+            {
+              calculatedLevel: 'Unknown',
+              calculatedScore: 50.67035607277805,
+              calculatedScoreNorm: 19.399064346392823,
+              identifierField: 'host.name',
+              identifierValue: 'host-1',
+            },
+          ]);
+        });
       });
 
-      it('risk scores calculated for 2 alert with different host names', async () => {
-        const documentId = uuidv4();
-        await indexListOfDocuments([
-          createDocument(host('host-1'), documentId),
-          createDocument(host('host-2'), documentId),
-        ]);
+      describe('rule risk score 100', () => {
+        it('risk scores calculated for 100 alert', async () => {
+          const documentId = uuidv4();
+          const doc = createDocument(host('host-1'), documentId);
+          await indexListOfDocuments(Array(100).fill(doc));
 
-        const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, 2);
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
+            riskScore: 100,
+            alerts: 100,
+          });
 
-        expect(removeFields(body.scores)).to.eql([
-          {
-            calculatedLevel: 'Unknown',
-            calculatedScore: 1,
-            calculatedScoreNorm: 0.38284839203675347,
-            identifierField: 'host.name',
-            identifierValue: 'host-1',
-          },
-          {
-            calculatedLevel: 'Unknown',
-            calculatedScore: 1,
-            calculatedScoreNorm: 0.38284839203675347,
-            identifierField: 'host.name',
-            identifierValue: 'host-2',
-          },
-        ]);
-      });
-      it('risk scores calculated for 2 alert with different host names', async () => {
-        const documentId = uuidv4();
-        await indexListOfDocuments([
-          createDocument(host('host-1'), documentId),
-          createDocument(host('host-1'), documentId),
-        ]);
+          expect(removeFields(body.scores)).to.eql([
+            {
+              calculatedLevel: 'Critical',
+              calculatedScore: 241.2874098703716,
+              calculatedScoreNorm: 92.37649688758484,
+              identifierField: 'host.name',
+              identifierValue: 'host-1',
+            },
+          ]);
+        });
 
-        const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, 2);
+        it('risk scores calculated for 10.000 alert', async () => {
+          const documentId = uuidv4();
+          const doc = createDocument(host('host-1'), documentId);
+          await indexListOfDocuments(
+            Array(10000)
+              .fill(doc)
+              .map((item, index) => ({
+                ...item,
+                ['@timestamp']: item['@timestamp'] - index,
+              }))
+          );
 
-        expect(removeFields(body.scores)).to.eql([
-          {
-            calculatedLevel: 'Unknown',
-            calculatedScore: 1.3535533905932737,
-            calculatedScoreNorm: 0.5182057391245306,
-            identifierField: 'host.name',
-            identifierValue: 'host-1',
-          },
-        ]);
-      });
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
+            riskScore: 100,
+            alerts: 10000,
+            maxSignals: 10000,
+          });
 
-      it('risk scores calculated for 30 alert with different host names', async () => {
-        const documentId = uuidv4();
-        const doc = createDocument(host('host-1'), documentId);
-        await indexListOfDocuments(Array(30).fill(doc));
-
-        const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, 30);
-
-        expect(removeFields(body.scores)).to.eql([
-          {
-            calculatedLevel: 'Unknown',
-            calculatedScore: 2.2502445266929905,
-            calculatedScoreNorm: 0.8615024987339168,
-            identifierField: 'host.name',
-            identifierValue: 'host-1',
-          },
-        ]);
-      });
-
-      it('risk scores calculated for 30 alert with same host names and 1 different', async () => {
-        const documentId = uuidv4();
-        const doc = createDocument(host('host-1'), documentId);
-        await indexListOfDocuments([
-          ...Array(30).fill(doc),
-          createDocument(host('host-2'), documentId),
-        ]);
-
-        const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, 31);
-
-        expect(removeFields(body.scores)).to.eql([
-          {
-            calculatedLevel: 'Unknown',
-            calculatedScore: 2.2502445266929905,
-            calculatedScoreNorm: 0.8615024987339168,
-            identifierField: 'host.name',
-            identifierValue: 'host-1',
-          },
-          {
-            calculatedLevel: 'Unknown',
-            calculatedScore: 1,
-            calculatedScoreNorm: 0.38284839203675347,
-            identifierField: 'host.name',
-            identifierValue: 'host-2',
-          },
-        ]);
-      });
-
-      it('risk scores calculated for 100 alert with different host names', async () => {
-        const documentId = uuidv4();
-        const doc = createDocument(host('host-1'), documentId);
-        await indexListOfDocuments(Array(100).fill(doc));
-
-        const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, 100);
-
-        expect(removeFields(body.scores)).to.eql([
-          {
-            calculatedLevel: 'Unknown',
-            calculatedScore: 2.412874098703719,
-            calculatedScoreNorm: 0.9237649688758496,
-            identifierField: 'host.name',
-            identifierValue: 'host-1',
-          },
-        ]);
+          expect(removeFields(body.scores)).to.eql([
+            {
+              calculatedLevel: 'Critical',
+              calculatedScore: 259.237584867298,
+              calculatedScoreNorm: 99.24869252193645,
+              identifierField: 'host.name',
+              identifierValue: 'host-1',
+            },
+          ]);
+        });
       });
     });
   });
