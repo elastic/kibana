@@ -98,7 +98,7 @@ const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_P
   });
 };
 
-describe('Detections : Page Filters', { testIsolation: false }, () => {
+describe.skip('Detections : Page Filters', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
     login();

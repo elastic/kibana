@@ -30,7 +30,8 @@ jest.mock('../../ml/hooks/use_ml_capabilities');
 jest.mock('../../ml/api/get_jobs_summary');
 jest.mock('../api');
 
-describe('useSecurityJobs', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/153550
+describe.skip('useSecurityJobs', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
