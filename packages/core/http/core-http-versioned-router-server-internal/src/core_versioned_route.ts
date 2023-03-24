@@ -21,7 +21,7 @@ import type {
   VersionedRouteConfig,
 } from '@kbn/core-http-server';
 import type { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
-import { Mutable } from 'utility-types';
+import type { Mutable } from 'utility-types';
 import type { Method } from './types';
 
 import { validate } from './validate';
