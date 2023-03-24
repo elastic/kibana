@@ -18,15 +18,15 @@ For example, see:
 * Latency, throughput, and errors over time
 * Service dependencies
 
-All of this and more can help you understand how the performance of your backend impacts
-user experience on the frontend.
+All of these metrics & insights can help SREs and developers better understand the health
+of their mobile application environment and the impact of backend errors and bottlenecks on end-user experience.
 
 [discrete]
 [[mobile-service-stats]]
 === Quick stats
 
-Reduce your mean time to resolution time with insights into your slowest app load time and crash rate (coming soon).
-Visualize session and HTTP trends, and see where your users are located--enabling you to optimize your infrastructure.
+Understand the impact of slow application load times and variations in application crash rate on user traffic (coming soon).
+Visualize session and HTTP trends, and see where your users are located--enabling you to optimize your infrastructure deployment and routing topology.
 
 [role="screenshot"]
 image::apm/images/mobile-location.png[mobile service overview centered on location map]
@@ -35,7 +35,7 @@ image::apm/images/mobile-location.png[mobile service overview centered on locati
 [[mobile-service-most-used]]
 === Most used
 
-Optimize your app for a certain device type or operating system based on who your users are.
+Optimize your end-user experience and your application QA strategy based on your most used device models and operating system versions.
 
 [role="screenshot"]
 image::apm/images/mobile-most-used.png[mobile service overview showing most used devices, network, OS, and app version]
