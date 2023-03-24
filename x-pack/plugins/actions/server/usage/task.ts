@@ -6,11 +6,11 @@
  */
 
 import { Logger, CoreSetup } from '@kbn/core/server';
-import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
 import { PreConfiguredAction } from '../types';
 import { getTotalCount, getInUseTotalCount, getExecutionsPerDayCount } from './actions_telemetry';
@@ -18,6 +18,7 @@ import { getTotalCount, getInUseTotalCount, getExecutionsPerDayCount } from './a
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
 
 export const TASK_ID = `Actions-${TELEMETRY_TASK_TYPE}`;
+export const SCHEDULE: IntervalSchedule = { interval: '1d' };
 
 export function initializeActionsTelemetry(
   logger: Logger,
@@ -71,6 +72,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
       taskType: TELEMETRY_TASK_TYPE,
       state: {},
       params: {},
+      schedule: SCHEDULE,
     });
   } catch (e) {
     logger.debug(`Error scheduling task, received ${e.message}`);
@@ -133,14 +135,12 @@ export function telemetryTaskRunner(
               count_connector_types_by_action_run_outcome_per_day:
                 totalExecutionsPerDay.countRunOutcomeByConnectorType,
             },
-            runAt: getNextMidnight(),
+            // Useful for setting a schedule for the old tasks that don't have one
+            // or to update the schedule if ever the frequency changes in code
+            schedule: SCHEDULE,
           };
         });
       },
     };
   };
-}
-
-function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
 }

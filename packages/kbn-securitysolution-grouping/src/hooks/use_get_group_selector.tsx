@@ -7,10 +7,10 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { getGroupSelector, isNoneGroup } from '../..';
+import { GroupSelector, isNoneGroup } from '..';
 import { groupActions, groupByIdSelector } from './state';
 import type { GroupOption } from './types';
 import { Action, defaultGroup, GroupMap } from './types';
@@ -22,8 +22,8 @@ export interface UseGetGroupSelectorArgs {
   fields: FieldSpec[];
   groupingId: string;
   groupingState: GroupMap;
-  onGroupChangeCallback?: (param: { groupByField: string; tableId: string }) => void;
-  tracker: (
+  onGroupChange?: (param: { groupByField: string; tableId: string }) => void;
+  tracker?: (
     type: UiCounterMetricType,
     event: string | string[],
     count?: number | undefined
@@ -36,7 +36,7 @@ export const useGetGroupSelector = ({
   fields,
   groupingId,
   groupingState,
-  onGroupChangeCallback,
+  onGroupChange,
   tracker,
 }: UseGetGroupSelectorArgs) => {
   const { activeGroup: selectedGroup, options } =
@@ -63,7 +63,7 @@ export const useGetGroupSelector = ({
     [dispatch, groupingId]
   );
 
-  const onGroupChange = useCallback(
+  const onChange = useCallback(
     (groupSelection: string) => {
       if (groupSelection === selectedGroup) {
         return;
@@ -77,7 +77,7 @@ export const useGetGroupSelector = ({
         getTelemetryEvent.groupChanged({ groupingId, selected: groupSelection })
       );
 
-      onGroupChangeCallback?.({ tableId: groupingId, groupByField: groupSelection });
+      onGroupChange?.({ tableId: groupingId, groupByField: groupSelection });
 
       // only update options if the new selection is a custom field
       if (
@@ -96,7 +96,7 @@ export const useGetGroupSelector = ({
     [
       defaultGroupingOptions,
       groupingId,
-      onGroupChangeCallback,
+      onGroupChange,
       options,
       selectedGroup,
       setGroupsActivePage,
@@ -126,12 +126,16 @@ export const useGetGroupSelector = ({
     );
   }, [defaultGroupingOptions, options.length, selectedGroup, setOptions]);
 
-  return getGroupSelector({
-    groupingId,
-    groupSelected: selectedGroup,
-    'data-test-subj': 'alerts-table-group-selector',
-    onGroupChange,
-    fields,
-    options,
-  });
+  return (
+    <GroupSelector
+      {...{
+        groupingId,
+        groupSelected: selectedGroup,
+        'data-test-subj': 'alerts-table-group-selector',
+        onGroupChange: onChange,
+        fields,
+        options,
+      }}
+    />
+  );
 };
