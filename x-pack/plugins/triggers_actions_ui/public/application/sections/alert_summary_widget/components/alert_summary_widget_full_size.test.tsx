@@ -12,14 +12,14 @@ import {
   AlertSummaryWidgetFullSizeProps,
 } from './alert_summary_widget_full_size';
 import { render } from '@testing-library/react';
-import { mockedAlertSummaryResponse, mockedChartThemes } from '../../../mock/alert_summary_widget';
+import { mockedAlertSummaryResponse, mockedChartProps } from '../../../mock/alert_summary_widget';
 
 describe('AlertSummaryWidgetFullSize', () => {
   const renderComponent = (props: Partial<AlertSummaryWidgetFullSizeProps> = {}) =>
     render(
       <IntlProvider locale="en">
         <AlertSummaryWidgetFullSize
-          chartThemes={mockedChartThemes}
+          chartProps={mockedChartProps}
           {...mockedAlertSummaryResponse}
           {...props}
         />
