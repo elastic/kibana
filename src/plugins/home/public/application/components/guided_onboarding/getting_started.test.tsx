@@ -129,7 +129,7 @@ describe('getting started', () => {
     await act(async () => {
       component = mountWithIntl(
         <MemoryRouter
-          initialEntries={[{ pathname: '/', search: `?cloudDiscoveryUseCase=${cloudDiscoveryUseCase}` }]}
+          initialEntries={[{ pathname: '/', search: `?useCase=${cloudDiscoveryUseCase}` }]}
         >
           <GettingStarted />
         </MemoryRouter>

@@ -53,7 +53,7 @@ export const GettingStarted = () => {
   const query = parse(search);
 
   const [filter, setFilter] = useState<GuideFilterValues>(
-    query.cloudDiscoveryUseCase ? (query.cloudDiscoveryUseCase as GuideFilterValues) : 'all'
+    query.useCase ? (query.useCase as GuideFilterValues) : 'all'
   );
   const history = useHistory();
 
@@ -203,6 +203,7 @@ export const GettingStarted = () => {
         <EuiSpacer size="s" />
         <EuiSpacer size="xxl" />
         <GuideFilters
+          application={application}
           activeFilter={filter}
           setActiveFilter={setFilter}
           data-test-subj="onboarding--guideFilters"
