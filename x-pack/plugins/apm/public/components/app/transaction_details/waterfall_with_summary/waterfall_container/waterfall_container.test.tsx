@@ -6,7 +6,7 @@
  */
 
 import { composeStories } from '@storybook/testing-react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { disableConsoleWarning } from '../../../../../utils/test_helpers';
 import * as stories from './waterfall_container.stories';
@@ -24,13 +24,9 @@ describe('WaterfallContainer', () => {
     consoleMock.mockRestore();
   });
 
-  it('renders', () => {
-    expect(() => render(<Example />)).not.toThrowError();
-  });
-
-  it('expands and contracts the accordion', () => {
+  it('expands and contracts the accordion', async () => {
     const { getAllByRole } = render(<Example />);
-    const buttons = getAllByRole('button');
+    const buttons = await waitFor(() => getAllByRole('button'));
     const parentItem = buttons[1];
     const childItem = buttons[2];
 

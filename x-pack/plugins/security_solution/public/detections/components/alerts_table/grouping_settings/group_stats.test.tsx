@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getBadgeMetrics } from '.';
+import { getStats } from '.';
 
-describe('getBadgeMetrics', () => {
-  it('returns array of badges which roccespondes to the field name', () => {
-    const badgesRuleName = getBadgeMetrics('kibana.alert.rule.name', {
+describe('getStats', () => {
+  it('returns array of badges which corresponds to the field name', () => {
+    const badgesRuleName = getStats('kibana.alert.rule.name', {
       key: ['Rule name test', 'Some description'],
       usersCountAggregation: {
         value: 10,
@@ -18,13 +18,17 @@ describe('getBadgeMetrics', () => {
     });
 
     expect(
-      badgesRuleName.find((badge) => badge.title === 'Users:' && badge.value === 10)
+      badgesRuleName.find(
+        (badge) => badge.badge != null && badge.title === 'Users:' && badge.badge.value === 10
+      )
     ).toBeTruthy();
     expect(
-      badgesRuleName.find((badge) => badge.title === 'Alerts:' && badge.value === 10)
+      badgesRuleName.find(
+        (badge) => badge.badge != null && badge.title === 'Alerts:' && badge.badge.value === 10
+      )
     ).toBeTruthy();
 
-    const badgesHostName = getBadgeMetrics('host.name', {
+    const badgesHostName = getStats('host.name', {
       key: 'Host',
       rulesCountAggregation: {
         value: 3,
@@ -33,10 +37,12 @@ describe('getBadgeMetrics', () => {
     });
 
     expect(
-      badgesHostName.find((badge) => badge.title === 'Rules:' && badge.value === 3)
+      badgesHostName.find(
+        (badge) => badge.badge != null && badge.title === 'Rules:' && badge.badge.value === 3
+      )
     ).toBeTruthy();
 
-    const badgesUserName = getBadgeMetrics('user.name', {
+    const badgesUserName = getStats('user.name', {
       key: 'User test',
       hostsCountAggregation: {
         value: 1,
@@ -44,12 +50,14 @@ describe('getBadgeMetrics', () => {
       doc_count: 1,
     });
     expect(
-      badgesUserName.find((badge) => badge.title === `IP's:` && badge.value === 1)
+      badgesUserName.find(
+        (badge) => badge.badge != null && badge.title === `IP's:` && badge.badge.value === 1
+      )
     ).toBeTruthy();
   });
 
   it('returns default badges if the field specific does not exist', () => {
-    const badges = getBadgeMetrics('process.name', {
+    const badges = getStats('process.name', {
       key: 'process',
       rulesCountAggregation: {
         value: 3,
@@ -58,7 +66,15 @@ describe('getBadgeMetrics', () => {
     });
 
     expect(badges.length).toBe(2);
-    expect(badges.find((badge) => badge.title === 'Rules:' && badge.value === 3)).toBeTruthy();
-    expect(badges.find((badge) => badge.title === 'Alerts:' && badge.value === 10)).toBeTruthy();
+    expect(
+      badges.find(
+        (badge) => badge.badge != null && badge.title === 'Rules:' && badge.badge.value === 3
+      )
+    ).toBeTruthy();
+    expect(
+      badges.find(
+        (badge) => badge.badge != null && badge.title === 'Alerts:' && badge.badge.value === 10
+      )
+    ).toBeTruthy();
   });
 });

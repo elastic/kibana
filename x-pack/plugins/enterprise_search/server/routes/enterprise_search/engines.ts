@@ -4,9 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SearchResponse, AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 
-import { EnterpriseSearchEngineDetails } from '../../../common/types/engines';
+import {
+  EnterpriseSearchEngineDetails,
+  EnterpriseSearchEnginesResponse,
+  EnterpriseSearchEngineUpsertResponse,
+} from '../../../common/types/engines';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { createApiKey } from '../../lib/engines/create_api_key';
 
@@ -17,12 +22,7 @@ import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { fetchEnterpriseSearch, isResponseError } from '../../utils/fetch_enterprise_search';
 
-export function registerEnginesRoutes({
-  config,
-  enterpriseSearchRequestHandler,
-  log,
-  router,
-}: RouteDependencies) {
+export function registerEnginesRoutes({ config, log, router }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/engines',
@@ -34,20 +34,18 @@ export function registerEnginesRoutes({
         }),
       },
     },
-    enterpriseSearchRequestHandler.createRequest({ path: '/api/engines' })
-  );
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const engines = await client.asCurrentUser.transport.request<EnterpriseSearchEnginesResponse>(
+        {
+          method: 'GET',
+          path: `/_application/search_application`,
+          querystring: request.query,
+        }
+      );
 
-  router.post(
-    {
-      path: '/internal/enterprise_search/engines',
-      validate: {
-        body: schema.object({
-          indices: schema.arrayOf(schema.string()),
-          name: schema.string(),
-        }),
-      },
-    },
-    enterpriseSearchRequestHandler.createRequest({ path: '/api/engines' })
+      return response.ok({ body: engines });
+    })
   );
 
   router.get(
@@ -59,7 +57,14 @@ export function registerEnginesRoutes({
         }),
       },
     },
-    enterpriseSearchRequestHandler.createRequest({ path: '/api/engines/:engine_name' })
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const engine = await client.asCurrentUser.transport.request<EnterpriseSearchEngineDetails>({
+        method: 'GET',
+        path: `/_application/search_application/${request.params.engine_name}`,
+      });
+      return response.ok({ body: engine });
+    })
   );
 
   router.put(
@@ -70,12 +75,25 @@ export function registerEnginesRoutes({
           indices: schema.arrayOf(schema.string()),
           name: schema.maybe(schema.string()),
         }),
+        query: schema.object({
+          create: schema.maybe(schema.boolean()),
+        }),
         params: schema.object({
           engine_name: schema.string(),
         }),
       },
     },
-    enterpriseSearchRequestHandler.createRequest({ path: '/api/engines/:engine_name' })
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const engine =
+        await client.asCurrentUser.transport.request<EnterpriseSearchEngineUpsertResponse>({
+          method: 'PUT',
+          path: `/_application/search_application/${request.params.engine_name}`,
+          body: { indices: request.body.indices },
+          querystring: request.query,
+        });
+      return response.ok({ body: engine });
+    })
   );
 
   router.delete(
@@ -87,12 +105,38 @@ export function registerEnginesRoutes({
         }),
       },
     },
-    enterpriseSearchRequestHandler.createRequest({
-      hasJsonResponse: false,
-      path: '/api/engines/:engine_name',
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const engine = await client.asCurrentUser.transport.request<AcknowledgedResponseBase>({
+        method: 'DELETE',
+        path: `_application/search_application/${request.params.engine_name}`,
+      });
+      return response.ok({ body: engine });
     })
   );
 
+  router.post(
+    {
+      path: '/internal/enterprise_search/engines/{engine_name}/search',
+      validate: {
+        body: schema.object({}, { unknowns: 'allow' }),
+        params: schema.object({
+          engine_name: schema.string(),
+          from: schema.maybe(schema.number()),
+          size: schema.maybe(schema.number()),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const engines = await client.asCurrentUser.transport.request<SearchResponse>({
+        method: 'POST',
+        path: `/${request.params.engine_name}/_search`,
+        body: {},
+      });
+      return response.ok({ body: engines });
+    })
+  );
   router.post(
     {
       path: '/internal/enterprise_search/engines/{engine_name}/api_key',
@@ -118,24 +162,6 @@ export function registerEnginesRoutes({
       });
     })
   );
-
-  router.post(
-    {
-      path: '/internal/enterprise_search/engines/{engine_name}/search',
-      validate: {
-        body: schema.object({}, { unknowns: 'allow' }),
-        params: schema.object({
-          engine_name: schema.string(),
-          from: schema.maybe(schema.number()),
-          size: schema.maybe(schema.number()),
-        }),
-      },
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/api/engines/:engine_name/_search',
-    })
-  );
-
   router.get(
     {
       path: '/internal/enterprise_search/engines/{engine_name}/field_capabilities',
@@ -150,6 +176,7 @@ export function registerEnginesRoutes({
         request,
         `/api/engines/${engineName}`
       );
+
       if (!engine || (isResponseError(engine) && engine.responseStatus === 404)) {
         return createError({
           errorCode: ErrorCode.ENGINE_NOT_FOUND,
