@@ -45,6 +45,8 @@ export const exportRulesRoute = (
       const siemResponse = buildSiemResponse(response);
       const rulesClient = (await context.alerting).getRulesClient();
       const exceptionsClient = (await context.lists)?.getExceptionListClient();
+      const actionsClient = (await context.actions)?.getActionsClient();
+
       const {
         getExporter,
         getClient,
@@ -81,7 +83,8 @@ export const exportRulesRoute = (
                 request.body.objects,
                 logger,
                 actionsExporter,
-                request
+                request,
+                actionsClient
               )
             : await getExportAll(
                 rulesClient,
@@ -90,6 +93,7 @@ export const exportRulesRoute = (
                 logger,
                 actionsExporter,
                 request
+                // actionsClient
               );
 
         const responseBody = request.query.exclude_export_details
