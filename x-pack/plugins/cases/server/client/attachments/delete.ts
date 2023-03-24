@@ -112,14 +112,17 @@ export const deleteFileAttachments = async (
       throw Boom.badRequest(`Failed to delete files because filed ids were invalid: ${invalidIds}`);
     }
 
-    // It's possible for this to return an empty array if there was an error creating file attachments
+    if (validFiles.length <= 0) {
+      throw Boom.badRequest(`Failed to find files to delete`);
+    }
+
+    // It's possible for this to return an empty array if there was an error creating file attachments in which case the
+    // file would be present but the case attachment would not
     const fileAttachments = await attachmentService.getter.getFileAttachments({ caseId, fileIds });
 
     const fileEntities: OwnerEntity[] = [];
     for (const fileInfo of validFiles) {
-      for (const owner of fileInfo.data.meta.owner) {
-        fileEntities.push({ id: fileInfo.id, owner });
-      }
+      fileEntities.push(...fileInfo.data.meta.owner.map((owner) => ({ id: fileInfo.id, owner })));
     }
 
     await authorization.ensureAuthorized({

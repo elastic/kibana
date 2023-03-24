@@ -7,12 +7,6 @@
 
 import expect from '@kbn/expect';
 
-import {
-  APP_ID as CASES_APP_ID,
-  constructFileKindIdByOwner,
-} from '@kbn/cases-plugin/common/constants';
-import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugin/common/constants';
-import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
 import { BaseFilesClient } from '@kbn/shared-ux-file-types';
 import { User } from '../../../cases_api_integration/common/lib/authentication/types';
 import {
@@ -34,15 +28,16 @@ import {
   secAllUser,
   secReadCasesReadUser,
 } from './common/users';
+import {
+  CASES_FILE_KIND,
+  OBSERVABILITY_FILE_KIND,
+  SECURITY_SOLUTION_FILE_KIND,
+} from '../../../cases_api_integration/common/lib/constants';
 
 interface TestScenario {
   user: User;
   fileKind: string;
 }
-
-const SECURITY_SOLUTION_FILE_KIND = constructFileKindIdByOwner(SECURITY_SOLUTION_APP_ID);
-const OBSERVABILITY_FILE_KIND = constructFileKindIdByOwner(OBSERVABILITY_APP_ID);
-const CASES_FILE_KIND = constructFileKindIdByOwner(CASES_APP_ID);
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');

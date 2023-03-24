@@ -264,7 +264,7 @@ export const deleteFileAttachments = async ({
   supertest,
   caseId,
   fileIds,
-  expectedHttpCode = 200,
+  expectedHttpCode = 204,
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
