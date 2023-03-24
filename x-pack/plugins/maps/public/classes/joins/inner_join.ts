@@ -138,7 +138,10 @@ export class InnerJoin {
     return this._descriptor;
   }
 
-  async getTooltipProperties(properties: GeoJsonProperties, executionContext: KibanaExecutionContext) {
+  async getTooltipProperties(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ) {
     return await this.getRightJoinSource().getTooltipProperties(properties, executionContext);
   }
 

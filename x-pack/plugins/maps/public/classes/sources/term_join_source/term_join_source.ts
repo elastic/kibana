@@ -35,6 +35,9 @@ export interface ITermJoinSource extends ISource {
 
   getId(): string;
   getRightFields(): IField[];
-  getTooltipProperties(properties: GeoJsonProperties, executionContext: KibanaExecutionContext): Promise<ITooltipProperty[]>;
+  getTooltipProperties(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ): Promise<ITooltipProperty[]>;
   getFieldByName(fieldName: string): IField | null;
 }

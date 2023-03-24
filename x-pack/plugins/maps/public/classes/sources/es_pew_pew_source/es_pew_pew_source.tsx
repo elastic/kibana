@@ -184,7 +184,10 @@ export class ESPewPewSource extends AbstractESAggSource {
         defaultMessage: 'Source-destination connections request',
       }),
       searchSessionId: searchFilters.searchSessionId,
-      executionContext: mergeExecutionContext({ description: 'es_pew_pew_source:connections' }, searchFilters.executionContext),
+      executionContext: mergeExecutionContext(
+        { description: 'es_pew_pew_source:connections' },
+        searchFilters.executionContext
+      ),
       requestsAdapter: inspectorAdapters.requests,
     });
 
@@ -229,7 +232,10 @@ export class ESPewPewSource extends AbstractESAggSource {
         searchSource.fetch$({
           abortSignal: abortController.signal,
           legacyHitsTotal: false,
-          executionContext: mergeExecutionContext({ description: 'es_pew_pew_source:bounds' }, boundsFilters.executionContext),
+          executionContext: mergeExecutionContext(
+            { description: 'es_pew_pew_source:bounds' },
+            boundsFilters.executionContext
+          ),
         })
       );
       const destBounds = (esResp.aggregations?.destFitToBounds as AggregationsGeoBoundsAggregate)

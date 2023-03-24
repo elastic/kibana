@@ -9,7 +9,12 @@ import React from 'react';
 import _ from 'lodash';
 import { finalize, switchMap, tap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { AppLeaveAction, AppMountParameters, KibanaExecutionContext, ScopedHistory } from '@kbn/core/public';
+import {
+  AppLeaveAction,
+  AppMountParameters,
+  KibanaExecutionContext,
+  ScopedHistory,
+} from '@kbn/core/public';
 import { Adapters } from '@kbn/embeddable-plugin/public';
 import { Subscription } from 'rxjs';
 import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
@@ -130,7 +135,7 @@ export class MapApp extends React.Component<Props, State> {
       url: window.location.pathname,
       id: this.props.savedMap.getSavedObjectId() || 'new',
       page: 'editor',
-    }
+    };
     getExecutionContextService().set(executionContext); // set execution context in core ExecutionContextStartService
     this.props.setExecutionContext(executionContext); // set execution context in redux store
 

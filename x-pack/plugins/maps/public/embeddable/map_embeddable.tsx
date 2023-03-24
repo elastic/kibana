@@ -171,9 +171,7 @@ export class MapEmbeddable
       return;
     }
 
-    this._savedMap.getStore().dispatch(
-      setExecutionContext(this.getExecutionContext())
-    );
+    this._savedMap.getStore().dispatch(setExecutionContext(this.getExecutionContext()));
 
     // deferred loading of this embeddable is complete
     this.setInitializationFinished();

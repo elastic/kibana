@@ -310,7 +310,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         searchSource.fetch$({
           abortSignal: abortController.signal,
           legacyHitsTotal: false,
-          executionContext: mergeExecutionContext({ description: 'es_source:bounds' }, boundsFilters.executionContext),
+          executionContext: mergeExecutionContext(
+            { description: 'es_source:bounds' },
+            boundsFilters.executionContext
+          ),
         })
       );
 
@@ -508,7 +511,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         }
       ),
       searchSessionId,
-      executionContext: mergeExecutionContext({ description: 'es_source:style_meta' }, executionContext),
+      executionContext: mergeExecutionContext(
+        { description: 'es_source:style_meta' },
+        executionContext
+      ),
       requestsAdapter: inspectorAdapters.requests,
     });
 

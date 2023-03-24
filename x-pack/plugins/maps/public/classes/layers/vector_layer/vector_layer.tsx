@@ -95,7 +95,10 @@ export interface IVectorLayer extends ILayer {
   getSource(): IVectorSource;
   getFeatureId(feature: Feature): string | number | undefined;
   getFeatureById(id: string | number): Feature | null;
-  getPropertiesForTooltip(properties: GeoJsonProperties, executionContext: KibanaExecutionContext): Promise<ITooltipProperty[]>;
+  getPropertiesForTooltip(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
   showJoinEditor(): boolean;
   canShowTooltip(): boolean;
@@ -933,13 +936,19 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     }
   }
 
-  async getPropertiesForTooltip(properties: GeoJsonProperties, executionContext: KibanaExecutionContext) {
+  async getPropertiesForTooltip(
+    properties: GeoJsonProperties,
+    executionContext: KibanaExecutionContext
+  ) {
     const vectorSource = this.getSource();
     let allProperties = await vectorSource.getTooltipProperties(properties, executionContext);
     this._addJoinsToSourceTooltips(allProperties);
 
     for (let i = 0; i < this.getJoins().length; i++) {
-      const propsFromJoin = await this.getJoins()[i].getTooltipProperties(properties, executionContext);
+      const propsFromJoin = await this.getJoins()[i].getTooltipProperties(
+        properties,
+        executionContext
+      );
       allProperties = [...allProperties, ...propsFromJoin];
     }
     return allProperties;

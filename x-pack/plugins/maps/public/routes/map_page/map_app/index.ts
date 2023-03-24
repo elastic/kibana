@@ -66,7 +66,8 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     enableFullScreen: () => dispatch(enableFullScreen()),
     openMapSettings: () => dispatch(openMapSettings()),
-    setExecutionContext: (executionContext: KibanaExecutionContext) => dispatch(setExecutionContext(executionContext)),
+    setExecutionContext: (executionContext: KibanaExecutionContext) =>
+      dispatch(setExecutionContext(executionContext)),
   };
 }
 
