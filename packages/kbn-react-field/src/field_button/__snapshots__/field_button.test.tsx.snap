@@ -11,7 +11,11 @@ exports[`fieldAction is rendered 1`] = `
     <span
       className="kbnFieldButton__name"
     >
-      name
+      <span
+        className="kbnFieldButton__nameInner domDragDrop__enableTextSelection"
+      >
+        name
+      </span>
     </span>
   </button>
   <div
@@ -42,7 +46,11 @@ exports[`fieldIcon is rendered 1`] = `
     <span
       className="kbnFieldButton__name"
     >
-      name
+      <span
+        className="kbnFieldButton__nameInner domDragDrop__enableTextSelection"
+      >
+        name
+      </span>
     </span>
   </button>
 </div>
@@ -59,7 +67,11 @@ exports[`isActive defaults to false 1`] = `
     <span
       className="kbnFieldButton__name"
     >
-      name
+      <span
+        className="kbnFieldButton__nameInner domDragDrop__enableTextSelection"
+      >
+        name
+      </span>
     </span>
   </button>
 </div>
@@ -93,7 +105,11 @@ exports[`sizes s is applied 1`] = `
     <span
       className="kbnFieldButton__name"
     >
-      name
+      <span
+        className="kbnFieldButton__nameInner domDragDrop__enableTextSelection"
+      >
+        name
+      </span>
     </span>
   </button>
 </div>
@@ -138,7 +154,11 @@ exports[`with drag handle is rendered 1`] = `
     <span
       className="kbnFieldButton__name"
     >
-      name
+      <span
+        className="kbnFieldButton__nameInner domDragDrop__enableTextSelection"
+      >
+        name
+      </span>
     </span>
   </button>
 </div>
