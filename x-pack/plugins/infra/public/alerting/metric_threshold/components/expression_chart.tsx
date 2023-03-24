@@ -40,7 +40,7 @@ import { CUSTOM_EQUATION } from '../i18n_strings';
 interface Props {
   expression: MetricExpression;
   derivedIndexPattern: DataViewBase;
-  source: MetricsSourceConfiguration | null;
+  source?: MetricsSourceConfiguration;
   filterQuery?: string;
   groupBy?: string | string[];
   chartType?: MetricsExplorerChartType;

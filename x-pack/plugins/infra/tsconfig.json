@@ -58,6 +58,7 @@
     "@kbn/cases-plugin",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/exploratory-view-plugin",
+    "@kbn/shared-ux-prompt-not-found"
   ],
   "exclude": ["target/**/*"]
 }
