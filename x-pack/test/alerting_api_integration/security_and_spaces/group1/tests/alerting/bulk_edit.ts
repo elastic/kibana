@@ -18,6 +18,8 @@ import {
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
+const SOURCE_LOG_DATA_INDEX = 'log-bulk-edit-rule'
+
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -612,7 +614,49 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
     describe('do NOT delete reference for rule type like', () => {
       const es = getService('es');
 
+      const createDataView = async (dataView: string) => {
+        return await supertest
+          .post(`/api/data_views/data_view`)
+          .set('kbn-xsrf', 'foo')
+          .send({ data_view: { title: dataView, timeFieldName: '@timestamp' } })
+          .expect(200);
+      };
+
+      const deleteDataView = async (dataViewId: string) => {
+        return await supertest
+          .delete(`/api/data_views/data_view/${dataViewId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+      };
+
+      const createSourceIndex = () => {
+        es.index({
+          index: SOURCE_LOG_DATA_INDEX,
+          body: {
+            settings: { number_of_shards: 1 },
+            mappings: {
+              properties: {
+                '@timestamp': { type: 'date' },
+                message: { type: 'keyword' },
+              },
+            },
+          },
+        });
+      }
+
+      before(async () => {
+        await createSourceIndex();
+      })
+
+      after(async () => {
+        await es.transport.request({
+          path: `${SOURCE_LOG_DATA_INDEX}`,
+          method: 'DELETE',
+        });
+      })
+
       it('.esquery', async () => {
+        const dv = await createDataView(SOURCE_LOG_DATA_INDEX)
         const space1 = UserAtSpaceScenarios[1].space.id;
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(space1)}/api/alerting/rule`)
@@ -621,20 +665,21 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             getTestRuleData({
               params: {
                 searchConfiguration: {
-                  query: { query: 'host.name:*', language: 'kuery' },
-                  index: 'logs-*',
+                  query: {
+                    query: '_id:*',
+                    language: 'kuery'
+                  },
+                  index: dv.body.data_view.id
                 },
-                timeField: '@timestamp',
                 searchType: 'searchSource',
                 timeWindowSize: 5,
                 timeWindowUnit: 'm',
-                threshold: [1000],
+                threshold: [
+                  1000
+                ],
                 thresholdComparator: '>',
                 size: 100,
-                aggType: 'count',
-                groupBy: 'all',
-                termSize: 5,
-                excludeHitsFromPreviousRun: true,
+                excludeHitsFromPreviousRun: true
               },
               consumer: 'alerts',
               schedule: { interval: '1m' },
@@ -684,6 +729,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         expect(alertHitsV1[0]?._source?.references ?? true).to.eql(
           alertHitsV2[0]?._source?.references ?? false
         );
+
+        await deleteDataView(dv.body.data_view.id);
       });
     });
   });
