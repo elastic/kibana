@@ -21,7 +21,7 @@ export function registerIntegrations(
     }),
     description: i18n.translate('xpack.maps.registerIntegrations.gdal.integrationDescription', {
       defaultMessage:
-        'Upload shapefiles and ingest from relational databases such as PostGIS or Oracle Spatial with GDAL.',
+        'Upload shapefiles and ingest from relational databases such as PostGIS or Oracle Spatial with GDAL and Elastic Maps.',
     }),
     uiInternalPath:
       'https://www.elastic.co/blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal',
