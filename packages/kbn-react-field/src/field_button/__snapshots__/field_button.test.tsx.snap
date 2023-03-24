@@ -110,7 +110,11 @@ exports[`sizes xs is applied 1`] = `
     <span
       className="kbnFieldButton__name"
     >
-      name
+      <span
+        className="kbnFieldButton__nameInner domDragDrop__enableTextSelection"
+      >
+        name
+      </span>
     </span>
   </button>
 </div>

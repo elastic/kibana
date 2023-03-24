@@ -246,13 +246,6 @@ export const DragDrop = (props: BaseProps) => {
   return <DropsInner {...dropProps} />;
 };
 
-const removeSelection = () => {
-  const selection = window.getSelection();
-  if (selection) {
-    selection.removeAllRanges();
-  }
-};
-
 const DragInner = memo(function DragInner({
   dataTestSubj,
   className,
@@ -345,10 +338,27 @@ const DragInner = memo(function DragInner({
     return { onKeyDown, onKeyUp };
   }, [activeDropTarget, setTargetOfIndex]);
 
+  let shouldSkipDragEvent: boolean = false;
+  const mouseDown = (e: Event) => {
+    const target = e.target;
+    const specialClassName = 'domDragDrop__enableTextSelection';
+    shouldSkipDragEvent = Boolean(
+      target instanceof Element &&
+        (target.classList.contains(specialClassName) ||
+          target.parentElement?.classList.contains(specialClassName))
+    );
+  };
+
   const dragStart = (
     e: DroppableEvent | KeyboardEvent<HTMLButtonElement>,
     keyboardModeOn?: boolean
   ) => {
+    if (shouldSkipDragEvent) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
     // Setting stopPropgagation causes Chrome failures, so
     // we are manually checking if we've already handled this
     // in a nested child, and doing nothing if so...
@@ -396,6 +406,7 @@ const DragInner = memo(function DragInner({
     if (onDragEnd) {
       onDragEnd();
     }
+    shouldSkipDragEvent = false;
   };
 
   const setNextTarget = (e: KeyboardEvent<HTMLButtonElement>, reversed = false) => {
@@ -494,7 +505,7 @@ const DragInner = memo(function DragInner({
         draggable: true,
         onDragEnd: dragEnd,
         onDragStart: dragStart,
-        onMouseDown: removeSelection,
+        onMouseDown: mouseDown,
         ...(withDragHandle ? { dragHandle: <DragHandle /> } : {}),
       })}
     </div>

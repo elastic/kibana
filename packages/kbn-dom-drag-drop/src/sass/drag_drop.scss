@@ -235,3 +235,12 @@ $reorderItemMargin: 8px;
     @include mixinDomDroppableActiveHover;
   }
 }
+
+.domDragDrop__enableTextSelection {
+  user-select: text;
+  cursor: default;
+
+  button & {
+    cursor: pointer;
+  }
+}

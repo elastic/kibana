@@ -26,12 +26,15 @@
 .kbnFieldButton__fieldIcon {
   flex-shrink: 0;
   line-height: 0;
-  margin-right: $euiSizeS;
 }
 
 .kbnFieldButton__name {
   flex-grow: 1;
   word-break: break-word;
+}
+
+.kbnFieldButton__nameInner {
+  padding: 0 $euiSizeS;
 }
 
 .kbnFieldButton__infoIcon {
@@ -41,7 +44,6 @@
   min-height: $euiSize;
   flex-shrink: 0;
   line-height: 0;
-  margin-left: $euiSizeXS;
 }
 
 .kbnFieldButton__fieldAction {

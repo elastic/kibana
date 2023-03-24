@@ -102,7 +102,13 @@ export function FieldButton({
   const innerContent = (
     <>
       {fieldIcon && <span className="kbnFieldButton__fieldIcon">{fieldIcon}</span>}
-      {fieldName && <span className="kbnFieldButton__name">{fieldName}</span>}
+      {fieldName && (
+        <span className="kbnFieldButton__name">
+          <span className="kbnFieldButton__nameInner domDragDrop__enableTextSelection">
+            {fieldName}
+          </span>
+        </span>
+      )}
       {fieldInfoIcon && <div className="kbnFieldButton__infoIcon">{fieldInfoIcon}</div>}
     </>
   );
