@@ -51,9 +51,10 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      expect(res.status).to.be('not-deployed');
-      expect(res.installedPolicyTemplates).length(1).contain('kspm');
-      expect(res.healthyAgents).to.be(0);
+      expect(res.kspm.status).to.be('not-deployed');
+      expect(res.cspm.status).to.be('not-installed');
+      expect(res.kspm.healthyAgents).to.be(0);
+      expect(res.kspm.installedPackagePolicies).to.be(1);
     });
 
     it(`Should return not-deployed when installed cspm`, async () => {
@@ -71,9 +72,10 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      expect(res.status).to.be('not-deployed');
-      expect(res.installedPolicyTemplates).length(1).contain('cspm');
-      expect(res.healthyAgents).to.be(0);
+      expect(res.cspm.status).to.be('not-deployed');
+      expect(res.kspm.status).to.be('not-installed');
+      expect(res.cspm.healthyAgents).to.be(0);
+      expect(res.cspm.installedPackagePolicies).to.be(1);
     });
   });
 }

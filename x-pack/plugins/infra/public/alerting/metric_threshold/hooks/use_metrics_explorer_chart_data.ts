@@ -5,19 +5,23 @@
  * 2.0.
  */
 
+import DateMath from '@kbn/datemath';
 import { DataViewBase } from '@kbn/es-query';
 import { useMemo } from 'react';
 import { MetricExpressionCustomMetric } from '../../../../common/alerting/metrics';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { MetricExpression } from '../types';
-import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import {
+  MetricsExplorerOptions,
+  MetricsExplorerTimestampsRT,
+} from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useMetricsExplorerData } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_data';
 import { MetricExplorerCustomMetricAggregations } from '../../../../common/http_api/metrics_explorer';
 
 export const useMetricsExplorerChartData = (
   expression: MetricExpression,
   derivedIndexPattern: DataViewBase,
-  source: MetricsSourceConfiguration | null,
+  source?: MetricsSourceConfiguration,
   filterQuery?: string,
   groupBy?: string | string[]
 ) => {
@@ -52,23 +56,19 @@ export const useMetricsExplorerChartData = (
       groupBy,
     ]
   );
-  const timerange = useMemo(
-    () => ({
+  const timestamps: MetricsExplorerTimestampsRT = useMemo(() => {
+    const from = `now-${(timeSize || 1) * 20}${timeUnit}`;
+    const to = 'now';
+    const fromTimestamp = DateMath.parse(from)!.valueOf();
+    const toTimestamp = DateMath.parse(to, { roundUp: true })!.valueOf();
+    return {
       interval: `>=${timeSize || 1}${timeUnit}`,
-      from: `now-${(timeSize || 1) * 20}${timeUnit}`,
-      to: 'now',
-    }),
-    [timeSize, timeUnit]
-  );
+      fromTimestamp,
+      toTimestamp,
+    };
+  }, [timeSize, timeUnit]);
 
-  return useMetricsExplorerData(
-    options,
-    source?.configuration,
-    derivedIndexPattern,
-    timerange,
-    null,
-    null
-  );
+  return useMetricsExplorerData(options, source?.configuration, derivedIndexPattern, timestamps);
 };
 
 const mapMetricThresholdMetricToMetricsExplorerMetric = (metric: MetricExpressionCustomMetric) => {

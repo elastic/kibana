@@ -17,6 +17,7 @@
       "quote": "",
       "should_trim_fields": "__flag__",
       "grok_pattern": "",
+      "ecs_compatibility": "",
       "timestamp_field": "",
       "timestamp_format": "",
       "explain": "__flag__"

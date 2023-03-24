@@ -43,7 +43,7 @@ export const getAlertsGroupingQuery = ({
     additionalFilters,
     from,
     groupByFields: !isNoneGroup(selectedGroup) ? getGroupFields(selectedGroup) : [],
-    metricsAggregations: !isNoneGroup(selectedGroup)
+    statsAggregations: !isNoneGroup(selectedGroup)
       ? getAggregationsByGroupField(selectedGroup)
       : [],
     pageNumber: pageIndex * pageSize,
