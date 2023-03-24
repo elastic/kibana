@@ -229,6 +229,8 @@ const updateIndexSafe = async (
   mappings: MappingTypeMapping
 ) => {
   try {
+    // Todo: fix error field [json] doesn't exist, that is preventing putMapping from executing when
+    // upgrading from 8.6 to 8.7
     await esClient.indices.putMapping({
       index,
       properties: mappings.properties,
