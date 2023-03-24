@@ -215,6 +215,34 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(getByText(i18n.errorValueLengthExceeded)).toBeTruthy();
   });
 
+  it('shows an error if condition values fail their pattern regex', async () => {
+    const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
+
+    const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
+    addConditionBtn.click();
+
+    await waitFor(() => getByText('Container image name').click()); // add containerImageName
+
+    const updatedSelector: Selector = onChange.mock.calls[0][0];
+
+    rerender(<WrappedComponent selector={updatedSelector} />);
+
+    const el = getByTestId('cloud-defend-selectorcondition-containerImageName').querySelector(
+      'input'
+    );
+
+    if (el) {
+      userEvent.type(el, 'bad*imagename{enter}');
+    } else {
+      throw new Error("Can't find input");
+    }
+
+    const expectedError = '"containerImageName" values must match the pattern: /^[a-z0-9]+$/';
+
+    expect(getByText(expectedError)).toBeTruthy();
+  });
+
+
   it('allows the user to remove conditions', async () => {
     const selector: Selector = {
       type: 'file',

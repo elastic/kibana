@@ -116,6 +116,14 @@ export const name = i18n.translate('xpack.cloudDefend.name', {
   defaultMessage: 'Name',
 });
 
+export const errorInvalidResourceLabel = i18n.translate('xpack.cloudDefend.errorInvalidResourceLabel', {
+  defaultMessage: '"Orchestrator resource label" values must have the format: "key:value". A wildcard "*" can be used at the end of the value. e.g. "key:val*"\nTo match on an empty label value, use "key:".',
+});
+
+export const errorInvalidFullContainerImageName = i18n.translate('xpack.cloudDefend.errorInvalidFullContainerImageName', {
+  defaultMessage: '"Full container image name" values must be in the format: image_repo/image_name e.g. "docker.io/nginx"'
+});
+
 export const errorConditionRequired = i18n.translate('xpack.cloudDefend.errorConditionRequired', {
   defaultMessage: 'At least one condition per selector is required.',
 });
