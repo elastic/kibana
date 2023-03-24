@@ -42,6 +42,7 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
         identifier_type: identifierType,
         filter,
         range: userRange,
+        weights,
       } = request.body;
 
       try {
@@ -55,16 +56,17 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
           siemClient.getAlertsIndex();
 
         const range = userRange ?? { start: 'now-15d', end: 'now' };
-          const result = await riskScoreService.getScores({
-            debug,
-            enrichInputs,
-            index,
-            filter,
-            range,
-            identifierType: identifierType as IdentifierType, // TODO
-          });
+        const result = await riskScoreService.getScores({
+          debug,
+          enrichInputs,
+          index,
+          filter,
+          range,
+          weights,
+          identifierType: identifierType as IdentifierType, // TODO
+        });
 
-          return response.ok({ body: result });
+        return response.ok({ body: result });
       } catch (e) {
         const error = transformError(e);
 

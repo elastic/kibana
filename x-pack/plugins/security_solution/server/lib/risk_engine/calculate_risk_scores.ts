@@ -53,7 +53,18 @@ const filterFromRange = (range: GetScoresParams['range']): QueryDslQueryContaine
   range: { '@timestamp': { lt: range.end, gte: range.start } },
 });
 
-const reduceScript = `
+const getRiskWeightForIdentifier = ({
+  identifierType,
+  weights,
+}: {
+  identifierType: IdentifierType;
+  weights: GetScoresParams['weights'];
+}): number | undefined => {
+  return weights?.[identifierType];
+};
+
+const buildReduceScript = ({ riskWeight }: { riskWeight?: number }): string => {
+  return `
     Map results = new HashMap();
     List scores = [];
     for (state in states) {
@@ -71,6 +82,8 @@ const reduceScript = `
     for (int i = 0; i < num_inputs_to_score; i++) {
       total_score += scores[i] / Math.pow(i + 1, params.p);
     }
+
+    ${riskWeight != null ? `total_score *= ${riskWeight};` : ''}
     double score_norm = 100 * total_score / params.risk_cap;
     results['score'] = total_score;
     results['normalized_score'] = score_norm;
@@ -93,47 +106,53 @@ const reduceScript = `
 
     return results;
   `;
+};
 
 const buildIdentifierTypeAggregation = (
   identifierType: IdentifierType,
-  enrichInputs?: boolean
-): SearchRequest['aggs'] => ({
-  [identifierType]: {
-    terms: {
-      field: getFieldForIdentifierAgg(identifierType),
-      size: 65536,
-    },
-    aggs: {
-      riskiest_inputs: {
-        // TODO top_metrics would be faster if enrichInputs is false
-        top_hits: {
-          size: 30,
-          sort: [
-            {
-              [ALERT_RISK_SCORE]: {
-                order: 'desc',
+  enrichInputs?: boolean,
+  weights?: GetScoresParams['weights']
+): SearchRequest['aggs'] => {
+  const riskWeight = getRiskWeightForIdentifier({ identifierType, weights });
+
+  return {
+    [identifierType]: {
+      terms: {
+        field: getFieldForIdentifierAgg(identifierType),
+        size: 65536,
+      },
+      aggs: {
+        riskiest_inputs: {
+          // TODO top_metrics would be faster if enrichInputs is false
+          top_hits: {
+            size: 30,
+            sort: [
+              {
+                [ALERT_RISK_SCORE]: {
+                  order: 'desc',
+                },
               },
-            },
-          ],
-          _source: enrichInputs,
-        },
-      },
-      risk_details: {
-        scripted_metric: {
-          init_script: 'state.scores = []',
-          map_script: `state.scores.add(doc['${ALERT_RISK_SCORE}'].value)`,
-          combine_script: 'return state',
-          params: {
-            max_risk_inputs_per_identity: 999999,
-            p: 1.5,
-            risk_cap: 261.2,
+            ],
+            _source: enrichInputs,
           },
-          reduce_script: reduceScript,
+        },
+        risk_details: {
+          scripted_metric: {
+            init_script: 'state.scores = []',
+            map_script: `state.scores.add(doc['${ALERT_RISK_SCORE}'].value)`,
+            combine_script: 'return state',
+            params: {
+              max_risk_inputs_per_identity: 999999,
+              p: 1.5,
+              risk_cap: 261.2,
+            },
+            reduce_script: buildReduceScript({ riskWeight }),
+          },
         },
       },
     },
-  },
-});
+  };
+};
 
 export const calculateRiskScores = async ({
   debug,
@@ -144,6 +163,7 @@ export const calculateRiskScores = async ({
   index,
   logger,
   range,
+  weights,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -169,7 +189,7 @@ export const calculateRiskScores = async ({
       aggs: identifierTypes.reduce(
         (aggs, _identifierType) => ({
           ...aggs,
-          ...buildIdentifierTypeAggregation(_identifierType),
+          ...buildIdentifierTypeAggregation(_identifierType, enrichInputs, weights),
         }),
         {}
       ),
