@@ -83,7 +83,8 @@ export function createCapabilityFailureMessage(
       message = i18n.translate(
         'xpack.transform.capability.noPermission.scheduleNowTransformTooltip',
         {
-          defaultMessage: 'You do not have permission to schedule transforms now.',
+          defaultMessage:
+            'You do not have permission to schedule transforms to process data instantly.',
         }
       );
       break;
