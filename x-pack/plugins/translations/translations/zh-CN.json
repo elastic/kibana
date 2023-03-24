@@ -930,8 +930,6 @@
     "core.status.yellowTitle": "黄色",
     "core.statusPage.coreStatus.sectionTitle": "核心状态",
     "core.statusPage.loadStatus.serverIsDownErrorMessage": "无法请求服务器状态。也许您的服务器已关闭？",
-    "core.statusPage.metricsTiles.columns.heapTotalHeader": "堆总数",
-    "core.statusPage.metricsTiles.columns.heapUsedHeader": "已使用堆数",
     "core.statusPage.metricsTiles.columns.load.metaHeader": "加载时间间隔",
     "core.statusPage.metricsTiles.columns.loadHeader": "加载",
     "core.statusPage.metricsTiles.columns.processDelayDetailsHeader": "百分位数",
