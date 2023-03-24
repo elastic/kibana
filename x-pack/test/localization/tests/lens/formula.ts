@@ -22,21 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'formula',
-        formula: `count() + average(bytes)`,
-      });
-
-      expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(0);
-      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
-      expect(data).to.be.ok();
-    });
-
-    it('should handle correctly raw types in formula', async () => {
-      await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
-      // create a new formula
-      await PageObjects.lens.configureDimension({
-        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'formula',
-        formula: `count() / 2`,
+        formula: `ifelse(count() > 1, (count() + average(bytes)) / 2, count(kql='aaa'))`,
       });
 
       expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(0);
