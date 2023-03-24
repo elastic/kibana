@@ -59,6 +59,7 @@ export const EnginesList: React.FC = () => {
     openDeleteEngineModal,
     setSearchQuery,
     setIsFirstRequest,
+    showEmptyEngines,
   } = useActions(EnginesListLogic);
 
   const { openFetchEngineFlyout } = useActions(EnginesListFlyoutLogic);
@@ -81,15 +82,25 @@ export const EnginesList: React.FC = () => {
 
   const throttledSearchQuery = useThrottle(searchQuery, INPUT_THROTTLE_DELAY_MS);
 
-  useEffect(() => {
-    fetchEngines();
-  }, [meta.from, meta.size, throttledSearchQuery]);
+  // Don't fetch engines if we don't have a valid license
+  if (!isGated) {
+    useEffect(() => {
+      fetchEngines();
+    }, [meta.from, meta.size, throttledSearchQuery]);
 
-  useEffect(() => {
-    // We don't want to trigger loading for each search query change, so we need this
-    // flag to set if the call to backend is first request.
-    setIsFirstRequest();
-  }, []);
+    useEffect(() => {
+      // We don't want to trigger loading for each search query change, so we need this
+      // flag to set if the call to backend is first request.
+      setIsFirstRequest();
+    }, []);
+  } else {
+    useEffect(() => {
+      // We don't want to trigger loading for each search query change, so we need this
+      // flag to set if the call to backend is first request.
+      showEmptyEngines();
+    }, []);
+  }
+
   return (
     <>
       {isDeleteModalVisible ? (

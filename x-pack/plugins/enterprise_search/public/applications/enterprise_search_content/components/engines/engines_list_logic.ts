@@ -51,6 +51,7 @@ export type EnginesListActions = Pick<
     engine: EnterpriseSearchEngine;
   };
   setIsFirstRequest(): void;
+  showEmptyEngines(): void;
   openEngineCreate(): void;
   setSearchQuery(searchQuery: string): { searchQuery: string };
 };
@@ -66,6 +67,7 @@ interface EngineListValues {
   isDeleteModalVisible: boolean;
   isFirstRequest: boolean;
   isLoading: boolean;
+  showEmptyEngines: boolean;
   meta: Page;
   parameters: { count: number; meta: Page; searchQuery?: string }; // Added this variable to store to the search Query value as well
   results: EnterpriseSearchEngine[]; // stores engine list value from data
@@ -97,6 +99,7 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     openEngineCreate: true,
     setSearchQuery: (searchQuery: string) => ({ searchQuery }),
     setIsFirstRequest: true,
+    showEmptyEngines: true,
   },
   path: ['enterprise_search', 'content', 'engine_list_logic'],
   reducers: ({}) => ({
@@ -128,6 +131,13 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
         apiError: () => false,
         apiSuccess: () => false,
         setIsFirstRequest: () => true,
+        showEmptyEngines: () => false,
+      },
+    ],
+    showEmptyEngines: [
+      false,
+      {
+        showEmptyEngines: () => true,
       },
     ],
 
@@ -171,9 +181,9 @@ export const EnginesListLogic = kea<MakeLogicType<EngineListValues, EnginesListA
     results: [() => [selectors.data], (data) => data?.results ?? []],
 
     hasNoEngines: [
-      () => [selectors.data, selectors.results],
-      (data: EngineListValues['data'], results: EngineListValues['results']) =>
-        (data?.params?.from === 0 && results.length === 0 && !data?.params?.q) ?? false,
+      () => [selectors.data, selectors.results, selectors.showEmptyEngines],
+      (data: EngineListValues['data'], results: EngineListValues['results'], showEmptyEngines: EngineListValues['showEmptyEngines']) =>
+        (data?.params?.from === 0 && results.length === 0 && !data?.params?.q) ?? showEmptyEngines,
     ],
     meta: [() => [selectors.parameters], (parameters) => parameters.meta],
   }),
