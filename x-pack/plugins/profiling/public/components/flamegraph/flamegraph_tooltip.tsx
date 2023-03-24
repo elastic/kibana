@@ -145,7 +145,7 @@ export function FlameGraphTooltip({
                 formatDifferenceAsPercentage={false}
               />
               <TooltipRow
-                label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedCo2', {
+                label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedDollarCost', {
                   defaultMessage: `Annualized dollar cost`,
                 })}
                 value={impactEstimates.annualizedDollarCost}
