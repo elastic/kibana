@@ -112,7 +112,11 @@ export class CoreVersionedRoute implements VersionedRoute {
       Boolean(validation.request.body || validation.request.params || validation.request.query)
     ) {
       try {
-        const { body, params, query } = validate(req, validation.request, handler.options.version);
+        const { body, params, query } = validate(
+          mutableCoreKibanaRequest,
+          validation.request,
+          handler.options.version
+        );
         mutableCoreKibanaRequest.body = body;
         mutableCoreKibanaRequest.params = params;
         mutableCoreKibanaRequest.query = query;
