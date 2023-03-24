@@ -7,13 +7,13 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import type { PropsWithChildren, ReactElement, RefObject } from 'react';
+import { PropsWithChildren, ReactElement, RefObject } from 'react';
 import React, { useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { LensEmbeddableInput, Suggestion } from '@kbn/lens-plugin/public';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { LensEmbeddableInput, LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
 import type {
@@ -26,6 +26,7 @@ import type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramInput$,
 } from '../types';
+import { useLensSuggestions } from './hooks/use_lens_suggestions';
 
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
   /**
@@ -53,10 +54,6 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   currentSuggestion?: Suggestion;
   /**
-   * The suggested Lens visualizations
-   */
-  allSuggestions?: Suggestion[];
-  /**
    * Flag that indicates that a text based language is used
    */
   isPlainRecord?: boolean;
@@ -64,6 +61,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * The current time range
    */
   timeRange?: TimeRange;
+  /**
+   * The current columns
+   */
+  columns?: string[];
   /**
    * Context object for requests made by Unified Histogram components -- optional
    */
@@ -108,6 +109,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Input observable
    */
   input$?: UnifiedHistogramInput$;
+  /**
+   * The Lens suggestions API
+   */
+  lensSuggestionsApi: LensSuggestionsApi;
   /**
    * Callback to get the relative time range, useful when passing an absolute time range (e.g. for edit visualization button)
    */
@@ -157,13 +162,13 @@ export const UnifiedHistogramLayout = ({
   dataView,
   query,
   filters,
-  currentSuggestion,
-  allSuggestions,
+  currentSuggestion: originalSuggestion,
   isPlainRecord,
   timeRange,
+  columns,
   request,
   hits,
-  chart,
+  chart: originalChart,
   breakdown,
   resizeRef,
   topPanelHeight,
@@ -171,6 +176,7 @@ export const UnifiedHistogramLayout = ({
   disableAutoFetching,
   disableTriggers,
   disabledActions,
+  lensSuggestionsApi,
   input$,
   getRelativeTimeRange,
   onTopPanelHeightChange,
@@ -184,6 +190,18 @@ export const UnifiedHistogramLayout = ({
   onBrushEnd,
   children,
 }: UnifiedHistogramLayoutProps) => {
+  const { allSuggestions, currentSuggestion, suggestionUnsupported } = useLensSuggestions({
+    dataView,
+    query,
+    originalSuggestion,
+    isPlainRecord,
+    columns,
+    lensSuggestionsApi,
+    onSuggestionChange,
+  });
+
+  const chart = suggestionUnsupported ? undefined : originalChart;
+
   const topPanelNode = useMemo(
     () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
     []

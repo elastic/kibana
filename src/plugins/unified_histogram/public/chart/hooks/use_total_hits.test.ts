@@ -18,6 +18,7 @@ import { of, Subject, throwError } from 'rxjs';
 import { waitFor } from '@testing-library/dom';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DataViewType, SearchSourceSearchOptions } from '@kbn/data-plugin/common';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 
 jest.mock('react-use/lib/useDebounce', () => {
   return jest.fn((...args) => {
@@ -29,7 +30,20 @@ describe('useTotalHits', () => {
   const timeRange = { from: 'now-15m', to: 'now' };
   const refetch$: UnifiedHistogramInput$ = new Subject();
   const getDeps = () => ({
-    services: { data: dataPluginMock.createStartContract() } as any,
+    services: {
+      data: dataPluginMock.createStartContract(),
+      expressions: {
+        ...expressionsPluginMock.createStartContract(),
+        run: jest.fn(() =>
+          of({
+            partial: false,
+            result: {
+              rows: [{}, {}, {}],
+            },
+          })
+        ),
+      },
+    } as any,
     dataView: dataViewWithTimefieldMock,
     request: undefined,
     hits: {
@@ -103,21 +117,27 @@ describe('useTotalHits', () => {
     });
   });
 
+  it('should fetch total hits if isPlainRecord is true', async () => {
+    const onTotalHitsChange = jest.fn();
+    const deps = {
+      ...getDeps(),
+      isPlainRecord: true,
+      onTotalHitsChange,
+      query: { sql: 'select * from test' },
+    };
+    renderHook(() => useTotalHits(deps));
+    expect(onTotalHitsChange).toBeCalledTimes(1);
+    await waitFor(() => {
+      expect(deps.services.expressions.run).toBeCalledTimes(1);
+      expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.complete, 3);
+    });
+  });
+
   it('should not fetch total hits if chartVisible is true', async () => {
     const onTotalHitsChange = jest.fn();
     const fetchSpy = jest.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     renderHook(() => useTotalHits({ ...getDeps(), chartVisible: true, onTotalHitsChange }));
-    expect(onTotalHitsChange).toBeCalledTimes(0);
-    expect(setFieldSpy).not.toHaveBeenCalled();
-    expect(fetchSpy).not.toHaveBeenCalled();
-  });
-
-  it('should not fetch total hits if isPlainRecord is true', async () => {
-    const onTotalHitsChange = jest.fn();
-    const fetchSpy = jest.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
-    const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
-    renderHook(() => useTotalHits({ ...getDeps(), isPlainRecord: true, onTotalHitsChange }));
     expect(onTotalHitsChange).toBeCalledTimes(0);
     expect(setFieldSpy).not.toHaveBeenCalled();
     expect(fetchSpy).not.toHaveBeenCalled();

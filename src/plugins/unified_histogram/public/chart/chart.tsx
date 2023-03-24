@@ -161,6 +161,7 @@ export function Chart({
     filters,
     query,
     relativeTimeRange,
+    currentSuggestion,
     disableAutoFetching,
     input$,
     beforeRefetch: updateTimeRange,

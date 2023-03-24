@@ -14,7 +14,7 @@ import { act } from 'react-test-renderer';
 import { UnifiedHistogramFetchStatus } from '../../types';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
-import { allSuggestionsMock, currentSuggestionMock } from '../../__mocks__/suggestions';
+import { currentSuggestionMock } from '../../__mocks__/suggestions';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import {
   createStateService,
@@ -40,7 +40,6 @@ describe('useStateProps', () => {
     totalHitsResult: undefined,
     columns: [],
     currentSuggestion: undefined,
-    allSuggestions: undefined,
   };
 
   const getStateService = (options: Omit<UnifiedHistogramStateOptions, 'services'>) => {
@@ -56,7 +55,6 @@ describe('useStateProps', () => {
     jest.spyOn(stateService, 'setLensRequestAdapter');
     jest.spyOn(stateService, 'setTotalHits');
     jest.spyOn(stateService, 'setCurrentSuggestion');
-    jest.spyOn(stateService, 'setAllSuggestions');
     return stateService;
   };
 
@@ -65,7 +63,6 @@ describe('useStateProps', () => {
     const { result } = renderHook(() => useStateProps(stateService));
     expect(result.current).toMatchInlineSnapshot(`
       Object {
-        "allSuggestions": undefined,
         "breakdown": Object {
           "field": Object {
             "aggregatable": true,
@@ -80,8 +77,6 @@ describe('useStateProps', () => {
           "hidden": false,
           "timeInterval": "auto",
         },
-        "columns": Array [],
-        "currentSuggestion": undefined,
         "hits": Object {
           "status": "uninitialized",
           "total": undefined,
@@ -115,11 +110,11 @@ describe('useStateProps', () => {
     const { result } = renderHook(() => useStateProps(stateService));
     expect(result.current).toMatchInlineSnapshot(`
       Object {
-        "allSuggestions": undefined,
         "breakdown": undefined,
-        "chart": undefined,
-        "columns": Array [],
-        "currentSuggestion": undefined,
+        "chart": Object {
+          "hidden": false,
+          "timeInterval": "auto",
+        },
         "hits": Object {
           "status": "uninitialized",
           "total": undefined,
@@ -146,38 +141,18 @@ describe('useStateProps', () => {
     `);
   });
 
-  it('should return the correct props when a text based language is used with Lens suggestions', () => {
+  it('should return the correct props when a text based language is used', () => {
     const stateService = getStateService({
       initialState: {
         ...initialState,
         query: { sql: 'SELECT * FROM index' },
         currentSuggestion: currentSuggestionMock,
-        allSuggestions: allSuggestionsMock,
       },
     });
     const { result } = renderHook(() => useStateProps(stateService));
-    expect(result.current.allSuggestions).toBe(allSuggestionsMock);
-    expect(result.current.currentSuggestion).toBe(currentSuggestionMock);
     expect(result.current.chart).toStrictEqual({ hidden: false, timeInterval: 'auto' });
-  });
-
-  it('should return the suggestions if text based languages', async () => {
-    const stateService = getStateService({
-      initialState: {
-        ...initialState,
-        query: { sql: 'SELECT * FROM index' },
-        columns: ['Dest', 'AvgTicketPrice'],
-      },
-    });
-
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useStateProps(stateService, unifiedHistogramServicesMock)
-    );
-    await waitForNextUpdate();
-    expect(stateService.setCurrentSuggestion).toHaveBeenCalledWith(currentSuggestionMock);
-    expect(stateService.setAllSuggestions).toHaveBeenCalledWith(allSuggestionsMock);
-    expect(result.current.allSuggestions).toStrictEqual(allSuggestionsMock);
-    expect(result.current.currentSuggestion).toStrictEqual(currentSuggestionMock);
+    expect(result.current.breakdown).toBe(undefined);
+    expect(result.current.isPlainRecord).toBe(true);
   });
 
   it('should return the correct props when a rollup data view is used', () => {
@@ -193,11 +168,8 @@ describe('useStateProps', () => {
     const { result } = renderHook(() => useStateProps(stateService));
     expect(result.current).toMatchInlineSnapshot(`
       Object {
-        "allSuggestions": undefined,
         "breakdown": undefined,
         "chart": undefined,
-        "columns": Array [],
-        "currentSuggestion": undefined,
         "hits": Object {
           "status": "uninitialized",
           "total": undefined,
@@ -231,11 +203,8 @@ describe('useStateProps', () => {
     const { result } = renderHook(() => useStateProps(stateService));
     expect(result.current).toMatchInlineSnapshot(`
       Object {
-        "allSuggestions": undefined,
         "breakdown": undefined,
         "chart": undefined,
-        "columns": Array [],
-        "currentSuggestion": undefined,
         "hits": Object {
           "status": "uninitialized",
           "total": undefined,
