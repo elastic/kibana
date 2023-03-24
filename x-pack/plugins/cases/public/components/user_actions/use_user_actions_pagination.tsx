@@ -26,7 +26,6 @@ export const useUserActionsPagination = ({
 }: UserActionsPagination) => {
   const isFirstRender = useRef(true);
   const activityParams = useRef(userActivityQueryParams);
-  console.log('pagination hook called', isFirstRender.current);
 
   const lastPage = useMemo(() => {
     if (!userActionsStats) {
