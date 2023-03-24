@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
 import { SavedObject } from '@kbn/core/server';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { ShouldIncrementRevision } from './bulk_edit';
 import {
   PartialRule,
   RawRule,
@@ -30,6 +31,7 @@ import {
   updateMeta,
   getPartialRuleFromRaw,
   addUuid,
+  incrementRevision,
 } from '../lib';
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 
@@ -45,22 +47,29 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     notifyWhen?: RuleNotifyWhenType | null;
   };
   allowMissingConnectorSecrets?: boolean;
+  shouldIncrementRevision?: ShouldIncrementRevision<Params>;
 }
 
 export async function update<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
-  { id, data, allowMissingConnectorSecrets }: UpdateOptions<Params>
+  { id, data, allowMissingConnectorSecrets, shouldIncrementRevision }: UpdateOptions<Params>
 ): Promise<PartialRule<Params>> {
   return await retryIfConflicts(
     context.logger,
     `rulesClient.update('${id}')`,
-    async () => await updateWithOCC<Params>(context, { id, data, allowMissingConnectorSecrets })
+    async () =>
+      await updateWithOCC<Params>(context, {
+        id,
+        data,
+        allowMissingConnectorSecrets,
+        shouldIncrementRevision,
+      })
   );
 }
 
 async function updateWithOCC<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data, allowMissingConnectorSecrets }: UpdateOptions<Params>
+  { id, data, allowMissingConnectorSecrets, shouldIncrementRevision }: UpdateOptions<Params>
 ): Promise<PartialRule<Params>> {
   let alertSavedObject: SavedObject<RawRule>;
 
@@ -108,7 +117,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
   const updateResult = await updateAlert<Params>(
     context,
-    { id, data, allowMissingConnectorSecrets },
+    { id, data, allowMissingConnectorSecrets, shouldIncrementRevision },
     alertSavedObject
   );
 
@@ -149,9 +158,15 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
 async function updateAlert<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data: initialData, allowMissingConnectorSecrets }: UpdateOptions<Params>,
-  { attributes, version }: SavedObject<RawRule>
+  {
+    id,
+    data: initialData,
+    allowMissingConnectorSecrets,
+    shouldIncrementRevision = () => true,
+  }: UpdateOptions<Params>,
+  currentRule: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
+  const { attributes, version } = currentRule;
   const data = { ...initialData, actions: addUuid(initialData.actions) };
 
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
@@ -203,6 +218,15 @@ async function updateAlert<Params extends RuleTypeParams>(
   const apiKeyAttributes = apiKeyAsAlertAttributes(createdAPIKey, username);
   const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
 
+  // Increment revision if applicable field has changed
+  const revision = shouldIncrementRevision(updatedParams)
+    ? incrementRevision<Params>(
+        currentRule,
+        { id, data, allowMissingConnectorSecrets },
+        updatedParams
+      )
+    : currentRule.attributes.revision;
+
   let updatedObject: SavedObject<RawRule>;
   const createAttributes = updateMeta(context, {
     ...attributes,
@@ -211,6 +235,7 @@ async function updateAlert<Params extends RuleTypeParams>(
     params: updatedParams as RawRule['params'],
     actions,
     notifyWhen,
+    revision,
     updatedBy: username,
     updatedAt: new Date().toISOString(),
   });

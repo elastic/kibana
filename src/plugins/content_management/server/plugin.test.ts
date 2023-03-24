@@ -129,6 +129,7 @@ describe('ContentManagementPlugin', () => {
         const context = {
           requestHandlerContext: mockedRequestHandlerContext,
           contentRegistry: 'mockedContentRegistry',
+          getTransformsFactory: expect.any(Function),
         };
         expect(mockGet).toHaveBeenCalledWith(context, input);
         expect(mockCreate).toHaveBeenCalledWith(context, input);

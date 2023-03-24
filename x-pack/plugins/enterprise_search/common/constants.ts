@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { ProductFeatures } from './types';
 import { IngestPipelineParams } from './types/connectors';
 
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
@@ -161,3 +162,11 @@ export enum INGESTION_METHOD_IDS {
   crawler = 'crawler',
   native_connector = 'native_connector',
 }
+
+export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
+  hasConnectors: true,
+  hasDefaultIngestPipeline: true,
+  hasNativeConnectors: true,
+  hasSearchApplications: false,
+  hasWebCrawler: true,
+};

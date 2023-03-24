@@ -125,6 +125,7 @@ export const MonitorManagementList = ({
       sortable: true,
       render: (name: string, monitor: EncryptedSyntheticsMonitorWithId) => (
         <EuiLink
+          data-test-subj="syntheticsColumnsLink"
           href={`${basePath}/app/uptime/monitor/${btoa(
             (monitor as unknown as BrowserFields)[ConfigKey.MONITOR_QUERY_ID]
           )}`}

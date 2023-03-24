@@ -12,6 +12,8 @@ export type { ControlGroupInput, ControlGroupOutput } from './types';
 export { CONTROL_GROUP_TYPE } from './types';
 export { ControlGroupContainerFactory } from './embeddable/control_group_container_factory';
 
+export { ACTION_EDIT_CONTROL, ACTION_DELETE_CONTROL } from './actions';
+
 export {
   type AddDataControlProps,
   type AddOptionsListControlProps,

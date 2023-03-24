@@ -18,10 +18,10 @@ import { Subscription } from 'rxjs';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
 
 interface Props {
-  dataView: DataView;
+  dataView: DataView | undefined;
+  timeRange: TimeRange;
   filters: Filter[];
   query: Query;
-  timeRange: TimeRange;
   onFiltersChange: (filters: Filter[]) => void;
 }
 
@@ -38,7 +38,7 @@ export const ControlsContent: React.FC<Props> = ({
 
   const getInitialInput = useCallback(async () => {
     const initialInput: Partial<ControlGroupInput> = {
-      id: dataView.id ?? '',
+      id: dataView?.id ?? '',
       viewMode: ViewMode.VIEW,
       chainingSystem: 'HIERARCHICAL',
       controlStyle: 'oneLine',
@@ -50,7 +50,7 @@ export const ControlsContent: React.FC<Props> = ({
     };
 
     return { initialInput };
-  }, [controlPanels, dataView.id, filters, query, timeRange]);
+  }, [controlPanels, dataView?.id, filters, query, timeRange]);
 
   const loadCompleteHandler = useCallback(
     (controlGroup: ControlGroupAPI) => {

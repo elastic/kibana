@@ -35,6 +35,7 @@ export class TimeSliderEmbeddableFactory
   public isFieldCompatible = () => false;
 
   public isEditable = () => Promise.resolve(false);
+  public canCreateNew = () => false;
 
   public getDisplayName = () =>
     i18n.translate('controls.timeSlider.displayName', {

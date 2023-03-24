@@ -27,7 +27,13 @@ export const UserManagementLink: React.FunctionComponent<EuiButtonProps> = (prop
   if (!canAccessUserManagement) return null;
 
   return (
-    <EuiButton color="primary" fill {...linkProps} {...props}>
+    <EuiButton
+      data-test-subj="infraUserManagementLinkManageUsersButton"
+      color="primary"
+      fill
+      {...linkProps}
+      {...props}
+    >
       <FormattedMessage
         id="xpack.infra.logs.analysis.userManagementButtonLabel"
         defaultMessage="Manage users"

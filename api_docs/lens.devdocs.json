@@ -5926,11 +5926,23 @@
               "((props: { prevState: T; target: ",
               "DragDropOperation",
               "; source: ",
-              "DragDropIdentifier",
+              {
+                "pluginId": "@kbn/dom-drag-drop",
+                "scope": "public",
+                "docId": "kibKbnDomDragDropPluginApi",
+                "section": "def-public.DragDropIdentifier",
+                "text": "DragDropIdentifier"
+              },
               "; frame: ",
               "FramePublicAPI",
               "; dropType: ",
-              "DropType",
+              {
+                "pluginId": "@kbn/dom-drag-drop",
+                "scope": "public",
+                "docId": "kibKbnDomDragDropPluginApi",
+                "section": "def-public.DropType",
+                "text": "DropType"
+              },
               "; group?: ",
               "VisualizationDimensionGroupConfig",
               " | undefined; }) => T) | undefined"
@@ -6053,7 +6065,13 @@
               "((dropProps: ",
               "GetDropPropsArgs",
               "<unknown>) => { dropTypes: ",
-              "DropType",
+              {
+                "pluginId": "@kbn/dom-drag-drop",
+                "scope": "public",
+                "docId": "kibKbnDomDragDropPluginApi",
+                "section": "def-public.DropType",
+                "text": "DropType"
+              },
               "[]; nextLabel?: string | undefined; } | undefined) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
@@ -9722,7 +9740,7 @@
         "label": "YScaleType",
         "description": [],
         "signature": [
-          "\"log\" | \"time\" | \"sqrt\" | \"linear\""
+          "\"log\" | \"time\" | \"linear\" | \"sqrt\""
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -11178,7 +11196,7 @@
         "label": "OperationTypePost712",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"range\" | \"cumulative_sum\" | \"date_histogram\" | \"filters\" | \"terms\" | \"percentile\" | \"average\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"range\" | \"filters\" | \"date_histogram\" | \"percentile\" | \"average\" | \"terms\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"last_value\" | \"counter_rate\" | \"differences\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,
@@ -11193,7 +11211,7 @@
         "label": "OperationTypePre712",
         "description": [],
         "signature": [
-          "\"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | \"count\" | \"range\" | \"cardinality\" | \"cumulative_sum\" | \"date_histogram\" | \"derivative\" | \"filters\" | \"terms\" | \"percentile\" | \"moving_average\" | \"last_value\" | \"counter_rate\""
+          "\"min\" | \"max\" | \"sum\" | \"avg\" | \"median\" | \"count\" | \"range\" | \"filters\" | \"date_histogram\" | \"percentile\" | \"terms\" | \"cumulative_sum\" | \"derivative\" | \"moving_average\" | \"last_value\" | \"counter_rate\" | \"cardinality\""
         ],
         "path": "x-pack/plugins/lens/server/migrations/types.ts",
         "deprecated": false,

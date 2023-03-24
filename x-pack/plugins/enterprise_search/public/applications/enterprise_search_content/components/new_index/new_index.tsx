@@ -9,6 +9,8 @@ import React, { useState } from 'react';
 
 import { useLocation } from 'react-router-dom';
 
+import { useValues } from 'kea';
+
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -22,7 +24,9 @@ import { i18n } from '@kbn/i18n';
 
 import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
 
+import { ProductFeatures } from '../../../../../common/types';
 import { BETA_LABEL } from '../../../shared/constants/labels';
+import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 import { parseQueryParams } from '../../../shared/query_params';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 
@@ -41,8 +45,8 @@ const betaBadge = (
   </EuiBadge>
 );
 
-const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
-  {
+const METHOD_BUTTON_GROUP_OPTIONS: Record<INGESTION_METHOD_IDS, ButtonGroupOption> = {
+  [INGESTION_METHOD_IDS.crawler]: {
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.description',
       {
@@ -58,7 +62,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       defaultMessage: 'Use the web crawler',
     }),
   },
-  {
+  [INGESTION_METHOD_IDS.native_connector]: {
     badge: betaBadge,
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.nativeConnector.description',
@@ -82,7 +86,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       }
     ),
   },
-  {
+  [INGESTION_METHOD_IDS.api]: {
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.api.description',
       {
@@ -98,7 +102,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       defaultMessage: 'Use the API',
     }),
   },
-  {
+  [INGESTION_METHOD_IDS.connector]: {
     badge: betaBadge,
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.description',
@@ -116,15 +120,32 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       defaultMessage: 'Build a connector',
     }),
   },
-];
+};
+
+const getAvailableMethodOptions = (productFeatures: ProductFeatures): ButtonGroupOption[] => {
+  return [
+    ...(productFeatures.hasWebCrawler
+      ? [METHOD_BUTTON_GROUP_OPTIONS[INGESTION_METHOD_IDS.crawler]]
+      : []),
+    ...(productFeatures.hasNativeConnectors
+      ? [METHOD_BUTTON_GROUP_OPTIONS[INGESTION_METHOD_IDS.native_connector]]
+      : []),
+    METHOD_BUTTON_GROUP_OPTIONS[INGESTION_METHOD_IDS.api],
+    ...(productFeatures.hasConnectors
+      ? [METHOD_BUTTON_GROUP_OPTIONS[INGESTION_METHOD_IDS.connector]]
+      : []),
+  ];
+};
 
 export const NewIndex: React.FC = () => {
   const { search } = useLocation();
+  const { capabilities, productFeatures } = useValues(KibanaLogic);
   const { method: methodParam } = parseQueryParams(search);
+  const availableIngestionMethodOptions = getAvailableMethodOptions(productFeatures);
 
   const initialSelectedMethod =
-    METHOD_BUTTON_GROUP_OPTIONS.find((option) => option.id === methodParam) ??
-    METHOD_BUTTON_GROUP_OPTIONS[0];
+    availableIngestionMethodOptions.find((option) => option.id === methodParam) ??
+    availableIngestionMethodOptions[0];
 
   const [selectedMethod, setSelectedMethod] = useState<ButtonGroupOption>(initialSelectedMethod);
 
@@ -168,16 +189,20 @@ export const NewIndex: React.FC = () => {
             </EuiText>
             <EuiSpacer size="m" />
             <ButtonGroup
-              options={METHOD_BUTTON_GROUP_OPTIONS}
+              options={availableIngestionMethodOptions}
               selected={selectedMethod}
               onChange={setSelectedMethod}
             />
-            <EuiSpacer size="xxl" />
-            <EuiLinkTo to="/app/integrations" shouldNotCreateHref>
-              {i18n.translate('xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink', {
-                defaultMessage: 'View additional integrations',
-              })}
-            </EuiLinkTo>
+            {capabilities.navLinks.integrations && (
+              <>
+                <EuiSpacer size="xxl" />
+                <EuiLinkTo to="/app/integrations" shouldNotCreateHref>
+                  {i18n.translate('xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink', {
+                    defaultMessage: 'View additional integrations',
+                  })}
+                </EuiLinkTo>
+              </>
+            )}
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>

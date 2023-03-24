@@ -11,7 +11,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
@@ -27,9 +26,6 @@ import {
   controlGroupSelector,
   useControlGroupContainer,
 } from '../embeddable/control_group_container';
-import { pluginServices } from '../../services';
-import { TIME_SLIDER_CONTROL } from '../../../common';
-import { EditControlButton } from '../editor/edit_control';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 
@@ -43,7 +39,7 @@ const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
     <EuiButtonEmpty
       color="danger"
       iconSize="m"
-      iconType={'alert'}
+      iconType="error"
       onClick={() => setPopoverOpen((open) => !open)}
       className={'errorEmbeddableCompact__button'}
       textProps={{ className: 'errorEmbeddableCompact__text' }}
@@ -91,11 +87,8 @@ export const ControlFrame = ({
   const controlGroup = useControlGroupContainer();
 
   const controlStyle = controlGroupSelector((state) => state.explicitInput.controlStyle);
-
-  // Controls Services Context
-  const {
-    overlays: { openConfirm },
-  } = pluginServices.getServices();
+  const viewMode = controlGroupSelector((state) => state.explicitInput.viewMode);
+  const disabledActions = controlGroupSelector((state) => state.explicitInput.disabledActions);
 
   const embeddable = useChildEmbeddable({
     untilEmbeddableLoaded: controlGroup.untilEmbeddableLoaded.bind(controlGroup),
@@ -122,36 +115,6 @@ export const ControlFrame = ({
       errorSubscription?.unsubscribe();
     };
   }, [embeddable, embeddableRoot]);
-
-  const floatingActions = (
-    <>
-      {!fatalError && embeddableType !== TIME_SLIDER_CONTROL && (
-        <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
-          <EditControlButton embeddableId={embeddableId} />
-        </EuiToolTip>
-      )}
-      <EuiToolTip content={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}>
-        <EuiButtonIcon
-          data-test-subj={`control-action-${embeddableId}-delete`}
-          aria-label={ControlGroupStrings.floatingActions.getRemoveButtonTitle()}
-          onClick={() =>
-            openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
-              confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
-              cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
-              title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
-              buttonColor: 'danger',
-            }).then((confirmed) => {
-              if (confirmed) {
-                controlGroup.removeEmbeddable(embeddableId);
-              }
-            })
-          }
-          iconType="cross"
-          color="danger"
-        />
-      </EuiToolTip>
-    </>
-  );
 
   const embeddableParentClassNames = classNames('controlFrame__control', {
     'controlFrame--twoLine': controlStyle === 'twoLine',
@@ -216,7 +179,9 @@ export const ControlFrame = ({
         'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
         'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
-      actions={floatingActions}
+      viewMode={viewMode}
+      embeddable={embeddable}
+      disabledActions={disabledActions}
       isEnabled={embeddable && enableActions}
     >
       <EuiFormRow

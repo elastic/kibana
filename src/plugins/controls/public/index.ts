@@ -57,7 +57,12 @@ export {
   type RangeSliderEmbeddableInput,
 } from './range_slider';
 
-export { ControlGroupRenderer, type ControlGroupRendererProps } from './control_group';
+export {
+  ACTION_EDIT_CONTROL,
+  ACTION_DELETE_CONTROL,
+  ControlGroupRenderer,
+  type ControlGroupRendererProps,
+} from './control_group';
 
 export function plugin() {
   return new ControlsPlugin();

@@ -43,11 +43,11 @@ import {
 } from '../external_api/control_group_input_builder';
 import { pluginServices } from '../../services';
 import { getNextPanelOrder } from './control_group_helpers';
-import { EditControlGroup } from '../editor/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
+import { openEditControlGroupFlyout } from '../editor/open_edit_control_group_flyout';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -223,15 +223,7 @@ export class ControlGroupContainer extends Container<
 
   public openAddDataControlFlyout = openAddDataControlFlyout;
 
-  public getEditControlGroupButton = (closePopover: () => void) => {
-    const ControlsServicesProvider = pluginServices.getContextProvider();
-
-    return (
-      <ControlsServicesProvider>
-        <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />
-      </ControlsServicesProvider>
-    );
-  };
+  public openEditControlGroupFlyout = openEditControlGroupFlyout;
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
