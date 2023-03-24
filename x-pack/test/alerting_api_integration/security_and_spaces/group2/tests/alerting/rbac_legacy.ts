@@ -111,16 +111,16 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await rescheduleTask(migratedAlertId);
 
               await alertUtils.disable(migratedAlertId);
-              await retry.try(async () => {
-                const updateResponse = await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
-                expect(updateResponse.statusCode).to.eql(200);
-              });
+              await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
 
               // update alert as user with privileges - so it is no longer a legacy alert
               await retry.try(async () => {
                 const updatedKeyResponse = await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
                 expect(updatedKeyResponse.statusCode).to.eql(204);
               });
+              // As we update the task multiple times in this test case, we might be updating the one already picked up by the task manager.
+              // To avoid 409 conflict error, we disable the rule above before updating and wait for 3 seconds
+              // after updating it to be sure that one task manager cycle is done. So we are not updating a task that is in progress.
               await new Promise((resolve) => setTimeout(resolve, 3000));
               await alertUtils.enable(migratedAlertId);
               await ensureAlertIsRunning();
@@ -134,10 +134,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
               await ensureAlertIsRunning();
 
-              await retry.try(async () => {
-                const updateResponse = await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
-                expect(updateResponse.statusCode).to.eql(200);
-              });
+              await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
 
               // attempt to update alert as user with no Alerts privileges - as it is no longer a legacy alert
               // this should fail, as the user doesn't have the `updateApiKey` privilege for Alerts
@@ -160,11 +157,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await rescheduleTask(migratedAlertId);
 
               await ensureAlertIsRunning();
-
-              await retry.try(async () => {
-                const updateResponse = await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
-                expect(updateResponse.statusCode).to.eql(200);
-              });
+              await updateAlertSoThatItIsNoLongerLegacy(migratedAlertId);
 
               // attempt to update alert as user with no Actions privileges - as it is no longer a legacy alert
               // this should fail, as the user doesn't have the `execute` privilege for Actions
@@ -282,16 +275,20 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
           async function updateAlertSoThatItIsNoLongerLegacy(alertId: string) {
             // update the alert as super user (to avoid privilege limitations) so that it is no longer a legacy alert
-            return await alertUtils.updateAlwaysFiringAction({
-              alertId,
-              actionId: MIGRATED_ACTION_ID,
-              user: Superuser,
-              reference,
-              overwrites: {
-                name: 'Updated Alert',
-                schedule: { interval: '2s' },
-                throttle: '2s',
-              },
+            await retry.try(async () => {
+              const response = await alertUtils.updateAlwaysFiringAction({
+                alertId,
+                actionId: MIGRATED_ACTION_ID,
+                user: Superuser,
+                reference,
+                overwrites: {
+                  name: 'Updated Alert',
+                  schedule: { interval: '2s' },
+                  throttle: '2s',
+                },
+              });
+
+              expect(response.statusCode).to.eql(200);
             });
           }
         });
