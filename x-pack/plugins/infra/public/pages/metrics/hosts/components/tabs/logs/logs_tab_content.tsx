@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import type { Filter } from '@kbn/es-query';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InfraLoadingPanel } from '../../../../../../components/loading';
@@ -17,6 +16,7 @@ import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state';
 import { LogsLinkToStream } from './logs_link_to_stream';
 import { LogsSearchBar } from './logs_search_bar';
+import { createHostsFilter } from '../../../utils';
 
 export const LogsTabContent = () => {
   const [filterQuery] = useLogsSearchUrlState();
@@ -72,17 +72,6 @@ export const LogsTabContent = () => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
-
-const createHostsFilter = (hostNodes: SnapshotNode[]): Filter => {
-  return {
-    query: {
-      terms: {
-        'host.name': hostNodes.map((p) => p.name),
-      },
-    },
-    meta: {},
-  };
 };
 
 const createHostsFilterQueryParam = (hostNodes: SnapshotNode[]): string => {

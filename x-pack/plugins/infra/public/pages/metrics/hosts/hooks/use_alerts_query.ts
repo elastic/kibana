@@ -15,6 +15,7 @@ import { HostsState } from './use_unified_search_url_state';
 import { useHostsViewContext } from './use_hosts_view';
 import { AlertStatus } from '../types';
 import { ALERT_STATUS_QUERY } from '../constants';
+import { createHostsFilter } from '../utils';
 
 export interface AlertsEsQuery {
   bool: BoolQuery;
@@ -80,12 +81,3 @@ const createDateFilter = (date: HostsState['dateRange']) =>
 
 const createAlertStatusFilter = (status: AlertStatus = 'all'): Filter | null =>
   ALERT_STATUS_QUERY[status] ? { query: ALERT_STATUS_QUERY[status], meta: {} } : null;
-
-const createHostsFilter = (hosts: SnapshotNode[]): Filter => ({
-  query: {
-    terms: {
-      'host.name': hosts.map((p) => p.name),
-    },
-  },
-  meta: {},
-});
