@@ -22,7 +22,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import useBoolean from 'react-use/lib/useBoolean';
+import useToggle from 'react-use/lib/useToggle';
 import { AutoSizer } from '../../../../../../../components/auto_sizer';
 import { Process } from './types';
 import { ProcessRowCharts } from './process_row_charts';
@@ -33,7 +33,7 @@ interface Props {
 }
 
 export const ProcessRow = ({ cells, item }: Props) => {
-  const [isExpanded, toggle] = useBoolean(false);
+  const [isExpanded, toggle] = useToggle(false);
 
   return (
     <>

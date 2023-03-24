@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useBoolean from 'react-use/lib/useBoolean';
+import useToggle from 'react-use/lib/useToggle';
 
 interface Row {
   name: string;
@@ -119,7 +119,7 @@ interface ExpandableContentProps {
 
 const ExpandableContent = (props: ExpandableContentProps) => {
   const { values } = props;
-  const [isExpanded, toggle] = useBoolean(false);
+  const [isExpanded, toggle] = useToggle(false);
 
   const list = Array.isArray(values) ? values : [values];
   const [first, ...others] = list;

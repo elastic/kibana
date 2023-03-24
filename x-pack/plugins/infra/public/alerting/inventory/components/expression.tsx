@@ -30,7 +30,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { debounce, omit } from 'lodash';
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import useBoolean from 'react-use/lib/useBoolean';
+import useToggle from 'react-use/lib/useToggle';
 import {
   Comparator,
   FilterQuery,
@@ -434,7 +434,7 @@ const StyledHealth = euiStyled(EuiHealth)`
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
-  const [isExpanded, toggle] = useBoolean(true);
+  const [isExpanded, toggle] = useToggle(true);
 
   const { children, setRuleParams, expression, errors, expressionId, remove, canDelete, fields } =
     props;
