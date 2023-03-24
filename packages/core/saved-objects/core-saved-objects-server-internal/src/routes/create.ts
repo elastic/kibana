@@ -43,6 +43,7 @@ export const registerCreateRoute = (
           attributes: schema.recordOf(schema.string(), schema.any()),
           migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
           coreMigrationVersion: schema.maybe(schema.string()),
+          typeMigrationVersion: schema.maybe(schema.string()),
           references: schema.maybe(
             schema.arrayOf(
               schema.object({
@@ -65,8 +66,14 @@ export const registerCreateRoute = (
       });
       const { type, id } = req.params;
       const { overwrite } = req.query;
-      const { attributes, migrationVersion, coreMigrationVersion, references, initialNamespaces } =
-        req.body;
+      const {
+        attributes,
+        migrationVersion,
+        coreMigrationVersion,
+        typeMigrationVersion,
+        references,
+        initialNamespaces,
+      } = req.body;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsCreate({ request: req }).catch(() => {});
@@ -80,6 +87,7 @@ export const registerCreateRoute = (
         overwrite,
         migrationVersion,
         coreMigrationVersion,
+        typeMigrationVersion,
         references,
         initialNamespaces,
       };

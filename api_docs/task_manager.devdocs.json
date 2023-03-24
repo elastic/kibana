@@ -702,6 +702,33 @@
       },
       {
         "parentPluginId": "taskManager",
+        "id": "def-server.IntervalSchedule",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntervalSchedule",
+        "description": [],
+        "path": "x-pack/plugins/task_manager/server/task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.IntervalSchedule.interval",
+            "type": "string",
+            "tags": [],
+            "label": "interval",
+            "description": [
+              "\nAn interval in minutes (e.g. '5m'). If specified, this is a recurring task."
+            ],
+            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "taskManager",
         "id": "def-server.RunContext",
         "type": "Interface",
         "tags": [],
@@ -891,7 +918,13 @@
               "\nA TaskSchedule string, which specifies this as a recurring task.\n\nCurrently, this supports a single format: an interval in minutes or seconds (e.g. '5m', '30s')."
             ],
             "signature": [
-              "IntervalSchedule",
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.IntervalSchedule",
+                "text": "IntervalSchedule"
+              },
               " | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task.ts",

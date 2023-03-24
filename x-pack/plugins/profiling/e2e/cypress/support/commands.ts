@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import URL from 'url';
+
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {
@@ -39,8 +42,13 @@ Cypress.Commands.add('getByTestSubj', (selector: string) => {
   return cy.get(`[data-test-subj="${selector}"]`);
 });
 
-Cypress.Commands.add('visitKibana', (url: string) => {
-  cy.visit(url);
+Cypress.Commands.add('visitKibana', (url: string, rangeFrom?: string, rangeTo?: string) => {
+  const urlPath = URL.format({
+    pathname: url,
+    query: { rangeFrom, rangeTo },
+  });
+
+  cy.visit(urlPath);
   cy.getByTestSubj('kbnLoadingMessage').should('exist');
   cy.getByTestSubj('kbnLoadingMessage').should('not.exist', {
     timeout: 50000,

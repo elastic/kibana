@@ -9,8 +9,9 @@ import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { buildMetricThresholdRule } from '../mocks/metric_threshold_rule';
-import AlertDetailsAppSection from './alert_details_app_section';
+import { AlertDetailsAppSection } from './alert_details_app_section';
 
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibanaContextForPlugin: () => ({
@@ -18,18 +19,22 @@ jest.mock('../../../hooks/use_kibana', () => ({
   }),
 }));
 
-jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
-  useSourceViaHttp: () => ({
+jest.mock('../../../containers/metrics_source/source', () => ({
+  withSourceProvider: () => jest.fn,
+  useSourceContext: () => ({
     source: { id: 'default' },
     createDerivedIndexPattern: () => ({ fields: [], title: 'metricbeat-*' }),
   }),
 }));
 
 describe('AlertDetailsAppSection', () => {
+  const queryClient = new QueryClient();
   const renderComponent = () => {
     return render(
       <IntlProvider locale="en">
-        <AlertDetailsAppSection rule={buildMetricThresholdRule()} />
+        <QueryClientProvider client={queryClient}>
+          <AlertDetailsAppSection rule={buildMetricThresholdRule()} />
+        </QueryClientProvider>
       </IntlProvider>
     );
   };

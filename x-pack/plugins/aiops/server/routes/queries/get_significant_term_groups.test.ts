@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { orderBy } from 'lodash';
+
 import { fields } from '../../../common/__mocks__/artificial_logs/fields';
 import { frequentItemSets } from '../../../common/__mocks__/artificial_logs/frequent_item_sets';
 import { significantTerms } from '../../../common/__mocks__/artificial_logs/significant_terms';
@@ -20,6 +22,8 @@ describe('getSignificantTermGroups', () => {
       fields
     );
 
-    expect(significantTermGroups).toEqual(finalSignificantTermGroups);
+    expect(orderBy(significantTermGroups, ['docCount'])).toEqual(
+      orderBy(finalSignificantTermGroups, ['docCount'])
+    );
   });
 });

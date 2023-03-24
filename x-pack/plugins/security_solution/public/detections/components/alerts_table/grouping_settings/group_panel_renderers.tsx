@@ -58,15 +58,15 @@ const RuleNameGroupContent = React.memo<{
     </EuiBadge>
   );
   return (
-    <>
+    <div style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
       <EuiFlexGroup data-test-subj="rule-name-group-renderer" gutterSize="m" alignItems="center">
-        <EuiFlexItem grow={false} style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
+        <EuiFlexItem grow={false} style={{ display: 'contents' }}>
           <EuiTitle size="xs">
             <h5 className="eui-textTruncate">{ruleName.trim()}</h5>
           </EuiTitle>
         </EuiFlexItem>
         {tags && tags.length > 0 ? (
-          <EuiFlexItem onClick={(e) => e.stopPropagation()} grow={false}>
+          <EuiFlexItem grow={false}>
             <PopoverItems
               items={tags.map((tag) => tag.key.toString())}
               popoverTitle={COLUMN_TAGS}
@@ -84,7 +84,7 @@ const RuleNameGroupContent = React.memo<{
           <EuiTextColor color="subdued">{ruleDescription}</EuiTextColor>
         </p>
       </EuiText>
-    </>
+    </div>
   );
 });
 RuleNameGroupContent.displayName = 'RuleNameGroup';

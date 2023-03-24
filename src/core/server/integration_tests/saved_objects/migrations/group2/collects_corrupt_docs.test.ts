@@ -126,7 +126,7 @@ describe('migration v2 with corrupt saved object documents', () => {
         },
         {
           mode: 'contain',
-          value: 'at tryTransformDoc',
+          value: 'at transform',
         },
         {
           mode: 'equal',
@@ -146,7 +146,7 @@ describe('migration v2 with corrupt saved object documents', () => {
         },
         {
           mode: 'contain',
-          value: 'at tryTransformDoc',
+          value: 'at transform',
         },
         {
           mode: 'equal',

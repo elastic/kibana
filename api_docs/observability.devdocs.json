@@ -61,7 +61,7 @@
         "label": "AlertSummary",
         "description": [],
         "signature": [
-          "({ alert, alertSummaryFields }: ",
+          "({ alertSummaryFields }: ",
           "AlertSummaryProps",
           ") => JSX.Element"
         ],
@@ -74,7 +74,7 @@
             "id": "def-public.AlertSummary.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ alert, alertSummaryFields }",
+            "label": "{ alertSummaryFields }",
             "description": [],
             "signature": [
               "AlertSummaryProps"
@@ -2171,7 +2171,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "string | number"
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "x-pack/plugins/observability/public/pages/alert_details/components/alert_summary.tsx",
             "deprecated": false,
@@ -6203,37 +6203,6 @@
           "\"observability:apmServiceGroupMaxNumberOfServices\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.DragHandleProps",
-        "type": "Type",
-        "tags": [],
-        "label": "DragHandleProps",
-        "description": [],
-        "signature": [
-          "DraggableProvidedDragHandleProps",
-          " | undefined"
-        ],
-        "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-public.DropResult",
-        "type": "Type",
-        "tags": [],
-        "label": "DropResult",
-        "description": [],
-        "signature": [
-          "DropResult"
-        ],
-        "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10281,7 +10250,7 @@
             "section": "def-common.SavedObject",
             "text": "SavedObject"
           },
-          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { timestampField: string; syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
+          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; } & { timestampField?: string | undefined; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
           "TransformGetTransformStatsResponse",
           "; dataSample: string | ",
           "SearchResponse",
@@ -10440,6 +10409,8 @@
           "<{ type: ",
           "LiteralC",
           "<\"sli.kql.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
           "StringC",
@@ -10449,7 +10420,11 @@
           "StringC",
           "; total: ",
           "StringC",
-          "; }>; }>]>; timeWindow: ",
+          "; }>, ",
+          "PartialC",
+          "<{ timestampField: ",
+          "StringC",
+          "; }>]>; }>]>; timeWindow: ",
           "UnionC",
           "<[",
           "TypeC",
@@ -10509,9 +10484,7 @@
           },
           ", string, unknown>; }>]>; settings: ",
           "PartialC",
-          "<{ timestampField: ",
-          "StringC",
-          "; syncDelay: ",
+          "<{ syncDelay: ",
           "Type",
           "<",
           {
@@ -10543,7 +10516,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; } & { timestampField?: string | undefined; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10573,7 +10546,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; } & { timestampField?: string | undefined; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10621,7 +10594,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
+          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; } & { timestampField?: string | undefined; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -10866,6 +10839,8 @@
           "<{ type: ",
           "LiteralC",
           "<\"sli.kql.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
           "StringC",
@@ -10875,7 +10850,11 @@
           "StringC",
           "; total: ",
           "StringC",
-          "; }>; }>]>; timeWindow: ",
+          "; }>, ",
+          "PartialC",
+          "<{ timestampField: ",
+          "StringC",
+          "; }>]>; }>]>; timeWindow: ",
           "UnionC",
           "<[",
           "TypeC",
@@ -10937,9 +10916,7 @@
           "PartialC",
           "<{ settings: ",
           "PartialC",
-          "<{ timestampField: ",
-          "StringC",
-          "; syncDelay: ",
+          "<{ syncDelay: ",
           "Type",
           "<",
           {
@@ -11083,7 +11060,7 @@
             "section": "def-common.SavedObject",
             "text": "SavedObject"
           },
-          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { timestampField: string; syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
+          "<{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; } & { timestampField?: string | undefined; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }>; sloTransformStats: ",
           "TransformGetTransformStatsResponse",
           "; dataSample: string | ",
           "SearchResponse",
@@ -11242,6 +11219,8 @@
           "<{ type: ",
           "LiteralC",
           "<\"sli.kql.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
           "StringC",
@@ -11251,7 +11230,11 @@
           "StringC",
           "; total: ",
           "StringC",
-          "; }>; }>]>; timeWindow: ",
+          "; }>, ",
+          "PartialC",
+          "<{ timestampField: ",
+          "StringC",
+          "; }>]>; }>]>; timeWindow: ",
           "UnionC",
           "<[",
           "TypeC",
@@ -11311,9 +11294,7 @@
           },
           ", string, unknown>; }>]>; settings: ",
           "PartialC",
-          "<{ timestampField: ",
-          "StringC",
-          "; syncDelay: ",
+          "<{ syncDelay: ",
           "Type",
           "<",
           {
@@ -11345,7 +11326,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; } & { timestampField?: string | undefined; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -11375,7 +11356,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; } & { timestampField?: string | undefined; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -11423,7 +11404,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { timestampField: string; syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
+          ", { page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { goodStatusCodes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; } & { timestampField?: string | undefined; }; }; timeWindow: { duration: string; isRolling: boolean; } | { duration: string; calendar: { startTime: string; }; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; revision: number; settings: { syncDelay: string; frequency: string; }; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; })[]; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -11668,6 +11649,8 @@
           "<{ type: ",
           "LiteralC",
           "<\"sli.kql.custom\">; params: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ index: ",
           "StringC",
@@ -11677,7 +11660,11 @@
           "StringC",
           "; total: ",
           "StringC",
-          "; }>; }>]>; timeWindow: ",
+          "; }>, ",
+          "PartialC",
+          "<{ timestampField: ",
+          "StringC",
+          "; }>]>; }>]>; timeWindow: ",
           "UnionC",
           "<[",
           "TypeC",
@@ -11739,9 +11726,7 @@
           "PartialC",
           "<{ settings: ",
           "PartialC",
-          "<{ timestampField: ",
-          "StringC",
-          "; syncDelay: ",
+          "<{ syncDelay: ",
           "Type",
           "<",
           {
