@@ -11,7 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
-import { renderDiscoverLink } from '../../../../lib/render_discover_link';
 import { DataStream } from '../../../../../../common/types';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
 import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/routing';
@@ -56,7 +55,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           >
             {name}
           </EuiLink>
-          {renderDiscoverLink(name)}
           <DataStreamsBadges dataStream={dataStream} />
         </Fragment>
       );

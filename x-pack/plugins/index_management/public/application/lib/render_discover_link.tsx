@@ -14,7 +14,7 @@ export const renderDiscoverLink = (indexName: string) => {
   return (
     <AppContextConsumer>
       {(ctx) => {
-        const locators = ctx?.url.locators.get('DISCOVER_APP_LOCATOR');
+        const locators = ctx?.url?.locators.get('DISCOVER_APP_LOCATOR');
 
         if (!locators) {
           return null;
@@ -35,6 +35,7 @@ export const renderDiscoverLink = (indexName: string) => {
               size="xs"
               iconType="discoverApp"
               aria-label="Discover"
+              data-test-subj="indexDetailFlyoutDiscover"
               css={{ margin: '0 0.3em' }}
             />
           </EuiToolTip>

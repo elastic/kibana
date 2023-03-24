@@ -158,7 +158,7 @@ describe('Data Streams tab', () => {
       setLoadTemplatesResponse({ templates: [indexTemplate], legacyTemplates: [] });
       setLoadTemplateResponse(indexTemplate.name, indexTemplate);
 
-      testBed = await setup(httpSetup, { history: createMemoryHistory(), url: urlServiceMock });
+      testBed = await setup(httpSetup, { history: createMemoryHistory() });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
       });
