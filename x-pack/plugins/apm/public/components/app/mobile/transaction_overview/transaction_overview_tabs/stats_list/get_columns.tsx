@@ -39,7 +39,7 @@ export function getColumns({
   comparisonEnabled,
   offset,
 }: {
-  agentName: string;
+  agentName?: string;
   showAppLaunchTimeColumn: boolean;
   detailedStatisticsLoading: boolean;
   detailedStatistics: MobileDetailedStatisticsByField;

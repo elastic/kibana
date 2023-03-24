@@ -19,7 +19,7 @@ type MobileDetailedStatisticsByField =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/detailed_statistics'>;
 
 interface Props {
-  agentName: string;
+  agentName?: string;
   isLoading: boolean;
   mainStatistics: MobileMainStatisticsByField;
   detailedStatisticsLoading: boolean;

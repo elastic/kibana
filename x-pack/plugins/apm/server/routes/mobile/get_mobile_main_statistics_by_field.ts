@@ -43,7 +43,7 @@ export interface MobileMainStatisticsResponse {
     crashRate: number;
     appLaunchTime: number | null;
   }>;
-  agentName: string;
+  agentName?: string;
 }
 
 export async function getMobileMainStatisticsByField({
@@ -116,7 +116,7 @@ export async function getMobileMainStatisticsByField({
     }
   );
 
-  const agentName = response.hits.hits[0]._source.agent.name;
+  const agentName = response.hits.hits[0]?._source.agent.name;
   const mainStatistics =
     response.aggregations?.main_statistics.buckets.map((bucket) => {
       return {
