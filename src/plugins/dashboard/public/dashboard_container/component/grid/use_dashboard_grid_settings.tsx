@@ -26,8 +26,6 @@ export const useDashboardGridSettings = () => {
     };
   }, [panels]);
 
-  // { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }
-  // ...(viewMode === ViewMode.VIEW ? { sm: 768 } : {})
   const breakpoints = useMemo(
     () => ({ lg: 768, ...(viewMode === ViewMode.VIEW ? { sm: 0 } : {}) }),
     [viewMode]
