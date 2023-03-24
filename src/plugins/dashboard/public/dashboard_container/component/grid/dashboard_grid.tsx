@@ -6,28 +6,30 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import classNames from 'classnames';
 import 'react-resizable/css/styles.css';
 import 'react-grid-layout/css/styles.css';
+
+import { pick } from 'lodash';
+import classNames from 'classnames';
 import { useEffectOnce } from 'react-use/lib';
-import React, { useCallback, useMemo, useState } from 'react';
-import ReactGridLayout, { Layout } from 'react-grid-layout';
+import React, { useState, useMemo, useCallback } from 'react';
+import { Layout, Responsive as ResponsiveReactGridLayout } from 'react-grid-layout';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
+import { DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
 import { useDashboardContainerContext } from '../../dashboard_container_context';
 import { useDashboardPerformanceTracker } from './use_dashboard_performance_tracker';
-import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
 import { getPanelLayoutsAreEqual } from '../../embeddable/integrations/diff_state/dashboard_diffing_utils';
+import { useDashboardGridSettings } from './use_dashboard_grid_settings';
 
 export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
   const {
+    useEmbeddableSelector: select,
     actions: { setPanels },
     useEmbeddableDispatch,
-    useEmbeddableSelector: select,
   } = useDashboardContainerContext();
   const dispatch = useEmbeddableDispatch();
 
@@ -39,23 +41,29 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
   // turn off panel transform animations for the first 50 ms so that the dashboard doesn't animate on its first render.
   const [animatePanelTransforms, setAnimatePanelTransforms] = useState(false);
   useEffectOnce(() => {
-    setTimeout(() => setAnimatePanelTransforms(true), 50);
+    setTimeout(() => setAnimatePanelTransforms(true), 500);
   });
 
-  const layout = useMemo(() => Object.values(panels).map((panel) => panel.gridData), [panels]);
-  const panelsInOrder = useMemo(
-    () =>
-      Object.keys(panels)
-        .map((key: string) => panels[key])
-        .sort((panelA, panelB) => {
-          if (panelA.gridData.y === panelB.gridData.y) {
-            return panelA.gridData.x - panelB.gridData.x;
-          } else {
-            return panelA.gridData.y - panelB.gridData.y;
-          }
-        }),
-    [panels]
-  );
+  const { onPanelStatusChange } = useDashboardPerformanceTracker({
+    panelCount: Object.keys(panels).length,
+  });
+
+  const panelComponents = useMemo(() => {
+    return Object.keys(panels).map((embeddableId, index) => {
+      const type = panels[embeddableId].type;
+      return (
+        <DashboardGridItem
+          data-grid={panels[embeddableId].gridData}
+          key={embeddableId}
+          id={embeddableId}
+          index={index + 1}
+          type={type}
+          expandedPanelId={expandedPanelId}
+          onPanelStatusChange={onPanelStatusChange}
+        />
+      );
+    });
+  }, [expandedPanelId, onPanelStatusChange, panels]);
 
   const onLayoutChange = useCallback(
     (newLayout: Array<Layout & { i: string }>) => {
@@ -63,14 +71,12 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
         (updatedPanelsAcc, panelLayout) => {
           updatedPanelsAcc[panelLayout.i] = {
             ...panels[panelLayout.i],
-            gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
+            gridData: pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
           };
           return updatedPanelsAcc;
         },
         {} as { [key: string]: DashboardPanelState }
       );
-
-      // onLayoutChange gets called by react grid layout a lot more than it should, so only dispatch the updated panels if the layout has actually changed
       if (!getPanelLayoutsAreEqual(panels, updatedPanels)) {
         dispatch(setPanels(updatedPanels));
       }
@@ -78,53 +84,37 @@ export const DashboardGrid = ({ viewportWidth }: { viewportWidth: number }) => {
     [dispatch, panels, setPanels]
   );
 
-  const { onPanelStatusChange } = useDashboardPerformanceTracker({
-    panelCount: panelsInOrder.length,
+  const classes = classNames({
+    'dshLayout-withoutMargins': !useMargins,
+    'dshLayout--viewing': viewMode === ViewMode.VIEW,
+    'dshLayout--editing': viewMode !== ViewMode.VIEW,
+    'dshLayout--noAnimation': !animatePanelTransforms,
+    'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
   });
 
-  const dashboardPanels = useMemo(() => {
-    return panelsInOrder.map(({ explicitInput, type }, index) => (
-      <DashboardGridItem
-        key={explicitInput.id}
-        id={explicitInput.id}
-        index={index + 1}
-        type={type}
-        expandedPanelId={expandedPanelId}
-        onPanelStatusChange={onPanelStatusChange}
-      />
-    ));
-  }, [expandedPanelId, panelsInOrder, onPanelStatusChange]);
+  const { layouts, breakpoints, columns } = useDashboardGridSettings();
 
   // in print mode, dashboard layout is not controlled by React Grid Layout
   if (viewMode === ViewMode.PRINT) {
-    return <>{dashboardPanels}</>;
+    return <>{panelComponents}</>;
   }
 
-  const classes = classNames({
-    'dshLayout--noanimation': !animatePanelTransforms,
-    'dshLayout--viewing': viewMode === ViewMode.VIEW,
-    'dshLayout--editing': viewMode !== ViewMode.VIEW,
-    'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
-    'dshLayout-withoutMargins': !useMargins,
-  });
-
-  const MARGINS = useMargins ? 8 : 0;
-
   return (
-    <ReactGridLayout
-      width={viewportWidth}
+    <ResponsiveReactGridLayout
+      cols={columns}
+      layouts={layouts}
       className={classes}
-      isDraggable={!expandedPanelId}
+      width={viewportWidth}
+      breakpoints={breakpoints}
+      onDragStop={onLayoutChange}
+      onResizeStop={onLayoutChange}
       isResizable={!expandedPanelId}
-      margin={[MARGINS, MARGINS]}
-      cols={DASHBOARD_GRID_COLUMN_COUNT}
+      isDraggable={!expandedPanelId}
       rowHeight={DASHBOARD_GRID_HEIGHT}
-      // Pass the named classes of what should get the dragging handle
+      margin={useMargins ? [8, 8] : [0, 0]}
       draggableHandle={'.embPanel--dragHandle'}
-      layout={layout}
-      onLayoutChange={onLayoutChange}
     >
-      {dashboardPanels}
-    </ReactGridLayout>
+      {panelComponents}
+    </ResponsiveReactGridLayout>
   );
 };

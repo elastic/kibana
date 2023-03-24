@@ -30,7 +30,7 @@
 /**
  * turn off panel transforms initially so that the dashboard panels don't swoop in on first load.
  */
-.dshLayout--noanimation .react-grid-item.cssTransforms {
+.dshLayout--noAnimation .react-grid-item.cssTransforms {
   transition-property: none !important;
 }
 
@@ -62,6 +62,7 @@
   width: 100% !important; /* 1 */
   top: 0 !important; /* 1 */
   left: 0 !important; /* 1 */
+  transform: translate(0, 0) !important; /* 1 */
   padding: $euiSizeS;
 
   // Altered panel styles can be found in ../panel
@@ -77,10 +78,6 @@
 // REACT-GRID
 
 .react-grid-item {
-  /**
-   * Disable transitions from the library on each grid element.
-   */
-  transition: none;
   /**
     * Copy over and overwrite the fill color with EUI color mixin (for theming)
     */
@@ -118,24 +115,5 @@
   &.react-grid-placeholder {
     border-radius: $euiBorderRadius;
     background: $euiColorWarning;
-  }
-}
-
-// When in view-mode only, and on tiny mobile screens, just stack each of the grid-items
-
-@include euiBreakpoint('xs', 's') {
-  .dshLayout--viewing {
-    .react-grid-item {
-      position: static !important;
-      width: calc(100% - #{$euiSize}) !important;
-      margin: $euiSizeS;
-    }
-
-    &.dshLayout-withoutMargins {
-      .react-grid-item {
-        width: 100% !important;
-        margin: 0;
-      }
-    }
   }
 }
