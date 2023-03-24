@@ -136,8 +136,8 @@ export const previewRulesRoute = async (
           .atSpace(spaceId, {
             elasticsearch: {
               index: {
-                [`${DEFAULT_PREVIEW_INDEX}`]: ['read'],
-                [`.internal${DEFAULT_PREVIEW_INDEX}-`]: ['read'],
+                [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]: ['read'],
+                [`.internal${DEFAULT_PREVIEW_INDEX}-${spaceId}-*`]: ['read'],
               },
               cluster: [],
             },
