@@ -8,7 +8,7 @@
 import omit from 'lodash/omit';
 import type { CreateSLOInput, SLOWithSummaryResponse, UpdateSLOInput } from '@kbn/slo-schema';
 
-import { toDuration } from '../../../../utils/slo/duration';
+import { toDuration } from '../../../utils/slo/duration';
 
 export function transformSloResponseToCreateSloInput(
   values: SLOWithSummaryResponse | undefined

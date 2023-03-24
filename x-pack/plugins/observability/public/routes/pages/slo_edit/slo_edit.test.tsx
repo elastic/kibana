@@ -415,6 +415,7 @@ describe('SLO Edit Page', () => {
                         "filter": "baz: foo and bar > 2",
                         "good": "http_status: 2xx",
                         "index": "some-index",
+                        "timestampField": "custom_timestamp",
                         "total": "a query",
                       },
                       "type": "sli.kql.custom",
@@ -426,7 +427,6 @@ describe('SLO Edit Page', () => {
                     "settings": Object {
                       "frequency": "1m",
                       "syncDelay": "1m",
-                      "timestampField": "@timestamp",
                     },
                     "tags": Array [
                       "k8s",
