@@ -388,7 +388,7 @@
                                     }
                                 },
                                 "revision": {
-                                  "type": "long"
+                                    "type": "long"
                                 },
                                 "rule_type_id": {
                                     "type": "keyword",

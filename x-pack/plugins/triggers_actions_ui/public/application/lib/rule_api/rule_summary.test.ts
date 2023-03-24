@@ -28,6 +28,7 @@ describe('loadRuleSummary', () => {
       lastRun: '2021-04-01T22:18:27.609Z',
       muteAll: false,
       name: 'test',
+      revision: 0,
       ruleTypeId: '.index-threshold',
       status: 'OK',
       statusEndDate: '2021-04-01T22:19:25.174Z',
