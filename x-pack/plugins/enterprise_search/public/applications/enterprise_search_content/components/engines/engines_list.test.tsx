@@ -15,7 +15,7 @@ import { Status } from '../../../../../common/types/api';
 
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
-import { LicensingCallout } from '../new_index/licensing_callout';
+import { LicensingCallout } from '../shared/licensing_callout/licensing_callout';
 
 import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
 import { EnginesListTable } from './components/tables/engines_table';

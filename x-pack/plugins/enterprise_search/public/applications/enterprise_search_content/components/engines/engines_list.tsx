@@ -22,7 +22,7 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { LicensingLogic } from '../../../shared/licensing';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
-import { LicensingCallout, LICENSING_FEATURE } from '../new_index/licensing_callout';
+import { LicensingCallout, LICENSING_FEATURE } from '../shared/licensing_callout/licensing_callout';
 
 import { EmptyEnginesPrompt } from './components/empty_engines_prompt';
 import { EnginesListTable } from './components/tables/engines_table';
