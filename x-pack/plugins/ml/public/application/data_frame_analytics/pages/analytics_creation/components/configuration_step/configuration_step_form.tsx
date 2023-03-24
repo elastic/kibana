@@ -224,7 +224,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
         let resetDependentVariable = true;
         for (const field of fields) {
-          if (shouldAddAsDepVarOption(field.id, field.type, field.counter ?? false, jobType)) {
+          if (shouldAddAsDepVarOption(field.id, field.type, field.counter, jobType)) {
             depVarOptions.push({
               label: field.id,
               field,
