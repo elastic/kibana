@@ -72,6 +72,9 @@
           "required": ["containerImageTag"]
         },
         {
+          "required": ["targetFilePath"]
+        },
+        {
           "required": ["orchestratorClusterId"]
         },
         {
@@ -87,13 +90,7 @@
           "required": ["orchestratorResourceName"]
         },
         {
-          "required": ["orchestratorResourceType"]
-        },
-        {
           "required": ["orchestratorType"]
-        },
-        {
-          "required": ["targetFilePath"]
         },
         {
           "required": ["ignoreVolumeMounts"]
@@ -154,7 +151,8 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$"
           }
         },
         "orchestratorResourceName": {
@@ -162,13 +160,6 @@
           "minItems": 1,
           "items": {
             "type": "string"
-          }
-        },
-        "orchestratorResourceType": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "enum": ["node", "pod"]
           }
         },
         "orchestratorType": {
@@ -253,9 +244,6 @@
           "required": ["orchestratorResourceName"]
         },
         {
-          "required": ["orchestratorResourceType"]
-        },
-        {
           "required": ["orchestratorType"]
         },
         {
@@ -265,13 +253,13 @@
           "required": ["processName"]
         },
         {
+          "required": ["processUserName"]
+        },
+        {
           "required": ["processUserId"]
         },
         {
           "required": ["sessionLeaderInteractive"]
-        },
-        {
-          "required": ["sessionLeaderName"]
         }
       ],
       "properties": {
@@ -326,7 +314,8 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^([a-zA-Z0-9\\.\\-]+\\/)?[a-zA-Z0-9\\.\\-]+:[a-zA-Z0-9\\.\\-\\_]*\\*?$"
           }
         },
         "orchestratorResourceName": {
@@ -334,13 +323,6 @@
           "minItems": 1,
           "items": {
             "type": "string"
-          }
-        },
-        "orchestratorResourceType": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "enum": ["node", "pod"]
           }
         },
         "orchestratorType": {
@@ -387,13 +369,6 @@
         },
         "sessionLeaderInteractive": {
           "type": "boolean"
-        },
-        "sessionLeaderName": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "string"
-          }
         }
       },
       "dependencies": {
