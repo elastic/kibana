@@ -626,7 +626,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
             <EuiFormRow
               fullWidth
               label={i18n.translate('xpack.ml.dataframe.analytics.create.dependentVariableLabel', {
-                defaultMessage: 'Dependent variable2',
+                defaultMessage: 'Dependent variable',
               })}
               helpText={
                 dependentVariableOptions.length === 0 &&

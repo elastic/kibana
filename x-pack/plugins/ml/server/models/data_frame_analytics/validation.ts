@@ -69,7 +69,7 @@ const lowFieldCountHeading = i18n.translate(
 const dependentVarHeading = i18n.translate(
   'xpack.ml.models.dfaValidation.messages.dependentVarHeading',
   {
-    defaultMessage: 'Dependent variable3',
+    defaultMessage: 'Dependent variable',
   }
 );
 const dependentVarWarningMessage = {
