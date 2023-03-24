@@ -29,10 +29,9 @@ const removeFields = (scores: any[]) =>
   });
 
 const createDocument = (body: any, id?: string) => {
-  const documentId = uuidv4();
   const firstTimestamp = Date.now();
   const doc = {
-    id: id || documentId,
+    id: id || uuidv4(),
     '@timestamp': firstTimestamp,
     agent: {
       name: 'agent-12345',
