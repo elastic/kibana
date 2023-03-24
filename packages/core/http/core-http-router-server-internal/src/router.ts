@@ -24,6 +24,8 @@ import type {
   RequestHandler,
 } from '@kbn/core-http-server';
 import { validBodyOutput } from '@kbn/core-http-server';
+import { performance } from 'perf_hooks';
+import apm from 'elastic-apm-node';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
@@ -143,13 +145,28 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
         this.routes.push({
-          handler: async (req, responseToolkit) =>
-            await this.handle({
+          handler: async (req, responseToolkit) => {
+            const startUtilization = performance.eventLoopUtilization();
+
+            const response = await this.handle({
               routeSchemas,
               request: req,
               responseToolkit,
               handler: this.enhanceWithContext(handler),
-            }),
+            });
+
+            const eventLoopUtilization = performance.eventLoopUtilization(
+              performance.eventLoopUtilization(),
+              startUtilization
+            );
+
+            apm.currentTransaction?.addLabels({
+              event_loop_utilization: eventLoopUtilization.utilization,
+              event_loop_active: eventLoopUtilization.active,
+            });
+
+            return response;
+          },
           method,
           path: getRouteFullPath(this.routerPath, route.path),
           options: validOptions(method, route),
