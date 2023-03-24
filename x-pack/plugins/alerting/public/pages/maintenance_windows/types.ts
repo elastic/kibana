@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
-
 export enum RRuleFrequency {
   YEARLY = 0,
   MONTHLY = 1,
@@ -24,7 +22,7 @@ export const RRuleFrequencyMap = {
 export interface RecurringSchedule {
   freq: RRuleFrequency;
   interval: number;
-  until?: Moment;
+  until?: string;
   count?: number;
   byweekday?: string[];
   bymonthday?: number[];

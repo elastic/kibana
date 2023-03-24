@@ -14,7 +14,7 @@ import { APP_ID, MAINTENANCE_WINDOWS_APP_ID } from '../config/paths';
 export const AlertingDeepLinkId = {
   maintenanceWindows: 'maintenanceWindows',
   maintenanceWindowsCreate: 'create',
-} as const;
+};
 
 export type IAlertingDeepLinkId = typeof AlertingDeepLinkId[keyof typeof AlertingDeepLinkId];
 

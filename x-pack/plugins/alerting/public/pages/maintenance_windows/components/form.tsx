@@ -24,7 +24,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { MaintenanceWindow } from '../types';
 import { FormProps, schema } from './schema';
 import * as i18n from '../translations';
 import { RecurringSchedule } from './recurring_schedule_form/recurring_schedule';
@@ -39,7 +38,7 @@ const UseField = getUseField({ component: Field });
 export interface CreateMaintenanceWindowFormProps {
   onCancel: () => void;
   onSuccess: () => void;
-  initialValue?: MaintenanceWindow;
+  initialValue?: FormProps;
 }
 
 export const useTimeZone = (): string => {
@@ -61,7 +60,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             {
               title: formData.title,
               duration: formData.duration,
-              rRule: convertToRRule(formData.date, timezone, formData.recurringSchedule),
+              rRule: convertToRRule(moment(formData.date), timezone, formData.recurringSchedule),
             },
             { onSuccess }
           );
@@ -114,6 +113,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                 <UseField
                   path="title"
                   componentProps={{
+                    'data-test-subj': 'title-field',
                     euiFieldProps: {
                       autoFocus: true,
                       fullWidth: true,
@@ -135,6 +135,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                           path="date"
                           component={DateAndTimeField}
                           componentProps={{
+                            'data-test-subj': 'date-field',
                             isDisabled: false,
                           }}
                         />
@@ -143,6 +144,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                         <UseField
                           path="duration"
                           componentProps={{
+                            'data-test-subj': 'duration-field',
                             euiFieldProps: {
                               autoFocus: false,
                               fullWidth: false,
@@ -161,13 +163,16 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                     <UseField
                       path="recurring"
                       componentProps={{
+                        'data-test-subj': 'recurring-field',
                         euiFieldProps: {
                           disabled: false,
                         },
                       }}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem>{isRecurring ? <RecurringSchedule /> : null}</EuiFlexItem>
+                  <EuiFlexItem>
+                    {isRecurring ? <RecurringSchedule data-test-subj="recurring-form" /> : null}
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGrid>

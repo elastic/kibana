@@ -274,6 +274,13 @@ export const CREATE_FORM_COUNT_REQUIRED = i18n.translate(
   }
 );
 
+export const CREATE_FORM_INTERVAL_REQUIRED = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.intervalFieldRequiredError',
+  {
+    defaultMessage: 'An interval is required.',
+  }
+);
+
 export const CREATE_FORM_INTERVAL_EVERY = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.interval.every',
   {

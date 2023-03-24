@@ -26,14 +26,16 @@ interface DateAndTimeFieldProps {
 
 export const DateAndTimeField: React.FC<DateAndTimeFieldProps> = React.memo(
   ({ field, isDisabled, showTimeSelect = true, ...rest }) => {
-    const initialDate = moment();
     const { setFieldValue } = useFormContext();
     const [form] = useFormData({ watch: [field.path] });
-    const selected = get(form, field.path, initialDate);
+    // parse from a string date to moment() if there is an intitial value
+    // otherwise just get an initial date
+    const selected = get(form, field.path) ? moment(get(form, field.path)) : moment();
 
     const onChange = useCallback(
       (currentDate: Moment | null) => {
-        setFieldValue(field.path, currentDate);
+        // convert the moment date back into a string if it's not null
+        setFieldValue(field.path, currentDate ? currentDate.toISOString() : currentDate);
       },
       [setFieldValue, field.path]
     );

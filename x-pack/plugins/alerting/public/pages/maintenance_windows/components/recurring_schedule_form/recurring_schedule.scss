@@ -6,3 +6,9 @@
     width: 80%;
   }
 }
+
+.recurringScheduleFlexField {
+  .euiFormRow__labelWrapper {
+    margin-bottom: unset;
+  }
+}

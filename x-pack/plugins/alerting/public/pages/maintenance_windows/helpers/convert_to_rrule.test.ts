@@ -42,7 +42,7 @@ describe('convertToRRule', () => {
   });
 
   test('should convert a maintenance window that is recurring on a daily schedule until', () => {
-    const until = moment(today).add(1, 'month');
+    const until = moment(today).add(1, 'month').toISOString();
     const rRule = convertToRRule(startDate, timezone, {
       byweekday: { 1: false, 2: false, 3: true, 4: false, 5: false, 6: false, 7: false },
       ends: 'until',

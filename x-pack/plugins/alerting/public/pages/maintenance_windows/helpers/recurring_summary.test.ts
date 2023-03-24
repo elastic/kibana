@@ -37,7 +37,7 @@ describe('convertToRRule', () => {
   });
 
   test('should return the summary for maintenance window that is recurring on a daily schedule until', () => {
-    const until = moment(today).add(1, 'month');
+    const until = moment(today).add(1, 'month').toISOString();
     const summary = recurringSummary(
       startDate,
       {

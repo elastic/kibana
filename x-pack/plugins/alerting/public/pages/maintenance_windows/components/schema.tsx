@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import moment, { Moment } from 'moment';
-import { get, isEmpty } from 'lodash';
+import moment from 'moment';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
@@ -18,17 +17,17 @@ const { emptyField } = fieldValidators;
 
 export interface FormProps {
   title: string;
-  date: Moment;
+  date: string;
   duration: number;
   recurring: boolean;
-  recurringSchedule: RecurringScheduleFormProps;
+  recurringSchedule?: RecurringScheduleFormProps;
 }
 
 export interface RecurringScheduleFormProps {
   frequency: Frequency | 'CUSTOM';
   interval?: number;
   ends: string;
-  until?: Moment;
+  until?: string;
   count?: number;
   customFrequency?: Frequency;
   byweekday?: Record<string, boolean>;
@@ -45,7 +44,11 @@ export const schema: FormSchema<FormProps> = {
       },
     ],
   },
-  date: { label: i18n.CREATE_FORM_DATE_AND_TIME, defaultValue: moment(), validations: [] },
+  date: {
+    label: i18n.CREATE_FORM_DATE_AND_TIME,
+    defaultValue: moment().toISOString(),
+    validations: [],
+  },
   duration: {
     type: FIELD_TYPES.TEXT,
     label: i18n.CREATE_FORM_DURATION,
@@ -58,6 +61,7 @@ export const schema: FormSchema<FormProps> = {
   recurring: {
     type: FIELD_TYPES.TOGGLE,
     label: i18n.CREATE_FORM_RECURRING,
+    defaultValue: false,
   },
   recurringSchedule: {
     frequency: {
@@ -69,6 +73,11 @@ export const schema: FormSchema<FormProps> = {
       type: FIELD_TYPES.TEXT,
       label: ' ',
       defaultValue: 1,
+      validations: [
+        {
+          validator: emptyField(i18n.CREATE_FORM_INTERVAL_REQUIRED),
+        },
+      ],
     },
     ends: {
       label: i18n.CREATE_FORM_ENDS,
@@ -77,7 +86,7 @@ export const schema: FormSchema<FormProps> = {
     },
     until: {
       label: ' ',
-      defaultValue: moment().endOf('day'),
+      defaultValue: moment().endOf('day').toISOString(),
       validations: [],
     },
     count: {
@@ -86,14 +95,7 @@ export const schema: FormSchema<FormProps> = {
       defaultValue: 1,
       validations: [
         {
-          validator: ({ value, path, formData }) => {
-            if (isEmpty(value) && !isEmpty(get(formData, 'recurringSchedule.ends'))) {
-              return {
-                path,
-                message: i18n.CREATE_FORM_COUNT_REQUIRED,
-              };
-            }
-          },
+          validator: emptyField(i18n.CREATE_FORM_COUNT_REQUIRED),
         },
       ],
     },

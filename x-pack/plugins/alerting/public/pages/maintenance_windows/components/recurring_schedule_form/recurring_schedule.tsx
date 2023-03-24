@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import moment from 'moment';
 import { EuiHorizontalRule, EuiSplitPanel } from '@elastic/eui';
 import { getUseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
@@ -20,10 +21,9 @@ import * as i18n from '../../translations';
 import { ButtonGroupField } from '../fields/button_group_field';
 import { DateAndTimeField } from '../fields/date_and_time_field';
 import { CustomRecurringSchedule } from './custom_recurring_schedule';
-
-import './recurring_schedule.scss';
 import { recurringSummary } from '../../helpers/recurring_summary';
 import { getPresets } from '../../helpers/get_presets';
+import './recurring_schedule.scss';
 
 const UseField = getUseField({ component: Field });
 
@@ -33,7 +33,7 @@ export const RecurringSchedule: React.FC = React.memo(() => {
     style: { alignItems: 'center' },
   };
 
-  const [{ date: startDate, recurringSchedule }] = useFormData({
+  const [{ date, recurringSchedule }] = useFormData({
     watch: [
       'date',
       'recurringSchedule.frequency',
@@ -48,9 +48,10 @@ export const RecurringSchedule: React.FC = React.memo(() => {
   });
 
   const { options, presets } = useMemo(() => {
-    if (!startDate) {
+    if (!date) {
       return { options: DEFAULT_FREQUENCY_OPTIONS, presets: DEFAULT_PRESETS };
     }
+    const startDate = moment(date);
     const { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth } = getWeekdayInfo(startDate);
     return {
       options: [
@@ -79,7 +80,7 @@ export const RecurringSchedule: React.FC = React.memo(() => {
       ],
       presets: getPresets(startDate),
     };
-  }, [startDate]);
+  }, [date]);
 
   return (
     <EuiSplitPanel.Outer hasShadow={false} hasBorder={true}>
@@ -88,6 +89,7 @@ export const RecurringSchedule: React.FC = React.memo(() => {
           className="recurringScheduleField"
           path="recurringSchedule.frequency"
           componentProps={{
+            'data-test-subj': 'frequency-field',
             euiFieldProps: {
               options,
               compressed: true,
@@ -98,13 +100,14 @@ export const RecurringSchedule: React.FC = React.memo(() => {
         />
         {recurringSchedule?.frequency === Frequency.DAILY ||
         recurringSchedule?.frequency === 'CUSTOM' ? (
-          <CustomRecurringSchedule />
+          <CustomRecurringSchedule data-test-subj="custom-recurring-form" />
         ) : null}
         <UseField
           className="recurringScheduleField"
           path="recurringSchedule.ends"
           component={ButtonGroupField}
           componentProps={{
+            'data-test-subj': 'ends-field',
             legend: 'Recurrence ends',
             options: RECURRENCE_END_OPTIONS,
             ...displayProps,
@@ -116,6 +119,7 @@ export const RecurringSchedule: React.FC = React.memo(() => {
             path="recurringSchedule.until"
             component={DateAndTimeField}
             componentProps={{
+              'data-test-subj': 'until-field',
               isDisabled: false,
               showTimeSelect: false,
               ...displayProps,
@@ -127,6 +131,7 @@ export const RecurringSchedule: React.FC = React.memo(() => {
             className="recurringScheduleField"
             path="recurringSchedule.count"
             componentProps={{
+              'data-test-subj': 'count-field',
               euiFieldProps: {
                 fullWidth: false,
                 type: 'number',
@@ -143,7 +148,7 @@ export const RecurringSchedule: React.FC = React.memo(() => {
       <EuiHorizontalRule margin="none" />
       <EuiSplitPanel.Inner>
         {i18n.CREATE_FORM_RECURRING_SUMMARY_PREFIX(
-          recurringSummary(startDate, recurringSchedule, presets)
+          recurringSummary(moment(date), recurringSchedule, presets)
         )}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
