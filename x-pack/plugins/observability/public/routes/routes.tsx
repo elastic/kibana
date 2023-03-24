@@ -60,7 +60,8 @@ export const paths = {
   observability: {
     overview: `${OBSERVABILITY_BASE_PATH}${OVERVIEW_URL}`,
     alerts: `${OBSERVABILITY_BASE_PATH}${ALERTS_URL}`,
-    alertDetails: (alertId: string) => `${ALERTS_URL}/${encodeURI(alertId)}`,
+    alertDetails: (alertId: string) =>
+      `${OBSERVABILITY_BASE_PATH}${ALERTS_URL}/${encodeURI(alertId)}`,
     rules: `${OBSERVABILITY_BASE_PATH}${RULES_URL}`,
     ruleDetails: (ruleId?: string | null) =>
       ruleId ? `${OBSERVABILITY_BASE_PATH}${RULES_URL}/${encodeURI(ruleId)}` : RULES_URL,
