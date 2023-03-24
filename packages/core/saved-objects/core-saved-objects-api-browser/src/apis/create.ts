@@ -24,10 +24,15 @@ export interface SavedObjectsCreateOptions {
   id?: string;
   /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
   overwrite?: boolean;
-  /** {@inheritDoc SavedObjectsMigrationVersion} */
+  /**
+   * {@inheritDoc SavedObjectsMigrationVersion}
+   * @deprecated
+   */
   migrationVersion?: SavedObjectsMigrationVersion;
   /** A semver value that is used when upgrading objects between Kibana versions. */
   coreMigrationVersion?: string;
+  /** A semver value that is used when migrating documents between Kibana versions. */
+  typeMigrationVersion?: string;
   /** Array of referenced saved objects. */
   references?: SavedObjectReference[];
 }

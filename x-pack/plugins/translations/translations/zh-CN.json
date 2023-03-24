@@ -610,7 +610,6 @@
     "core.euiStepStrings.simpleWarning": "第 {number} 步有警告",
     "core.euiStepStrings.step": "第 {number} 步：{title}",
     "core.euiStepStrings.warning": "第 {number} 步：{title} 有警告",
-    "core.euiSuperSelectControl.selectAnOption": "选择选项：{selectedValue} 已选",
     "core.euiTableHeaderCell.titleTextWithDesc": "{innerText}; {description}",
     "core.euiTablePagination.rowsPerPageOption": "{rowsPerPage} 行",
     "core.euiTourStepIndicator.ariaLabel": "第 {number} 步{status}",
