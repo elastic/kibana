@@ -6,7 +6,6 @@
  */
 
 import rison from '@kbn/rison';
-import { observabilityAppId } from '@kbn/observability-plugin/public';
 import { URL_KEYS } from './constants/url_constants';
 import type { ReportViewType, SeriesUrl } from '../types';
 import type { AllSeries } from '../../../..';
@@ -44,8 +43,7 @@ export function convertToShortUrl(series: SeriesUrl) {
 
 export function createExploratoryViewUrl(
   { reportType, allSeries }: { reportType: ReportViewType; allSeries: AllSeries },
-  baseHref = '',
-  appId = observabilityAppId
+  baseHref = ''
 ) {
   const allShortSeries: AllShortSeries = allSeries.map((series) => convertToShortUrl(series));
 
