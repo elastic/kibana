@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useLocalDataView } from './use_local_data_view';
-import type { ExploratoryEmbeddableProps, ObservabilityPublicPluginsStart } from '../../../..';
+import {
+  ExploratoryEmbeddableProps,
+  ObservabilityPublicPluginsStart,
+  useFetcher,
+} from '../../../..';
 import type { DataViewState } from '../hooks/use_app_data_view';
 import type { AppDataType } from '../types';
 import { ObservabilityDataViews } from '../../../../utils/observability_data_views/observability_data_views';
@@ -28,42 +32,24 @@ export const useAppDataView = ({
   dataTypesIndexPatterns: ExploratoryEmbeddableProps['dataTypesIndexPatterns'];
 }) => {
   const [dataViews, setDataViews] = useState<DataViewState>({} as DataViewState);
-  const [loading, setLoading] = useState(false);
-
   const { dataViewTitle } = useLocalDataView(seriesDataType, dataTypesIndexPatterns);
 
-  const loadIndexPattern = useCallback(
-    async ({ dataType }: { dataType: AppDataType }) => {
-      setLoading(true);
-      try {
-        if (dataViewTitle) {
-          if (dataViewCache[dataViewTitle]) {
-            setDataViews((prevState) => ({
-              ...(prevState ?? {}),
-              [dataType]: dataViewCache[dataViewTitle],
-            }));
-          } else {
-            const obsvIndexP = new ObservabilityDataViews(dataViewsService, true);
-            const indPattern = await obsvIndexP.getDataView(dataType, dataViewTitle);
-            dataViewCache[dataViewTitle] = indPattern!;
-            setDataViews((prevState) => ({ ...(prevState ?? {}), [dataType]: indPattern }));
-          }
-
-          setLoading(false);
-        }
-      } catch (e) {
-        setLoading(false);
+  const { loading } = useFetcher(async () => {
+    if (dataViewTitle && !dataViews[seriesDataType]) {
+      if (dataViewCache[dataViewTitle]) {
+        setDataViews((prevState) => ({
+          ...(prevState ?? {}),
+          [seriesDataType]: dataViewCache[dataViewTitle],
+        }));
+      } else {
+        const obsvIndexP = new ObservabilityDataViews(dataViewsService, true);
+        const indPattern = await obsvIndexP.getDataView(seriesDataType, dataViewTitle);
+        dataViewCache[dataViewTitle] = indPattern!;
+        setDataViews((prevState) => ({ ...(prevState ?? {}), [seriesDataType]: indPattern }));
       }
-    },
-    [dataViewCache, dataViewTitle, dataViewsService]
-  );
-
-  useEffect(() => {
-    if (seriesDataType && !loading && !dataViews[seriesDataType]) {
-      loadIndexPattern({ dataType: seriesDataType });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViewTitle, seriesDataType, loadIndexPattern, JSON.stringify(series)]);
+  }, [dataViewTitle, seriesDataType, JSON.stringify(series)]);
 
   return { dataViews, loading };
 };
