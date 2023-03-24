@@ -934,6 +934,8 @@ describe('SavedObjectsRepository', () => {
           _source: {
             ...response.items[0].create._source,
             namespaces: response.items[0].create._source.namespaces,
+            coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: '1.1.1',
           },
           _id: expect.stringMatching(/^myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/),
         });
@@ -942,6 +944,8 @@ describe('SavedObjectsRepository', () => {
           _source: {
             ...response.items[1].create._source,
             namespaces: response.items[1].create._source.namespaces,
+            coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: '1.1.1',
           },
         });
 
@@ -2946,7 +2950,8 @@ describe('SavedObjectsRepository', () => {
           attributes,
           references,
           namespaces: [namespace ?? 'default'],
-          migrationVersion: { [MULTI_NAMESPACE_TYPE]: '1.1.1' },
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '1.1.1',
         });
       });
     });
@@ -3533,6 +3538,7 @@ describe('SavedObjectsRepository', () => {
                 'references',
                 'migrationVersion',
                 'coreMigrationVersion',
+                'typeMigrationVersion',
                 'updated_at',
                 'created_at',
                 'originId',
