@@ -20,7 +20,7 @@ export interface TabContentProps {
   kueryWithMobileFilters: string;
   comparisonEnabled: boolean;
   offset?: string;
-  mobileTablesTab?: string;
+  mobileSelectedTab?: string;
 }
 
 const tabs = [transactionsTab, appVersionTab, osVersionTab, devicesTab];
@@ -32,12 +32,12 @@ export function TransactionOverviewTabs({
   kueryWithMobileFilters,
   comparisonEnabled,
   offset,
-  mobileTablesTab,
+  mobileSelectedTab,
 }: TabContentProps) {
   const history = useHistory();
 
   const { component: TabContent } =
-    tabs.find((tab) => tab.key === mobileTablesTab) ?? transactionsTab;
+    tabs.find((tab) => tab.key === mobileSelectedTab) ?? transactionsTab;
   return (
     <>
       <EuiTabs>
@@ -45,11 +45,11 @@ export function TransactionOverviewTabs({
           <EuiTab
             data-test-subj={dataTestSubj}
             key={key}
-            isSelected={key === mobileTablesTab}
+            isSelected={key === mobileSelectedTab}
             onClick={() => {
               push(history, {
                 query: {
-                  mobileTablesTab: key,
+                  mobileSelectedTab: key,
                 },
               });
             }}
