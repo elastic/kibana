@@ -46,6 +46,7 @@ const notifications: NotificationsStart = {
     remove: () => {},
     get$: () => of([]),
   },
+  showErrorDialog: () => {},
 };
 
 export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps> = (props) => {

@@ -869,6 +869,144 @@
     "functions": [
       {
         "parentPluginId": "alerting",
+        "id": "def-server.createConcreteWriteIndex",
+        "type": "Function",
+        "tags": [],
+        "label": "createConcreteWriteIndex",
+        "description": [
+          "\nInstalls index template that uses installed component template\nPrior to installation, simulates the installation to check for possible\nconflicts. Simulate should return an empty mapping if a template\nconflicts with an already installed template."
+        ],
+        "signature": [
+          "({ logger, esClient, indexPatterns, totalFieldsLimit, }: CreateConcreteWriteIndexOpts) => Promise<void>"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_concrete_write_index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.createConcreteWriteIndex.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  logger,\n  esClient,\n  indexPatterns,\n  totalFieldsLimit,\n}",
+            "description": [],
+            "signature": [
+              "CreateConcreteWriteIndexOpts"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_concrete_write_index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.createOrUpdateComponentTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "createOrUpdateComponentTemplate",
+        "description": [],
+        "signature": [
+          "({ logger, esClient, template, totalFieldsLimit, }: CreateOrUpdateComponentTemplateOpts) => Promise<void>"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_component_template.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.createOrUpdateComponentTemplate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  logger,\n  esClient,\n  template,\n  totalFieldsLimit,\n}",
+            "description": [],
+            "signature": [
+              "CreateOrUpdateComponentTemplateOpts"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_component_template.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.createOrUpdateIlmPolicy",
+        "type": "Function",
+        "tags": [],
+        "label": "createOrUpdateIlmPolicy",
+        "description": [
+          "\nCreates ILM policy if it doesn't already exist, updates it if it does"
+        ],
+        "signature": [
+          "({ logger, esClient, name, policy, }: CreateOrUpdateIlmPolicyOpts) => Promise<void>"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_ilm_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.createOrUpdateIlmPolicy.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  logger,\n  esClient,\n  name,\n  policy,\n}",
+            "description": [],
+            "signature": [
+              "CreateOrUpdateIlmPolicyOpts"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_ilm_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.createOrUpdateIndexTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "createOrUpdateIndexTemplate",
+        "description": [
+          "\nInstalls index template that uses installed component template\nPrior to installation, simulates the installation to check for possible\nconflicts. Simulate should return an empty mapping if a template\nconflicts with an already installed template."
+        ],
+        "signature": [
+          "({ logger, esClient, template, }: CreateOrUpdateIndexTemplateOpts) => Promise<void>"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.createOrUpdateIndexTemplate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  logger,\n  esClient,\n  template,\n}",
+            "description": [],
+            "signature": [
+              "CreateOrUpdateIndexTemplateOpts"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-server.getComponentTemplate",
         "type": "Function",
         "tags": [],
@@ -928,6 +1066,135 @@
               "ElasticsearchError"
             ],
             "path": "x-pack/plugins/alerting/server/lib/errors/es_error_parser.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.getIndexTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexTemplate",
+        "description": [],
+        "signature": [
+          "(kibanaVersion: string, ilmPolicyName: string, indexPatterns: ",
+          "IIndexPatternString",
+          ", componentTemplateRefs: string[], totalFieldsLimit: number) => ",
+          "IndicesPutIndexTemplateRequest"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.getIndexTemplate.$1",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersion",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.getIndexTemplate.$2",
+            "type": "string",
+            "tags": [],
+            "label": "ilmPolicyName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.getIndexTemplate.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "indexPatterns",
+            "description": [],
+            "signature": [
+              "IIndexPatternString"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.getIndexTemplate.$4",
+            "type": "Array",
+            "tags": [],
+            "label": "componentTemplateRefs",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.getIndexTemplate.$5",
+            "type": "number",
+            "tags": [],
+            "label": "totalFieldsLimit",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_service/lib/create_or_update_index_template.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.installWithTimeout",
+        "type": "Function",
+        "tags": [],
+        "label": "installWithTimeout",
+        "description": [],
+        "signature": [
+          "({ description, installFn, pluginStop$, logger, timeoutMs, }: InstallWithTimeoutOpts) => Promise<void>"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_service/lib/install_with_timeout.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.installWithTimeout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  description,\n  installFn,\n  pluginStop$,\n  logger,\n  timeoutMs = INSTALLATION_TIMEOUT,\n}",
+            "description": [],
+            "signature": [
+              "InstallWithTimeoutOpts"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_service/lib/install_with_timeout.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3894,6 +4161,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.TOTAL_FIELDS_LIMIT",
+        "type": "number",
+        "tags": [],
+        "label": "TOTAL_FIELDS_LIMIT",
+        "description": [],
+        "signature": [
+          "2500"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_service/alerts_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -3910,10 +4192,10 @@
         "children": [
           {
             "parentPluginId": "alerting",
-            "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy",
+            "id": "def-server.DEFAULT_ALERTS_ILM_POLICY._meta",
             "type": "Object",
             "tags": [],
-            "label": "policy",
+            "label": "_meta",
             "description": [],
             "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
             "deprecated": false,
@@ -3921,34 +4203,34 @@
             "children": [
               {
                 "parentPluginId": "alerting",
-                "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy._meta",
-                "type": "Object",
+                "id": "def-server.DEFAULT_ALERTS_ILM_POLICY._meta.managed",
+                "type": "boolean",
                 "tags": [],
-                "label": "_meta",
+                "label": "managed",
                 "description": [],
                 "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
                 "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "alerting",
-                    "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy._meta.managed",
-                    "type": "boolean",
-                    "tags": [],
-                    "label": "managed",
-                    "description": [],
-                    "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.phases",
+            "type": "Object",
+            "tags": [],
+            "label": "phases",
+            "description": [],
+            "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
               {
                 "parentPluginId": "alerting",
-                "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy.phases",
+                "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.phases.hot",
                 "type": "Object",
                 "tags": [],
-                "label": "phases",
+                "label": "hot",
                 "description": [],
                 "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
                 "deprecated": false,
@@ -3956,10 +4238,10 @@
                 "children": [
                   {
                     "parentPluginId": "alerting",
-                    "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy.phases.hot",
+                    "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.phases.hot.actions",
                     "type": "Object",
                     "tags": [],
-                    "label": "hot",
+                    "label": "actions",
                     "description": [],
                     "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
                     "deprecated": false,
@@ -3967,10 +4249,10 @@
                     "children": [
                       {
                         "parentPluginId": "alerting",
-                        "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy.phases.hot.actions",
+                        "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.phases.hot.actions.rollover",
                         "type": "Object",
                         "tags": [],
-                        "label": "actions",
+                        "label": "rollover",
                         "description": [],
                         "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
                         "deprecated": false,
@@ -3978,38 +4260,25 @@
                         "children": [
                           {
                             "parentPluginId": "alerting",
-                            "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy.phases.hot.actions.rollover",
-                            "type": "Object",
+                            "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.phases.hot.actions.rollover.max_age",
+                            "type": "string",
                             "tags": [],
-                            "label": "rollover",
+                            "label": "max_age",
                             "description": [],
                             "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
                             "deprecated": false,
-                            "trackAdoption": false,
-                            "children": [
-                              {
-                                "parentPluginId": "alerting",
-                                "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy.phases.hot.actions.rollover.max_age",
-                                "type": "string",
-                                "tags": [],
-                                "label": "max_age",
-                                "description": [],
-                                "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
-                                "deprecated": false,
-                                "trackAdoption": false
-                              },
-                              {
-                                "parentPluginId": "alerting",
-                                "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.policy.phases.hot.actions.rollover.max_primary_shard_size",
-                                "type": "string",
-                                "tags": [],
-                                "label": "max_primary_shard_size",
-                                "description": [],
-                                "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
-                                "deprecated": false,
-                                "trackAdoption": false
-                              }
-                            ]
+                            "trackAdoption": false
+                          },
+                          {
+                            "parentPluginId": "alerting",
+                            "id": "def-server.DEFAULT_ALERTS_ILM_POLICY.phases.hot.actions.rollover.max_primary_shard_size",
+                            "type": "string",
+                            "tags": [],
+                            "label": "max_primary_shard_size",
+                            "description": [],
+                            "path": "x-pack/plugins/alerting/server/alerts_service/default_lifecycle_policy.ts",
+                            "deprecated": false,
+                            "trackAdoption": false
                           }
                         ]
                       }
