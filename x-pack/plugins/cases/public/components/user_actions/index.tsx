@@ -39,9 +39,11 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
   } = props;
   const { detailName: caseId } = useCaseViewParams();
   const {
+    caseUserActions,
+    infiniteCaseUserActions,
+    isLoadingUserActions,
     isLoadingInfiniteUserActions,
     lastPage,
-    caseUserActions: infiniteUserActions,
     hasNextPage,
     fetchNextPage,
     showLoadMore,
@@ -50,14 +52,6 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     userActivityQueryParams,
     userActionsStats,
     caseId: caseData.id,
-    isExpandable: true,
-  });
-
-  const { caseUserActions, isLoadingUserActions } = useUserActionsPagination({
-    userActivityQueryParams: { ...userActivityQueryParams, page: lastPage > 0 ? lastPage : 1 },
-    userActionsStats,
-    caseId: caseData.id,
-    isExpandable: false,
   });
 
   const alertIdsWithoutRuleInfo = useMemo(
@@ -166,7 +160,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
       >
         <UserActionsList
           {...props}
-          caseUserActions={infiniteUserActions}
+          caseUserActions={infiniteCaseUserActions}
           loadingAlertData={loadingAlertData}
           manualAlertsData={manualAlertsData}
           commentRefs={commentRefs}

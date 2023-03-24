@@ -191,6 +191,7 @@ export const CaseViewActivity = ({
   const showUserActions =
     !isLoadingUserActionsStats &&
     !isLoadingCaseConnectors &&
+    !isLoadingCaseUsers &&
     caseConnectors &&
     caseUsers &&
     userActionsStats;
@@ -225,7 +226,7 @@ export const CaseViewActivity = ({
           />
         </EuiFlexItem>
         <EuiSpacer size="l" />
-        {(isLoadingUserActionsStats || isLoadingCaseConnectors) && (
+        {(isLoadingUserActionsStats || isLoadingCaseConnectors || isLoadingCaseUsers) && (
           <EuiLoadingSpinner data-test-subj="case-view-loading-content" size="l" />
         )}
         {showUserActions ? (

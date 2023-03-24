@@ -147,6 +147,7 @@ describe.skip('Case View Page activity tab', () => {
   });
 
   beforeEach(() => {
+    jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
     useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
   });
@@ -170,11 +171,6 @@ describe.skip('Case View Page activity tab', () => {
 
     const lastPageForAll = Math.ceil(userActionsStats.total / userActivityQueryParams.perPage);
 
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-      caseData.id,
-      userActivityQueryParams,
-      false
-    );
     expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
       caseData.id,
       userActivityQueryParams,
@@ -184,11 +180,6 @@ describe.skip('Case View Page activity tab', () => {
       caseData.id,
       { ...userActivityQueryParams, page: lastPageForAll },
       true
-    );
-    expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
-      caseData.id,
-      { ...userActivityQueryParams, page: lastPageForAll },
-      false
     );
 
     await waitForComponentToUpdate();
@@ -282,11 +273,6 @@ describe.skip('Case View Page activity tab', () => {
       userEvent.click(screen.getByTestId('user-actions-filter-activity-button-all'));
 
       await waitFor(() => {
-        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-          caseData.id,
-          userActivityQueryParams,
-          false
-        );
         expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
           caseData.id,
           userActivityQueryParams,
@@ -296,11 +282,6 @@ describe.skip('Case View Page activity tab', () => {
           caseData.id,
           { ...userActivityQueryParams, page: lastPageForAll },
           true
-        );
-        expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
-          caseData.id,
-          { ...userActivityQueryParams, page: lastPageForAll },
-          false
         );
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
       });
