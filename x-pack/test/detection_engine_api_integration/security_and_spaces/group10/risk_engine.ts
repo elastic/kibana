@@ -42,8 +42,6 @@ const createDocument = (body: any, id?: string) => {
   return doc;
 };
 
-const host = (name: string) => ({ host: { name } });
-
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -128,7 +126,7 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('rule risk score 21', () => {
         it('risk scores calculated for 1 alert', async () => {
           const documentId = uuidv4();
-          await indexListOfDocuments([createDocument(host('host-1'), documentId)]);
+          await indexListOfDocuments([createDocument({ host: { name: 'host-1' } }, documentId)]);
 
           const body = await getRiskScoreAfterRuleCreationAndExecution(documentId);
 
@@ -146,8 +144,8 @@ export default ({ getService }: FtrProviderContext): void => {
         it('risk scores calculated for 2 alert with different host names', async () => {
           const documentId = uuidv4();
           await indexListOfDocuments([
-            createDocument(host('host-1'), documentId),
-            createDocument(host('host-2'), documentId),
+            createDocument({ host: { name: 'host-1' } }, documentId),
+            createDocument({ host: { name: 'host-2' } }, documentId),
           ]);
 
           const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
@@ -174,8 +172,8 @@ export default ({ getService }: FtrProviderContext): void => {
         it('risk scores calculated for 2 alert with different host names', async () => {
           const documentId = uuidv4();
           await indexListOfDocuments([
-            createDocument(host('host-1'), documentId),
-            createDocument(host('host-1'), documentId),
+            createDocument({ host: { name: 'host-1' } }, documentId),
+            createDocument({ host: { name: 'host-1' } }, documentId),
           ]);
 
           const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
@@ -195,7 +193,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('risk scores calculated for 30 alert with different host names', async () => {
           const documentId = uuidv4();
-          const doc = createDocument(host('host-1'), documentId);
+          const doc = createDocument({ host: { name: 'host-1' } }, documentId);
           await indexListOfDocuments(Array(30).fill(doc));
 
           const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
@@ -215,10 +213,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('risk scores calculated for 30 alert with same host names and 1 different', async () => {
           const documentId = uuidv4();
-          const doc = createDocument(host('host-1'), documentId);
+          const doc = createDocument({ host: { name: 'host-1' } }, documentId);
           await indexListOfDocuments([
             ...Array(30).fill(doc),
-            createDocument(host('host-2'), documentId),
+            createDocument({ host: { name: 'host-2' } }, documentId),
           ]);
 
           const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
@@ -245,7 +243,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('risk scores calculated for 100 alert with the same host names', async () => {
           const documentId = uuidv4();
-          const doc = createDocument(host('host-1'), documentId);
+          const doc = createDocument({ host: { name: 'host-1' } }, documentId);
           await indexListOfDocuments(Array(100).fill(doc));
 
           const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
@@ -267,7 +265,7 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('rule risk score 100', () => {
         it('risk scores calculated for 100 alert', async () => {
           const documentId = uuidv4();
-          const doc = createDocument(host('host-1'), documentId);
+          const doc = createDocument({ host: { name: 'host-1' } }, documentId);
           await indexListOfDocuments(Array(100).fill(doc));
 
           const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
@@ -288,7 +286,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('risk scores calculated for 10.000 alert', async () => {
           const documentId = uuidv4();
-          const doc = createDocument(host('host-1'), documentId);
+          const doc = createDocument({ host: { name: 'host-1' } }, documentId);
           await indexListOfDocuments(
             Array(10000)
               .fill(doc)
