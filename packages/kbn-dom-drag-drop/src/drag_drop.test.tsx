@@ -468,7 +468,7 @@ describe('DragDrop', () => {
         ghost: {
           children: <button>Hi!</button>,
           style: {
-            height: 0,
+            minHeight: 0,
             width: 0,
           },
         },

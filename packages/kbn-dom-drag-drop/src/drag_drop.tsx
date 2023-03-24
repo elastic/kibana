@@ -246,6 +246,13 @@ export const DragDrop = (props: BaseProps) => {
   return <DropsInner {...dropProps} />;
 };
 
+const removeSelection = () => {
+  const selection = window.getSelection();
+  if (selection) {
+    selection.removeAllRanges();
+  }
+};
+
 const DragInner = memo(function DragInner({
   dataTestSubj,
   className,
@@ -339,14 +346,21 @@ const DragInner = memo(function DragInner({
   }, [activeDropTarget, setTargetOfIndex]);
 
   let shouldSkipDragEvent: boolean = false;
+
   const mouseDown = (e: Event) => {
     const target = e.target;
     const specialClassName = 'domDragDrop__enableTextSelection';
+
+    // this way we can allow users to select text inside a draggable element
     shouldSkipDragEvent = Boolean(
       target instanceof Element &&
         (target.classList.contains(specialClassName) ||
           target.parentElement?.classList.contains(specialClassName))
     );
+
+    if (!shouldSkipDragEvent) {
+      removeSelection();
+    }
   };
 
   const dragStart = (
