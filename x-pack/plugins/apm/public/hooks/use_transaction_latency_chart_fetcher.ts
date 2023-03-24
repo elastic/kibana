@@ -6,27 +6,30 @@
  */
 
 import { useMemo } from 'react';
+import { ApmDocumentType } from '../../common/document_type';
+import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import { isTimeComparison } from '../components/shared/time_comparison/get_comparison_options';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
-import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
 import { useAnyOfApmParams } from './use_apm_params';
 import { FETCH_STATUS, useFetcher } from './use_fetcher';
+import { usePreferredDataSourceAndBucketSize } from './use_preferred_data_source_and_bucket_size';
 import { usePreviousPeriodLabel } from './use_previous_period_text';
 import { useTimeRange } from './use_time_range';
 
 export function useTransactionLatencyChartsFetcher({
   kuery,
   environment,
+  transactionName,
+  latencyAggregationType,
 }: {
   kuery: string;
   environment: string;
+  transactionName: string | null;
+  latencyAggregationType: LatencyAggregationType;
 }) {
   const { transactionType, serviceName, transactionTypeStatus } =
     useApmServiceContext();
-  const {
-    urlParams: { transactionName, latencyAggregationType },
-  } = useLegacyUrlParams();
 
   const {
     query: { rangeFrom, rangeTo, offset, comparisonEnabled },
@@ -36,6 +39,14 @@ export function useTransactionLatencyChartsFetcher({
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const preferred = usePreferredDataSourceAndBucketSize({
+    kuery,
+    numBuckets: 100,
+    start,
+    end,
+    type: ApmDocumentType.ServiceTransactionMetric,
+  });
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {
@@ -48,7 +59,8 @@ export function useTransactionLatencyChartsFetcher({
         start &&
         end &&
         transactionType &&
-        latencyAggregationType
+        latencyAggregationType &&
+        preferred
       ) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/transactions/charts/latency',
@@ -61,12 +73,15 @@ export function useTransactionLatencyChartsFetcher({
                 start,
                 end,
                 transactionType,
-                transactionName,
+                transactionName: transactionName || undefined,
                 latencyAggregationType,
                 offset:
                   comparisonEnabled && isTimeComparison(offset)
                     ? offset
                     : undefined,
+                documentType: preferred.source.documentType,
+                rollupInterval: preferred.source.rollupInterval,
+                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
               },
             },
           }
@@ -85,6 +100,7 @@ export function useTransactionLatencyChartsFetcher({
       latencyAggregationType,
       offset,
       comparisonEnabled,
+      preferred,
     ]
   );
 

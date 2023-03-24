@@ -119,7 +119,6 @@ const mountComponent = async ({
     isPlainRecord,
     dataView: dataViewMock,
     navigateTo: jest.fn(),
-    setExpandedDoc: jest.fn(),
     savedSearch,
     stateContainer,
     onFieldEdited: jest.fn(),

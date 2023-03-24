@@ -63,7 +63,7 @@ journey('Exploratory view', async ({ page, params }) => {
     await page.click('[aria-label="Remove report metric"]');
     await page.click('button:has-text("Select report metric")');
     await page.click('button:has-text("Step duration")');
-    await page.click('text=Select an option: Monitor type, is selectedMonitor type >> button');
+    await page.click('button[data-test-subj="seriesBreakdown"]:has-text("Monitor type")');
     await page.click('button[role="option"]:has-text("Step name")');
     await page.click('.euiComboBox__inputWrap');
     await page.click(

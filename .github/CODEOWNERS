@@ -42,7 +42,7 @@ packages/kbn-apm-synthtrace-client @elastic/apm-ui
 packages/kbn-apm-utils @elastic/apm-ui
 test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
-x-pack/plugins/asset_manager @jasonrhodes
+x-pack/plugins/asset_manager @elastic/infra-monitoring-ui
 x-pack/test/security_api_integration/plugins/audit_log @elastic/kibana-security
 packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
@@ -312,6 +312,7 @@ x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 src/plugins/discover @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/kibana-docs
 packages/kbn-docs-utils @elastic/kibana-operations
+packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-ebt-tools @elastic/kibana-core
 packages/kbn-ecs @elastic/kibana-core @elastic/security-threat-hunting-investigations
 x-pack/packages/kbn-ecs-data-quality-dashboard @elastic/security-threat-hunting-investigations
@@ -775,6 +776,10 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 
 # Actionable Observability
 /x-pack/test/observability_functional @elastic/actionable-observability
+
+# Observability robots
+/.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots
+/.github/workflows/oblt-github-commands @elastic/observablt-robots
 
 # Infra Monitoring
 /x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui

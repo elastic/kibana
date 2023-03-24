@@ -67,6 +67,7 @@ include::{kib-repo-dir}/setup/configuring-reporting.asciidoc[]
 include::{kib-repo-dir}/setup/configuring-logging.asciidoc[]
 
 include::monitoring/configuring-monitoring.asciidoc[leveloffset=+1]
+include::monitoring/monitoring-elastic-agent.asciidoc[leveloffset=+2]
 include::monitoring/monitoring-metricbeat.asciidoc[leveloffset=+2]
 include::monitoring/viewing-metrics.asciidoc[leveloffset=+2]
 include::monitoring/monitoring-kibana.asciidoc[leveloffset=+2]
