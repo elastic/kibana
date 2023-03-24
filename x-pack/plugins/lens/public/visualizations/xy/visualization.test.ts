@@ -3676,4 +3676,110 @@ describe('xy_visualization', () => {
       );
     });
   });
+
+  describe('#isEqual', () => {
+    const annotationGroupId1 = 'my-annotation-group-id1';
+    const annotationGroupId2 = 'my-annotation-group-id2';
+
+    const refName1 = 'my-reference';
+    const refName2 = 'my-other-reference';
+
+    const references1: SavedObjectReference[] = [
+      {
+        name: refName1,
+        id: annotationGroupId1,
+        type: 'event-annotation-group',
+      },
+      {
+        name: 'some-name',
+        id: 'some-index-pattern-*',
+        type: 'index-pattern',
+      },
+    ];
+
+    const references2: SavedObjectReference[] = [
+      {
+        name: refName2,
+        id: annotationGroupId1,
+        type: 'event-annotation-group',
+      },
+      {
+        name: 'some-name',
+        id: 'some-index-pattern-*',
+        type: 'index-pattern',
+      },
+    ];
+
+    const baseState = exampleState();
+
+    const state1 = {
+      ...baseState,
+      layers: [
+        ...baseState.layers,
+        {
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          persistanceType: 'byReference',
+          annotationGroupRef: refName1,
+        } as XYPersistedByReferenceAnnotationLayerConfig,
+      ],
+    } as XYPersistedState;
+
+    const state2 = {
+      ...baseState,
+      layers: [
+        ...baseState.layers,
+        {
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          persistanceType: 'byReference',
+          annotationGroupRef: refName2,
+        } as XYPersistedByReferenceAnnotationLayerConfig,
+      ],
+    } as XYPersistedState;
+
+    const annotationGroups = {
+      [annotationGroupId1]: {
+        annotations: [exampleAnnotation],
+        indexPatternId: 'data-view-123',
+        ignoreGlobalFilters: true,
+        title: 'my title!',
+        description: '',
+        tags: [],
+      },
+      [annotationGroupId2]: {
+        annotations: [exampleAnnotation2],
+        indexPatternId: 'data-view-123',
+        ignoreGlobalFilters: true,
+        title: 'my title!',
+        description: '',
+        tags: [],
+      },
+    };
+
+    it('compares after injecting annotation groups', () => {
+      expect(xyVisualization.isEqual!(state1, references1, state2, references2, annotationGroups));
+
+      expect(
+        xyVisualization.isEqual!(
+          state1,
+          references1,
+          state2,
+          [
+            {
+              name: refName2,
+              id: annotationGroupId2,
+              type: 'event-annotation-group',
+            },
+            {
+              name: 'some-name',
+              id: 'some-index-pattern-*',
+              type: 'index-pattern',
+            },
+          ],
+          annotationGroups
+        )
+      ).toBeFalsy();
+    });
+  });
 });

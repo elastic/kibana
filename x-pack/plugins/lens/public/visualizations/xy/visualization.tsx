@@ -24,6 +24,7 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { isEqual } from 'lodash';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -1008,6 +1009,13 @@ export const getXyVisualization = ({
     return {
       layers: visualizationLayersInfo,
     };
+  },
+
+  isEqual(state1, references1, state2, references2, annotationGroups) {
+    return isEqual(
+      injectReferences(state1, annotationGroups, references1),
+      injectReferences(state2, annotationGroups, references2)
+    );
   },
 });
 

@@ -246,6 +246,7 @@ export async function initializeSources(
   return {
     indexPatterns,
     indexPatternRefs,
+    annotationGroups,
     datasourceStates: initializeDatasources({
       datasourceMap,
       datasourceStates,

@@ -1304,6 +1304,14 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   ) => Suggestion<T> | undefined;
 
   getVisualizationInfo?: (state: T) => VisualizationInfo;
+
+  isEqual?: (
+    state1: P,
+    references1: SavedObjectReference[],
+    state2: P,
+    references2: SavedObjectReference[],
+    annotationGroups: AnnotationGroups
+  ) => boolean;
 }
 
 // Use same technique as TriggerContext
