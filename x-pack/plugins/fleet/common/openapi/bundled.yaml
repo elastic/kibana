@@ -2406,6 +2406,8 @@ paths:
                   - item
         '400':
           $ref: '#/components/responses/error'
+        '409':
+          $ref: '#/components/responses/error'
       requestBody:
         description: >-
           You should use inputs as an object and not use the deprecated inputs
@@ -2536,6 +2538,8 @@ paths:
                     - id
                     - success
         '400':
+          $ref: '#/components/responses/error'
+        '409':
           $ref: '#/components/responses/error'
   /package_policies/upgrade/dryrun:
     post:

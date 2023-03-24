@@ -1,0 +1,8 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/dom-drag-drop",
+  "owner": [
+    "@elastic/kibana-visualizations",
+    "@elastic/kibana-data-discovery"
+  ]
+}

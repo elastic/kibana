@@ -21,7 +21,7 @@ import { MetricExplorerCustomMetricAggregations } from '../../../../common/http_
 export const useMetricsExplorerChartData = (
   expression: MetricExpression,
   derivedIndexPattern: DataViewBase,
-  source: MetricsSourceConfiguration | null,
+  source?: MetricsSourceConfiguration,
   filterQuery?: string,
   groupBy?: string | string[]
 ) => {
