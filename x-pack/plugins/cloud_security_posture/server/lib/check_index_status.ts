@@ -11,14 +11,28 @@ import { IndexStatus } from '../../common/types';
 export const checkIndexStatus = async (
   esClient: ElasticsearchClient,
   index: string,
-  logger: Logger
+  logger: Logger,
+  postureType: 'cspm' | 'kspm' | 'all' = 'all'
 ): Promise<IndexStatus> => {
+  const query =
+    postureType === 'all'
+      ? {
+          match_all: {},
+        }
+      : {
+          bool: {
+            filter: {
+              term: {
+                'rule.benchmark.posture_type': postureType,
+              },
+            },
+          },
+        };
+
   try {
     const queryResult = await esClient.search({
       index,
-      query: {
-        match_all: {},
-      },
+      query,
       size: 1,
     });
 

@@ -18,10 +18,13 @@ export const farequoteDataViewTestData: TestData = {
   expected: {
     totalDocCountFormatted: '86,374',
     analysisGroupsTable: [
-      { docCount: '297', group: 'airline: AAL' },
+      {
+        docCount: '297',
+        group: '* airline: AAL',
+      },
       {
         docCount: '100',
-        group: 'airline: UALcustom_field.keyword: deviation',
+        group: '* custom_field.keyword: deviation* airline: UAL',
       },
     ],
     analysisTable: [
@@ -54,16 +57,37 @@ export const artificialLogDataViewTestData: TestData = {
   expected: {
     totalDocCountFormatted: '8,400',
     analysisGroupsTable: [
-      { group: 'user: Peter', docCount: '1981' },
-      { group: 'response_code: 500url: home.phpurl: login.php', docCount: '792' },
+      {
+        group: 'response_code: 500url: home.php',
+        docCount: '792',
+      },
+      {
+        group: 'url: login.phpresponse_code: 500',
+        docCount: '790',
+      },
+      {
+        docCount: '636',
+        group: 'user: Peterurl: home.php',
+      },
+      {
+        docCount: '632',
+        group: 'user: Peterurl: login.php',
+      },
     ],
     analysisTable: [
       {
-        fieldName: 'user',
-        fieldValue: 'Peter',
+        fieldName: 'response_code',
+        fieldValue: '500',
         logRate: 'Chart type:bar chart',
-        pValue: '2.75e-21',
+        pValue: '3.61e-12',
         impact: 'High',
+      },
+      {
+        fieldName: 'url',
+        fieldValue: 'home.php',
+        impact: 'Low',
+        logRate: 'Chart type:bar chart',
+        pValue: '0.00974',
       },
     ],
   },

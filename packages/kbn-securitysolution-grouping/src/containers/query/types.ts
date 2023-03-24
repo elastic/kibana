@@ -24,12 +24,12 @@ export interface GroupingQueryArgs {
   additionalFilters: BoolAgg[];
   from: string;
   groupByFields: string[];
-  metricsAggregations?: NamedAggregation[];
   pageNumber?: number;
   rootAggregations?: NamedAggregation[];
   runtimeMappings?: MappingRuntimeFields;
   size?: number;
   sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
+  statsAggregations?: NamedAggregation[];
   to: string;
 }
 
