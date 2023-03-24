@@ -24,11 +24,11 @@ const DashboardRendererComponent = ({
   timeRange,
 }: {
   canReadDashboard: boolean;
-  filters: Filter[];
+  filters?: Filter[];
   id: string;
   inputId?: InputsModelId.global | InputsModelId.timeline;
   onDashboardContainerLoaded?: (dashboardContainer: DashboardContainer) => void;
-  query: Query;
+  query?: Query;
   savedObjectId: string | undefined;
   timeRange: {
     from: string;

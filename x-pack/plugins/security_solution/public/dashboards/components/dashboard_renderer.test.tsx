@@ -33,9 +33,11 @@ describe('DashboardRenderer', () => {
   const props = {
     canReadDashboard: true,
     id: 'dashboard-savedObjectId',
-    from: '2023-03-10T00:00:00.000Z',
     savedObjectId: 'savedObjectId',
-    to: '2023-03-10T23:59:59.999Z',
+    timeRange: {
+      from: '2023-03-10T00:00:00.000Z',
+      to: '2023-03-10T23:59:59.999Z',
+    },
   };
 
   it('renders', () => {
