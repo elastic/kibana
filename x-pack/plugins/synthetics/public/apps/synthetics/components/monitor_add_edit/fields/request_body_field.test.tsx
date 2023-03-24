@@ -8,6 +8,7 @@
 import 'jest-canvas-mock';
 
 import React, { useState, useCallback } from 'react';
+import userEvent from '@testing-library/user-event';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { RequestBodyField } from './request_body_field';
@@ -29,6 +30,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
         onChange={(e: any) => {
           props.onChange(e.jsonContent);
         }}
+        readOnly={props.readOnly}
       />
     ),
   };
@@ -37,7 +39,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 describe('<RequestBodyField />', () => {
   const defaultMode = Mode.PLAINTEXT;
   const defaultValue = 'sample value';
-  const WrappedComponent = () => {
+  const WrappedComponent = ({ readOnly }: { readOnly?: boolean }) => {
     const [config, setConfig] = useState({
       type: defaultMode,
       value: defaultValue,
@@ -53,6 +55,7 @@ describe('<RequestBodyField />', () => {
           (code) => setConfig({ type: code.type as Mode, value: code.value }),
           [setConfig]
         )}
+        readOnly={readOnly}
       />
     );
   };
@@ -84,5 +87,77 @@ describe('<RequestBodyField />', () => {
       expect(getByText('Add form field')).toBeInTheDocument();
       expect(queryByLabelText('Text code editor')).not.toBeInTheDocument();
     });
+  });
+
+  it('handles updating input', async () => {
+    const { getByText, getByRole, getAllByRole, getByLabelText } = render(<WrappedComponent />);
+
+    expect(getByLabelText('Text code editor')).toBeInTheDocument();
+    userEvent.type(getByRole('textbox'), 'text');
+    expect(getByRole('textbox')).toHaveValue('text');
+
+    const xmlButton = getByText('XML').closest('button');
+    if (xmlButton) {
+      fireEvent.click(xmlButton);
+    }
+
+    expect(getByText('XML').closest('button')).toHaveAttribute('aria-selected', 'true');
+    userEvent.type(getByRole('textbox'), 'xml');
+    expect(getByRole('textbox')).toHaveValue('textxml');
+
+    const jsonButton = getByText('JSON').closest('button');
+    if (jsonButton) {
+      fireEvent.click(jsonButton);
+    }
+
+    expect(getByText('JSON').closest('button')).toHaveAttribute('aria-selected', 'true');
+    userEvent.type(getByRole('textbox'), 'json');
+    expect(getByRole('textbox')).toHaveValue('textxmljson');
+
+    const formButton = getByText('Form').closest('button');
+    if (formButton) {
+      fireEvent.click(formButton);
+    }
+
+    expect(getByText('Form').closest('button')).toHaveAttribute('aria-selected', 'true');
+    userEvent.click(getByText('Add form field'));
+    expect(getByText('Key')).toBeInTheDocument();
+    expect(getByText('Value')).toBeInTheDocument();
+    userEvent.type(getAllByRole('textbox')[0], 'formfield');
+    expect(getAllByRole('textbox')[0]).toHaveValue('formfield');
+  });
+
+  it('handles read only', async () => {
+    const { getByText, getByRole, getByLabelText } = render(<WrappedComponent readOnly={true} />);
+
+    expect(getByLabelText('Text code editor')).toBeInTheDocument();
+    userEvent.type(getByRole('textbox'), 'text');
+    expect(getByRole('textbox')).toHaveValue('');
+
+    const xmlButton = getByText('XML').closest('button');
+    if (xmlButton) {
+      fireEvent.click(xmlButton);
+    }
+
+    expect(getByText('XML').closest('button')).toHaveAttribute('aria-selected', 'true');
+    userEvent.type(getByRole('textbox'), 'xml');
+    expect(getByRole('textbox')).toHaveValue('');
+
+    const jsonButton = getByText('JSON').closest('button');
+    if (jsonButton) {
+      fireEvent.click(jsonButton);
+    }
+
+    expect(getByText('JSON').closest('button')).toHaveAttribute('aria-selected', 'true');
+    userEvent.type(getByRole('textbox'), 'json');
+    expect(getByRole('textbox')).toHaveValue('');
+
+    const formButton = getByText('Form').closest('button');
+    if (formButton) {
+      fireEvent.click(formButton);
+    }
+
+    expect(getByText('Form').closest('button')).toHaveAttribute('aria-selected', 'true');
+    expect(getByRole('button', { name: 'Add form field' })).toBeDisabled();
   });
 });
