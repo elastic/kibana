@@ -73,6 +73,7 @@ export const useEsSearch = <DocumentSource extends unknown, TParams extends esty
             },
             error: (err) => {
               if (isErrorResponse(err)) {
+                console.error(err);
                 if (addInspectorRequest) {
                   addInspectorRequest({
                     data: {

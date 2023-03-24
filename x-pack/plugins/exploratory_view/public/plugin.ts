@@ -114,13 +114,10 @@ export class Plugin
           isDev: this.initContext.env.mode.dev,
         });
       },
-      order: 8300,
       title: i18n.translate('xpack.exploratoryView.appTitle', {
         defaultMessage: 'Exploratory View',
       }),
       searchable: false,
-      navLinkStatus: AppNavLinkStatus.hidden,
-      status: AppStatus.inaccessible,
       updater$: appUpdater$,
       keywords: [
         'observability',
@@ -142,6 +139,10 @@ export class Plugin
   }
 
   public start(coreStart: CoreStart, pluginsStart: ExploratoryViewPublicPluginsStart) {
+    this.appUpdater$.next(() => ({
+      navLinkStatus: AppNavLinkStatus.hidden,
+    }));
+
     return {
       createExploratoryViewUrl,
       getAppDataView: getAppDataView(pluginsStart.dataViews),
