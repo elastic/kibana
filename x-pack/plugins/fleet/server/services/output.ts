@@ -34,6 +34,7 @@ import {
 import { agentPolicyService } from './agent_policy';
 import { appContextService } from './app_context';
 import { escapeSearchQueryPhrase } from './saved_object';
+import { auditLoggingService } from './audit_logging';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
 
@@ -206,7 +207,7 @@ class OutputService {
     });
 
     for (const output of outputs.saved_objects) {
-      appContextService.writeCustomSoAuditLog({
+      auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: output.id,
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
@@ -224,7 +225,7 @@ class OutputService {
     });
 
     for (const output of outputs.saved_objects) {
-      appContextService.writeCustomSoAuditLog({
+      auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: output.id,
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
@@ -386,7 +387,7 @@ class OutputService {
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
       id,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
@@ -433,7 +434,7 @@ class OutputService {
     });
 
     for (const output of outputs.saved_objects) {
-      appContextService.writeCustomSoAuditLog({
+      auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: output.id,
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
@@ -458,7 +459,7 @@ class OutputService {
     });
 
     for (const output of outputs.saved_objects) {
-      appContextService.writeCustomSoAuditLog({
+      auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: output.id,
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
@@ -479,7 +480,7 @@ class OutputService {
       outputIdToUuid(id)
     );
 
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id: outputSO.id,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
@@ -521,7 +522,7 @@ class OutputService {
       id
     );
 
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
       id: outputIdToUuid(id),
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
@@ -615,7 +616,7 @@ class OutputService {
       }
     }
 
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: outputIdToUuid(id),
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,

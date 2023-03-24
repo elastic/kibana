@@ -77,6 +77,7 @@ import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackages } from './bundled_packages';
 import { withPackageSpan } from './utils';
+import { auditLoggingService } from '../../audit_logging';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -670,7 +671,7 @@ export const updateVersion = async (
   pkgName: string,
   pkgVersion: string
 ) => {
-  appContextService.writeCustomSoAuditLog({
+  auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
@@ -690,7 +691,7 @@ export const updateInstallStatus = async ({
   pkgName: string;
   status: EpmPackageInstallStatus;
 }) => {
-  appContextService.writeCustomSoAuditLog({
+  auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
@@ -725,7 +726,7 @@ export async function restartInstallation(options: {
     };
   }
 
-  appContextService.writeCustomSoAuditLog({
+  auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
@@ -775,7 +776,7 @@ export async function createInstallation(options: {
     savedObject = { ...savedObject, ...formatVerificationResultForSO(verificationResult) };
   }
 
-  appContextService.writeCustomSoAuditLog({
+  auditLoggingService.writeCustomSoAuditLog({
     action: 'create',
     id: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
@@ -795,7 +796,7 @@ export const saveKibanaAssetsRefs = async (
   pkgName: string,
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
 ) => {
-  appContextService.writeCustomSoAuditLog({
+  auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
@@ -859,7 +860,7 @@ export const updateEsAssetReferences = async (
     ({ type, id }) => `${type}-${id}`
   );
 
-  appContextService.writeCustomSoAuditLog({
+  auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
@@ -902,7 +903,7 @@ export const optimisticallyAddEsAssetReferences = async (
   const addEsAssets = async () => {
     // TODO: Should this be replaced by a `get()` call from epm/get.ts?
     const so = await savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id: pkgName,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
@@ -915,7 +916,7 @@ export const optimisticallyAddEsAssetReferences = async (
       ({ type, id }) => `${type}-${id}`
     );
 
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: pkgName,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,

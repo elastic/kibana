@@ -23,6 +23,7 @@ import {
 import { AgentActionNotFoundError } from '../../errors';
 
 import { bulkUpdateAgents } from './crud';
+import { auditLoggingService } from '../audit_logging';
 
 const ONE_MONTH_IN_MS = 2592000000;
 
@@ -57,7 +58,7 @@ export async function createAgentAction(
     refresh: 'wait_for',
   });
 
-  appContextService.writeCustomAuditLog({
+  auditLoggingService.writeCustomAuditLog({
     message: `User created Fleet action [id=${actionId}]`,
   });
 
@@ -110,7 +111,7 @@ export async function bulkCreateAgentActions(
   });
 
   for (const action of actions) {
-    appContextService.writeCustomAuditLog({
+    auditLoggingService.writeCustomAuditLog({
       message: `User created Fleet action [id=${action.id}]`,
     });
   }
@@ -175,7 +176,7 @@ export async function bulkCreateAgentActionResults(
   });
 
   for (const result of results) {
-    appContextService.writeCustomAuditLog({
+    auditLoggingService.writeCustomAuditLog({
       message: `User created Fleet action result [id=${result.actionId}]`,
     });
   }
@@ -211,7 +212,7 @@ export async function getAgentActions(esClient: ElasticsearchClient, actionId: s
   const result: FleetServerAgentAction[] = [];
 
   for (const hit of res.hits.hits) {
-    appContextService.writeCustomAuditLog({
+    auditLoggingService.writeCustomAuditLog({
       message: `User retrieved Fleet action [id=${hit._id}]}]`,
     });
 
@@ -256,7 +257,7 @@ export async function getUnenrollAgentActions(
   const result: FleetServerAgentAction[] = [];
 
   for (const hit of res.hits.hits) {
-    appContextService.writeCustomAuditLog({
+    auditLoggingService.writeCustomAuditLog({
       message: `User retrieved Fleet action [id=${hit._id}]}]`,
     });
 
@@ -292,7 +293,7 @@ export async function cancelAgentAction(esClient: ElasticsearchClient, actionId:
     }
 
     for (const hit of res.hits.hits) {
-      appContextService.writeCustomAuditLog({
+      auditLoggingService.writeCustomAuditLog({
         message: `User retrieved Fleet action [id=${hit._id}]}]`,
       });
     }
@@ -413,7 +414,7 @@ async function getAgentActionsByIds(esClient: ElasticsearchClient, actionIds: st
   const result: FleetServerAgentAction[] = [];
 
   for (const hit of res.hits.hits) {
-    appContextService.writeCustomAuditLog({
+    auditLoggingService.writeCustomAuditLog({
       message: `User retrieved Fleet action [id=${hit._id}]}]`,
     });
 

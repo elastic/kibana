@@ -22,6 +22,7 @@ import { FleetError, isESClientError, AgentNotFoundError } from '../../errors';
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
+import { auditLoggingService } from '../audit_logging';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive OR status:unenrolled`;
 const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
@@ -106,7 +107,7 @@ export async function openPointInTime(
     keep_alive: pitKeepAlive,
   });
 
-  appContextService.writeCustomAuditLog({
+  auditLoggingService.writeCustomAuditLog({
     message: `User opened point in time query [index=${index}] [pitId=${pitRes.id}]`,
   });
 
@@ -114,7 +115,7 @@ export async function openPointInTime(
 }
 
 export async function closePointInTime(esClient: ElasticsearchClient, pitId: string) {
-  appContextService.writeCustomAuditLog({
+  auditLoggingService.writeCustomAuditLog({
     message: `User closing point in time query [pitId=${pitId}]`,
   });
 
@@ -474,7 +475,7 @@ export async function updateAgent(
   agentId: string,
   data: Partial<AgentSOAttributes>
 ) {
-  appContextService.writeCustomAuditLog({
+  auditLoggingService.writeCustomAuditLog({
     message: `User updated agent [id=${agentId}]`,
   });
 

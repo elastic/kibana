@@ -22,11 +22,7 @@ import type {
   EncryptedSavedObjectsPluginSetup,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 
-import type {
-  SecurityPluginStart,
-  SecurityPluginSetup,
-  AuditLogger,
-} from '@kbn/security-plugin/server';
+import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
@@ -73,7 +69,6 @@ class AppContextService {
   private savedObjectsTagging: SavedObjectTaggingStart | undefined;
   private bulkActionsResolver: BulkActionsResolver | undefined;
   private messageSigningService: MessageSigningServiceInterface | undefined;
-  private auditLogger?: AuditLogger;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -258,76 +253,6 @@ class AppContextService {
 
   public getMessageSigningService() {
     return this.messageSigningService;
-  }
-
-  /**
-   * The audit logger must be set after the AppContextService class is instantiated, as it
-   * requires a `KibanaRequest` to provide user/session data in the audit log records
-   *
-   * @param request The request to use for user/session info included in audit logging
-   */
-  public setAuditLogger(request: KibanaRequest) {
-    this.auditLogger = this.getSecuritySetup().audit.asScoped(request);
-  }
-
-  /**
-   * Write a custom audit log record. If a current request is available, the log will include
-   * user/session data. If not, an unscoped audit logger will be used.
-   */
-  public writeCustomAuditLog(...args: Parameters<AuditLogger['log']>) {
-    let auditLogger = this.auditLogger;
-
-    // If there's no request-scoped audit logger available, log to an unscoped one.
-    // This should ideally be an infrequent occurence only called during preconfiguration
-    // contexts or other "Fleet system" operations.
-    if (!auditLogger) {
-      auditLogger = this.getSecuritySetup().audit.withoutRequest;
-    }
-
-    auditLogger.log(...args);
-  }
-
-  /**
-   * Helper method for writing saved object related audit logs. Since Fleet
-   * uses an internal SO client to support its custom RBAC model around Fleet/Integrations
-   * permissions, we need to implement our own audit logging for saved objects that use the
-   * internal client. This helper reduces the boilerplate around audit logging in those cases.
-   *
-   * @example
-   * ```ts
-   * appContextService.writeCustomSoAuditLog({
-   *   action: 'find',
-   *   id: 'some-id-123',
-   *   savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE
-   * });
-   * ```
-   */
-  public writeCustomSoAuditLog({
-    action,
-    id,
-    savedObjectType,
-  }: {
-    action: 'find' | 'get' | 'create' | 'update' | 'delete';
-    id: string;
-    savedObjectType: string;
-  }) {
-    this.writeCustomAuditLog({
-      message: `User ${
-        action === 'find' || action === 'get' ? 'has accessed' : 'is accessing'
-      } ${savedObjectType} [id=${id}]`,
-      event: {
-        action: `saved_object_${action}`,
-        category: ['database'],
-        outcome: 'unknown',
-        type: ['access'],
-      },
-      kibana: {
-        saved_object: {
-          id,
-          type: savedObjectType,
-        },
-      },
-    });
   }
 }
 

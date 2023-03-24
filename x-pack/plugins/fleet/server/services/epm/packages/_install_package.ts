@@ -54,6 +54,7 @@ import {
   installIndexTemplatesAndPipelines,
 } from './install';
 import { withPackageSpan } from './utils';
+import { auditLoggingService } from '../../audit_logging';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path
@@ -289,7 +290,7 @@ export async function _installPackage({
       })
     );
 
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: pkgName,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,

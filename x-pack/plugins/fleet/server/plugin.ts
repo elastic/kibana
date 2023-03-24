@@ -115,6 +115,7 @@ import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
 import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
+import { auditLoggingService } from './services/audit_logging';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -367,7 +368,10 @@ export class FleetPlugin
             .getSavedObjects()
             .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
 
-        appContextService.setAuditLogger(request);
+        // Initialize the audit logging service scoped to the current request.
+        // Any subsequent calls to the audit logger during this request's lifecycle
+        // will be scoped to this request.
+        auditLoggingService.start(request);
 
         return {
           get agentClient() {

@@ -270,10 +270,10 @@ jest.mock('./app_context', () => ({
           },
         }
       ),
-    writeCustomAuditLog: jest.fn(),
-    writeCustomSoAuditLog: jest.fn(),
   },
 }));
+
+jest.mock('./audit_logging');
 
 const spyAgentPolicyServiceUpdate = jest.spyOn(agentPolicy.agentPolicyService, 'update');
 const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(

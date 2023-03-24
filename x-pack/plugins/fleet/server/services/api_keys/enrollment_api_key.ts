@@ -21,7 +21,7 @@ import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { escapeSearchQueryPhrase } from '../saved_object';
 
-import { appContextService } from '../app_context';
+import { auditLoggingService } from '../audit_logging';
 
 import { invalidateAPIKeys } from './security';
 
@@ -108,7 +108,7 @@ export async function deleteEnrollmentApiKey(
 ) {
   const enrollmentApiKey = await getEnrollmentAPIKey(esClient, id);
 
-  appContextService.writeCustomAuditLog({
+  auditLoggingService.writeCustomAuditLog({
     message: `User deleting enrollment API key [id=${enrollmentApiKey.id}] [api_key_id=${enrollmentApiKey.api_key_id}]`,
   });
 
@@ -214,7 +214,7 @@ export async function generateEnrollmentAPIKey(
 
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
 
-  appContextService.writeCustomAuditLog({
+  auditLoggingService.writeCustomAuditLog({
     message: `User creating API enrollment key [name=${name}] [policy_id=${agentPolicyId}]`,
   });
 

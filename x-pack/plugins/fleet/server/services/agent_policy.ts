@@ -84,6 +84,7 @@ import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
 import { validateOutputForPolicy } from './agent_policies';
+import { auditLoggingService } from './audit_logging';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -107,7 +108,7 @@ class AgentPolicyService {
     user?: AuthenticatedUser,
     options: { bumpRevision: boolean } = { bumpRevision: true }
   ): Promise<AgentPolicy> {
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id,
       savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -215,7 +216,7 @@ class AgentPolicyService {
       options.id = SavedObjectsUtils.generateId();
     }
 
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
       id: options.id,
       savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -288,7 +289,7 @@ class AgentPolicyService {
         (await packagePolicyService.findAllForAgentPolicy(soClient, id)) || [];
     }
 
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id,
       savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -342,7 +343,7 @@ class AgentPolicyService {
     );
 
     for (const agentPolicy of result) {
-      appContextService.writeCustomSoAuditLog({
+      auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: agentPolicy.id,
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -423,7 +424,7 @@ class AgentPolicyService {
     );
 
     for (const agentPolicy of agentPolicies) {
-      appContextService.writeCustomSoAuditLog({
+      auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: agentPolicy.id,
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -705,7 +706,7 @@ class AgentPolicyService {
     id: string,
     options?: { force?: boolean; removeFleetServerDocuments?: boolean; user?: AuthenticatedUser }
   ): Promise<DeleteAgentPolicyResponse> {
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
       id,
       savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -787,7 +788,7 @@ class AgentPolicyService {
     }
 
     for (const policyId of agentPolicyIds) {
-      appContextService.writeCustomAuditLog({
+      auditLoggingService.writeCustomAuditLog({
         message: `User deploying policy [id=${policyId}]`,
       });
     }
@@ -891,7 +892,7 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     agentPolicyId: string
   ) {
-    appContextService.writeCustomAuditLog({
+    auditLoggingService.writeCustomAuditLog({
       message: `User deleting policy [id=${agentPolicyId}]`,
     });
 

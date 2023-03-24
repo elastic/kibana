@@ -42,6 +42,7 @@ import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 
 import { createInstallableFrom } from '.';
+import { auditLoggingService } from '../../audit_logging';
 
 export type { SearchParams } from '../registry';
 export { getFile } from '../registry';
@@ -115,7 +116,7 @@ export async function getPackages(
     .sort(sortByName);
 
   for (const pkg of packageList) {
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: pkg.id,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
@@ -166,7 +167,7 @@ export async function getLimitedPackages(options: {
   const packages = installedPackagesInfo.filter(isPackageLimited).map((pkgInfo) => pkgInfo.name);
 
   for (const pkg of installedPackages) {
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: pkg.id,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
@@ -187,7 +188,7 @@ export async function getPackageSavedObjects(
   });
 
   for (const savedObject of result.saved_objects) {
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
@@ -297,7 +298,7 @@ export const getPackageUsageStats = async ({
     });
 
     for (const packagePolicy of packagePolicies.saved_objects) {
-      appContextService.writeCustomSoAuditLog({
+      auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -423,7 +424,7 @@ export async function getInstallationObject(options: {
     return;
   }
 
-  appContextService.writeCustomSoAuditLog({
+  auditLoggingService.writeCustomSoAuditLog({
     action: 'find',
     id: installation.id,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
@@ -444,7 +445,7 @@ export async function getInstallationObjects(options: {
   const installations = res.saved_objects.filter((so) => so?.attributes);
 
   for (const installation of installations) {
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: installation.id,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,

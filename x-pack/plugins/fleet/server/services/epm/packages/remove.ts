@@ -42,6 +42,7 @@ import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
 
 import { getInstallation, kibanaSavedObjectTypes } from '.';
+import { auditLoggingService } from '../../audit_logging';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -85,7 +86,7 @@ export async function removeInstallation(options: {
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
-  appContextService.writeCustomSoAuditLog({
+  auditLoggingService.writeCustomSoAuditLog({
     action: 'delete',
     id: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
@@ -124,7 +125,7 @@ async function deleteKibanaAssets(
   );
 
   for (const { saved_object: savedObject } of resolvedObjects) {
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id: savedObject.id,
       savedObjectType: savedObject.type,
@@ -140,7 +141,7 @@ async function deleteKibanaAssets(
   const assetsToDelete = foundObjects.map(({ saved_object: { id, type } }) => ({ id, type }));
 
   for (const asset of assetsToDelete) {
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
       id: asset.id,
       savedObjectType: asset.type,

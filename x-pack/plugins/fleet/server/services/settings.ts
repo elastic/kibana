@@ -14,12 +14,13 @@ import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common/
 
 import { appContextService } from './app_context';
 import { listFleetServerHosts } from './fleet_server_host';
+import { auditLoggingService } from './audit_logging';
 
 export async function getSettings(soClient: SavedObjectsClientContract): Promise<Settings> {
   const res = await soClient.find<SettingsSOAttributes>({
     type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   });
-  appContextService.writeCustomSoAuditLog({
+  auditLoggingService.writeCustomSoAuditLog({
     action: 'get',
     id: GLOBAL_SETTINGS_ID,
     savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -64,7 +65,7 @@ export async function saveSettings(
   try {
     const settings = await getSettings(soClient);
 
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: settings.id,
       savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -84,7 +85,7 @@ export async function saveSettings(
     if (e.isBoom && e.output.statusCode === 404) {
       const defaultSettings = createDefaultSettings();
 
-      appContextService.writeCustomSoAuditLog({
+      auditLoggingService.writeCustomSoAuditLog({
         action: 'update',
         id: GLOBAL_SETTINGS_ID,
         savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,

@@ -105,6 +105,7 @@ import { handleExperimentalDatastreamFeatureOptIn } from './package_policies';
 import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
 import type { PackagePolicyClient, PackagePolicyService } from './package_policy_service';
 import { installAssetsForInputPackagePolicy } from './epm/packages/install';
+import { auditLoggingService } from './audit_logging';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -145,7 +146,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       options.id = SavedObjectsUtils.generateId();
     }
 
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
       id: options.id,
       savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -296,7 +297,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicy.id = SavedObjectsUtils.generateId();
       }
 
-      appContextService.writeCustomSoAuditLog({
+      auditLoggingService.writeCustomSoAuditLog({
         action: 'create',
         id: packagePolicy.id,
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -415,7 +416,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       response.package.experimental_data_stream_features = experimentalFeatures;
     }
 
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id,
       savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -444,7 +445,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }));
 
     for (const packagePolicy of packagePolicies) {
-      appContextService.writeCustomSoAuditLog({
+      auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -490,7 +491,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .filter((packagePolicy): packagePolicy is PackagePolicy => packagePolicy !== null);
 
     for (const packagePolicy of packagePolicies) {
-      appContextService.writeCustomSoAuditLog({
+      auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: packagePolicy.id,
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -516,7 +517,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     for (const packagePolicy of packagePolicies?.saved_objects ?? []) {
-      appContextService.writeCustomSoAuditLog({
+      auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -552,7 +553,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     for (const packagePolicy of packagePolicies.saved_objects) {
-      appContextService.writeCustomSoAuditLog({
+      auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -574,7 +575,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicyUpdate: UpdatePackagePolicy,
     options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
   ): Promise<PackagePolicy> {
-    appContextService.writeCustomSoAuditLog({
+    auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id,
       savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -721,7 +722,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     currentVersion?: string
   ): Promise<PackagePolicy[] | null> {
     for (const packagePolicy of packagePolicyUpdates) {
-      appContextService.writeCustomSoAuditLog({
+      auditLoggingService.writeCustomSoAuditLog({
         action: 'update',
         id: packagePolicy.id,
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -851,7 +852,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     request?: KibanaRequest
   ): Promise<PostDeletePackagePoliciesResponse> {
     for (const id of ids) {
-      appContextService.writeCustomSoAuditLog({
+      auditLoggingService.writeCustomSoAuditLog({
         action: 'delete',
         id,
         savedObjectType: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
