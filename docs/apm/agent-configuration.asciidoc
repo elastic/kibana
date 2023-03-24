@@ -43,3 +43,13 @@ PHP agent:: {apm-php-ref}/configuration.html[Configuration reference]
 Python agent:: {apm-py-ref}/configuration.html[Configuration reference]
 Ruby agent:: {apm-ruby-ref}/configuration.html[Configuration reference]
 Real User Monitoring (RUM) agent:: {apm-rum-ref}/configuration.html[Configuration reference]
+
+[float]
+==== APM Server configuration
+
+For most users, APM agent configuration should work out-of-the-box.
+If you run into trouble, it may be because you're not using the {es} output,
+or because your {es} credentials don't have sufficient privileges.
+
+See {apm-guide-ref}/configure-agent-config.html[configure APM agent configuration]
+to learn how to configure APM Server to avoid these problems.
