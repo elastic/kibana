@@ -17,7 +17,6 @@ import { useTimelineDataFilters } from '../../../timelines/containers/use_timeli
 import { ERROR_TITLE, ERROR_MESSAGE } from '../../translations';
 import { ALERTS_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
-// import { useGlobalTime } from '../../../common/containers/use_global_time';
 
 export const ANALYZE_GRAPH_ID = 'analyze_graph';
 
