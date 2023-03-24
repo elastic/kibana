@@ -12,6 +12,7 @@ import { isTimeComparison } from '../../../../shared/time_comparison/get_compari
 
 const INITIAL_STATE_MAIN_STATISTICS = {
   mainStatistics: [],
+  agentName: '',
   requestId: undefined,
   totalItems: 0,
 };
@@ -66,6 +67,7 @@ export function useMobileStatisticsFetcher({
               requestId: uuidv4(),
               mainStatistics: response.mainStatistics,
               totalItems: response.mainStatistics.length,
+              agentName: response.agentName,
             };
           });
         }
@@ -73,7 +75,7 @@ export function useMobileStatisticsFetcher({
       [environment, start, end, kueryWithMobileFilters, serviceName, field]
     );
 
-  const { mainStatistics, requestId, totalItems } = data;
+  const { mainStatistics, requestId, totalItems, agentName } = data;
 
   const {
     data: detailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
@@ -112,6 +114,7 @@ export function useMobileStatisticsFetcher({
   );
 
   return {
+    agentName,
     mainStatistics,
     mainStatisticsStatus,
     detailedStatistics,

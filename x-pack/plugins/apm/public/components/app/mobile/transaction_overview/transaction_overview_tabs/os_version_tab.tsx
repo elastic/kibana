@@ -22,6 +22,7 @@ function OSVersionTab({
   offset,
 }: TabContentProps) {
   const {
+    agentName,
     mainStatistics,
     mainStatisticsStatus,
     detailedStatistics,
@@ -38,6 +39,7 @@ function OSVersionTab({
 
   return (
     <StatsList
+      agentName={agentName}
       isLoading={isPending(mainStatisticsStatus)}
       mainStatistics={mainStatistics}
       detailedStatisticsLoading={isPending(detailedStatisticsStatus)}

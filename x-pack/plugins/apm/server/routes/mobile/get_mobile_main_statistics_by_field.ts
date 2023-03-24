@@ -17,6 +17,7 @@ import {
   SESSION_ID,
   TRANSACTION_DURATION,
   ERROR_TYPE,
+  AGENT_NAME,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -34,6 +35,17 @@ interface Props {
   field: string;
 }
 
+export interface MobileMainStatisticsResponse {
+  mainStatistics: Array<{
+    name: string | number;
+    latency: number | null;
+    throughput: number;
+    crashRate: number;
+    appLaunchTime: number | null;
+  }>;
+  agentName: string;
+}
+
 export async function getMobileMainStatisticsByField({
   kuery,
   apmEventClient,
@@ -47,11 +59,15 @@ export async function getMobileMainStatisticsByField({
     `get_mobile_main_statistics_by_${field}`,
     {
       apm: {
-        events: [ProcessorEvent.transaction, ProcessorEvent.error],
+        events: [
+          ProcessorEvent.transaction,
+          ProcessorEvent.error,
+          ProcessorEvent.metric,
+        ],
       },
       body: {
         track_total_hits: false,
-        size: 0,
+        size: 1,
         query: {
           bool: {
             filter: [
@@ -62,6 +78,7 @@ export async function getMobileMainStatisticsByField({
             ],
           },
         },
+        _source: [AGENT_NAME],
         aggs: {
           main_statistics: {
             terms: {
@@ -87,7 +104,7 @@ export async function getMobileMainStatisticsByField({
                   },
                 },
               },
-              launches: {
+              app_launch_time: {
                 sum: {
                   field: APP_LAUNCH_TIME,
                 },
@@ -99,6 +116,7 @@ export async function getMobileMainStatisticsByField({
     }
   );
 
+  const agentName = response.hits.hits[0]._source.agent.name;
   const mainStatistics =
     response.aggregations?.main_statistics.buckets.map((bucket) => {
       return {
@@ -113,9 +131,9 @@ export async function getMobileMainStatisticsByField({
           value: bucket.doc_count,
         }),
         crashRate: (bucket.crashes.doc_count / bucket.sessions.value) * 100,
-        appLaunchTime: bucket.launches.value,
+        appLaunchTime: bucket.app_launch_time.value,
       };
     }) ?? [];
 
-  return mainStatistics;
+  return { mainStatistics, agentName };
 }

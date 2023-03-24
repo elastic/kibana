@@ -26,7 +26,10 @@ import {
   getMobileTermsByField,
   MobileTermsByFieldResponse,
 } from './get_mobile_terms_by_field';
-import { getMobileMainStatisticsByField } from './get_mobile_main_statistics_by_field';
+import {
+  getMobileMainStatisticsByField,
+  MobileMainStatisticsResponse,
+} from './get_mobile_main_statistics_by_field';
 import { getMobileDetailedStatisticsByFieldPeriods } from './get_mobile_detailed_statistics_by_field';
 
 const mobileFiltersRoute = createApmServerRoute({
@@ -286,17 +289,13 @@ const mobileMainStatisticsByField = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<{
-    mainStatistics: Awaited<ReturnType<typeof getMobileMainStatisticsByField>>;
-  }> => {
+  handler: async (resources): Promise<MobileMainStatisticsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
     const { kuery, environment, start, end, field } = params.query;
 
-    const mainStatistics = await getMobileMainStatisticsByField({
+    return await getMobileMainStatisticsByField({
       kuery,
       environment,
       start,
@@ -305,7 +304,6 @@ const mobileMainStatisticsByField = createApmServerRoute({
       apmEventClient,
       field,
     });
-    return { mainStatistics };
   },
 });
 

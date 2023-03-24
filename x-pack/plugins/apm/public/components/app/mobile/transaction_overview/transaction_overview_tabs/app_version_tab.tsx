@@ -22,6 +22,7 @@ function AppVersionTab({
   offset,
 }: TabContentProps) {
   const {
+    agentName,
     mainStatistics,
     mainStatisticsStatus,
     detailedStatistics,
@@ -35,8 +36,10 @@ function AppVersionTab({
     comparisonEnabled,
     offset,
   });
+
   return (
     <StatsList
+      agentName={agentName}
       isLoading={isPending(mainStatisticsStatus)}
       mainStatistics={mainStatistics}
       detailedStatisticsLoading={isPending(detailedStatisticsStatus)}
