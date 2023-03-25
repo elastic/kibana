@@ -93,7 +93,7 @@ export function initMVTRoutes({
           name: APP_ID,
           description: 'mvt:get_hits_tile',
           url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/${z}/${x}/${y}.pbf`,
-          id: query.executionContextId
+          id: query.executionContextId,
         }),
         logger,
         path: tileRequest.path,
@@ -284,25 +284,23 @@ function makeExecutionContext({
   name,
   description,
   url,
-  id
+  id,
 }: {
-  type: string,
-  name: string,
-  description: string,
-  url: string,
-  id?: string,
+  type: string;
+  name: string;
+  description: string;
+  url: string;
+  id?: string;
 }): KibanaExecutionContext {
-  return id !== undefined 
-    ? 
-      {
+  return id !== undefined
+    ? {
         type,
         name,
         description,
         url,
         id,
       }
-    :
-      {
+    : {
         type,
         name,
         description,
