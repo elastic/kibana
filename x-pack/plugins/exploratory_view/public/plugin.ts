@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AppNavLinkStatus, AppStatus } from '@kbn/core-application-browser';
+import { AppNavLinkStatus } from '@kbn/core-application-browser';
 import { BehaviorSubject } from 'rxjs';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
