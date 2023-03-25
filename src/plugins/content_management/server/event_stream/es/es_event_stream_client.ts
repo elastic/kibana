@@ -74,12 +74,15 @@ export class EsEventStreamClient implements EventStreamClient {
       operations.push({ create: {} }, dto);
     }
 
-    const { errors } = await esClient.bulk({
-      index: this.#names.dataStream,
-      operations,
-    }, {
-      maxRetries: 0,
-    });
+    const { errors } = await esClient.bulk(
+      {
+        index: this.#names.dataStream,
+        operations,
+      },
+      {
+        maxRetries: 0,
+      }
+    );
 
     if (errors) {
       throw new Error('Some events failed to be indexed.');
