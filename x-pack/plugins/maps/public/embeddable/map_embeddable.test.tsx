@@ -19,7 +19,7 @@ jest.mock('../kibana_services', () => {
       return {
         get: () => {
           return {};
-        }
+        },
       };
     },
     getHttp() {
