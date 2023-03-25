@@ -10,7 +10,7 @@ import { APP_ID } from '../../../common/constants';
 
 export function mergeExecutionContext(
   mergeContext: Partial<KibanaExecutionContext>,
-  context: KibanaExecutionContext
+  context: KibanaExecutionContext = {}
 ): KibanaExecutionContext {
   if (isMapContext(context)) {
     return {
@@ -31,7 +31,7 @@ export function mergeExecutionContext(
   return context;
 }
 
-export function getExecutionContextId(context: KibanaExecutionContext): string | undefined {
+export function getExecutionContextId(context: KibanaExecutionContext = {}): string | undefined {
   if (isMapContext(context)) {
     return context.id;
   }
