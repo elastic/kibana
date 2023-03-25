@@ -7,9 +7,12 @@
 
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { FleetStartServices } from '@kbn/fleet-plugin/public';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import type { PackagePolicyEditExtensionComponentProps } from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ConfigKey, DataStream } from './types';
+import { useEditMonitorLocator } from '../../../apps/synthetics/hooks';
 
 /**
  * Exports Synthetics-specific package policy instructions
@@ -19,7 +22,13 @@ export const SyntheticsPolicyEditExtensionWrapper = memo<PackagePolicyEditExtens
   ({ policy: currentPolicy, newPolicy, onChange }) => {
     const { http } = useKibana().services;
 
-    const { config_id: configId } = defaultConfig;
+    const locators = useKibana<FleetStartServices>().services?.share?.url?.locators;
+    const currentInput = currentPolicy.inputs.find((input) => input.enabled === true);
+    const vars = currentInput?.streams.find((stream) =>
+      Object.values(DataStream).includes(stream.data_stream.dataset as DataStream)
+    )?.vars;
+
+    const configId: string = vars?.[ConfigKey.CONFIG_ID].value as DataStream;
 
     const url = useEditMonitorLocator({ configId, locators });
 
