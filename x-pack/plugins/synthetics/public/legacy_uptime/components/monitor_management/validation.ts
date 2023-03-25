@@ -152,6 +152,7 @@ const validateThrottleValue = (speed: string | undefined, allowZero?: boolean) =
 
 const validateBrowser: Validation = {
   ...validateCommon,
+  [ConfigKey.SOURCE_INLINE]: ({ [ConfigKey.SOURCE_INLINE]: inlineScript }) => !inlineScript,
   [ConfigKey.DOWNLOAD_SPEED]: ({ [ConfigKey.DOWNLOAD_SPEED]: downloadSpeed }) =>
     validateThrottleValue(downloadSpeed),
   [ConfigKey.UPLOAD_SPEED]: ({ [ConfigKey.UPLOAD_SPEED]: uploadSpeed }) =>

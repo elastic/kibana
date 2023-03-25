@@ -255,10 +255,6 @@ describe('<CustomFields />', () => {
       getByText(/To create a "Browser" monitor, please ensure you are using the/)
     ).toBeInTheDocument();
 
-    // expect tls options to be available for browser
-    expect(queryByLabelText('Proxy Zip URL')).toBeInTheDocument();
-    expect(queryByText(/Enable TLS configuration for Zip URL/)).toBeInTheDocument();
-
     // ensure at least one browser advanced option is present
     advancedOptionsButton = getByText('Advanced Browser options');
     fireEvent.click(advancedOptionsButton);
