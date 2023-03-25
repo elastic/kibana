@@ -77,6 +77,8 @@ export class EsEventStreamClient implements EventStreamClient {
     const { errors } = await esClient.bulk({
       index: this.#names.dataStream,
       operations,
+    }, {
+      maxRetries: 0,
     });
 
     if (errors) {
