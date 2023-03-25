@@ -210,7 +210,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
 
   async getTooltipProperties(
     properties: GeoJsonProperties,
-    featureId?: string | number
   ): Promise<ITooltipProperty[]> {
     const tooltips = [];
     for (const key in properties) {

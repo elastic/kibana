@@ -10,6 +10,7 @@ import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
 import { DataView } from '@kbn/data-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
