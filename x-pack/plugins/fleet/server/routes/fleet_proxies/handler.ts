@@ -148,7 +148,7 @@ export const deleteFleetProxyHandler: RequestHandler<
 
     const { fleetServerHosts, outputs } = await getFleetProxyRelatedSavedObjects(soClient, proxyId);
 
-    await deleteFleetProxy(soClient, request.params.itemId);
+    await deleteFleetProxy(soClient, esClient, request.params.itemId);
 
     await bumpRelatedPolicies(soClient, esClient, fleetServerHosts, outputs);
 

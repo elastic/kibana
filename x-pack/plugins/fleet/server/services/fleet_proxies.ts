@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
+import type {
+  SavedObjectsClientContract,
+  SavedObject,
+  ElasticsearchClient,
+} from '@kbn/core/server';
 import { omit } from 'lodash';
 import pMap from 'p-map';
 
@@ -87,6 +91,7 @@ export async function getFleetProxy(
 
 export async function deleteFleetProxy(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   id: string,
   options?: { fromPreconfiguration?: boolean }
 ) {
@@ -108,7 +113,7 @@ export async function deleteFleetProxy(
     );
   }
 
-  await updateRelatedSavedObject(soClient, fleetServerHosts, outputs);
+  await updateRelatedSavedObject(soClient, esClient, fleetServerHosts, outputs);
 
   return await soClient.delete(FLEET_PROXY_SAVED_OBJECT_TYPE, id);
 }
@@ -172,6 +177,7 @@ export async function bulkGetFleetProxies(
 
 async function updateRelatedSavedObject(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   fleetServerHosts: FleetServerHost[],
   outputs: Output[]
 ) {
@@ -189,7 +195,7 @@ async function updateRelatedSavedObject(
   await pMap(
     outputs,
     (output) => {
-      outputService.update(soClient, output.id, {
+      outputService.update(soClient, esClient, output.id, {
         ...omit(output, 'id'),
         proxy_id: null,
       });
