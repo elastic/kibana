@@ -7,7 +7,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useUpdatePolicy } from './use_update_policy';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { validate } from '../validation';
+import { validate } from '../../monitor_management/validation';
 import {
   ConfigKey,
   MonitorFields,

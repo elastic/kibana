@@ -19,7 +19,7 @@ import {
 } from './contexts';
 import { CustomFields } from './custom_fields';
 import { ConfigKey, DataStream, ScheduleUnit } from './types';
-import { validate as centralValidation } from './validation';
+import { validate as centralValidation } from '../monitor_management/validation';
 import { defaultConfig } from './synthetics_policy_create_extension';
 
 // ensures that fields appropriately match to their label

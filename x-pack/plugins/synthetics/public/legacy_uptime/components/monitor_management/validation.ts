@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
-import { validateParamsValue } from '../fleet_package/validation';
 import {
   ConfigKey,
   DataStream,
@@ -29,6 +28,17 @@ function validateHeaders<T>(headers: T): boolean {
     }
   });
 }
+
+export const validateParamsValue = (params?: string) => {
+  try {
+    if (params) {
+      JSON.parse(params ?? '');
+    }
+  } catch (e) {
+    return true;
+  }
+  return false;
+};
 
 // returns true if invalid
 const validateTimeout = ({
