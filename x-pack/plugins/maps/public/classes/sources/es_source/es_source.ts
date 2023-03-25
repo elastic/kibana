@@ -62,6 +62,7 @@ export interface IESSource extends IVectorSource {
     timeFilters,
     searchSessionId,
     inspectorAdapters,
+    executionContext,
   }: {
     layerName: string;
     style: IVectorStyle;
@@ -71,6 +72,7 @@ export interface IESSource extends IVectorSource {
     timeFilters: TimeRange;
     searchSessionId?: string;
     inspectorAdapters: Adapters;
+    executionContext: KibanaExecutionContext;
   }): Promise<object>;
 }
 

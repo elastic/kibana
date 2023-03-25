@@ -83,22 +83,18 @@ export function initMVTRoutes({
         return response.badRequest();
       }
 
-      const executionContext: KibanaExecutionContext = {
-        type: 'server',
-        name: APP_ID,
-        description: 'mvt:get_hits_tile',
-        url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/${z}/${x}/${y}.pbf`,
-      };
-      if (query.executionContextId) {
-        executionContext.id = query.executionContextId;
-      }
-
       const { stream, headers, statusCode } = await getTile({
         abortController: makeAbortController(request),
         body: tileRequest.body,
         context,
         core,
-        executionContext,
+        executionContext: makeExecutionContext({
+          type: 'server',
+          name: APP_ID,
+          description: 'mvt:get_hits_tile',
+          url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/${z}/${x}/${y}.pbf`,
+          id: query.executionContextId
+        }),
         logger,
         path: tileRequest.path,
       });
@@ -160,22 +156,18 @@ export function initMVTRoutes({
         return response.badRequest();
       }
 
-      const executionContext: KibanaExecutionContext = {
-        type: 'server',
-        name: APP_ID,
-        description: 'mvt:get_aggs_tile',
-        url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/${z}/${x}/${y}.pbf`,
-      };
-      if (query.executionContextId) {
-        executionContext.id = query.executionContextId;
-      }
-
       const { stream, headers, statusCode } = await getTile({
         abortController: makeAbortController(request),
         body: tileRequest.body,
         context,
         core,
-        executionContext,
+        executionContext: makeExecutionContext({
+          type: 'server',
+          name: APP_ID,
+          description: 'mvt:get_aggs_tile',
+          url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/${z}/${x}/${y}.pbf`,
+          id: query.executionContextId,
+        }),
         logger,
         path: tileRequest.path,
       });
@@ -285,4 +277,35 @@ function makeAbortController(
     abortController.abort();
   });
   return abortController;
+}
+
+function makeExecutionContext({
+  type,
+  name,
+  description,
+  url,
+  id
+}: {
+  type: string,
+  name: string,
+  description: string,
+  url: string,
+  id?: string,
+}): KibanaExecutionContext {
+  return id !== undefined 
+    ? 
+      {
+        type,
+        name,
+        description,
+        url,
+        id,
+      }
+    :
+      {
+        type,
+        name,
+        description,
+        url,
+      };
 }
