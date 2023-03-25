@@ -288,7 +288,7 @@ describe('nodeBuilder', () => {
       for (const operator of operators) {
         const nodes = nodeBuilder.range('foo', operator, dateString);
         const query = toElasticsearchQuery(nodes);
-        
+
         expect(query).toMatchObject({
           bool: {
             minimum_should_match: 1,
@@ -301,7 +301,7 @@ describe('nodeBuilder', () => {
                 },
               },
             ],
-          }
+          },
         });
       }
     });
