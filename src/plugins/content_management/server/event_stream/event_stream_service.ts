@@ -77,6 +77,11 @@ export class EventStreamService {
       });
   }
 
+  /** Called during "stop" plugin life-cycle. */
+  public stop(): void {
+    this.#buffer.flush();
+  }
+
   #getClient(): EventStreamClient {
     if (!this.client) throw new Error('EventStreamClient not initialized.');
     return this.client;

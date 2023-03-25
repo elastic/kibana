@@ -73,4 +73,8 @@ export class ContentManagementPlugin
 
     return {};
   }
+
+  public stop(): void {
+    this.#eventStream.stop();
+  }
 }
