@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
 
-  describe('Observability alerts', function () {
+  describe('Observability alerts >', function () {
     this.tags('includeFirefox');
 
     const testSubjects = getService('testSubjects');
