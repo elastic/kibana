@@ -201,7 +201,7 @@ describe('<CustomFields />', () => {
   });
 
   it('handles switching monitor type', () => {
-    const { getByText, queryByText, getByLabelText, queryByLabelText, getAllByLabelText } = render(
+    const { getByText, queryByText, getByLabelText, queryByLabelText } = render(
       <WrappedComponent />
     );
     const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
@@ -251,12 +251,6 @@ describe('<CustomFields />', () => {
       screen.getByText('Runs Synthetic test scripts that are defined inline.')
     ).toBeInTheDocument();
 
-    const zip = screen.getByTestId('syntheticsSourceTab__zipUrl');
-    fireEvent.click(zip);
-
-    getAllByLabelText('Zip URL').forEach((node: any) => {
-      expect(node).toBeInTheDocument();
-    });
     expect(
       getByText(/To create a "Browser" monitor, please ensure you are using the/)
     ).toBeInTheDocument();
