@@ -29,6 +29,13 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
     },
     async (context, req, res) => {
       const { size, ...filters } = req.query || {};
+
+      if (filters.type && filters.ean) {
+        return res.badRequest({
+          body: 'Filters "type" and "ean" are mutually exclusive but found both.',
+        });
+      }
+
       const esClient = await getEsClientFromContext(context);
 
       try {
