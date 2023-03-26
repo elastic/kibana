@@ -59,20 +59,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
         frequency: {
           dynamic: false,
-          properties: {
-            // summary: {
-            //   index: false,
-            //   type: 'boolean',
-            // },
-            // notifyWhen: {
-            //   index: false,
-            //   type: 'keyword',
-            // },
-            // throttle: {
-            //   index: false,
-            //   type: 'keyword',
-            // },
-          },
+          properties: {},
         },
       },
     },

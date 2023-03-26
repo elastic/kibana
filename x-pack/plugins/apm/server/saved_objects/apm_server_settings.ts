@@ -17,7 +17,7 @@ export const apmServerSettings: SavedObjectsType = {
     properties: {
       schemaJson: {
         type: 'text',
-        index: false,
+        index: false, // referenced directly in `createCloudApmPackgePolicy`
       },
     },
   },
