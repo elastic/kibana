@@ -34,7 +34,7 @@ export const TestRunErrorInfo = ({
           data-test-subj="monitorTestRunErrorCallout"
           title={ERROR_RUNNING_TEST}
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
           <EuiText color="danger">{errorMessage ?? FAILED_TO_RUN}</EuiText>
         </EuiCallOut>

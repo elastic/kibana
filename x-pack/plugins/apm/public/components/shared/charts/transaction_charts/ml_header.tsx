@@ -49,7 +49,7 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
   const icon = hasKuery ? (
     <EuiIconTip
       aria-label="Warning"
-      type="alert"
+      type="warning"
       color="warning"
       content={i18n.translate(
         'xpack.apm.metrics.transactionChart.machineLearningTooltip.withKuery',

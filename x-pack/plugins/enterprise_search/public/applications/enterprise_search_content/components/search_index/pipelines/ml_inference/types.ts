@@ -25,6 +25,7 @@ export interface AddInferencePipelineFormErrors {
 
 export enum AddInferencePipelineSteps {
   Configuration,
+  Fields,
   Test,
   Review,
 }

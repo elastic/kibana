@@ -10,9 +10,19 @@ import { BUCKET_TARGET_COUNT } from '../../transactions/constants';
 import { getBuckets } from './get_buckets';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { Maybe } from '../../../../typings/common';
 
 function getBucketSize({ start, end }: { start: number; end: number }) {
   return Math.floor((end - start) / BUCKET_TARGET_COUNT);
+}
+
+export interface ErrorDistributionResponse {
+  currentPeriod: Array<{ x: number; y: number }>;
+  previousPeriod: Array<{
+    x: number;
+    y: Maybe<number>;
+  }>;
+  bucketSize: number;
 }
 
 export async function getErrorDistribution({
@@ -33,7 +43,7 @@ export async function getErrorDistribution({
   start: number;
   end: number;
   offset?: string;
-}) {
+}): Promise<ErrorDistributionResponse> {
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,

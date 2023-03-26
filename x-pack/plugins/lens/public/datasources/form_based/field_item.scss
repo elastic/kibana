@@ -1,31 +1,10 @@
-@import '../../mixins';
-
-.lnsFieldItem {
-  width: 100%;
-
-  &.kbnFieldButton {
-    &:focus-within,
-    &-isActive {
-      @include removeEuiFocusRing;
-    }
-  }
-
-  .kbnFieldButton__button:focus {
-    @include passDownFocusRing('.kbnFieldButton__name > span');
-
-    .kbnFieldButton__name > span {
-      text-decoration: underline;
-    }
-  }
-
+.kbnFieldButton {
   .lnsFieldItem__infoIcon {
     visibility: hidden;
     opacity: 0;
   }
 
   &:hover:not([class*='isActive']) {
-    cursor: grab;
-
     .lnsFieldItem__infoIcon {
       visibility: visible;
       opacity: 1;
@@ -34,20 +13,11 @@
   }
 }
 
-.kbnFieldButton.lnsDragDrop_ghost {
+.kbnFieldButton.domDragDrop_ghost {
   .lnsFieldItem__infoIcon {
     visibility: hidden;
     opacity: 0;
   }
-}
-
-.kbnFieldButton__name {
-  transition: background-color $euiAnimSpeedFast ease-in-out;
-}
-
-.lnsFieldItem--missing {
-  background: lightOrDarkTheme(transparentize($euiColorMediumShade, .9), $euiColorEmptyShade);
-  color: $euiColorDarkShade;
 }
 
 .lnsFieldItem__fieldPanel {

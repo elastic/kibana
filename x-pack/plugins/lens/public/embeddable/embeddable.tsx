@@ -30,10 +30,10 @@ import {
 } from '@kbn/data-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
-import { Subscription } from 'rxjs';
+import { merge, Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
 import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
-import { map, distinctUntilChanged, skip } from 'rxjs/operators';
+import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -204,7 +204,7 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
   return (
     <div className="lnsEmbeddedError">
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         iconColor="danger"
         data-test-subj="embeddable-lens-failure"
         body={
@@ -461,34 +461,42 @@ export class Embeddable
         })
     );
 
+    // Use a trigger to distinguish between observables in the subscription
+    const withTrigger = (trigger: 'attributesOrSavedObjectId' | 'searchContext') =>
+      map((input: LensEmbeddableInput) => ({ trigger, input }));
+
     // Re-initialize the visualization if either the attributes or the saved object id changes
-    this.inputReloadSubscriptions.push(
-      input$
-        .pipe(
-          distinctUntilChanged((a, b) =>
-            fastIsEqual(
-              ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
-              ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
-            )
-          ),
-          skip(1)
+    const attributesOrSavedObjectId$ = input$.pipe(
+      distinctUntilChanged((a, b) =>
+        fastIsEqual(
+          ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
+          ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
         )
-        .subscribe(async (input) => {
-          await this.initializeSavedVis(input);
-          this.reload();
-        })
+      ),
+      skip(1),
+      withTrigger('attributesOrSavedObjectId')
     );
 
     // Update search context and reload on changes related to search
+    const searchContext$ = shouldFetch$<LensEmbeddableInput>(input$, () => this.getInput()).pipe(
+      withTrigger('searchContext')
+    );
+
+    // Merge and debounce the observables to avoid multiple reloads
     this.inputReloadSubscriptions.push(
-      shouldFetch$<LensEmbeddableInput>(this.getUpdated$(), () => this.getInput()).subscribe(
-        (input) => {
+      merge(searchContext$, attributesOrSavedObjectId$)
+        .pipe(debounceTime(0))
+        .subscribe(async ({ trigger, input }) => {
+          if (trigger === 'attributesOrSavedObjectId') {
+            await this.initializeSavedVis(input);
+          }
+
           // reset removable messages
           // Dashboard search/context changes are detected here
           this.additionalUserMessages = {};
+
           this.reload();
-        }
-      )
+        })
     );
   }
 

@@ -30,6 +30,7 @@ import type {
   GetActionStatusResponse,
   GetAgentUploadsResponse,
   PostAgentReassignResponse,
+  PostRetrieveAgentsByActionsResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -45,6 +46,7 @@ import type {
   PostBulkUpdateAgentTagsRequestSchema,
   GetActionStatusRequestSchema,
   GetAgentUploadFileRequestSchema,
+  PostRetrieveAgentsByActionsRequestSchema,
 } from '../../types';
 import { defaultFleetErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
@@ -404,6 +406,23 @@ export const getActionStatusHandler: RequestHandler<
   try {
     const actionStatuses = await AgentService.getActionStatuses(esClient, request.query);
     const body: GetActionStatusResponse = { items: actionStatuses };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const postRetrieveAgentsByActionsHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostRetrieveAgentsByActionsRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  try {
+    const agents = await AgentService.getAgentsByActionsIds(esClient, request.body.actionIds);
+    const body: PostRetrieveAgentsByActionsResponse = { items: agents };
     return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });

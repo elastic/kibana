@@ -30,14 +30,8 @@ export interface MetricChartProps {
 const MIN_HEIGHT = 300;
 
 export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) => {
-  const {
-    unifiedSearchDateRange,
-    unifiedSearchQuery,
-    unifiedSearchFilters,
-    controlPanelFilters,
-    onSubmit,
-  } = useUnifiedSearchContext();
-  const { metricsDataView } = useMetricsDataViewContext();
+  const { searchCriteria, onSubmit } = useUnifiedSearchContext();
+  const { dataView } = useMetricsDataViewContext();
   const { baseRequest } = useHostsViewContext();
   const {
     services: { lens },
@@ -47,19 +41,19 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
 
   const { injectData, getExtraActions, error } = useLensAttributes({
     type,
-    dataView: metricsDataView,
+    dataView,
     options: {
       breakdownSize,
     },
   });
 
   const injectedLensAttributes = injectData({
-    filters: [...unifiedSearchFilters, ...controlPanelFilters],
-    query: unifiedSearchQuery,
+    filters: [...searchCriteria.filters, ...searchCriteria.panelFilters],
+    query: searchCriteria.query,
     title,
   });
 
-  const extraActionOptions = getExtraActions(injectedLensAttributes, unifiedSearchDateRange);
+  const extraActionOptions = getExtraActions(injectedLensAttributes, searchCriteria.dateRange);
   const extraAction: Action[] = [extraActionOptions.openInLens];
 
   const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
@@ -91,7 +85,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
           direction="column"
         >
           <EuiFlexItem grow={false}>
-            <EuiIcon type="alert" />
+            <EuiIcon type="warning" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" textAlign="center">
@@ -109,9 +103,9 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
             style={{ height: MIN_HEIGHT }}
             attributes={injectedLensAttributes}
             viewMode={ViewMode.VIEW}
-            timeRange={unifiedSearchDateRange}
-            query={unifiedSearchQuery}
-            filters={unifiedSearchFilters}
+            timeRange={searchCriteria.dateRange}
+            query={searchCriteria.query}
+            filters={searchCriteria.filters}
             extraActions={extraAction}
             lastReloadRequestTime={baseRequest.requestTs}
             executionContext={{

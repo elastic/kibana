@@ -1021,6 +1021,35 @@ paths:
             type: boolean
       security:
         - basicAuth: []
+    post:
+      summary: List agents by action ids
+      tags:
+        - Agents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/agent_get_by_actions'
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-agents-by-actions
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                actionIds:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - policy_id
   /agents/bulk_upgrade:
     post:
       summary: Bulk upgrade agents
@@ -1094,18 +1123,35 @@ paths:
                             - ROLLOUT_PASSED
                         nbAgentsActioned:
                           type: number
+                          description: number of agents actioned
                         nbAgentsActionCreated:
                           type: number
+                          description: number of agents included in action from kibana
                         nbAgentsAck:
                           type: number
+                          description: number of agents that acknowledged the action
                         nbAgentsFailed:
                           type: number
+                          description: number of agents that failed to execute the action
                         version:
                           type: string
+                          description: agent version number (UPGRADE action)
                         startTime:
                           type: string
+                          description: start time of action (scheduled actions)
                         type:
                           type: string
+                          enum:
+                            - POLICY_REASSIGN
+                            - UPGRADE
+                            - UNENROLL
+                            - FORCE_UNENROLL
+                            - UPDATE_TAGS
+                            - CANCEL
+                            - REQUEST_DIAGNOSTICS
+                            - SETTINGS
+                            - POLICY_CHANGE
+                            - INPUT_ACTION
                         expiration:
                           type: string
                         completionTime:
@@ -1114,8 +1160,16 @@ paths:
                           type: string
                         newPolicyId:
                           type: string
+                          description: new policy id (POLICY_REASSIGN action)
+                        policyId:
+                          type: string
+                          description: policy id (POLICY_CHANGE action)
+                        revision:
+                          type: string
+                          description: new policy revision (POLICY_CHANGE action)
                         creationTime:
                           type: string
+                          description: creation time of action
                         latestErrors:
                           type: array
                           description: >-
@@ -1139,6 +1193,7 @@ paths:
                         - nbAgentsFailed
                         - status
                         - creationTime
+                        - type
                 required:
                   - items
         '400':
@@ -2351,6 +2406,8 @@ paths:
                   - item
         '400':
           $ref: '#/components/responses/error'
+        '409':
+          $ref: '#/components/responses/error'
       requestBody:
         description: >-
           You should use inputs as an object and not use the deprecated inputs
@@ -2481,6 +2538,8 @@ paths:
                     - id
                     - success
         '400':
+          $ref: '#/components/responses/error'
+        '409':
           $ref: '#/components/responses/error'
   /package_policies/upgrade/dryrun:
     post:
@@ -3890,6 +3949,13 @@ components:
         - total
         - page
         - perPage
+    agent_get_by_actions:
+      title: Agents get by action ids
+      type: array
+      items:
+        type: array
+        items:
+          type: string
     bulk_upgrade_agents:
       title: Bulk upgrade agents
       type: object

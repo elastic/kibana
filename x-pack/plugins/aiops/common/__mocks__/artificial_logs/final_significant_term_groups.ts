@@ -9,19 +9,87 @@ import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 export const finalSignificantTermGroups: SignificantTermGroup[] = [
   {
-    id: '2038579476',
+    docCount: 632,
     group: [
-      { fieldName: 'response_code', fieldValue: '500', duplicate: false },
-      { fieldName: 'url', fieldValue: 'home.php', duplicate: false },
-      { fieldName: 'url', fieldValue: 'login.php', duplicate: false },
+      {
+        docCount: 790,
+        duplicate: 2,
+        fieldName: 'url',
+        fieldValue: 'login.php',
+        pValue: 0.012783309213417932,
+      },
+      {
+        docCount: 632,
+        duplicate: 2,
+        fieldName: 'user',
+        fieldValue: 'Peter',
+        pValue: 0.012783309213417932,
+      },
     ],
-    docCount: 792,
-    pValue: 0.010770456205312423,
+    id: '1982924514',
+    pValue: 0.012783309213417932,
   },
   {
-    id: '817080373',
-    group: [{ fieldName: 'user', fieldValue: 'Peter', duplicate: false }],
-    docCount: 1981,
-    pValue: 2.7454255728359757e-21,
+    docCount: 792,
+    group: [
+      {
+        docCount: 792,
+        duplicate: 2,
+        fieldName: 'response_code',
+        fieldValue: '500',
+        pValue: 0.012783309213417932,
+      },
+      {
+        docCount: 792,
+        duplicate: 2,
+        fieldName: 'url',
+        fieldValue: 'home.php',
+        pValue: 0.00974308761016614,
+      },
+    ],
+    id: '2052830342',
+    pValue: 0.00974308761016614,
+  },
+  {
+    docCount: 790,
+    group: [
+      {
+        docCount: 792,
+        duplicate: 2,
+        fieldName: 'response_code',
+        fieldValue: '500',
+        pValue: 0.012783309213417932,
+      },
+      {
+        docCount: 790,
+        duplicate: 2,
+        fieldName: 'url',
+        fieldValue: 'login.php',
+        pValue: 0.012783309213417932,
+      },
+    ],
+    id: '3851735068',
+    pValue: 0.012783309213417932,
+  },
+  {
+    docCount: 636,
+    group: [
+      {
+        docCount: 792,
+        duplicate: 2,
+        fieldName: 'url',
+        fieldValue: 'home.php',
+        pValue: 0.00974308761016614,
+      },
+      {
+        docCount: 636,
+        duplicate: 2,
+        fieldName: 'user',
+        fieldValue: 'Peter',
+        pValue: 0.00974308761016614,
+      },
+    ],
+    id: '92732022',
+    pValue: 0.00974308761016614,
   },
 ];
