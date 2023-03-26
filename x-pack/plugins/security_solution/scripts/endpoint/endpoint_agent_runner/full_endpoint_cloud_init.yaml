@@ -1,0 +1,31 @@
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+packages:
+  - jq
+snap:
+  commands:
+    - snap install yq
+runcmd:
+- |
+  sudo apt install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev
+  su -c "curl https://pyenv.run | bash" ubuntu
+  echo 'export PATH="/home/ubuntu/.pyenv/bin:$PATH"' >> /home/ubuntu/.bashrc
+  echo 'eval "$(pyenv init -)"' >> /home/ubuntu/.bashrc
+  echo 'eval "$(pyenv virtualenv-init -)"' >> /home/ubuntu/.bashrc
+  cd / && su -c "/home/ubuntu/.pyenv/bin/pyenv install 3.8" ubuntu
+  cd / && su -c "/home/ubuntu/.pyenv/bin/pyenv global 3.8" ubuntu
+  sudo add-apt-repository -y ppa:oisf/suricata-stable
+  sudo apt-get update
+  NEEDRESTART_MODE=a sudo apt -y install suricata moreutils
+  sudo suricata-update
+  cat /etc/suricata/suricata.yaml | interfaceName=$(ip -j -p route show default | jq -j '.[].dev') yq '.af-packet.0.interface = strenv(interfaceName)'  | sudo sponge /etc/suricata/suricata.yaml
+  cat /etc/suricata/suricata.yaml | yq '.outputs.[1].[].community-id |= true' | sudo sponge /etc/suricata/suricata.yaml
+  git clone https://github.com/elastic/detection-rules.git /home/ubuntu/detection-rules
+  chown ubuntu /home/ubuntu/detection-rules
+
+
+
+
+
+
