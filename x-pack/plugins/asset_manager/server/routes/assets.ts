@@ -8,23 +8,32 @@
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from '@kbn/core/server';
 import { debug } from '../../common/debug_log';
-import { AssetFilters } from '../../common/types_api';
 import { ASSET_MANAGER_API_BASE } from '../constants';
 import { getAssets } from '../lib/get_assets';
 import { SetupRouteOptions } from './types';
 import { getEsClientFromContext } from './utils';
 
-export type GetAssetsQueryOptions = AssetFilters & {
-  size?: number;
-};
+const assetType = schema.oneOf([
+  schema.literal('k8s.pod'),
+  schema.literal('k8s.cluster'),
+  schema.literal('k8s.node'),
+]);
+
+const getAssetsQueryOptions = schema.object({
+  from: schema.maybe(schema.string()),
+  to: schema.maybe(schema.string()),
+  type: schema.maybe(schema.oneOf([schema.arrayOf(assetType), assetType])),
+  ean: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
+  size: schema.maybe(schema.number()),
+});
 
 export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupRouteOptions<T>) {
-  // GET assets
-  router.get<unknown, GetAssetsQueryOptions | undefined, unknown>(
+  // GET /assets
+  router.get<unknown, typeof getAssetsQueryOptions.type, unknown>(
     {
       path: `${ASSET_MANAGER_API_BASE}/assets`,
       validate: {
-        query: schema.any({}),
+        query: getAssetsQueryOptions,
       },
     },
     async (context, req, res) => {

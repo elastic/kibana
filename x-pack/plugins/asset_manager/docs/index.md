@@ -60,7 +60,7 @@ Returns a list of assets present within a given time range. Can be limited by as
 
 | Option  | Type          | Required? | Default | Description                                                                        |
 | :------ | :------------ | :-------- | :------ | :--------------------------------------------------------------------------------- |
-| from    | RangeDate     | Yes       | N/A     | Starting point for date range to search for assets within                          |
+| from    | RangeDate     | No       | "now-24h"     | Starting point for date range to search for assets within                          |
 | to      | RangeDate     | No        | "now"   | End point for date range to search for assets                                      |
 | type    | AssetType[]   | No        | all     | Specify one or more types to restrict the query                                    |
 | ean     | AssetEan[]    | No        | all     | Specify one or more EANs (specific assets) to restrict the query                   |
