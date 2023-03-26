@@ -13,10 +13,10 @@ export enum FilterBy {
 }
 export const getFormulaByFilter = (filter: FilterBy, shift?: string): string => {
   const mapFilterByToFormula: { [key in FilterBy]: string } = {
-    [FilterBy.Searches]: "count(kql='event.action: search'",
-    [FilterBy.NoResults]: "count(kql='event.customer_data.totalResults : 0'",
-    [FilterBy.Clicks]: "count(kql='event.action: click'",
-    [FilterBy.Sessions]: 'unique_count(labels.session_uuid',
+    [FilterBy.Searches]: 'count(search.query',
+    [FilterBy.NoResults]: "count(kql='search.results.total_results : 0'",
+    [FilterBy.Clicks]: "count(kql='event.action: search_click'",
+    [FilterBy.Sessions]: 'unique_count(session.id',
   };
 
   return mapFilterByToFormula[filter] + (shift ? `, shift='${shift}'` : '') + ')';
