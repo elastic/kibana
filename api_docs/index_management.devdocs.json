@@ -2627,7 +2627,7 @@
         "label": "TemplateType",
         "description": [],
         "signature": [
-          "\"default\" | \"system\" | \"managed\" | \"cloudManaged\""
+          "\"managed\" | \"default\" | \"system\" | \"cloudManaged\""
         ],
         "path": "x-pack/plugins/index_management/common/types/templates.ts",
         "deprecated": false,

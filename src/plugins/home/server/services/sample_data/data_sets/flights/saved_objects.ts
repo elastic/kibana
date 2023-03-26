@@ -17,9 +17,8 @@ export const getSavedObjects = (): SavedObject[] => [
     type: 'search',
     updated_at: '2021-07-01T20:41:40.379Z',
     version: '1',
-    migrationVersion: {
-      search: '7.9.3',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.9.3',
     attributes: {
       title: i18n.translate('home.sampleData.flightsSpec.flightLogTitle', {
         defaultMessage: '[Flights] Flight Log',
@@ -57,9 +56,8 @@ export const getSavedObjects = (): SavedObject[] => [
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
     version: '1',
-    migrationVersion: {
-      visualization: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     attributes: {
       title: i18n.translate('home.sampleData.flightsSpec.delaysAndCancellationsTitle', {
         defaultMessage: '[Flights] Delays & Cancellations',
@@ -91,9 +89,8 @@ export const getSavedObjects = (): SavedObject[] => [
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
     version: '1',
-    migrationVersion: {
-      visualization: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     attributes: {
       title: i18n.translate('home.sampleData.flightsSpec.delayBucketsTitle', {
         defaultMessage: '[Flights] Delay Buckets',
@@ -126,7 +123,6 @@ export const getSavedObjects = (): SavedObject[] => [
     type: 'visualization',
     updated_at: '2021-07-07T01:48:55.366Z',
     version: '1',
-    migrationVersion: {},
     attributes: {
       title: i18n.translate('home.sampleData.flightsSpec.destinationWeatherTitle', {
         defaultMessage: '[Flights] Destination Weather',
@@ -154,7 +150,6 @@ export const getSavedObjects = (): SavedObject[] => [
     type: 'visualization',
     updated_at: '2021-07-07T01:36:42.568Z',
     version: '4',
-    migrationVersion: {},
     attributes: {
       title: i18n.translate('home.sampleData.flightsSpec.airportConnectionsTitle', {
         defaultMessage: '[Flights] Airport Connections (Hover Over Airport)',
@@ -175,9 +170,8 @@ export const getSavedObjects = (): SavedObject[] => [
     type: 'visualization',
     updated_at: '2018-05-09T15:49:03.736Z',
     version: '1',
-    migrationVersion: {
-      visualization: '7.14.0',
-    },
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '7.14.0',
     attributes: {
       title: i18n.translate('home.sampleData.flightsSpec.departuresCountMapTitle', {
         defaultMessage: '[Flights] Departures Count Map',
@@ -205,7 +199,6 @@ export const getSavedObjects = (): SavedObject[] => [
     type: 'index-pattern',
     updated_at: '2018-05-09T15:49:03.736Z',
     version: '1',
-    migrationVersion: {},
     attributes: {
       title: 'kibana_sample_data_flights',
       name: 'Kibana Sample Data Flights',
@@ -408,9 +401,7 @@ export const getSavedObjects = (): SavedObject[] => [
         id: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
       },
     ],
-    migrationVersion: {
-      dashboard: '8.5.0',
-    },
-    coreMigrationVersion: '8.6.0',
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '8.5.0',
   },
 ];

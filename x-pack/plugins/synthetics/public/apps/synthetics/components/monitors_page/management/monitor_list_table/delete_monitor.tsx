@@ -125,6 +125,7 @@ export const ProjectMonitorDisclaimer = () => {
       values={{
         docsLink: (
           <EuiLink
+            data-test-subj="syntheticsProjectMonitorDisclaimerLearnMoreLink"
             href="https://elastic.co/guide/en/observability/current/synthetics-manage-monitors.html#manage-monitors-delete"
             target="_blank"
           >

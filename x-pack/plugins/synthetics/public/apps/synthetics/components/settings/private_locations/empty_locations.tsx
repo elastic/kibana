@@ -40,6 +40,7 @@ export const EmptyLocations = ({
       actions={
         redirectToSettings ? (
           <EuiButton
+            data-test-subj="syntheticsEmptyLocationsButton"
             iconType="plusInCircle"
             color="primary"
             fill
@@ -52,6 +53,7 @@ export const EmptyLocations = ({
           </EuiButton>
         ) : (
           <EuiButton
+            data-test-subj="syntheticsEmptyLocationsButton"
             iconType="plusInCircle"
             disabled={disabled}
             color="primary"
@@ -77,6 +79,7 @@ export const EmptyLocations = ({
 
 export const PrivateLocationDocsLink = ({ label }: { label?: string }) => (
   <EuiLink
+    data-test-subj="syntheticsPrivateLocationDocsLinkLink"
     href="https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html"
     target="_blank"
   >

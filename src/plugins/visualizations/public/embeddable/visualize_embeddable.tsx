@@ -468,22 +468,6 @@ export class VisualizeEmbeddable
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async (event) => {
-        // maps hack, remove once esaggs function is cleaned up and ready to accept variables
-        if (event.name === 'bounds') {
-          const agg = this.vis.data.aggs!.aggs.find((a: any) => {
-            return get(a, 'type.dslName') === 'geohash_grid';
-          });
-          if (
-            (agg && agg.params.precision !== event.data.precision) ||
-            (agg && !_.isEqual(agg.params.boundingBox, event.data.boundingBox))
-          ) {
-            agg.params.boundingBox = event.data.boundingBox;
-            agg.params.precision = event.data.precision;
-            this.reload();
-          }
-          return;
-        }
-
         if (!this.input.disableTriggers) {
           const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
           let context;

@@ -64,7 +64,7 @@ export async function getTopDependencyOperations({
   environment: Environment;
   kuery: string;
   searchServiceDestinationMetrics: boolean;
-}) {
+}): Promise<DependencyOperation[]> {
   const { startWithOffset, endWithOffset, offsetInMs } = getOffsetInMs({
     start,
     end,
