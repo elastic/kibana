@@ -72,7 +72,6 @@ export type SelectorCondition =
   | 'orchestratorResourceLabel'
   | 'orchestratorResourceName'
   | 'orchestratorResourceType'
-  | 'orchestratorResourceLabel'
   | 'orchestratorType'
   | 'targetFilePath'
   | 'ignoreVolumeFiles'
@@ -80,11 +79,9 @@ export type SelectorCondition =
   | 'operation'
   | 'processExecutable'
   | 'processName'
-  | 'processUserName'
   | 'processUserId'
   | 'sessionLeaderInteractive'
-  | 'sessionLeaderExecutable'
-  | 'operation';
+  | 'sessionLeaderName';
 
 export interface SelectorConditionOptions {
   type: SelectorConditionType;
@@ -115,7 +112,7 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
   orchestratorNamespace: { type: 'stringArray' },
   orchestratorResourceLabel: { type: 'stringArray' },
   orchestratorResourceName: { type: 'stringArray' },
-  orchestratorResourceType: { type: 'stringArray' },
+  orchestratorResourceType: { type: 'stringArray', values: ['node', 'pod'] },
   orchestratorType: { type: 'stringArray', values: ['kubernetes'] },
   operation: {
     type: 'stringArray',
@@ -129,10 +126,9 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
   ignoreVolumeMounts: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeFiles'] },
   processExecutable: { selectorType: 'process', type: 'stringArray', not: ['processName'] },
   processName: { selectorType: 'process', type: 'stringArray', not: ['processExecutable'] },
-  processUserName: { selectorType: 'process', type: 'stringArray' },
   processUserId: { selectorType: 'process', type: 'stringArray' },
   sessionLeaderInteractive: { selectorType: 'process', type: 'boolean' },
-  sessionLeaderExecutable: { selectorType: 'process', type: 'stringArray' },
+  sessionLeaderName: { selectorType: 'process', type: 'stringArray' },
 };
 
 export type ResponseAction = 'log' | 'alert' | 'block';
@@ -158,9 +154,9 @@ export interface Selector {
   // process selector properties
   processExecutable?: string[];
   processName?: string[];
-  processUserName?: string[];
   processUserId?: string[];
   sessionLeaderInteractive?: string[];
+  sessionLeaderName?: string[];
 
   // non yaml fields
   type: SelectorType;
