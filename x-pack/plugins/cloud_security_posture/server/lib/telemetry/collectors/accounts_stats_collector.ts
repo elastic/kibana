@@ -88,6 +88,9 @@ const getAccountsStatsQuery = (): SearchRequest => ({
               field: 'rule.benchmark.id',
             },
             size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
           },
         },
         benchmark_version: {
@@ -96,6 +99,9 @@ const getAccountsStatsQuery = (): SearchRequest => ({
               field: 'rule.benchmark.version',
             },
             size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
           },
         },
         benchmark_name: {
@@ -104,6 +110,9 @@ const getAccountsStatsQuery = (): SearchRequest => ({
               field: 'rule.benchmark.name',
             },
             size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
           },
         },
         kubernetes_version: {
@@ -112,6 +121,9 @@ const getAccountsStatsQuery = (): SearchRequest => ({
               field: 'cloudbeat.kubernetes.version',
             },
             size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
           },
         },
         passed_findings_count: {

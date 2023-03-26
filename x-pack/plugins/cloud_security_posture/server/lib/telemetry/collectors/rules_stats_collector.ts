@@ -100,6 +100,9 @@ const getRulesStatsQuery = (): SearchRequest => ({
                   field: 'rule.name',
                 },
                 size: 1,
+                sort: {
+                  '@timestamp': 'desc',
+                },
               },
             },
             rule_section: {
@@ -108,6 +111,9 @@ const getRulesStatsQuery = (): SearchRequest => ({
                   field: 'rule.section',
                 },
                 size: 1,
+                sort: {
+                  '@timestamp': 'desc',
+                },
               },
             },
             rule_version: {
@@ -116,6 +122,9 @@ const getRulesStatsQuery = (): SearchRequest => ({
                   field: 'rule.version',
                 },
                 size: 1,
+                sort: {
+                  '@timestamp': 'desc',
+                },
               },
             },
             posture_type: {
@@ -124,6 +133,9 @@ const getRulesStatsQuery = (): SearchRequest => ({
                   field: 'rule.benchmark.posture_type',
                 },
                 size: 1,
+                sort: {
+                  '@timestamp': 'desc',
+                },
               },
             },
             rule_number: {
@@ -132,6 +144,9 @@ const getRulesStatsQuery = (): SearchRequest => ({
                   field: 'rule.benchmark.rule_number',
                 },
                 size: 1,
+                sort: {
+                  '@timestamp': 'desc',
+                },
               },
             },
             benchmark_id: {
@@ -140,6 +155,9 @@ const getRulesStatsQuery = (): SearchRequest => ({
                   field: 'rule.benchmark.id',
                 },
                 size: 1,
+                sort: {
+                  '@timestamp': 'desc',
+                },
               },
             },
             benchmark_version: {
@@ -148,6 +166,9 @@ const getRulesStatsQuery = (): SearchRequest => ({
                   field: 'rule.benchmark.version',
                 },
                 size: 1,
+                sort: {
+                  '@timestamp': 'desc',
+                },
               },
             },
             benchmark_name: {
@@ -156,6 +177,9 @@ const getRulesStatsQuery = (): SearchRequest => ({
                   field: 'rule.benchmark.name',
                 },
                 size: 1,
+                sort: {
+                  '@timestamp': 'desc',
+                },
               },
             },
             passed_findings_count: {
