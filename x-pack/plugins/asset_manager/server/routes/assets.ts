@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from '@kbn/core/server';
+import { differenceBy, intersectionBy } from 'lodash';
 import { debug } from '../../common/debug_log';
 import { AssetFilters } from '../../common/types_api';
 import { ASSET_MANAGER_API_BASE } from '../constants';
@@ -34,6 +35,75 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       try {
         const results = await getAssets({ esClient, size, filters });
         return res.ok({ body: { results } });
+      } catch (error: unknown) {
+        debug('error looking up asset records', error);
+        return res.customError({ statusCode: 500 });
+      }
+    }
+  );
+
+  // GET /assets/diff
+  const getAssetsDiffQueryOptions = schema.object({
+    aFrom: schema.string(),
+    aTo: schema.string(),
+    bFrom: schema.string(),
+    bTo: schema.string(),
+    type: schema.maybe(schema.arrayOf(schema.string())),
+  });
+  router.get<unknown, typeof getAssetsDiffQueryOptions.type, unknown>(
+    {
+      path: `${ASSET_MANAGER_API_BASE}/assets/diff`,
+      validate: {
+        query: getAssetsDiffQueryOptions,
+      },
+    },
+    async (context, req, res) => {
+      const { aFrom, aTo, bFrom, bTo } = req.query;
+
+      // Assuming for now that these are valid ISO strings, they might not be or they might be ES datemath strings
+      if (new Date(aFrom) > new Date(aTo)) {
+        return res.badRequest({
+          body: `Time range cannot move backwards in time. "aTo" (${aTo}) is before "aFrom" (${aFrom}).`,
+        });
+      }
+
+      if (new Date(bFrom) > new Date(bTo)) {
+        return res.badRequest({
+          body: `Time range cannot move backwards in time. "bTo" (${bTo}) is before "bFrom" (${bFrom}).`,
+        });
+      }
+
+      const esClient = await getEsClientFromContext(context);
+
+      try {
+        // Worth doing this in parallel?
+        const resultsForA = await getAssets({
+          esClient,
+          filters: {
+            from: aFrom,
+            to: aTo,
+          },
+        });
+
+        const resultsForB = await getAssets({
+          esClient,
+          filters: {
+            from: bFrom,
+            to: bTo,
+          },
+        });
+
+        const onlyInA = differenceBy(resultsForA, resultsForB, 'asset.ean');
+        const onlyInB = differenceBy(resultsForB, resultsForA, 'asset.ean');
+        const inBoth = intersectionBy(resultsForA, resultsForB, 'asset.ean');
+
+        return res.ok({
+          body: {
+            onlyInA,
+            onlyInB,
+            inBoth,
+          },
+        });
       } catch (error: unknown) {
         debug('error looking up asset records', error);
         return res.customError({ statusCode: 500 });
