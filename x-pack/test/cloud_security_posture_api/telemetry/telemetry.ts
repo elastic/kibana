@@ -233,7 +233,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`'includes only KSPM findings without posture_type'`, async () => {
-      const foo = data.kspmFindingsNoPostureType;
       await index.add(data.kspmFindingsNoPostureType);
 
       const {
