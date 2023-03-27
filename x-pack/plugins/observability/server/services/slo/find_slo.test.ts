@@ -66,7 +66,6 @@ describe('FindSLO', () => {
               isRolling: true,
             },
             settings: {
-              timestampField: '@timestamp',
               syncDelay: '1m',
               frequency: '1m',
             },

@@ -385,27 +385,6 @@ export const patchTypeSpecificSnakeToCamel = (
   }
 };
 
-const versionExcludedKeys = ['enabled', 'id', 'rule_id'];
-const incrementVersion = (nextParams: PatchRuleRequestBody, existingRule: RuleParams) => {
-  // The the version from nextParams if it's provided
-  if (nextParams.version) {
-    return nextParams.version;
-  }
-
-  // If the rule is immutable, keep the current version
-  if (existingRule.immutable) {
-    return existingRule.version;
-  }
-
-  // For custom rules, check modified params to deicide whether version increment is needed
-  for (const key in nextParams) {
-    if (!versionExcludedKeys.includes(key)) {
-      return existingRule.version + 1;
-    }
-  }
-  return existingRule.version;
-};
-
 // eslint-disable-next-line complexity
 export const convertPatchAPIToInternalSchema = (
   nextParams: PatchRuleRequestBody & {
@@ -468,9 +447,7 @@ export const convertPatchAPIToInternalSchema = (
       references: nextParams.references ?? existingParams.references,
       namespace: nextParams.namespace ?? existingParams.namespace,
       note: nextParams.note ?? existingParams.note,
-      // Always use the version from the request if specified. If it isn't specified, leave immutable rules alone and
-      // increment the version of mutable rules by 1.
-      version: incrementVersion(nextParams, existingParams),
+      version: nextParams.version ?? existingParams.version,
       exceptionsList: nextParams.exceptions_list ?? existingParams.exceptionsList,
       ...typeSpecificParams,
     },
