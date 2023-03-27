@@ -89,7 +89,7 @@ export const TestPipeline: React.FC = () => {
       <EuiPanel hasBorder hasShadow={false}>
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
-            <EuiFlexGroup alignItems='center'>
+            <EuiFlexGroup alignItems="center">
               <EuiFlexItem>
                 <EuiFormRow
                   fullWidth
