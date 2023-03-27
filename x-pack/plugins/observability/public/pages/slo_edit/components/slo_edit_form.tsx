@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -54,6 +54,29 @@ export function SloEditForm({ slo }: Props) {
       formState,
       watch,
     });
+
+  const [showObjectiveSection, setShowObjectiveSection] = useState<boolean>(isEditMode);
+  const [showDescriptionSection, setShowDescriptionSection] = useState<boolean>(isEditMode);
+  useEffect(() => {
+    if (!formState.isValidating && !showObjectiveSection && isIndicatorSectionValid) {
+      setShowObjectiveSection(true);
+    }
+
+    if (
+      !formState.isValidating &&
+      !showDescriptionSection &&
+      isIndicatorSectionValid &&
+      isObjectiveSectionValid
+    ) {
+      setShowDescriptionSection(true);
+    }
+  }, [
+    showObjectiveSection,
+    showDescriptionSection,
+    isIndicatorSectionValid,
+    isObjectiveSectionValid,
+    formState,
+  ]);
 
   const { mutateAsync: createSlo, isLoading: isCreateSloLoading } = useCreateSlo();
   const { mutateAsync: updateSlo, isLoading: isUpdateSloLoading } = useUpdateSlo();
@@ -126,30 +149,16 @@ export function SloEditForm({ slo }: Props) {
               title: i18n.translate('xpack.observability.slo.sloEdit.objectives.title', {
                 defaultMessage: 'Set objectives',
               }),
-              children:
-                isEditMode || isIndicatorSectionValid ? <SloEditFormObjectiveSection /> : null,
-              status:
-                (!isEditMode && isIndicatorSectionValid && isObjectiveSectionValid) ||
-                (isEditMode && isObjectiveSectionValid)
-                  ? 'complete'
-                  : 'incomplete',
+              children: showObjectiveSection ? <SloEditFormObjectiveSection /> : null,
+              status: showObjectiveSection && isObjectiveSectionValid ? 'complete' : 'incomplete',
             },
             {
               title: i18n.translate('xpack.observability.slo.sloEdit.description.title', {
                 defaultMessage: 'Describe SLO',
               }),
-              children:
-                isEditMode || (isIndicatorSectionValid && isObjectiveSectionValid) ? (
-                  <SloEditFormDescriptionSection />
-                ) : null,
+              children: showDescriptionSection ? <SloEditFormDescriptionSection /> : null,
               status:
-                (!isEditMode &&
-                  isIndicatorSectionValid &&
-                  isObjectiveSectionValid &&
-                  isDescriptionSectionValid) ||
-                (isEditMode && isDescriptionSectionValid)
-                  ? 'complete'
-                  : 'incomplete',
+                showDescriptionSection && isDescriptionSectionValid ? 'complete' : 'incomplete',
             },
           ]}
         />
