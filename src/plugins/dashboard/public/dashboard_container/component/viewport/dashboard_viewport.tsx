@@ -11,7 +11,6 @@ import classNames from 'classnames';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { css } from '@emotion/css';
 import { EuiPortal } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';

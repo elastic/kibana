@@ -24315,7 +24315,7 @@ react-shortcuts@^2.1.0:
     platform "^1.3.0"
     prop-types "^15.5.8"
 
-react-sizeme@^3.0.1, react-sizeme@^3.0.2:
+react-sizeme@^3.0.1:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/react-sizeme/-/react-sizeme-3.0.2.tgz#4a2f167905ba8f8b8d932a9e35164e459f9020e4"
   integrity sha512-xOIAOqqSSmKlKFJLO3inBQBdymzDuXx4iuwkNcJmC96jeiOg5ojByvL+g3MW9LPEsojLbC6pf68zOfobK8IPlw==
