@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CsvGenerator } from '@kbn/generate-csv/src/index';
-import type { TaskPayloadCsvFromSavedObject } from '@kbn/generate-csv/types/index';
+import { CsvGenerator } from '@kbn/generate-csv/src';
+import type { TaskPayloadCsvFromSavedObject } from '@kbn/generate-csv/types';
 import { getFieldFormats } from '../../services';
 import type { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders } from '../common';
