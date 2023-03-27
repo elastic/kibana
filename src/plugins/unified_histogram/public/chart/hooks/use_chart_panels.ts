@@ -73,7 +73,7 @@ export function useChartPanels({
       });
     }
 
-    if (!Boolean(isPlainRecord)) {
+    if (!isPlainRecord) {
       mainPanelItems.push({
         name: i18n.translate('unifiedHistogram.timeIntervalWithValue', {
           defaultMessage: 'Time interval: {timeInterval}',
@@ -96,7 +96,7 @@ export function useChartPanels({
       items: mainPanelItems,
     },
   ];
-  if (!chart.hidden && !Boolean(isPlainRecord)) {
+  if (!chart.hidden && !isPlainRecord) {
     panels.push({
       id: 1,
       initialFocusedItemIndex: selectedOptionIdx > -1 ? selectedOptionIdx : 0,

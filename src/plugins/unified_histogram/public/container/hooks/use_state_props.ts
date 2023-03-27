@@ -43,7 +43,7 @@ export const useStateProps = (stateService: UnifiedHistogramStateService | undef
     return (
       query &&
       isOfAggregateQueryType(query) &&
-      (getAggregateQueryMode(query) === 'sql' || getAggregateQueryMode(query) === 'esql')
+      ['sql', 'esql'].some((mode) => mode === getAggregateQueryMode(query))
     );
   }, [query]);
 

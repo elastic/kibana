@@ -35,7 +35,7 @@ export const unifiedHistogramServicesMock = {
     navigateToPrefilledEditor: jest.fn(),
     stateHelperApi: jest.fn(() => {
       return {
-        suggestionsApi: jest.fn(() => allSuggestionsMock),
+        suggestions: jest.fn(() => allSuggestionsMock),
       };
     }),
   },

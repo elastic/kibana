@@ -235,7 +235,7 @@ export interface LensPublicStart {
   stateHelperApi: () => Promise<{
     formula: FormulaPublicApi;
     chartInfo: ChartInfoApi;
-    suggestionsApi: LensSuggestionsApi;
+    suggestions: LensSuggestionsApi;
   }>;
 }
 
@@ -607,7 +607,7 @@ export class LensPlugin {
         return {
           formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(startDependencies.dataViews, this.editorFrameService),
-          suggestionsApi: (
+          suggestions: (
             context: VisualizeFieldContext | VisualizeEditorContext,
             dataView: DataView
           ) => {

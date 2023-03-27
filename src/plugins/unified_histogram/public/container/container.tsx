@@ -118,7 +118,7 @@ export const UnifiedHistogramContainer = forwardRef<
 
         (async () => {
           const apiHelper = await services.lens.stateHelperApi();
-          setLensSuggestionsApi(() => apiHelper.suggestionsApi);
+          setLensSuggestionsApi(() => apiHelper.suggestions);
         })();
 
         setLayoutProps({
