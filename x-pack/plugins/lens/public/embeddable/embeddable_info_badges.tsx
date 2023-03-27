@@ -8,13 +8,15 @@
 import {
   EuiPopover,
   EuiToolTip,
-  EuiButtonIcon,
   EuiHorizontalRule,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
   useEuiTheme,
+  EuiIcon,
+  EuiButtonEmpty,
+  useEuiFontSize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -25,27 +27,39 @@ import './embeddable_info_badges.scss';
 
 export const EmbeddableFeatureBadge = ({ badges }: { badges: FeatureBadge[] }) => {
   const { euiTheme } = useEuiTheme();
+  const xsFontSize = useEuiFontSize('xs').fontSize;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
   const closePopover = () => setIsPopoverOpen(false);
   if (!badges.length) {
     return null;
   }
+  const iconTitle = i18n.translate('xpack.lens.embeddable.featureBadge.iconDescription', {
+    defaultMessage: `Visualization modifiers`,
+  });
   return (
     <EuiPopover
       panelPaddingSize="none"
       button={
-        <EuiToolTip
-          content={i18n.translate('xpack.lens.embeddable.featureBadge.iconDescription', {
-            defaultMessage: `Visualization modifiers`,
-          })}
-        >
-          <EuiButtonIcon
+        <EuiToolTip content={iconTitle}>
+          <EuiButtonEmpty
+            data-test-subj="lens-feature-badges-trigger"
             color={'text'}
             onClick={onButtonClick}
-            iconType="iInCircle"
-            aria-label={`Visualization modifiers`}
-          />
+            title={iconTitle}
+            css={css`
+              block-size: ${euiTheme.size.l};
+              border-radius: 0 ${euiTheme.border.radius.medium} 0 ${euiTheme.border.radius.small};
+              font-size: ${xsFontSize};
+              padding: 0 ${euiTheme.size.xs};
+              & > * {
+                gap: ${euiTheme.size.xs};
+              }
+            `}
+          >
+            <EuiIcon type="wrench" aria-label={iconTitle} />
+            {badges ? badges.length : null}
+          </EuiButtonEmpty>
         </EuiToolTip>
       }
       isOpen={isPopoverOpen}

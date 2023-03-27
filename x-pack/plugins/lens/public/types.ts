@@ -281,8 +281,8 @@ type UserMessageDisplayLocation =
 export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 
 export interface FeatureBadge {
-  icon: React.ReactElement;
-  title: React.ReactElement;
+  icon: React.ReactNode;
+  title: React.ReactNode;
   meta?: Array<{
     layerTitle: string;
     dataView: string;
