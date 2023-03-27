@@ -8,8 +8,8 @@
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiLink, EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import useToggle from 'react-use/lib/useToggle';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useToggle from 'react-use/lib/useToggle';
 
 interface Row {
   name: string;
@@ -53,7 +53,15 @@ export const Table = (props: Props) => {
     []
   );
 
-  return <EuiBasicTable tableLayout={'fixed'} responsive={false} columns={columns} items={rows} />;
+  return (
+    <EuiBasicTable
+      data-test-subj="infraMetadataTable"
+      tableLayout={'fixed'}
+      responsive={false}
+      columns={columns}
+      items={rows}
+    />
+  );
 };
 
 interface ExpandableContentProps {
