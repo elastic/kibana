@@ -94,7 +94,7 @@ export class RuleDataClient implements IRuleDataClient {
 
   public getReader(options: { namespace?: string } = {}): IRuleDataReader {
     const { indexInfo } = this.options;
-    let indexPattern = indexInfo.getPatternForReading(options.namespace);
+    const indexPattern = indexInfo.getPatternForReading(options.namespace);
 
     const waitUntilReady = async () => {
       const result = await this.options.waitUntilReadyForReading;

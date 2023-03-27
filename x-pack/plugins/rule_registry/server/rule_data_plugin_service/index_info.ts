@@ -117,7 +117,7 @@ export class IndexInfo {
    * @example '.alerts-security.alerts-default*', '.alerts-security.alerts*'
    */
   public getPatternForReading(namespace?: string): string {
-    return namespace ?`${joinWithDash(this.baseName, namespace)}`: `${this.baseName}*`;
+    return namespace ? `${joinWithDash(this.baseName, namespace)}` : `${this.baseName}*`;
   }
 
   /**

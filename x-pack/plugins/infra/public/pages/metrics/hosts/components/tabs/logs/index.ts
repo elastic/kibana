@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import { GENERAL_CASES_OWNER, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../common';
-
-/**
- * This should only be used within telemetry
- */
-export const OWNERS = [OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER, GENERAL_CASES_OWNER] as const;
+export * from './logs_tab_content';

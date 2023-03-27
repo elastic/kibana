@@ -54,22 +54,20 @@ export const querySignalsRoute = (
 
       try {
         const spaceId = (await context.securitySolution).getSpaceId();
-        const result = await ruleDataClient
-          ?.getReader({ namespace: spaceId })
-          .search({
-            body: {
-              query,
-              // Note: I use a spread operator to please TypeScript with aggs: { ...aggs }
-              aggs: { ...aggs },
-              _source,
-              fields,
-              track_total_hits,
-              size,
-              runtime_mappings: runtime_mappings as MappingRuntimeFields,
-              sort: sort as Sort,
-            },
-            ignore_unavailable: true,
-          });
+        const result = await ruleDataClient?.getReader({ namespace: spaceId }).search({
+          body: {
+            query,
+            // Note: I use a spread operator to please TypeScript with aggs: { ...aggs }
+            aggs: { ...aggs },
+            _source,
+            fields,
+            track_total_hits,
+            size,
+            runtime_mappings: runtime_mappings as MappingRuntimeFields,
+            sort: sort as Sort,
+          },
+          ignore_unavailable: true,
+        });
         return response.ok({ body: result });
       } catch (err) {
         // error while getting or updating signal with id: id in signal index .siem-signals
