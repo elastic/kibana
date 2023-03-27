@@ -55,8 +55,6 @@ export const useUserActionsPagination = ({
     !deepEqual(actionsStats.current, userActionsStats) &&
     !isFirstRender.current; // refetch top actions only when new action added in the top list (i.e. in descending order)
 
-  // console.log('pagination hook', {isFirstRender: isFirstRender.current, isActionsStatsUpdated, isActivityParamsUpdated, lastPage, isExpandable })
-
   const {
     data: caseInfiniteUserActionsData,
     isLoading: isLoadingInfiniteUserActions,
