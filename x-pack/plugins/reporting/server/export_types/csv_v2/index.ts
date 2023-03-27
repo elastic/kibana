@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { CSV_REPORT_TYPE_V2 as CSV_JOB_TYPE } from '@kbn/generate-csv/types';
 import {
-  CSV_REPORT_TYPE_V2 as CSV_JOB_TYPE,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,

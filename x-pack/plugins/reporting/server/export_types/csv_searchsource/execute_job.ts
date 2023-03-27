@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { CsvGenerator } from '@kbn/generate-csv/public/generate_csv';
 import { TaskPayloadCSV } from '@kbn/generate-csv/types';
 import { getFieldFormats } from '../../services';

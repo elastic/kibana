@@ -19,12 +19,11 @@ import type {
 import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
 import type { CancellationToken } from '@kbn/reporting-common/cancellation_token';
+import { CsvConfig, JobParams as JobParamsCSV } from '@kbn/generate-csv/types';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
 import { AuthenticationExpiredError, ReportingError } from '../../../../common/errors';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
-import { ReportingConfigType } from '../../../config';
 import type { TaskRunResult } from '../../../lib/tasks';
-import type { JobParamsCSV } from '../types';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { i18nTexts } from './i18n_texts';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
@@ -47,7 +46,7 @@ export class CsvGenerator {
 
   constructor(
     private job: Omit<JobParamsCSV, 'version'>,
-    private config: ReportingConfigType['csv'],
+    private config: CsvConfig,
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
