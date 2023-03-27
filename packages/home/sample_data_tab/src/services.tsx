@@ -129,26 +129,26 @@ export const SampleDataTabKibanaProvider: FC<SampleDataTabKibanaDependencies> = 
 }) => {
   const { coreStart, trackUiMetric, getDiscoverLocator } = dependencies;
   const { http, notifications } = coreStart;
+  const largeDatasetApiEndpoint = `${URL_SAMPLE_DATA_API}/large_dataset`;
 
   const installLargeDataset = async (params: LargeDataSetParams) => {
-    await http.post(`${URL_SAMPLE_DATA_API}/large_dataset`, {
+    await http.post(largeDatasetApiEndpoint, {
       body: JSON.stringify(params),
     });
   };
 
   const checkLargeDatasetInstalled = async () => {
-    return (await http.get(`${URL_SAMPLE_DATA_API}/large_dataset/installed`)) as Promise<{
+    return (await http.get(`${largeDatasetApiEndpoint}/installed`)) as Promise<{
       installed: boolean;
       count: number;
     }>;
   };
 
   const uninstallLargeDataset = async () => {
-    await http.delete(`${URL_SAMPLE_DATA_API}/large_dataset`);
+    await http.delete(largeDatasetApiEndpoint);
   };
 
   const installCustomDataset = async (params: CustomDatasetParams) => {
-    console.log('Calli');
     await http.post(`${URL_SAMPLE_DATA_API}/custom_dataset`, {
       body: JSON.stringify(params),
     });
