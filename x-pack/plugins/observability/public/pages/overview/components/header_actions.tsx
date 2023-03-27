@@ -95,7 +95,13 @@ export function HeaderActions({
               </EuiText>
             }
             footerAction={
-              <EuiButtonEmpty color="text" flush="right" size="xs" onClick={onTourDismiss}>
+              <EuiButtonEmpty
+                data-test-subj="o11yHeaderActionsDismissButton"
+                color="text"
+                flush="right"
+                size="xs"
+                onClick={onTourDismiss}
+              >
                 <FormattedMessage
                   id="xpack.observability.overview.guidedSetupTourDismissButton"
                   defaultMessage="Dismiss"

@@ -8,21 +8,19 @@
 import * as t from 'io-ts';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { casesPath } from '../../common';
-import { CasesPage } from '../pages/cases';
-import { AlertsPage } from '../pages/alerts/alerts';
-import { OverviewPage } from '../pages/overview/overview';
-import { jsonRt } from './json_rt';
-import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
-import { RulesPage } from '../pages/rules';
-import { RuleDetailsPage } from '../pages/rule_details';
-import { AlertingPages } from '../config';
-import { AlertDetails } from '../pages/alert_details';
 import { DatePickerContextProvider } from '../context/date_picker_context';
-import { SlosPage } from '../pages/slos';
+import { jsonRt } from './json_rt';
+import { AlertsPage } from '../pages/alerts/alerts';
+import { AlertDetails } from '../pages/alert_details/alert_details';
+import { CasesPage } from '../pages/cases/cases';
+import { OverviewPage } from '../pages/overview/overview';
+import { RulesPage } from '../pages/rules/rules';
+import { RuleDetailsPage } from '../pages/rule_details';
+import { SlosPage } from '../pages/slos/slos';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';
 import { SloEditPage } from '../pages/slo_edit/slo_edit';
+import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
+import { casesPath } from '../../common';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -59,7 +57,7 @@ export const routes = {
     exact: true,
   },
   '/overview': {
-    handler: ({ query }: any) => {
+    handler: () => {
       return (
         <DatePickerContextProvider>
           <OverviewPage />
@@ -71,22 +69,14 @@ export const routes = {
   },
   [casesPath]: {
     handler: () => {
-      return (
-        <TrackApplicationView viewId={AlertingPages.cases}>
-          <CasesPage />
-        </TrackApplicationView>
-      );
+      return <CasesPage />;
     },
     params: {},
     exact: false,
   },
   '/alerts': {
     handler: () => {
-      return (
-        <TrackApplicationView viewId={AlertingPages.alerts}>
-          <AlertsPage />
-        </TrackApplicationView>
-      );
+      return <AlertsPage />;
     },
     params: {
       // Technically gets a '_a' param by using Kibana URL state sync helpers
@@ -109,11 +99,7 @@ export const routes = {
   },
   '/alerts/rules': {
     handler: () => {
-      return (
-        <TrackApplicationView viewId={AlertingPages.rules}>
-          <RulesPage />
-        </TrackApplicationView>
-      );
+      return <RulesPage />;
     },
     params: {},
     exact: true,

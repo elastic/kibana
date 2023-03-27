@@ -47,6 +47,9 @@ disabled:
   - x-pack/plugins/apm/ftr_e2e/ftr_config_open.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_run.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config.ts
+  - x-pack/plugins/profiling/e2e/ftr_config_open.ts
+  - x-pack/plugins/profiling/e2e/ftr_config_runner.ts
+  - x-pack/plugins/profiling/e2e/ftr_config.ts
 
   # Elastic Synthetics configs
   - x-pack/plugins/synthetics/e2e/config.ts
@@ -68,6 +71,9 @@ disabled:
   # Scalability testing config that we run in its own pipeline
   - x-pack/test/scalability/config.ts
 
+  # Asset Manager configs, in tech preview, will move to enabled after more stability introduced
+  - x-pack/test/api_integration/apis/asset_manager/config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
@@ -88,6 +94,7 @@ enabled:
   - test/functional/apps/discover/embeddable/config.ts
   - test/functional/apps/discover/group1/config.ts
   - test/functional/apps/discover/group2/config.ts
+  - test/functional/apps/discover/group3/config.ts
   - test/functional/apps/getting_started/config.ts
   - test/functional/apps/home/config.ts
   - test/functional/apps/kibana_overview/config.ts
@@ -146,6 +153,7 @@ enabled:
   - x-pack/test/api_integration/config_security_basic.ts
   - x-pack/test/api_integration/config_security_trial.ts
   - x-pack/test/api_integration/apis/aiops/config.ts
+  - x-pack/test/api_integration/apis/asset_manager/config_when_disabled.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
   - x-pack/test/api_integration/apis/console/config.ts
