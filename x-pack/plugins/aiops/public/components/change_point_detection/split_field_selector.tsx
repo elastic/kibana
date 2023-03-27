@@ -47,6 +47,7 @@ export const SplitFieldSelector: FC<SplitFieldSelectorProps> = React.memo(({ val
   return (
     <EuiFormRow>
       <EuiComboBox
+        compressed
         prepend={i18n.translate('xpack.aiops.changePointDetection.selectSpitFieldLabel', {
           defaultMessage: 'Split field',
         })}

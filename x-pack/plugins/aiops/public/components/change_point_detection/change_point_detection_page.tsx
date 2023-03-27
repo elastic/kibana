@@ -124,7 +124,7 @@ export const ChangePointDetectionPage: FC = () => {
       <EuiSpacer size="m" />
 
       <EuiFlexGroup alignItems={'center'}>
-        <EuiFlexItem grow={false} css={selectControlCss}>
+        <EuiFlexItem grow={false} css={{ width: '200px' }}>
           <FunctionPicker value={requestParams.fn} onChange={setFn} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={selectControlCss}>
