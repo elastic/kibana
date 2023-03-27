@@ -202,7 +202,6 @@ const getCspStatus = async ({
     ),
     getInstalledPolicyTemplates(packagePolicyService, soClient),
   ]);
-
   const healthyAgentsKspm = await getHealthyAgents(
     soClient,
     installedPackagePoliciesKspm.items,
@@ -369,10 +368,11 @@ const getStatusResponse = (statusResponseInfo: StatusResponseInfo) => {
     healthyAgentsKspm,
     installedPackagePoliciesTotalKspm,
     installedPackagePoliciesTotalCspm,
+    installedPackagePoliciesTotalVulnMgmt,
     indicesDetails,
     latestCspPackageVersion,
     isPluginInitialized,
-  } = statusResponseInfo;
+  }: StatusResponseInfo = statusResponseInfo;
   return {
     [CSPM_POLICY_TEMPLATE]: {
       status: statusCspm,
@@ -387,7 +387,7 @@ const getStatusResponse = (statusResponseInfo: StatusResponseInfo) => {
     [VULN_MGMT_POLICY_TEMPLATE]: {
       status: statusVulnMgmt,
       healthyAgents: healthyAgentsKspm,
-      installedPackagePolicies: installedPackagePoliciesTotalKspm,
+      installedPackagePolicies: installedPackagePoliciesTotalVulnMgmt,
     },
     indicesDetails,
     isPluginInitialized,

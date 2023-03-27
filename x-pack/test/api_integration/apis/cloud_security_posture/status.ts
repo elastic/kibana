@@ -74,8 +74,31 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(res.cspm.status).to.be('not-deployed');
       expect(res.kspm.status).to.be('not-installed');
+      expect(res.vuln_mgmt.status).to.be("not-installed");
       expect(res.cspm.healthyAgents).to.be(0);
       expect(res.cspm.installedPackagePolicies).to.be(1);
+    });
+
+    it(`Should return not-deployed when vuln_mngt is not installed`, async () => {
+      await createPackagePolicy(
+        supertest,
+        agentPolicyId,
+        'vuln_mngt',
+        'cloudbeat/cis_aws',
+        'aws',
+        'vuln_mngt'
+      );
+
+      const { body: res }: { body: CspSetupStatus } = await supertest
+        .get(`/internal/cloud_security_posture/status`)
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
+      expect(res.cspm.status).to.be('not-installed');
+      expect(res.kspm.status).to.be('not-installed');
+      expect(res.vuln_mgmt.status).to.be('not-deployed');
+      expect(res.vuln_mgmt.healthyAgents).to.be(0);
+      expect(res.vuln_mgmt.installedPackagePolicies).to.be(1);
     });
   });
 }
