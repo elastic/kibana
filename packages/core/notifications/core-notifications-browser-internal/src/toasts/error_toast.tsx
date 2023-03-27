@@ -48,7 +48,7 @@ const isRequestError = (e: Error | RequestError): e is RequestError => {
  * does not disappear. NOTE: this should use a global modal in the overlay service
  * in the future.
  */
-function showErrorDialog({
+export function showErrorDialog({
   title,
   error,
   openModal,

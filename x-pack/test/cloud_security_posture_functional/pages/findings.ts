@@ -29,6 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         section: 'Upper case section',
         benchmark: {
           id: 'cis_k8s',
+          posture_type: 'kspm',
           name: 'CIS Kubernetes V1.23',
           version: 'v1.0.0',
         },
@@ -44,6 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         section: 'Another upper case section',
         benchmark: {
           id: 'cis_k8s',
+          posture_type: 'kspm',
           name: 'CIS Kubernetes V1.23',
           version: 'v1.0.0',
         },
@@ -59,6 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         section: 'lower case section',
         benchmark: {
           id: 'cis_k8s',
+          posture_type: 'kspm',
           name: 'CIS Kubernetes V1.23',
           version: 'v1.0.0',
         },
@@ -74,6 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         section: 'another lower case section',
         benchmark: {
           id: 'cis_k8s',
+          posture_type: 'kspm',
           name: 'CIS Kubernetes V1.23',
           version: 'v1.0.0',
         },
@@ -105,6 +109,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       resourceFindingsTable = findings.resourceFindingsTable;
       distributionBar = findings.distributionBar;
 
+      await findings.index.remove();
       await findings.index.add(data);
       await findings.navigateToLatestFindingsPage();
       await retry.waitFor(

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 
 import { renderHook } from '@testing-library/react-hooks';
@@ -15,53 +16,60 @@ import {
   options,
   source,
   derivedIndexPattern,
-  timeRange,
+  timestamps,
   resp,
   createSeries,
 } from '../../../../utils/fixtures/metrics_explorer';
-import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
+import {
+  MetricsExplorerOptions,
+  MetricsExplorerTimestampsRT,
+} from './use_metrics_explorer_options';
 import { DataViewBase } from '@kbn/es-query';
-import { HttpHandler } from '@kbn/core/public';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 
 const mockedFetch = jest.fn();
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
 
 const renderUseMetricsExplorerDataHook = () => {
   const wrapper: React.FC = ({ children }) => {
     const services = {
       http: {
-        fetch: mockedFetch,
+        post: mockedFetch,
       },
     };
-    return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
+    return (
+      <QueryClientProvider client={queryClient}>
+        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+      </QueryClientProvider>
+    );
   };
   return renderHook(
     (props: {
       options: MetricsExplorerOptions;
       source: MetricsSourceConfigurationProperties | undefined;
       derivedIndexPattern: DataViewBase;
-      timeRange: MetricsExplorerTimeOptions;
-      afterKey: string | null | Record<string, string | null>;
-      signal: any;
-      fetch?: HttpHandler;
-      shouldLoadImmediately?: boolean;
+      timestamps: MetricsExplorerTimestampsRT;
     }) =>
       useMetricsExplorerData(
         props.options,
         props.source,
         props.derivedIndexPattern,
-        props.timeRange,
-        props.afterKey,
-        props.signal
+        props.timestamps
       ),
     {
       initialProps: {
         options,
         source,
         derivedIndexPattern,
-        timeRange,
-        afterKey: null as string | null | Record<string, string | null>,
-        signal: 1,
+        timestamps,
       },
       wrapper,
     }
@@ -75,85 +83,77 @@ jest.mock('../../../../utils/kuery', () => {
 });
 
 describe('useMetricsExplorerData Hook', () => {
+  afterEach(() => {
+    queryClient.clear();
+  });
+
   it('should just work', async () => {
-    mockedFetch.mockResolvedValue(resp as any);
+    mockedFetch.mockResolvedValue(resp);
     const { result, waitForNextUpdate } = renderUseMetricsExplorerDataHook();
-    expect(result.current.data).toBe(null);
-    expect(result.current.loading).toBe(true);
+
+    expect(result.current.data).toBeUndefined();
+    expect(result.current.isLoading).toBe(true);
+
     await waitForNextUpdate();
-    expect(result.current.data).toEqual(resp);
-    expect(result.current.loading).toBe(false);
-    const { series } = result.current.data!;
+
+    expect(result.current.data!.pages[0]).toEqual(resp);
+    expect(result.current.isLoading).toBe(false);
+    const { series } = result.current.data!.pages[0];
     expect(series).toBeDefined();
     expect(series.length).toBe(3);
   });
 
   it('should paginate', async () => {
-    mockedFetch.mockResolvedValue(resp as any);
-    const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerDataHook();
-    expect(result.current.data).toBe(null);
-    expect(result.current.loading).toBe(true);
+    mockedFetch.mockResolvedValue(resp);
+    const { result, waitForNextUpdate } = renderUseMetricsExplorerDataHook();
+    expect(result.current.data).toBeUndefined();
+    expect(result.current.isLoading).toBe(true);
     await waitForNextUpdate();
-    expect(result.current.data).toEqual(resp);
-    expect(result.current.loading).toBe(false);
-    const { series, pageInfo } = result.current.data!;
+    expect(result.current.data!.pages[0]).toEqual(resp);
+    expect(result.current.isLoading).toBe(false);
+    const { series } = result.current.data!.pages[0];
     expect(series).toBeDefined();
     expect(series.length).toBe(3);
     mockedFetch.mockResolvedValue({
       pageInfo: { total: 10, afterKey: 'host-06' },
       series: [createSeries('host-04'), createSeries('host-05'), createSeries('host-06')],
     } as any);
-    rerender({
-      options,
-      source,
-      derivedIndexPattern,
-      timeRange,
-      afterKey: pageInfo.afterKey!,
-      signal: 1,
-    });
-    expect(result.current.loading).toBe(true);
+    result.current.fetchNextPage();
     await waitForNextUpdate();
-    expect(result.current.loading).toBe(false);
-    const { series: nextSeries } = result.current.data!;
+    expect(result.current.isLoading).toBe(false);
+    const { series: nextSeries } = result.current.data!.pages[1];
     expect(nextSeries).toBeDefined();
-    expect(nextSeries.length).toBe(6);
+    expect(nextSeries.length).toBe(3);
   });
 
   it('should reset error upon recovery', async () => {
     const error = new Error('Network Error');
     mockedFetch.mockRejectedValue(error);
-    const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerDataHook();
-    expect(result.current.data).toBe(null);
+    const { result, waitForNextUpdate } = renderUseMetricsExplorerDataHook();
+    expect(result.current.data).toBeUndefined();
     expect(result.current.error).toEqual(null);
-    expect(result.current.loading).toBe(true);
+    expect(result.current.isLoading).toBe(true);
     await waitForNextUpdate();
-    expect(result.current.data).toEqual(null);
+    expect(result.current.data).toBeUndefined();
     expect(result.current.error).toEqual(error);
-    expect(result.current.loading).toBe(false);
+    expect(result.current.isLoading).toBe(false);
     mockedFetch.mockResolvedValue(resp as any);
-    rerender({
-      options,
-      source,
-      derivedIndexPattern,
-      timeRange,
-      afterKey: null,
-      signal: 2,
-    });
+    result.current.refetch();
     await waitForNextUpdate();
-    expect(result.current.data).toEqual(resp);
-    expect(result.current.loading).toBe(false);
+    expect(result.current.data!.pages[0]).toEqual(resp);
+    expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBe(null);
   });
 
   it('should not paginate on option change', async () => {
     mockedFetch.mockResolvedValue(resp as any);
     const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerDataHook();
-    expect(result.current.data).toBe(null);
-    expect(result.current.loading).toBe(true);
+    expect(result.current.data).toBeUndefined();
+    expect(result.current.isLoading).toBe(true);
     await waitForNextUpdate();
-    expect(result.current.data).toEqual(resp);
-    expect(result.current.loading).toBe(false);
-    const { series, pageInfo } = result.current.data!;
+    expect(result.current.data!.pages[0]).toEqual(resp);
+    expect(result.current.isLoading).toBe(false);
+    const { series } = result.current.data!.pages[0];
     expect(series).toBeDefined();
     expect(series.length).toBe(3);
     mockedFetch.mockResolvedValue(resp as any);
@@ -165,25 +165,23 @@ describe('useMetricsExplorerData Hook', () => {
       },
       source,
       derivedIndexPattern,
-      timeRange,
-      afterKey: pageInfo.afterKey!,
-      signal: 1,
+      timestamps,
     });
-    expect(result.current.loading).toBe(true);
+    expect(result.current.isLoading).toBe(true);
     await waitForNextUpdate();
-    expect(result.current.data).toEqual(resp);
-    expect(result.current.loading).toBe(false);
+    expect(result.current.data!.pages[0]).toEqual(resp);
+    expect(result.current.isLoading).toBe(false);
   });
 
   it('should not paginate on time change', async () => {
     mockedFetch.mockResolvedValue(resp as any);
     const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerDataHook();
-    expect(result.current.data).toBe(null);
-    expect(result.current.loading).toBe(true);
+    expect(result.current.data).toBeUndefined();
+    expect(result.current.isLoading).toBe(true);
     await waitForNextUpdate();
-    expect(result.current.data).toEqual(resp);
-    expect(result.current.loading).toBe(false);
-    const { series, pageInfo } = result.current.data!;
+    expect(result.current.data!.pages[0]).toEqual(resp);
+    expect(result.current.isLoading).toBe(false);
+    const { series } = result.current.data!.pages[0];
     expect(series).toBeDefined();
     expect(series.length).toBe(3);
     mockedFetch.mockResolvedValue(resp as any);
@@ -191,13 +189,11 @@ describe('useMetricsExplorerData Hook', () => {
       options,
       source,
       derivedIndexPattern,
-      timeRange: { from: 'now-1m', to: 'now', interval: '>=1m' },
-      afterKey: pageInfo.afterKey!,
-      signal: 1,
+      timestamps: { fromTimestamp: 1678378092225, toTimestamp: 1678381693477, interval: '>=10s' },
     });
-    expect(result.current.loading).toBe(true);
+    expect(result.current.isLoading).toBe(true);
     await waitForNextUpdate();
-    expect(result.current.data).toEqual(resp);
-    expect(result.current.loading).toBe(false);
+    expect(result.current.data!.pages[0]).toEqual(resp);
+    expect(result.current.isLoading).toBe(false);
   });
 });

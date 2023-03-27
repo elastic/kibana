@@ -1060,8 +1060,8 @@
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
+            "plugin": "@kbn/core-saved-objects-api-browser",
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-api-server",
@@ -1074,6 +1074,14 @@
           {
             "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-api-server",
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -3242,7 +3250,11 @@
           },
           {
             "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/types.ts"
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/utils.ts"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/utils.ts"
           },
           {
             "plugin": "infra",
@@ -3250,11 +3262,7 @@
           },
           {
             "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/cpu.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/cpu.ts"
+            "path": "x-pack/plugins/infra/public/common/visualizations/lens/types.ts"
           },
           {
             "plugin": "infra",
@@ -3263,54 +3271,6 @@
           {
             "plugin": "infra",
             "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/load.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/memory.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/memory.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/memory_available.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/memory_available.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/rx.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/rx.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/tx.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/tx.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/diskio_read.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/diskio_read.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/diskio_write.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/common/visualizations/lens/hosts/diskio_write.ts"
           },
           {
             "plugin": "cases",
