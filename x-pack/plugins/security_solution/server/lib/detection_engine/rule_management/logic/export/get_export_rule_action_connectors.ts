@@ -47,7 +47,7 @@ const filterOutPredefinedActionConnectorsIds = async (
   actionsClient: ActionsClient,
   actionsIds: string[]
 ): Promise<string[]> => {
-  const actionsIdsToExport = actionsIds;
+  const actionsIdsToExport = [...actionsIds];
   const allActions = await actionsClient.getAll();
   const predefinedActionsIds = allActions
     .filter(({ isPreconfigured }) => isPreconfigured)
@@ -56,6 +56,12 @@ const filterOutPredefinedActionConnectorsIds = async (
     return actionsIdsToExport.filter((id) => !predefinedActionsIds.includes(id));
   return actionsIdsToExport;
 };
+
+// This function is used to get, and return the exported actions' connectors'
+// using the ISavedObjectsExporter and it filters out any Preconfigured
+// Connectors as they shouldn't be exported, imported or changed
+// by the user, that's why the function also accepts the actionsClient
+// to getAll actions connectors
 
 export const getRuleActionConnectorsForExport = async (
   rules: RuleResponse[],
