@@ -128,7 +128,7 @@ describe('fetchNodesFromClusterStats', () => {
       clusters: {
         buckets: [
           {
-            key: '1CS8DXLbS-e8tCcCL8oXoA',
+            key: 'NG2d5jHiSBGPE6HLlUN2Bg',
             doc_count: 4,
             top: {
               hits: {
@@ -351,7 +351,7 @@ describe('fetchNodesFromClusterStats', () => {
         clusters: {
           buckets: [
             {
-              key: '1CS8DXLbS-e8tCcCL8oXoA',
+              key: 'NG2d5jHiSBGPE6HLlUN2Bg',
               doc_count: 1,
               top: {
                 hits: {
