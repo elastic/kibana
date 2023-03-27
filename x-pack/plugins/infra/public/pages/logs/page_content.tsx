@@ -21,6 +21,7 @@ import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
+import { NotFoundPage } from '../404';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -90,6 +91,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <RedirectWithQueryParams from={'/analysis'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/log-rate'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/'} to={streamTab.pathname} exact />
+        <Route render={() => <NotFoundPage title="Logs" />} />
       </Switch>
     </>
   );

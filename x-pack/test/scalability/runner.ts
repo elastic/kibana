@@ -25,9 +25,18 @@ async function sendReportMetricsToTelemetry(
 ) {
   const reportRootPath = path.resolve(gatlingProjectRootPath, 'target', 'gatling');
   const fileName = path.basename(scalabilityJsonPath, path.extname(scalabilityJsonPath));
-  const journeyReportDir = fs.readdirSync(reportRootPath).filter((f) => f.startsWith(fileName));
+  const journeyReportDir = fs
+    .readdirSync(reportRootPath)
+    // Gatling report folder has unique postfix, e.g. 'api.telemetry.cluster_stats.no_cache-20230309224753010'
+    .filter(doesMatchWithoutSuffix);
+  function doesMatchWithoutSuffix(filePath: string): boolean {
+    const suffix: RegExp = /-\d+$/;
+    return filePath.replace(suffix, '') === fileName;
+  }
   const lastReportPath = journeyReportDir.pop();
-  if (lastReportPath) {
+  if (!lastReportPath) {
+    throw new Error(`No report found with '${fileName}' filename`);
+  } else {
     const journeyHtmlReportPath = path.resolve(reportRootPath, lastReportPath, 'index.html');
 
     const journey: ScalabilityJourney = JSON.parse(fs.readFileSync(scalabilityJsonPath, 'utf8'));

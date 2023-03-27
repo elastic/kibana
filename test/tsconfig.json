@@ -4,9 +4,10 @@
     "outDir": "target/types",
     "types": [
       "node",
+      "cheerio",
       "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
-      "@kbn/ambient-ftr-types",
+      "@kbn/ambient-ftr-types"
     ]
   },
   "include": [
@@ -16,13 +17,9 @@
     "api_integration/apis/logstash/pipeline/fixtures/*.json",
     "api_integration/apis/logstash/pipelines/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json",
-    "api_integration/apis/telemetry/fixtures/*.json",
+    "api_integration/apis/telemetry/fixtures/*.json"
   ],
-  "exclude": [
-    "target/**/*",
-    "*/plugins/**/*",
-    "plugins/**/*",
-  ],
+  "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
     "@kbn/core",
     { "path": "../src/setup_node_env/tsconfig.json" },
@@ -68,6 +65,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/utility-types",
     "@kbn/dev-proc-runner",
-    "@kbn/enterprise-search-plugin",
+    "@kbn/enterprise-search-plugin"
   ]
 }

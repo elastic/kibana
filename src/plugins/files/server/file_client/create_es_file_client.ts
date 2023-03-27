@@ -31,6 +31,13 @@ export interface CreateEsFileClientArgs {
    */
   elasticsearchClient: ElasticsearchClient;
   /**
+   * Treat the indices provided as Aliases. If set to true, ES `search()` will be used to
+   * retrieve the file info and content instead of `get()`. This is needed to ensure the
+   * content can be retrieved in cases where an index may have rolled over (ES `get()`
+   * needs a "real" index)
+   */
+  indexIsAlias?: boolean;
+  /**
    * The maximum file size to be written.
    */
   maxSizeBytes?: number;
@@ -49,15 +56,29 @@ export interface CreateEsFileClientArgs {
  * @param arg - See {@link CreateEsFileClientArgs}
  */
 export function createEsFileClient(arg: CreateEsFileClientArgs): FileClient {
-  const { blobStorageIndex, elasticsearchClient, logger, metadataIndex, maxSizeBytes } = arg;
+  const {
+    blobStorageIndex,
+    elasticsearchClient,
+    logger,
+    metadataIndex,
+    maxSizeBytes,
+    indexIsAlias,
+  } = arg;
   return new FileClientImpl(
     {
       id: NO_FILE_KIND,
       http: {},
       maxSizeBytes,
     },
-    new EsIndexFilesMetadataClient(metadataIndex, elasticsearchClient, logger),
-    new ElasticsearchBlobStorageClient(elasticsearchClient, blobStorageIndex, undefined, logger),
+    new EsIndexFilesMetadataClient(metadataIndex, elasticsearchClient, logger, indexIsAlias),
+    new ElasticsearchBlobStorageClient(
+      elasticsearchClient,
+      blobStorageIndex,
+      undefined,
+      logger,
+      undefined,
+      indexIsAlias
+    ),
     undefined,
     undefined,
     logger

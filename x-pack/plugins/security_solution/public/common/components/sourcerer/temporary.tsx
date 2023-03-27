@@ -111,7 +111,7 @@ export const TemporarySourcererComp = React.memo<Props>(
         <EuiCallOut
           color="warning"
           data-test-subj="sourcerer-deprecated-callout"
-          iconType="alert"
+          iconType="warning"
           size="s"
           title={translations[isModified].title[timelineType]}
         />

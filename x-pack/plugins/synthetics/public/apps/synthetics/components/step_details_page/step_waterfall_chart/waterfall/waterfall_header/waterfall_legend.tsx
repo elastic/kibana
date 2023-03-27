@@ -58,7 +58,11 @@ export const WaterfallLegend = ({ activeFilters, setActiveFilters }: Props) => {
           ) : null}
 
           {anyFilterApplied ? (
-            <EuiButtonEmpty size="xs" onClick={clearFilters}>
+            <EuiButtonEmpty
+              data-test-subj="syntheticsWaterfallLegendButton"
+              size="xs"
+              onClick={clearFilters}
+            >
               {CLEAR_FILTER_LABEL}
             </EuiButtonEmpty>
           ) : null}

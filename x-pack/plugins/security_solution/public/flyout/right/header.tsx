@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import type { RightPanelPaths } from '.';
 import { tabs } from './tabs';
 import { HeaderTitle } from './components/header_title';
+import { ExpandDetailButton } from './components/expand_detail_button';
 
 export interface PanelHeaderProps {
   selectedTabId: RightPanelPaths;
@@ -40,6 +41,14 @@ export const PanelHeader: VFC<PanelHeaderProps> = memo(
           margin-bottom: -24px;
         `}
       >
+        <div
+          css={css`
+            margin-top: -24px;
+            margin-left: -8px;
+          `}
+        >
+          <ExpandDetailButton />
+        </div>
         <EuiSpacer size="m" />
         <HeaderTitle />
         <EuiSpacer size="m" />

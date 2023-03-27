@@ -53,7 +53,12 @@ export const MetricsTableNoIndicesContent = () => {
       title={<h2>{noMetricIndicesPromptTitle}</h2>}
       body={<p>{noMetricIndicesPromptDescription}</p>}
       actions={
-        <EuiButton color="primary" fill {...integrationsLinkProps}>
+        <EuiButton
+          data-test-subj="infraMetricsTableNoIndicesContentButton"
+          color="primary"
+          fill
+          {...integrationsLinkProps}
+        >
           {noMetricIndicesPromptPrimaryActionTitle}
         </EuiButton>
       }

@@ -49,14 +49,26 @@ export const LogDatepicker: React.FC<LogDatepickerProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {isStreaming ? (
-          <EuiButton color="primary" iconType="pause" iconSide="left" onClick={onStopStreaming}>
+          <EuiButton
+            data-test-subj="infraLogDatepickerStopStreamingButton"
+            color="primary"
+            iconType="pause"
+            iconSide="left"
+            onClick={onStopStreaming}
+          >
             <FormattedMessage
               id="xpack.infra.logs.stopStreamingButtonLabel"
               defaultMessage="Stop streaming"
             />
           </EuiButton>
         ) : (
-          <EuiButton color="primary" iconType="play" iconSide="left" onClick={onStartStreaming}>
+          <EuiButton
+            data-test-subj="infraLogDatepickerStreamLiveButton"
+            color="primary"
+            iconType="play"
+            iconSide="left"
+            onClick={onStartStreaming}
+          >
             <FormattedMessage
               id="xpack.infra.logs.startStreamingButtonLabel"
               defaultMessage="Stream live"

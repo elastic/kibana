@@ -171,6 +171,7 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
               Body not recorded. Read our 
               <a
                 class="euiLink emotion-euiLink-primary"
+                data-test-subj="syntheticsDocLinkForBodyDocsLink"
                 href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
                 rel="noopener noreferrer"
                 target="_blank"

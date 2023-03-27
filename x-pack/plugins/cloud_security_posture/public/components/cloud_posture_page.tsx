@@ -181,7 +181,7 @@ const defaultErrorRenderer = (error: unknown) => (
   <FullSizeCenteredPage>
     <EuiEmptyPrompt
       color="danger"
-      iconType="alert"
+      iconType="warning"
       data-test-subj={ERROR_STATE_TEST_SUBJECT}
       title={
         <h2>
@@ -275,7 +275,12 @@ export const CloudPosturePage = <TData, TError>({
       return defaultLoadingRenderer();
     }
 
-    if (getSetupStatus.data.status === 'not-installed') {
+    /* Checks if its a completely new user which means no integration has been installed and no latest findings default index has been found */
+    if (
+      getSetupStatus.data?.kspm?.status === 'not-installed' &&
+      getSetupStatus.data?.cspm?.status === 'not-installed' &&
+      getSetupStatus.data?.indicesDetails[0].status === 'empty'
+    ) {
       return packageNotInstalledRenderer({ kspmIntegrationLink, cspmIntegrationLink });
     }
 

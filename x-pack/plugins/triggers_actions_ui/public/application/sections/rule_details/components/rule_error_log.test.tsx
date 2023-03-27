@@ -117,6 +117,7 @@ const mockRule: Rule = {
     status: 'unknown',
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
+  revision: 0,
 };
 
 const loadActionErrorLogMock = jest.fn();
