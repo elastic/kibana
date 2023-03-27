@@ -6,7 +6,7 @@
  */
 
 import { Chart, Datum, Flame, FlameLayerValue, PartialTheme, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
 import { Maybe } from '@kbn/observability-plugin/common/typings';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../../common/flamegraph';
@@ -90,89 +90,95 @@ export function FlameGraph({
   }, [columnarData.key]);
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiFlexGroup direction="row">
-          {columnarData.viewModel.label.length > 0 && (
-            <EuiFlexItem grow>
-              <Chart key={columnarData.key} className="caue-chart">
-                <Settings
-                  theme={chartTheme}
-                  onElementClick={(elements) => {
-                    const selectedElement = elements[0] as Maybe<FlameLayerValue>;
-                    if (Number.isNaN(selectedElement?.vmIndex)) {
-                      setHighlightedVmIndex(undefined);
-                    } else {
-                      setHighlightedVmIndex(selectedElement!.vmIndex);
-                    }
-                  }}
-                  tooltip={{
-                    actions: [{ label: '', onSelect: () => {} }],
-                    customTooltip: (props) => {
-                      if (!primaryFlamegraph) {
-                        return <></>;
+    <>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiFlexGroup direction="row">
+            {columnarData.viewModel.label.length > 0 && (
+              <EuiFlexItem grow>
+                <Chart key={columnarData.key} className="caue-chart">
+                  <Settings
+                    theme={chartTheme}
+                    onElementClick={(elements) => {
+                      const selectedElement = elements[0] as Maybe<FlameLayerValue>;
+                      if (Number.isNaN(selectedElement?.vmIndex)) {
+                        setHighlightedVmIndex(undefined);
+                      } else {
+                        setHighlightedVmIndex(selectedElement!.vmIndex);
                       }
+                    }}
+                    tooltip={{
+                      actions: [{ label: '', onSelect: () => {} }],
+                      customTooltip: (props) => {
+                        if (!primaryFlamegraph) {
+                          return <></>;
+                        }
 
-                      const valueIndex = props.values[0].valueAccessor as number;
-                      const label = primaryFlamegraph.Label[valueIndex];
-                      const countInclusive = primaryFlamegraph.CountInclusive[valueIndex];
-                      const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
-                      const totalSeconds = primaryFlamegraph.TotalSeconds;
-                      const nodeID = primaryFlamegraph.ID[valueIndex];
+                        const valueIndex = props.values[0].valueAccessor as number;
+                        const label = primaryFlamegraph.Label[valueIndex];
+                        const countInclusive = primaryFlamegraph.CountInclusive[valueIndex];
+                        const countExclusive = primaryFlamegraph.CountExclusive[valueIndex];
+                        const totalSeconds = primaryFlamegraph.TotalSeconds;
+                        const nodeID = primaryFlamegraph.ID[valueIndex];
 
-                      const comparisonNode = columnarData.comparisonNodesById[nodeID];
+                        const comparisonNode = columnarData.comparisonNodesById[nodeID];
 
-                      return (
-                        <FlameGraphTooltip
-                          isRoot={valueIndex === 0}
-                          label={label}
-                          countInclusive={countInclusive}
-                          countExclusive={countExclusive}
-                          totalSamples={totalSamples}
-                          totalSeconds={totalSeconds}
-                          comparisonCountInclusive={comparisonNode?.CountInclusive}
-                          comparisonCountExclusive={comparisonNode?.CountExclusive}
-                          comparisonTotalSamples={comparisonFlamegraph?.CountInclusive[0]}
-                          comparisonTotalSeconds={comparisonFlamegraph?.TotalSeconds}
-                          baselineScaleFactor={baseline}
-                          comparisonScaleFactor={comparison}
-                          onShowMoreClick={() => {
-                            if (!showInformationWindow) {
-                              toggleShowInformationWindow();
-                            }
-                            setHighlightedVmIndex(valueIndex);
-                          }}
-                        />
-                      );
-                    },
-                  }}
-                />
-                <Flame
-                  id={id}
-                  columnarData={columnarData.viewModel}
-                  valueAccessor={(d: Datum) => d.value as number}
-                  valueFormatter={(value) => `${value}`}
-                  animation={{ duration: 100 }}
-                  controlProviderCallback={{}}
-                />
-              </Chart>
-            </EuiFlexItem>
-          )}
-          {showInformationWindow ? (
-            <EuiFlexItem grow={false}>
-              <FlamegraphInformationWindow
-                frame={selected}
-                totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
-                totalSamples={totalSamples}
-                onClose={toggleShowInformationWindow}
-              />
-            </EuiFlexItem>
-          ) : undefined}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <FlameGraphLegend legendItems={columnarData.legendItems} asScale={!!comparisonFlamegraph} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+                        return (
+                          <FlameGraphTooltip
+                            isRoot={valueIndex === 0}
+                            label={label}
+                            countInclusive={countInclusive}
+                            countExclusive={countExclusive}
+                            totalSamples={totalSamples}
+                            totalSeconds={totalSeconds}
+                            comparisonCountInclusive={comparisonNode?.CountInclusive}
+                            comparisonCountExclusive={comparisonNode?.CountExclusive}
+                            comparisonTotalSamples={comparisonFlamegraph?.CountInclusive[0]}
+                            comparisonTotalSeconds={comparisonFlamegraph?.TotalSeconds}
+                            baselineScaleFactor={baseline}
+                            comparisonScaleFactor={comparison}
+                            onShowMoreClick={() => {
+                              if (!showInformationWindow) {
+                                toggleShowInformationWindow();
+                              }
+                              setHighlightedVmIndex(valueIndex);
+                            }}
+                          />
+                        );
+                      },
+                    }}
+                  />
+                  <Flame
+                    id={id}
+                    columnarData={columnarData.viewModel}
+                    valueAccessor={(d: Datum) => d.value as number}
+                    valueFormatter={(value) => `${value}`}
+                    animation={{ duration: 100 }}
+                    controlProviderCallback={{}}
+                  />
+                </Chart>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FlameGraphLegend
+            legendItems={columnarData.legendItems}
+            asScale={!!comparisonFlamegraph}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {showInformationWindow && (
+        <EuiFlyout onClose={toggleShowInformationWindow} size="s">
+          <EuiFlyoutBody>
+            <FlamegraphInformationWindow
+              frame={selected}
+              totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
+              totalSamples={totalSamples}
+            />
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      )}
+    </>
   );
 }
