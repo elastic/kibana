@@ -15,7 +15,6 @@ import {
   BUCKET_TYPES,
 } from '@kbn/data-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { SavedObjectAttributes } from '@kbn/core/types';
 
 export interface VisParams {
   [key: string]: any;
@@ -29,16 +28,10 @@ export type SavedVisState<TVisParams = SerializableRecord> = {
   aggs: AggConfigSerialized[];
 };
 
-export interface VisualizationSavedObjectAttributes extends SavedObjectAttributes {
-  description: string;
-  kibanaSavedObjectMeta: {
-    searchSourceJSON: string;
-  };
-  title: string;
-  version: number;
-  visState: string;
-  uiStateJSON: string;
-}
+export type {
+  VisualizationSavedObjectAttributes,
+  VisualizationSavedObject,
+} from './content_management';
 
 export interface SerializedVisData {
   expression?: string;
