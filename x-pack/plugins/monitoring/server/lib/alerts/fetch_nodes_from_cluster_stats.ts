@@ -124,10 +124,12 @@ export async function fetchNodesFromClusterStats(
     nodes.push({
       clusterUuid,
       recentNodes: formatNode(
-        hits[0]._source.cluster_state?.nodes || hits[0]._source.elasticsearch.cluster.stats.state.nodes
+        hits[0]._source.cluster_state?.nodes ||
+          hits[0]._source.elasticsearch.cluster.stats.state.nodes
       ),
       priorNodes: formatNode(
-        hits[1]._source.cluster_state?.nodes || hits[1]._source.elasticsearch.cluster.stats.state.nodes
+        hits[1]._source.cluster_state?.nodes ||
+          hits[1]._source.elasticsearch.cluster.stats.state.nodes
       ),
       ccs: indexName.includes(':') ? indexName.split(':')[0] : undefined,
     });
