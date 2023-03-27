@@ -100,13 +100,12 @@ const GroupingComponent = <T,>({
               extraAction={
                 <GroupStats
                   bucketKey={groupKey}
-                  takeActionItems={takeActionItems(
-                    createGroupFilter(selectedGroup, group),
-                    groupNumber
-                  )}
+                  groupFilter={createGroupFilter(selectedGroup, group)}
+                  groupNumber={groupNumber}
                   statRenderers={
                     groupStatsRenderer && groupStatsRenderer(selectedGroup, groupBucket)
                   }
+                  takeActionItems={takeActionItems}
                 />
               }
               forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
